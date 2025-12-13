@@ -15,10 +15,22 @@ export default async function PricingPage() {
   ]);
 
   return (
+  <div className="flex flex-col items-center">
+    {/* AXIPROVA LOGO */}
+    <div className="mt-20 mb-16">
+      <img
+        src="/axiprova.jpeg"
+        alt="Axiprova"
+        style={{ height: '140px' }}
+      />
+    </div>
+
+    {/* PRICING */}
     <Pricing
       user={user}
       products={products ?? []}
       subscription={subscription}
     />
-  );
+  </div>
+);
 }
