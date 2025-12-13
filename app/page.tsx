@@ -20,10 +20,14 @@ export default async function PricingPage() {
     {/* LOGO */}
     <div className="mt-28 mb-12">
       <img
-        src="/axiprova.jpeg"
-        alt="Axiprova"
-        style={{ height: '220px' }}
-      />
+  src="/axiprova.jpeg"
+  alt="Axiprova"
+  style={{
+    height: '320px',
+    width: 'auto'
+  }}
+/>
+
     </div>
 
     {/* HEADLINE */}
