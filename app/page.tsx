@@ -31,15 +31,14 @@ export default async function PricingPage() {
     </div>
 
     {/* HEADLINE */}
-    <h1 className="text-4xl md:text-5xl font-semibold max-w-4xl mb-6">
-      AI-powered impact research & predictive intelligence
-    </h1>
+   <h1 className="text-4xl md:text-5xl font-semibold max-w-4xl mb-6">
+  AI platform for measuring and predicting impact in culture and creative industries
+</h1>
 
-    {/* SUBTITLE */}
-    <p className="text-lg md:text-xl text-gray-400 max-w-3xl mb-16">
-      Measure, predict, and understand social impact through AI-driven analysis,
-      field research, and real-world data insights.
-    </p>
+<p className="text-lg md:text-xl text-gray-400 max-w-3xl mb-16">
+  Axiprova helps cultural organizations, creative teams, and researchers evaluate impact,
+  test ideas through pilot studies, and make evidence-based decisions using AI.
+</p>
 
     {/* PRICING */}
     <Pricing
