@@ -2,7 +2,7 @@ import OpenAI from "openai";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-export const runtime = "nodejs";
+export const runtime = "nodejs"; 
 export const maxDuration = 60;
 
 
@@ -38,8 +38,10 @@ export async function POST(req: Request) {
     const model = process.env.OPENAI_MODEL || "gpt-5-mini";
 
     const response = await client.responses.create({
-      model,
-      instructions:
+  model,
+  max_output_tokens: 700,
+  temperature: 0.2,
+instructions:
         "You are Axiprova, an impact measurement & evaluation consultant for culture and creative industries. " +
         "Write professionally like a consultant. Be practical. Do not invent numbers. " +
         "Always include: assumptions, risks, bias considerations, missing data. " +
