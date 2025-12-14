@@ -11,6 +11,11 @@ export const dynamic = "force-dynamic";
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const InputSchema = z.object({
+  meta: z
+    .object({
+      language: z.enum(["auto", "el", "en"]).default("auto"),
+    })
+    .optional(),
   project: z.object({
     title: z.string().min(1),
     type: z.string().min(1),
@@ -36,7 +41,7 @@ const InputSchema = z.object({
     .optional(),
 });
 
-// Structured Outputs: όλα required => nullable όπου χρειάζεται
+// Structured Outputs: όλα required -> nullable όπου χρειάζεται
 const OutputSchema = z.object({
   version: z.string(),
   assessment: z.object({
@@ -46,7 +51,6 @@ const OutputSchema = z.object({
         applicable: z.boolean(),
         score_0_to_1: z.number().min(0).max(1).nullable(),
         confidence: z.enum(["grey", "amber", "green"]),
-        // IMPORTANT: Strings will be bilingual "EL: ... | EN: ..."
         missing_data: z.array(z.string()),
         recommended_next_actions: z.array(z.string()),
         notes: z.string().nullable(),
@@ -56,130 +60,110 @@ const OutputSchema = z.object({
       what_is_strong: z.array(z.string()),
       what_is_risky: z.array(z.string()),
       top_missing_data: z.array(z.string()),
+      top_next_actions: z.array(z.string()),
     }),
   }),
 });
 
-function elPillarName(id: string, fallback: string) {
-  const map: Record<string, string> = {
-    EXPERIENCE: "Εμπειρία / Δέσμευση",
-    ACCESS: "Πρόσβαση",
-    INCLUSIVITY: "Συμπερίληψη / Ισότητα & Διαφορετικότητα",
-    TRANSPARENCY: "Διαφάνεια",
-    COMMUNITY: "Κοινότητα / Συμμετοχή",
-  };
-  return map[id] || fallback;
+function detectLanguage(metaLang: "auto" | "el" | "en" | undefined, req: Request) {
+  if (metaLang && metaLang !== "auto") return metaLang;
+  const al = (req.headers.get("accept-language") || "").toLowerCase();
+  if (al.startsWith("el") || al.includes("el")) return "el";
+  return "en";
 }
 
-function buildConsultantReportMarkdown(input: any, framework: any, parsed: any) {
-  const proj = input.project || {};
-  const a = parsed.assessment || {};
-  const list = a.indicator_assessments || [];
+function t(lang: "el" | "en") {
+  const dict = {
+    el: {
+      title: "Axiprova — Αναφορά Impact (Framework)",
+      subtitle: "Σύμβουλος αξιολόγησης impact για πολιτισμό & δημιουργικές βιομηχανίες",
+      projectBrief: "Σύνοψη έργου",
+      whatMeasures: "Τι μετρά το Axiprova",
+      exec: "Γρήγορη διάγνωση",
+      strengths: "Δυνατά σημεία",
+      risks: "Κύρια ρίσκα",
+      missing: "Τι λείπει (δεδομένα/τεκμήρια)",
+      next: "Επόμενα βήματα (πρακτικά)",
+      notes: "Σημειώσεις μεθοδολογίας",
+      langLine: "Γλώσσα αναφοράς",
+      confLegend:
+        "Βεβαιότητα: green=έχει τεκμήρια, amber=μερικά τεκμήρια, grey=λείπουν τεκμήρια/υπόθεση",
+    },
+    en: {
+      title: "Axiprova — Impact Report (Framework)",
+      subtitle: "Impact evaluation consultant for culture & creative industries",
+      projectBrief: "Project brief",
+      whatMeasures: "What Axiprova measures",
+      exec: "Quick diagnosis",
+      strengths: "Strengths",
+      risks: "Key risks",
+      missing: "Top missing evidence/data",
+      next: "Next steps (practical)",
+      notes: "Method notes",
+      langLine: "Report language",
+      confLegend:
+        "Confidence: green=evidence present, amber=partial evidence, grey=missing/assumed",
+    },
+  };
+  return dict[lang];
+}
 
-  const byPillar: Record<string, any[]> = {};
-  for (const ia of list) {
-    const ind = framework.pillars
-      .flatMap((p: any) => p.indicators)
-      .find((x: any) => x.id === ia.indicator_id);
-    const pillarId = ind?.pillar_id || "OTHER";
-    byPillar[pillarId] = byPillar[pillarId] || [];
-    byPillar[pillarId].push({ ia, ind });
-  }
+// Σύντομο report (ΟΧΙ σεντόνι). Το checklist θα το δείχνει το UI ξεχωριστά.
+function buildShortReportMarkdown(input: any, framework: any, assessment: any, lang: "el" | "en") {
+  const L = t(lang);
+  const p = input.project || {};
+  const e = input.evidence || {};
+  const s = assessment?.summary || {};
 
   const md: string[] = [];
-
-  md.push(`# Axiprova Impact Framework Report (v${framework.version})`);
-  md.push(`# Αναφορά Πλαισίου Impact Axiprova (v${framework.version})`);
+  md.push(`# ${L.title}`);
+  md.push(`_${L.subtitle}_`);
+  md.push(``);
+  md.push(`**${L.langLine}:** ${lang === "el" ? "Ελληνικά" : "English"}`);
   md.push(``);
 
-  md.push(`## Project brief / Σύνοψη έργου`);
-  md.push(`- **Title / Τίτλος:** ${proj.title ?? "—"}`);
-  md.push(`- **Type / Τύπος:** ${proj.type ?? "—"}`);
-  md.push(`- **Location / Τοποθεσία:** ${proj.location ?? "—"}`);
-  md.push(`- **Duration (days) / Διάρκεια (ημέρες):** ${proj.duration_days ?? "—"}`);
-  md.push(`- **Audience target / Κοινό-στόχος:** ${(proj.audience_target ?? []).join(", ") || "—"}`);
-  md.push(`- **Goals / Στόχοι:** ${(proj.goals ?? []).join("; ") || "—"}`);
-  md.push(`- **Activities / Δραστηριότητες:** ${(proj.activities ?? []).join("; ") || "—"}`);
-
+  md.push(`## ${L.projectBrief}`);
+  md.push(`- **${lang === "el" ? "Τίτλος" : "Title"}:** ${p.title ?? "—"}`);
+  md.push(`- **${lang === "el" ? "Τύπος" : "Type"}:** ${p.type ?? "—"}`);
+  md.push(`- **${lang === "el" ? "Τοποθεσία" : "Location"}:** ${p.location ?? "—"}`);
+  md.push(`- **${lang === "el" ? "Διάρκεια (ημέρες)" : "Duration (days)"}:** ${p.duration_days ?? "—"}`);
   md.push(``);
-  md.push(`## What Axiprova measures / Τι μετρά το Axiprova`);
+
+  md.push(`## ${L.whatMeasures}`);
   md.push(
-    `This report uses a fixed indicator library with weights and transparent rubrics. ` +
-      `Missing evidence is flagged and confidence is shown. ` +
-      `\n\nΧρησιμοποιούμε σταθερή βιβλιοθήκη δεικτών (με βάρη και ρουμπρίκες). ` +
-      `Ό,τι λείπει σημαίνεται (missing data) και εμφανίζεται επίπεδο βεβαιότητας (confidence).`
+    lang === "el"
+      ? `Χρησιμοποιούμε σταθερό framework με πυλώνες & δείκτες. Δεν “μαντεύουμε” νούμερα: αν λείπουν τεκμήρια, το λέμε καθαρά και σου δίνουμε checklist για το τι να μαζέψεις.`
+      : `We use a fixed framework (pillars & indicators). We do not invent numbers: if evidence is missing, we flag it and give you a clear checklist of what to collect.`
   );
-
   md.push(``);
-  md.push(`## Executive synthesis / Εκτελεστική σύνοψη`);
+  md.push(`## ${L.exec}`);
 
-  md.push(`**Strengths / Δυνατά σημεία:**`);
-  md.push(
-    (a.summary?.what_is_strong ?? []).length
-      ? (a.summary?.what_is_strong ?? []).map((x: string) => `- ${x}`).join("\n")
-      : `- (EL: Δεν υπάρχουν ακόμη επαρκή τεκμήρια. | EN: Not enough evidence yet.)`
-  );
-
+  md.push(`**${L.strengths}:**`);
+  md.push((s.what_is_strong?.length ? s.what_is_strong : [lang === "el" ? "Δεν υπάρχουν ακόμη αρκετά τεκμήρια." : "Not enough evidence yet."]).map((x: string) => `- ${x}`).join("\n"));
   md.push(``);
-  md.push(`**Risks / Ρίσκα:**`);
-  md.push(
-    (a.summary?.what_is_risky ?? []).length
-      ? (a.summary?.what_is_risky ?? []).map((x: string) => `- ${x}`).join("\n")
-      : `- (EL: Δεν υπάρχουν ακόμη επαρκή τεκμήρια. | EN: Not enough evidence yet.)`
-  );
 
+  md.push(`**${L.risks}:**`);
+  md.push((s.what_is_risky?.length ? s.what_is_risky : [lang === "el" ? "—" : "—"]).map((x: string) => `- ${x}`).join("\n"));
   md.push(``);
-  md.push(`**Top missing data / Κορυφαία “κενά” δεδομένων:**`);
-  md.push(
-    (a.summary?.top_missing_data ?? []).length
-      ? (a.summary?.top_missing_data ?? []).map((x: string) => `- ${x}`).join("\n")
-      : `- (EL: Κανένα. | EN: None.)`
-  );
 
+  md.push(`**${L.missing}:**`);
+  md.push((s.top_missing_data?.length ? s.top_missing_data : [lang === "el" ? "—" : "—"]).map((x: string) => `- ${x}`).join("\n"));
   md.push(``);
-  md.push(`## Pillar breakdown / Ανάλυση ανά πυλώνα`);
-  md.push(`Each item includes confidence + missing data + next actions. / Περιλαμβάνει βεβαιότητα + τι λείπει + επόμενα βήματα.`);
 
-  for (const p of framework.pillars) {
-    const elName = elPillarName(p.id, p.name);
-
-    md.push(``);
-    md.push(`### ${p.name} (${p.weight_points} pts)`);
-    md.push(`### ${elName} (${p.weight_points} μονάδες)`);
-    md.push(`${p.description}`);
-
-    const rows = byPillar[p.id] || [];
-    if (!rows.length) {
-      md.push(`- (EL: Δεν επιστράφηκαν εφαρμόσιμοι δείκτες. | EN: No applicable indicators returned.)`);
-      continue;
-    }
-
-    for (const { ia, ind } of rows) {
-      md.push(``);
-      md.push(`**${ind.id} — ${ind.name}** (${ind.weight_points} pts)`);
-      md.push(`- Definition / Ορισμός: ${ind.definition}`);
-      md.push(`- Confidence / Βεβαιότητα: **${ia.confidence}**`);
-      md.push(
-        `- Missing data / Τι λείπει:\n` +
-          ((ia.missing_data ?? []).length
-            ? (ia.missing_data ?? []).map((x: string) => `  - ${x}`).join("\n")
-            : `  - (EL: Τίποτα. | EN: None.)`)
-      );
-      md.push(
-        `- Next actions / Επόμενα βήματα:\n` +
-          ((ia.recommended_next_actions ?? []).length
-            ? (ia.recommended_next_actions ?? []).map((x: string) => `  - ${x}`).join("\n")
-            : `  - (EL: Κανένα. | EN: None.)`)
-      );
-      if (ia.notes) md.push(`- Notes / Σημειώσεις: ${ia.notes}`);
-    }
-  }
-
+  md.push(`**${L.next}:**`);
+  md.push((s.top_next_actions?.length ? s.top_next_actions : [lang === "el" ? "—" : "—"]).map((x: string) => `- ${x}`).join("\n"));
   md.push(``);
-  md.push(`## Method notes / Μεθοδολογικές σημειώσεις`);
-  md.push(`- Missing data rule: ${framework.rules.missing_data_rule}`);
-  md.push(`- Confidence flags: green=audit, amber=submitted, grey=estimated/missing.`);
-  md.push(`- Το score 0–100 θα ενεργοποιηθεί στο επόμενο βήμα με deterministic κανόνες (όχι “γνώμη” του AI).`);
+
+  // evidence snapshot
+  md.push(`---`);
+  md.push(`**${lang === "el" ? "Τεκμήρια που δηλώθηκαν" : "Declared evidence"}:**`);
+  md.push(`- ${lang === "el" ? "Public sources" : "Public sources"}: ${(e.public_sources || []).length}`);
+  md.push(`- ${lang === "el" ? "Internal evidence" : "Internal evidence"}: ${(e.internal_sources || []).length}`);
+  if (e.notes) md.push(`- ${lang === "el" ? "Σημειώσεις" : "Notes"}: ${e.notes}`);
+  md.push(``);
+  md.push(`## ${L.notes}`);
+  md.push(`- ${L.confLegend}`);
+  md.push(`- ${framework.rules.missing_data_rule}`);
 
   return md.join("\n");
 }
@@ -194,50 +178,42 @@ export async function POST(req: Request) {
     const input = InputSchema.parse(body);
 
     const framework = AXIPROVA_CULTURAL_IMPACT_V01;
+    const lang = detectLanguage(input.meta?.language, req);
 
-    // model που υποστηρίζει structured outputs καλά
     const model = "gpt-4o-mini";
 
     const response = await client.responses.parse({
       model,
-      max_output_tokens: 1100,
+      max_output_tokens: 1200,
       instructions:
-        "You are Axiprova, a cultural impact measurement consultant. " +
-        "You MUST use the provided indicator library. " +
-        "Return ALL user-facing strings as bilingual in one string: 'EL: ... | EN: ...'. " +
-        "For each indicator: decide if applicable, set score_0_to_1=null unless strong evidence exists in input, " +
-        "set confidence to grey/amber/green, list missing data, and give next actions. " +
-        "Keep outputs short, practical, and do not invent numbers. " +
-        "Return JSON that matches the schema exactly.",
+        (lang === "el"
+          ? "Είσαι η Axiprova: φιλικός/ή αλλά επαγγελματικός/ή σύμβουλος impact για πολιτισμό. Γράψε καθαρά, πρακτικά, ενδυναμωτικά. Μην εφευρίσκεις νούμερα."
+          : "You are Axiprova: a friendly but professional impact consultant for culture. Be clear, practical, empowering. Do not invent numbers.") +
+        " Use the provided indicator library. Return ALL text in ONE language only (no bilingual). " +
+        "For each indicator: applicable, score_0_to_1=null unless evidence is explicit, confidence grey/amber/green, missing_data, recommended_next_actions, short notes. " +
+        "Also return summary fields (strengths/risks/missing/next). Output must match schema exactly.",
       input:
-        "INPUT PROJECT:\n" +
+        "PROJECT INPUT:\n" +
         JSON.stringify(input, null, 2) +
-        "\n\nINDICATOR LIBRARY (fixed):\n" +
-        JSON.stringify(framework, null, 2) +
-        "\n\nReturn JSON that matches the schema exactly.",
+        "\n\nINDICATOR LIBRARY:\n" +
+        JSON.stringify(framework, null, 2),
       text: { format: zodTextFormat(OutputSchema, "impact_outline") },
     });
 
     const parsed = (response as any).output_parsed;
     if (!parsed) {
-      return NextResponse.json(
-        { error: "impact-outline failed", details: "No structured output returned." },
-        { status: 502 }
-      );
+      return NextResponse.json({ error: "impact-outline failed", details: "No structured output returned." }, { status: 502 });
     }
 
-    const report_markdown = buildConsultantReportMarkdown(input, framework, parsed);
+    const report_markdown = buildShortReportMarkdown(input, framework, parsed.assessment, lang);
 
     return NextResponse.json({
       version: framework.version,
       framework,
       report_markdown,
-      data: parsed.assessment,
+      data: parsed.assessment, // checklist data (θα το δείχνει το UI ξεχωριστά)
     });
   } catch (err: any) {
-    return NextResponse.json(
-      { error: "impact-outline failed", details: err?.message ?? String(err) },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "impact-outline failed", details: err?.message ?? String(err) }, { status: 400 });
   }
 }
