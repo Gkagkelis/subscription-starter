@@ -40,7 +40,7 @@ export async function POST(req: Request) {
     const response = await client.responses.create({
   model,
   max_output_tokens: 700,
-  temperature: 0.2,
+
 instructions:
         "You are Axiprova, an impact measurement & evaluation consultant for culture and creative industries. " +
         "Write professionally like a consultant. Be practical. Do not invent numbers. " +
