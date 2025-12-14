@@ -23,16 +23,15 @@ function confidenceBadge(conf: Confidence) {
 }
 
 export default function DashboardImpactPage() {
-  // Step wizard
   const [step, setStep] = useState<1 | 2 | 3>(1);
 
-  // Project fields
+  // Project
   const [title, setTitle] = useState("Museum Nights");
   const [type, setType] = useState("event series");
   const [location, setLocation] = useState("Athens");
   const [days, setDays] = useState<number>(4);
 
-  // Evidence fields (NEW)
+  // Evidence
   const [publicSourcesText, setPublicSourcesText] = useState(
     "https://example.org/programme\nhttps://example.org/pricing"
   );
@@ -40,7 +39,7 @@ export default function DashboardImpactPage() {
     "Ticketing export (CSV)\nExit survey draft (Google Form)\nInstagram analytics screenshot"
   );
   const [evidenceNotes, setEvidenceNotes] = useState(
-    "We can run an exit survey for 2 days. We have ticketing data and basic social analytics."
+    "EL: Μπορούμε να τρέξουμε exit survey για 2 μέρες. Έχουμε ticketing data και βασικά social analytics. | EN: We can run an exit survey for 2 days. We have ticketing data and basic social analytics."
   );
 
   // API state
@@ -48,12 +47,12 @@ export default function DashboardImpactPage() {
   const [status, setStatus] = useState<number | null>(null);
   const [error, setError] = useState<string>("");
 
-  // Response fields (NEW API)
+  // New API fields
   const [report, setReport] = useState<string>("");
   const [framework, setFramework] = useState<any>(null);
   const [assessment, setAssessment] = useState<any>(null);
 
-  // UI styles
+  // Styles
   const pageStyle: React.CSSProperties = {
     minHeight: "100vh",
     padding: 24,
@@ -88,7 +87,6 @@ export default function DashboardImpactPage() {
     marginBottom: 6,
   };
 
-  // Always readable inputs
   const inputStyle: React.CSSProperties = {
     width: "100%",
     padding: 10,
@@ -155,26 +153,16 @@ export default function DashboardImpactPage() {
     margin: "14px 0",
   };
 
-  // Build evidence arrays from textareas
   const public_sources = useMemo(
-    () =>
-      publicSourcesText
-        .split("\n")
-        .map((s) => s.trim())
-        .filter(Boolean),
+    () => publicSourcesText.split("\n").map((s) => s.trim()).filter(Boolean),
     [publicSourcesText]
   );
 
   const internal_sources = useMemo(
-    () =>
-      internalSourcesText
-        .split("\n")
-        .map((s) => s.trim())
-        .filter(Boolean),
+    () => internalSourcesText.split("\n").map((s) => s.trim()).filter(Boolean),
     [internalSourcesText]
   );
 
-  // Payload to API (NEW evidence fields included)
   const payload = useMemo(
     () => ({
       project: {
@@ -183,8 +171,16 @@ export default function DashboardImpactPage() {
         location,
         duration_days: Number(days) || 1,
         audience_target: ["18-34"],
-        goals: ["deeper experience", "repeat visits", "word-of-mouth"],
-        activities: ["guided tour", "micro-performance", "Q&A"],
+        goals: [
+          "EL: Πιο ουσιαστική εμπειρία | EN: Deeper experience",
+          "EL: Επαναλαμβανόμενες επισκέψεις | EN: Repeat visits",
+          "EL: Word-of-mouth | EN: Word-of-mouth",
+        ],
+        activities: [
+          "EL: Ξενάγηση | EN: Guided tour",
+          "EL: Μικρή performance | EN: Micro-performance",
+          "EL: Συζήτηση Q&A | EN: Q&A",
+        ],
       },
       constraints: {
         budget_eur: 12000,
@@ -224,12 +220,9 @@ export default function DashboardImpactPage() {
         return;
       }
 
-      // NEW API fields:
       setReport(out?.report_markdown || "");
       setFramework(out?.framework || null);
       setAssessment(out?.data || null);
-
-      // jump to results step
       setStep(3);
     } catch (e: any) {
       setError(String(e?.message ?? e));
@@ -262,9 +255,9 @@ export default function DashboardImpactPage() {
 
     return (
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 12 }}>
-        {chip(1, "Project")}
-        {chip(2, "Evidence")}
-        {chip(3, "Results")}
+        {chip(1, "Έργο / Project")}
+        {chip(2, "Τεκμήρια / Evidence")}
+        {chip(3, "Αποτελέσματα / Results")}
       </div>
     );
   }
@@ -272,28 +265,20 @@ export default function DashboardImpactPage() {
   const indicatorMap = useMemo(() => {
     const m = new Map<string, any>();
     if (!framework?.pillars) return m;
-    for (const p of framework.pillars) {
-      for (const ind of p.indicators || []) {
-        m.set(ind.id, ind);
-      }
-    }
+    for (const p of framework.pillars) for (const ind of p.indicators || []) m.set(ind.id, ind);
     return m;
   }, [framework]);
 
   const assessmentsByPillar = useMemo(() => {
     const by: Record<string, any[]> = {};
     if (!framework?.pillars || !assessment?.indicator_assessments) return by;
-
-    // init pillars
     for (const p of framework.pillars) by[p.id] = [];
-
     for (const ia of assessment.indicator_assessments) {
       const ind = indicatorMap.get(ia.indicator_id);
       const pillarId = ind?.pillar_id || "OTHER";
       if (!by[pillarId]) by[pillarId] = [];
       by[pillarId].push({ ia, ind });
     }
-
     return by;
   }, [framework, assessment, indicatorMap]);
 
@@ -301,197 +286,156 @@ export default function DashboardImpactPage() {
     <div style={pageStyle}>
       <div style={containerStyle}>
         <div style={headerRowStyle}>
-          <h1 style={{ fontSize: 24, fontWeight: 900, margin: 0 }}>Axiprova — Impact Framework</h1>
+          <h1 style={{ fontSize: 24, fontWeight: 900, margin: 0 }}>
+            Axiprova — Impact Framework (EL/EN)
+          </h1>
           <div style={badgeStyle}>
             Status: <b>{status ?? "-"}</b>
           </div>
         </div>
 
         <div style={{ marginTop: 8, fontSize: 13, opacity: 0.85 }}>
-          Στόχος: να μετατρέψουμε την <b>αξία</b> του project σε <b>δείκτες</b> με τεκμήρια (evidence), ώστε να βγει ένα
-          επαγγελματικό report και ένα “to-do list” για pilot / measurement.
+          EL: Μετατρέπουμε την αξία του project σε δείκτες (pillars → indicators → evidence). | EN: We convert project
+          value into indicators (pillars → indicators → evidence).
         </div>
 
         <StepHeader />
 
-        {/* STEP 1: Project */}
         {step === 1 && (
           <div style={cardStyle}>
-            <div style={{ fontSize: 13, fontWeight: 800, marginBottom: 6 }}>Step 1 — Project</div>
+            <div style={{ fontSize: 13, fontWeight: 800, marginBottom: 6 }}>
+              Step 1 — Έργο / Project
+            </div>
             <div style={{ fontSize: 12, opacity: 0.8 }}>
-              Γράψε τα βασικά. Το Axiprova θα το χαρτογραφήσει πάνω στο framework (pillars → indicators).
+              EL: Βασικές πληροφορίες έργου. | EN: Basic project information.
             </div>
 
             <div style={divider} />
 
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr 1fr 140px",
-                gap: 12,
-              }}
-            >
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 140px", gap: 12 }}>
               <label>
-                <div style={labelStyle}>Project title</div>
+                <div style={labelStyle}>Τίτλος / Title</div>
                 <input value={title} onChange={(e) => setTitle(e.target.value)} style={inputStyle} />
               </label>
 
               <label>
-                <div style={labelStyle}>Project type</div>
+                <div style={labelStyle}>Τύπος / Type</div>
                 <input value={type} onChange={(e) => setType(e.target.value)} style={inputStyle} />
               </label>
 
               <label>
-                <div style={labelStyle}>Location</div>
+                <div style={labelStyle}>Τοποθεσία / Location</div>
                 <input value={location} onChange={(e) => setLocation(e.target.value)} style={inputStyle} />
               </label>
 
               <label>
-                <div style={labelStyle}>Days</div>
-                <input
-                  type="number"
-                  value={days}
-                  onChange={(e) => setDays(Number(e.target.value))}
-                  style={inputStyle}
-                  min={1}
-                />
+                <div style={labelStyle}>Ημέρες / Days</div>
+                <input type="number" value={days} onChange={(e) => setDays(Number(e.target.value))} style={inputStyle} min={1} />
               </label>
             </div>
 
             <div style={{ marginTop: 12, display: "flex", gap: 10 }}>
               <button style={buttonStyle} onClick={() => setStep(2)}>
-                Continue → Evidence
+                Συνέχεια → Τεκμήρια / Continue → Evidence
               </button>
             </div>
           </div>
         )}
 
-        {/* STEP 2: Evidence */}
         {step === 2 && (
           <div style={cardStyle}>
-            <div style={{ fontSize: 13, fontWeight: 800, marginBottom: 6 }}>Step 2 — Evidence</div>
+            <div style={{ fontSize: 13, fontWeight: 800, marginBottom: 6 }}>
+              Step 2 — Τεκμήρια / Evidence
+            </div>
             <div style={{ fontSize: 12, opacity: 0.8 }}>
-              Εδώ δηλώνεις <b>τι τεκμήρια έχεις</b>. Αυτό ανεβάζει confidence (grey → amber → green) και μειώνει missing
-              data.
+              EL: Πρόσθεσε URLs και εσωτερικά τεκμήρια. Αυτό επηρεάζει confidence + missing data. | EN: Add URLs and internal evidence.
             </div>
 
             <div style={divider} />
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
               <label>
-                <div style={labelStyle}>Public sources (one URL per line)</div>
-                <textarea
-                  value={publicSourcesText}
-                  onChange={(e) => setPublicSourcesText(e.target.value)}
-                  style={textareaStyle}
-                />
+                <div style={labelStyle}>Δημόσιες πηγές (URL ανά γραμμή) / Public sources (1 URL per line)</div>
+                <textarea value={publicSourcesText} onChange={(e) => setPublicSourcesText(e.target.value)} style={textareaStyle} />
               </label>
 
               <label>
-                <div style={labelStyle}>Internal evidence (one item per line)</div>
-                <textarea
-                  value={internalSourcesText}
-                  onChange={(e) => setInternalSourcesText(e.target.value)}
-                  style={textareaStyle}
-                />
+                <div style={labelStyle}>Εσωτερικά τεκμήρια (1 item ανά γραμμή) / Internal evidence (1 item per line)</div>
+                <textarea value={internalSourcesText} onChange={(e) => setInternalSourcesText(e.target.value)} style={textareaStyle} />
               </label>
             </div>
 
             <div style={{ marginTop: 12 }}>
-              <div style={labelStyle}>Evidence notes</div>
+              <div style={labelStyle}>Σημειώσεις / Notes</div>
               <textarea value={evidenceNotes} onChange={(e) => setEvidenceNotes(e.target.value)} style={textareaStyle} />
             </div>
 
             <div style={{ marginTop: 12, display: "flex", gap: 10, flexWrap: "wrap" }}>
               <button style={secondaryButton} onClick={() => setStep(1)}>
-                ← Back
+                ← Πίσω / Back
               </button>
 
               <button
                 onClick={run}
                 disabled={loading}
-                style={{
-                  ...buttonStyle,
-                  opacity: loading ? 0.7 : 1,
-                  cursor: loading ? "not-allowed" : "pointer",
-                }}
+                style={{ ...buttonStyle, opacity: loading ? 0.7 : 1, cursor: loading ? "not-allowed" : "pointer" }}
               >
-                {loading ? "Generating..." : "Generate framework report"}
+                {loading ? "Παράγεται... / Generating..." : "Generate framework report (EL/EN)"}
               </button>
             </div>
 
             {error && (
-              <div
-                style={{
-                  marginTop: 12,
-                  padding: 12,
-                  borderRadius: 12,
-                  border: "1px solid rgba(255, 120, 120, 0.35)",
-                  background: "rgba(255, 120, 120, 0.10)",
-                }}
-              >
+              <div style={{ marginTop: 12, padding: 12, borderRadius: 12, border: "1px solid rgba(255, 120, 120, 0.35)", background: "rgba(255, 120, 120, 0.10)" }}>
                 <b>Error:</b> {error}
               </div>
             )}
           </div>
         )}
 
-        {/* STEP 3: Results */}
         {step === 3 && (
           <div style={cardStyle}>
-            <div style={{ fontSize: 13, fontWeight: 800, marginBottom: 6 }}>Step 3 — Results</div>
-            <div style={{ fontSize: 12, opacity: 0.8 }}>
-              Αυτό είναι το αποτέλεσμα του framework: breakdown ανά indicator + missing data + επόμενες ενέργειες.
+            <div style={{ fontSize: 13, fontWeight: 800, marginBottom: 6 }}>
+              Step 3 — Αποτελέσματα / Results
             </div>
 
             <div style={divider} />
 
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
               <button style={secondaryButton} onClick={() => setStep(2)}>
-                ← Back to Evidence
+                ← Πίσω στα Τεκμήρια / Back to Evidence
               </button>
               <button style={buttonStyle} onClick={run} disabled={loading}>
-                {loading ? "Generating..." : "Re-run"}
+                {loading ? "Παράγεται... / Generating..." : "Re-run"}
               </button>
             </div>
 
             {error && (
-              <div
-                style={{
-                  marginTop: 12,
-                  padding: 12,
-                  borderRadius: 12,
-                  border: "1px solid rgba(255, 120, 120, 0.35)",
-                  background: "rgba(255, 120, 120, 0.10)",
-                }}
-              >
+              <div style={{ marginTop: 12, padding: 12, borderRadius: 12, border: "1px solid rgba(255, 120, 120, 0.35)", background: "rgba(255, 120, 120, 0.10)" }}>
                 <b>Error:</b> {error}
               </div>
             )}
 
             {framework && (
               <div style={{ marginTop: 14, padding: 12, borderRadius: 12, border: "1px solid rgba(255,255,255,0.10)" }}>
-                <div style={{ fontSize: 12, opacity: 0.8 }}>Framework used</div>
+                <div style={{ fontSize: 12, opacity: 0.8 }}>Framework / Πλαίσιο</div>
                 <div style={{ fontSize: 14, fontWeight: 900 }}>
                   {framework.name} — v{framework.version}
-                </div>
-                <div style={{ fontSize: 12, opacity: 0.75, marginTop: 6 }}>
-                  Pillars: {(framework.pillars || []).map((p: any) => p.name).join(" · ")}
                 </div>
               </div>
             )}
 
             {report && (
               <div style={{ marginTop: 14 }}>
-                <div style={{ fontSize: 12, opacity: 0.8, marginBottom: 10 }}>Consultant report (Markdown)</div>
+                <div style={{ fontSize: 12, opacity: 0.8, marginBottom: 10 }}>Consultant report (Markdown) / Αναφορά</div>
                 <pre style={reportBoxStyle}>{report}</pre>
               </div>
             )}
 
-            {/* Indicator Checklist */}
             {framework?.pillars && assessment?.indicator_assessments && (
               <div style={{ marginTop: 16 }}>
-                <div style={{ fontSize: 13, fontWeight: 900, marginBottom: 8 }}>Indicator checklist</div>
+                <div style={{ fontSize: 13, fontWeight: 900, marginBottom: 8 }}>
+                  Indicator checklist / Checklist δεικτών
+                </div>
 
                 {(framework.pillars || []).map((p: any) => {
                   const items = assessmentsByPillar[p.id] || [];
@@ -500,23 +444,11 @@ export default function DashboardImpactPage() {
                       <div style={{ fontSize: 14, fontWeight: 900 }}>
                         {p.name} <span style={{ opacity: 0.7, fontWeight: 700 }}>({p.weight_points} pts)</span>
                       </div>
-                      <div style={{ fontSize: 12, opacity: 0.8, marginTop: 4 }}>{p.description}</div>
 
                       <div style={divider} />
 
-                      {!items.length && <div style={{ fontSize: 12, opacity: 0.8 }}>No indicators returned for this pillar.</div>}
-
                       {items.map(({ ia, ind }: any) => (
-                        <div
-                          key={ia.indicator_id}
-                          style={{
-                            padding: 12,
-                            borderRadius: 12,
-                            border: "1px solid rgba(255,255,255,0.10)",
-                            background: "rgba(255,255,255,0.03)",
-                            marginBottom: 10,
-                          }}
-                        >
+                        <div key={ia.indicator_id} style={{ padding: 12, borderRadius: 12, border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.03)", marginBottom: 10 }}>
                           <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
                             <div>
                               <div style={{ fontSize: 13, fontWeight: 900 }}>
@@ -526,39 +458,38 @@ export default function DashboardImpactPage() {
                                 {ind?.definition || ""}
                               </div>
                             </div>
-
                             <div style={confidenceBadge(ia.confidence as Confidence)}>
-                              Confidence: <b>{ia.confidence}</b>
+                              Confidence / Βεβαιότητα: <b>{ia.confidence}</b>
                             </div>
                           </div>
 
                           <div style={{ marginTop: 10, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                             <div>
-                              <div style={{ fontSize: 12, opacity: 0.8, fontWeight: 800 }}>Missing data</div>
+                              <div style={{ fontSize: 12, opacity: 0.8, fontWeight: 800 }}>
+                                Missing data / Τι λείπει
+                              </div>
                               <div style={{ fontSize: 12, opacity: 0.9, marginTop: 6 }}>
-                                {(ia.missing_data || []).length
-                                  ? (ia.missing_data || []).map((x: string, i: number) => (
-                                      <div key={i}>- {x}</div>
-                                    ))
-                                  : "- (none)"}
+                                {(ia.missing_data || []).map((x: string, i: number) => (
+                                  <div key={i}>- {x}</div>
+                                ))}
                               </div>
                             </div>
 
                             <div>
-                              <div style={{ fontSize: 12, opacity: 0.8, fontWeight: 800 }}>Next actions</div>
+                              <div style={{ fontSize: 12, opacity: 0.8, fontWeight: 800 }}>
+                                Next actions / Επόμενα βήματα
+                              </div>
                               <div style={{ fontSize: 12, opacity: 0.9, marginTop: 6 }}>
-                                {(ia.recommended_next_actions || []).length
-                                  ? (ia.recommended_next_actions || []).map((x: string, i: number) => (
-                                      <div key={i}>- {x}</div>
-                                    ))
-                                  : "- (none)"}
+                                {(ia.recommended_next_actions || []).map((x: string, i: number) => (
+                                  <div key={i}>- {x}</div>
+                                ))}
                               </div>
                             </div>
                           </div>
 
                           {ia.notes && (
                             <div style={{ marginTop: 10, fontSize: 12, opacity: 0.85 }}>
-                              <b>Notes:</b> {ia.notes}
+                              <b>Notes / Σημειώσεις:</b> {ia.notes}
                             </div>
                           )}
                         </div>
@@ -566,32 +497,9 @@ export default function DashboardImpactPage() {
                     </div>
                   );
                 })}
-
-                <details style={{ marginTop: 12 }}>
-                  <summary style={{ cursor: "pointer", opacity: 0.9 }}>Show raw JSON (assessment)</summary>
-                  <pre
-                    style={{
-                      marginTop: 10,
-                      whiteSpace: "pre-wrap",
-                      borderRadius: 12,
-                      padding: 14,
-                      background: "#0f1117",
-                      border: "1px solid rgba(255,255,255,0.10)",
-                      fontSize: 12,
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    {JSON.stringify(assessment, null, 2)}
-                  </pre>
-                </details>
               </div>
             )}
           </div>
-        )}
-
-        {/* default first-load: show step 1 if nothing else */}
-        {step !== 1 && step !== 2 && step !== 3 && (
-          <div style={cardStyle}>Invalid step.</div>
         )}
       </div>
     </div>
