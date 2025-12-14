@@ -6,7 +6,7 @@ export default function DashboardImpactPage() {
   const [title, setTitle] = useState("Museum Nights");
   const [type, setType] = useState("event series");
   const [location, setLocation] = useState("Athens");
-  const [days, setDays] = useState(4);
+  const [days, setDays] = useState<number>(4);
 
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<number | null>(null);
@@ -34,6 +34,82 @@ export default function DashboardImpactPage() {
     [title, type, location, days]
   );
 
+  const pageStyle: React.CSSProperties = {
+    minHeight: "100vh",
+    padding: 24,
+    background: "#0b0b0f",
+    color: "#f5f5f5",
+  };
+
+  const containerStyle: React.CSSProperties = {
+    maxWidth: 980,
+    margin: "0 auto",
+  };
+
+  const headerRowStyle: React.CSSProperties = {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "baseline",
+    gap: 12,
+  };
+
+  const cardStyle: React.CSSProperties = {
+    marginTop: 16,
+    padding: 16,
+    borderRadius: 14,
+    border: "1px solid rgba(255,255,255,0.10)",
+    background: "rgba(255,255,255,0.04)",
+    backdropFilter: "blur(6px)",
+  };
+
+  const labelStyle: React.CSSProperties = {
+    fontSize: 12,
+    opacity: 0.85,
+    marginBottom: 6,
+  };
+
+  // IMPORTANT: Always readable inputs (white bg + black text)
+  const inputStyle: React.CSSProperties = {
+    width: "100%",
+    padding: 10,
+    background: "#ffffff",
+    color: "#111111",
+    border: "1px solid #b5b5b5",
+    borderRadius: 10,
+    outline: "none",
+  };
+
+  const buttonStyle: React.CSSProperties = {
+    marginTop: 12,
+    padding: "10px 14px",
+    borderRadius: 10,
+    border: "1px solid rgba(255,255,255,0.18)",
+    background: loading ? "rgba(255,255,255,0.18)" : "#ffffff",
+    color: loading ? "#eaeaea" : "#111",
+    cursor: loading ? "not-allowed" : "pointer",
+    fontWeight: 700,
+  };
+
+  const badgeStyle: React.CSSProperties = {
+    fontSize: 12,
+    padding: "4px 10px",
+    borderRadius: 999,
+    border: "1px solid rgba(255,255,255,0.18)",
+    opacity: 0.9,
+  };
+
+  const reportBoxStyle: React.CSSProperties = {
+    whiteSpace: "pre-wrap",
+    margin: 0,
+    lineHeight: 1.55,
+    background: "#0f1117",
+    border: "1px solid rgba(255,255,255,0.10)",
+    borderRadius: 12,
+    padding: 14,
+    fontSize: 13,
+    color: "#f5f5f5",
+  };
+
   async function run() {
     setLoading(true);
     setStatus(null);
@@ -54,7 +130,6 @@ export default function DashboardImpactPage() {
 
       if (!res.ok) {
         setError(out?.details || out?.error || "Unknown error");
-        setLoading(false);
         return;
       }
 
@@ -68,74 +143,122 @@ export default function DashboardImpactPage() {
   }
 
   return (
-    <div style={{ padding: 24, maxWidth: 980, margin: "0 auto" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", gap: 16, alignItems: "baseline" }}>
-        <h1 style={{ fontSize: 24, fontWeight: 800 }}>Axiprova Consultant Report</h1>
-        <div style={{ fontSize: 12, opacity: 0.7 }}>Status: {status ?? "-"}</div>
-      </div>
+    <div style={pageStyle}>
+      <div style={containerStyle}>
+        <div style={headerRowStyle}>
+          <h1 style={{ fontSize: 24, fontWeight: 900, margin: 0 }}>
+            Axiprova Consultant Report
+          </h1>
 
-      <div style={{ marginTop: 16, padding: 16, border: "1px solid #eee", borderRadius: 12 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 120px", gap: 12 }}>
-          <label>
-            <div style={{ fontSize: 12, opacity: 0.8, marginBottom: 6 }}>Project title</div>
-            <input value={title} onChange={(e) => setTitle(e.target.value)} style={{ width: "100%", padding: 10 }} />
-          </label>
-
-          <label>
-            <div style={{ fontSize: 12, opacity: 0.8, marginBottom: 6 }}>Project type</div>
-            <input value={type} onChange={(e) => setType(e.target.value)} style={{ width: "100%", padding: 10 }} />
-          </label>
-
-          <label>
-            <div style={{ fontSize: 12, opacity: 0.8, marginBottom: 6 }}>Location</div>
-            <input value={location} onChange={(e) => setLocation(e.target.value)} style={{ width: "100%", padding: 10 }} />
-          </label>
-
-          <label>
-            <div style={{ fontSize: 12, opacity: 0.8, marginBottom: 6 }}>Days</div>
-            <input
-              type="number"
-              value={days}
-              onChange={(e) => setDays(Number(e.target.value))}
-              style={{ width: "100%", padding: 10 }}
-            />
-          </label>
+          <div style={badgeStyle}>
+            Status: <b>{status ?? "-"}</b>
+          </div>
         </div>
 
-        <button
-          onClick={run}
-          disabled={loading}
-          style={{
-            marginTop: 12,
-            padding: "10px 14px",
-            border: "1px solid #ccc",
-            borderRadius: 10,
-            cursor: loading ? "not-allowed" : "pointer",
-          }}
-        >
-          {loading ? "Generating..." : "Generate consultant report"}
-        </button>
+        <div style={{ marginTop: 8, fontSize: 13, opacity: 0.8 }}>
+          Συμπλήρωσε τα βασικά και πάτα <b>Generate</b>. Θα πάρεις πίσω report (markdown) + structured data.
+        </div>
 
-        {error && (
-          <div style={{ marginTop: 12, padding: 12, border: "1px solid #f3caca", borderRadius: 10 }}>
-            <strong>Error:</strong> {error}
+        <div style={cardStyle}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr 1fr 140px",
+              gap: 12,
+            }}
+          >
+            <label>
+              <div style={labelStyle}>Project title</div>
+              <input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                style={inputStyle}
+                placeholder="e.g. Museum Nights"
+              />
+            </label>
+
+            <label>
+              <div style={labelStyle}>Project type</div>
+              <input
+                value={type}
+                onChange={(e) => setType(e.target.value)}
+                style={inputStyle}
+                placeholder="e.g. event series"
+              />
+            </label>
+
+            <label>
+              <div style={labelStyle}>Location</div>
+              <input
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                style={inputStyle}
+                placeholder="e.g. Athens"
+              />
+            </label>
+
+            <label>
+              <div style={labelStyle}>Days</div>
+              <input
+                type="number"
+                value={days}
+                onChange={(e) => setDays(Number(e.target.value))}
+                style={inputStyle}
+                min={1}
+              />
+            </label>
+          </div>
+
+          <button onClick={run} disabled={loading} style={buttonStyle}>
+            {loading ? "Generating..." : "Generate consultant report"}
+          </button>
+
+          {error && (
+            <div
+              style={{
+                marginTop: 12,
+                padding: 12,
+                borderRadius: 12,
+                border: "1px solid rgba(255, 120, 120, 0.35)",
+                background: "rgba(255, 120, 120, 0.10)",
+              }}
+            >
+              <b>Error:</b> {error}
+            </div>
+          )}
+        </div>
+
+        {report && (
+          <div style={cardStyle}>
+            <div style={{ fontSize: 12, opacity: 0.8, marginBottom: 10 }}>
+              Report (Markdown)
+            </div>
+            <pre style={reportBoxStyle}>{report}</pre>
           </div>
         )}
+
+        {data && (
+          <details style={{ marginTop: 12 }}>
+            <summary style={{ cursor: "pointer", opacity: 0.9 }}>
+              Show structured data (JSON)
+            </summary>
+            <pre
+              style={{
+                marginTop: 10,
+                whiteSpace: "pre-wrap",
+                borderRadius: 12,
+                padding: 14,
+                background: "#0f1117",
+                border: "1px solid rgba(255,255,255,0.10)",
+                fontSize: 12,
+                lineHeight: 1.5,
+              }}
+            >
+              {JSON.stringify(data, null, 2)}
+            </pre>
+          </details>
+        )}
       </div>
-
-      {report && (
-        <div style={{ marginTop: 16, padding: 16, border: "1px solid #eee", borderRadius: 12 }}>
-          <div style={{ fontSize: 13, opacity: 0.75, marginBottom: 10 }}>Report (Markdown)</div>
-          <pre style={{ whiteSpace: "pre-wrap", margin: 0, lineHeight: 1.5 }}>{report}</pre>
-        </div>
-      )}
-
-      {data && (
-        <details style={{ marginTop: 12 }}>
-          <summary style={{ cursor: "pointer" }}>Show structured data (JSON)</summary>
-          <pre style={{ marginTop: 10, whiteSpace: "pre-wrap" }}>{JSON.stringify(data, null, 2)}</pre>
-        </details>
-      )}
     </div>
   );
 }
