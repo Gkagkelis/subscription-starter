@@ -28,7 +28,7 @@ const InputSchema = z.object({
     .optional(),
 });
 
-// Structured outputs: fields must be required -> use nullable() instead of optional()
+// Structured outputs: NO optional() fields. Use nullable().
 const OutputSchema = z.object({
   version: z.string(),
   report_markdown: z.string(),
@@ -76,30 +76,21 @@ export async function POST(req: Request) {
     const body = await req.json();
     const input = InputSchema.parse(body);
 
-    // For Structured Outputs, use a model that is known to support it well
-    // (You can later change this, but let's make it work first.)
-    const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
+    // LOCK the model here so env var cannot override
+    const model = "gpt-4o-mini";
 
     const response = await client.responses.parse({
       model,
       max_output_tokens: 700,
-      input: [
-        {
-          role: "system",
-          content:
-            "You are Axiprova, an impact measurement & evaluation consultant for culture and creative industries. " +
-            "Write professionally like a consultant. Be practical. Do not invent numbers. " +
-            "Always include: assumptions, risks, bias considerations, missing data. " +
-            "Output must match the provided JSON schema exactly.",
-        },
-        {
-          role: "user",
-          content:
-            "Create an Axiprova impact outline (v0.1) for this project input:\n\n" +
-            JSON.stringify(input, null, 2) +
-            "\n\nPillars and weights:\n- experience 25\n- access 20\n- inclusivity 20\n- transparency 15\n- community 20\n",
-        },
-      ],
+      instructions:
+        "You are Axiprova, an impact measurement & evaluation consultant for culture and creative industries. " +
+        "Write professionally like a consultant. Be practical. Do not invent numbers. " +
+        "Always include: assumptions, risks, bias considerations, missing data. " +
+        "Output must match the provided JSON schema exactly.",
+      input:
+        "Create an Axiprova impact outline (v0.1) for this project input:\n\n" +
+        JSON.stringify(input, null, 2) +
+        "\n\nPillars and weights:\n- experience 25\n- access 20\n- inclusivity 20\n- transparency 15\n- community 20\n",
       text: {
         format: zodTextFormat(OutputSchema, "impact_outline"),
       },
@@ -107,14 +98,14 @@ export async function POST(req: Request) {
 
     const parsed = (response as any).output_parsed;
 
-    // If parsing didn't produce structured output, fail loudly (no more 'null')
     if (!parsed) {
+      // Return the full response summary to debug (still safe)
       return NextResponse.json(
         {
           error: "impact-outline failed",
-          details:
-            "Model did not return structured output. Try model gpt-4o-mini and ensure Structured Outputs are supported.",
+          details: "No structured output returned by the model.",
           output_text: (response as any).output_text ?? null,
+          output: (response as any).output ?? null,
         },
         { status: 502 }
       );
