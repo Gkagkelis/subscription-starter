@@ -28,7 +28,6 @@ const InputSchema = z.object({
     .optional(),
 });
 
-// Structured outputs: NO optional() fields. Use nullable().
 const OutputSchema = z.object({
   version: z.string(),
   report_markdown: z.string(),
@@ -76,12 +75,11 @@ export async function POST(req: Request) {
     const body = await req.json();
     const input = InputSchema.parse(body);
 
-    // LOCK the model here so env var cannot override
     const model = "gpt-4o-mini";
 
     const response = await client.responses.parse({
       model,
-      max_output_tokens: 700,
+      max_output_tokens: 4096,  // ← ΑΥΞΗΜΕΝΟ!
       instructions:
         "You are Axiprova, an impact measurement & evaluation consultant for culture and creative industries. " +
         "Write professionally like a consultant. Be practical. Do not invent numbers. " +
@@ -99,7 +97,6 @@ export async function POST(req: Request) {
     const parsed = (response as any).output_parsed;
 
     if (!parsed) {
-      // Return the full response summary to debug (still safe)
       return NextResponse.json(
         {
           error: "impact-outline failed",
