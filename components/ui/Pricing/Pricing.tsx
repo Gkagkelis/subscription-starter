@@ -107,6 +107,10 @@ export default function Pricing({ user, products, subscription }: Props) {
       <section className="bg-black">
         <div className="max-w-6xl px-4 py-8 mx-auto sm:py-24 sm:px-6 lg:px-8">
           <div className="sm:flex sm:flex-col sm:align-center">
+            <p className="mt-6 text-center text-lg text-zinc-400">
+  Start for free — no credit card required
+</p>
+
           
             <div className="relative self-center mt-6 bg-zinc-900 rounded-lg p-0.5 flex sm:mt-8 border border-zinc-800">
               {intervals.includes('month') && (
