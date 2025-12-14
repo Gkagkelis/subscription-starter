@@ -28,6 +28,8 @@ const InputSchema = z.object({
     .optional(),
 });
 
+// IMPORTANT: Structured Outputs requires fields to be required.
+// Use nullable() (not optional()) for "maybe missing" fields.
 const OutputSchema = z.object({
   version: z.string(),
   report_markdown: z.string(),
@@ -35,37 +37,37 @@ const OutputSchema = z.object({
     project_summary: z.object({
       title: z.string(),
       type: z.string(),
-      location: z.string().optional(),
+      location: z.string().nullable(),
     }),
-    pillars: z
-      .array(
-        z.object({
-          name: z.string(),
-          weight: z.number(),
-          rationale: z.string().optional(),
-          metrics: z.array(z.string()).default([]),
-        })
-      )
-      .default([]),
+
+    pillars: z.array(
+      z.object({
+        name: z.string(),
+        weight: z.number(),
+        rationale: z.string().nullable(),
+        metrics: z.array(z.string()),
+      })
+    ),
+
     pilot_design: z.object({
-      hypotheses: z.array(z.string()).default([]),
-      sample: z.string().optional(),
-      instruments: z.array(z.string()).default([]),
-      timeline_days: z.number().int().positive().optional(),
+      hypotheses: z.array(z.string()),
+      sample: z.string().nullable(),
+      instruments: z.array(z.string()),
+      timeline_days: z.number().int().positive().nullable(),
     }),
-    scenario_levers: z
-      .array(
-        z.object({
-          lever: z.string(),
-          direction: z.string(),
-          expected_effect: z.string(),
-        })
-      )
-      .default([]),
+
+    scenario_levers: z.array(
+      z.object({
+        lever: z.string(),
+        direction: z.string(),
+        expected_effect: z.string(),
+      })
+    ),
+
     prediction_scaffold: z.object({
-      outcomes: z.array(z.string()).default([]),
-      assumptions: z.array(z.string()).default([]),
-      data_needed: z.array(z.string()).default([]),
+      outcomes: z.array(z.string()),
+      assumptions: z.array(z.string()),
+      data_needed: z.array(z.string()),
     }),
   }),
 });
@@ -89,7 +91,9 @@ export async function POST(req: Request) {
           content:
             "You are Axiprova, an impact measurement & evaluation consultant for culture and creative industries. " +
             "Write professionally like a consultant. Be practical. Do not invent numbers. " +
-            "Always include: assumptions, risks, bias considerations, missing data.",
+            "Do not fabricate numbers or claims. If info is missing, say what is missing. " +
+            "Always include: assumptions, risks, bias considerations, missing data. " +
+            "Output must match the provided JSON schema exactly.",
         },
         {
           role: "user",
@@ -97,7 +101,7 @@ export async function POST(req: Request) {
             "Create an Axiprova impact outline (v0.1) for this project input:\n\n" +
             JSON.stringify(input, null, 2) +
             "\n\nPillars and weights:\n- experience 25\n- access 20\n- inclusivity 20\n- transparency 15\n- community 20\n\n" +
-            "Return a JSON object that matches the provided schema.",
+            "Make it consultant-grade but concise.\n",
         },
       ],
       text: {
