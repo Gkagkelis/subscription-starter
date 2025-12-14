@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react";
 
 type Confidence = "grey" | "amber" | "green";
+type Lang = "auto" | "el" | "en";
+type ViewMode = "report" | "checklist";
 
 function confidenceBadge(conf: Confidence) {
   const base: React.CSSProperties = {
@@ -15,15 +17,15 @@ function confidenceBadge(conf: Confidence) {
     border: "1px solid rgba(255,255,255,0.16)",
   };
 
-  if (conf === "green")
-    return { ...base, background: "rgba(36, 212, 128, 0.12)", color: "#bff5d9" };
-  if (conf === "amber")
-    return { ...base, background: "rgba(255, 193, 7, 0.14)", color: "#ffe7a3" };
+  if (conf === "green") return { ...base, background: "rgba(36, 212, 128, 0.12)", color: "#bff5d9" };
+  if (conf === "amber") return { ...base, background: "rgba(255, 193, 7, 0.14)", color: "#ffe7a3" };
   return { ...base, background: "rgba(180, 180, 180, 0.10)", color: "#e6e6e6" };
 }
 
 export default function DashboardImpactPage() {
   const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [lang, setLang] = useState<Lang>("auto");
+  const [view, setView] = useState<ViewMode>("report");
 
   // Project
   const [title, setTitle] = useState("Museum Nights");
@@ -32,46 +34,23 @@ export default function DashboardImpactPage() {
   const [days, setDays] = useState<number>(4);
 
   // Evidence
-  const [publicSourcesText, setPublicSourcesText] = useState(
-    "https://example.org/programme\nhttps://example.org/pricing"
-  );
-  const [internalSourcesText, setInternalSourcesText] = useState(
-    "Ticketing export (CSV)\nExit survey draft (Google Form)\nInstagram analytics screenshot"
-  );
-  const [evidenceNotes, setEvidenceNotes] = useState(
-    "EL: Μπορούμε να τρέξουμε exit survey για 2 μέρες. Έχουμε ticketing data και βασικά social analytics. | EN: We can run an exit survey for 2 days. We have ticketing data and basic social analytics."
-  );
+  const [publicSourcesText, setPublicSourcesText] = useState("https://example.org/programme");
+  const [internalSourcesText, setInternalSourcesText] = useState("Ticketing export (CSV)\nExit survey draft (Google Form)");
+  const [evidenceNotes, setEvidenceNotes] = useState("Έχουμε ticketing data και μπορούμε να κάνουμε exit survey.");
 
   // API state
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<number | null>(null);
   const [error, setError] = useState<string>("");
 
-  // New API fields
+  // Response
   const [report, setReport] = useState<string>("");
   const [framework, setFramework] = useState<any>(null);
   const [assessment, setAssessment] = useState<any>(null);
 
   // Styles
-  const pageStyle: React.CSSProperties = {
-    minHeight: "100vh",
-    padding: 24,
-    background: "#0b0b0f",
-    color: "#f5f5f5",
-  };
-
-  const containerStyle: React.CSSProperties = {
-    maxWidth: 1100,
-    margin: "0 auto",
-  };
-
-  const headerRowStyle: React.CSSProperties = {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "baseline",
-    gap: 12,
-  };
-
+  const pageStyle: React.CSSProperties = { minHeight: "100vh", padding: 24, background: "#0b0b0f", color: "#f5f5f5" };
+  const containerStyle: React.CSSProperties = { maxWidth: 1100, margin: "0 auto" };
   const cardStyle: React.CSSProperties = {
     marginTop: 16,
     padding: 16,
@@ -80,13 +59,7 @@ export default function DashboardImpactPage() {
     background: "rgba(255,255,255,0.04)",
     backdropFilter: "blur(6px)",
   };
-
-  const labelStyle: React.CSSProperties = {
-    fontSize: 12,
-    opacity: 0.85,
-    marginBottom: 6,
-  };
-
+  const labelStyle: React.CSSProperties = { fontSize: 12, opacity: 0.85, marginBottom: 6 };
   const inputStyle: React.CSSProperties = {
     width: "100%",
     padding: 10,
@@ -96,104 +69,43 @@ export default function DashboardImpactPage() {
     borderRadius: 10,
     outline: "none",
   };
-
-  const textareaStyle: React.CSSProperties = {
-    ...inputStyle,
-    minHeight: 84,
-    resize: "vertical",
-    fontFamily:
-      'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
-    fontSize: 12,
-    lineHeight: 1.5,
-  };
-
-  const buttonStyle: React.CSSProperties = {
-    padding: "10px 14px",
-    borderRadius: 10,
-    border: "1px solid rgba(255,255,255,0.18)",
-    background: "#ffffff",
-    color: "#111",
-    cursor: "pointer",
-    fontWeight: 800,
-  };
-
-  const secondaryButton: React.CSSProperties = {
-    padding: "10px 14px",
-    borderRadius: 10,
-    border: "1px solid rgba(255,255,255,0.18)",
-    background: "rgba(255,255,255,0.08)",
-    color: "#f5f5f5",
-    cursor: "pointer",
-    fontWeight: 700,
-  };
-
-  const badgeStyle: React.CSSProperties = {
-    fontSize: 12,
-    padding: "4px 10px",
-    borderRadius: 999,
-    border: "1px solid rgba(255,255,255,0.18)",
-    opacity: 0.92,
-  };
+  const textareaStyle: React.CSSProperties = { ...inputStyle, minHeight: 84, resize: "vertical", fontSize: 12, lineHeight: 1.5 };
+  const buttonStyle: React.CSSProperties = { padding: "10px 14px", borderRadius: 10, border: "1px solid rgba(255,255,255,0.18)", background: "#ffffff", color: "#111", cursor: "pointer", fontWeight: 800 };
+  const secondaryButton: React.CSSProperties = { padding: "10px 14px", borderRadius: 10, border: "1px solid rgba(255,255,255,0.18)", background: "rgba(255,255,255,0.08)", color: "#f5f5f5", cursor: "pointer", fontWeight: 700 };
+  const badgeStyle: React.CSSProperties = { fontSize: 12, padding: "4px 10px", borderRadius: 999, border: "1px solid rgba(255,255,255,0.18)", opacity: 0.92 };
+  const divider: React.CSSProperties = { height: 1, background: "rgba(255,255,255,0.10)", margin: "14px 0" };
 
   const reportBoxStyle: React.CSSProperties = {
     whiteSpace: "pre-wrap",
     margin: 0,
-    lineHeight: 1.55,
+    lineHeight: 1.65,
     background: "#0f1117",
     border: "1px solid rgba(255,255,255,0.10)",
     borderRadius: 12,
-    padding: 14,
-    fontSize: 13,
+    padding: 16,
+    fontSize: 14,
     color: "#f5f5f5",
   };
 
-  const divider: React.CSSProperties = {
-    height: 1,
-    background: "rgba(255,255,255,0.10)",
-    margin: "14px 0",
-  };
-
-  const public_sources = useMemo(
-    () => publicSourcesText.split("\n").map((s) => s.trim()).filter(Boolean),
-    [publicSourcesText]
-  );
-
-  const internal_sources = useMemo(
-    () => internalSourcesText.split("\n").map((s) => s.trim()).filter(Boolean),
-    [internalSourcesText]
-  );
+  const public_sources = useMemo(() => publicSourcesText.split("\n").map((s) => s.trim()).filter(Boolean), [publicSourcesText]);
+  const internal_sources = useMemo(() => internalSourcesText.split("\n").map((s) => s.trim()).filter(Boolean), [internalSourcesText]);
 
   const payload = useMemo(
     () => ({
+      meta: { language: lang },
       project: {
         title,
         type,
         location,
         duration_days: Number(days) || 1,
         audience_target: ["18-34"],
-        goals: [
-          "EL: Πιο ουσιαστική εμπειρία | EN: Deeper experience",
-          "EL: Επαναλαμβανόμενες επισκέψεις | EN: Repeat visits",
-          "EL: Word-of-mouth | EN: Word-of-mouth",
-        ],
-        activities: [
-          "EL: Ξενάγηση | EN: Guided tour",
-          "EL: Μικρή performance | EN: Micro-performance",
-          "EL: Συζήτηση Q&A | EN: Q&A",
-        ],
+        goals: ["deeper experience", "repeat visits", "word-of-mouth"],
+        activities: ["guided tour", "micro-performance", "Q&A"],
       },
-      constraints: {
-        budget_eur: 12000,
-        team_size: 3,
-        data_available: ["ticketing", "instagram", "exit survey"],
-      },
-      evidence: {
-        public_sources,
-        internal_sources,
-        notes: evidenceNotes,
-      },
+      constraints: { budget_eur: 12000, team_size: 3, data_available: ["ticketing", "instagram", "exit survey"] },
+      evidence: { public_sources, internal_sources, notes: evidenceNotes },
     }),
-    [title, type, location, days, public_sources, internal_sources, evidenceNotes]
+    [lang, title, type, location, days, public_sources, internal_sources, evidenceNotes]
   );
 
   async function run() {
@@ -214,7 +126,6 @@ export default function DashboardImpactPage() {
       setStatus(res.status);
 
       const out = await res.json().catch(() => null);
-
       if (!res.ok) {
         setError(out?.details || out?.error || "Unknown error");
         return;
@@ -224,6 +135,7 @@ export default function DashboardImpactPage() {
       setFramework(out?.framework || null);
       setAssessment(out?.data || null);
       setStep(3);
+      setView("report");
     } catch (e: any) {
       setError(String(e?.message ?? e));
     } finally {
@@ -255,13 +167,14 @@ export default function DashboardImpactPage() {
 
     return (
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 12 }}>
-        {chip(1, "Έργο / Project")}
-        {chip(2, "Τεκμήρια / Evidence")}
-        {chip(3, "Αποτελέσματα / Results")}
+        {chip(1, "Έργο")}
+        {chip(2, "Τεκμήρια")}
+        {chip(3, "Αποτελέσματα")}
       </div>
     );
   }
 
+  // map indicator -> pillar
   const indicatorMap = useMemo(() => {
     const m = new Map<string, any>();
     if (!framework?.pillars) return m;
@@ -282,97 +195,113 @@ export default function DashboardImpactPage() {
     return by;
   }, [framework, assessment, indicatorMap]);
 
+  const tabBtn = (active: boolean): React.CSSProperties => ({
+    padding: "8px 12px",
+    borderRadius: 999,
+    border: active ? "1px solid rgba(255,255,255,0.30)" : "1px solid rgba(255,255,255,0.12)",
+    background: active ? "rgba(255,255,255,0.10)" : "rgba(255,255,255,0.04)",
+    cursor: "pointer",
+    fontSize: 13,
+    fontWeight: active ? 900 : 700,
+  });
+
   return (
     <div style={pageStyle}>
       <div style={containerStyle}>
-        <div style={headerRowStyle}>
-          <h1 style={{ fontSize: 24, fontWeight: 900, margin: 0 }}>
-            Axiprova — Impact Framework (EL/EN)
-          </h1>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12 }}>
+          <h1 style={{ fontSize: 24, fontWeight: 900, margin: 0 }}>Axiprova — Impact</h1>
           <div style={badgeStyle}>
             Status: <b>{status ?? "-"}</b>
           </div>
         </div>
 
         <div style={{ marginTop: 8, fontSize: 13, opacity: 0.85 }}>
-          EL: Μετατρέπουμε την αξία του project σε δείκτες (pillars → indicators → evidence). | EN: We convert project
-          value into indicators (pillars → indicators → evidence).
+          Γράφεις λίγα → δηλώνεις τεκμήρια → παίρνεις καθαρό report + checklist για το τι να μετρήσεις.
         </div>
 
         <StepHeader />
 
+        {/* Step 1 */}
         {step === 1 && (
           <div style={cardStyle}>
-            <div style={{ fontSize: 13, fontWeight: 800, marginBottom: 6 }}>
-              Step 1 — Έργο / Project
-            </div>
-            <div style={{ fontSize: 12, opacity: 0.8 }}>
-              EL: Βασικές πληροφορίες έργου. | EN: Basic project information.
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 900 }}>Βήμα 1 — Έργο</div>
+                <div style={{ fontSize: 12, opacity: 0.8 }}>Συμπλήρωσε τα βασικά. (Μην αγχώνεσαι — μπορείς να τα αλλάξεις μετά.)</div>
+              </div>
+
+              <div>
+                <div style={{ fontSize: 12, opacity: 0.8, marginBottom: 6 }}>Γλώσσα report</div>
+                <select value={lang} onChange={(e) => setLang(e.target.value as Lang)} style={{ ...inputStyle, padding: 8 }}>
+                  <option value="auto">Auto (browser)</option>
+                  <option value="el">Ελληνικά</option>
+                  <option value="en">English</option>
+                </select>
+              </div>
             </div>
 
             <div style={divider} />
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 140px", gap: 12 }}>
               <label>
-                <div style={labelStyle}>Τίτλος / Title</div>
+                <div style={labelStyle}>Τίτλος</div>
                 <input value={title} onChange={(e) => setTitle(e.target.value)} style={inputStyle} />
               </label>
 
               <label>
-                <div style={labelStyle}>Τύπος / Type</div>
+                <div style={labelStyle}>Τύπος</div>
                 <input value={type} onChange={(e) => setType(e.target.value)} style={inputStyle} />
               </label>
 
               <label>
-                <div style={labelStyle}>Τοποθεσία / Location</div>
+                <div style={labelStyle}>Τοποθεσία</div>
                 <input value={location} onChange={(e) => setLocation(e.target.value)} style={inputStyle} />
               </label>
 
               <label>
-                <div style={labelStyle}>Ημέρες / Days</div>
+                <div style={labelStyle}>Ημέρες</div>
                 <input type="number" value={days} onChange={(e) => setDays(Number(e.target.value))} style={inputStyle} min={1} />
               </label>
             </div>
 
             <div style={{ marginTop: 12, display: "flex", gap: 10 }}>
               <button style={buttonStyle} onClick={() => setStep(2)}>
-                Συνέχεια → Τεκμήρια / Continue → Evidence
+                Συνέχεια → Τεκμήρια
               </button>
             </div>
           </div>
         )}
 
+        {/* Step 2 */}
         {step === 2 && (
           <div style={cardStyle}>
-            <div style={{ fontSize: 13, fontWeight: 800, marginBottom: 6 }}>
-              Step 2 — Τεκμήρια / Evidence
-            </div>
-            <div style={{ fontSize: 12, opacity: 0.8 }}>
-              EL: Πρόσθεσε URLs και εσωτερικά τεκμήρια. Αυτό επηρεάζει confidence + missing data. | EN: Add URLs and internal evidence.
+            <div style={{ fontSize: 13, fontWeight: 900 }}>Βήμα 2 — Τεκμήρια</div>
+            <div style={{ fontSize: 12, opacity: 0.8, marginTop: 6 }}>
+              Όσο περισσότερα τεκμήρια δηλώσεις, τόσο ανεβαίνει η “βεβαιότητα” και τόσο λιγότερα “missing data”.
             </div>
 
             <div style={divider} />
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
               <label>
-                <div style={labelStyle}>Δημόσιες πηγές (URL ανά γραμμή) / Public sources (1 URL per line)</div>
+                <div style={labelStyle}>Public sources (1 URL ανά γραμμή)</div>
                 <textarea value={publicSourcesText} onChange={(e) => setPublicSourcesText(e.target.value)} style={textareaStyle} />
               </label>
 
               <label>
-                <div style={labelStyle}>Εσωτερικά τεκμήρια (1 item ανά γραμμή) / Internal evidence (1 item per line)</div>
+                <div style={labelStyle}>Internal evidence (1 item ανά γραμμή)</div>
                 <textarea value={internalSourcesText} onChange={(e) => setInternalSourcesText(e.target.value)} style={textareaStyle} />
               </label>
             </div>
 
             <div style={{ marginTop: 12 }}>
-              <div style={labelStyle}>Σημειώσεις / Notes</div>
+              <div style={labelStyle}>Notes</div>
               <textarea value={evidenceNotes} onChange={(e) => setEvidenceNotes(e.target.value)} style={textareaStyle} />
             </div>
 
             <div style={{ marginTop: 12, display: "flex", gap: 10, flexWrap: "wrap" }}>
               <button style={secondaryButton} onClick={() => setStep(1)}>
-                ← Πίσω / Back
+                ← Πίσω
               </button>
 
               <button
@@ -380,7 +309,7 @@ export default function DashboardImpactPage() {
                 disabled={loading}
                 style={{ ...buttonStyle, opacity: loading ? 0.7 : 1, cursor: loading ? "not-allowed" : "pointer" }}
               >
-                {loading ? "Παράγεται... / Generating..." : "Generate framework report (EL/EN)"}
+                {loading ? "Παράγεται..." : "Generate report"}
               </button>
             </div>
 
@@ -392,22 +321,46 @@ export default function DashboardImpactPage() {
           </div>
         )}
 
+        {/* Step 3 */}
         {step === 3 && (
           <div style={cardStyle}>
-            <div style={{ fontSize: 13, fontWeight: 800, marginBottom: 6 }}>
-              Step 3 — Αποτελέσματα / Results
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 900 }}>Βήμα 3 — Αποτελέσματα</div>
+                <div style={{ fontSize: 12, opacity: 0.8, marginTop: 6 }}>
+                  Διάλεξε προβολή: Report (σύντομο) ή Checklist (αναλυτικό).
+                </div>
+              </div>
+
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <div onClick={() => setView("report")} style={tabBtn(view === "report")}>
+                  Report
+                </div>
+                <div onClick={() => setView("checklist")} style={tabBtn(view === "checklist")}>
+                  Checklist
+                </div>
+              </div>
             </div>
 
             <div style={divider} />
 
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
               <button style={secondaryButton} onClick={() => setStep(2)}>
-                ← Πίσω στα Τεκμήρια / Back to Evidence
+                ← Πίσω στα Τεκμήρια
               </button>
               <button style={buttonStyle} onClick={run} disabled={loading}>
-                {loading ? "Παράγεται... / Generating..." : "Re-run"}
+                {loading ? "Παράγεται..." : "Re-run"}
               </button>
             </div>
+
+            {framework && (
+              <div style={{ marginTop: 14, padding: 12, borderRadius: 12, border: "1px solid rgba(255,255,255,0.10)" }}>
+                <div style={{ fontSize: 12, opacity: 0.8 }}>Framework</div>
+                <div style={{ fontSize: 14, fontWeight: 900 }}>
+                  {framework.name} — v{framework.version}
+                </div>
+              </div>
+            )}
 
             {error && (
               <div style={{ marginTop: 12, padding: 12, borderRadius: 12, border: "1px solid rgba(255, 120, 120, 0.35)", background: "rgba(255, 120, 120, 0.10)" }}>
@@ -415,35 +368,22 @@ export default function DashboardImpactPage() {
               </div>
             )}
 
-            {framework && (
-              <div style={{ marginTop: 14, padding: 12, borderRadius: 12, border: "1px solid rgba(255,255,255,0.10)" }}>
-                <div style={{ fontSize: 12, opacity: 0.8 }}>Framework / Πλαίσιο</div>
-                <div style={{ fontSize: 14, fontWeight: 900 }}>
-                  {framework.name} — v{framework.version}
-                </div>
-              </div>
-            )}
-
-            {report && (
+            {view === "report" && report && (
               <div style={{ marginTop: 14 }}>
-                <div style={{ fontSize: 12, opacity: 0.8, marginBottom: 10 }}>Consultant report (Markdown) / Αναφορά</div>
                 <pre style={reportBoxStyle}>{report}</pre>
               </div>
             )}
 
-            {framework?.pillars && assessment?.indicator_assessments && (
-              <div style={{ marginTop: 16 }}>
-                <div style={{ fontSize: 13, fontWeight: 900, marginBottom: 8 }}>
-                  Indicator checklist / Checklist δεικτών
-                </div>
-
+            {view === "checklist" && framework?.pillars && assessment?.indicator_assessments && (
+              <div style={{ marginTop: 14 }}>
                 {(framework.pillars || []).map((p: any) => {
-                  const items = assessmentsByPillar[p.id] || [];
+                  const items = (assessmentsByPillar[p.id] || []) as any[];
                   return (
                     <div key={p.id} style={{ marginTop: 12, padding: 12, borderRadius: 12, border: "1px solid rgba(255,255,255,0.10)" }}>
                       <div style={{ fontSize: 14, fontWeight: 900 }}>
                         {p.name} <span style={{ opacity: 0.7, fontWeight: 700 }}>({p.weight_points} pts)</span>
                       </div>
+                      <div style={{ fontSize: 12, opacity: 0.8, marginTop: 6 }}>{p.description}</div>
 
                       <div style={divider} />
 
@@ -454,44 +394,32 @@ export default function DashboardImpactPage() {
                               <div style={{ fontSize: 13, fontWeight: 900 }}>
                                 {ia.indicator_id} — {ind?.name || "Indicator"}
                               </div>
-                              <div style={{ fontSize: 12, opacity: 0.8, marginTop: 4 }}>
-                                {ind?.definition || ""}
-                              </div>
+                              <div style={{ fontSize: 12, opacity: 0.8, marginTop: 4 }}>{ind?.definition || ""}</div>
                             </div>
                             <div style={confidenceBadge(ia.confidence as Confidence)}>
-                              Confidence / Βεβαιότητα: <b>{ia.confidence}</b>
+                              Confidence: <b>{ia.confidence}</b>
                             </div>
                           </div>
 
                           <div style={{ marginTop: 10, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                             <div>
-                              <div style={{ fontSize: 12, opacity: 0.8, fontWeight: 800 }}>
-                                Missing data / Τι λείπει
-                              </div>
+                              <div style={{ fontSize: 12, opacity: 0.8, fontWeight: 800 }}>Missing data</div>
                               <div style={{ fontSize: 12, opacity: 0.9, marginTop: 6 }}>
-                                {(ia.missing_data || []).map((x: string, i: number) => (
-                                  <div key={i}>- {x}</div>
-                                ))}
+                                {(ia.missing_data || []).length ? (ia.missing_data || []).map((x: string, i: number) => <div key={i}>- {x}</div>) : <div>- (none)</div>}
                               </div>
                             </div>
 
                             <div>
-                              <div style={{ fontSize: 12, opacity: 0.8, fontWeight: 800 }}>
-                                Next actions / Επόμενα βήματα
-                              </div>
+                              <div style={{ fontSize: 12, opacity: 0.8, fontWeight: 800 }}>Next actions</div>
                               <div style={{ fontSize: 12, opacity: 0.9, marginTop: 6 }}>
-                                {(ia.recommended_next_actions || []).map((x: string, i: number) => (
-                                  <div key={i}>- {x}</div>
-                                ))}
+                                {(ia.recommended_next_actions || []).length
+                                  ? (ia.recommended_next_actions || []).map((x: string, i: number) => <div key={i}>- {x}</div>)
+                                  : <div>- (none)</div>}
                               </div>
                             </div>
                           </div>
 
-                          {ia.notes && (
-                            <div style={{ marginTop: 10, fontSize: 12, opacity: 0.85 }}>
-                              <b>Notes / Σημειώσεις:</b> {ia.notes}
-                            </div>
-                          )}
+                          {ia.notes && <div style={{ marginTop: 10, fontSize: 12, opacity: 0.85 }}><b>Notes:</b> {ia.notes}</div>}
                         </div>
                       ))}
                     </div>
