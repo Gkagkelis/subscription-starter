@@ -28,8 +28,7 @@ const InputSchema = z.object({
     .optional(),
 });
 
-// IMPORTANT: Structured Outputs requires fields to be required.
-// Use nullable() (not optional()) for "maybe missing" fields.
+// Structured outputs: fields must be required -> use nullable() instead of optional()
 const OutputSchema = z.object({
   version: z.string(),
   report_markdown: z.string(),
@@ -39,7 +38,6 @@ const OutputSchema = z.object({
       type: z.string(),
       location: z.string().nullable(),
     }),
-
     pillars: z.array(
       z.object({
         name: z.string(),
@@ -48,14 +46,12 @@ const OutputSchema = z.object({
         metrics: z.array(z.string()),
       })
     ),
-
     pilot_design: z.object({
       hypotheses: z.array(z.string()),
       sample: z.string().nullable(),
       instruments: z.array(z.string()),
       timeline_days: z.number().int().positive().nullable(),
     }),
-
     scenario_levers: z.array(
       z.object({
         lever: z.string(),
@@ -63,7 +59,6 @@ const OutputSchema = z.object({
         expected_effect: z.string(),
       })
     ),
-
     prediction_scaffold: z.object({
       outcomes: z.array(z.string()),
       assumptions: z.array(z.string()),
@@ -80,7 +75,10 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const input = InputSchema.parse(body);
-    const model = process.env.OPENAI_MODEL || "gpt-5-mini";
+
+    // For Structured Outputs, use a model that is known to support it well
+    // (You can later change this, but let's make it work first.)
+    const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
 
     const response = await client.responses.parse({
       model,
@@ -91,7 +89,6 @@ export async function POST(req: Request) {
           content:
             "You are Axiprova, an impact measurement & evaluation consultant for culture and creative industries. " +
             "Write professionally like a consultant. Be practical. Do not invent numbers. " +
-            "Do not fabricate numbers or claims. If info is missing, say what is missing. " +
             "Always include: assumptions, risks, bias considerations, missing data. " +
             "Output must match the provided JSON schema exactly.",
         },
@@ -100,8 +97,7 @@ export async function POST(req: Request) {
           content:
             "Create an Axiprova impact outline (v0.1) for this project input:\n\n" +
             JSON.stringify(input, null, 2) +
-            "\n\nPillars and weights:\n- experience 25\n- access 20\n- inclusivity 20\n- transparency 15\n- community 20\n\n" +
-            "Make it consultant-grade but concise.\n",
+            "\n\nPillars and weights:\n- experience 25\n- access 20\n- inclusivity 20\n- transparency 15\n- community 20\n",
         },
       ],
       text: {
@@ -109,7 +105,22 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.json(response.output_parsed);
+    const parsed = (response as any).output_parsed;
+
+    // If parsing didn't produce structured output, fail loudly (no more 'null')
+    if (!parsed) {
+      return NextResponse.json(
+        {
+          error: "impact-outline failed",
+          details:
+            "Model did not return structured output. Try model gpt-4o-mini and ensure Structured Outputs are supported.",
+          output_text: (response as any).output_text ?? null,
+        },
+        { status: 502 }
+      );
+    }
+
+    return NextResponse.json(parsed);
   } catch (err: any) {
     return NextResponse.json(
       { error: "impact-outline failed", details: err?.message ?? String(err) },
