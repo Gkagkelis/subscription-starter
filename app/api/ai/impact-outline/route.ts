@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 export const runtime = "nodejs";
+export const maxDuration = 60;
+
 
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
