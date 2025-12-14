@@ -110,6 +110,15 @@ export default function Pricing({ user, products, subscription }: Props) {
             <p className="mt-6 text-center text-lg text-zinc-400">
   Start for free — no credit card required
 </p>
+            <div className="mt-6 flex justify-center">
+  <a
+    href="/signin/signup"
+    className="inline-flex items-center justify-center rounded-md bg-white px-6 py-3 text-base font-medium text-black hover:bg-zinc-200 transition"
+  >
+    Get Axiprova free
+  </a>
+</div>
+
 
           
             <div className="relative self-center mt-6 bg-zinc-900 rounded-lg p-0.5 flex sm:mt-8 border border-zinc-800">
