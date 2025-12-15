@@ -1,135 +1,141 @@
-import OpenAI from "openai";
-import { NextResponse } from "next/server";
+// app/api/ai/copilot/route.ts
 import { z } from "zod";
-import { zodTextFormat } from "openai/helpers/zod";
 
-export const runtime = "nodejs";
-export const maxDuration = 60;
-export const dynamic = "force-dynamic";
+// ========================================
+// ΒΗΜΑ 1: Ορίζουμε τα action types (typed payloads)
+// ========================================
 
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-const InputSchema = z.object({
-  org_id: z.string().min(1),
-  message: z.string().min(1),
-
-  // Προαιρετικά meta από UI
-  meta: z.object({
-    language: z.enum(["auto", "el", "en"]),
-  }),
-
-  // Προαιρετικά: αν πατήσεις κουμπί από actions
-  action: z.object({
-    id: z.string(),
-    payload: z.record(z.any()),
-  }),
+const GenerateTitlesPayload = z.object({
+  count: z.number().default(3),
+  tone: z.enum(["academic", "playful", "press"]).optional(),
 });
 
-const OutputSchema = z.object({
-  language: z.enum(["el", "en"]),
-  assistant_message: z.string(),
-
-  // 3-6 προτεινόμενες επόμενες ερωτήσεις (για να καθοδηγγεί τον χρήστη)
-  next_questions: z.array(z.string()),
-
-  // Κουμπιά δράσης (π.χ. “Δώσε 3 τίτλους”, “Φτιάξε IG caption”, “Pilot study plan”)
-  actions: z.array(
-    z.object({
-      id: z.string(),
-      label: z.string(),
-      hint: z.string(),
-      payload: z.record(z.any()),
-    })
-  ),
-
-  // Τι υποθέτουμε / τι λείπει (σαν σύμβουλος)
-  assumptions: z.array(z.string()),
-  missing_data: z.array(z.string()),
-  risks: z.array(z.string()),
+const DraftContentPayload = z.object({
+  content_type: z.enum(["instagram", "email", "press_release"]),
+  target_audience: z.string().optional(),
+  length: z.enum(["short", "medium", "long"]).optional(),
 });
 
-function detectLanguageAuto(text: string): "el" | "en" {
-  // Αν έχει ελληνικούς χαρακτήρες, θεωρούμε EL
-  const hasGreek = /[Α-Ωα-ωΆΈΉΊΌΎΏάέήίόύώ]/.test(text);
-  return hasGreek ? "el" : "en";
-}
+const WorkshopIdeasPayload = z.object({
+  age_group: z.string().optional(),
+  topic: z.string().optional(),
+  count: z.number().default(5),
+});
+
+const AnalyzeCompetitorsPayload = z.object({
+  competitors: z.array(z.string()).optional(),
+  focus: z.string().optional(),
+});
+
+// Union όλων των actions (discriminated union)
+const ActionSchema = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("generate_titles"),
+    label: z.string(),
+    payload: GenerateTitlesPayload,
+  }),
+  z.object({
+    type: z.literal("draft_content"),
+    label: z.string(),
+    payload: DraftContentPayload,
+  }),
+  z.object({
+    type: z.literal("workshop_ideas"),
+    label: z.string(),
+    payload: WorkshopIdeasPayload,
+  }),
+  z.object({
+    type: z.literal("analyze_competitors"),
+    label: z.string(),
+    payload: AnalyzeCompetitorsPayload,
+  }),
+  z.object({
+    type: z.literal("draft_funding_section"),
+    label: z.string(),
+    payload: z.object({
+      section: z.string(),
+    }),
+  }),
+]);
+
+// ========================================
+// ΒΗΜΑ 2: Το τελικό Output Schema
+// ========================================
+
+const CopilotOutputSchema = z.object({
+  reply: z.string().describe("Conversational reply in user's language (1-2 paragraphs max)"),
+  insights: z.array(z.string()).describe("2-3 bullet points with actionable insights").optional(),
+  actions: z.array(ActionSchema).describe("3-5 suggested action buttons"),
+  language_detected: z.enum(["el", "en"]).describe("Auto-detected language"),
+});
+
+// ========================================
+// ΒΗΜΑ 3: Το route handler
+// ========================================
 
 export async function POST(req: Request) {
   try {
-    if (!process.env.OPENAI_API_KEY) {
-      return NextResponse.json({ error: "Missing OPENAI_API_KEY" }, { status: 500 });
-    }
-
     const body = await req.json();
-    const input = InputSchema.parse(body);
+    const { message, context, language = "auto" } = body;
 
-    const lang: "el" | "en" =
-      input.meta.language === "auto" ? detectLanguageAuto(input.message) : input.meta.language;
+    // Language detection
+    const detectedLanguage = language === "auto" 
+      ? (/[\u0370-\u03FF\u1F00-\u1FFF]/.test(message) ? "el" : "en")
+      : language;
 
-    const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
+    // System prompt (conversational advisor, not report generator)
+    const systemPrompt = `You are a cultural sector advisor AI assistant.
 
-    const systemEL =
-      "Είσαι το Axiprova — καθημερινός co-pilot για επαγγελματίες πολιτισμού & δημιουργικών βιομηχανιών. " +
-      "Μιλάς φιλικά, καθαρά, πρακτικά, σαν έμπειρος σύμβουλος. " +
-      "Δεν πετάς άσχετες θεωρίες. Δεν εφευρίσκεις νούμερα. " +
-      "Δίνεις: (1) άμεση βοήθεια στο σχέδιο, (2) 2-3 insights/ευκαιρίες, (3) συγκεκριμένα επόμενα βήματα. " +
-      "Αν λείπουν στοιχεία, ρωτάς 2-4 σωστές διευκρινιστικές ερωτήσεις. " +
-      "ΜΗΝ γράφεις markdown. ΜΟΝΟ valid JSON που ταιριάζει 100% στο schema.";
+TONE: Conversational, practical, encouraging. You're a colleague, not a robot.
+LANGUAGE: Respond ONLY in ${detectedLanguage === "el" ? "Greek" : "English"}. Never mix languages.
 
-    const systemEN =
-      "You are Axiprova — a daily co-pilot for cultural and creative industry professionals. " +
-      "You speak friendly, clear, practical, like an experienced consultant. " +
-      "No generic theory. Do not invent numbers. " +
-      "Provide: (1) immediate help improving the plan, (2) 2-3 insights/opportunities, (3) concrete next steps. " +
-      "If key details are missing, ask 2-4 smart clarifying questions. " +
-      "NO markdown. Output ONLY valid JSON matching the schema exactly.";
+STRUCTURE:
+1. Reply: 1-2 short paragraphs addressing their message directly
+2. Insights: 2-3 bullet points with actionable suggestions (if relevant)
+3. Actions: 3-5 specific action buttons they can click next
 
-    const userPrompt =
-      (lang === "el"
-        ? "Μήνυμα χρήστη:\n"
-        : "User message:\n") +
-      input.message +
-      "\n\n" +
-      (input.action?.id
-        ? (lang === "el"
-            ? `Ενέργεια που πάτησε ο χρήστης: ${input.action.id}\nPayload: ${JSON.stringify(
-                input.action.payload
-              )}\n`
-            : `Action clicked: ${input.action.id}\nPayload: ${JSON.stringify(input.action.payload)}\n`)
-        : "") +
-      "\n" +
-      (lang === "el"
-        ? "Στόχος: φτιάξε απάντηση τύπου co-pilot + προτεινόμενα κουμπιά δράσης."
-        : "Goal: produce a co-pilot response + suggested action buttons.");
+RULES:
+- Don't dump frameworks unless asked
+- Ask max 1 clarifying question if needed
+- Be specific, not generic
+- Always end with concrete next steps (actions)
 
-    const response = await client.responses.parse({
-      model,
-      max_output_tokens: 1200,
-      instructions: lang === "el" ? systemEL : systemEN,
-      input: userPrompt,
-      text: {
-        format: zodTextFormat(OutputSchema, "copilot_response"),
+Examples of good responses:
+User: "Σχεδιάζω έκθεση για κεραμική"
+You: "Ωραία! Η κεραμική μπορεί να είναι challenging για νέο κοινό. Βάσει trends, θα δούλευε καλύτερα αν τη συνδέσεις με σύγχρονο design ή sustainability. Έχεις κάποιο συγκεκριμένο angle που σκέφτεσαι;
+
+Insights:
+- Το κοινό 18-35 ενδιαφέρεται για 'πώς φτιάχνεται' stories
+- Τα interactive workshops έχουν +40% engagement vs passive εκθέσεις
+
+Actions: [3 buttons like: 'Δώσε τίτλους για την έκθεση', 'Ιδέες για workshop', 'Ανάλυσε ανταγωνισμό']"`;
+
+    // Call OpenAI with structured output
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-2024-08-06",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: message },
+      ],
+      response_format: {
+        type: "json_schema",
+        json_schema: {
+          name: "copilot_response",
+          strict: true,
+          schema: zodToJsonSchema(CopilotOutputSchema),
+        },
       },
     });
 
-    const parsed = (response as any).output_parsed;
+    const result = JSON.parse(completion.choices[0].message.content);
+    
+    return Response.json(result);
 
-    if (!parsed) {
-      return NextResponse.json(
-        {
-          error: "copilot failed",
-          details: "No structured output returned by the model.",
-          output_text: (response as any).output_text ?? null,
-        },
-        { status: 502 }
-      );
-    }
-
-    return NextResponse.json(parsed);
-  } catch (err: any) {
-    return NextResponse.json(
-      { error: "copilot failed", details: err?.message ?? String(err) },
-      { status: 400 }
+  } catch (error: any) {
+    console.error("Copilot error:", error);
+    return Response.json(
+      { error: error.message || "Internal server error" },
+      { status: 500 }
     );
   }
 }
