@@ -1,5 +1,5 @@
 import { openai } from "@ai-sdk/openai";
-import { streamObject } from "ai";
+import { streamObject, embed } from "ai";
 import { z } from "zod";
 import { createClient } from "@/utils/supabase/server";
 
@@ -52,8 +52,10 @@ export async function POST(req: Request) {
     
     let profileContext = "";
     let snippetsContext = "";
+    let knowledgeContext = "";
     
     if (user) {
+      // Get user profile
       const { data: profile } = await supabase
         .from("org_profiles")
         .select("*")
@@ -71,10 +73,11 @@ ORGANIZATION PROFILE:
 - Main Challenges: ${profile.main_challenges || "Not set"}
 - Goals: ${profile.goals || "Not set"}
 
-USE THIS PROFILE to personalize ALL your advice. Refer to their specific type, challenges, and goals.
+USE THIS PROFILE to personalize ALL your advice.
 `;
       }
 
+      // Get user snippets/data
       const { data: snippets } = await supabase
         .from("org_snippets")
         .select("*")
@@ -84,25 +87,39 @@ USE THIS PROFILE to personalize ALL your advice. Refer to their specific type, c
 
       if (snippets && snippets.length > 0) {
         const reviews = snippets.filter(s => s.kind === "review");
-        const trends = snippets.filter(s => s.kind === "trend");
-        const competitors = snippets.filter(s => s.kind === "competitor");
-
         snippetsContext = `
 USER'S DATA:
 REVIEWS (${reviews.length} total):
 ${reviews.map(r => `- [${r.source}, Rating: ${r.rating || "N/A"}] "${r.content}"`).join("\n")}
-
-TRENDS (${trends.length} total):
-${trends.map(t => `- [${t.source}] "${t.content}"`).join("\n")}
-
-COMPETITOR INSIGHTS (${competitors.length} total):
-${competitors.map(c => `- [${c.source}] "${c.content}"`).join("\n")}
 `;
       }
     }
 
     const body = await req.json();
     const { message, language = "auto" } = body;
+
+    // Search knowledge base for relevant info
+    try {
+      const { embedding } = await embed({
+        model: openai.embedding("text-embedding-3-small"),
+        value: message,
+      });
+
+      const { data: knowledgeResults } = await supabase.rpc("match_knowledge", {
+        query_embedding: embedding,
+        match_threshold: 0.7,
+        match_count: 3,
+      });
+
+      if (knowledgeResults && knowledgeResults.length > 0) {
+        knowledgeContext = `
+EXPERT KNOWLEDGE (use this to give specific, professional advice):
+${knowledgeResults.map((k: any) => `[${k.category}] ${k.content}`).join("\n\n")}
+`;
+      }
+    } catch (e) {
+      console.log("Knowledge search skipped:", e);
+    }
 
     const detectedLanguage = language === "auto" 
       ? (/[\u0370-\u03FF\u1F00-\u1FFF]/.test(message) ? "el" : "en")
@@ -111,11 +128,7 @@ ${competitors.map(c => `- [${c.source}] "${c.content}"`).join("\n")}
     const langName = detectedLanguage === "el" ? "Greek" : "English";
 
     const noProfileMessage = !profileContext 
-      ? "\n\nNOTE: User hasn't set up their profile yet. Encourage them to visit /dashboard/profile to get more personalized advice."
-      : "";
-
-    const noDataMessage = !snippetsContext 
-      ? "\n\nNOTE: User hasn't added any data yet. Encourage them to add reviews and insights at /dashboard/data."
+      ? "\n\nNOTE: User hasn't set up their profile yet. Encourage them to visit /dashboard/profile."
       : "";
 
     const systemPrompt = `You are Axiprova - an expert AI advisor for cultural sector professionals.
@@ -128,8 +141,8 @@ YOUR IDENTITY:
 - You speak as a supportive partner, practical and encouraging
 ${profileContext}
 ${snippetsContext}
+${knowledgeContext}
 ${noProfileMessage}
-${noDataMessage}
 
 YOUR EXPERTISE:
 1. Exhibition & Event Planning
@@ -137,13 +150,16 @@ YOUR EXPERTISE:
 3. Marketing & Communications
 4. Funding & Grants
 5. Educational Programs
+6. Museum Management
+7. Cultural Policy
 
 IMPORTANT RULES:
-- If user has a PROFILE, tailor ALL advice to their org type, size, location, challenges and goals
-- If user has DATA (reviews, trends), reference SPECIFIC examples in your advice
-- Maximum 2 short paragraphs
+- If you have KNOWLEDGE CONTEXT above, use it to give SPECIFIC, EXPERT advice
+- Reference specific techniques, frameworks, and best practices from the knowledge
+- If user has a PROFILE, tailor advice to their org type, size, and challenges
+- Maximum 2-3 paragraphs
 - Be specific and actionable
-- Always suggest 3-5 relevant next action buttons based on their profile/needs`;
+- Always suggest 3-5 relevant next action buttons`;
 
     const result = await streamObject({
       model: openai("gpt-4o-2024-08-06"),
