@@ -36,6 +36,11 @@ const ActionSchema = z.discriminatedUnion("type", [
     label: z.string(),
     payload: z.object({ focus: z.string().optional() }),
   }),
+  z.object({
+    type: z.literal("search_web"),
+    label: z.string(),
+    payload: z.object({ query: z.string().optional() }),
+  }),
 ]);
 
 const CopilotOutputSchema = z.object({
@@ -45,6 +50,59 @@ const CopilotOutputSchema = z.object({
   language_detected: z.enum(["el", "en"]),
 });
 
+// Check if query needs web search
+function needsWebSearch(message: string): boolean {
+  const searchTriggers = [
+    // Greek triggers
+    'επιχορήγηση', 'επιχορηγήσεις', 'χρηματοδότηση', 'προκήρυξη', 'προκηρύξεις',
+    'deadline', 'προθεσμία', 'προθεσμίες', 'τρέχουσες', 'τρέχοντα', 'νέες', 'νέα',
+    'ανοιχτές', 'ανοιχτά', '2024', '2025', 'τώρα', 'σήμερα', 'φέτος',
+    'creative europe', 'ελλάδα', 'υπουργείο πολιτισμού', 'εσπα',
+    // English triggers
+    'grant', 'grants', 'funding', 'deadline', 'current', 'open call', 'open calls',
+    'apply', 'application', 'opportunity', 'opportunities', 'latest', 'recent',
+    'new', 'available', 'announcement', 'call for'
+  ];
+  
+  const lowerMessage = message.toLowerCase();
+  return searchTriggers.some(trigger => lowerMessage.includes(trigger));
+}
+
+// Search web using Tavily
+async function searchWeb(query: string): Promise<string> {
+  try {
+    const response = await fetch('https://api.tavily.com/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        api_key: process.env.TAVILY_API_KEY,
+        query: query + ' cultural grants funding Greece Europe',
+        search_depth: 'basic',
+        include_answer: true,
+        max_results: 5,
+      }),
+    });
+
+    const data = await response.json();
+    
+    if (data.results && data.results.length > 0) {
+      let searchContext = "LIVE WEB SEARCH RESULTS:\n";
+      if (data.answer) {
+        searchContext += `Summary: ${data.answer}\n\n`;
+      }
+      searchContext += "Sources:\n";
+      data.results.forEach((r: any, i: number) => {
+        searchContext += `${i + 1}. ${r.title}\n   ${r.content}\n   URL: ${r.url}\n\n`;
+      });
+      return searchContext;
+    }
+    return "";
+  } catch (e) {
+    console.error("Web search error:", e);
+    return "";
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const supabase = createClient();
@@ -53,6 +111,7 @@ export async function POST(req: Request) {
     let profileContext = "";
     let snippetsContext = "";
     let knowledgeContext = "";
+    let webSearchContext = "";
     
     if (user) {
       // Get user profile
@@ -121,6 +180,11 @@ ${knowledgeResults.map((k: any) => `[${k.category}] ${k.content}`).join("\n\n")}
       console.log("Knowledge search skipped:", e);
     }
 
+    // Web search if needed
+    if (needsWebSearch(message)) {
+      webSearchContext = await searchWeb(message);
+    }
+
     const detectedLanguage = language === "auto" 
       ? (/[\u0370-\u03FF\u1F00-\u1FFF]/.test(message) ? "el" : "en")
       : language;
@@ -129,6 +193,10 @@ ${knowledgeResults.map((k: any) => `[${k.category}] ${k.content}`).join("\n\n")}
 
     const noProfileMessage = !profileContext 
       ? "\n\nNOTE: User hasn't set up their profile yet. Encourage them to visit /dashboard/profile."
+      : "";
+
+    const webSearchInstructions = webSearchContext 
+      ? "\n\nWEB SEARCH INSTRUCTIONS: You have live search results below. Use them to provide CURRENT, UP-TO-DATE information. Always mention specific programs, deadlines, and include URLs when relevant."
       : "";
 
     const systemPrompt = `You are Axiprova - an expert AI advisor for cultural sector professionals.
@@ -142,7 +210,9 @@ YOUR IDENTITY:
 ${profileContext}
 ${snippetsContext}
 ${knowledgeContext}
+${webSearchContext}
 ${noProfileMessage}
+${webSearchInstructions}
 
 YOUR EXPERTISE:
 1. Exhibition & Event Planning
@@ -154,8 +224,8 @@ YOUR EXPERTISE:
 7. Cultural Policy
 
 IMPORTANT RULES:
-- If you have KNOWLEDGE CONTEXT above, use it to give SPECIFIC, EXPERT advice
-- Reference specific techniques, frameworks, and best practices from the knowledge
+- If you have WEB SEARCH RESULTS, prioritize that information for current/timely queries
+- If you have KNOWLEDGE CONTEXT, use it for expert advice
 - If user has a PROFILE, tailor advice to their org type, size, and challenges
 - Maximum 2-3 paragraphs
 - Be specific and actionable
