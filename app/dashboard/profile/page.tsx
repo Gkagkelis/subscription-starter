@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 
 interface Profile {
   org_name: string;
@@ -14,7 +13,6 @@ interface Profile {
 }
 
 export default function ProfilePage() {
-  const router = useRouter();
   const [isNewUser, setIsNewUser] = useState(false);
   const [profile, setProfile] = useState<Profile>({
     org_name: "",
@@ -27,7 +25,6 @@ export default function ProfilePage() {
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     loadProfile();
@@ -61,16 +58,17 @@ export default function ProfilePage() {
         body: JSON.stringify(profile),
       });
       if (res.ok) {
-        setSaved(true);
-        setTimeout(() => {
-          router.push("/dashboard/copilot");
-        }, 1000);
+        window.location.href = "/dashboard/copilot";
       }
     } catch (error) {
       console.error("Failed to save profile:", error);
     } finally {
       setSaving(false);
     }
+  };
+
+  const skipProfile = () => {
+    window.location.href = "/dashboard/copilot";
   };
 
   const orgTypes = [
@@ -106,16 +104,23 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-zinc-950 text-white py-8 px-4">
       <div className="max-w-2xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">
-            {isNewUser ? "Καλωσηρθες στο Axiprova!" : "Προφιλ Οργανισμου"}
-          </h1>
-          <p className="text-zinc-500">
-            {isNewUser 
-              ? "Συμπληρωσε τα στοιχεια σου για να ξεκινησεις"
-              : "Ενημερωσε τα στοιχεια σου"
-            }
-          </p>
+        <div className="mb-8 flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-2">
+              {isNewUser ? "Καλωσηρθες στο Axiprova!" : "Προφιλ Οργανισμου"}
+            </h1>
+            <p className="text-zinc-500">
+              Συμπληρωσε για εξατομικευμενες συμβουλες
+            </p>
+          </div>
+          {isNewUser && (
+            <button
+              onClick={skipProfile}
+              className="text-zinc-500 hover:text-white transition text-sm"
+            >
+              Παραλειψη →
+            </button>
+          )}
         </div>
 
         <div className="space-y-6 bg-zinc-900 rounded-2xl p-6 border border-zinc-800">
@@ -172,7 +177,7 @@ export default function ProfilePage() {
               type="text"
               value={profile.location}
               onChange={(e) => setProfile({ ...profile, location: e.target.value })}
-              placeholder="π.χ. Αθηνα, Ελλαδα"
+              placeholder="π.χ. Αθηνα"
               className="w-full px-4 py-3 bg-zinc-800 text-white border border-zinc-700 rounded-xl focus:outline-none focus:border-zinc-500 placeholder-zinc-600"
             />
           </div>
@@ -185,7 +190,7 @@ export default function ProfilePage() {
               type="text"
               value={profile.target_audience}
               onChange={(e) => setProfile({ ...profile, target_audience: e.target.value })}
-              placeholder="π.χ. Νεοι 18-35, οικογενειες, τουριστες"
+              placeholder="π.χ. Νεοι 18-35, οικογενειες"
               className="w-full px-4 py-3 bg-zinc-800 text-white border border-zinc-700 rounded-xl focus:outline-none focus:border-zinc-500 placeholder-zinc-600"
             />
           </div>
@@ -210,7 +215,7 @@ export default function ProfilePage() {
             <textarea
               value={profile.goals}
               onChange={(e) => setProfile({ ...profile, goals: e.target.value })}
-              placeholder="π.χ. Αυξηση επισκεπτων 20%, νεες χορηγιες..."
+              placeholder="π.χ. Αυξηση επισκεπτων 20%..."
               rows={3}
               className="w-full px-4 py-3 bg-zinc-800 text-white border border-zinc-700 rounded-xl focus:outline-none focus:border-zinc-500 placeholder-zinc-600 resize-none"
             />
@@ -221,15 +226,17 @@ export default function ProfilePage() {
             disabled={saving}
             className="w-full py-3 bg-white text-black font-medium rounded-xl hover:bg-zinc-200 disabled:opacity-50 transition"
           >
-            {saving ? "Αποθηκευση..." : isNewUser ? "Ξεκινα!" : "Αποθηκευση"}
+            {saving ? "Αποθηκευση..." : "Αποθηκευση & Συνεχεια"}
           </button>
-
-          {saved && (
-            <div className="text-center text-green-400 text-sm">
-              Παμε στο Axiprova...
-            </div>
-          )}
         </div>
+
+        {!isNewUser && (
+          <div className="mt-6 text-center">
+            <a href="/dashboard/copilot" className="text-zinc-500 hover:text-white transition">
+              ← Πισω στο Chat
+            </a>
+          </div>
+        )}
       </div>
     </div>
   );
