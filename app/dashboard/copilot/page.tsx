@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Button, Textarea, Card, CardContent } from "@/components/ui/components";
+import Button from "@/components/ui/Button/Button";
+import Card from "@/components/ui/Card/Card";
 
 export default function CopilotPage() {
   const [message, setMessage] = useState("");
