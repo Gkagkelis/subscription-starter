@@ -35,21 +35,27 @@ export default function Navlinks({ user }: NavlinksProps) {
               My Data
             </Link>
           )}
-          {user && (
-            <Link href="/account" className={s.link}>
-              Account
-            </Link>
-          )}
         </nav>
       </div>
-      <div className="flex justify-end space-x-8">
+      <div className="flex justify-end items-center space-x-4">
         {user ? (
-          <form onSubmit={(e) => handleRequest(e, SignOut, router)}>
-            <input type="hidden" name="pathName" value={usePathname()} />
-            <button type="submit" className={s.link}>
-              Sign out
-            </button>
-          </form>
+          <>
+            <Link href="/dashboard/profile" className="flex items-center gap-2 hover:opacity-80 transition">
+              <Image 
+                src="/profil_logo.png" 
+                alt="Profile" 
+                width={28} 
+                height={28}
+                className="rounded-full"
+              />
+            </Link>
+            <form onSubmit={(e) => handleRequest(e, SignOut, router)}>
+              <input type="hidden" name="pathName" value={usePathname()} />
+              <button type="submit" className={s.link}>
+                Sign out
+              </button>
+            </form>
+          </>
         ) : (
           <Link href="/signin" className={s.link}>
             Sign In
