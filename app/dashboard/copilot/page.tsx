@@ -200,98 +200,117 @@ export default function CopilotPage() {
       <div className="flex-1 flex flex-col">
         {activeSection === "chat" && (
           <React.Fragment>
-            <div className="flex-1 overflow-y-auto px-6 py-4 flex flex-col">
-              {messages.length === 0 ? (
-                <div className="flex flex-col items-center justify-center flex-1 max-w-2xl mx-auto w-full">
-                  <img src="/axiprova-icon.png" alt="Axiprova" className="w-24 h-24 mb-4" />
-                  <h1 className="text-xl font-light text-zinc-300 mb-1">Axiprova</h1>
-                  <p className="text-zinc-500 text-center mb-6">Ο AI συμβουλος σου για τον πολιτισμο</p>
-                  <div className="flex flex-wrap justify-center gap-2">
-                    {suggestions.map((s, i) => (
-                      <button
-                        key={i}
-                        onClick={() => handleSubmit(s)}
-                        className="px-4 py-2 text-sm bg-zinc-900 text-zinc-400 border border-zinc-800 rounded-full hover:bg-zinc-800 hover:text-white transition"
-                      >
-                        {s}
-                      </button>
+            {messages.length === 0 ? (
+              <div className="flex-1 flex flex-col items-center justify-center px-6">
+                <img src="/axiprova-icon.png" alt="Axiprova" className="w-20 h-20 mb-4" />
+                <h1 className="text-xl font-light text-zinc-300 mb-1">Axiprova</h1>
+                <p className="text-zinc-500 text-center mb-6">Ο AI συμβουλος σου για τον πολιτισμο</p>
+                <div className="flex flex-wrap justify-center gap-2 mb-6">
+                  {suggestions.map((s, i) => (
+                    <button
+                      key={i}
+                      onClick={() => handleSubmit(s)}
+                      className="px-4 py-2 text-sm bg-zinc-900 text-zinc-400 border border-zinc-800 rounded-full hover:bg-zinc-800 hover:text-white transition"
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+                <div className="w-full max-w-2xl flex gap-3">
+                  <input
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Ρωτησε οτιδηποτε..."
+                    className="flex-1 bg-zinc-900 text-white px-4 py-3 rounded-xl border border-zinc-800 focus:outline-none focus:border-zinc-600 placeholder-zinc-600"
+                  />
+                  <button
+                    onClick={() => handleSubmit()}
+                    disabled={loading || !input.trim()}
+                    className="px-6 py-3 bg-white text-black font-medium rounded-xl hover:bg-zinc-200 disabled:opacity-50 transition"
+                  >
+                    Στειλε
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <React.Fragment>
+                <div className="flex-1 overflow-y-auto px-6 py-4">
+                  <div className="max-w-2xl mx-auto">
+                    {messages.map((msg, i) => (
+                      <div key={i} className="mb-6">
+                        {msg.role === "user" ? (
+                          <div className="flex justify-end">
+                            <div className="bg-zinc-800 text-white px-4 py-3 rounded-2xl rounded-br-md max-w-lg">
+                              {msg.content}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex gap-3">
+                            <img src="/axiprova-icon.png" alt="AI" className="w-8 h-8 flex-shrink-0 mt-1" />
+                            <div className="flex-1 space-y-4">
+                              <div className="text-zinc-200 leading-relaxed">{msg.content}</div>
+                              {msg.insights && msg.insights.length > 0 && (
+                                <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4">
+                                  <p className="text-zinc-500 text-xs uppercase mb-2">Insights</p>
+                                  <ul className="space-y-1">
+                                    {msg.insights.map((insight, j) => (
+                                      <li key={j} className="text-zinc-400 text-sm flex items-start">
+                                        <span className="text-blue-400 mr-2">→</span>{insight}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                              {msg.actions && msg.actions.length > 0 && (
+                                <div className="flex flex-wrap gap-2">
+                                  {msg.actions.map((action, j) => (
+                                    <button
+                                      key={j}
+                                      onClick={() => handleSubmit(action.label)}
+                                      className="px-3 py-1.5 text-sm bg-zinc-900 text-zinc-400 border border-zinc-700 rounded-full hover:bg-zinc-800 hover:text-white transition"
+                                    >
+                                      {action.label}
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     ))}
+                    {loading && (
+                      <div className="flex gap-3 mb-6">
+                        <img src="/axiprova-icon.png" alt="AI" className="w-8 h-8 flex-shrink-0" />
+                        <div className="text-zinc-500">Σκεφτομαι...</div>
+                      </div>
+                    )}
+                    <div ref={messagesEndRef} />
                   </div>
                 </div>
-              ) : (
-                <div className="max-w-2xl mx-auto w-full flex-1">
-                  {messages.map((msg, i) => (
-                    <div key={i} className="mb-6">
-                      {msg.role === "user" ? (
-                        <div className="flex justify-end">
-                          <div className="bg-zinc-800 text-white px-4 py-3 rounded-2xl rounded-br-md max-w-lg">
-                            {msg.content}
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex gap-3">
-                          <img src="/axiprova-icon.png" alt="AI" className="w-8 h-8 flex-shrink-0 mt-1" />
-                          <div className="flex-1 space-y-4">
-                            <div className="text-zinc-200 leading-relaxed">{msg.content}</div>
-                            {msg.insights && msg.insights.length > 0 && (
-                              <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4">
-                                <p className="text-zinc-500 text-xs uppercase mb-2">Insights</p>
-                                <ul className="space-y-1">
-                                  {msg.insights.map((insight, j) => (
-                                    <li key={j} className="text-zinc-400 text-sm flex items-start">
-                                      <span className="text-blue-400 mr-2">→</span>{insight}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
-                            {msg.actions && msg.actions.length > 0 && (
-                              <div className="flex flex-wrap gap-2">
-                                {msg.actions.map((action, j) => (
-                                  <button
-                                    key={j}
-                                    onClick={() => handleSubmit(action.label)}
-                                    className="px-3 py-1.5 text-sm bg-zinc-900 text-zinc-400 border border-zinc-700 rounded-full hover:bg-zinc-800 hover:text-white transition"
-                                  >
-                                    {action.label}
-                                  </button>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                  {loading && (
-                    <div className="flex gap-3 mb-6">
-                      <img src="/axiprova-icon.png" alt="AI" className="w-8 h-8 flex-shrink-0" />
-                      <div className="text-zinc-500">Σκεφτομαι...</div>
-                    </div>
-                  )}
-                  <div ref={messagesEndRef} />
+                <div className="border-t border-zinc-800 bg-zinc-950 px-6 py-4">
+                  <div className="max-w-2xl mx-auto flex gap-3">
+                    <input
+                      type="text"
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      placeholder="Ρωτησε οτιδηποτε..."
+                      className="flex-1 bg-zinc-900 text-white px-4 py-3 rounded-xl border border-zinc-800 focus:outline-none focus:border-zinc-600 placeholder-zinc-600"
+                    />
+                    <button
+                      onClick={() => handleSubmit()}
+                      disabled={loading || !input.trim()}
+                      className="px-6 py-3 bg-white text-black font-medium rounded-xl hover:bg-zinc-200 disabled:opacity-50 transition"
+                    >
+                      Στειλε
+                    </button>
+                  </div>
                 </div>
-              )}
-            </div>
-            <div className="border-t border-zinc-800 bg-zinc-950 px-6 py-4">
-              <div className="max-w-2xl mx-auto flex gap-3">
-                <input
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Ρωτησε οτιδηποτε..."
-                  className="flex-1 bg-zinc-900 text-white px-4 py-3 rounded-xl border border-zinc-800 focus:outline-none focus:border-zinc-600 placeholder-zinc-600"
-                />
-                <button
-                  onClick={() => handleSubmit()}
-                  disabled={loading || !input.trim()}
-                  className="px-6 py-3 bg-white text-black font-medium rounded-xl hover:bg-zinc-200 disabled:opacity-50 transition"
-                >
-                  Στειλε
-                </button>
-              </div>
-            </div>
+              </React.Fragment>
+            )}
           </React.Fragment>
         )}
 
