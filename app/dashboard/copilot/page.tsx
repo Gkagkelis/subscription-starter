@@ -29,18 +29,69 @@ export default function CopilotPage() {
   const messages = currentChat?.messages || [];
 
   useEffect(() => {
+    loadChats();
+  }, []);
+
+  useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const createNewChat = () => {
-    const newChat: Chat = {
-      id: Date.now().toString(),
-      title: "Νεο Chat",
-      messages: [],
-    };
-    setChats((prev) => [newChat, ...prev]);
-    setActiveChat(newChat.id);
-    setActiveSection("chat");
+  const loadChats = async () => {
+    try {
+      const res = await fetch("/api/chats");
+      if (res.ok) {
+        const data = await res.json();
+        setChats(data);
+      }
+    } catch (error) {
+      console.error("Failed to load chats:", error);
+    }
+  };
+
+  const createNewChat = async () => {
+    try {
+      const res = await fetch("/api/chats", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: "Νεο Chat", messages: [] }),
+      });
+      if (res.ok) {
+        const newChat = await res.json();
+        setChats((prev) => [newChat, ...prev]);
+        setActiveChat(newChat.id);
+        setActiveSection("chat");
+      }
+    } catch (error) {
+      console.error("Failed to create chat:", error);
+    }
+  };
+
+  const updateChat = async (chatId: string, title: string, messages: Message[]) => {
+    try {
+      await fetch("/api/chats", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: chatId, title, messages }),
+      });
+    } catch (error) {
+      console.error("Failed to update chat:", error);
+    }
+  };
+
+  const deleteChat = async (chatId: string) => {
+    try {
+      await fetch("/api/chats", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: chatId }),
+      });
+      setChats((prev) => prev.filter((c) => c.id !== chatId));
+      if (activeChat === chatId) {
+        setActiveChat(null);
+      }
+    } catch (error) {
+      console.error("Failed to delete chat:", error);
+    }
   };
 
   const startEditingChat = (chatId: string, currentTitle: string) => {
@@ -48,13 +99,17 @@ export default function CopilotPage() {
     setEditingTitle(currentTitle);
   };
 
-  const saveEditingChat = () => {
+  const saveEditingChat = async () => {
     if (editingChatId && editingTitle.trim()) {
-      setChats((prev) =>
-        prev.map((chat) =>
-          chat.id === editingChatId ? { ...chat, title: editingTitle.trim() } : chat
-        )
-      );
+      const chat = chats.find((c) => c.id === editingChatId);
+      if (chat) {
+        await updateChat(editingChatId, editingTitle.trim(), chat.messages);
+        setChats((prev) =>
+          prev.map((c) =>
+            c.id === editingChatId ? { ...c, title: editingTitle.trim() } : c
+          )
+        );
+      }
     }
     setEditingChatId(null);
     setEditingTitle("");
@@ -65,21 +120,34 @@ export default function CopilotPage() {
     if (!message.trim()) return;
 
     let chatId = activeChat;
+    let isNewChat = false;
+
     if (!chatId) {
-      const newChat: Chat = {
-        id: Date.now().toString(),
-        title: message.slice(0, 25),
-        messages: [],
-      };
-      setChats((prev) => [newChat, ...prev]);
-      setActiveChat(newChat.id);
-      chatId = newChat.id;
+      try {
+        const res = await fetch("/api/chats", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title: message.slice(0, 25), messages: [] }),
+        });
+        if (res.ok) {
+          const newChat = await res.json();
+          setChats((prev) => [newChat, ...prev]);
+          setActiveChat(newChat.id);
+          chatId = newChat.id;
+          isNewChat = true;
+        }
+      } catch (error) {
+        console.error("Failed to create chat:", error);
+        return;
+      }
     }
 
     const userMessage: Message = { role: "user", content: message };
+    const updatedMessages = [...(isNewChat ? [] : messages), userMessage];
+    
     setChats((prev) =>
       prev.map((chat) =>
-        chat.id === chatId ? { ...chat, messages: [...chat.messages, userMessage] } : chat
+        chat.id === chatId ? { ...chat, messages: updatedMessages } : chat
       )
     );
     setInput("");
@@ -98,11 +166,16 @@ export default function CopilotPage() {
         insights: data.insights,
         actions: data.actions,
       };
+      
+      const finalMessages = [...updatedMessages, assistantMessage];
       setChats((prev) =>
         prev.map((chat) =>
-          chat.id === chatId ? { ...chat, messages: [...chat.messages, assistantMessage] } : chat
+          chat.id === chatId ? { ...chat, messages: finalMessages } : chat
         )
       );
+
+      const chat = chats.find((c) => c.id === chatId);
+      await updateChat(chatId!, chat?.title || message.slice(0, 25), finalMessages);
     } catch (error) {
       console.error(error);
     } finally {
@@ -163,7 +236,7 @@ export default function CopilotPage() {
             <div className="mt-4 pt-4 border-t border-zinc-800">
               <p className="text-xs text-zinc-600 px-3 mb-2">RECENT CHATS</p>
               {chats.map((chat) => (
-                <div key={chat.id} className="relative">
+                <div key={chat.id} className="relative group">
                   {editingChatId === chat.id ? (
                     <input
                       type="text"
@@ -175,20 +248,28 @@ export default function CopilotPage() {
                       className="w-full px-3 py-2 bg-zinc-800 text-white rounded-lg text-sm border border-zinc-600 focus:outline-none"
                     />
                   ) : (
-                    <button
-                      onClick={() => {
-                        setActiveChat(chat.id);
-                        setActiveSection("chat");
-                      }}
-                      onDoubleClick={() => startEditingChat(chat.id, chat.title)}
-                      className={`w-full text-left px-3 py-2 rounded-lg mb-1 text-sm truncate transition ${
-                        activeChat === chat.id
-                          ? "bg-zinc-800 text-white"
-                          : "text-zinc-500 hover:bg-zinc-900"
-                      }`}
-                    >
-                      {chat.title}
-                    </button>
+                    <div className="flex items-center">
+                      <button
+                        onClick={() => {
+                          setActiveChat(chat.id);
+                          setActiveSection("chat");
+                        }}
+                        onDoubleClick={() => startEditingChat(chat.id, chat.title)}
+                        className={`flex-1 text-left px-3 py-2 rounded-lg text-sm truncate transition ${
+                          activeChat === chat.id
+                            ? "bg-zinc-800 text-white"
+                            : "text-zinc-500 hover:bg-zinc-900"
+                        }`}
+                      >
+                        {chat.title}
+                      </button>
+                      <button
+                        onClick={() => deleteChat(chat.id)}
+                        className="opacity-0 group-hover:opacity-100 px-2 text-zinc-600 hover:text-red-500 transition"
+                      >
+                        ×
+                      </button>
+                    </div>
                   )}
                 </div>
               ))}
