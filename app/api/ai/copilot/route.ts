@@ -49,10 +49,32 @@ export async function POST(req: Request) {
   try {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
-
+    
+    let profileContext = "";
     let snippetsContext = "";
     
     if (user) {
+      const { data: profile } = await supabase
+        .from("org_profiles")
+        .select("*")
+        .eq("user_id", user.id)
+        .single();
+
+      if (profile) {
+        profileContext = `
+ORGANIZATION PROFILE:
+- Name: ${profile.org_name || "Not set"}
+- Type: ${profile.org_type || "Not set"}
+- Size: ${profile.org_size || "Not set"}
+- Location: ${profile.location || "Not set"}
+- Target Audience: ${profile.target_audience || "Not set"}
+- Main Challenges: ${profile.main_challenges || "Not set"}
+- Goals: ${profile.goals || "Not set"}
+
+USE THIS PROFILE to personalize ALL your advice. Refer to their specific type, challenges, and goals.
+`;
+      }
+
       const { data: snippets } = await supabase
         .from("org_snippets")
         .select("*")
@@ -66,8 +88,7 @@ export async function POST(req: Request) {
         const competitors = snippets.filter(s => s.kind === "competitor");
 
         snippetsContext = `
-USER'S DATA (use this to personalize your advice):
-
+USER'S DATA:
 REVIEWS (${reviews.length} total):
 ${reviews.map(r => `- [${r.source}, Rating: ${r.rating || "N/A"}] "${r.content}"`).join("\n")}
 
@@ -89,6 +110,14 @@ ${competitors.map(c => `- [${c.source}] "${c.content}"`).join("\n")}
 
     const langName = detectedLanguage === "el" ? "Greek" : "English";
 
+    const noProfileMessage = !profileContext 
+      ? "\n\nNOTE: User hasn't set up their profile yet. Encourage them to visit /dashboard/profile to get more personalized advice."
+      : "";
+
+    const noDataMessage = !snippetsContext 
+      ? "\n\nNOTE: User hasn't added any data yet. Encourage them to add reviews and insights at /dashboard/data."
+      : "";
+
     const systemPrompt = `You are Axiprova - an expert AI advisor for cultural sector professionals.
 
 RESPOND ONLY IN ${langName}. NEVER mix languages.
@@ -97,23 +126,24 @@ YOUR IDENTITY:
 - A trusted colleague with deep experience in cultural management
 - You understand limited budgets, volunteer teams, funding challenges
 - You speak as a supportive partner, practical and encouraging
-
-${snippetsContext ? snippetsContext : "No user data available yet. Encourage them to add reviews and insights at /dashboard/data"}
+${profileContext}
+${snippetsContext}
+${noProfileMessage}
+${noDataMessage}
 
 YOUR EXPERTISE:
 1. Exhibition & Event Planning
-2. Audience Development
+2. Audience Development  
 3. Marketing & Communications
 4. Funding & Grants
 5. Educational Programs
 
-IMPORTANT: If the user has data (reviews, trends, competitors), USE IT to give personalized advice. Reference specific reviews or trends when relevant.
-
-RESPONSE RULES:
+IMPORTANT RULES:
+- If user has a PROFILE, tailor ALL advice to their org type, size, location, challenges and goals
+- If user has DATA (reviews, trends), reference SPECIFIC examples in your advice
 - Maximum 2 short paragraphs
 - Be specific and actionable
-- Reference user's actual data when possible
-- Always suggest 3-5 next action buttons`;
+- Always suggest 3-5 relevant next action buttons based on their profile/needs`;
 
     const result = await streamObject({
       model: openai("gpt-4o-2024-08-06"),
