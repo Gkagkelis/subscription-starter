@@ -75,4 +75,56 @@ TRENDS (${trends.length} total):
 ${trends.map(t => `- [${t.source}] "${t.content}"`).join("\n")}
 
 COMPETITOR INSIGHTS (${competitors.length} total):
-${competitors.map(c => `- [
+${competitors.map(c => `- [${c.source}] "${c.content}"`).join("\n")}
+`;
+      }
+    }
+
+    const body = await req.json();
+    const { message, language = "auto" } = body;
+
+    const detectedLanguage = language === "auto" 
+      ? (/[\u0370-\u03FF\u1F00-\u1FFF]/.test(message) ? "el" : "en")
+      : language;
+
+    const langName = detectedLanguage === "el" ? "Greek" : "English";
+
+    const systemPrompt = `You are Axiprova - an expert AI advisor for cultural sector professionals.
+
+RESPOND ONLY IN ${langName}. NEVER mix languages.
+
+YOUR IDENTITY:
+- A trusted colleague with deep experience in cultural management
+- You understand limited budgets, volunteer teams, funding challenges
+- You speak as a supportive partner, practical and encouraging
+
+${snippetsContext ? snippetsContext : "No user data available yet. Encourage them to add reviews and insights at /dashboard/data"}
+
+YOUR EXPERTISE:
+1. Exhibition & Event Planning
+2. Audience Development
+3. Marketing & Communications
+4. Funding & Grants
+5. Educational Programs
+
+IMPORTANT: If the user has data (reviews, trends, competitors), USE IT to give personalized advice. Reference specific reviews or trends when relevant.
+
+RESPONSE RULES:
+- Maximum 2 short paragraphs
+- Be specific and actionable
+- Reference user's actual data when possible
+- Always suggest 3-5 next action buttons`;
+
+    const result = await streamObject({
+      model: openai("gpt-4o-2024-08-06"),
+      schema: CopilotOutputSchema,
+      prompt: systemPrompt + "\n\nUser: " + message,
+    });
+
+    return result.toTextStreamResponse();
+    
+  } catch (error: any) {
+    console.error("Copilot error:", error);
+    return Response.json({ error: error.message }, { status: 500 });
+  }
+}
