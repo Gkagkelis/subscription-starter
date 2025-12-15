@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
 
 interface Message {
   role: "user" | "assistant";
@@ -331,7 +332,24 @@ export default function CopilotPage() {
                           <div className="flex gap-3">
                             <img src="/axiprova-icon.png" alt="AI" className="w-8 h-8 flex-shrink-0 mt-1" />
                             <div className="flex-1 space-y-4">
-                              <div className="text-zinc-200 leading-relaxed">{msg.content}</div>
+                              <div className="text-zinc-200 leading-relaxed prose prose-invert prose-sm max-w-none">
+                                <ReactMarkdown
+                                  components={{
+                                    a: ({ href, children }) => (
+                                      
+                                        href={href}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-400 hover:text-blue-300 underline"
+                                      >
+                                        {children}
+                                      </a>
+                                    ),
+                                  }}
+                                >
+                                  {msg.content}
+                                </ReactMarkdown>
+                              </div>
                               {msg.insights && msg.insights.length > 0 && (
                                 <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4">
                                   <p className="text-zinc-500 text-xs uppercase mb-2">Insights</p>
