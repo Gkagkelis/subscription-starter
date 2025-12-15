@@ -35,33 +35,19 @@ export default function Pricing({ user, products, subscription }: Props) {
 
   const handleStripeCheckout = async (price: Price) => {
     setPriceIdLoading(price.id);
-
     if (!user) {
       setPriceIdLoading(undefined);
       return router.push('/signin/signup');
     }
-
-    const { errorRedirect, sessionId } = await checkoutWithStripe(
-      price,
-      currentPath
-    );
-
+    const { errorRedirect, sessionId } = await checkoutWithStripe(price, currentPath);
     if (errorRedirect) {
       setPriceIdLoading(undefined);
       return router.push(errorRedirect);
     }
-
     if (!sessionId) {
       setPriceIdLoading(undefined);
-      return router.push(
-        getErrorRedirect(
-          currentPath,
-          'An unknown error occurred.',
-          'Please try again later or contact a system administrator.'
-        )
-      );
+      return router.push(getErrorRedirect(currentPath, 'Error', 'Please try again.'));
     }
-
     const stripe = await getStripe();
     stripe?.redirectToCheckout({ sessionId });
     setPriceIdLoading(undefined);
@@ -71,7 +57,7 @@ export default function Pricing({ user, products, subscription }: Props) {
   const betaPrice = betaProduct?.prices?.find(p => p.interval === 'month');
 
   return (
-    <section className="bg-black w-full">
+    <section className="w-full">
       <div className="max-w-6xl px-4 py-8 mx-auto sm:py-16 sm:px-6 lg:px-8">
         
         <div className="text-center mb-12">
@@ -82,7 +68,7 @@ export default function Pricing({ user, products, subscription }: Props) {
             Join the Axiprova Beta
           </h2>
           <p className="text-zinc-400 max-w-2xl mx-auto">
-            Lock in your early adopter price forever. When we launch publicly, prices will increase.
+            Lock in your early adopter price forever.
           </p>
         </div>
 
@@ -128,24 +114,9 @@ export default function Pricing({ user, products, subscription }: Props) {
               </li>
             </ul>
 
-            {betaPrice ? (
-              <Button
-                variant="slim"
-                type="button"
-                loading={priceIdLoading === betaPrice.id}
-                onClick={() => handleStripeCheckout(betaPrice)}
-                className="w-full py-3 text-base font-semibold text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition"
-              >
-                {subscription ? 'Manage Subscription' : 'Join Beta Now'}
-              </Button>
-            ) : (
-              
-                href="/signin/signup"
-                className="block w-full py-3 text-base font-semibold text-center text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition"
-              >
-                Join Beta Now
-              </a>
-            )}
+            <a href="/signin/signup" className="block w-full py-3 text-base font-semibold text-center text-white bg-purple-600 hover:bg-purple-700 rounded-lg">
+              Join Beta Now
+            </a>
 
             <p className="text-center text-zinc-500 text-sm mt-4">
               Cancel anytime. No questions asked.
@@ -167,9 +138,9 @@ export default function Pricing({ user, products, subscription }: Props) {
               <span className="text-3xl font-bold text-zinc-400">Free</span>
             </div>
             <ul className="space-y-2 text-sm text-zinc-500 mb-6">
-              <li>✓ Limited AI queries</li>
-              <li>✓ Basic data import</li>
-              <li>✓ Community support</li>
+              <li>Limited AI queries</li>
+              <li>Basic data import</li>
+              <li>Community support</li>
             </ul>
             <div className="py-2 text-center text-zinc-600 border border-zinc-700 rounded-lg">
               Coming Soon
@@ -184,10 +155,10 @@ export default function Pricing({ user, products, subscription }: Props) {
               <span className="text-zinc-500">/month</span>
             </div>
             <ul className="space-y-2 text-sm text-zinc-500 mb-6">
-              <li>✓ Unlimited AI queries</li>
-              <li>✓ Advanced analytics</li>
-              <li>✓ Priority support</li>
-              <li>✓ Content templates</li>
+              <li>Unlimited AI queries</li>
+              <li>Advanced analytics</li>
+              <li>Priority support</li>
+              <li>Content templates</li>
             </ul>
             <div className="py-2 text-center text-zinc-600 border border-zinc-700 rounded-lg">
               Coming Soon
@@ -202,10 +173,10 @@ export default function Pricing({ user, products, subscription }: Props) {
               <span className="text-zinc-500">/month</span>
             </div>
             <ul className="space-y-2 text-sm text-zinc-500 mb-6">
-              <li>✓ Up to 5 team members</li>
-              <li>✓ Shared workspace</li>
-              <li>✓ Custom reports</li>
-              <li>✓ Dedicated support</li>
+              <li>Up to 5 team members</li>
+              <li>Shared workspace</li>
+              <li>Custom reports</li>
+              <li>Dedicated support</li>
             </ul>
             <div className="py-2 text-center text-zinc-600 border border-zinc-700 rounded-lg">
               Coming Soon
@@ -216,8 +187,7 @@ export default function Pricing({ user, products, subscription }: Props) {
 
         <div className="text-center mt-12">
           <p className="text-zinc-500">
-            Join the beta now at €18/month and keep this price forever, 
-            <br/>even when we launch higher-priced plans.
+            Join the beta now and keep this price forever.
           </p>
         </div>
 
