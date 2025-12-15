@@ -1,9 +1,9 @@
 import { openai } from "@ai-sdk/openai";
-import { streamText } from "ai";
+import { streamObject } from "ai";
 import { z } from "zod";
 
 // ========================================
-// ΣΩΣΤΟ SCHEMA - Typed Actions (χωρίς additionalProperties)
+// SCHEMA - Typed Actions
 // ========================================
 
 const ActionSchema = z.discriminatedUnion("type", [
@@ -102,44 +102,4 @@ Insights:
 
 Actions:
 1. "Δώσε μου 3 τίτλους για την έκθεση"
-2. "Ιδέες για interactive workshop"
-3. "Ανάλυσε τι κάνουν άλλα μουσεία"
-
-User: "I need help with social media for the festival"
-Reply: "Got it! Social media for festivals needs a content calendar + real-time engagement strategy. Are you looking for pre-event buzz, during-event coverage, or post-event highlights?
-
-What platforms are you prioritizing?"
-
-Insights:
-- Instagram Reels get 3x more reach than static posts
-- User-generated content drives authenticity
-- Behind-the-scenes content performs best 2 weeks before event
-
-Actions:
-1. "Create content calendar template"
-2. "Draft 5 Instagram captions"
-3. "Hashtag strategy for maximum reach"`;
-
-    const result = await streamText({
-      model: openai("gpt-4o-2024-08-06"),
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: message },
-      ],
-      output: "object",
-      schema: CopilotOutputSchema,
-    });
-
-    return result.toTextStreamResponse();
-    
-  } catch (error: any) {
-    console.error("Copilot error:", error);
-    return Response.json(
-      { 
-        error: error.message || "Internal server error",
-        details: error.response?.data || null 
-      },
-      { status: 500 }
-    );
-  }
-}
+2. "Ιδέες για interact
