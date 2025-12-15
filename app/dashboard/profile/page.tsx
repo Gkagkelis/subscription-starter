@@ -62,13 +62,9 @@ export default function ProfilePage() {
       });
       if (res.ok) {
         setSaved(true);
-        if (isNewUser) {
-          setTimeout(() => {
-            router.push("/dashboard/copilot");
-          }, 1000);
-        } else {
-          setTimeout(() => setSaved(false), 3000);
-        }
+        setTimeout(() => {
+          router.push("/dashboard/copilot");
+        }, 1000);
       }
     } catch (error) {
       console.error("Failed to save profile:", error);
@@ -116,8 +112,8 @@ export default function ProfilePage() {
           </h1>
           <p className="text-zinc-500">
             {isNewUser 
-              ? "Συμπληρωσε τα στοιχεια σου για να ξεκινησεις με εξατομικευμενες συμβουλες"
-              : "Ενημερωσε τα στοιχεια σου για πιο εξατομικευμενες συμβουλες απο το AI"
+              ? "Συμπληρωσε τα στοιχεια σου για να ξεκινησεις"
+              : "Ενημερωσε τα στοιχεια σου"
             }
           </p>
         </div>
@@ -201,7 +197,7 @@ export default function ProfilePage() {
             <textarea
               value={profile.main_challenges}
               onChange={(e) => setProfile({ ...profile, main_challenges: e.target.value })}
-              placeholder="π.χ. Χρειαζομαστε περισσοτερους επισκεπτες, δυσκολια στο marketing..."
+              placeholder="π.χ. Χρειαζομαστε περισσοτερους επισκεπτες..."
               rows={3}
               className="w-full px-4 py-3 bg-zinc-800 text-white border border-zinc-700 rounded-xl focus:outline-none focus:border-zinc-500 placeholder-zinc-600 resize-none"
             />
@@ -214,7 +210,7 @@ export default function ProfilePage() {
             <textarea
               value={profile.goals}
               onChange={(e) => setProfile({ ...profile, goals: e.target.value })}
-              placeholder="π.χ. Αυξηση επισκεπτων 20%, νεες χορηγιες, επεκταση προγραμματων..."
+              placeholder="π.χ. Αυξηση επισκεπτων 20%, νεες χορηγιες..."
               rows={3}
               className="w-full px-4 py-3 bg-zinc-800 text-white border border-zinc-700 rounded-xl focus:outline-none focus:border-zinc-500 placeholder-zinc-600 resize-none"
             />
@@ -230,18 +226,10 @@ export default function ProfilePage() {
 
           {saved && (
             <div className="text-center text-green-400 text-sm">
-              {isNewUser ? "Τελεια! Παμε στο Axiprova..." : "Αποθηκευτηκε επιτυχως!"}
+              Παμε στο Axiprova...
             </div>
           )}
         </div>
-
-        {!isNewUser && (
-          <div className="mt-6 text-center">
-            <a href="/dashboard/copilot" className="text-zinc-500 hover:text-white transition">
-              ← Πισω στο Chat
-            </a>
-          </div>
-        )}
       </div>
     </div>
   );
