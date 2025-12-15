@@ -1,5 +1,4 @@
 'use client';
-
 import Link from 'next/link';
 import Image from 'next/image';
 import { SignOut } from '@/utils/auth-helpers/server';
@@ -26,16 +25,16 @@ export default function Navlinks({ user }: NavlinksProps) {
             height={40}
           />
         </Link>
-        <nav className="ml-6 space-x-2 lg:block">
-          <Link href="/dashboard/copilot" className={s.link}>
-            Let's Go!
-          </Link>
-          {user && (
+        {user && (
+          <nav className="ml-6 space-x-2 lg:block">
+            <Link href="/dashboard/copilot" className={s.link}>
+              Chat
+            </Link>
             <Link href="/dashboard/data" className={s.link}>
               My Data
             </Link>
-          )}
-        </nav>
+          </nav>
+        )}
       </div>
       <div className="flex justify-end items-center space-x-4">
         {user ? (
@@ -57,9 +56,14 @@ export default function Navlinks({ user }: NavlinksProps) {
             </form>
           </>
         ) : (
-          <Link href="/signin" className={s.link}>
-            Sign In
-          </Link>
+          <>
+            <Link href="/signin/signup" className={s.link}>
+              Sign Up
+            </Link>
+            <Link href="/signin" className={s.link}>
+              Sign In
+            </Link>
+          </>
         )}
       </div>
     </div>
