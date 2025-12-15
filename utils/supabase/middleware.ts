@@ -64,12 +64,29 @@ export const updateSession = async (request: NextRequest) => {
     
     const path = request.nextUrl.pathname;
 
-    // If user is logged in and on homepage, redirect to copilot
-    if (user && path === '/') {
-      return NextResponse.redirect(new URL('/dashboard/copilot', request.url));
+    if (user) {
+      // Check if user has profile
+      const { data: profile } = await supabase
+        .from('org_profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+
+      // If logged in, on homepage, redirect to copilot (or profile if no profile)
+      if (path === '/') {
+        if (!profile) {
+          return NextResponse.redirect(new URL('/dashboard/profile', request.url));
+        }
+        return NextResponse.redirect(new URL('/dashboard/copilot', request.url));
+      }
+
+      // If going to copilot but no profile, redirect to profile first
+      if (path === '/dashboard/copilot' && !profile) {
+        return NextResponse.redirect(new URL('/dashboard/profile', request.url));
+      }
     }
 
-    // If user is NOT logged in and trying to access dashboard, redirect to signin
+    // If NOT logged in and trying to access dashboard, redirect to signin
     if (!user && path.startsWith('/dashboard')) {
       return NextResponse.redirect(new URL('/signin', request.url));
     }
