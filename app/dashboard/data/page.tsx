@@ -10,10 +10,15 @@ export default function DataPage() {
   const [rating, setRating] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async () => {
-    if (!content.trim()) return;
+    if (!content.trim()) {
+      setError("Γραψε κατι στο περιεχομενο");
+      return;
+    }
     setLoading(true);
+    setError("");
     try {
       const res = await fetch("/api/data/snippets", {
         method: "POST",
@@ -25,14 +30,17 @@ export default function DataPage() {
           rating: rating ? parseInt(rating) : null,
         }),
       });
+      const data = await res.json();
       if (res.ok) {
         setSuccess(true);
         setContent("");
         setRating("");
         setTimeout(() => setSuccess(false), 3000);
+      } else {
+        setError(data.error || "Κατι πηγε στραβα");
       }
-    } catch (error) {
-      console.error(error);
+    } catch (err: any) {
+      setError("Σφαλμα συνδεσης: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -58,7 +66,7 @@ export default function DataPage() {
             <select
               value={kind}
               onChange={(e) => setKind(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-4 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
             >
               <option value="review">Review (Κριτικη)</option>
               <option value="trend">Trend (Ταση)</option>
@@ -73,7 +81,7 @@ export default function DataPage() {
             <select
               value={source}
               onChange={(e) => setSource(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-4 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
             >
               <option value="Google">Google Reviews</option>
               <option value="TripAdvisor">TripAdvisor</option>
@@ -93,7 +101,7 @@ export default function DataPage() {
               <select
                 value={rating}
                 onChange={(e) => setRating(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
               >
                 <option value="">Χωρις βαθμολογια</option>
                 <option value="5">5 - Αριστο</option>
@@ -112,31 +120,27 @@ export default function DataPage() {
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="Επικολλησε το review, trend ή παρατηρηση εδω..."
+              placeholder="Επικολλησε το review εδω..."
               rows={5}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+              className="w-full px-4 py-3 text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 resize-none"
             />
           </div>
 
-          <Button onClick={handleSubmit} disabled={loading || !content.trim()}>
+          <Button onClick={handleSubmit} disabled={loading}>
             {loading ? "Αποθηκευση..." : "Προσθηκη"}
           </Button>
 
           {success && (
-            <div className="bg-green-50 text-green-700 p-3 rounded-lg text-center">
+            <div className="bg-green-100 text-green-800 p-3 rounded-lg text-center font-medium">
               Αποθηκευτηκε επιτυχως!
             </div>
           )}
-        </div>
 
-        <div className="bg-purple-50 rounded-xl p-6 border border-purple-100">
-          <h3 className="font-semibold text-purple-900 mb-3">Συμβουλες</h3>
-          <ul className="space-y-2 text-purple-800 text-sm">
-            <li>→ Προσθεσε reviews απο Google, TripAdvisor κλπ</li>
-            <li>→ Σημειωσε trends που βλεπεις στα social media</li>
-            <li>→ Καταγραψε τι κανουν οι ανταγωνιστες σου</li>
-            <li>→ Οσο περισσοτερα δεδομενα, τοσο καλυτερες συμβουλες!</li>
-          </ul>
+          {error && (
+            <div className="bg-red-100 text-red-800 p-3 rounded-lg text-center">
+              {error}
+            </div>
+          )}
         </div>
 
       </div>
