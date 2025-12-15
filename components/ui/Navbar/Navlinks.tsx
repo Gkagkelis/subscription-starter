@@ -1,9 +1,9 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { SignOut } from '@/utils/auth-helpers/server';
 import { handleRequest } from '@/utils/auth-helpers/client';
-import Logo from '@/components/icons/Logo';
 import { usePathname, useRouter } from 'next/navigation';
 import { getRedirectMethod } from '@/utils/auth-helpers/settings';
 import s from './Navbar.module.css';
@@ -19,12 +19,22 @@ export default function Navlinks({ user }: NavlinksProps) {
     <div className="relative flex flex-row justify-between py-4 align-center md:py-6">
       <div className="flex items-center flex-1">
         <Link href="/" className={s.logo} aria-label="Logo">
-          <Logo />
+          <Image 
+            src="/axiprova-removebg-preview.png" 
+            alt="Axiprova" 
+            width={40} 
+            height={40}
+          />
         </Link>
         <nav className="ml-6 space-x-2 lg:block">
-          <Link href="/" className={s.link}>
-            Pricing
+          <Link href="/dashboard/copilot" className={s.link}>
+            Let's Go!
           </Link>
+          {user && (
+            <Link href="/dashboard/data" className={s.link}>
+              My Data
+            </Link>
+          )}
           {user && (
             <Link href="/account" className={s.link}>
               Account
