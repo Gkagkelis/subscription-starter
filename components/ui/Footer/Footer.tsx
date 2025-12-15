@@ -1,12 +1,15 @@
 import Link from "next/link";
+
 import Logo from "@/components/icons/Logo";
 
 export default function Footer() {
   return (
     <footer className="mx-auto max-w-[1920px] px-6 bg-zinc-900">
-      <div className="grid grid-cols-1 gap-8 py-12 text-white border-b lg:grid-cols-12 border-zinc-600 bg-zinc-900">
+      {/* Top footer area */}
+      <div className="grid grid-cols-1 gap-8 py-12 text-white transition-colors duration-150 border-b lg:grid-cols-12 border-zinc-600 bg-zinc-900">
+        {/* Brand */}
         <div className="col-span-1 lg:col-span-4">
-          <Link href="/" className="flex items-center font-bold">
+          <Link href="/" className="flex items-center flex-initial font-bold md:mr-24">
             <span className="mr-2 border rounded-full border-zinc-700">
               <Logo />
             </span>
@@ -14,49 +17,73 @@ export default function Footer() {
           </Link>
 
           <p className="mt-3 text-sm text-zinc-300 max-w-sm">
-            Ο AI σύμβουλός σου για τον πολιτισμό & τη δημιουργική βιομηχανία.
+            Your AI advisor for culture &amp; the creative industries
           </p>
         </div>
 
+        {/* Navigation */}
         <div className="col-span-1 lg:col-span-4">
           <p className="font-bold text-white mb-4">Links</p>
           <ul className="flex flex-col gap-3">
             <li>
-              <Link href="/about" className="text-white hover:text-zinc-200 transition">
+              <Link
+                href="/about"
+                className="text-white transition duration-150 ease-in-out hover:text-zinc-200"
+              >
                 About
               </Link>
             </li>
             <li>
-              <Link href="/privacy" className="text-white hover:text-zinc-200 transition">
+              <Link
+                href="/privacy"
+                className="text-white transition duration-150 ease-in-out hover:text-zinc-200"
+              >
                 Privacy Policy
               </Link>
             </li>
             <li>
-              <Link href="/terms" className="text-white hover:text-zinc-200 transition">
+              <Link
+                href="/terms"
+                className="text-white transition duration-150 ease-in-out hover:text-zinc-200"
+              >
                 Terms of Use
               </Link>
             </li>
           </ul>
         </div>
 
+        {/* Contact */}
         <div className="col-span-1 lg:col-span-4 lg:flex lg:justify-end">
-          <div className="flex items-center h-10">
-            <a
-              href="mailto:hello@axiprova.com"
-              className="text-white hover:text-zinc-200 transition"
-            >
-              hello@axiprova.com
-            </a>
+          <div className="flex items-start">
+            <div>
+              <p className="font-bold text-white mb-4">Contact</p>
+              <a
+                href="mailto:viewscoperesearch@gmail.com"
+                className="text-white transition duration-150 ease-in-out hover:text-zinc-200"
+              >
+                viewscoperesearch@gmail.com
+              </a>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="flex flex-col items-center justify-between py-8 space-y-3 md:flex-row bg-zinc-900">
-        <span className="text-sm text-zinc-300">
-          &copy; {new Date().getFullYear()} Axiprova. All rights reserved.
-        </span>
+      {/* Bottom footer area */}
+      <div className="flex flex-col items-center justify-between py-10 space-y-4 md:flex-row bg-zinc-900">
+        <div className="text-sm text-zinc-300">Axiprova 2025</div>
 
-        <span className="text-sm text-zinc-400">Beta — pilot release.</span>
+        <div className="text-sm text-zinc-400 text-center">
+          Your AI advisor for culture &amp; the creative industries
+        </div>
+
+        <div className="text-sm">
+          <a
+            href="mailto:viewscoperesearch@gmail.com"
+            className="text-zinc-300 hover:text-zinc-200 transition"
+          >
+            viewscoperesearch@gmail.com
+          </a>
+        </div>
       </div>
     </footer>
   );
