@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Button from "@/components/ui/Button/Button";
 import Card from "@/components/ui/Card/Card";
-import Textarea from "@/components/ui/Textarea/Textarea";
 
 export default function CopilotPage() {
   const [message, setMessage] = useState("");
@@ -46,12 +45,12 @@ export default function CopilotPage() {
       </div>
 
       <Card className="p-6">
-        <Textarea
+        <textarea
           placeholder="Γράψε τι σχεδιάζεις σήμερα... π.χ. 'Θέλω να οργανώσω workshop φωτογραφίας για εφήβους'"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           rows={4}
-          className="mb-4"
+          className="w-full px-3 py-2 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <Button onClick={handleSubmit} disabled={loading}>
           {loading ? "Σκέφτομαι..." : "Στείλε"}
@@ -82,7 +81,7 @@ export default function CopilotPage() {
                 {response.actions.map((action: any, i: number) => (
                   <Button
                     key={i}
-                    variant="outline"
+                    variant="flat"
                     onClick={() => handleAction(action)}
                   >
                     {action.label}
