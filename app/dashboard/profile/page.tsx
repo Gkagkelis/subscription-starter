@@ -52,19 +52,15 @@ export default function ProfilePage() {
   const saveProfile = async () => {
     setSaving(true);
     try {
-      const res = await fetch("/api/profile", {
+      await fetch("/api/profile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(profile),
       });
-      if (res.ok) {
-        window.location.href = "/dashboard/copilot";
-      }
     } catch (error) {
       console.error("Failed to save profile:", error);
-    } finally {
-      setSaving(false);
     }
+    window.location.href = "/dashboard/copilot";
   };
 
   const skipProfile = () => {
