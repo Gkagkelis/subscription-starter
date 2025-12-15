@@ -1,471 +1,514 @@
-&quot;use client&quot;;
-import React, { useState, useRef, useEffect } from &quot;react&quot;;import ReactMarkdown from &quot;react-markdown&quot;;
-interface Action {  label: string;  // πρόσθεσε κι άλλα fields αν υπάρχουν στο API σου}
-interface Message {  role: &quot;user&quot; | &quot;assistant&quot;;  content: string;  insights?: string[];  actions?: Action[];}
-interface Chat {  id: string;  title: string;  messages: Message[];}
-const suggestions = [  &quot;Θελω να οργανωσω εκθεση&quot;,  &quot;Βρες μου grants&quot;,  &quot;Αναλυσε τα reviews μου&quot;,  &quot;Προβλεψε το impact&quot;,];
-const menuItems = [  { id: &quot;chat&quot;, icon: &quot;/chat_logo.png&quot;, label: &quot;Chat&quot; },  { id: &quot;data&quot;, icon: &quot;/my_data_logo.png&quot;, label: &quot;My Data&quot; },  { id: &quot;projects&quot;, icon: &quot;/project_logo.png&quot;, label: &quot;Projects&quot; },  { id: &quot;grants&quot;, icon: &quot;/Grand_Finder.png&quot;, label: &quot;Grant Finder&quot; },  { id: &quot;impact&quot;, icon: &quot;/Impact_Predictor_logo.png&quot;, label: &quot;Impact Predictor&quot; },  { id: &quot;trends&quot;, icon: &quot;/Trend_Radar_logo.png&quot;, label: &quot;Trend Radar&quot; },];
-export default function CopilotPage() {  const [chats, setChats] = useState&lt;Chat[]&gt;([]);  const [activeChat, setActiveChat] = useState&lt;string | null&gt;(null);  const [input, setInput] = useState(&quot;&quot;);  const [loading, setLoading] = useState(false);  const [activeSection, setActiveSection] = useState(&quot;chat&quot;);  const [editingChatId, setEditingChatId] = useState&lt;string | null&gt;(null);  const [editingTitle, setEditingTitle] = useState(&quot;&quot;);  const messagesEndRef = useRef&lt;HTMLDivElement | null&gt;(null);
-  const currentChat = chats.find((c) =&gt; c.id === activeChat);  const messages = currentChat?.messages || [];
-  useEffect(() =&gt; {    loadChats();  }, []);
-  useEffect(() =&gt; {    messagesEndRef.current?.scrollIntoView({ behavior: &quot;smooth&quot; });  }, [messages]);
-  const loadChats = async () =&gt; {    try {      const res = await fetch(&quot;/api/chats&quot;);      if (res.ok) {        const data = await res.json();        setChats(data);      }    } catch (error) {      console.error(&quot;Failed to load chats:&quot;, error);    }  };
-  const createNewChat = async () =&gt; {    try {      const res = await fetch(&quot;/api/chats&quot;, {        method: &quot;POST&quot;,        headers: { &quot;Content-Type&quot;: &quot;application/json&quot; },        body: JSON.stringify({ title: &quot;Νεο Chat&quot;, messages: [] }),      });
-  if (res.ok) {
-    const newChat: Chat = await res.json();
-    setChats((prev) =&gt; [newChat, ...prev]);
-    setActiveChat(newChat.id);
-    setActiveSection(&quot;chat&quot;);
-  }
-} catch (error) {
-  console.error(&quot;Failed to create chat:&quot;, error);
+"use client";
+
+import React, { useState, useRef, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
+
+interface Message {
+  role: "user" | "assistant";
+  content: string;
+  insights?: string[];
+  actions?: Array<{ label: string; [key: string]: any }>;
 }
 
-  };
-  const updateChat = async (    chatId: string,    title: string,    messages: Message[]  ) =&gt; {    try {      await fetch(&quot;/api/chats&quot;, {        method: &quot;PUT&quot;,        headers: { &quot;Content-Type&quot;: &quot;application/json&quot; },        body: JSON.stringify({ id: chatId, title, messages }),      });    } catch (error) {      console.error(&quot;Failed to update chat:&quot;, error);    }  };
-  const deleteChat = async (chatId: string) =&gt; {    try {      await fetch(&quot;/api/chats&quot;, {        method: &quot;DELETE&quot;,        headers: { &quot;Content-Type&quot;: &quot;application/json&quot; },        body: JSON.stringify({ id: chatId }),      });
-  setChats((prev) =&gt; prev.filter((c) =&gt; c.id !== chatId));
-
-  if (activeChat === chatId) {
-    setActiveChat(null);
-  }
-} catch (error) {
-  console.error(&quot;Failed to delete chat:&quot;, error);
+interface Chat {
+  id: string;
+  title: string;
+  messages: Message[];
 }
 
-  };
-  const startEditingChat = (chatId: string, currentTitle: string) =&gt; {    setEditingChatId(chatId);    setEditingTitle(currentTitle);  };
-  const saveEditingChat = async () =&gt; {    if (editingChatId &amp;&amp; editingTitle.trim()) {      const chat = chats.find((c) =&gt; c.id === editingChatId);      if (chat) {        await updateChat(editingChatId, editingTitle.trim(), chat.messages);        setChats((prev) =&gt;          prev.map((c) =&gt;            c.id === editingChatId              ? { ...c, title: editingTitle.trim() }              : c          )        );      }    }    setEditingChatId(null);    setEditingTitle(&quot;&quot;);  };
-  const handleSubmit = async (text?: string) =&gt; {    const message = text || input;    if (!message.trim()) return;
-let chatId = activeChat;
-let isNewChat = false;
+export default function CopilotPage() {
+  const [chats, setChats] = useState<Chat[]>([]);
+  const [activeChat, setActiveChat] = useState<string | null>(null);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [activeSection, setActiveSection] = useState("chat");
+  const [editingChatId, setEditingChatId] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState("");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-if (!chatId) {
-  try {
-    const res = await fetch(&quot;/api/chats&quot;, {
-      method: &quot;POST&quot;,
-      headers: { &quot;Content-Type&quot;: &quot;application/json&quot; },
-      body: JSON.stringify({
-        title: message.slice(0, 25),
-        messages: [],
-      }),
-    });
+  const currentChat = chats.find((c) => c.id === activeChat);
+  const messages = currentChat?.messages || [];
 
-    if (res.ok) {
-      const newChat: Chat = await res.json();
-      setChats((prev) =&gt; [newChat, ...prev]);
-      setActiveChat(newChat.id);
-      chatId = newChat.id;
-      isNewChat = true;
+  useEffect(() => {
+    loadChats();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const loadChats = async () => {
+    try {
+      const res = await fetch("/api/chats");
+      if (res.ok) {
+        const data = await res.json();
+        setChats(data);
+      }
+    } catch (error) {
+      console.error("Failed to load chats:", error);
     }
-  } catch (error) {
-    console.error(&quot;Failed to create chat:&quot;, error);
-    return;
-  }
-}
-
-const userMessage: Message = {
-  role: &quot;user&quot;,
-  content: message,
-};
-
-const updatedMessages = [...(isNewChat ? [] : messages), userMessage];
-
-setChats((prev) =&gt;
-  prev.map((chat) =&gt;
-    chat.id === chatId
-      ? { ...chat, messages: updatedMessages }
-      : chat
-  )
-);
-
-setInput(&quot;&quot;);
-setLoading(true);
-
-try {
-  const res = await fetch(&quot;/api/ai/copilot&quot;, {
-    method: &quot;POST&quot;,
-    headers: { &quot;Content-Type&quot;: &quot;application/json&quot; },
-    body: JSON.stringify({ message, language: &quot;auto&quot; }),
-  });
-
-  const data = await res.json();
-
-  const assistantMessage: Message = {
-    role: &quot;assistant&quot;,
-    content: data.reply,
-    insights: data.insights,
-    actions: data.actions,
   };
 
-  const finalMessages = [...updatedMessages, assistantMessage];
-
-  setChats((prev) =&gt;
-    prev.map((chat) =&gt;
-      chat.id === chatId
-        ? { ...chat, messages: finalMessages }
-        : chat
-    )
-  );
-
-  const chat = chats.find((c) =&gt; c.id === chatId);
-  await updateChat(
-    chatId!,
-    chat?.title | message.slice(0, 25),
-    finalMessages
-  );
-} catch (error) {
-  console.error(error);
-} finally {
-  setLoading(false);
-}
-
+  const createNewChat = async () => {
+    try {
+      const res = await fetch("/api/chats", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: "Νεο Chat", messages: [] }),
+      });
+      if (res.ok) {
+        const newChat = await res.json();
+        setChats((prev) => [newChat, ...prev]);
+        setActiveChat(newChat.id);
+        setActiveSection("chat");
+      }
+    } catch (error) {
+      console.error("Failed to create chat:", error);
+    }
   };
-  const handleKeyDown = (e: React.KeyboardEvent) =&gt; {    if (e.key === &quot;Enter&quot; &amp;&amp; !e.shiftKey) {      e.preventDefault();      handleSubmit();    }  };
-  return (          {/* Sidebar */}                                    + Νεο Chat                  
-    &lt;nav className=&quot;flex-1 overflow-y-auto p-2&quot;&gt;
-      {menuItems.map((item) =&gt; (
-        &lt;button
-          key={item.id}
-          onClick={() =&gt; setActiveSection(item.id)}
-          className={`w-full text-left px-3 py-2 rounded-lg mb-1 flex items-center gap-3 transition ${
-            activeSection === item.id
-              ? &quot;bg-zinc-800 text-white&quot;
-              : &quot;text-zinc-400 hover:bg-zinc-900 hover:text-white&quot;
-          }`}
-        &gt;
-          &lt;img src={item.icon} alt={item.label} className=&quot;w-5 h-5&quot; /&gt;
-          &lt;span className=&quot;text-sm&quot;&gt;{item.label}&lt;/span&gt;
-        &lt;/button&gt;
-      ))}
 
-      {chats.length &gt; 0 &amp;&amp; (
-        &lt;div className=&quot;mt-4 pt-4 border-t border-zinc-800&quot;&gt;
-          &lt;p className=&quot;text-xs text-zinc-600 px-3 mb-2&quot;&gt;
-            RECENT CHATS
-          &lt;/p&gt;
+  const updateChat = async (chatId: string, title: string, messages: Message[]) => {
+    try {
+      await fetch("/api/chats", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: chatId, title, messages }),
+      });
+    } catch (error) {
+      console.error("Failed to update chat:", error);
+    }
+  };
 
-          {chats.map((chat) =&gt; (
-            &lt;div key={chat.id} className=&quot;relative group&quot;&gt;
-              {editingChatId === chat.id ? (
-                &lt;input
-                  type=&quot;text&quot;
-                  value={editingTitle}
-                  onChange={(e) =&gt; setEditingTitle(e.target.value)}
-                  onBlur={saveEditingChat}
-                  onKeyDown={(e) =&gt;
-                    e.key === &quot;Enter&quot; &amp;&amp; saveEditingChat()
-                  }
-                  autoFocus
-                  className=&quot;w-full px-3 py-2 bg-zinc-800 text-white rounded-lg text-sm border border-zinc-600 focus:outline-none&quot;
-                /&gt;
-              ) : (
-                &lt;div className=&quot;flex items-center&quot;&gt;
-                  &lt;button
-                    onClick={() =&gt; {
-                      setActiveChat(chat.id);
-                      setActiveSection(&quot;chat&quot;);
-                    }}
-                    onDoubleClick={() =&gt;
-                      startEditingChat(chat.id, chat.title)
-                    }
-                    className={`flex-1 text-left px-3 py-2 rounded-lg text-sm truncate transition ${
-                      activeChat === chat.id
-                        ? &quot;bg-zinc-800 text-white&quot;
-                        : &quot;text-zinc-500 hover:bg-zinc-900&quot;
-                    }`}
-                  &gt;
-                    {chat.title}
-                  &lt;/button&gt;
-                  &lt;button
-                    onClick={() =&gt; deleteChat(chat.id)}
-                    className=&quot;opacity-0 group-hover:opacity-100 px-2 text-zinc-600 hover:text-red-500 transition&quot;
-                  &gt;
-                    ×
-                  &lt;/button&gt;
-                &lt;/div&gt;
-              )}
-            &lt;/div&gt;
+  const deleteChat = async (chatId: string) => {
+    try {
+      await fetch("/api/chats", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: chatId }),
+      });
+      setChats((prev) => prev.filter((c) => c.id !== chatId));
+      if (activeChat === chatId) {
+        setActiveChat(null);
+      }
+    } catch (error) {
+      console.error("Failed to delete chat:", error);
+    }
+  };
+
+  const startEditingChat = (chatId: string, currentTitle: string) => {
+    setEditingChatId(chatId);
+    setEditingTitle(currentTitle);
+  };
+
+  const saveEditingChat = async () => {
+    if (editingChatId && editingTitle.trim()) {
+      const chat = chats.find((c) => c.id === editingChatId);
+      if (chat) {
+        await updateChat(editingChatId, editingTitle.trim(), chat.messages);
+        setChats((prev) =>
+          prev.map((c) => (c.id === editingChatId ? { ...c, title: editingTitle.trim() } : c))
+        );
+      }
+    }
+    setEditingChatId(null);
+    setEditingTitle("");
+  };
+
+  const handleSubmit = async (text?: string) => {
+    const message = (text ?? input).trim();
+    if (!message) return;
+
+    let chatId = activeChat;
+    let isNewChat = false;
+
+    if (!chatId) {
+      try {
+        const res = await fetch("/api/chats", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title: message.slice(0, 25), messages: [] }),
+        });
+        if (res.ok) {
+          const newChat = await res.json();
+          setChats((prev) => [newChat, ...prev]);
+          setActiveChat(newChat.id);
+          chatId = newChat.id;
+          isNewChat = true;
+        }
+      } catch (error) {
+        console.error("Failed to create chat:", error);
+        return;
+      }
+    }
+
+    const userMessage: Message = { role: "user", content: message };
+    const updatedMessages = [...(isNewChat ? [] : messages), userMessage];
+
+    setChats((prev) =>
+      prev.map((chat) => (chat.id === chatId ? { ...chat, messages: updatedMessages } : chat))
+    );
+
+    setInput("");
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/ai/copilot", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message, language: "auto" }),
+      });
+
+      const data = await res.json();
+
+      const assistantMessage: Message = {
+        role: "assistant",
+        content: data?.reply ?? "",
+        insights: Array.isArray(data?.insights) ? data.insights : [],
+        actions: Array.isArray(data?.actions) ? data.actions : [],
+      };
+
+      const finalMessages = [...updatedMessages, assistantMessage];
+
+      setChats((prev) =>
+        prev.map((chat) => (chat.id === chatId ? { ...chat, messages: finalMessages } : chat))
+      );
+
+      // Αν θες 100% σωστό title εδώ, χρησιμοποίησε τον τίτλο από state AFTER setChats,
+      // αλλά κρατάμε το δικό σου pattern:
+      const chat = chats.find((c) => c.id === chatId);
+      await updateChat(chatId!, chat?.title || message.slice(0, 25), finalMessages);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit();
+    }
+  };
+
+  const suggestions = [
+    "Θελω να οργανωσω εκθεση",
+    "Βρες μου grants",
+    "Αναλυσε τα reviews μου",
+    "Προβλεψε το impact",
+  ];
+
+  const menuItems = [
+    { id: "chat", icon: "/chat_logo.png", label: "Chat" },
+    { id: "data", icon: "/my_data_logo.png", label: "My Data" },
+    { id: "projects", icon: "/project_logo.png", label: "Projects" },
+    { id: "grants", icon: "/Grand_Finder.png", label: "Grant Finder" },
+    { id: "impact", icon: "/Impact_Predictor_logo.png", label: "Impact Predictor" },
+    { id: "trends", icon: "/Trend_Radar_logo.png", label: "Trend Radar" },
+  ];
+
+  return (
+    <div className="h-screen bg-zinc-950 text-white flex overflow-hidden">
+      {/* Sidebar */}
+      <div className="w-64 bg-black border-r border-zinc-800 flex flex-col">
+        <div className="p-4 border-b border-zinc-800">
+          <button
+            onClick={createNewChat}
+            className="w-full py-2 px-4 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2"
+          >
+            + Νεο Chat
+          </button>
+        </div>
+
+        <nav className="flex-1 overflow-y-auto p-2">
+          {menuItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setActiveSection(item.id)}
+              className={`w-full text-left px-3 py-2 rounded-lg mb-1 flex items-center gap-3 transition ${
+                activeSection === item.id
+                  ? "bg-zinc-800 text-white"
+                  : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
+              }`}
+            >
+              <img src={item.icon} alt={item.label} className="w-5 h-5" />
+              <span className="text-sm">{item.label}</span>
+            </button>
           ))}
-        &lt;/div&gt;
-      )}
-    &lt;/nav&gt;
-  &lt;/div&gt;
 
-  {/* Main content */}
-  &lt;div className=&quot;flex-1 flex flex-col&quot;&gt;
-    {/* CHAT SECTION */}
-    {activeSection === &quot;chat&quot; &amp;&amp; (
-      &lt;&gt;
-        {messages.length === 0 ? (
-          &lt;div className=&quot;flex-1 flex flex-col items-center justify-center px-6&quot;&gt;
-            &lt;img
-              src=&quot;/axiprova-icon.png&quot;
-              alt=&quot;Axiprova&quot;
-              className=&quot;w-20 h-20 mb-4&quot;
-            /&gt;
-            &lt;h1 className=&quot;text-xl font-light text-zinc-300 mb-1&quot;&gt;
-              Axiprova
-            &lt;/h1&gt;
-            &lt;p className=&quot;text-zinc-500 text-center mb-6&quot;&gt;
-              Ο AI συμβουλος σου για τον πολιτισμο
-            &lt;/p&gt;
+          {chats.length > 0 && (
+            <div className="mt-4 pt-4 border-t border-zinc-800">
+              <p className="text-xs text-zinc-600 px-3 mb-2">RECENT CHATS</p>
 
-            &lt;div className=&quot;flex flex-wrap justify-center gap-2 mb-6&quot;&gt;
-              {suggestions.map((s, i) =&gt; (
-                &lt;button
-                  key={i}
-                  onClick={() =&gt; handleSubmit(s)}
-                  className=&quot;px-4 py-2 text-sm bg-zinc-900 text-zinc-400 border border-zinc-800 rounded-full hover:bg-zinc-800 hover:text-white transition&quot;
-                &gt;
-                  {s}
-                &lt;/button&gt;
+              {chats.map((chat) => (
+                <div key={chat.id} className="relative group">
+                  {editingChatId === chat.id ? (
+                    <input
+                      type="text"
+                      value={editingTitle}
+                      onChange={(e) => setEditingTitle(e.target.value)}
+                      onBlur={saveEditingChat}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") saveEditingChat();
+                      }}
+                      autoFocus
+                      className="w-full px-3 py-2 bg-zinc-800 text-white rounded-lg text-sm border border-zinc-600 focus:outline-none"
+                    />
+                  ) : (
+                    <div className="flex items-center">
+                      <button
+                        onClick={() => {
+                          setActiveChat(chat.id);
+                          setActiveSection("chat");
+                        }}
+                        onDoubleClick={() => startEditingChat(chat.id, chat.title)}
+                        className={`flex-1 text-left px-3 py-2 rounded-lg text-sm truncate transition ${
+                          activeChat === chat.id
+                            ? "bg-zinc-800 text-white"
+                            : "text-zinc-500 hover:bg-zinc-900"
+                        }`}
+                      >
+                        {chat.title}
+                      </button>
+
+                      <button
+                        onClick={() => deleteChat(chat.id)}
+                        className="opacity-0 group-hover:opacity-100 px-2 text-zinc-600 hover:text-red-500 transition"
+                        aria-label="Delete chat"
+                        title="Delete chat"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  )}
+                </div>
               ))}
-            &lt;/div&gt;
+            </div>
+          )}
+        </nav>
+      </div>
 
-            &lt;div className=&quot;w-full max-w-2xl flex gap-3&quot;&gt;
-              &lt;input
-                type=&quot;text&quot;
-                value={input}
-                onChange={(e) =&gt; setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder=&quot;Ρωτησε οτιδηποτε...&quot;
-                className=&quot;flex-1 bg-zinc-900 text-white px-4 py-3 rounded-xl border border-zinc-800 focus:outline-none focus:border-zinc-600 placeholder-zinc-600&quot;
-              /&gt;
-              &lt;button
-                onClick={() =&gt; handleSubmit()}
-                disabled={loading || !input.trim()}
-                className=&quot;px-6 py-3 bg-white text-black font-medium rounded-xl hover:bg-zinc-200 disabled:opacity-50 transition&quot;
-              &gt;
-                Στειλε
-              &lt;/button&gt;
-            &lt;/div&gt;
-          &lt;/div&gt;
-        ) : (
-          &lt;&gt;
-            &lt;div className=&quot;flex-1 overflow-y-auto px-6 py-4&quot;&gt;
-              &lt;div className=&quot;max-w-2xl mx-auto&quot;&gt;
-                {messages.map((msg, i) =&gt; (
-                  &lt;div key={i} className=&quot;mb-6&quot;&gt;
-                    {msg.role === &quot;user&quot; ? (
-                      &lt;div className=&quot;flex justify-end&quot;&gt;
-                        &lt;div className=&quot;bg-zinc-800 text-white px-4 py-3 rounded-2xl rounded-br-md max-w-lg&quot;&gt;
-                          {msg.content}
-                        &lt;/div&gt;
-                      &lt;/div&gt;
-                    ) : (
-                      &lt;div className=&quot;flex gap-3&quot;&gt;
-                        &lt;img
-                          src=&quot;/axiprova-icon.png&quot;
-                          alt=&quot;AI&quot;
-                          className=&quot;w-8 h-8 flex-shrink-0 mt-1&quot;
-                        /&gt;
-                        &lt;div className=&quot;flex-1 space-y-4&quot;&gt;
-                          &lt;div className=&quot;text-zinc-200 leading-relaxed prose prose-invert prose-sm max-w-none&quot;&gt;
-                            &lt;ReactMarkdown
-                              components={{
-                                a: ({ href, children }) =&gt; (
-                                  &lt;a
-                                    href={href ?? &quot;#&quot;}
-                                    target=&quot;_blank&quot;
-                                    rel=&quot;noopener noreferrer&quot;
-                                    className=&quot;text-blue-400 hover:text-blue-300 underline&quot;
-                                  &gt;
-                                    {children}
-                                  &lt;/a&gt;
-                                ),
-                              }}
-                            &gt;
+      {/* Main */}
+      <div className="flex-1 flex flex-col">
+        {activeSection === "chat" && (
+          <>
+            {messages.length === 0 ? (
+              <div className="flex-1 flex flex-col items-center justify-center px-6">
+                <img src="/axiprova-icon.png" alt="Axiprova" className="w-20 h-20 mb-4" />
+                <h1 className="text-xl font-light text-zinc-300 mb-1">Axiprova</h1>
+                <p className="text-zinc-500 text-center mb-6">Ο AI συμβουλος σου για τον πολιτισμο</p>
+
+                <div className="flex flex-wrap justify-center gap-2 mb-6">
+                  {suggestions.map((s, i) => (
+                    <button
+                      key={i}
+                      onClick={() => handleSubmit(s)}
+                      className="px-4 py-2 text-sm bg-zinc-900 text-zinc-400 border border-zinc-800 rounded-full hover:bg-zinc-800 hover:text-white transition"
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="w-full max-w-2xl flex gap-3">
+                  <input
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Ρωτησε οτιδηποτε..."
+                    className="flex-1 bg-zinc-900 text-white px-4 py-3 rounded-xl border border-zinc-800 focus:outline-none focus:border-zinc-600 placeholder-zinc-600"
+                  />
+                  <button
+                    onClick={() => handleSubmit()}
+                    disabled={loading || !input.trim()}
+                    className="px-6 py-3 bg-white text-black font-medium rounded-xl hover:bg-zinc-200 disabled:opacity-50 transition"
+                  >
+                    Στειλε
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="flex-1 overflow-y-auto px-6 py-4">
+                  <div className="max-w-2xl mx-auto">
+                    {messages.map((msg, i) => (
+                      <div key={i} className="mb-6">
+                        {msg.role === "user" ? (
+                          <div className="flex justify-end">
+                            <div className="bg-zinc-800 text-white px-4 py-3 rounded-2xl rounded-br-md max-w-lg">
                               {msg.content}
-                            &lt;/ReactMarkdown&gt;
-                          &lt;/div&gt;
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex gap-3">
+                            <img
+                              src="/axiprova-icon.png"
+                              alt="AI"
+                              className="w-8 h-8 flex-shrink-0 mt-1"
+                            />
+                            <div className="flex-1 space-y-4">
+                              <div className="text-zinc-200 leading-relaxed prose prose-invert prose-sm max-w-none">
+                                <ReactMarkdown
+                                  components={{
+                                    a: ({ href, children, ...props }) => (
+                                      <a
+                                        href={href}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-400 hover:text-blue-300 underline"
+                                        {...props}
+                                      >
+                                        {children}
+                                      </a>
+                                    ),
+                                  }}
+                                >
+                                  {msg.content}
+                                </ReactMarkdown>
+                              </div>
 
-                          {msg.insights &amp;&amp; msg.insights.length &gt; 0 &amp;&amp; (
-                            &lt;div className=&quot;bg-zinc-900/50 border border-zinc-800 rounded-xl p-4&quot;&gt;
-                              &lt;p className=&quot;text-zinc-500 text-xs uppercase mb-2&quot;&gt;
-                                Insights
-                              &lt;/p&gt;
-                              &lt;ul className=&quot;space-y-1&quot;&gt;
-                                {msg.insights.map((insight, j) =&gt; (
-                                  &lt;li
-                                    key={j}
-                                    className=&quot;text-zinc-400 text-sm flex items-start&quot;
-                                  &gt;
-                                    &lt;span className=&quot;text-blue-400 mr-2&quot;&gt;
-                                      →
-                                    &lt;/span&gt;
-                                    {insight}
-                                  &lt;/li&gt;
-                                ))}
-                              &lt;/ul&gt;
-                            &lt;/div&gt;
-                          )}
+                              {msg.insights && msg.insights.length > 0 && (
+                                <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4">
+                                  <p className="text-zinc-500 text-xs uppercase mb-2">Insights</p>
+                                  <ul className="space-y-1">
+                                    {msg.insights.map((insight, j) => (
+                                      <li key={j} className="text-zinc-400 text-sm flex items-start">
+                                        <span className="text-blue-400 mr-2">→</span>
+                                        {insight}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
 
-                          {msg.actions &amp;&amp; msg.actions.length &gt; 0 &amp;&amp; (
-                            &lt;div className=&quot;flex flex-wrap gap-2&quot;&gt;
-                              {msg.actions.map((action, j) =&gt; (
-                                &lt;button
-                                  key={j}
-                                  onClick={() =&gt;
-                                    handleSubmit(action.label)
-                                  }
-                                  className=&quot;px-3 py-1.5 text-sm bg-zinc-900 text-zinc-400 border border-zinc-700 rounded-full hover:bg-zinc-800 hover:text-white transition&quot;
-                                &gt;
-                                  {action.label}
-                                &lt;/button&gt;
-                              ))}
-                            &lt;/div&gt;
-                          )}
-                        &lt;/div&gt;
-                      &lt;/div&gt;
+                              {msg.actions && msg.actions.length > 0 && (
+                                <div className="flex flex-wrap gap-2">
+                                  {msg.actions.map((action, j) => (
+                                    <button
+                                      key={j}
+                                      onClick={() => handleSubmit(action.label)}
+                                      className="px-3 py-1.5 text-sm bg-zinc-900 text-zinc-400 border border-zinc-700 rounded-full hover:bg-zinc-800 hover:text-white transition"
+                                    >
+                                      {action.label}
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+
+                    {loading && (
+                      <div className="flex gap-3 mb-6">
+                        <img src="/axiprova-icon.png" alt="AI" className="w-8 h-8 flex-shrink-0" />
+                        <div className="text-zinc-500">Σκεφτομαι...</div>
+                      </div>
                     )}
-                  &lt;/div&gt;
-                ))}
 
-                {loading &amp;&amp; (
-                  &lt;div className=&quot;flex gap-3 mb-6&quot;&gt;
-                    &lt;img
-                      src=&quot;/axiprova-icon.png&quot;
-                      alt=&quot;AI&quot;
-                      className=&quot;w-8 h-8 flex-shrink-0&quot;
-                    /&gt;
-                    &lt;div className=&quot;text-zinc-500&quot;&gt;Σκεφτομαι...&lt;/div&gt;
-                  &lt;/div&gt;
-                )}
+                    <div ref={messagesEndRef} />
+                  </div>
+                </div>
 
-                &lt;div ref={messagesEndRef} /&gt;
-              &lt;/div&gt;
-            &lt;/div&gt;
-
-            &lt;div className=&quot;border-t border-zinc-800 bg-zinc-950 px-6 py-4&quot;&gt;
-              &lt;div className=&quot;max-w-2xl mx-auto flex gap-3&quot;&gt;
-                &lt;input
-                  type=&quot;text&quot;
-                  value={input}
-                  onChange={(e) =&gt; setInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder=&quot;Ρωτησε οτιδηποτε...&quot;
-                  className=&quot;flex-1 bg-zinc-900 text-white px-4 py-3 rounded-xl border border-zinc-800 focus:outline-none focus:border-zinc-600 placeholder-zinc-600&quot;
-                /&gt;
-                &lt;button
-                  onClick={() =&gt; handleSubmit()}
-                  disabled={loading || !input.trim()}
-                  className=&quot;px-6 py-3 bg-white text-black font-medium rounded-xl hover:bg-zinc-200 disabled:opacity-50 transition&quot;
-                &gt;
-                  Στειλε
-                &lt;/button&gt;
-              &lt;/div&gt;
-            &lt;/div&gt;
-          &lt;/&gt;
+                <div className="border-t border-zinc-800 bg-zinc-950 px-6 py-4">
+                  <div className="max-w-2xl mx-auto flex gap-3">
+                    <input
+                      type="text"
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      placeholder="Ρωτησε οτιδηποτε..."
+                      className="flex-1 bg-zinc-900 text-white px-4 py-3 rounded-xl border border-zinc-800 focus:outline-none focus:border-zinc-600 placeholder-zinc-600"
+                    />
+                    <button
+                      onClick={() => handleSubmit()}
+                      disabled={loading || !input.trim()}
+                      className="px-6 py-3 bg-white text-black font-medium rounded-xl hover:bg-zinc-200 disabled:opacity-50 transition"
+                    >
+                      Στειλε
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </>
         )}
-      &lt;/&gt;
-    )}
 
-    {/* DATA SECTION */}
-    {activeSection === &quot;data&quot; &amp;&amp; (
-      &lt;div className=&quot;flex-1 flex items-center justify-center&quot;&gt;
-        &lt;div className=&quot;text-center&quot;&gt;
-          &lt;img
-            src=&quot;/my_data_logo.png&quot;
-            alt=&quot;My Data&quot;
-            className=&quot;w-20 h-20 mx-auto mb-4&quot;
-          /&gt;
-          &lt;h2 className=&quot;text-2xl font-bold text-white mb-2&quot;&gt;My Data&lt;/h2&gt;
-          &lt;p className=&quot;text-zinc-500 mb-6&quot;&gt;Διαχειρισου τα reviews σου&lt;/p&gt;
-          &lt;a
-            href=&quot;/dashboard/data&quot;
-            className=&quot;px-6 py-3 bg-white text-black font-medium rounded-xl hover:bg-zinc-200 transition inline-block&quot;
-          &gt;
-            Ανοιξε
-          &lt;/a&gt;
-        &lt;/div&gt;
-      &lt;/div&gt;
-    )}
+        {activeSection === "data" && (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <img src="/my_data_logo.png" alt="My Data" className="w-20 h-20 mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-white mb-2">My Data</h2>
+              <p className="text-zinc-500 mb-6">Διαχειρισου τα reviews σου</p>
+              <a
+                href="/dashboard/data"
+                className="px-6 py-3 bg-white text-black font-medium rounded-xl hover:bg-zinc-200 transition inline-block"
+              >
+                Ανοιξε
+              </a>
+            </div>
+          </div>
+        )}
 
-    {/* PROJECTS SECTION */}
-    {activeSection === &quot;projects&quot; &amp;&amp; (
-      &lt;div className=&quot;flex-1 flex items-center justify-center&quot;&gt;
-        &lt;div className=&quot;text-center&quot;&gt;
-          &lt;img
-            src=&quot;/project_logo.png&quot;
-            alt=&quot;Projects&quot;
-            className=&quot;w-20 h-20 mx-auto mb-4&quot;
-          /&gt;
-          &lt;h2 className=&quot;text-2xl font-bold text-white mb-2&quot;&gt;
-            Projects
-          &lt;/h2&gt;
-          &lt;p className=&quot;text-zinc-500 mb-6&quot;&gt;
-            Οργανωσε τα projects σου
-          &lt;/p&gt;
-          &lt;span className=&quot;px-4 py-2 bg-zinc-800 text-zinc-400 rounded-full text-sm&quot;&gt;
-            Coming Soon
-          &lt;/span&gt;
-        &lt;/div&gt;
-      &lt;/div&gt;
-    )}
+        {activeSection === "projects" && (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <img src="/project_logo.png" alt="Projects" className="w-20 h-20 mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-white mb-2">Projects</h2>
+              <p className="text-zinc-500 mb-6">Οργανωσε τα projects σου</p>
+              <span className="px-4 py-2 bg-zinc-800 text-zinc-400 rounded-full text-sm">
+                Coming Soon
+              </span>
+            </div>
+          </div>
+        )}
 
-    {/* GRANTS SECTION */}
-    {activeSection === &quot;grants&quot; &amp;&amp; (
-      &lt;div className=&quot;flex-1 flex items-center justify-center&quot;&gt;
-        &lt;div className=&quot;text-center&quot;&gt;
-          &lt;img
-            src=&quot;/Grand_Finder.png&quot;
-            alt=&quot;Grant Finder&quot;
-            className=&quot;w-20 h-20 mx-auto mb-4&quot;
-          /&gt;
-          &lt;h2 className=&quot;text-2xl font-bold text-white mb-2&quot;&gt;
-            Grant Finder
-          &lt;/h2&gt;
-          &lt;p className=&quot;text-zinc-500 mb-6&quot;&gt;Βρες χρηματοδοτησεις&lt;/p&gt;
-          &lt;span className=&quot;px-4 py-2 bg-zinc-800 text-zinc-400 rounded-full text-sm&quot;&gt;
-            Coming Soon
-          &lt;/span&gt;
-        &lt;/div&gt;
-      &lt;/div&gt;
-    )}
+        {activeSection === "grants" && (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <img src="/Grand_Finder.png" alt="Grant Finder" className="w-20 h-20 mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-white mb-2">Grant Finder</h2>
+              <p className="text-zinc-500 mb-6">Βρες χρηματοδοτησεις</p>
+              <span className="px-4 py-2 bg-zinc-800 text-zinc-400 rounded-full text-sm">
+                Coming Soon
+              </span>
+            </div>
+          </div>
+        )}
 
-    {/* IMPACT SECTION */}
-    {activeSection === &quot;impact&quot; &amp;&amp; (
-      &lt;div className=&quot;flex-1 flex items-center justify-center&quot;&gt;
-        &lt;div className=&quot;text-center&quot;&gt;
-          &lt;img
-            src=&quot;/Impact_Predictor_logo.png&quot;
-            alt=&quot;Impact Predictor&quot;
-            className=&quot;w-20 h-20 mx-auto mb-4&quot;
-          /&gt;
-          &lt;h2 className=&quot;text-2xl font-bold text-white mb-2&quot;&gt;
-            Impact Predictor
-          &lt;/h2&gt;
-          &lt;p className=&quot;text-zinc-500 mb-6&quot;&gt;
-            Προβλεψε την επιτυχια σου
-          &lt;/p&gt;
-          &lt;span className=&quot;px-4 py-2 bg-zinc-800 text-zinc-400 rounded-full text-sm&quot;&gt;
-            Coming Soon
-          &lt;/span&gt;
-        &lt;/div&gt;
-      &lt;/div&gt;
-    )}
+        {activeSection === "impact" && (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <img
+                src="/Impact_Predictor_logo.png"
+                alt="Impact Predictor"
+                className="w-20 h-20 mx-auto mb-4"
+              />
+              <h2 className="text-2xl font-bold text-white mb-2">Impact Predictor</h2>
+              <p className="text-zinc-500 mb-6">Προβλεψε την επιτυχια σου</p>
+              <span className="px-4 py-2 bg-zinc-800 text-zinc-400 rounded-full text-sm">
+                Coming Soon
+              </span>
+            </div>
+          </div>
+        )}
 
-    {/* TRENDS SECTION */}
-    {activeSection === &quot;trends&quot; &amp;&amp; (
-      &lt;div className=&quot;flex-1 flex items-center justify-center&quot;&gt;
-        &lt;div className=&quot;text-center&quot;&gt;
-          &lt;img
-            src=&quot;/Trend_Radar_logo.png&quot;
-            alt=&quot;Trend Radar&quot;
-            className=&quot;w-20 h-20 mx-auto mb-4&quot;
-          /&gt;
-          &lt;h2 className=&quot;text-2xl font-bold text-white mb-2&quot;&gt;
-            Trend Radar
-          &lt;/h2&gt;
-          &lt;p className=&quot;text-zinc-500 mb-6&quot;&gt;Δες τι ειναι trending&lt;/p&gt;
-          &lt;span className=&quot;px-4 py-2 bg-zinc-800 text-zinc-400 rounded-full text-sm&quot;&gt;
-            Coming Soon
-          &lt;/span&gt;
-        &lt;/div&gt;
-      &lt;/div&gt;
-    )}
-  &lt;/div&gt;
-&lt;/div&gt;
-
-  );}
+        {activeSection === "trends" && (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <img src="/Trend_Radar_logo.png" alt="Trend Radar" className="w-20 h-20 mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-white mb-2">Trend Radar</h2>
+              <p className="text-zinc-500 mb-6">Δες τι ειναι trending</p>
+              <span className="px-4 py-2 bg-zinc-800 text-zinc-400 rounded-full text-sm">
+                Coming Soon
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
