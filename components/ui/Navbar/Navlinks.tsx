@@ -20,7 +20,7 @@ export default function Navlinks({ user }: NavlinksProps) {
       <div className="flex items-center flex-1">
         <Link href="/" className={s.logo} aria-label="Logo">
           <Image 
-            src="/axiprova-removebg-preview.png" 
+            src="/axiprova-icon.png" 
             alt="Axiprova" 
             width={40} 
             height={40}
