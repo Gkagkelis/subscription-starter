@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Button from "@/components/ui/Button/Button";
-import Card from "@/components/ui/Card/Card";
 
 export default function CopilotPage() {
   const [message, setMessage] = useState("");
@@ -31,67 +30,21 @@ export default function CopilotPage() {
   };
 
   const handleAction = async (action: any) => {
-    const actionMessage = `[Ενέργεια: ${action.label}]`;
-    setMessage(actionMessage);
+    setMessage(action.label);
+    setResponse(null);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit();
+    }
   };
 
   return (
-    <div className="container max-w-4xl mx-auto py-8 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">AI Copilot</h1>
-        <p className="text-gray-500">
-          Ο καθημερινός σύμβουλός σου για πολιτιστικά projects
-        </p>
-      </div>
-
-      <Card className="p-6">
-        <textarea
-          placeholder="Γράψε τι σχεδιάζεις σήμερα... π.χ. 'Θέλω να οργανώσω workshop φωτογραφίας για εφήβους'"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          rows={4}
-          className="w-full px-3 py-2 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <Button onClick={handleSubmit} disabled={loading}>
-          {loading ? "Σκέφτομαι..." : "Στείλε"}
-        </Button>
-      </Card>
-
-      {response && (
-        <Card className="p-6 space-y-4">
-          <div>
-            <p className="whitespace-pre-wrap">{response.reply}</p>
-          </div>
-
-          {response.insights && response.insights.length > 0 && (
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <h3 className="font-semibold mb-2">💡 Insights:</h3>
-              <ul className="list-disc list-inside space-y-1">
-                {response.insights.map((insight: string, i: number) => (
-                  <li key={i}>{insight}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {response.actions && response.actions.length > 0 && (
-            <div>
-              <h3 className="font-semibold mb-2">⚡ Επόμενα βήματα:</h3>
-              <div className="flex flex-wrap gap-2">
-                {response.actions.map((action: any, i: number) => (
-                  <Button
-                    key={i}
-                    variant="flat"
-                    onClick={() => handleAction(action)}
-                  >
-                    {action.label}
-                  </Button>
-                ))}
-              </div>
-            </div>
-          )}
-        </Card>
-      )}
-    </div>
-  );
-}
+    <div className="min-h-screen bg-gray-50 py-8 px-4">
+      <div className="max-w-3xl mx-auto space-y-6">
+        
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">🎭 Culture Copilot</h1>
