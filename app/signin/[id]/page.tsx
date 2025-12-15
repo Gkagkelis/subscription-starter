@@ -51,14 +51,13 @@ export default async function SignIn({
   }
 
   return (
-    <div className="flex justify-center height-screen-helper">
-      <div className="flex flex-col justify-between max-w-lg p-3 m-auto w-80 ">
-        <div className="flex justify-center pb-12 ">
+   <div className="flex justify-center pb-12 ">
           <Image 
-            src="/axiprova-icon.png" 
+            src="/axiprova.jpeg" 
             alt="Axiprova" 
-            width={64} 
-            height={64}
+            width={200} 
+            height={80}
+            style={{ objectFit: 'contain' }}
           />
         </div>
         <Card
