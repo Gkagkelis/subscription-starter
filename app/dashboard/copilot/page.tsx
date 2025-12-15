@@ -1,16 +1,37 @@
 "use client";
 
-import { useState } from "react";
-import Button from "@/components/ui/Button/Button";
+import { useState, useRef, useEffect } from "react";
+
+interface Message {
+  role: "user" | "assistant";
+  content: string;
+  insights?: string[];
+  actions?: any[];
+}
 
 export default function CopilotPage() {
-  const [message, setMessage] = useState("");
-  const [response, setResponse] = useState<any>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const handleSubmit = async () => {
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const handleSubmit = async (text?: string) => {
+    const message = text || input;
     if (!message.trim()) return;
+
+    const userMessage: Message = { role: "user", content: message };
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
     setLoading(true);
+
     try {
       const res = await fetch("/api/ai/copilot", {
         method: "POST",
@@ -18,17 +39,18 @@ export default function CopilotPage() {
         body: JSON.stringify({ message, language: "auto" }),
       });
       const data = await res.json();
-      setResponse(data);
+      const assistantMessage: Message = {
+        role: "assistant",
+        content: data.reply,
+        insights: data.insights,
+        actions: data.actions,
+      };
+      setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
       console.error(error);
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleAction = (action: any) => {
-    setMessage(action.label);
-    setResponse(null);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -39,90 +61,34 @@ export default function CopilotPage() {
   };
 
   const suggestions = [
-    "Θελω να οργανωσω εκθεση φωτογραφιας",
-    "Πως να προσελκυσω νεο κοινο 18-25",
-    "Ιδεες για εκπαιδευτικα προγραμματα",
+    "Θελω να οργανωσω εκθεση",
+    "Πως να προσελκυσω νεο κοινο",
+    "Ιδεες για workshops",
     "Βοηθεια με grant application",
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white py-8 px-4">
-      <div className="max-w-3xl mx-auto space-y-6">
+    <div className="min-h-screen bg-black text-white flex flex-col">
+      
+      <div className="flex-1 overflow-y-auto px-4 py-6 max-w-3xl mx-auto w-full">
         
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-purple-900">Axiprova</h1>
-          <p className="text-purple-600 mt-2 text-lg">
-            Ο AI συμβουλος σου για τον πολιτισμο
-          </p>
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-xl p-6 border border-purple-100">
-          <textarea
-            placeholder="Περιεγραψε τι σχεδιαζεις ή τι προκληση αντιμετωπιζεις..."
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={handleKeyDown}
-            rows={4}
-            className="w-full px-4 py-3 text-gray-800 bg-purple-50 border border-purple-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none text-lg placeholder-purple-300"
-          />
-          <div className="flex justify-between items-center mt-4">
-            <p className="text-sm text-purple-400">Enter για αποστολη</p>
-            <Button onClick={handleSubmit} disabled={loading}>
-              {loading ? "Σκεφτομαι..." : "Ρωτησε το Axiprova"}
-            </Button>
-          </div>
-        </div>
-
-        {response && (
-          <div className="bg-white rounded-2xl shadow-xl p-6 border border-purple-100 space-y-5">
-            <div className="prose max-w-none">
-              <p className="text-gray-800 text-lg leading-relaxed whitespace-pre-wrap">
-                {response.reply}
-              </p>
-            </div>
-
-            {response.insights && response.insights.length > 0 && (
-              <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-5 rounded-xl border border-purple-100">
-                <h3 className="font-semibold text-purple-900 mb-3">Insights</h3>
-                <ul className="space-y-2">
-                  {response.insights.map((insight: string, i: number) => (
-                    <li key={i} className="flex items-start text-purple-800">
-                      <span className="mr-3 text-purple-500">→</span>
-                      <span>{insight}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {response.actions && response.actions.length > 0 && (
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-3">Επομενα βηματα</h3>
-                <div className="flex flex-wrap gap-2">
-                  {response.actions.map((action: any, i: number) => (
-                    <button
-                      key={i}
-                      onClick={() => handleAction(action)}
-                      className="px-4 py-2 bg-purple-100 border border-purple-200 rounded-full text-purple-700 hover:bg-purple-200 transition-all text-sm font-medium"
-                    >
-                      {action.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {!response && !loading && (
-          <div className="text-center py-6">
-            <p className="text-gray-500 mb-4">Ή δοκιμασε κατι απο αυτα:</p>
+        {messages.length === 0 && (
+          <div className="flex flex-col items-center justify-center h-full py-20">
+            <img
+              src="/axiprova-removebg-preview.png"
+              alt="Axiprova"
+              className="w-24 h-24 mb-6 opacity-80"
+            />
+            <h1 className="text-2xl font-light text-zinc-300 mb-2">Axiprova</h1>
+            <p className="text-zinc-500 text-center mb-8">
+              Ο AI συμβουλος σου για τον πολιτισμο
+            </p>
             <div className="flex flex-wrap justify-center gap-2">
               {suggestions.map((s, i) => (
                 <button
                   key={i}
-                  onClick={() => setMessage(s)}
-                  className="px-4 py-2 text-sm bg-white border border-purple-200 text-purple-600 rounded-full hover:bg-purple-50 transition"
+                  onClick={() => handleSubmit(s)}
+                  className="px-4 py-2 text-sm bg-zinc-900 text-zinc-400 border border-zinc-800 rounded-full hover:bg-zinc-800 hover:text-white transition"
                 >
                   {s}
                 </button>
@@ -131,6 +97,91 @@ export default function CopilotPage() {
           </div>
         )}
 
+        {messages.map((msg, i) => (
+          <div key={i} className="mb-6">
+            {msg.role === "user" ? (
+              <div className="flex justify-end">
+                <div className="bg-zinc-800 text-white px-4 py-3 rounded-2xl rounded-br-md max-w-lg">
+                  {msg.content}
+                </div>
+              </div>
+            ) : (
+              <div className="flex gap-3">
+                <img
+                  src="/axiprova-removebg-preview.png"
+                  alt="AI"
+                  className="w-8 h-8 rounded-full flex-shrink-0 mt-1"
+                />
+                <div className="flex-1 space-y-4">
+                  <div className="text-zinc-200 leading-relaxed">
+                    {msg.content}
+                  </div>
+
+                  {msg.insights && msg.insights.length > 0 && (
+                    <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4">
+                      <p className="text-zinc-500 text-xs uppercase mb-2">Insights</p>
+                      <ul className="space-y-1">
+                        {msg.insights.map((insight, j) => (
+                          <li key={j} className="text-zinc-400 text-sm flex items-start">
+                            <span className="text-blue-400 mr-2">→</span>
+                            {insight}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {msg.actions && msg.actions.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {msg.actions.map((action, j) => (
+                        <button
+                          key={j}
+                          onClick={() => handleSubmit(action.label)}
+                          className="px-3 py-1.5 text-sm bg-zinc-900 text-zinc-400 border border-zinc-700 rounded-full hover:bg-zinc-800 hover:text-white transition"
+                        >
+                          {action.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+
+        {loading && (
+          <div className="flex gap-3 mb-6">
+            <img
+              src="/axiprova-removebg-preview.png"
+              alt="AI"
+              className="w-8 h-8 rounded-full flex-shrink-0"
+            />
+            <div className="text-zinc-500">Σκεφτομαι...</div>
+          </div>
+        )}
+
+        <div ref={messagesEndRef} />
+      </div>
+
+      <div className="border-t border-zinc-800 bg-black px-4 py-4">
+        <div className="max-w-3xl mx-auto flex gap-3">
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Γραψε κατι..."
+            className="flex-1 bg-zinc-900 text-white px-4 py-3 rounded-xl border border-zinc-800 focus:outline-none focus:border-zinc-600 placeholder-zinc-600"
+          />
+          <button
+            onClick={() => handleSubmit()}
+            disabled={loading || !input.trim()}
+            className="px-6 py-3 bg-white text-black font-medium rounded-xl hover:bg-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed transition"
+          >
+            Στειλε
+          </button>
+        </div>
       </div>
     </div>
   );
