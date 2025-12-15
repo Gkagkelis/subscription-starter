@@ -1,27 +1,23 @@
 import Link from "next/link";
 
-import Logo from "@/components/icons/Logo";
-
 export default function Footer() {
   return (
     <footer className="mx-auto max-w-[1920px] px-6 bg-zinc-900">
       {/* Top footer area */}
       <div className="grid grid-cols-1 gap-8 py-12 text-white transition-colors duration-150 border-b lg:grid-cols-12 border-zinc-600 bg-zinc-900">
-        {/* Brand */}
+        {/* Brand (NO LOGO) */}
         <div className="col-span-1 lg:col-span-4">
-          <Link href="/" className="flex items-center flex-initial font-bold md:mr-24">
-            <span className="mr-2 border rounded-full border-zinc-700">
-              <Logo />
+          <Link href="/" className="flex items-center flex-initial md:mr-24">
+            <span className="flex flex-col leading-tight">
+              <span className="font-bold">Axiprova 2025</span>
+              <span className="text-sm font-normal text-zinc-400">
+                Your AI advisor for culture &amp; the creative industries
+              </span>
             </span>
-            <span>Axiprova</span>
           </Link>
-
-          <p className="mt-3 text-sm text-zinc-300 max-w-sm">
-            Your AI advisor for culture &amp; the creative industries
-          </p>
         </div>
 
-        {/* Navigation */}
+        {/* Links */}
         <div className="col-span-1 lg:col-span-4">
           <p className="font-bold text-white mb-4">Links</p>
           <ul className="flex flex-col gap-3">
@@ -33,6 +29,7 @@ export default function Footer() {
                 About
               </Link>
             </li>
+
             <li>
               <Link
                 href="/privacy"
@@ -41,6 +38,7 @@ export default function Footer() {
                 Privacy Policy
               </Link>
             </li>
+
             <li>
               <Link
                 href="/terms"
