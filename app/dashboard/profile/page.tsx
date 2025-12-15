@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 interface Profile {
   org_name: string;
@@ -13,6 +14,8 @@ interface Profile {
 }
 
 export default function ProfilePage() {
+  const router = useRouter();
+  const [isNewUser, setIsNewUser] = useState(false);
   const [profile, setProfile] = useState<Profile>({
     org_name: "",
     org_type: "",
@@ -37,6 +40,9 @@ export default function ProfilePage() {
         const data = await res.json();
         if (data) {
           setProfile(data);
+          setIsNewUser(false);
+        } else {
+          setIsNewUser(true);
         }
       }
     } catch (error) {
@@ -56,7 +62,13 @@ export default function ProfilePage() {
       });
       if (res.ok) {
         setSaved(true);
-        setTimeout(() => setSaved(false), 3000);
+        if (isNewUser) {
+          setTimeout(() => {
+            router.push("/dashboard/copilot");
+          }, 1000);
+        } else {
+          setTimeout(() => setSaved(false), 3000);
+        }
       }
     } catch (error) {
       console.error("Failed to save profile:", error);
@@ -99,9 +111,14 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-zinc-950 text-white py-8 px-4">
       <div className="max-w-2xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Προφιλ Οργανισμου</h1>
+          <h1 className="text-3xl font-bold text-white mb-2">
+            {isNewUser ? "Καλωσηρθες στο Axiprova!" : "Προφιλ Οργανισμου"}
+          </h1>
           <p className="text-zinc-500">
-            Συμπληρωσε τα στοιχεια σου για πιο εξατομικευμενες συμβουλες απο το AI
+            {isNewUser 
+              ? "Συμπληρωσε τα στοιχεια σου για να ξεκινησεις με εξατομικευμενες συμβουλες"
+              : "Ενημερωσε τα στοιχεια σου για πιο εξατομικευμενες συμβουλες απο το AI"
+            }
           </p>
         </div>
 
@@ -208,21 +225,23 @@ export default function ProfilePage() {
             disabled={saving}
             className="w-full py-3 bg-white text-black font-medium rounded-xl hover:bg-zinc-200 disabled:opacity-50 transition"
           >
-            {saving ? "Αποθηκευση..." : "Αποθηκευση"}
+            {saving ? "Αποθηκευση..." : isNewUser ? "Ξεκινα!" : "Αποθηκευση"}
           </button>
 
           {saved && (
             <div className="text-center text-green-400 text-sm">
-              Αποθηκευτηκε επιτυχως!
+              {isNewUser ? "Τελεια! Παμε στο Axiprova..." : "Αποθηκευτηκε επιτυχως!"}
             </div>
           )}
         </div>
 
-        <div className="mt-6 text-center">
-          <a href="/dashboard/copilot" className="text-zinc-500 hover:text-white transition">
-            ← Πισω στο Chat
-          </a>
-        </div>
+        {!isNewUser && (
+          <div className="mt-6 text-center">
+            <a href="/dashboard/copilot" className="text-zinc-500 hover:text-white transition">
+              ← Πισω στο Chat
+            </a>
+          </div>
+        )}
       </div>
     </div>
   );
