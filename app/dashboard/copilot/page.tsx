@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Button from "@/components/ui/Button/Button";
 import Card from "@/components/ui/Card/Card";
+import Textarea from "@/components/ui/Textarea/Textarea";
 
 export default function CopilotPage() {
   const [message, setMessage] = useState("");
@@ -11,7 +12,6 @@ export default function CopilotPage() {
 
   const handleSubmit = async () => {
     if (!message.trim()) return;
-
     setLoading(true);
     try {
       const res = await fetch("/api/ai/copilot", {
@@ -19,10 +19,9 @@ export default function CopilotPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message,
-          language: "auto", // auto-detect
+          language: "auto",
         }),
       });
-
       const data = await res.json();
       setResponse(data);
     } catch (error) {
@@ -33,23 +32,19 @@ export default function CopilotPage() {
   };
 
   const handleAction = async (action: any) => {
-    // When user clicks an action button, append it to conversation
     const actionMessage = `[Ενέργεια: ${action.label}]`;
     setMessage(actionMessage);
-    // Optionally auto-submit
-    // handleSubmit();
   };
 
   return (
     <div className="container max-w-4xl mx-auto py-8 space-y-6">
       <div>
         <h1 className="text-3xl font-bold">AI Copilot</h1>
-        <p className="text-muted-foreground">
+        <p className="text-gray-500">
           Ο καθημερινός σύμβουλός σου για πολιτιστικά projects
         </p>
       </div>
 
-      {/* Chat Input */}
       <Card className="p-6">
         <Textarea
           placeholder="Γράψε τι σχεδιάζεις σήμερα... π.χ. 'Θέλω να οργανώσω workshop φωτογραφίας για εφήβους'"
@@ -63,15 +58,12 @@ export default function CopilotPage() {
         </Button>
       </Card>
 
-      {/* AI Response */}
       {response && (
         <Card className="p-6 space-y-4">
-          {/* Reply */}
-          <div className="prose prose-sm">
+          <div>
             <p className="whitespace-pre-wrap">{response.reply}</p>
           </div>
 
-          {/* Insights */}
           {response.insights && response.insights.length > 0 && (
             <div className="bg-blue-50 p-4 rounded-lg">
               <h3 className="font-semibold mb-2">💡 Insights:</h3>
@@ -83,7 +75,6 @@ export default function CopilotPage() {
             </div>
           )}
 
-          {/* Actions */}
           {response.actions && response.actions.length > 0 && (
             <div>
               <h3 className="font-semibold mb-2">⚡ Επόμενα βήματα:</h3>
