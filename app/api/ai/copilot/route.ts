@@ -196,7 +196,12 @@ ${knowledgeResults.map((k: any) => `[${k.category}] ${k.content}`).join("\n\n")}
       : "";
 
     const webSearchInstructions = webSearchContext 
-      ? "\n\nWEB SEARCH INSTRUCTIONS: You have live search results below. Use them to provide CURRENT, UP-TO-DATE information. Always mention specific programs, deadlines, and include URLs when relevant."
+      ? `\n\nWEB SEARCH INSTRUCTIONS: 
+- You have live search results below with ACTUAL URLs
+- ALWAYS include the full clickable URLs in your response using markdown format: [Name](https://url.com)
+- Example: "Δείτε το πρόγραμμα [Art-Works](https://art-works.gr) για χρηματοδότηση"
+- NEVER just mention a website name without the link
+- List at least 2-3 specific opportunities with their direct links`
       : "";
 
     const systemPrompt = `You are Axiprova - an expert AI advisor for cultural sector professionals.
