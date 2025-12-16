@@ -1,588 +1,465 @@
-"use client";
-
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import ReactMarkdown from "react-markdown";
-import { useRouter } from "next/navigation";
+import { openai } from "@ai-sdk/openai";
+import { streamObject, embed } from "ai";
+import { z } from "zod";
+import { createClient } from "@/utils/supabase/server";
 
 type Mode = "chat" | "projects" | "grants" | "impact" | "trends";
 
-interface Message {
-  role: "user" | "assistant";
-  content: string;
-  insights?: string[];
-  actions?: Array<{ label: string; [key: string]: any }>;
-}
+/**
+ * ACTIONS
+ * Τα actions εμφανίζονται ως κουμπιά στο UI (το UI σου χρησιμοποιεί action.label σαν prompt).
+ */
+const ActionSchema = z.discriminatedUnion("type", [
+  // New, mode-focused actions (safe + simple)
+  z.object({
+    type: z.literal("create_project_outline"),
+    label: z.string(),
+    payload: z.object({}),
+  }),
+  z.object({
+    type: z.literal("create_grant_checklist"),
+    label: z.string(),
+    payload: z.object({}),
+  }),
+  z.object({
+    type: z.literal("create_kpi_plan"),
+    label: z.string(),
+    payload: z.object({}),
+  }),
+  z.object({
+    type: z.literal("run_trend_scan"),
+    label: z.string(),
+    payload: z.object({}),
+  }),
 
-interface Chat {
-  id: string;
-  title: string;
-  messages: Message[];
-}
+  // Your existing action types
+  z.object({
+    type: z.literal("generate_titles"),
+    label: z.string(),
+    payload: z.object({ count: z.number().default(3) }),
+  }),
+  z.object({
+    type: z.literal("draft_content"),
+    label: z.string(),
+    payload: z.object({
+      content_type: z.enum(["instagram", "email", "press_release", "newsletter"]),
+    }),
+  }),
+  z.object({
+    type: z.literal("workshop_ideas"),
+    label: z.string(),
+    payload: z.object({ topic: z.string().optional() }),
+  }),
+  z.object({
+    type: z.literal("analyze_audience"),
+    label: z.string(),
+    payload: z.object({ focus: z.string().optional() }),
+  }),
+  z.object({
+    type: z.literal("funding_help"),
+    label: z.string(),
+    payload: z.object({ section: z.string().optional() }),
+  }),
+  z.object({
+    type: z.literal("analyze_reviews"),
+    label: z.string(),
+    payload: z.object({ focus: z.string().optional() }),
+  }),
+  z.object({
+    type: z.literal("search_web"),
+    label: z.string(),
+    payload: z.object({ query: z.string().optional() }),
+  }),
+]);
 
-export default function CopilotPage() {
-  const router = useRouter();
+const CopilotOutputSchema = z.object({
+  reply: z.string(),
+  insights: z.array(z.string()).optional(),
+  actions: z.array(ActionSchema),
+  language_detected: z.enum(["el", "en"]),
+});
 
-  const [chats, setChats] = useState<Chat[]>([]);
-  const chatsRef = useRef<Chat[]>([]);
-  useEffect(() => {
-    chatsRef.current = chats;
-  }, [chats]);
+/**
+ * Decide if we should web search
+ * - grants/trends: almost always helpful, so we do it aggressively
+ * - otherwise: trigger-based
+ */
+function needsWebSearch(message: string, mode: Mode): boolean {
+  if (mode === "grants" || mode === "trends") return true;
 
-  const [activeChat, setActiveChat] = useState<string | null>(null);
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  // Modes for specialized behavior
-  const [mode, setMode] = useState<Mode>("chat");
-
-  const [editingChatId, setEditingChatId] = useState<string | null>(null);
-  const [editingTitle, setEditingTitle] = useState("");
-
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const currentChat = chats.find((c) => c.id === activeChat);
-  const messages = currentChat?.messages || [];
-
-  useEffect(() => {
-    loadChats();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, loading]);
-
-  const modeLabel: Record<Mode, string> = {
-    chat: "Axiprova Advisor",
-    projects: "Projects",
-    grants: "Grants",
-    impact: "Impact",
-    trends: "Trends",
-  };
-
-  const modeHint: Record<Mode, string> = {
-    chat: "Γράψε ελεύθερα — το Axiprova θα σε βοηθήσει.",
-    projects: "Οργάνωση project: στόχος, κοινό, timeline, συνεργάτες, budget notes.",
-    grants: "Χρηματοδοτήσεις: eligibility, shortlist, checklist, sections αίτησης.",
-    impact: "Impact & KPIs: theory of change, δείκτες, evaluation plan.",
-    trends: "Trends: signals → ιδέες → πώς γίνονται project/ευκαιρία.",
-  };
-
-  const quickTools: Record<Mode, Array<{ label: string; prompt: string }>> = {
-    chat: [
-      { label: "Σύνοψη", prompt: "Summarize our conversation so far in bullet points." },
-      { label: "Επόμενο βήμα", prompt: "Suggest the next best action and why." },
-    ],
-    projects: [
-      { label: "Project outline", prompt: "Create a structured project outline (goal, audience, partners, timeline, budget notes)." },
-      { label: "Project description", prompt: "Write a grant-ready project description (200-300 words)." },
-      { label: "Timeline", prompt: "Create a simple timeline with milestones and deliverables." },
-      { label: "Partner email", prompt: "Draft a professional partnership outreach email for this project." },
-    ],
-    grants: [
-      { label: "Find grants", prompt: "Ask me 3 questions to find suitable grants, then propose a shortlist format." },
-      { label: "Eligibility check", prompt: "Create an eligibility checklist and tell me what info is missing." },
-      { label: "Application checklist", prompt: "Create a grant application checklist for this project." },
-      { label: "Draft section", prompt: "Draft a strong application section (Objectives, Activities, Audience, Partners)." },
-    ],
-    impact: [
-      { label: "KPIs", prompt: "Propose KPIs and a measurement plan for this project (outputs/outcomes/impact)." },
-      { label: "Theory of Change", prompt: "Create a short Theory of Change (inputs → activities → outputs → outcomes → impact)." },
-      { label: "Evaluation plan", prompt: "Write a concise evaluation plan suitable for a grant application." },
-      { label: "Risks & mitigation", prompt: "List key risks and mitigation strategies for this project." },
-    ],
-    trends: [
-      { label: "Trend scan", prompt: "Give me 5 relevant trends for culture & creative industries and how to use them in a project." },
-      { label: "3 ideas", prompt: "Generate 3 project ideas aligned with current trends, including audience and partners." },
-      { label: "Audience fit", prompt: "Suggest target audiences and engagement tactics aligned with these trends." },
-      { label: "Project angle", prompt: "Propose 3 compelling project angles that improve relevance and fundability." },
-    ],
-  };
-
-  const suggestions = useMemo(() => {
-    switch (mode) {
-      case "projects":
-        return ["Θέλω να οργανώσω έκθεση", "Φτιάξε μου project outline", "Γράψε περιγραφή project", "Βοήθησέ με με timeline"];
-      case "grants":
-        return ["Βρες μου grants", "Φτιάξε eligibility checklist", "Γράψε grant summary", "Τι χρειάζομαι για αίτηση;"];
-      case "impact":
-        return ["Πρόβλεψε το impact", "Δώσε KPIs", "Φτιάξε evaluation plan", "Theory of Change"];
-      case "trends":
-        return ["Τι είναι trending;", "Δώσε μου 5 trends", "Φτιάξε 3 ιδέες", "Πώς συνδέεται με grants;"];
-      default:
-        return ["Θέλω να οργανώσω έκθεση", "Βρες μου grants", "Ανάλυσε τα reviews μου", "Πρόβλεψε το impact"];
-    }
-  }, [mode]);
-
-  const menuItems: Array<
-    | { id: Mode; icon: string; label: string; kind: "mode" }
-    | { id: "data"; icon: string; label: string; kind: "link"; href: string }
-  > = [
-    { id: "chat", icon: "/chat_logo.png", label: "Advisor", kind: "mode" },
-    { id: "data", icon: "/my_data_logo.png", label: "My Data", kind: "link", href: "/dashboard/data" },
-    { id: "projects", icon: "/project_logo.png", label: "Projects", kind: "mode" },
-    { id: "grants", icon: "/Grand_Finder.png", label: "Grant Finder", kind: "mode" },
-    { id: "impact", icon: "/Impact_Predictor_logo.png", label: "Impact Predictor", kind: "mode" },
-    { id: "trends", icon: "/Trend_Radar_logo.png", label: "Trend Radar", kind: "mode" },
+  const searchTriggers = [
+    // Greek triggers
+    "επιχορήγηση",
+    "επιχορηγήσεις",
+    "χρηματοδότηση",
+    "προκήρυξη",
+    "προκηρύξεις",
+    "deadline",
+    "προθεσμία",
+    "προθεσμίες",
+    "τρέχουσες",
+    "τρέχοντα",
+    "νέες",
+    "νέα",
+    "ανοιχτές",
+    "ανοιχτά",
+    "2024",
+    "2025",
+    "τώρα",
+    "σήμερα",
+    "φέτος",
+    "creative europe",
+    "ελλάδα",
+    "υπουργείο πολιτισμού",
+    "εσπα",
+    // English triggers
+    "grant",
+    "grants",
+    "funding",
+    "deadline",
+    "current",
+    "open call",
+    "open calls",
+    "apply",
+    "application",
+    "opportunity",
+    "opportunities",
+    "latest",
+    "recent",
+    "new",
+    "available",
+    "announcement",
+    "call for",
   ];
 
-  const loadChats = async () => {
-    try {
-      const res = await fetch("/api/chats");
-      if (res.ok) {
-        const data = await res.json();
-        setChats(data);
+  const lowerMessage = message.toLowerCase();
+  return searchTriggers.some((trigger) => lowerMessage.includes(trigger));
+}
+
+/**
+ * Search web using Tavily
+ */
+async function searchWeb(query: string): Promise<string> {
+  try {
+    const response = await fetch("https://api.tavily.com/search", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        api_key: process.env.TAVILY_API_KEY,
+        query: query + " cultural creative industries Greece Europe",
+        search_depth: "basic",
+        include_answer: true,
+        max_results: 5,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (data.results && data.results.length > 0) {
+      let searchContext = "LIVE WEB SEARCH RESULTS:\n";
+      if (data.answer) {
+        searchContext += `Summary: ${data.answer}\n\n`;
       }
-    } catch (error) {
-      console.error("Failed to load chats:", error);
-    }
-  };
-
-  const createNewChat = async () => {
-    try {
-      const res = await fetch("/api/chats", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: "Νέο Chat", messages: [] }),
+      searchContext += "Sources:\n";
+      data.results.forEach((r: any, i: number) => {
+        searchContext += `${i + 1}. ${r.title}\n   ${r.content}\n   URL: ${r.url}\n\n`;
       });
-      if (res.ok) {
-        const newChat = await res.json();
-        setChats((prev) => [newChat, ...prev]);
-        setActiveChat(newChat.id);
+      return searchContext;
+    }
+    return "";
+  } catch (e) {
+    console.error("Web search error:", e);
+    return "";
+  }
+}
+
+/**
+ * Friendly, human, non-robotic instructions per mode
+ * - Avoid formal report style
+ * - Keep it practical and specific
+ * - Funding talk only in grants mode (unless user asks explicitly)
+ */
+function modeInstructions(mode: Mode) {
+  const sharedStyle = `
+STYLE (very important):
+- Sound like a helpful colleague/friend (warm, human, not robotic).
+- Avoid formal report headings (no big titles like "Τάσεις στον Τομέα").
+- Use short paragraphs + bullets. No long enumerations.
+- Be concrete (examples, materials, sizes, quick experiments).
+- Ask at most 1–2 clarifying questions, only if needed.
+- Do NOT mention funding unless the user asks about funding/grants.`;
+
+  switch (mode) {
+    case "projects":
+      return `
+CURRENT MODE: PROJECTS
+You are a senior cultural project planner.
+Give a friendly opener, then:
+- 5–8 bullets with a clear plan (timeline milestones, partners, resources/budget notes)
+- A simple next step (one action)
+${sharedStyle}`;
+
+    case "grants":
+      return `
+CURRENT MODE: GRANTS
+You are a grant consultant (EU/Greece/cultural funding).
+Give:
+- 2–3 eligibility questions
+- A short checklist (sections + documents)
+- 1–2 draft-ready text blocks (short)
+If web search exists, include 2–5 opportunities with markdown links.
+${sharedStyle}
+NOTE: Funding is allowed here.`;
+
+    case "impact":
+      return `
+CURRENT MODE: IMPACT
+You are an impact & evaluation specialist for cultural projects.
+Give:
+- A short Theory of Change
+- KPIs (outputs/outcomes/impact) in bullets
+- A measurement plan (how/when/what data)
+- One next step
+${sharedStyle}`;
+
+    case "trends":
+      return `
+CURRENT MODE: TRENDS
+You are a trend analyst for culture & creative industries,
+but respond like a creative partner, not a report.
+For product/market questions (e.g., ceramics), focus on competitiveness:
+- 4–6 relevant market/product trends (short, specific)
+- 3 concrete product directions (with examples: shapes, glazes, price tiers)
+- 1 quick experiment to validate demand this week
+- Ask 1 clarifying question at the end
+${sharedStyle}`;
+
+    default:
+      return `
+CURRENT MODE: CHAT
+You are Axiprova Advisor: warm, practical, human.
+Give actionable bullets + one next step.
+${sharedStyle}`;
+  }
+}
+
+/**
+ * Actions per mode (buttons)
+ * Keep them "human" and useful — not corporate.
+ */
+function actionsByMode(mode: Mode) {
+  switch (mode) {
+    case "projects":
+      return [
+        { type: "create_project_outline", label: "Make a project outline", payload: {} },
+        { type: "draft_content", label: "Draft a partner email", payload: { content_type: "email" } },
+        { type: "draft_content", label: "Draft a press release", payload: { content_type: "press_release" } },
+        { type: "analyze_audience", label: "Who is my audience?", payload: {} },
+      ] as const;
+
+    case "grants":
+      return [
+        { type: "create_grant_checklist", label: "Build an application checklist", payload: {} },
+        { type: "funding_help", label: "Draft Objectives & Activities", payload: { section: "Objectives & Activities" } },
+        { type: "search_web", label: "Search web for open calls", payload: {} },
+        { type: "funding_help", label: "Fix weak points & risks", payload: { section: "Risks & Weak Points" } },
+      ] as const;
+
+    case "impact":
+      return [
+        { type: "create_kpi_plan", label: "Generate KPIs (simple)", payload: {} },
+        { type: "funding_help", label: "Draft a Theory of Change", payload: { section: "Theory of Change" } },
+        { type: "funding_help", label: "Draft an evaluation plan", payload: { section: "Evaluation Plan" } },
+        { type: "analyze_audience", label: "Impact by audience segment", payload: {} },
+      ] as const;
+
+    case "trends":
+      return [
+        { type: "run_trend_scan", label: "Give me 5 trends + 3 ideas", payload: {} },
+        { type: "workshop_ideas", label: "Give me 3 concrete product directions", payload: {} },
+        { type: "analyze_audience", label: "Who would buy this?", payload: {} },
+        { type: "search_web", label: "Search web for trend sources", payload: {} },
+      ] as const;
+
+    default:
+      return [
+        { type: "draft_content", label: "Draft an email", payload: { content_type: "email" } },
+        { type: "generate_titles", label: "Generate titles", payload: { count: 3 } },
+        { type: "analyze_audience", label: "Analyze audience", payload: {} },
+        { type: "analyze_reviews", label: "Analyze reviews", payload: {} },
+      ] as const;
+  }
+}
+
+export async function POST(req: Request) {
+  try {
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    let profileContext = "";
+    let snippetsContext = "";
+    let knowledgeContext = "";
+    let webSearchContext = "";
+
+    // ---------------------------
+    // 1) Load profile + snippets
+    // ---------------------------
+    if (user) {
+      const { data: profile } = await supabase
+        .from("org_profiles")
+        .select("*")
+        .eq("user_id", user.id)
+        .single();
+
+      if (profile) {
+        profileContext = `
+ORGANIZATION PROFILE:
+- Name: ${profile.org_name || "Not set"}
+- Type: ${profile.org_type || "Not set"}
+- Size: ${profile.org_size || "Not set"}
+- Location: ${profile.location || "Not set"}
+- Target Audience: ${profile.target_audience || "Not set"}
+- Main Challenges: ${profile.main_challenges || "Not set"}
+- Goals: ${profile.goals || "Not set"}
+
+Use this profile to personalize advice (only when relevant).
+`;
       }
-    } catch (error) {
-      console.error("Failed to create chat:", error);
-    }
-  };
 
-  const updateChat = async (chatId: string, title: string, messages: Message[]) => {
-    try {
-      await fetch("/api/chats", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: chatId, title, messages }),
-      });
-    } catch (error) {
-      console.error("Failed to update chat:", error);
-    }
-  };
+      const { data: snippets } = await supabase
+        .from("org_snippets")
+        .select("*")
+        .eq("org_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(20);
 
-  const deleteChat = async (chatId: string) => {
-    try {
-      await fetch("/api/chats", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: chatId }),
-      });
-      setChats((prev) => prev.filter((c) => c.id !== chatId));
-      if (activeChat === chatId) setActiveChat(null);
-    } catch (error) {
-      console.error("Failed to delete chat:", error);
-    }
-  };
-
-  const startEditingChat = (chatId: string, currentTitle: string) => {
-    setEditingChatId(chatId);
-    setEditingTitle(currentTitle);
-  };
-
-  const saveEditingChat = async () => {
-    if (editingChatId && editingTitle.trim()) {
-      const chat = chatsRef.current.find((c) => c.id === editingChatId);
-      if (chat) {
-        const nextTitle = editingTitle.trim();
-        await updateChat(editingChatId, nextTitle, chat.messages);
-        setChats((prev) =>
-          prev.map((c) => (c.id === editingChatId ? { ...c, title: nextTitle } : c))
-        );
+      if (snippets && snippets.length > 0) {
+        const reviews = snippets.filter((s) => s.kind === "review");
+        snippetsContext = `
+USER'S DATA:
+REVIEWS (${reviews.length} total):
+${reviews
+  .map((r) => `- [${r.source}, Rating: ${r.rating || "N/A"}] "${r.content}"`)
+  .join("\n")}
+`;
       }
     }
-    setEditingChatId(null);
-    setEditingTitle("");
-  };
 
-  // ✅ STEP 3: SAVE ARTIFACT (the whole point of "Save")
-  const saveArtifact = async (content: string) => {
+    // ---------------------------
+    // 2) Read request
+    // ---------------------------
+    const body = await req.json();
+    const { message, language = "auto", mode = "chat" } = body as {
+      message: string;
+      language?: "auto" | "el" | "en";
+      mode?: Mode;
+    };
+
+    // ---------------------------
+    // 3) Knowledge base search
+    // ---------------------------
     try {
-      const title = content.split("\n").find((l) => l.trim())?.slice(0, 60) || "Saved";
-
-      await fetch("/api/artifacts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mode, title, content }),
+      const { embedding } = await embed({
+        model: openai.embedding("text-embedding-3-small"),
+        value: message,
       });
+
+      const { data: knowledgeResults } = await supabase.rpc("match_knowledge", {
+        query_embedding: embedding,
+        match_threshold: 0.7,
+        match_count: 3,
+      });
+
+      if (knowledgeResults && knowledgeResults.length > 0) {
+        knowledgeContext = `
+EXPERT KNOWLEDGE (use when relevant):
+${knowledgeResults.map((k: any) => `[${k.category}] ${k.content}`).join("\n\n")}
+`;
+      }
     } catch (e) {
-      console.error("Save failed", e);
-    }
-  };
-
-  const handleSubmit = async (text?: string) => {
-    const message = (text ?? input).trim();
-    if (!message) return;
-
-    let chatId = activeChat;
-    let isNewChat = false;
-
-    if (!chatId) {
-      try {
-        const res = await fetch("/api/chats", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title: message.slice(0, 25), messages: [] }),
-        });
-        if (res.ok) {
-          const newChat = await res.json();
-          setChats((prev) => [newChat, ...prev]);
-          setActiveChat(newChat.id);
-          chatId = newChat.id;
-          isNewChat = true;
-        }
-      } catch (error) {
-        console.error("Failed to create chat:", error);
-        return;
-      }
+      console.log("Knowledge search skipped:", e);
     }
 
-    const userMessage: Message = { role: "user", content: message };
-    const updatedMessages = [...(isNewChat ? [] : messages), userMessage];
-
-    setChats((prev) =>
-      prev.map((chat) => (chat.id === chatId ? { ...chat, messages: updatedMessages } : chat))
-    );
-
-    setInput("");
-    setLoading(true);
-
-    try {
-      const res = await fetch("/api/ai/copilot", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message, language: "auto", mode }),
-      });
-
-      const data = await res.json();
-
-      const assistantMessage: Message = {
-        role: "assistant",
-        content: data?.reply ?? "",
-        insights: Array.isArray(data?.insights) ? data.insights : [],
-        actions: Array.isArray(data?.actions) ? data.actions : [],
-      };
-
-      const finalMessages = [...updatedMessages, assistantMessage];
-
-      setChats((prev) =>
-        prev.map((chat) => (chat.id === chatId ? { ...chat, messages: finalMessages } : chat))
-      );
-
-      const chatNow = chatsRef.current.find((c) => c.id === chatId);
-      await updateChat(chatId!, chatNow?.title || message.slice(0, 25), finalMessages);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
+    // ---------------------------
+    // 4) Web search (when needed)
+    // ---------------------------
+    if (needsWebSearch(message, mode)) {
+      webSearchContext = await searchWeb(message);
     }
-  };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSubmit();
-    }
-  };
+    // ---------------------------
+    // 5) Language detect
+    // ---------------------------
+    const detectedLanguage =
+      language === "auto"
+        ? /[\u0370-\u03FF\u1F00-\u1FFF]/.test(message)
+          ? "el"
+          : "en"
+        : language;
 
-  return (
-    <div className="h-screen bg-zinc-950 text-white flex overflow-hidden">
-      {/* Sidebar */}
-      <div className="w-64 bg-black border-r border-zinc-800 flex flex-col">
-        <div className="p-4 border-b border-zinc-800">
-          <button
-            onClick={createNewChat}
-            className="w-full py-2 px-4 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2"
-          >
-            + Νέο Chat
-          </button>
-        </div>
+    const langName = detectedLanguage === "el" ? "Greek" : "English";
 
-        <nav className="flex-1 overflow-y-auto p-2">
-          {menuItems.map((item) => {
-            const isActive = item.kind === "mode" ? mode === item.id : false;
+    const noProfileMessage = !profileContext
+      ? "\n\nNOTE: User hasn't set up their profile yet. Encourage them to visit /dashboard/profile."
+      : "";
 
-            return (
-              <button
-                key={item.label}
-                onClick={() => {
-                  if (item.kind === "link") {
-                    router.push(item.href);
-                    return;
-                  }
-                  setMode(item.id);
-                }}
-                className={`w-full text-left px-3 py-2 rounded-lg mb-1 flex items-center gap-3 transition ${
-                  isActive ? "bg-zinc-800 text-white" : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
-                }`}
-              >
-                <img
-                  src={item.icon}
-                  alt=""
-                  className="w-5 h-5"
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).style.display = "none";
-                  }}
-                />
-                <span className="text-sm">{item.label}</span>
-              </button>
-            );
-          })}
+    const webSearchInstructions = webSearchContext
+      ? `\n\nWEB SEARCH INSTRUCTIONS:
+- You have live search results below with ACTUAL URLs.
+- ALWAYS include clickable links in markdown: [Name](https://url.com)
+- Use web results only when they truly help the user's question.`
+      : "";
 
-          {chats.length > 0 && (
-            <div className="mt-4 pt-4 border-t border-zinc-800">
-              <p className="text-xs text-zinc-600 px-3 mb-2">RECENT CHATS</p>
+    // ---------------------------
+    // 6) System prompt (friendly)
+    // ---------------------------
+    const systemPrompt = `You are Axiprova — an expert AI advisor for culture & the creative industries.
 
-              {chats.map((chat) => (
-                <div key={chat.id} className="relative group">
-                  {editingChatId === chat.id ? (
-                    <input
-                      type="text"
-                      value={editingTitle}
-                      onChange={(e) => setEditingTitle(e.target.value)}
-                      onBlur={saveEditingChat}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") saveEditingChat();
-                      }}
-                      autoFocus
-                      className="w-full px-3 py-2 bg-zinc-800 text-white rounded-lg text-sm border border-zinc-600 focus:outline-none"
-                    />
-                  ) : (
-                    <div className="flex items-center">
-                      <button
-                        onClick={() => setActiveChat(chat.id)}
-                        onDoubleClick={() => startEditingChat(chat.id, chat.title)}
-                        className={`flex-1 text-left px-3 py-2 rounded-lg text-sm truncate transition ${
-                          activeChat === chat.id ? "bg-zinc-800 text-white" : "text-zinc-500 hover:bg-zinc-900"
-                        }`}
-                      >
-                        {chat.title}
-                      </button>
+RESPOND ONLY IN ${langName}. NEVER mix languages.
 
-                      <button
-                        onClick={() => deleteChat(chat.id)}
-                        className="opacity-0 group-hover:opacity-100 px-2 text-zinc-600 hover:text-red-500 transition"
-                        aria-label="Delete chat"
-                        title="Delete chat"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </nav>
-      </div>
+CORE BEHAVIOR:
+- Sound like a real helpful colleague/friend (warm, human).
+- Avoid robotic templates and corporate report tone.
+- Be specific, practical, and short.
+- Ask at most 1–2 clarifying questions when needed.
+- Do NOT mention funding unless the user asks, except in GRANTS mode.
 
-      {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col">
-        {/* Mode header */}
-        <div className="border-b border-zinc-800 bg-zinc-950 px-6 py-4">
-          <div className="max-w-6xl mx-auto flex items-start justify-between gap-4">
-            <div>
-              <div className="text-sm text-zinc-300">
-                <span className="text-zinc-500">Mode:</span> {modeLabel[mode]}
-              </div>
-              <div className="text-xs text-zinc-500 mt-1">{modeHint[mode]}</div>
-            </div>
+${modeInstructions(mode)}
 
-            {/* Quick tools (small) */}
-            <div className="flex gap-2 flex-wrap justify-end">
-              {quickTools[mode].slice(0, 2).map((t, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => handleSubmit(t.prompt)}
-                  className="px-3 py-2 text-xs bg-zinc-900 text-zinc-300 border border-zinc-800 rounded-lg hover:bg-zinc-800 hover:text-white transition"
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
+${profileContext}
+${snippetsContext}
+${knowledgeContext}
+${webSearchContext}
+${noProfileMessage}
+${webSearchInstructions}
 
-        {messages.length === 0 ? (
-          <div className="flex-1 flex flex-col items-center justify-center px-6">
-            <img src="/axiprova-icon.png" alt="Axiprova" className="w-20 h-20 mb-4" />
-            <h1 className="text-xl font-light text-zinc-300 mb-1">Axiprova</h1>
-            <p className="text-zinc-500 text-center mb-6">
-              Ο AI σύμβουλός σου για τον πολιτισμό & τη δημιουργική βιομηχανία
-            </p>
+OUTPUT RULES:
+- Write naturally (like a helpful colleague), not like a formal report.
+- Prefer short paragraphs + bullets (max ~10 bullets total).
+- Avoid generic phrases and avoid repetitive templates.
+- Provide 2–5 action button ideas (the system will show buttons).`;
 
-            <div className="flex flex-wrap justify-center gap-2 mb-6 max-w-2xl">
-              {suggestions.map((s, i) => (
-                <button
-                  key={i}
-                  onClick={() => handleSubmit(s)}
-                  className="px-4 py-2 text-sm bg-zinc-900 text-zinc-400 border border-zinc-800 rounded-full hover:bg-zinc-800 hover:text-white transition"
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
+    // ---------------------------
+    // 7) Call model (structured)
+    // ---------------------------
+    const result = await streamObject({
+      model: openai("gpt-4o-2024-08-06"),
+      schema: CopilotOutputSchema,
+      prompt:
+        systemPrompt +
+        `
 
-            <div className="w-full max-w-2xl flex gap-3">
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Ρώτησε οτιδήποτε..."
-                className="flex-1 bg-zinc-900 text-white px-4 py-3 rounded-xl border border-zinc-800 focus:outline-none focus:border-zinc-600 placeholder-zinc-600"
-              />
-              <button
-                onClick={() => handleSubmit()}
-                disabled={loading || !input.trim()}
-                className="px-6 py-3 bg-white text-black font-medium rounded-xl hover:bg-zinc-200 disabled:opacity-50 transition"
-              >
-                Στείλε
-              </button>
-            </div>
-          </div>
-        ) : (
-          <>
-            <div className="flex-1 overflow-y-auto px-6 py-4">
-              <div className="max-w-6xl mx-auto flex gap-6">
-                {/* Left: Messages */}
-                <div className="flex-1 max-w-2xl">
-                  {messages.map((msg, i) => (
-                    <div key={i} className="mb-6">
-                      {msg.role === "user" ? (
-                        <div className="flex justify-end">
-                          <div className="bg-zinc-800 text-white px-4 py-3 rounded-2xl rounded-br-md max-w-lg">
-                            {msg.content}
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex gap-3">
-                          <img src="/axiprova-icon.png" alt="AI" className="w-8 h-8 flex-shrink-0 mt-1" />
-                          <div className="flex-1 space-y-4">
-                            <div className="text-zinc-200 leading-relaxed prose prose-invert prose-sm max-w-none">
-                              <ReactMarkdown
-                                components={{
-                                  a: ({ href, children, ...props }) => (
-                                    <a
-                                      href={href}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-blue-400 hover:text-blue-300 underline"
-                                      {...props}
-                                    >
-                                      {children}
-                                    </a>
-                                  ),
-                                }}
-                              >
-                                {msg.content}
-                              </ReactMarkdown>
-                            </div>
+Return actions that match the current mode.
+Mode actions available: ${JSON.stringify(actionsByMode(mode))}
 
-                            {/* ✅ SAVE BUTTON under every assistant reply */}
-                            <div className="flex gap-2">
-                              <button
-                                onClick={() => saveArtifact(msg.content)}
-                                className="px-3 py-1.5 text-sm bg-zinc-900 text-zinc-300 border border-zinc-700 rounded-full hover:bg-zinc-800 hover:text-white transition"
-                              >
-                                Save
-                              </button>
-                            </div>
+User: ${message}`,
+    });
 
-                            {msg.insights && msg.insights.length > 0 && (
-                              <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4">
-                                <p className="text-zinc-500 text-xs uppercase mb-2">Insights</p>
-                                <ul className="space-y-1">
-                                  {msg.insights.map((insight, j) => (
-                                    <li key={j} className="text-zinc-400 text-sm flex items-start">
-                                      <span className="text-blue-400 mr-2">→</span>
-                                      {insight}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
-
-                            {msg.actions && msg.actions.length > 0 && (
-                              <div className="flex flex-wrap gap-2">
-                                {msg.actions.map((action, j) => (
-                                  <button
-                                    key={j}
-                                    onClick={() => handleSubmit(action.label)}
-                                    className="px-3 py-1.5 text-sm bg-zinc-900 text-zinc-400 border border-zinc-700 rounded-full hover:bg-zinc-800 hover:text-white transition"
-                                  >
-                                    {action.label}
-                                  </button>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-
-                  {loading && (
-                    <div className="flex gap-3 mb-6">
-                      <img src="/axiprova-icon.png" alt="AI" className="w-8 h-8 flex-shrink-0" />
-                      <div className="text-zinc-500">Σκέφτομαι...</div>
-                    </div>
-                  )}
-
-                  <div ref={messagesEndRef} />
-                </div>
-
-                {/* Right: Tool Panel (desktop only) */}
-                <div className="w-80 hidden lg:block">
-                  <div className="sticky top-4">
-                    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
-                      <p className="text-zinc-500 text-xs uppercase mb-3">Quick Tools</p>
-                      <div className="space-y-2">
-                        {quickTools[mode].map((t, idx) => (
-                          <button
-                            key={idx}
-                            onClick={() => handleSubmit(t.prompt)}
-                            className="w-full text-left px-3 py-2 text-sm bg-zinc-950 text-zinc-300 border border-zinc-800 rounded-lg hover:bg-zinc-800 hover:text-white transition"
-                          >
-                            {t.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Input */}
-            <div className="border-t border-zinc-800 bg-zinc-950 px-6 py-4">
-              <div className="max-w-2xl mx-auto flex gap-3">
-                <input
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Ρώτησε οτιδήποτε..."
-                  className="flex-1 bg-zinc-900 text-white px-4 py-3 rounded-xl border border-zinc-800 focus:outline-none focus:border-zinc-600 placeholder-zinc-600"
-                />
-                <button
-                  onClick={() => handleSubmit()}
-                  disabled={loading || !input.trim()}
-                  className="px-6 py-3 bg-white text-black font-medium rounded-xl hover:bg-zinc-200 disabled:opacity-50 transition"
-                >
-                  Στείλε
-                </button>
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-    </div>
-  );
+    return result.toTextStreamResponse();
+  } catch (error: any) {
+    console.error("Copilot error:", error);
+    return Response.json({ error: error.message }, { status: 500 });
+  }
 }
