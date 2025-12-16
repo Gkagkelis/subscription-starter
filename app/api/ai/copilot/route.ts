@@ -61,12 +61,42 @@ function needsWebSearch(message: string, mode: Mode): boolean {
   if (mode === "grants" || mode === "trends") return true;
 
   const triggers = [
-    "επιχορήγηση","επιχορηγήσεις","χρηματοδότηση","προκήρυξη","προκηρύξεις",
-    "deadline","προθεσμία","προθεσμίες","τρέχουσες","τρέχοντα","νέες","νέα",
-    "ανοιχτές","ανοιχτά","2024","2025","τώρα","σήμερα","φέτος",
-    "creative europe","ελλάδα","υπουργείο πολιτισμού","εσπα",
-    "grant","grants","funding","current","open call","open calls","apply",
-    "application","opportunity","latest","recent","new","available",
+    "επιχορήγηση",
+    "επιχορηγήσεις",
+    "χρηματοδότηση",
+    "προκήρυξη",
+    "προκηρύξεις",
+    "deadline",
+    "προθεσμία",
+    "προθεσμίες",
+    "τρέχουσες",
+    "τρέχοντα",
+    "νέες",
+    "νέα",
+    "ανοιχτές",
+    "ανοιχτά",
+    "2024",
+    "2025",
+    "τώρα",
+    "σήμερα",
+    "φέτος",
+    "creative europe",
+    "ελλάδα",
+    "υπουργείο πολιτισμού",
+    "εσπα",
+    "grant",
+    "grants",
+    "funding",
+    "current",
+    "open call",
+    "open calls",
+    "apply",
+    "application",
+    "opportunity",
+    "latest",
+    "recent",
+    "new",
+    "available",
   ];
   const lower = message.toLowerCase();
   return triggers.some((t) => lower.includes(t));
@@ -211,7 +241,9 @@ function actionsByMode(mode: Mode) {
 export async function POST(req: Request) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     let profileContext = "";
     let snippetsContext = "";
@@ -255,12 +287,36 @@ ${reviews.map((r) => `- [${r.source}, Rating: ${r.rating || "N/A"}] "${r.content
       }
     }
 
+    // ✅ Step 2B (1): body parsing with action + context
     const body = await req.json();
-    const { message, language = "auto", mode = "chat" } = body as {
+    const {
+      message,
+      language = "auto",
+      mode = "chat",
+      action,
+      context,
+    } = body as {
       message: string;
       language?: "auto" | "el" | "en";
       mode?: Mode;
+      action?: { type: string; label: string; payload?: any };
+      context?: { lastAssistantMessage?: string };
     };
+
+    // ✅ Step 2B (2): action-aware input
+    const lastAssistant = context?.lastAssistantMessage?.trim() || "";
+
+    const actionContext =
+      action && action.type !== "generic"
+        ? `
+USER CLICKED ACTION:
+- type: ${action.type}
+- label: ${action.label}
+- payload: ${JSON.stringify(action.payload ?? {})}
+PREVIOUS ASSISTANT MESSAGE (context):
+${lastAssistant ? lastAssistant : "(none)"}
+`
+        : "";
 
     // Knowledge search
     try {
@@ -332,16 +388,17 @@ OUTPUT RULES:
 - Provide 2–5 action buttons.
 - language_detected must match the detected language.`;
 
+    // ✅ finalPrompt includes actionContext
+    const finalPrompt = systemPrompt + "\n" + actionContext + "\nUser: " + message;
+
     const { object } = await generateObject({
       model: openai("gpt-4o-2024-08-06"),
       schema: CopilotOutputSchema,
       prompt:
-        systemPrompt +
+        finalPrompt +
         `
 
-Mode actions available: ${JSON.stringify(actionsByMode(mode))}
-
-User: ${message}`,
+Mode actions available: ${JSON.stringify(actionsByMode(mode))}`,
     });
 
     // Ensure actions always exist (UI expects array)
