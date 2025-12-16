@@ -53,7 +53,7 @@ export default function CopilotPage() {
   }, [messages, loading]);
 
   const modeLabel: Record<Mode, string> = {
-    chat: "Axiprova Copilot",
+    chat: "Axiprova Advisor",
     projects: "Projects Mode",
     grants: "Grant Finder Mode",
     impact: "Impact Predictor Mode",
@@ -61,7 +61,7 @@ export default function CopilotPage() {
   };
 
   const modeHint: Record<Mode, string> = {
-    chat: "Γράψε ελεύθερα — ο Copilot θα σε βοηθήσει.",
+    chat: "Γράψε ελεύθερα — το Axiprova θα σε βοηθήσει.",
     projects: "Οργάνωση project: στόχος, κοινό, timeline, συνεργάτες, budget notes.",
     grants: "Χρηματοδοτήσεις: eligibility, shortlist, checklist, sections αίτησης.",
     impact: "Impact & KPIs: theory of change, δείκτες, evaluation plan.",
@@ -119,7 +119,7 @@ export default function CopilotPage() {
     | { id: Mode; icon: string; label: string; kind: "mode" }
     | { id: "data"; icon: string; label: string; kind: "link"; href: string }
   > = [
-    { id: "chat", icon: "/chat_logo.png", label: "Copilot", kind: "mode" },
+    { id: "chat", icon: "/chat_logo.png", label: "Advisor", kind: "mode" },
     { id: "data", icon: "/my_data_logo.png", label: "My Data", kind: "link", href: "/dashboard/data" },
     { id: "projects", icon: "/project_logo.png", label: "Projects", kind: "mode" },
     { id: "grants", icon: "/Grand_Finder.png", label: "Grant Finder", kind: "mode" },
