@@ -5,7 +5,7 @@ import { createClient } from "@/utils/supabase/server";
 
 type Mode = "chat" | "projects" | "grants" | "impact" | "trends";
 
-/** ✅ Adds Smart Assist chips support via set_context */
+/** ✅ Actions schema (includes Smart Assist chips: set_context) */
 const ActionSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("create_project_outline"), label: z.string(), payload: z.object({}) }),
   z.object({ type: z.literal("create_grant_checklist"), label: z.string(), payload: z.object({}) }),
@@ -50,7 +50,7 @@ const ActionSchema = z.discriminatedUnion("type", [
     payload: z.object({ query: z.string().optional() }),
   }),
 
-  // ✅ Smart Assist: chips that write to session context
+  // ✅ Smart Assist chips (writes to sessionContext in UI)
   z.object({
     type: z.literal("set_context"),
     label: z.string(),
@@ -58,10 +58,7 @@ const ActionSchema = z.discriminatedUnion("type", [
   }),
 ]);
 
-/**
- * ✅ Output schema:
- * - actions defaults to [] so UI never crashes if model returns none.
- */
+/** ✅ Model output schema */
 const CopilotOutputSchema = z.object({
   reply: z.string(),
   insights: z.array(z.string()).optional(),
@@ -400,8 +397,9 @@ ${reviews.map((r) => `- [${r.source}, Rating: ${r.rating || "N/A"}] "${r.content
     }
 
     /**
-     * ✅ Smart Assist: parse body including sessionContext (new) + keep old context for compatibility.
-     * UI sends: { message, language, mode, sessionContext } and optionally { action } on chips.
+     * ✅ 2B: Body parsing with sessionContext + action
+     * UI sends: { message, language, mode, sessionContext } and optionally { action }.
+     * We keep legacy `context` too.
      */
     const body = await req.json();
     const {
@@ -420,10 +418,36 @@ ${reviews.map((r) => `- [${r.source}, Rating: ${r.rating || "N/A"}] "${r.content
       context?: { lastAssistantMessage?: string };
     };
 
-    // ✅ Put sessionContext into the prompt in a stable way
+    // ✅ Session context block (sent by UI and updated via chips)
     const ctxBlock =
       sessionContext && Object.keys(sessionContext).length > 0
         ? `\nSESSION CONTEXT:\n${JSON.stringify(sessionContext, null, 2)}\n`
+        : "";
+
+    // --- Smart Assist missing keys (Trend Radar) ---
+    const missingTrendKeys: Array<"market" | "price_tier" | "style"> = [];
+    if (mode === "trends") {
+      const hasMarket = !!sessionContext?.market;
+      const hasPrice = !!sessionContext?.price_tier;
+      const hasStyle = !!sessionContext?.style;
+
+      if (!hasMarket) missingTrendKeys.push("market");
+      if (!hasPrice) missingTrendKeys.push("price_tier");
+      if (!hasStyle) missingTrendKeys.push("style");
+    }
+
+    const trendChipsInstruction =
+      mode === "trends" && missingTrendKeys.length > 0
+        ? `
+TREND RADAR — CONTEXT NEEDED (chips):
+Missing keys: ${missingTrendKeys.join(", ")}.
+- Give a helpful partial answer first.
+- Ask at most ONE clarifying question total.
+- Also return set_context chips to lock missing context:
+  - market chips: Instagram / Retail / Wholesale (payloads: { "market":"instagram" }, { "market":"retail" }, { "market":"wholesale" })
+  - price chips: Low / Mid / Premium (payloads: { "price_tier":"low" }, { "price_tier":"mid" }, { "price_tier":"premium" })
+  - style chips: Minimal / Colorful / Experimental (payloads: { "style":"minimal" }, { "style":"colorful" }, { "style":"experimental" })
+Return these chips when the key is missing from SESSION CONTEXT.`
         : "";
 
     // Decide if we must ask for country first (ONLY for grants/trends)
@@ -516,19 +540,22 @@ CORE BEHAVIOR:
 - Warm, human, like a real colleague/friend.
 - Avoid robotic templates and corporate report tone.
 - Be specific and practical.
-- Ask at most ONE clarifying question (max 1).
+- Ask at most ONE clarifying question total.
 - Do NOT mention funding unless the user asks, except in GRANTS mode.
 
 SMART ASSIST (chips):
 When key info is missing:
 - Give a helpful partial answer first (do not refuse).
 - Ask at most ONE clarifying question.
-- Also return 3–5 quick "set_context" actions (chips) with short labels.
+- Also return quick "set_context" actions (chips) with short labels.
+- In Smart Assist (set_context), you may return up to 9 chips (e.g., 3 market + 3 price + 3 style).
 
 Examples (payload):
 - { "market": "instagram" } / { "market": "retail" } / { "market": "wholesale" }
 - { "price_tier": "low" } / "mid" / "premium"
 - { "style": "minimal" } / "colorful" / "experimental"
+
+${trendChipsInstruction}
 
 ${modeInstructions(mode)}
 
@@ -544,7 +571,7 @@ OUTPUT RULES:
 - Natural voice (not a formal report).
 - Short paragraphs + bullets (max ~10 bullets).
 - Avoid repetitive templates.
-- Return 2–5 action buttons.
+- Return 2–5 action buttons normally.
 - Actions MUST match the provided Zod schema.
 - language_detected must match the detected language.`;
 
@@ -558,7 +585,11 @@ OUTPUT RULES:
         finalPrompt +
         `
 
-Mode actions available: ${JSON.stringify(actionsByMode(mode))}`,
+ACTIONS:
+- You may return any actions that match the Zod schema.
+- In addition to the mode actions below, you MAY return "set_context" chips when you need missing info.
+
+Mode actions (optional): ${JSON.stringify(actionsByMode(mode))}`,
     });
 
     // Ensure actions always exist (UI expects array)
@@ -569,8 +600,7 @@ Mode actions available: ${JSON.stringify(actionsByMode(mode))}`,
       actions:
         Array.isArray(object.actions) && object.actions.length > 0
           ? object.actions
-          : // If model returned none, provide sane defaults
-            (fallbackActions as unknown as Array<z.infer<typeof ActionSchema>>),
+          : (fallbackActions as unknown as Array<z.infer<typeof ActionSchema>>),
     };
 
     return Response.json(safe);
