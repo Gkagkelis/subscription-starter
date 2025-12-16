@@ -32,7 +32,7 @@ export default function CopilotPage() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // ✅ The key change: tools are MODES inside the same chat UI
+  // Modes for specialized behavior
   const [mode, setMode] = useState<Mode>("chat");
 
   const [editingChatId, setEditingChatId] = useState<string | null>(null);
@@ -54,10 +54,10 @@ export default function CopilotPage() {
 
   const modeLabel: Record<Mode, string> = {
     chat: "Axiprova Advisor",
-    projects: "Projects Mode",
-    grants: "Grant Finder Mode",
-    impact: "Impact Predictor Mode",
-    trends: "Trend Radar Mode",
+    projects: "Projects",
+    grants: "Grants",
+    impact: "Impact",
+    trends: "Trends",
   };
 
   const modeHint: Record<Mode, string> = {
@@ -100,7 +100,6 @@ export default function CopilotPage() {
   };
 
   const suggestions = useMemo(() => {
-    // Small, friendly starter prompts (Greek UI, English output can be handled server-side if you want)
     switch (mode) {
       case "projects":
         return ["Θέλω να οργανώσω έκθεση", "Φτιάξε μου project outline", "Γράψε περιγραφή project", "Βοήθησέ με με timeline"];
@@ -150,7 +149,6 @@ export default function CopilotPage() {
         const newChat = await res.json();
         setChats((prev) => [newChat, ...prev]);
         setActiveChat(newChat.id);
-        // stay in chat UI; mode remains whatever user selected
       }
     } catch (error) {
       console.error("Failed to create chat:", error);
@@ -203,6 +201,21 @@ export default function CopilotPage() {
     setEditingTitle("");
   };
 
+  // ✅ STEP 3: SAVE ARTIFACT (the whole point of "Save")
+  const saveArtifact = async (content: string) => {
+    try {
+      const title = content.split("\n").find((l) => l.trim())?.slice(0, 60) || "Saved";
+
+      await fetch("/api/artifacts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mode, title, content }),
+      });
+    } catch (e) {
+      console.error("Save failed", e);
+    }
+  };
+
   const handleSubmit = async (text?: string) => {
     const message = (text ?? input).trim();
     if (!message) return;
@@ -210,7 +223,6 @@ export default function CopilotPage() {
     let chatId = activeChat;
     let isNewChat = false;
 
-    // Create a chat if none active
     if (!chatId) {
       try {
         const res = await fetch("/api/chats", {
@@ -234,7 +246,6 @@ export default function CopilotPage() {
     const userMessage: Message = { role: "user", content: message };
     const updatedMessages = [...(isNewChat ? [] : messages), userMessage];
 
-    // Optimistic UI update
     setChats((prev) =>
       prev.map((chat) => (chat.id === chatId ? { ...chat, messages: updatedMessages } : chat))
     );
@@ -246,7 +257,6 @@ export default function CopilotPage() {
       const res = await fetch("/api/ai/copilot", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        // ✅ send mode so backend can be specialized
         body: JSON.stringify({ message, language: "auto", mode }),
       });
 
@@ -296,8 +306,7 @@ export default function CopilotPage() {
 
         <nav className="flex-1 overflow-y-auto p-2">
           {menuItems.map((item) => {
-            const isActive =
-              item.kind === "mode" ? mode === item.id : false;
+            const isActive = item.kind === "mode" ? mode === item.id : false;
 
             return (
               <button
@@ -310,9 +319,7 @@ export default function CopilotPage() {
                   setMode(item.id);
                 }}
                 className={`w-full text-left px-3 py-2 rounded-lg mb-1 flex items-center gap-3 transition ${
-                  isActive
-                    ? "bg-zinc-800 text-white"
-                    : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
+                  isActive ? "bg-zinc-800 text-white" : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
                 }`}
               >
                 <img
@@ -352,9 +359,7 @@ export default function CopilotPage() {
                         onClick={() => setActiveChat(chat.id)}
                         onDoubleClick={() => startEditingChat(chat.id, chat.title)}
                         className={`flex-1 text-left px-3 py-2 rounded-lg text-sm truncate transition ${
-                          activeChat === chat.id
-                            ? "bg-zinc-800 text-white"
-                            : "text-zinc-500 hover:bg-zinc-900"
+                          activeChat === chat.id ? "bg-zinc-800 text-white" : "text-zinc-500 hover:bg-zinc-900"
                         }`}
                       >
                         {chat.title}
@@ -377,7 +382,7 @@ export default function CopilotPage() {
         </nav>
       </div>
 
-      {/* Main Chat Area (always chat UI) */}
+      {/* Main Chat Area */}
       <div className="flex-1 flex flex-col">
         {/* Mode header */}
         <div className="border-b border-zinc-800 bg-zinc-950 px-6 py-4">
@@ -389,7 +394,7 @@ export default function CopilotPage() {
               <div className="text-xs text-zinc-500 mt-1">{modeHint[mode]}</div>
             </div>
 
-            {/* Quick tools for mobile/tablet (simple & friendly) */}
+            {/* Quick tools (small) */}
             <div className="flex gap-2 flex-wrap justify-end">
               {quickTools[mode].slice(0, 2).map((t, idx) => (
                 <button
@@ -404,7 +409,6 @@ export default function CopilotPage() {
           </div>
         </div>
 
-        {/* Content */}
         {messages.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center px-6">
             <img src="/axiprova-icon.png" alt="Axiprova" className="w-20 h-20 mb-4" />
@@ -459,11 +463,7 @@ export default function CopilotPage() {
                         </div>
                       ) : (
                         <div className="flex gap-3">
-                          <img
-                            src="/axiprova-icon.png"
-                            alt="AI"
-                            className="w-8 h-8 flex-shrink-0 mt-1"
-                          />
+                          <img src="/axiprova-icon.png" alt="AI" className="w-8 h-8 flex-shrink-0 mt-1" />
                           <div className="flex-1 space-y-4">
                             <div className="text-zinc-200 leading-relaxed prose prose-invert prose-sm max-w-none">
                               <ReactMarkdown
@@ -483,6 +483,16 @@ export default function CopilotPage() {
                               >
                                 {msg.content}
                               </ReactMarkdown>
+                            </div>
+
+                            {/* ✅ SAVE BUTTON under every assistant reply */}
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => saveArtifact(msg.content)}
+                                className="px-3 py-1.5 text-sm bg-zinc-900 text-zinc-300 border border-zinc-700 rounded-full hover:bg-zinc-800 hover:text-white transition"
+                              >
+                                Save
+                              </button>
                             </div>
 
                             {msg.insights && msg.insights.length > 0 && (
