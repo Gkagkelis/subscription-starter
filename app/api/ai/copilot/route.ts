@@ -5,7 +5,7 @@ import { generateObject, embed } from "ai";
 import { z } from "zod";
 import { createClient } from "@/utils/supabase/server";
 
-export const runtime = "nodejs" as const; // 'nodejs' | 'edge'
+export const runtime = "nodejs" as const;
 export const dynamic = "force-dynamic" as const;
 
 type Mode = "chat" | "projects" | "grants" | "impact" | "trends";
@@ -75,6 +75,7 @@ const CopilotOutputSchema = z.object({
 
 function needsWebSearch(message: string, mode: Mode): boolean {
   if (mode === "grants" || mode === "trends") return true;
+
   const triggers = [
     "επιχορήγηση",
     "επιχορηγήσεις",
@@ -136,7 +137,7 @@ function isCountryKnown(message: string, profileLocation?: string): boolean {
 
 async function searchWeb(query: string): Promise<string> {
   const apiKey = process.env.TAVILY_API_KEY;
-  if (!apiKey) return ""; // μην σκάει build/runtime αν λείπει env
+  if (!apiKey) return "";
 
   try {
     const response = await fetch("https://api.tavily.com/search", {
@@ -166,6 +167,34 @@ async function searchWeb(query: string): Promise<string> {
   } catch (e) {
     console.error("Web search error:", e);
     return "";
+  }
+}
+
+function modeChipGuidance(mode: Mode) {
+  switch (mode) {
+    case "trends":
+      return `
+CHIPS GUIDANCE (TRENDS):
+When info is missing, prefer set_context chips for:
+- market: instagram / retail / wholesale
+- price_tier: low / mid / premium
+- style: minimal / colorful / experimental`;
+    case "grants":
+      return `
+CHIPS GUIDANCE (GRANTS):
+When info is missing, prefer set_context chips for:
+- organization_type: ngo / artist / venue / festival
+- project_scale: small / medium / large
+- timeline: 1–3 months / 3–6 / 6–12`;
+    case "projects":
+      return `
+CHIPS GUIDANCE (PROJECTS):
+When info is missing, prefer set_context chips for:
+- format: exhibition / festival / workshops
+- team_size: solo / small team / org
+- deadline: soon / this quarter / this year`;
+    default:
+      return "";
   }
 }
 
@@ -273,49 +302,88 @@ function actionsByMode(mode: Mode) {
   }
 }
 
-function ensureTrendContextChips(
+/**
+ * ✅ Enforces “magic consistency”:
+ * Always add missing set_context chips per mode (3–5 classic dimensions),
+ * regardless of whether the model returned them.
+ */
+function ensureModeContextChips(
+  mode: Mode,
   actions: CopilotAction[],
   sessionContext: Record<string, any> | undefined
 ): CopilotAction[] {
   const ctx = sessionContext ?? {};
-  const needsMarket = !ctx.market;
-  const needsPrice = !ctx.price_tier;
-  const needsStyle = !ctx.style;
-
-  if (!needsMarket && !needsPrice && !needsStyle) return actions;
-
-  const hasChip = (payload: Record<string, any>) =>
-    actions.some((a) => a.type === "set_context" && JSON.stringify(a.payload ?? {}) === JSON.stringify(payload));
-
   const chips: CopilotAction[] = [];
 
-  if (needsMarket) {
-    const marketChips: CopilotAction[] = [
-      { type: "set_context", label: "Instagram", payload: { market: "instagram" } },
-      { type: "set_context", label: "Retail", payload: { market: "retail" } },
-      { type: "set_context", label: "Wholesale", payload: { market: "wholesale" } },
-    ];
-    for (const c of marketChips) if (!hasChip(c.payload)) chips.push(c);
+  const addIfMissing = (key: string, options: Array<{ label: string; payload: Record<string, any> }>) => {
+    const current = ctx[key];
+    const hasValue = current !== undefined && current !== null && String(current).trim() !== "";
+    if (hasValue) return;
+
+    const alreadyHas = (payload: Record<string, any>) =>
+      actions.some((a) => a.type === "set_context" && JSON.stringify(a.payload ?? {}) === JSON.stringify(payload));
+
+    for (const opt of options) {
+      if (!alreadyHas(opt.payload)) chips.push({ type: "set_context", label: opt.label, payload: opt.payload });
+    }
+  };
+
+  if (mode === "trends") {
+    addIfMissing("market", [
+      { label: "Instagram", payload: { market: "instagram" } },
+      { label: "Retail", payload: { market: "retail" } },
+      { label: "Wholesale", payload: { market: "wholesale" } },
+    ]);
+    addIfMissing("price_tier", [
+      { label: "Low", payload: { price_tier: "low" } },
+      { label: "Mid", payload: { price_tier: "mid" } },
+      { label: "Premium", payload: { price_tier: "premium" } },
+    ]);
+    addIfMissing("style", [
+      { label: "Minimal", payload: { style: "minimal" } },
+      { label: "Colorful", payload: { style: "colorful" } },
+      { label: "Experimental", payload: { style: "experimental" } },
+    ]);
   }
 
-  if (needsPrice) {
-    const priceChips: CopilotAction[] = [
-      { type: "set_context", label: "Low", payload: { price_tier: "low" } },
-      { type: "set_context", label: "Mid", payload: { price_tier: "mid" } },
-      { type: "set_context", label: "Premium", payload: { price_tier: "premium" } },
-    ];
-    for (const c of priceChips) if (!hasChip(c.payload)) chips.push(c);
+  if (mode === "grants") {
+    addIfMissing("organization_type", [
+      { label: "NGO", payload: { organization_type: "ngo" } },
+      { label: "Artist", payload: { organization_type: "artist" } },
+      { label: "Venue", payload: { organization_type: "venue" } },
+      { label: "Festival", payload: { organization_type: "festival" } },
+    ]);
+    addIfMissing("project_scale", [
+      { label: "Small", payload: { project_scale: "small" } },
+      { label: "Medium", payload: { project_scale: "medium" } },
+      { label: "Large", payload: { project_scale: "large" } },
+    ]);
+    addIfMissing("timeline", [
+      { label: "1–3 months", payload: { timeline: "1-3" } },
+      { label: "3–6 months", payload: { timeline: "3-6" } },
+      { label: "6–12 months", payload: { timeline: "6-12" } },
+    ]);
   }
 
-  if (needsStyle) {
-    const styleChips: CopilotAction[] = [
-      { type: "set_context", label: "Minimal", payload: { style: "minimal" } },
-      { type: "set_context", label: "Colorful", payload: { style: "colorful" } },
-      { type: "set_context", label: "Experimental", payload: { style: "experimental" } },
-    ];
-    for (const c of styleChips) if (!hasChip(c.payload)) chips.push(c);
+  if (mode === "projects") {
+    addIfMissing("format", [
+      { label: "Exhibition", payload: { format: "exhibition" } },
+      { label: "Festival", payload: { format: "festival" } },
+      { label: "Workshops", payload: { format: "workshops" } },
+    ]);
+    addIfMissing("team_size", [
+      { label: "Solo", payload: { team_size: "solo" } },
+      { label: "Small team", payload: { team_size: "small_team" } },
+      { label: "Organization", payload: { team_size: "org" } },
+    ]);
+    addIfMissing("deadline", [
+      { label: "Soon", payload: { deadline: "soon" } },
+      { label: "This quarter", payload: { deadline: "this_quarter" } },
+      { label: "This year", payload: { deadline: "this_year" } },
+    ]);
   }
 
+  if (chips.length === 0) return actions;
   return [...chips, ...actions];
 }
 
@@ -390,27 +458,6 @@ ${reviews.map((r) => `- [${r.source}, Rating: ${r.rating || "N/A"}] "${r.content
     const ctxBlock =
       sessionContext && Object.keys(sessionContext).length > 0
         ? `\nSESSION CONTEXT:\n${JSON.stringify(sessionContext, null, 2)}\n`
-        : "";
-
-    const missingTrendKeys: Array<"market" | "price_tier" | "style"> = [];
-    if (mode === "trends") {
-      if (!sessionContext?.market) missingTrendKeys.push("market");
-      if (!sessionContext?.price_tier) missingTrendKeys.push("price_tier");
-      if (!sessionContext?.style) missingTrendKeys.push("style");
-    }
-
-    const trendChipsInstruction =
-      mode === "trends" && missingTrendKeys.length > 0
-        ? `
-TREND RADAR — CONTEXT NEEDED (chips):
-Missing keys: ${missingTrendKeys.join(", ")}.
-- Give a helpful partial answer first.
-- Ask at most ONE clarifying question total.
-- Also return set_context chips to lock missing context:
-  - market: Instagram / Retail / Wholesale
-  - price: Low / Mid / Premium
-  - style: Minimal / Colorful / Experimental
-Return these chips when the key is missing from SESSION CONTEXT.`
         : "";
 
     const countryFromSession = sessionContext?.country || sessionContext?.region || sessionContext?.location;
@@ -503,12 +550,7 @@ When key info is missing:
 - Ask at most ONE clarifying question.
 - Also return 3–9 quick "set_context" actions (chips) with short labels.
 
-Examples (payload):
-- { "market": "instagram" } / { "market": "retail" } / { "market": "wholesale" }
-- { "price_tier": "low" } / "mid" / "premium"
-- { "style": "minimal" } / "colorful" / "experimental"
-
-${trendChipsInstruction}
+${modeChipGuidance(mode)}
 
 ${modeInstructions(mode)}
 
@@ -547,9 +589,8 @@ Mode actions (optional): ${JSON.stringify(actionsByMode(mode))}`,
     let finalActions: CopilotAction[] =
       Array.isArray(object.actions) && object.actions.length > 0 ? (object.actions as CopilotAction[]) : fallbackActions;
 
-    if (mode === "trends") {
-      finalActions = ensureTrendContextChips(finalActions, sessionContext);
-    }
+    // ✅ ALWAYS enforce stable mode chips
+    finalActions = ensureModeContextChips(mode, finalActions, sessionContext);
 
     return NextResponse.json({
       ...object,
