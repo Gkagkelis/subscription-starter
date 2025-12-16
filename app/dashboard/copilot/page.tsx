@@ -6,11 +6,18 @@ import { useRouter } from "next/navigation";
 
 type Mode = "chat" | "projects" | "grants" | "impact" | "trends";
 
+interface CopilotAction {
+  type?: string;
+  label: string;
+  payload?: any;
+  [key: string]: any;
+}
+
 interface Message {
   role: "user" | "assistant";
   content: string;
   insights?: string[];
-  actions?: Array<{ label: string; [key: string]: any }>;
+  actions?: CopilotAction[];
 }
 
 interface Chat {
@@ -105,6 +112,9 @@ export default function CopilotPage() {
   const [editingTitle, setEditingTitle] = useState("");
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // ✅ Smart Assist context
+  const [sessionContext, setSessionContext] = useState<Record<string, any>>({});
 
   const currentChat = chats.find((c) => c.id === activeChat);
   const messages = currentChat?.messages || [];
@@ -214,29 +224,30 @@ export default function CopilotPage() {
     }
   };
 
-  const getLastAssistantText = () => {
-    const last = [...messages].reverse().find((m) => m.role === "assistant");
-    return last?.content ?? "";
-  };
-
-  const handleActionClick = async (action: { type?: string; label: string; payload?: any }) => {
-    // fallback: αν το action δεν έχει type/payload, το χειριζόμαστε σαν απλό prompt
+  const handleActionClick = async (action: CopilotAction) => {
     setLoading(true);
+
+    // ✅ update context BEFORE request when set_context
+    const nextContext =
+      action?.type === "set_context" ? { ...sessionContext, ...(action.payload ?? {}) } : sessionContext;
+
+    if (action?.type === "set_context") {
+      setSessionContext(nextContext);
+    }
+
     try {
       const res = await fetch("/api/ai/copilot", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          message: action.label, // fallback text
+          message: action.label, // ok σαν “human click”
           language: "auto",
           mode,
+          sessionContext: nextContext, // <- το σημαντικό
           action: {
             type: action.type ?? "generic",
             label: action.label,
             payload: action.payload ?? {},
-          },
-          context: {
-            lastAssistantMessage: getLastAssistantText(),
           },
         }),
       });
@@ -300,7 +311,8 @@ export default function CopilotPage() {
       const res = await fetch("/api/ai/copilot", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message, language: "auto", mode }),
+        // ✅ include sessionContext
+        body: JSON.stringify({ message, language: "auto", mode, sessionContext }),
       });
 
       const data = await res.json();
