@@ -5,6 +5,7 @@ import { createClient } from "@/utils/supabase/server";
 
 type Mode = "chat" | "projects" | "grants" | "impact" | "trends";
 
+/** ✅ Adds Smart Assist chips support via set_context */
 const ActionSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("create_project_outline"), label: z.string(), payload: z.object({}) }),
   z.object({ type: z.literal("create_grant_checklist"), label: z.string(), payload: z.object({}) }),
@@ -48,12 +49,23 @@ const ActionSchema = z.discriminatedUnion("type", [
     label: z.string(),
     payload: z.object({ query: z.string().optional() }),
   }),
+
+  // ✅ Smart Assist: chips that write to session context
+  z.object({
+    type: z.literal("set_context"),
+    label: z.string(),
+    payload: z.record(z.any()),
+  }),
 ]);
 
+/**
+ * ✅ Output schema:
+ * - actions defaults to [] so UI never crashes if model returns none.
+ */
 const CopilotOutputSchema = z.object({
   reply: z.string(),
   insights: z.array(z.string()).optional(),
-  actions: z.array(ActionSchema),
+  actions: z.array(ActionSchema).default([]),
   language_detected: z.enum(["el", "en"]),
 });
 
@@ -235,7 +247,7 @@ STYLE (very important):
 - Avoid formal report headings.
 - Use short paragraphs + bullets.
 - Be concrete (examples, quick experiments).
-- Ask at most 1–2 clarifying questions.
+- Ask at most ONE clarifying question.
 - Do NOT mention funding unless the user asks about funding/grants.`;
 
   switch (mode) {
@@ -387,20 +399,42 @@ ${reviews.map((r) => `- [${r.source}, Rating: ${r.rating || "N/A"}] "${r.content
       }
     }
 
-    // ✅ Step 2B (1): body parsing with action + context
+    /**
+     * ✅ Smart Assist: parse body including sessionContext (new) + keep old context for compatibility.
+     * UI sends: { message, language, mode, sessionContext } and optionally { action } on chips.
+     */
     const body = await req.json();
-    const { message, language = "auto", mode = "chat", action, context } = body as {
+    const {
+      message,
+      language = "auto",
+      mode = "chat",
+      action,
+      sessionContext,
+      context, // legacy (optional)
+    } = body as {
       message: string;
       language?: "auto" | "el" | "en";
       mode?: Mode;
       action?: { type: string; label: string; payload?: any };
+      sessionContext?: Record<string, any>;
       context?: { lastAssistantMessage?: string };
     };
 
-    // Decide if we must ask for country first (ONLY for grants/trends)
-    needsCountry = (mode === "grants" || mode === "trends") && !isCountryKnown(message, profileLocation);
+    // ✅ Put sessionContext into the prompt in a stable way
+    const ctxBlock =
+      sessionContext && Object.keys(sessionContext).length > 0
+        ? `\nSESSION CONTEXT:\n${JSON.stringify(sessionContext, null, 2)}\n`
+        : "";
 
-    // ✅ Step 2B (2): action-aware input
+    // Decide if we must ask for country first (ONLY for grants/trends)
+    const countryFromSession = sessionContext?.country || sessionContext?.region || sessionContext?.location;
+
+    needsCountry =
+      (mode === "grants" || mode === "trends") &&
+      !countryFromSession &&
+      !isCountryKnown(message, profileLocation);
+
+    // ✅ Action-aware input (chips, etc.)
     const lastAssistant = context?.lastAssistantMessage?.trim() || "";
 
     const actionContext =
@@ -461,6 +495,10 @@ ${knowledgeResults.map((k: any) => `[${k.category}] ${k.content}`).join("\n\n")}
 LOCATION NEEDED:
 - Before giving country-specific grants/opportunities/deadlines or market specifics, ask exactly ONE question first:
 "${countryQuestion}"
+- Also return 3–5 quick "set_context" actions (chips) with short labels for location (examples):
+  - Greece / Cyprus / EU / UK / USA
+  payload examples:
+  - { "country": "Greece" }, { "country": "Cyprus" }, { "region": "EU" }, { "country": "UK" }, { "country": "USA" }
 - Do NOT list opportunities yet. Keep the reply short.`
       : "";
 
@@ -478,8 +516,19 @@ CORE BEHAVIOR:
 - Warm, human, like a real colleague/friend.
 - Avoid robotic templates and corporate report tone.
 - Be specific and practical.
-- Ask at most 1–2 clarifying questions.
+- Ask at most ONE clarifying question (max 1).
 - Do NOT mention funding unless the user asks, except in GRANTS mode.
+
+SMART ASSIST (chips):
+When key info is missing:
+- Give a helpful partial answer first (do not refuse).
+- Ask at most ONE clarifying question.
+- Also return 3–5 quick "set_context" actions (chips) with short labels.
+
+Examples (payload):
+- { "market": "instagram" } / { "market": "retail" } / { "market": "wholesale" }
+- { "price_tier": "low" } / "mid" / "premium"
+- { "style": "minimal" } / "colorful" / "experimental"
 
 ${modeInstructions(mode)}
 
@@ -495,11 +544,12 @@ OUTPUT RULES:
 - Natural voice (not a formal report).
 - Short paragraphs + bullets (max ~10 bullets).
 - Avoid repetitive templates.
-- Provide 2–5 action buttons.
+- Return 2–5 action buttons.
+- Actions MUST match the provided Zod schema.
 - language_detected must match the detected language.`;
 
-    // ✅ finalPrompt includes actionContext
-    const finalPrompt = systemPrompt + "\n" + actionContext + "\nUser: " + message;
+    // ✅ finalPrompt includes ctxBlock + actionContext
+    const finalPrompt = systemPrompt + ctxBlock + "\n" + actionContext + "\nUser: " + message;
 
     const { object } = await generateObject({
       model: openai("gpt-4o-2024-08-06"),
@@ -512,14 +562,20 @@ Mode actions available: ${JSON.stringify(actionsByMode(mode))}`,
     });
 
     // Ensure actions always exist (UI expects array)
+    const fallbackActions = actionsByMode(mode);
+
     const safe = {
       ...object,
-      actions: Array.isArray(object.actions) ? object.actions : actionsByMode(mode),
+      actions:
+        Array.isArray(object.actions) && object.actions.length > 0
+          ? object.actions
+          : // If model returned none, provide sane defaults
+            (fallbackActions as unknown as Array<z.infer<typeof ActionSchema>>),
     };
 
     return Response.json(safe);
   } catch (error: any) {
     console.error("Copilot error:", error);
-    return Response.json({ error: error.message }, { status: 500 });
+    return Response.json({ error: error?.message ?? "Unknown error" }, { status: 500 });
   }
 }
