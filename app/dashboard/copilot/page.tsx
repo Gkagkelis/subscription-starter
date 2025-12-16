@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { useRouter } from "next/navigation";
 
@@ -18,6 +18,7 @@ interface Chat {
   title: string;
   messages: Message[];
 }
+
 const MODE_CONFIG: Record<
   Mode,
   {
@@ -116,37 +117,6 @@ export default function CopilotPage() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
-
-  const modeLabel: Record<Mode, string> = {
-    chat: "Axiprova Advisor",
-    projects: "Projects",
-    grants: "Grant Finder",
-    impact: "Impact Predictor",
-    trends: "Trend Radar",
-  };
-
-  const modeHint: Record<Mode, string> = {
-    chat: "Γράψε ελεύθερα — το Axiprova θα σε βοηθήσει.",
-    projects: "Οργάνωση project: στόχος, κοινό, timeline, συνεργάτες, resources.",
-    grants: "Χρηματοδοτήσεις: eligibility, shortlist, checklist, sections αίτησης.",
-    impact: "Impact & KPIs: theory of change, δείκτες, evaluation plan.",
-    trends: "Trends: ideas για αγορά/ανταγωνισμό με γρήγορα τεστ (όχι ρομποτικά).",
-  };
-
-  const suggestions = useMemo(() => {
-    switch (mode) {
-      case "projects":
-        return ["Θέλω να οργανώσω έκθεση", "Φτιάξε μου project outline", "Γράψε περιγραφή project", "Βοήθησέ με με timeline"];
-      case "grants":
-        return ["Βρες μου grants", "Φτιάξε eligibility checklist", "Γράψε grant summary", "Τι χρειάζομαι για αίτηση;"];
-      case "impact":
-        return ["Πρόβλεψε το impact", "Δώσε KPIs", "Φτιάξε evaluation plan", "Theory of Change"];
-      case "trends":
-        return ["Είμαι κεραμίστας — τι ποτήρια να φτιάξω;", "Δώσε μου 5 trends", "Φτιάξε 3 ιδέες", "Πώς να τεστάρω ζήτηση γρήγορα;"];
-      default:
-        return ["Θέλω να οργανώσω έκθεση", "Βρες μου grants", "Ανάλυσε τα reviews μου", "Πρόβλεψε το impact"];
-    }
-  }, [mode]);
 
   const menuItems: Array<
     | { id: Mode; icon: string; label: string; kind: "mode" }
@@ -399,9 +369,9 @@ export default function CopilotPage() {
         <div className="border-b border-zinc-800 bg-zinc-950 px-6 py-4">
           <div className="max-w-2xl mx-auto">
             <div className="text-sm text-zinc-300">
-              <span className="text-zinc-500">Mode:</span> {modeLabel[mode]}
+              <span className="text-zinc-500">Mode:</span> {MODE_CONFIG[mode].label}
             </div>
-            <div className="text-xs text-zinc-500 mt-1">{modeHint[mode]}</div>
+            <div className="text-xs text-zinc-500 mt-1">{MODE_CONFIG[mode].hint}</div>
           </div>
         </div>
 
@@ -414,7 +384,7 @@ export default function CopilotPage() {
             </p>
 
             <div className="flex flex-wrap justify-center gap-2 mb-6 max-w-2xl">
-              {suggestions.map((s, i) => (
+              {MODE_CONFIG[mode].suggestions.map((s, i) => (
                 <button
                   key={i}
                   onClick={() => handleSubmit(s)}
