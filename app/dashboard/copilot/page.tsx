@@ -232,7 +232,15 @@ export default function CopilotPage() {
                   : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
               }`}
             >
-              <img src={item.icon} alt={item.label} className="w-5 h-5" />
+              <img
+  src={item.icon}
+  alt=""
+  className="w-5 h-5"
+  onError={(e) => {
+    (e.currentTarget as HTMLImageElement).style.display = "none";
+  }}
+/>
+
               <span className="text-sm">{item.label}</span>
             </button>
           ))}
