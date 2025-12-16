@@ -1,5 +1,5 @@
 import { openai } from "@ai-sdk/openai";
-import { streamObject, embed } from "ai";
+import { generateObject, embed } from "ai";
 import { z } from "zod";
 import { createClient } from "@/utils/supabase/server";
 
@@ -41,11 +41,6 @@ const ActionSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("analyze_reviews"),
     label: z.string(),
-    payload: z.object({/artificial: any() as any).optional() }), // not used
-  }),
-  z.object({
-    type: z.literal("analyze_reviews"),
-    label: z.string(),
     payload: z.object({ focus: z.string().optional() }),
   }),
   z.object({
@@ -71,7 +66,7 @@ function needsWebSearch(message: string, mode: Mode): boolean {
     "ανοιχτές","ανοιχτά","2024","2025","τώρα","σήμερα","φέτος",
     "creative europe","ελλάδα","υπουργείο πολιτισμού","εσπα",
     "grant","grants","funding","current","open call","open calls","apply",
-    "opportunity","latest","recent","new","available",
+    "application","opportunity","latest","recent","new","available",
   ];
   const lower = message.toLowerCase();
   return triggers.some((t) => lower.includes(t));
@@ -267,6 +262,7 @@ ${reviews.map((r) => `- [${r.source}, Rating: ${r.rating || "N/A"}] "${r.content
       mode?: Mode;
     };
 
+    // Knowledge search
     try {
       const { embedding } = await embed({
         model: openai.embedding("text-embedding-3-small"),
@@ -289,10 +285,12 @@ ${knowledgeResults.map((k: any) => `[${k.category}] ${k.content}`).join("\n\n")}
       console.log("Knowledge search skipped:", e);
     }
 
+    // Web search
     if (needsWebSearch(message, mode)) {
       webSearchContext = await searchWeb(message);
     }
 
+    // Language detect
     const detectedLanguage =
       language === "auto"
         ? /[\u0370-\u03FF\u1F00-\u1FFF]/.test(message)
@@ -331,22 +329,28 @@ OUTPUT RULES:
 - Natural voice (not a formal report).
 - Short paragraphs + bullets (max ~10 bullets).
 - Avoid repetitive templates.
-- Provide 2–5 action buttons.`;
+- Provide 2–5 action buttons.
+- language_detected must match the detected language.`;
 
-    const result = await streamObject({
+    const { object } = await generateObject({
       model: openai("gpt-4o-2024-08-06"),
       schema: CopilotOutputSchema,
       prompt:
         systemPrompt +
         `
 
-Return actions that match the current mode.
 Mode actions available: ${JSON.stringify(actionsByMode(mode))}
 
 User: ${message}`,
     });
 
-    return result.toTextStreamResponse();
+    // Ensure actions always exist (UI expects array)
+    const safe = {
+      ...object,
+      actions: Array.isArray(object.actions) ? object.actions : actionsByMode(mode),
+    };
+
+    return Response.json(safe);
   } catch (error: any) {
     console.error("Copilot error:", error);
     return Response.json({ error: error.message }, { status: 500 });
