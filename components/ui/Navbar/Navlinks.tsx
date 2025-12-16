@@ -19,9 +19,9 @@ export default function Navlinks({ user }: NavlinksProps) {
     <div className="relative flex flex-row justify-between py-4 align-center md:py-6">
       {/* Left: Logo only */}
       <div className="flex items-center flex-1">
-        <Link href="/" className={s.logo} aria-label="Logo">
-          <Image src="/axiprova-icon.png" alt="Axiprova" width={40} height={40} />
-        </Link>
+        <Link href={user ? "/dashboard/copilot" : "/"} className={s.logo} aria-label="Logo">
+  <Image src="/axiprova-icon.png" alt="Axiprova" width={40} height={40} />
+</Link>
       </div>
 
       {/* Right: Auth actions */}
