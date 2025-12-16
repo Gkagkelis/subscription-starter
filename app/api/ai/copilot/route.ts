@@ -58,6 +58,8 @@ const ActionSchema = z.discriminatedUnion("type", [
   }),
 ]);
 
+type CopilotAction = z.infer<typeof ActionSchema>;
+
 /** ✅ Model output schema */
 const CopilotOutputSchema = z.object({
   reply: z.string(),
@@ -341,6 +343,55 @@ function actionsByMode(mode: Mode) {
   }
 }
 
+/** ✅ Ensures Trend Radar chips exist when context is missing (bulletproof for demo) */
+function ensureTrendContextChips(
+  actions: CopilotAction[],
+  sessionContext: Record<string, any> | undefined
+): CopilotAction[] {
+  const ctx = sessionContext ?? {};
+  const needsMarket = !ctx.market;
+  const needsPrice = !ctx.price_tier;
+  const needsStyle = !ctx.style;
+
+  if (!needsMarket && !needsPrice && !needsStyle) return actions;
+
+  // Avoid duplicates if model already returned set_context
+  const hasChip = (payload: Record<string, any>) =>
+    actions.some((a) => a.type === "set_context" && JSON.stringify(a.payload ?? {}) === JSON.stringify(payload));
+
+  const chips: CopilotAction[] = [];
+
+  if (needsMarket) {
+    const marketChips: CopilotAction[] = [
+      { type: "set_context", label: "Instagram", payload: { market: "instagram" } },
+      { type: "set_context", label: "Retail", payload: { market: "retail" } },
+      { type: "set_context", label: "Wholesale", payload: { market: "wholesale" } },
+    ];
+    for (const c of marketChips) if (!hasChip(c.payload)) chips.push(c);
+  }
+
+  if (needsPrice) {
+    const priceChips: CopilotAction[] = [
+      { type: "set_context", label: "Low", payload: { price_tier: "low" } },
+      { type: "set_context", label: "Mid", payload: { price_tier: "mid" } },
+      { type: "set_context", label: "Premium", payload: { price_tier: "premium" } },
+    ];
+    for (const c of priceChips) if (!hasChip(c.payload)) chips.push(c);
+  }
+
+  if (needsStyle) {
+    const styleChips: CopilotAction[] = [
+      { type: "set_context", label: "Minimal", payload: { style: "minimal" } },
+      { type: "set_context", label: "Colorful", payload: { style: "colorful" } },
+      { type: "set_context", label: "Experimental", payload: { style: "experimental" } },
+    ];
+    for (const c of styleChips) if (!hasChip(c.payload)) chips.push(c);
+  }
+
+  // Put chips first (UX), keep the rest after
+  return [...chips, ...actions];
+}
+
 export async function POST(req: Request) {
   try {
     const supabase = createClient();
@@ -398,10 +449,12 @@ ${reviews.map((r) => `- [${r.source}, Rating: ${r.rating || "N/A"}] "${r.content
 
     /**
      * ✅ 2B: Body parsing with sessionContext + action
-     * UI sends: { message, language, mode, sessionContext } and optionally { action }.
-     * We keep legacy `context` too.
      */
     const body = await req.json();
+
+    // ✅ SUPER EASY DEBUG: see exactly what the client sends (in terminal)
+    console.log("COPILOT BODY >>>", JSON.stringify(body, null, 2));
+
     const {
       message,
       language = "auto",
@@ -427,13 +480,9 @@ ${reviews.map((r) => `- [${r.source}, Rating: ${r.rating || "N/A"}] "${r.content
     // --- Smart Assist missing keys (Trend Radar) ---
     const missingTrendKeys: Array<"market" | "price_tier" | "style"> = [];
     if (mode === "trends") {
-      const hasMarket = !!sessionContext?.market;
-      const hasPrice = !!sessionContext?.price_tier;
-      const hasStyle = !!sessionContext?.style;
-
-      if (!hasMarket) missingTrendKeys.push("market");
-      if (!hasPrice) missingTrendKeys.push("price_tier");
-      if (!hasStyle) missingTrendKeys.push("style");
+      if (!sessionContext?.market) missingTrendKeys.push("market");
+      if (!sessionContext?.price_tier) missingTrendKeys.push("price_tier");
+      if (!sessionContext?.style) missingTrendKeys.push("style");
     }
 
     const trendChipsInstruction =
@@ -444,9 +493,9 @@ Missing keys: ${missingTrendKeys.join(", ")}.
 - Give a helpful partial answer first.
 - Ask at most ONE clarifying question total.
 - Also return set_context chips to lock missing context:
-  - market chips: Instagram / Retail / Wholesale (payloads: { "market":"instagram" }, { "market":"retail" }, { "market":"wholesale" })
-  - price chips: Low / Mid / Premium (payloads: { "price_tier":"low" }, { "price_tier":"mid" }, { "price_tier":"premium" })
-  - style chips: Minimal / Colorful / Experimental (payloads: { "style":"minimal" }, { "style":"colorful" }, { "style":"experimental" })
+  - market: Instagram / Retail / Wholesale
+  - price: Low / Mid / Premium
+  - style: Minimal / Colorful / Experimental
 Return these chips when the key is missing from SESSION CONTEXT.`
         : "";
 
@@ -460,7 +509,6 @@ Return these chips when the key is missing from SESSION CONTEXT.`
 
     // ✅ Action-aware input (chips, etc.)
     const lastAssistant = context?.lastAssistantMessage?.trim() || "";
-
     const actionContext =
       action && action.type !== "generic"
         ? `
@@ -510,16 +558,13 @@ ${knowledgeResults.map((k: any) => `[${k.category}] ${k.content}`).join("\n\n")}
         : language;
 
     const langName = detectedLanguage === "el" ? "Greek" : "English";
-
     const countryQuestion = detectedLanguage === "el" ? "Σε ποια χώρα βρίσκεσαι;" : "Which country are you in?";
 
     const countryClarificationInstruction = needsCountry
       ? `
-
 LOCATION NEEDED:
-- Before giving country-specific grants/opportunities/deadlines or market specifics, ask exactly ONE question first:
-"${countryQuestion}"
-- Also return 3–5 quick "set_context" actions (chips) with short labels for location (examples):
+- Ask exactly ONE question first: "${countryQuestion}"
+- Also return 3–5 set_context chips for location (examples):
   - Greece / Cyprus / EU / UK / USA
   payload examples:
   - { "country": "Greece" }, { "country": "Cyprus" }, { "region": "EU" }, { "country": "UK" }, { "country": "USA" }
@@ -547,8 +592,7 @@ SMART ASSIST (chips):
 When key info is missing:
 - Give a helpful partial answer first (do not refuse).
 - Ask at most ONE clarifying question.
-- Also return quick "set_context" actions (chips) with short labels.
-- In Smart Assist (set_context), you may return up to 9 chips (e.g., 3 market + 3 price + 3 style).
+- Also return 3–9 quick "set_context" actions (chips) with short labels.
 
 Examples (payload):
 - { "market": "instagram" } / { "market": "retail" } / { "market": "wholesale" }
@@ -571,8 +615,7 @@ OUTPUT RULES:
 - Natural voice (not a formal report).
 - Short paragraphs + bullets (max ~10 bullets).
 - Avoid repetitive templates.
-- Return 2–5 action buttons normally.
-- Actions MUST match the provided Zod schema.
+- Return actions that match the schema.
 - language_detected must match the detected language.`;
 
     // ✅ finalPrompt includes ctxBlock + actionContext
@@ -592,15 +635,20 @@ ACTIONS:
 Mode actions (optional): ${JSON.stringify(actionsByMode(mode))}`,
     });
 
-    // Ensure actions always exist (UI expects array)
-    const fallbackActions = actionsByMode(mode);
+    // If model returned nothing, provide defaults
+    const fallbackActions = actionsByMode(mode) as unknown as CopilotAction[];
+
+    let finalActions: CopilotAction[] =
+      Array.isArray(object.actions) && object.actions.length > 0 ? (object.actions as CopilotAction[]) : fallbackActions;
+
+    // ✅ Bulletproof: ensure Trend Radar chips appear when context missing
+    if (mode === "trends") {
+      finalActions = ensureTrendContextChips(finalActions, sessionContext);
+    }
 
     const safe = {
       ...object,
-      actions:
-        Array.isArray(object.actions) && object.actions.length > 0
-          ? object.actions
-          : (fallbackActions as unknown as Array<z.infer<typeof ActionSchema>>),
+      actions: finalActions,
     };
 
     return Response.json(safe);
