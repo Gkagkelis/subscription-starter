@@ -6,18 +6,11 @@ import { useRouter } from "next/navigation";
 
 type Mode = "chat" | "projects" | "grants" | "impact" | "trends";
 
-interface CopilotAction {
-  type?: string;
-  label: string;
-  payload?: any;
-  [key: string]: any;
-}
-
 interface Message {
   role: "user" | "assistant";
   content: string;
   insights?: string[];
-  actions?: CopilotAction[];
+  actions?: Array<{ label: string; [key: string]: any }>;
 }
 
 interface Chat {
@@ -25,17 +18,6 @@ interface Chat {
   title: string;
   messages: Message[];
 }
-
-const UI_TEXT = {
-  newChat: "+ New Chat",
-  recentChats: "RECENT CHATS",
-  askAnything: "Ask anything...",
-  send: "Send",
-  thinking: "Thinking...",
-  modeLabel: "Mode:",
-  myData: "My Data",
-  advisor: "Advisor",
-} as const;
 
 const MODE_CONFIG: Record<
   Mode,
@@ -49,69 +31,57 @@ const MODE_CONFIG: Record<
 > = {
   chat: {
     label: "Axiprova Advisor",
-    hint: "Type freely — Axiprova will help.",
-    suggestions: ["Help me plan an exhibition", "Find relevant grants", "Analyze my reviews", "Estimate my project impact"],
+    hint: "Γράψε ελεύθερα — το Axiprova θα σε βοηθήσει.",
+    suggestions: ["Θέλω να οργανώσω έκθεση", "Βρες μου grants", "Ανάλυσε τα reviews μου", "Πρόβλεψε το impact"],
     wizardTitle: "Quick setup (Advisor)",
     wizardQuestions: [
-      {
-        key: "goal",
-        label: "What do you want to achieve?",
-        placeholder: "e.g. increase visitors, launch a new project, find grants...",
-      },
-      {
-        key: "context",
-        label: "Any context?",
-        placeholder: "e.g. I’m a ceramic artist / museum / festival organizer...",
-      },
-      {
-        key: "constraint",
-        label: "What constraints do you have?",
-        placeholder: "e.g. time, budget, team, deadline...",
-      },
+      { key: "goal", label: "Τι θες να πετύχεις;", placeholder: "π.χ. αύξηση επισκεψιμότητας, νέο project, grants..." },
+      { key: "context", label: "Λίγο context;", placeholder: "π.χ. είμαι κεραμίστας/μουσείο/φεστιβάλ..." },
+      { key: "constraint", label: "Τι σε περιορίζει;", placeholder: "π.χ. χρόνος, budget, ομάδα, deadline..." },
     ],
   },
   projects: {
     label: "Projects",
-    hint: "From idea → a project plan (goal, audience, timeline, roles, resources).",
-    suggestions: ["Create a project outline", "Write a one-page concept note", "Build an 8-week timeline", "Roles & collaborators"],
+    hint: "Από ιδέα → σε project plan (στόχος, κοινό, timeline, ρόλοι, resources).",
+    suggestions: ["Φτιάξε μου project outline", "Γράψε concept note 1 σελίδα", "Βγάλε μου timeline 8 εβδομάδων", "Ρόλοι & συνεργάτες"],
     wizardTitle: "Start a Project",
     wizardQuestions: [
-      { key: "project", label: "What kind of project is it?", placeholder: "e.g. exhibition, festival, residency..." },
-      { key: "audience", label: "Who is it for?", placeholder: "e.g. ages 18–30, families, tourists..." },
-      { key: "deadline", label: "When do you need it ready?", placeholder: "e.g. in 6 weeks / March 15" },
+      { key: "project", label: "Τι project είναι;", placeholder: "π.χ. έκθεση, φεστιβάλ, residency..." },
+      { key: "audience", label: "Για ποιο κοινό;", placeholder: "π.χ. νέοι 18–30, οικογένειες, τουρίστες..." },
+      { key: "deadline", label: "Πότε το θες έτοιμο;", placeholder: "π.χ. σε 6 εβδομάδες / 15 Μαρτίου" },
     ],
   },
   grants: {
     label: "Grant Finder",
-    hint: "From need → a shortlist of opportunities + application checklist + draft texts.",
-    suggestions: ["Find grants for my project", "Build an eligibility checklist", "Draft the application summary", "What documents do I need?"],
+    hint: "Από ανάγκη → shortlist ευκαιριών + checklist αίτησης + draft κείμενα.",
+    suggestions: ["Βρες μου grants για το project μου", "Φτιάξε eligibility checklist", "Γράψε summary αίτησης", "Τι έγγραφα χρειάζομαι;"],
     wizardTitle: "Find Grants",
     wizardQuestions: [
-      { key: "country", label: "Region/Country?", placeholder: "e.g. Greece, EU, Athens..." },
-      { key: "topic", label: "Topic/Field?", placeholder: "e.g. contemporary art, museums, education..." },
-      { key: "window", label: "Time window?", placeholder: "e.g. deadlines in 1–3 months / this year" },
+      { key: "country", label: "Περιοχή/Χώρα;", placeholder: "π.χ. Ελλάδα, EU, Αθήνα..." },
+      { key: "topic", label: "Θέμα/Τομέας;", placeholder: "π.χ. σύγχρονη τέχνη, μουσεία, εκπαίδευση..." },
+      { key: "window", label: "Χρονικό παράθυρο;", placeholder: "π.χ. deadlines 1–3 μήνες / φέτος" },
     ],
   },
   impact: {
     label: "Impact Predictor",
-    hint: "KPIs + Theory of Change + a practical measurement plan (not academic).",
-    suggestions: ["Suggest KPIs for my project", "Create a Theory of Change", "Build an evaluation plan", "What data should I collect?"],
+    hint: "KPIs + Theory of Change + plan μέτρησης (πρακτικό, όχι ακαδημαϊκό).",
+    suggestions: ["Δώσε KPIs για το έργο μου", "Φτιάξε Theory of Change", "Φτιάξε evaluation plan", "Τι data να μαζεύω;"],
     wizardTitle: "Plan Impact",
     wizardQuestions: [
-      { key: "activity", label: "What activity are you running?", placeholder: "e.g. workshops, exhibition, education program..." },
-      { key: "outcome", label: "What change do you want to see?", placeholder: "e.g. higher participation, learning, inclusion..." },
-      { key: "data", label: "What data do you have/can collect?", placeholder: "e.g. ticketing, surveys, socials, interviews..." },
+      { key: "activity", label: "Τι δράση κάνεις;", placeholder: "π.χ. εργαστήρια, έκθεση, εκπαιδευτικό πρόγραμμα..." },
+      { key: "outcome", label: "Τι αλλαγή θες να δεις;", placeholder: "π.χ. αύξηση συμμετοχής, μάθηση, ένταξη..." },
+      { key: "data", label: "Τι δεδομένα έχεις/μπορείς;", placeholder: "π.χ. εισιτήρια, surveys, socials, interviews..." },
     ],
   },
   trends: {
     label: "Trend Radar",
-    hint: "Trends → 3 ideas → 1 quick test this week.",
-    suggestions: ["I'm a ceramic artist — what should I make next?", "Give me 5 trends", "Create 3 collection ideas", "How can I test demand fast?"],
+    hint: "Trends → 3 ιδέες → 1 γρήγορο test αυτή την εβδομάδα.",
+    suggestions: ["Είμαι κεραμίστας — τι ποτήρια να φτιάξω;", "Δώσε μου 5 trends", "Φτιάξε 3 ιδέες συλλογής", "Πώς να τεστάρω ζήτηση γρήγορα;"],
     wizardTitle: "Explore Trends",
     wizardQuestions: [
-      { key: "role", label: "What do you do?", placeholder: "e.g. ceramic artist, musician, curator..." },
-      { key: "market", label: "Where do you sell?", placeholder: "e.g. Instagram, markets, e-shop, galleries..." },
-      { key: "price", label: "What price point?", placeholder: "e.g. low / mid / premium (or € range)" },
+      { key: "role", label: "Τι κάνεις;", placeholder: "π.χ. κεραμίστας, μουσικός, curator..." },
+      { key: "market", label: "Πού πουλάς;", placeholder: "π.χ. Instagram, αγορές, e-shop, galleries..." },
+      { key: "price", label: "Τι τιμές θες;", placeholder: "π.χ. low / mid / premium (ή εύρος €)" },
     ],
   },
 };
@@ -131,13 +101,13 @@ export default function CopilotPage() {
 
   const [mode, setMode] = useState<Mode>("chat");
 
+  // ✅ Smart Assist session context
+  const [sessionContext, setSessionContext] = useState<Record<string, any>>({});
+
   const [editingChatId, setEditingChatId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState("");
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  // ✅ Smart Assist context
-  const [sessionContext, setSessionContext] = useState<Record<string, any>>({});
 
   const currentChat = chats.find((c) => c.id === activeChat);
   const messages = currentChat?.messages || [];
@@ -155,8 +125,8 @@ export default function CopilotPage() {
     | { id: Mode; icon: string; label: string; kind: "mode" }
     | { id: "data"; icon: string; label: string; kind: "link"; href: string }
   > = [
-    { id: "chat", icon: "/chat_logo.png", label: UI_TEXT.advisor, kind: "mode" },
-    { id: "data", icon: "/my_data_logo.png", label: UI_TEXT.myData, kind: "link", href: "/dashboard/data" },
+    { id: "chat", icon: "/chat_logo.png", label: "Advisor", kind: "mode" },
+    { id: "data", icon: "/my_data_logo.png", label: "My Data", kind: "link", href: "/dashboard/data" },
     { id: "projects", icon: "/project_logo.png", label: "Projects", kind: "mode" },
     { id: "grants", icon: "/Grand_Finder.png", label: "Grant Finder", kind: "mode" },
     { id: "impact", icon: "/Impact_Predictor_logo.png", label: "Impact Predictor", kind: "mode" },
@@ -177,7 +147,7 @@ export default function CopilotPage() {
       const res = await fetch("/api/chats", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: "New Chat", messages: [] }),
+        body: JSON.stringify({ title: "Νέο Chat", messages: [] }),
       });
       if (res.ok) {
         const newChat = await res.json();
@@ -233,7 +203,6 @@ export default function CopilotPage() {
     setEditingTitle("");
   };
 
-  // Save button under assistant messages
   const saveArtifact = async (content: string) => {
     try {
       const title = content.split("\n").find((l) => l.trim())?.slice(0, 60) || "Saved";
@@ -247,30 +216,57 @@ export default function CopilotPage() {
     }
   };
 
-  const handleActionClick = async (action: CopilotAction) => {
+  const getLastAssistantText = () => {
+    const last = [...messages].reverse().find((m) => m.role === "assistant");
+    return last?.content ?? "";
+  };
+
+  const handleActionClick = async (action: { type?: string; label: string; payload?: any }) => {
     setLoading(true);
 
-    // ✅ update context BEFORE request when set_context
     const nextContext =
-      action?.type === "set_context" ? { ...sessionContext, ...(action.payload ?? {}) } : sessionContext;
+      action?.type === "set_context"
+        ? { ...sessionContext, ...(action.payload ?? {}) }
+        : sessionContext;
 
     if (action?.type === "set_context") {
       setSessionContext(nextContext);
     }
 
     try {
+      let chatId = activeChat;
+      let baseMessages: Message[] = messages;
+
+      if (!chatId) {
+        const createRes = await fetch("/api/chats", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title: action.label.slice(0, 25), messages: [] }),
+        });
+        if (createRes.ok) {
+          const newChat = await createRes.json();
+          setChats((prev) => [newChat, ...prev]);
+          setActiveChat(newChat.id);
+          chatId = newChat.id;
+          baseMessages = [];
+        }
+      }
+
       const res = await fetch("/api/ai/copilot", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          message: action.label, // ok σαν “human click”
+          message: action.label,
           language: "auto",
           mode,
-          sessionContext: nextContext, // <- το σημαντικό
+          sessionContext: nextContext,
           action: {
             type: action.type ?? "generic",
             label: action.label,
             payload: action.payload ?? {},
+          },
+          context: {
+            lastAssistantMessage: getLastAssistantText(),
           },
         }),
       });
@@ -284,14 +280,13 @@ export default function CopilotPage() {
         actions: Array.isArray(data?.actions) ? data.actions : [],
       };
 
-      // append to current chat
       const userMessage: Message = { role: "user", content: action.label };
-      const updated = [...messages, userMessage, assistantMessage];
+      const updated = [...baseMessages, userMessage, assistantMessage];
 
-      if (activeChat) {
-        setChats((prev) => prev.map((c) => (c.id === activeChat ? { ...c, messages: updated } : c)));
-        const chatNow = chatsRef.current.find((c) => c.id === activeChat);
-        await updateChat(activeChat, chatNow?.title || "Chat", updated);
+      if (chatId) {
+        setChats((prev) => prev.map((c) => (c.id === chatId ? { ...c, messages: updated } : c)));
+        const chatNow = chatsRef.current.find((c) => c.id === chatId);
+        await updateChat(chatId, chatNow?.title || "Chat", updated);
       }
     } catch (e) {
       console.error(e);
@@ -334,7 +329,6 @@ export default function CopilotPage() {
       const res = await fetch("/api/ai/copilot", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        // ✅ include sessionContext
         body: JSON.stringify({ message, language: "auto", mode, sessionContext }),
       });
 
@@ -376,7 +370,7 @@ export default function CopilotPage() {
             onClick={createNewChat}
             className="w-full py-2 px-4 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2"
           >
-            {UI_TEXT.newChat}
+            + Νέο Chat
           </button>
         </div>
 
@@ -409,7 +403,7 @@ export default function CopilotPage() {
 
           {chats.length > 0 && (
             <div className="mt-4 pt-4 border-t border-zinc-800">
-              <p className="text-xs text-zinc-600 px-3 mb-2">{UI_TEXT.recentChats}</p>
+              <p className="text-xs text-zinc-600 px-3 mb-2">RECENT CHATS</p>
 
               {chats.map((chat) => (
                 <div key={chat.id} className="relative group">
@@ -456,7 +450,7 @@ export default function CopilotPage() {
         <div className="border-b border-zinc-800 bg-zinc-950 px-6 py-4">
           <div className="max-w-2xl mx-auto">
             <div className="text-sm text-zinc-300">
-              <span className="text-zinc-500">{UI_TEXT.modeLabel}</span> {MODE_CONFIG[mode].label}
+              <span className="text-zinc-500">Mode:</span> {MODE_CONFIG[mode].label}
             </div>
             <div className="text-xs text-zinc-500 mt-1">{MODE_CONFIG[mode].hint}</div>
           </div>
@@ -466,7 +460,9 @@ export default function CopilotPage() {
           <div className="flex-1 flex flex-col items-center justify-center px-6">
             <img src="/axiprova-icon.png" alt="Axiprova" className="w-20 h-20 mb-4" />
             <h1 className="text-xl font-light text-zinc-300 mb-1">Axiprova</h1>
-            <p className="text-zinc-500 text-center mb-6">Your AI advisor for culture & the creative industries</p>
+            <p className="text-zinc-500 text-center mb-6">
+              Ο AI σύμβουλός σου για τον πολιτισμό & τη δημιουργική βιομηχανία
+            </p>
 
             <div className="flex flex-wrap justify-center gap-2 mb-6 max-w-2xl">
               {MODE_CONFIG[mode].suggestions.map((s, i) => (
@@ -486,7 +482,7 @@ export default function CopilotPage() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder={UI_TEXT.askAnything}
+                placeholder="Ρώτησε οτιδήποτε..."
                 className="flex-1 bg-zinc-900 text-white px-4 py-3 rounded-xl border border-zinc-800 focus:outline-none focus:border-zinc-600 placeholder-zinc-600"
               />
               <button
@@ -494,7 +490,7 @@ export default function CopilotPage() {
                 disabled={loading || !input.trim()}
                 className="px-6 py-3 bg-white text-black font-medium rounded-xl hover:bg-zinc-200 disabled:opacity-50 transition"
               >
-                {UI_TEXT.send}
+                Στείλε
               </button>
             </div>
           </div>
@@ -565,7 +561,7 @@ export default function CopilotPage() {
                 {loading && (
                   <div className="flex gap-3 mb-6">
                     <img src="/axiprova-icon.png" alt="AI" className="w-8 h-8 flex-shrink-0" />
-                    <div className="text-zinc-500">{UI_TEXT.thinking}</div>
+                    <div className="text-zinc-500">Σκέφτομαι...</div>
                   </div>
                 )}
 
@@ -580,7 +576,7 @@ export default function CopilotPage() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder={UI_TEXT.askAnything}
+                  placeholder="Ρώτησε οτιδήποτε..."
                   className="flex-1 bg-zinc-900 text-white px-4 py-3 rounded-xl border border-zinc-800 focus:outline-none focus:border-zinc-600 placeholder-zinc-600"
                 />
                 <button
@@ -588,7 +584,7 @@ export default function CopilotPage() {
                   disabled={loading || !input.trim()}
                   className="px-6 py-3 bg-white text-black font-medium rounded-xl hover:bg-zinc-200 disabled:opacity-50 transition"
                 >
-                  {UI_TEXT.send}
+                  Στείλε
                 </button>
               </div>
             </div>
