@@ -18,6 +18,72 @@ interface Chat {
   title: string;
   messages: Message[];
 }
+const MODE_CONFIG: Record<
+  Mode,
+  {
+    label: string;
+    hint: string;
+    suggestions: string[];
+    wizardTitle: string;
+    wizardQuestions: Array<{ key: string; label: string; placeholder: string }>;
+  }
+> = {
+  chat: {
+    label: "Axiprova Advisor",
+    hint: "Γράψε ελεύθερα — το Axiprova θα σε βοηθήσει.",
+    suggestions: ["Θέλω να οργανώσω έκθεση", "Βρες μου grants", "Ανάλυσε τα reviews μου", "Πρόβλεψε το impact"],
+    wizardTitle: "Quick setup (Advisor)",
+    wizardQuestions: [
+      { key: "goal", label: "Τι θες να πετύχεις;", placeholder: "π.χ. αύξηση επισκεψιμότητας, νέο project, grants..." },
+      { key: "context", label: "Λίγο context;", placeholder: "π.χ. είμαι κεραμίστας/μουσείο/φεστιβάλ..." },
+      { key: "constraint", label: "Τι σε περιορίζει;", placeholder: "π.χ. χρόνος, budget, ομάδα, deadline..." },
+    ],
+  },
+  projects: {
+    label: "Projects",
+    hint: "Από ιδέα → σε project plan (στόχος, κοινό, timeline, ρόλοι, resources).",
+    suggestions: ["Φτιάξε μου project outline", "Γράψε concept note 1 σελίδα", "Βγάλε μου timeline 8 εβδομάδων", "Ρόλοι & συνεργάτες"],
+    wizardTitle: "Start a Project",
+    wizardQuestions: [
+      { key: "project", label: "Τι project είναι;", placeholder: "π.χ. έκθεση, φεστιβάλ, residency..." },
+      { key: "audience", label: "Για ποιο κοινό;", placeholder: "π.χ. νέοι 18–30, οικογένειες, τουρίστες..." },
+      { key: "deadline", label: "Πότε το θες έτοιμο;", placeholder: "π.χ. σε 6 εβδομάδες / 15 Μαρτίου" },
+    ],
+  },
+  grants: {
+    label: "Grant Finder",
+    hint: "Από ανάγκη → shortlist ευκαιριών + checklist αίτησης + draft κείμενα.",
+    suggestions: ["Βρες μου grants για το project μου", "Φτιάξε eligibility checklist", "Γράψε summary αίτησης", "Τι έγγραφα χρειάζομαι;"],
+    wizardTitle: "Find Grants",
+    wizardQuestions: [
+      { key: "country", label: "Περιοχή/Χώρα;", placeholder: "π.χ. Ελλάδα, EU, Αθήνα..." },
+      { key: "topic", label: "Θέμα/Τομέας;", placeholder: "π.χ. σύγχρονη τέχνη, μουσεία, εκπαίδευση..." },
+      { key: "window", label: "Χρονικό παράθυρο;", placeholder: "π.χ. deadlines 1–3 μήνες / φέτος" },
+    ],
+  },
+  impact: {
+    label: "Impact Predictor",
+    hint: "KPIs + Theory of Change + plan μέτρησης (πρακτικό, όχι ακαδημαϊκό).",
+    suggestions: ["Δώσε KPIs για το έργο μου", "Φτιάξε Theory of Change", "Φτιάξε evaluation plan", "Τι data να μαζεύω;"],
+    wizardTitle: "Plan Impact",
+    wizardQuestions: [
+      { key: "activity", label: "Τι δράση κάνεις;", placeholder: "π.χ. εργαστήρια, έκθεση, εκπαιδευτικό πρόγραμμα..." },
+      { key: "outcome", label: "Τι αλλαγή θες να δεις;", placeholder: "π.χ. αύξηση συμμετοχής, μάθηση, ένταξη..." },
+      { key: "data", label: "Τι δεδομένα έχεις/μπορείς;", placeholder: "π.χ. εισιτήρια, surveys, socials, interviews..." },
+    ],
+  },
+  trends: {
+    label: "Trend Radar",
+    hint: "Trends → 3 ιδέες → 1 γρήγορο test αυτή την εβδομάδα.",
+    suggestions: ["Είμαι κεραμίστας — τι ποτήρια να φτιάξω;", "Δώσε μου 5 trends", "Φτιάξε 3 ιδέες συλλογής", "Πώς να τεστάρω ζήτηση γρήγορα;"],
+    wizardTitle: "Explore Trends",
+    wizardQuestions: [
+      { key: "role", label: "Τι κάνεις;", placeholder: "π.χ. κεραμίστας, μουσικός, curator..." },
+      { key: "market", label: "Πού πουλάς;", placeholder: "π.χ. Instagram, αγορές, e-shop, galleries..." },
+      { key: "price", label: "Τι τιμές θες;", placeholder: "π.χ. low / mid / premium (ή εύρος €)" },
+    ],
+  },
+};
 
 export default function CopilotPage() {
   const router = useRouter();
