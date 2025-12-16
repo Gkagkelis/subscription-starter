@@ -5,35 +5,12 @@ import { createClient } from "@/utils/supabase/server";
 
 type Mode = "chat" | "projects" | "grants" | "impact" | "trends";
 
-/**
- * ACTIONS
- * Τα actions εμφανίζονται ως κουμπιά στο UI.
- * Το UI σου χρησιμοποιεί action.label για να ξαναστείλει prompt στο chat.
- * Άρα εδώ κρατάμε schema-based actions ώστε να περνάει το streamObject validation.
- */
 const ActionSchema = z.discriminatedUnion("type", [
-  z.object({
-    type: z.literal("create_project_outline"),
-    label: z.string(),
-    payload: z.object({}),
-  }),
-  z.object({
-    type: z.literal("create_grant_checklist"),
-    label: z.string(),
-    payload: z.object({}),
-  }),
-  z.object({
-    type: z.literal("create_kpi_plan"),
-    label: z.string(),
-    payload: z.object({}),
-  }),
-  z.object({
-    type: z.literal("run_trend_scan"),
-    label: z.string(),
-    payload: z.object({}),
-  }),
+  z.object({ type: z.literal("create_project_outline"), label: z.string(), payload: z.object({}) }),
+  z.object({ type: z.literal("create_grant_checklist"), label: z.string(), payload: z.object({}) }),
+  z.object({ type: z.literal("create_kpi_plan"), label: z.string(), payload: z.object({}) }),
+  z.object({ type: z.literal("run_trend_scan"), label: z.string(), payload: z.object({}) }),
 
-  // κρατάμε και τα δικά σου existing action types
   z.object({
     type: z.literal("generate_titles"),
     label: z.string(),
@@ -64,6 +41,11 @@ const ActionSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("analyze_reviews"),
     label: z.string(),
+    payload: z.object({/artificial: any() as any).optional() }), // not used
+  }),
+  z.object({
+    type: z.literal("analyze_reviews"),
+    label: z.string(),
     payload: z.object({ focus: z.string().optional() }),
   }),
   z.object({
@@ -80,61 +62,21 @@ const CopilotOutputSchema = z.object({
   language_detected: z.enum(["el", "en"]),
 });
 
-// Check if query needs web search
 function needsWebSearch(message: string, mode: Mode): boolean {
-  // grants/trends -> πιο συχνά web search
   if (mode === "grants" || mode === "trends") return true;
 
-  const searchTriggers = [
-    // Greek triggers
-    "επιχορήγηση",
-    "επιχορηγήσεις",
-    "χρηματοδότηση",
-    "προκήρυξη",
-    "προκηρύξεις",
-    "deadline",
-    "προθεσμία",
-    "προθεσμίες",
-    "τρέχουσες",
-    "τρέχοντα",
-    "νέες",
-    "νέα",
-    "ανοιχτές",
-    "ανοιχτά",
-    "2024",
-    "2025",
-    "τώρα",
-    "σήμερα",
-    "φέτος",
-    "creative europe",
-    "ελλάδα",
-    "υπουργείο πολιτισμού",
-    "εσπα",
-    // English triggers
-    "grant",
-    "grants",
-    "funding",
-    "deadline",
-    "current",
-    "open call",
-    "open calls",
-    "apply",
-    "application",
-    "opportunity",
-    "opportunities",
-    "latest",
-    "recent",
-    "new",
-    "available",
-    "announcement",
-    "call for",
+  const triggers = [
+    "επιχορήγηση","επιχορηγήσεις","χρηματοδότηση","προκήρυξη","προκηρύξεις",
+    "deadline","προθεσμία","προθεσμίες","τρέχουσες","τρέχοντα","νέες","νέα",
+    "ανοιχτές","ανοιχτά","2024","2025","τώρα","σήμερα","φέτος",
+    "creative europe","ελλάδα","υπουργείο πολιτισμού","εσπα",
+    "grant","grants","funding","current","open call","open calls","apply",
+    "opportunity","latest","recent","new","available",
   ];
-
-  const lowerMessage = message.toLowerCase();
-  return searchTriggers.some((trigger) => lowerMessage.includes(trigger));
+  const lower = message.toLowerCase();
+  return triggers.some((t) => lower.includes(t));
 }
 
-// Search web using Tavily
 async function searchWeb(query: string): Promise<string> {
   try {
     const response = await fetch("https://api.tavily.com/search", {
@@ -142,7 +84,7 @@ async function searchWeb(query: string): Promise<string> {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         api_key: process.env.TAVILY_API_KEY,
-        query: query + " cultural grants funding Greece Europe",
+        query: query + " cultural creative industries Greece Europe",
         search_depth: "basic",
         include_answer: true,
         max_results: 5,
@@ -151,16 +93,14 @@ async function searchWeb(query: string): Promise<string> {
 
     const data = await response.json();
 
-    if (data.results && data.results.length > 0) {
-      let searchContext = "LIVE WEB SEARCH RESULTS:\n";
-      if (data.answer) {
-        searchContext += `Summary: ${data.answer}\n\n`;
-      }
-      searchContext += "Sources:\n";
+    if (data.results?.length) {
+      let ctx = "LIVE WEB SEARCH RESULTS:\n";
+      if (data.answer) ctx += `Summary: ${data.answer}\n\n`;
+      ctx += "Sources:\n";
       data.results.forEach((r: any, i: number) => {
-        searchContext += `${i + 1}. ${r.title}\n   ${r.content}\n   URL: ${r.url}\n\n`;
+        ctx += `${i + 1}. ${r.title}\n   ${r.content}\n   URL: ${r.url}\n\n`;
       });
-      return searchContext;
+      return ctx;
     }
     return "";
   } catch (e) {
@@ -170,84 +110,99 @@ async function searchWeb(query: string): Promise<string> {
 }
 
 function modeInstructions(mode: Mode) {
+  const sharedStyle = `
+STYLE (very important):
+- Sound like a helpful colleague/friend (warm, human, not robotic).
+- Avoid formal report headings.
+- Use short paragraphs + bullets.
+- Be concrete (examples, quick experiments).
+- Ask at most 1–2 clarifying questions.
+- Do NOT mention funding unless the user asks about funding/grants.`;
+
   switch (mode) {
     case "projects":
       return `
 CURRENT MODE: PROJECTS
-You are a senior cultural project planner.
-Always output:
-1) Project snapshot (goal, audience, format)
-2) Plan (timeline milestones, partners, resources/budget notes)
-3) Deliverables (texts/docs needed)
-4) Next best action (1 step)
-Ask at most 2 clarifying questions.`;
+Give a friendly opener, then:
+- 5–8 bullets with a clear plan (timeline, partners, resources)
+- One simple next step
+${sharedStyle}`;
+
     case "grants":
       return `
 CURRENT MODE: GRANTS
-You are a grant consultant (EU/Greece/cultural funding).
-Always output:
-- Eligibility questions (max 3)
-- Shortlist or next steps
-- Application checklist (sections + documents)
-- Draft-ready text blocks (concise)
-If web search exists, include 2–5 opportunities with markdown links.`;
+Give:
+- 2–3 eligibility questions
+- A short checklist (sections + documents)
+- 1–2 draft-ready text blocks (short)
+If web search exists, include 2–5 opportunities with markdown links.
+${sharedStyle}
+NOTE: Funding is allowed here.`;
+
     case "impact":
       return `
 CURRENT MODE: IMPACT
-You are an impact & evaluation specialist for cultural projects.
-Always output:
-- Short Theory of Change
+Give:
+- A short Theory of Change
 - KPIs (outputs/outcomes/impact)
-- Measurement plan (how/when/what data)
-- Next best action (1 step)`;
+- Measurement plan
+- One next step
+${sharedStyle}`;
+
     case "trends":
       return `
 CURRENT MODE: TRENDS
-You are a trend analyst for culture & creative industries.
-Always output:
-- 5 relevant trends (1 line each)
-- 3 project ideas derived from trends
-- Why each idea improves relevance/fundability
-- Next best action (1 step)`;
+Respond like a creative partner, not a report.
+For product/market questions, focus on competitiveness:
+- 4–6 market/product trends
+- 3 concrete product directions (examples: shapes, glazes, price tiers)
+- 1 quick experiment to validate demand this week
+- Ask 1 clarifying question
+${sharedStyle}`;
+
     default:
       return `
 CURRENT MODE: CHAT
-You are Axiprova Advisor: friendly, professional, practical.
-Ask at most 2 clarifying questions. Provide actionable bullets + next step.`;
+Warm, practical, human.
+Bullets + one next step.
+${sharedStyle}`;
   }
 }
 
 function actionsByMode(mode: Mode) {
-  // αυτά θα εμφανιστούν ως κουμπιά κάτω από την απάντηση
   switch (mode) {
     case "projects":
       return [
-        { type: "create_project_outline", label: "Create a project outline", payload: {} },
+        { type: "create_project_outline", label: "Make a project outline", payload: {} },
+        { type: "draft_content", label: "Draft a partner email", payload: { content_type: "email" } },
         { type: "draft_content", label: "Draft a press release", payload: { content_type: "press_release" } },
-        { type: "draft_content", label: "Draft a partner outreach email", payload: { content_type: "email" } },
-        { type: "analyze_audience", label: "Analyze target audiences", payload: {} },
+        { type: "analyze_audience", label: "Who is my audience?", payload: {} },
       ] as const;
+
     case "grants":
       return [
         { type: "create_grant_checklist", label: "Build an application checklist", payload: {} },
-        { type: "funding_help", label: "Draft Objectives & Activities section", payload: { section: "Objectives & Activities" } },
-        { type: "search_web", label: "Search web for grants", payload: {} },
-        { type: "funding_help", label: "Strengthen weaknesses & risks", payload: { section: "Risks & Weak Points" } },
+        { type: "funding_help", label: "Draft Objectives & Activities", payload: { section: "Objectives & Activities" } },
+        { type: "search_web", label: "Search web for open calls", payload: {} },
+        { type: "funding_help", label: "Fix weak points & risks", payload: { section: "Risks & Weak Points" } },
       ] as const;
+
     case "impact":
       return [
-        { type: "create_kpi_plan", label: "Generate KPIs & measurement plan", payload: {} },
-        { type: "funding_help", label: "Draft an evaluation plan (grant-ready)", payload: { section: "Evaluation Plan" } },
+        { type: "create_kpi_plan", label: "Generate KPIs (simple)", payload: {} },
+        { type: "funding_help", label: "Draft a Theory of Change", payload: { section: "Theory of Change" } },
+        { type: "funding_help", label: "Draft an evaluation plan", payload: { section: "Evaluation Plan" } },
         { type: "analyze_audience", label: "Impact by audience segment", payload: {} },
-        { type: "funding_help", label: "Draft Theory of Change", payload: { section: "Theory of Change" } },
       ] as const;
+
     case "trends":
       return [
-        { type: "run_trend_scan", label: "Run a trend scan", payload: {} },
-        { type: "workshop_ideas", label: "Generate 3 project ideas from trends", payload: {} },
+        { type: "run_trend_scan", label: "Give me 5 trends + 3 ideas", payload: {} },
+        { type: "workshop_ideas", label: "Give me 3 concrete product directions", payload: {} },
+        { type: "analyze_audience", label: "Who would buy this?", payload: {} },
         { type: "search_web", label: "Search web for trend sources", payload: {} },
-        { type: "analyze_audience", label: "Audience fit for trends", payload: {} },
       ] as const;
+
     default:
       return [
         { type: "draft_content", label: "Draft an email", payload: { content_type: "email" } },
@@ -261,9 +216,7 @@ function actionsByMode(mode: Mode) {
 export async function POST(req: Request) {
   try {
     const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const { data: { user } } = await supabase.auth.getUser();
 
     let profileContext = "";
     let snippetsContext = "";
@@ -271,7 +224,6 @@ export async function POST(req: Request) {
     let webSearchContext = "";
 
     if (user) {
-      // Get user profile
       const { data: profile } = await supabase
         .from("org_profiles")
         .select("*")
@@ -288,12 +240,9 @@ ORGANIZATION PROFILE:
 - Target Audience: ${profile.target_audience || "Not set"}
 - Main Challenges: ${profile.main_challenges || "Not set"}
 - Goals: ${profile.goals || "Not set"}
-
-USE THIS PROFILE to personalize ALL your advice.
 `;
       }
 
-      // Get user snippets/data
       const { data: snippets } = await supabase
         .from("org_snippets")
         .select("*")
@@ -301,14 +250,12 @@ USE THIS PROFILE to personalize ALL your advice.
         .order("created_at", { ascending: false })
         .limit(20);
 
-      if (snippets && snippets.length > 0) {
+      if (snippets?.length) {
         const reviews = snippets.filter((s) => s.kind === "review");
         snippetsContext = `
 USER'S DATA:
 REVIEWS (${reviews.length} total):
-${reviews
-  .map((r) => `- [${r.source}, Rating: ${r.rating || "N/A"}] "${r.content}"`)
-  .join("\n")}
+${reviews.map((r) => `- [${r.source}, Rating: ${r.rating || "N/A"}] "${r.content}"`).join("\n")}
 `;
       }
     }
@@ -320,7 +267,6 @@ ${reviews
       mode?: Mode;
     };
 
-    // Search knowledge base for relevant info
     try {
       const { embedding } = await embed({
         model: openai.embedding("text-embedding-3-small"),
@@ -333,9 +279,9 @@ ${reviews
         match_count: 3,
       });
 
-      if (knowledgeResults && knowledgeResults.length > 0) {
+      if (knowledgeResults?.length) {
         knowledgeContext = `
-EXPERT KNOWLEDGE (use this to give specific, professional advice):
+EXPERT KNOWLEDGE (use when relevant):
 ${knowledgeResults.map((k: any) => `[${k.category}] ${k.content}`).join("\n\n")}
 `;
       }
@@ -343,7 +289,6 @@ ${knowledgeResults.map((k: any) => `[${k.category}] ${k.content}`).join("\n\n")}
       console.log("Knowledge search skipped:", e);
     }
 
-    // Web search if needed (or forced by mode)
     if (needsWebSearch(message, mode)) {
       webSearchContext = await searchWeb(message);
     }
@@ -357,25 +302,22 @@ ${knowledgeResults.map((k: any) => `[${k.category}] ${k.content}`).join("\n\n")}
 
     const langName = detectedLanguage === "el" ? "Greek" : "English";
 
-    const noProfileMessage = !profileContext
-      ? "\n\nNOTE: User hasn't set up their profile yet. Encourage them to visit /dashboard/profile."
-      : "";
-
     const webSearchInstructions = webSearchContext
-      ? `\n\nWEB SEARCH INSTRUCTIONS:
-- You have live search results below with ACTUAL URLs.
-- ALWAYS include clickable links in markdown: [Name](https://url.com)
-- List at least 2–5 specific opportunities/sources with direct links (when relevant).`
+      ? `\n\nWEB SEARCH:
+- Include clickable markdown links: [Name](https://url.com)
+- Use web results only when they help the question.`
       : "";
 
-    const systemPrompt = `You are Axiprova — an expert AI advisor for cultural sector professionals.
+    const systemPrompt = `You are Axiprova — an expert AI advisor for culture & the creative industries.
 
 RESPOND ONLY IN ${langName}. NEVER mix languages.
 
-TONE:
-- Friendly, calm, professional
-- Practical, not generic
-- If user is unclear, ask at most 2 clarifying questions
+CORE BEHAVIOR:
+- Warm, human, like a real colleague/friend.
+- Avoid robotic templates and corporate report tone.
+- Be specific and practical.
+- Ask at most 1–2 clarifying questions.
+- Do NOT mention funding unless the user asks, except in GRANTS mode.
 
 ${modeInstructions(mode)}
 
@@ -383,18 +325,25 @@ ${profileContext}
 ${snippetsContext}
 ${knowledgeContext}
 ${webSearchContext}
-${noProfileMessage}
 ${webSearchInstructions}
 
 OUTPUT RULES:
-- Keep it crisp: max 2–3 short paragraphs OR structured bullets.
-- Be specific and actionable.
-- Provide 2–5 action buttons ideas (the system will show buttons).`;
+- Natural voice (not a formal report).
+- Short paragraphs + bullets (max ~10 bullets).
+- Avoid repetitive templates.
+- Provide 2–5 action buttons.`;
 
     const result = await streamObject({
       model: openai("gpt-4o-2024-08-06"),
       schema: CopilotOutputSchema,
-      prompt: systemPrompt + "\n\nUser: " + message,
+      prompt:
+        systemPrompt +
+        `
+
+Return actions that match the current mode.
+Mode actions available: ${JSON.stringify(actionsByMode(mode))}
+
+User: ${message}`,
     });
 
     return result.toTextStreamResponse();
