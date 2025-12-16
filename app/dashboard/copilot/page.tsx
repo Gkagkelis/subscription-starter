@@ -10,7 +10,7 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   insights?: string[];
-  actions?: Array<{ label: string; [key: string]: any }>;
+  actions?: Array<{ label: string; type?: string; payload?: any; [key: string]: any }>;
 }
 
 interface Chat {
@@ -101,7 +101,7 @@ export default function CopilotPage() {
 
   const [mode, setMode] = useState<Mode>("chat");
 
-  // ✅ Smart Assist session context
+  // Smart Assist session context
   const [sessionContext, setSessionContext] = useState<Record<string, any>>({});
 
   const [editingChatId, setEditingChatId] = useState<string | null>(null);
