@@ -26,6 +26,17 @@ interface Chat {
   messages: Message[];
 }
 
+const UI_TEXT = {
+  newChat: "+ New Chat",
+  recentChats: "RECENT CHATS",
+  askAnything: "Ask anything...",
+  send: "Send",
+  thinking: "Thinking...",
+  modeLabel: "Mode:",
+  myData: "My Data",
+  advisor: "Advisor",
+} as const;
+
 const MODE_CONFIG: Record<
   Mode,
   {
@@ -144,8 +155,8 @@ export default function CopilotPage() {
     | { id: Mode; icon: string; label: string; kind: "mode" }
     | { id: "data"; icon: string; label: string; kind: "link"; href: string }
   > = [
-    { id: "chat", icon: "/chat_logo.png", label: "Advisor", kind: "mode" },
-    { id: "data", icon: "/my_data_logo.png", label: "My Data", kind: "link", href: "/dashboard/data" },
+    { id: "chat", icon: "/chat_logo.png", label: UI_TEXT.advisor, kind: "mode" },
+    { id: "data", icon: "/my_data_logo.png", label: UI_TEXT.myData, kind: "link", href: "/dashboard/data" },
     { id: "projects", icon: "/project_logo.png", label: "Projects", kind: "mode" },
     { id: "grants", icon: "/Grand_Finder.png", label: "Grant Finder", kind: "mode" },
     { id: "impact", icon: "/Impact_Predictor_logo.png", label: "Impact Predictor", kind: "mode" },
@@ -365,7 +376,7 @@ export default function CopilotPage() {
             onClick={createNewChat}
             className="w-full py-2 px-4 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2"
           >
-            + New Chat
+            {UI_TEXT.newChat}
           </button>
         </div>
 
@@ -398,7 +409,7 @@ export default function CopilotPage() {
 
           {chats.length > 0 && (
             <div className="mt-4 pt-4 border-t border-zinc-800">
-              <p className="text-xs text-zinc-600 px-3 mb-2">RECENT CHATS</p>
+              <p className="text-xs text-zinc-600 px-3 mb-2">{UI_TEXT.recentChats}</p>
 
               {chats.map((chat) => (
                 <div key={chat.id} className="relative group">
@@ -445,7 +456,7 @@ export default function CopilotPage() {
         <div className="border-b border-zinc-800 bg-zinc-950 px-6 py-4">
           <div className="max-w-2xl mx-auto">
             <div className="text-sm text-zinc-300">
-              <span className="text-zinc-500">Mode:</span> {MODE_CONFIG[mode].label}
+              <span className="text-zinc-500">{UI_TEXT.modeLabel}</span> {MODE_CONFIG[mode].label}
             </div>
             <div className="text-xs text-zinc-500 mt-1">{MODE_CONFIG[mode].hint}</div>
           </div>
@@ -475,7 +486,7 @@ export default function CopilotPage() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Ask anything..."
+                placeholder={UI_TEXT.askAnything}
                 className="flex-1 bg-zinc-900 text-white px-4 py-3 rounded-xl border border-zinc-800 focus:outline-none focus:border-zinc-600 placeholder-zinc-600"
               />
               <button
@@ -483,7 +494,7 @@ export default function CopilotPage() {
                 disabled={loading || !input.trim()}
                 className="px-6 py-3 bg-white text-black font-medium rounded-xl hover:bg-zinc-200 disabled:opacity-50 transition"
               >
-                Send
+                {UI_TEXT.send}
               </button>
             </div>
           </div>
@@ -554,7 +565,7 @@ export default function CopilotPage() {
                 {loading && (
                   <div className="flex gap-3 mb-6">
                     <img src="/axiprova-icon.png" alt="AI" className="w-8 h-8 flex-shrink-0" />
-                    <div className="text-zinc-500">Thinking...</div>
+                    <div className="text-zinc-500">{UI_TEXT.thinking}</div>
                   </div>
                 )}
 
@@ -569,7 +580,7 @@ export default function CopilotPage() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Ask anything..."
+                  placeholder={UI_TEXT.askAnything}
                   className="flex-1 bg-zinc-900 text-white px-4 py-3 rounded-xl border border-zinc-800 focus:outline-none focus:border-zinc-600 placeholder-zinc-600"
                 />
                 <button
@@ -577,7 +588,7 @@ export default function CopilotPage() {
                   disabled={loading || !input.trim()}
                   className="px-6 py-3 bg-white text-black font-medium rounded-xl hover:bg-zinc-200 disabled:opacity-50 transition"
                 >
-                  Send
+                  {UI_TEXT.send}
                 </button>
               </div>
             </div>
