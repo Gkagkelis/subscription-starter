@@ -53,7 +53,7 @@ export default function CopilotPage() {
   }, [messages, loading]);
 
   const modeLabel: Record<Mode, string> = {
-    chat: "Copilot",
+    chat: "Axiprova Copilot",
     projects: "Projects Mode",
     grants: "Grant Finder Mode",
     impact: "Impact Predictor Mode",
