@@ -102,6 +102,100 @@ function needsWebSearch(message: string, mode: Mode): boolean {
   return triggers.some((t) => lower.includes(t));
 }
 
+// Global-only approach: we don't detect country automatically.
+// We only consider it "known" if:
+// - it exists in the user's profile location OR
+// - the user mentioned it in the current message (light heuristic)
+function isCountryKnown(message: string, profileLocation?: string): boolean {
+  const loc = (profileLocation || "").trim().toLowerCase();
+  if (loc && loc !== "not set" && loc !== "unknown" && loc !== "n/a") return true;
+
+  const m = (message || "").toLowerCase();
+  const hints = [
+    // Greece/Cyprus
+    "greece",
+    "ελλάδα",
+    "athens",
+    "αθήνα",
+    "thessaloniki",
+    "θεσσαλονίκη",
+    "cyprus",
+    "κύπρος",
+
+    // EU / common countries
+    "europe",
+    "eu",
+    "e.u.",
+    "european union",
+    "united kingdom",
+    "uk",
+    "england",
+    "scotland",
+    "wales",
+    "ireland",
+    "france",
+    "paris",
+    "germany",
+    "berlin",
+    "italy",
+    "rome",
+    "spain",
+    "madrid",
+    "portugal",
+    "lisbon",
+    "netherlands",
+    "amsterdam",
+    "belgium",
+    "brussels",
+    "sweden",
+    "stockholm",
+    "norway",
+    "oslo",
+    "denmark",
+    "copenhagen",
+    "finland",
+    "helsinki",
+    "poland",
+    "warsaw",
+    "romania",
+    "bucharest",
+    "bulgaria",
+    "sofia",
+    "austria",
+    "vienna",
+    "switzerland",
+    "zurich",
+
+    // Americas / others
+    "usa",
+    "united states",
+    "america",
+    "new york",
+    "california",
+    "canada",
+    "toronto",
+    "vancouver",
+    "mexico",
+    "brazil",
+    "argentina",
+
+    // APAC
+    "australia",
+    "sydney",
+    "melbourne",
+    "new zealand",
+    "india",
+    "singapore",
+    "japan",
+    "tokyo",
+    "south korea",
+    "seoul",
+  ];
+
+  return hints.some((h) => m.includes(h));
+}
+
+// ✅ Global-first (neutral) Tavily query: no Greece/Europe bias
 async function searchWeb(query: string): Promise<string> {
   try {
     const response = await fetch("https://api.tavily.com/search", {
@@ -109,7 +203,7 @@ async function searchWeb(query: string): Promise<string> {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         api_key: process.env.TAVILY_API_KEY,
-        query: query + " cultural creative industries Greece Europe",
+        query: query + " culture creative industries",
         search_depth: "basic",
         include_answer: true,
         max_results: 5,
@@ -250,6 +344,10 @@ export async function POST(req: Request) {
     let knowledgeContext = "";
     let webSearchContext = "";
 
+    // We'll keep location as a real variable (so we can decide whether to ask country)
+    let profileLocation: string | undefined;
+    let needsCountry = false;
+
     if (user) {
       const { data: profile } = await supabase
         .from("org_profiles")
@@ -258,6 +356,8 @@ export async function POST(req: Request) {
         .single();
 
       if (profile) {
+        profileLocation = profile.location || undefined;
+
         profileContext = `
 ORGANIZATION PROFILE:
 - Name: ${profile.org_name || "Not set"}
@@ -289,19 +389,16 @@ ${reviews.map((r) => `- [${r.source}, Rating: ${r.rating || "N/A"}] "${r.content
 
     // ✅ Step 2B (1): body parsing with action + context
     const body = await req.json();
-    const {
-      message,
-      language = "auto",
-      mode = "chat",
-      action,
-      context,
-    } = body as {
+    const { message, language = "auto", mode = "chat", action, context } = body as {
       message: string;
       language?: "auto" | "el" | "en";
       mode?: Mode;
       action?: { type: string; label: string; payload?: any };
       context?: { lastAssistantMessage?: string };
     };
+
+    // Decide if we must ask for country first (ONLY for grants/trends)
+    needsCountry = (mode === "grants" || mode === "trends") && !isCountryKnown(message, profileLocation);
 
     // ✅ Step 2B (2): action-aware input
     const lastAssistant = context?.lastAssistantMessage?.trim() || "";
@@ -341,8 +438,8 @@ ${knowledgeResults.map((k: any) => `[${k.category}] ${k.content}`).join("\n\n")}
       console.log("Knowledge search skipped:", e);
     }
 
-    // Web search
-    if (needsWebSearch(message, mode)) {
+    // Web search (skip if we first need the country)
+    if (needsWebSearch(message, mode) && !needsCountry) {
       webSearchContext = await searchWeb(message);
     }
 
@@ -355,6 +452,17 @@ ${knowledgeResults.map((k: any) => `[${k.category}] ${k.content}`).join("\n\n")}
         : language;
 
     const langName = detectedLanguage === "el" ? "Greek" : "English";
+
+    const countryQuestion = detectedLanguage === "el" ? "Σε ποια χώρα βρίσκεσαι;" : "Which country are you in?";
+
+    const countryClarificationInstruction = needsCountry
+      ? `
+
+LOCATION NEEDED:
+- Before giving country-specific grants/opportunities/deadlines or market specifics, ask exactly ONE question first:
+"${countryQuestion}"
+- Do NOT list opportunities yet. Keep the reply short.`
+      : "";
 
     const webSearchInstructions = webSearchContext
       ? `\n\nWEB SEARCH:
@@ -374,6 +482,8 @@ CORE BEHAVIOR:
 - Do NOT mention funding unless the user asks, except in GRANTS mode.
 
 ${modeInstructions(mode)}
+
+${countryClarificationInstruction}
 
 ${profileContext}
 ${snippetsContext}
