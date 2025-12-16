@@ -101,7 +101,7 @@ export default function CopilotPage() {
 
   const [mode, setMode] = useState<Mode>("chat");
 
-  // Smart Assist session context
+  // ✅ Session Context (Smart Assist)
   const [sessionContext, setSessionContext] = useState<Record<string, any>>({});
 
   const [editingChatId, setEditingChatId] = useState<string | null>(null);
@@ -203,6 +203,7 @@ export default function CopilotPage() {
     setEditingTitle("");
   };
 
+  // ✅ Save (My Work)
   const saveArtifact = async (content: string) => {
     try {
       const title = content.split("\n").find((l) => l.trim())?.slice(0, 60) || "Saved";
@@ -221,13 +222,36 @@ export default function CopilotPage() {
     return last?.content ?? "";
   };
 
+  // ✅ Context Bar (ορατό + ελέγξιμο)
+  const ContextBar = () => {
+    const entries = Object.entries(sessionContext ?? {});
+    if (entries.length === 0) return null;
+
+    return (
+      <div className="max-w-2xl mx-auto mb-2 flex flex-wrap gap-2 items-center">
+        {entries.map(([k, v]) => (
+          <span
+            key={k}
+            className="text-xs px-2 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300"
+          >
+            {k}: {String(v)}
+          </span>
+        ))}
+        <button
+          onClick={() => setSessionContext({})}
+          className="text-xs px-2 py-1 rounded-full bg-zinc-800 text-white hover:bg-zinc-700"
+        >
+          Clear
+        </button>
+      </div>
+    );
+  };
+
   const handleActionClick = async (action: { type?: string; label: string; payload?: any }) => {
     setLoading(true);
 
     const nextContext =
-      action?.type === "set_context"
-        ? { ...sessionContext, ...(action.payload ?? {}) }
-        : sessionContext;
+      action?.type === "set_context" ? { ...sessionContext, ...(action.payload ?? {}) } : sessionContext;
 
     if (action?.type === "set_context") {
       setSessionContext(nextContext);
@@ -476,22 +500,25 @@ export default function CopilotPage() {
               ))}
             </div>
 
-            <div className="w-full max-w-2xl flex gap-3">
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Ρώτησε οτιδήποτε..."
-                className="flex-1 bg-zinc-900 text-white px-4 py-3 rounded-xl border border-zinc-800 focus:outline-none focus:border-zinc-600 placeholder-zinc-600"
-              />
-              <button
-                onClick={() => handleSubmit()}
-                disabled={loading || !input.trim()}
-                className="px-6 py-3 bg-white text-black font-medium rounded-xl hover:bg-zinc-200 disabled:opacity-50 transition"
-              >
-                Στείλε
-              </button>
+            <div className="w-full max-w-2xl">
+              <ContextBar />
+              <div className="flex gap-3">
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Ρώτησε οτιδήποτε..."
+                  className="flex-1 bg-zinc-900 text-white px-4 py-3 rounded-xl border border-zinc-800 focus:outline-none focus:border-zinc-600 placeholder-zinc-600"
+                />
+                <button
+                  onClick={() => handleSubmit()}
+                  disabled={loading || !input.trim()}
+                  className="px-6 py-3 bg-white text-black font-medium rounded-xl hover:bg-zinc-200 disabled:opacity-50 transition"
+                >
+                  Στείλε
+                </button>
+              </div>
             </div>
           </div>
         ) : (
@@ -570,6 +597,7 @@ export default function CopilotPage() {
             </div>
 
             <div className="border-t border-zinc-800 bg-zinc-950 px-6 py-4">
+              <ContextBar />
               <div className="max-w-2xl mx-auto flex gap-3">
                 <input
                   type="text"
