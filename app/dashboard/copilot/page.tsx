@@ -214,6 +214,58 @@ export default function CopilotPage() {
     }
   };
 
+  const getLastAssistantText = () => {
+    const last = [...messages].reverse().find((m) => m.role === "assistant");
+    return last?.content ?? "";
+  };
+
+  const handleActionClick = async (action: { type?: string; label: string; payload?: any }) => {
+    // fallback: αν το action δεν έχει type/payload, το χειριζόμαστε σαν απλό prompt
+    setLoading(true);
+    try {
+      const res = await fetch("/api/ai/copilot", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: action.label, // fallback text
+          language: "auto",
+          mode,
+          action: {
+            type: action.type ?? "generic",
+            label: action.label,
+            payload: action.payload ?? {},
+          },
+          context: {
+            lastAssistantMessage: getLastAssistantText(),
+          },
+        }),
+      });
+
+      const data = await res.json();
+
+      const assistantMessage: Message = {
+        role: "assistant",
+        content: data?.reply ?? "",
+        insights: Array.isArray(data?.insights) ? data.insights : [],
+        actions: Array.isArray(data?.actions) ? data.actions : [],
+      };
+
+      // append to current chat
+      const userMessage: Message = { role: "user", content: action.label };
+      const updated = [...messages, userMessage, assistantMessage];
+
+      if (activeChat) {
+        setChats((prev) => prev.map((c) => (c.id === activeChat ? { ...c, messages: updated } : c)));
+        const chatNow = chatsRef.current.find((c) => c.id === activeChat);
+        await updateChat(activeChat, chatNow?.title || "Chat", updated);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (text?: string) => {
     const message = (text ?? input).trim();
     if (!message) return;
@@ -463,7 +515,7 @@ export default function CopilotPage() {
                               {msg.actions.map((action, j) => (
                                 <button
                                   key={j}
-                                  onClick={() => handleSubmit(action.label)}
+                                  onClick={() => handleActionClick(action)}
                                   className="px-3 py-1.5 text-sm bg-zinc-900 text-zinc-400 border border-zinc-700 rounded-full hover:bg-zinc-800 hover:text-white transition"
                                 >
                                   {action.label}
