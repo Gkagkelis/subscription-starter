@@ -12,8 +12,9 @@ export default async function PricingPage() {
 
   return (
     <div className="flex flex-col items-center text-center px-6">
+
       {/* LOGO */}
-      <div className="mt-28 mb-12">
+      <div className="mt-28 mb-10">
         <img
           src="/axiprova.jpeg"
           alt="Axiprova"
@@ -21,24 +22,49 @@ export default async function PricingPage() {
         />
       </div>
 
-      {/* HEADLINE */}
-      <h1 className="text-4xl md:text-5xl font-semibold max-w-4xl mb-6">
-        Stop rewriting the same project description.
+      {/* HEADLINE (Anara-style) */}
+      <h1 className="text-4xl md:text-5xl font-semibold max-w-4xl mb-5">
+        AI workspace for artists, cultural producers, and creative teams
       </h1>
 
-      <p className="text-lg md:text-xl text-gray-400 max-w-3xl mb-8">
-        Make one <span className="text-gray-200 font-medium">Project DNA</span> — then instantly get ready-to-use
-        versions for your website, socials, emails, press, and applications.
+      {/* SUBHEADLINE (clear job + outcome) */}
+      <p className="text-lg md:text-xl text-gray-400 max-w-3xl mb-4">
+        Describe your project once, then generate ready-to-use versions for your website, social, email, press,
+        and applications — and save everything as a reusable library.
       </p>
 
-      {/* BOTTOM-UP POSITIONING (small, not salesy) */}
-      <p className="text-sm text-gray-500 max-w-3xl mb-16">
-        Built for artists, producers, curators, and cultural teams. Start with everyday writing → unlock Pro tools
-        for grants &amp; impact later.
+      {/* GREEK LINE (so people identify immediately) */}
+      <p className="text-sm md:text-base text-gray-500 max-w-3xl mb-10">
+        Ελληνικά/English αυτόματα. Φτιάχνεις “Project DNA” μία φορά και βγάζεις όλα τα format σε 1 κλικ.
       </p>
 
-      {/* PRICING */}
-      <Pricing user={user} products={products ?? []} subscription={subscription} />
+      {/* CTA (tie to the product) */}
+      <div className="flex flex-col md:flex-row gap-3 mb-14">
+        <a
+          href="/sign-up?next=/dashboard/projects/new"
+          className="px-6 py-3 rounded-xl bg-white text-black font-medium hover:bg-zinc-200 transition"
+        >
+          Join Beta — €8/month
+        </a>
+        <a
+          href="/sign-in?next=/dashboard/projects"
+          className="px-6 py-3 rounded-xl bg-zinc-900 text-white border border-zinc-700 hover:bg-zinc-800 transition"
+        >
+          Sign In
+        </a>
+      </div>
+
+      {/* PRICING (kept exactly as you had it) */}
+      <Pricing
+        user={user}
+        products={products ?? []}
+        subscription={subscription}
+      />
+
+      {/* Bottom-up framing (small, honest, not marketing fluff) */}
+      <p className="text-xs md:text-sm text-gray-500 max-w-3xl mt-10 mb-16">
+        Start with everyday writing & repurposing. Pro tools for grants & impact unlock as you grow.
+      </p>
     </div>
   );
 }
