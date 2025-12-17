@@ -21,33 +21,39 @@ export default async function PricingPage() {
         />
       </div>
 
-      {/* HEADLINE (Anara-style) */}
+      {/* ONE CLEAR HEADLINE */}
       <h1 className="text-4xl md:text-5xl font-semibold max-w-4xl mb-5">
         AI workspace for artists, cultural producers, and creative teams
       </h1>
 
-      {/* SUBHEADLINE (clear job + outcome) */}
-      <p className="text-lg md:text-xl text-gray-400 max-w-3xl mb-4">
-        Describe your project once, then generate ready-to-use versions for your website, social, email, press,
-        and applications — and save everything as a reusable library.
+      {/* ONE CLEAR VALUE PROP */}
+      <p className="text-lg md:text-xl text-gray-400 max-w-3xl mb-14">
+        Describe your project once → get ready-to-use versions for website, social, email, press, and applications.
+        <br />
+        <span className="text-gray-500 text-base">Ελληνικά/English αυτόματα.</span>
       </p>
 
-      {/* GREEK LINE (so people identify immediately) */}
-      <p className="text-sm md:text-base text-gray-500 max-w-3xl mb-14">
-        Ελληνικά/English αυτόματα. Φτιάχνεις "Project DNA" μία φορά και βγάζεις όλα τα format σε 1 κλικ.
-      </p>
-
-      {/* PRICING (with integrated CTA) */}
+      {/* PRICING (clean, no duplicate headers) */}
       <Pricing
         user={user}
         products={products ?? []}
         subscription={subscription}
       />
-
-      {/* Bottom-up framing (small, honest, not marketing fluff) */}
-      <p className="text-xs md:text-sm text-gray-500 max-w-3xl mt-10 mb-16">
-        Start with everyday writing & repurposing. Pro tools for grants & impact unlock as you grow.
-      </p>
     </div>
   );
 }
+```
+
+**ΤΙ ΑΛΛΑΞΕ:**
+- ✅ Ένα headline (όχι 3)
+- ✅ Ένα value prop (short & clear)
+- ✅ Greek line integrated (όχι ξεχωριστή παράγραφος)
+- ✅ Καθαρό flow: Logo → Headline → Value → Pricing
+
+---
+
+## **ΤΩΡΑ: Πρέπει να φτιάξω το Pricing component**
+
+Χρειάζομαι το αρχείο:
+```
+components/ui/Pricing/Pricing.tsx
