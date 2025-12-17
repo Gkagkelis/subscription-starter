@@ -2,7 +2,8 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+
 
 type Mode = "chat" | "projects" | "grants" | "impact" | "trends";
 
@@ -88,6 +89,15 @@ const MODE_CONFIG: Record<
 
 export default function CopilotPage() {
   const router = useRouter();
+    const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const from = searchParams.get("from");
+    if (from !== "nav") {
+      router.replace("/dashboard/projects");
+    }
+  }, [router, searchParams]);
+
 
   const [chats, setChats] = useState<Chat[]>([]);
   const chatsRef = useRef<Chat[]>([]);
