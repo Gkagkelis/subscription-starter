@@ -12,7 +12,6 @@ export default async function PricingPage() {
 
   return (
     <div className="flex flex-col items-center text-center px-6">
-
       {/* LOGO */}
       <div className="mt-28 mb-10">
         <img
@@ -34,27 +33,11 @@ export default async function PricingPage() {
       </p>
 
       {/* GREEK LINE (so people identify immediately) */}
-      <p className="text-sm md:text-base text-gray-500 max-w-3xl mb-10">
-        Ελληνικά/English αυτόματα. Φτιάχνεις “Project DNA” μία φορά και βγάζεις όλα τα format σε 1 κλικ.
+      <p className="text-sm md:text-base text-gray-500 max-w-3xl mb-14">
+        Ελληνικά/English αυτόματα. Φτιάχνεις "Project DNA" μία φορά και βγάζεις όλα τα format σε 1 κλικ.
       </p>
 
-      {/* CTA (tie to the product) */}
-      <div className="flex flex-col md:flex-row gap-3 mb-14">
-        <a
-          href="/sign-up?next=/dashboard/projects/new"
-          className="px-6 py-3 rounded-xl bg-white text-black font-medium hover:bg-zinc-200 transition"
-        >
-          Join Beta — €8/month
-        </a>
-        <a
-          href="/sign-in?next=/dashboard/projects"
-          className="px-6 py-3 rounded-xl bg-zinc-900 text-white border border-zinc-700 hover:bg-zinc-800 transition"
-        >
-          Sign In
-        </a>
-      </div>
-
-      {/* PRICING (kept exactly as you had it) */}
+      {/* PRICING (with integrated CTA) */}
       <Pricing
         user={user}
         products={products ?? []}
