@@ -33,41 +33,36 @@ export default function Pricing({ user, products, subscription }: Props) {
   const currentPath = usePathname();
   const [priceIdLoading, setPriceIdLoading] = useState<string>();
 
-  // === ROUTES (προσαρμόζονται αν έχεις άλλα auth paths) ===
+  // ✅ ΤΑ ΣΩΣΤΑ ROUTES ΠΟΥ ΜΟΥ ΕΔΩΣΕΣ
   const SIGNUP_URL = '/signin/signup?next=/dashboard/projects/new';
+  const SIGNIN_URL = '/signin/password_signin?next=/dashboard/projects';
   const DASH_ENTRY = '/dashboard/projects/new';
 
-  // Αν έχεις Stripe product/price, το βρίσκουμε (αλλά δεν το απαιτούμε)
+  // (αν έχεις Stripe/DB prices, το διαβάζουμε· αλλιώς δείχνουμε €8)
   const betaProduct = products?.[0];
   const betaPrice = useMemo(
     () => betaProduct?.prices?.find((p) => p.interval === 'month'),
     [betaProduct]
   );
 
-  // Αν ΔΕΝ είναι συνδεδεμένο, δείχνουμε €8 hardcoded
   const displayMonthlyEuro = useMemo(() => {
     const unit = betaPrice?.unit_amount;
     if (typeof unit === 'number' && !Number.isNaN(unit)) {
-      // unit_amount είναι σε cents
       const euro = Math.round(unit) / 100;
       return euro.toFixed(euro % 1 === 0 ? 0 : 2);
     }
     return '8';
   }, [betaPrice]);
 
-  // Αν όντως έχεις Stripe setup, μπορείς να κάνεις checkout.
-  // Αν όχι, πάει signup → wizard.
   const handleStripeCheckout = async (price: Price) => {
     setPriceIdLoading(price.id);
 
-    // Αν δεν υπάρχει user, πάμε signup (με next)
     if (!user) {
       setPriceIdLoading(undefined);
       return router.push(SIGNUP_URL);
     }
 
-    // Αν δεν έχεις στην πράξη stripe ενεργό, απλά πήγαινε στο entry point
-    // (πρακτικό safety ώστε να μη σκάει)
+    // Αν Stripe δεν είναι πραγματικά ενεργό, κάνουμε fallback στο entry point
     try {
       const { errorRedirect, sessionId } = await checkoutWithStripe(price, currentPath);
       if (errorRedirect) {
@@ -81,7 +76,6 @@ export default function Pricing({ user, products, subscription }: Props) {
       const stripe = await getStripe();
       stripe?.redirectToCheckout({ sessionId });
     } catch {
-      // fallback
       router.push(DASH_ENTRY);
     } finally {
       setPriceIdLoading(undefined);
@@ -91,7 +85,6 @@ export default function Pricing({ user, products, subscription }: Props) {
   return (
     <section className="w-full">
       <div className="max-w-6xl px-4 py-8 mx-auto sm:py-16 sm:px-6 lg:px-8">
-
         {/* Header */}
         <div className="text-center mb-12">
           <span className="inline-block px-4 py-1 mb-4 text-sm font-medium text-purple-400 bg-purple-900/30 rounded-full">
@@ -101,14 +94,28 @@ export default function Pricing({ user, products, subscription }: Props) {
             Join the Axiprova Beta
           </h2>
           <p className="text-zinc-400 max-w-2xl mx-auto">
-            Start with Project DNA (mass) — unlock Pro grants & impact tools later.
+            Start with Project DNA (mass). Pro tools for grants & impact unlock later.
           </p>
+
+          <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a
+              href={SIGNUP_URL}
+              className="px-6 py-3 rounded-xl bg-white text-black font-medium hover:bg-zinc-200 transition"
+            >
+              Join Beta — €{displayMonthlyEuro}/month
+            </a>
+            <a
+              href={SIGNIN_URL}
+              className="px-6 py-3 rounded-xl bg-zinc-900 text-white border border-zinc-700 hover:bg-zinc-800 transition"
+            >
+              Sign In
+            </a>
+          </div>
         </div>
 
         {/* Beta Card */}
         <div className="max-w-md mx-auto mb-16">
           <div className="bg-gradient-to-b from-purple-900/40 to-zinc-900 rounded-2xl p-8 border-2 border-purple-500 shadow-lg shadow-purple-500/20 relative">
-
             <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
               <span className="bg-purple-500 text-white text-xs font-bold px-3 py-1 rounded-full">
                 AVAILABLE NOW
@@ -117,9 +124,7 @@ export default function Pricing({ user, products, subscription }: Props) {
 
             <div className="text-center mb-6 mt-2">
               <h3 className="text-2xl font-bold text-white mb-2">Beta Access</h3>
-              <p className="text-zinc-400 text-sm">
-                Full access to the core workflow — built with real users
-              </p>
+              <p className="text-zinc-400 text-sm">Full access while we build together</p>
             </div>
 
             <div className="text-center mb-8">
@@ -150,12 +155,11 @@ export default function Pricing({ user, products, subscription }: Props) {
               </li>
               <li className="flex items-center text-zinc-300">
                 <span className="text-purple-400 mr-3">✓</span>
-                Direct access to the team + roadmap input
+                Direct access to the team + shape the roadmap
               </li>
             </ul>
 
-            {/* CTA: αν δεν έχεις Stripe connected → signup wizard.
-                Αν έχεις Price και user → μπορείς να κάνεις checkout. */}
+            {/* CTA */}
             {betaPrice && user ? (
               <button
                 onClick={() => handleStripeCheckout(betaPrice)}
@@ -183,12 +187,11 @@ export default function Pricing({ user, products, subscription }: Props) {
         <div className="text-center mb-8">
           <h3 className="text-xl font-semibold text-zinc-400 mb-2">Coming Soon</h3>
           <p className="text-zinc-500 text-sm">
-            Clear next steps: Creator → Pro (grants/impact) → Team workspace
+            Creator → Pro (grants/impact) → Team workspace
           </p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-
           {/* Free */}
           <div className="bg-zinc-900/50 rounded-xl p-6 border border-zinc-800 opacity-70">
             <h3 className="text-xl font-bold text-white mb-2">Free — Starter</h3>
@@ -246,7 +249,6 @@ export default function Pricing({ user, products, subscription }: Props) {
               Coming Soon
             </div>
           </div>
-
         </div>
 
         <div className="text-center mt-12">
@@ -254,7 +256,6 @@ export default function Pricing({ user, products, subscription }: Props) {
             Join the beta now and keep this price forever.
           </p>
         </div>
-
       </div>
     </section>
   );
