@@ -46,7 +46,11 @@ export default function ProjectPage() {
 
   const uiLang = useMemo(() => {
     const base = dnaAsset?.content || "";
-    const d = base ? detectLang(base) : (typeof navigator !== "undefined" && navigator.language.startsWith("el") ? "el" : "en");
+    const d = base
+      ? detectLang(base)
+      : typeof navigator !== "undefined" && navigator.language.startsWith("el")
+      ? "el"
+      : "en";
     return d;
   }, [dnaAsset]);
 
@@ -69,7 +73,6 @@ export default function ProjectPage() {
     return [...ders].sort((a, b) => (a.updated_at > b.updated_at ? -1 : 1))[0];
   }, [assets, selectedFormat]);
 
-  // ✅ Implicit Feedback Tracker
   async function trackFeedback(signal_type: string, format?: string, asset_id?: string) {
     try {
       await fetch("/api/feedback", {
@@ -140,8 +143,6 @@ export default function ProjectPage() {
       }
 
       const saved = await res.json();
-
-      // ✅ Track: user saved DNA
       await trackFeedback("save", "dna", saved?.id);
 
       setToast(t("Αποθηκεύτηκε ✅", "Saved ✅"));
@@ -180,7 +181,6 @@ export default function ProjectPage() {
       const data = await res.json();
       setGenerated(typeof data?.content === "string" ? data.content : "");
 
-      // ✅ Track: user generated derivative (or regenerated if exists)
       const signal = existingDerivative ? "regenerate" : "save";
       await trackFeedback(signal, format);
 
@@ -223,8 +223,6 @@ export default function ProjectPage() {
       }
 
       const saved = await res.json();
-
-      // ✅ Track: user saved derivative
       await trackFeedback("save", selectedFormat, saved?.id);
 
       setToast(t("Αποθηκεύτηκε ✅", "Saved ✅"));
@@ -241,7 +239,6 @@ export default function ProjectPage() {
     try {
       await navigator.clipboard.writeText(text);
 
-      // ✅ Track: user copied derivative
       if (format) await trackFeedback("copy", format);
 
       setToast(t("Αντιγράφηκε ✅", "Copied ✅"));
@@ -277,7 +274,6 @@ export default function ProjectPage() {
           const content = data?.content || "";
 
           if (content.trim()) {
-            // Auto-save each format
             await fetch("/api/project-assets", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -292,12 +288,10 @@ export default function ProjectPage() {
               }),
             });
 
-            // ✅ Track: pack generation (save)
             await trackFeedback("save", f);
           }
         }
 
-        // Small delay to avoid rate limits
         await new Promise((r) => setTimeout(r, 250));
       } catch (e) {
         console.error(`Pack generation failed for ${f}:`, e);
@@ -361,7 +355,6 @@ export default function ProjectPage() {
         ) : null}
 
         <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* LEFT: DNA */}
           <div className="border border-zinc-800 rounded-2xl p-5 bg-zinc-950">
             <div className="text-zinc-300 text-sm mb-3">{t("Το Project DNA σου", "Your Project DNA")}</div>
             <textarea
@@ -370,11 +363,13 @@ export default function ProjectPage() {
               className="w-full min-h-[420px] bg-zinc-900 border border-zinc-800 rounded-xl p-4 focus:outline-none focus:border-zinc-600 text-white"
             />
             <div className="text-xs text-zinc-500 mt-2">
-              {t("Tip: Μπορείς να το πειράξεις. Μετά τα formats βγαίνουν πιο σωστά.", "Tip: Edit DNA and formats improve instantly.")}
+              {t(
+                "Tip: Μπορείς να το πειράξεις. Μετά τα formats βγαίνουν πιο σωστά.",
+                "Tip: Edit DNA and formats improve instantly."
+              )}
             </div>
           </div>
 
-          {/* RIGHT: Derivatives */}
           <div className="border border-zinc-800 rounded-2xl p-5 bg-zinc-950">
             <div className="flex items-center justify-between mb-4">
               <div className="text-zinc-300 text-sm">{t("1-Click Derivatives", "1-Click Derivatives")}</div>
@@ -441,11 +436,7 @@ export default function ProjectPage() {
             <div>
               <textarea
                 value={generated}
-                onChange={(e) => {
-                  setGenerated(e.target.value);
-                  // ✅ Track: user edited derivative (debounced in real implementation)
-                  // For now, just track on change
-                }}
+                onChange={(e) => setGenerated(e.target.value)}
                 className="w-full min-h-[320px] bg-zinc-900 border border-zinc-800 rounded-xl p-4 focus:outline-none focus:border-zinc-600 text-white"
                 placeholder={t("Το αποτέλεσμα θα εμφανιστεί εδώ…", "Generated output will appear here…")}
               />
