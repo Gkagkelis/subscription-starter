@@ -5,7 +5,7 @@ import { getStripe } from '@/utils/stripe/client';
 import { checkoutWithStripe } from '@/utils/stripe/server';
 import { getErrorRedirect } from '@/utils/helpers';
 import { User } from '@supabase/supabase-js';
-import { useRouter, usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 
 type Subscription = Tables<'subscriptions'>;
@@ -33,28 +33,24 @@ export default function Pricing({ user, products, subscription }: Props) {
   const currentPath = usePathname();
   const [priceIdLoading, setPriceIdLoading] = useState<string>();
 
-  // ✅ ΚΛΕΙΔΩΜΕΝΗ ΤΙΜΗ UI (ώστε να μη δείξει ποτέ €79 λόγω σειράς DB)
-  const BETA_UI_PRICE_EUR = '8';
-
-  // ✅ ΣΩΣΤΑ ROUTES
+  // ✅ Routes (όπως μου τα έδωσες)
   const SIGNUP_URL = '/signin/signup?next=/dashboard/projects/new';
-  const SIGNIN_URL = '/signin/password_signin?next=/dashboard/projects/new';
+  const SIGNIN_URL = '/signin/password_signin?next=/dashboard';
   const DASH_ENTRY = '/dashboard/projects/new';
 
-  // ✅ Checkout ΜΟΝΟ αν υπάρχει πραγματικό Stripe price για €8 (= 800 cents).
-  // Έτσι δεν υπάρχει πιθανότητα να χρεώσει λάθος (π.χ. Team €79).
+  // ✅ Κλειδώνουμε το UI Beta price (για να μη σου ξαναβγει €79 λόγω λάθος product order)
+  const BETA_UI_PRICE_EUR = '8';
+
+  // ✅ Επιτρέπουμε Stripe checkout μόνο αν όντως υπάρχει price = 800 cents / month
+  // (Αλλιώς ο χρήστης πάει signup → projects/new, ώστε να μην χρεωθεί ποτέ κατά λάθος Team)
   const betaPrice = useMemo(() => {
     const allPrices = (products ?? []).flatMap((p) => p.prices ?? []);
     return allPrices.find((p) => p.interval === 'month' && p.unit_amount === 800);
   }, [products]);
 
-  // ✅ Η τιμή που εμφανίζουμε είναι πάντα €8
-  const displayMonthlyEuro = BETA_UI_PRICE_EUR;
-
   const handleStripeCheckout = async (price: Price) => {
     setPriceIdLoading(price.id);
 
-    // Αν δεν είναι logged-in → signup flow
     if (!user) {
       setPriceIdLoading(undefined);
       return router.push(SIGNUP_URL);
@@ -76,7 +72,7 @@ export default function Pricing({ user, products, subscription }: Props) {
       const stripe = await getStripe();
       await stripe?.redirectToCheckout({ sessionId });
     } catch {
-      // fallback: μην αφήσεις να σκάσει η σελίδα
+      // fallback: μην κολλήσει
       router.push(DASH_ENTRY);
     } finally {
       setPriceIdLoading(undefined);
@@ -92,10 +88,10 @@ export default function Pricing({ user, products, subscription }: Props) {
             Early Access Pricing
           </span>
 
-          <h2 className="text-3xl font-bold text-white mb-4">Join the Axiprova Beta</h2>
+          <h2 className="text-3xl font-bold text-white mb-3">Join the Axiprova Beta</h2>
 
           <p className="text-zinc-400 max-w-2xl mx-auto">
-            Start with Project DNA (mass). Pro tools for grants & impact unlock later.
+            Start with <span className="text-zinc-200">Project DNA</span> (mass). Pro tools for grants & impact unlock later.
           </p>
 
           <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -103,12 +99,12 @@ export default function Pricing({ user, products, subscription }: Props) {
               href={SIGNUP_URL}
               className="px-6 py-3 rounded-xl bg-white text-black font-medium hover:bg-zinc-200 transition"
             >
-              Join Beta — €{displayMonthlyEuro}/month
+              Join Beta — €{BETA_UI_PRICE_EUR}/month
             </a>
 
             <a
               href={SIGNIN_URL}
-              className="px-6 py-3 rounded-xl bg-zinc-900 text-white border border-zinc-700 hover:bg-zinc-800 transition"
+              className="px-6 py-3 rounded-xl bg-zinc-900 text-white border border-zinc-700 font-medium hover:bg-zinc-800 transition"
             >
               Sign In
             </a>
@@ -130,7 +126,7 @@ export default function Pricing({ user, products, subscription }: Props) {
             </div>
 
             <div className="text-center mb-8">
-              <span className="text-5xl font-bold text-white">€{displayMonthlyEuro}</span>
+              <span className="text-5xl font-bold text-white">€{BETA_UI_PRICE_EUR}</span>
               <span className="text-xl text-zinc-400 ml-1">/month</span>
             </div>
 
@@ -170,13 +166,6 @@ export default function Pricing({ user, products, subscription }: Props) {
               >
                 {priceIdLoading === betaPrice.id ? 'Redirecting…' : 'Join Beta Now'}
               </button>
-            ) : user ? (
-              <a
-                href={DASH_ENTRY}
-                className="block w-full py-3 text-base font-semibold text-center text-white bg-purple-600 hover:bg-purple-700 rounded-lg"
-              >
-                Go to Projects
-              </a>
             ) : (
               <a
                 href={SIGNUP_URL}
@@ -186,7 +175,9 @@ export default function Pricing({ user, products, subscription }: Props) {
               </a>
             )}
 
-            <p className="text-center text-zinc-500 text-sm mt-4">Cancel anytime. No questions asked.</p>
+            <p className="text-center text-zinc-500 text-sm mt-4">
+              Cancel anytime. No questions asked.
+            </p>
           </div>
         </div>
 
@@ -198,58 +189,69 @@ export default function Pricing({ user, products, subscription }: Props) {
 
         <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
           {/* Free */}
-          <div className="bg-zinc-900/50 rounded-xl p-6 border border-zinc-800 opacity-70">
+          <div className="bg-zinc-900/50 rounded-xl p-6 border border-zinc-800 opacity-80">
             <h3 className="text-xl font-bold text-white mb-2">Free — Starter</h3>
-            <p className="text-zinc-500 text-sm mb-4">For trying it out</p>
+            <p className="text-zinc-500 text-sm mb-4">For trying it out (Projects only)</p>
             <div className="mb-4">
               <span className="text-3xl font-bold text-zinc-400">Free</span>
             </div>
+
             <ul className="space-y-2 text-sm text-zinc-500 mb-6">
               <li>1 Project DNA</li>
               <li>Limited derivatives (e.g. 10 generations/month)</li>
               <li>Save 3 outputs</li>
               <li>Community support</li>
+              <li className="text-zinc-400">No Axiprova Copilot</li>
+              <li className="text-zinc-400">No Grants</li>
+              <li className="text-zinc-400">No Impact</li>
             </ul>
+
             <div className="py-2 text-center text-zinc-600 border border-zinc-700 rounded-lg">
               Coming Soon
             </div>
           </div>
 
           {/* Pro */}
-          <div className="bg-zinc-900/50 rounded-xl p-6 border border-zinc-800 opacity-70">
+          <div className="bg-zinc-900/50 rounded-xl p-6 border border-zinc-800 opacity-80">
             <h3 className="text-xl font-bold text-white mb-2">Pro</h3>
             <p className="text-zinc-500 text-sm mb-4">For professionals who apply & collaborate</p>
             <div className="mb-4">
               <span className="text-3xl font-bold text-zinc-400">€29</span>
               <span className="text-zinc-500">/month</span>
             </div>
+
             <ul className="space-y-2 text-sm text-zinc-500 mb-6">
               <li>Unlimited Project DNA + derivatives</li>
+              <li className="text-zinc-300">Axiprova Copilot (all modes)</li>
               <li>Grant-ready outputs (sections + application version)</li>
               <li>Impact framing (Theory of Change + KPI drafts)</li>
               <li>Templates library (bio / pitch / press / open-call answers)</li>
               <li>Priority support</li>
             </ul>
+
             <div className="py-2 text-center text-zinc-600 border border-zinc-700 rounded-lg">
               Coming Soon
             </div>
           </div>
 
           {/* Team */}
-          <div className="bg-zinc-900/50 rounded-xl p-6 border border-zinc-800 opacity-70">
+          <div className="bg-zinc-900/50 rounded-xl p-6 border border-zinc-800 opacity-80">
             <h3 className="text-xl font-bold text-white mb-2">Team</h3>
             <p className="text-zinc-500 text-sm mb-4">For small organizations & teams</p>
             <div className="mb-4">
               <span className="text-3xl font-bold text-zinc-400">€79</span>
               <span className="text-zinc-500">/month</span>
             </div>
+
             <ul className="space-y-2 text-sm text-zinc-500 mb-6">
               <li>Up to 5 members</li>
               <li>Shared library (projects + outputs)</li>
               <li>Org memory (shared tone/voice + reusable snippets)</li>
               <li>Roles (basic) + shared templates</li>
+              <li className="text-zinc-300">Team Copilot (shared context / org voice)</li>
               <li>Dedicated support</li>
             </ul>
+
             <div className="py-2 text-center text-zinc-600 border border-zinc-700 rounded-lg">
               Coming Soon
             </div>
