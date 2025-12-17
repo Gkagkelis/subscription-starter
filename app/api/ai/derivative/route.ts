@@ -27,7 +27,7 @@ async function callOpenAIJSON(system: string, user: string) {
     },
     body: JSON.stringify({
       model: "gpt-4o-mini",
-      temperature: 0.7,
+      temperature: 0.8,
       messages: [
         { role: "system", content: system },
         { role: "user", content: user },
@@ -49,11 +49,7 @@ async function callOpenAIJSON(system: string, user: string) {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const {
-      dna,
-      format,
-      tone = "neutral",
-    }: { dna: string; format: string; tone?: string } = body;
+    const { dna, format, tone = "neutral" } = body as { dna: string; format: string; tone?: string };
 
     if (!dna || !format) {
       return NextResponse.json({ error: "Missing dna or format" }, { status: 400 });
@@ -63,11 +59,11 @@ export async function POST(req: Request) {
     const langName = lang === "el" ? "Greek" : "English";
 
     const system = `You are Axiprova — a warm, modern writing co-pilot for creatives.
-RESPOND ONLY IN ${langName}. Do not mix languages.
-Write human, friendly, and useful (not robotic).
+RESPOND ONLY IN ${langName}. Never mix languages.
+Be friendly, specific, and ready-to-use (not robotic).
 Return STRICT JSON only: {"content":"..."} (no markdown fences).`;
 
-    const user = `Rewrite/repurpose the following Project DNA into the requested format.
+    const user = `Repurpose the following Project DNA into the requested format.
 
 FORMAT: ${format}
 TONE: ${tone}
@@ -75,13 +71,13 @@ TONE: ${tone}
 Project DNA:
 ${dna}
 
-Rules:
-- Make it practical and ready-to-use.
-- If format is "Social Post": include a hook + 3–5 lines + 3–6 hashtags (if relevant).
-- If "Email Pitch": subject + short email.
-- If "Website Blurb": 60–120 words.
-- If "Press Snippet": 40–80 words.
-- If "Application Version": slightly more formal, include impact/accessibility if present.
+Format rules:
+- Social Post: 1 hook + 3–6 lines + optional hashtags
+- Website Blurb: 60–120 words
+- Email Pitch: Subject + short email
+- Application Version: more formal + include impact/accessibility if present
+- Press Snippet: 40–80 words
+- Short Bio: 40–90 words (first person if possible)
 
 Return JSON only.`;
 
