@@ -5,67 +5,138 @@ import { useRouter } from "next/navigation";
 
 type Tone = "neutral" | "poetic" | "professional" | "accessible" | "funder_ready";
 
-const IMPACT = ["Cultural", "Social", "Educational", "Economic", "Environmental"];
+const AUDIENCE_OPTIONS = [
+  "General public",
+  "Clients",
+  "Institutions",
+  "Collectors",
+  "Community",
+  "Students",
+  "Professionals",
+];
+
+const CONTEXT_OPTIONS = ["Website", "Open call", "Email", "Social", "Press", "Portfolio"];
+
+const INTENTION_OPTIONS = ["Explain clearly", "Convince to collaborate", "Present professionally", "Make it compelling"];
+
+const IMPACT_OPTIONS = ["Cultural", "Social", "Educational", "Economic", "Environmental"];
+
+function toggle(arr: string[], v: string) {
+  return arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v];
+}
+
+async function safeText(res: Response) {
+  try {
+    return await res.text();
+  } catch {
+    return "";
+  }
+}
 
 export default function NewProjectWizard() {
   const router = useRouter();
+
   const [step, setStep] = useState(1);
   const [busy, setBusy] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  // Step 1
   const [raw, setRaw] = useState("");
+
+  // Step 2
   const [field, setField] = useState<string>("");
   const [format, setFormat] = useState<string>("");
   const [audience, setAudience] = useState<string[]>([]);
   const [contexts, setContexts] = useState<string[]>([]);
-  const [tone, setTone] = useState<Tone>("neutral");
+
+  // Step 3
   const [intention, setIntention] = useState<string[]>([]);
+  const [tone, setTone] = useState<Tone>("neutral");
+
+  // Step 4
   const [impactSignals, setImpactSignals] = useState<string[]>([]);
   const [accessibility, setAccessibility] = useState("");
+
+  // Step 5
   const [evidence, setEvidence] = useState("");
 
   const canNext = useMemo(() => {
-    if (step === 1) return raw.trim().length >= 20;
+    if (step === 1) return raw.trim().length >= 5; // για να μην “κολλάει” το Next
     return true;
   }, [step, raw]);
 
-  const toggle = (arr: string[], v: string) =>
-    arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v];
+  const stepTitle = useMemo(() => {
+    switch (step) {
+      case 1:
+        return "1) In 2–4 lines, what is this project?";
+      case 2:
+        return "2) Who is it for — and where will they encounter it?";
+      case 3:
+        return "3) What should this description do?";
+      case 4:
+        return "4) What changes because this project exists?";
+      case 5:
+        return "5) Any proof / assets to support it?";
+      default:
+        return "";
+    }
+  }, [step]);
 
   const onCreate = async () => {
     setBusy(true);
+    setErrorMsg(null);
+
     try {
-      // 1) Create project first (title from first line)
-      const titleGuess = raw.split("\n").find((l) => l.trim())?.slice(0, 60) || "New Project";
+      // 1) Create Project
+      const titleGuess =
+        raw
+          .split("\n")
+          .find((l) => l.trim())
+          ?.trim()
+          .slice(0, 80) || "New Project";
+
       const pRes = await fetch("/api/projects", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title: titleGuess }),
       });
-      if (!pRes.ok) throw new Error("Failed to create project");
+
+      if (!pRes.ok) {
+        const t = await safeText(pRes);
+        throw new Error(`Create project failed (${pRes.status}): ${t}`);
+      }
+
       const project = await pRes.json();
 
-      // 2) Generate DNA + defaults
+      // 2) Generate Project DNA (IMPORTANT: flat payload that matches /api/ai/project-dna)
       const aiRes = await fetch("/api/ai/project-dna", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          type: "create_dna",
-          answers: {
-            raw_description: raw,
-            field,
-            format,
-            audience,
-            contexts,
-            tone,
-            intention,
-            impact_signals: impactSignals,
-            accessibility_notes: accessibility,
-            evidence,
-          },
+          raw_description: raw,
+          field,
+          format,
+          audience,
+          contexts,
+          tone,
+          intention,
+          impact_signals: impactSignals,
+          accessibility_notes: accessibility,
+          evidence,
         }),
       });
-      if (!aiRes.ok) throw new Error("Failed to generate Project DNA");
+
+      if (!aiRes.ok) {
+        const t = await safeText(aiRes);
+        throw new Error(`Generate Project DNA failed (${aiRes.status}): ${t}`);
+      }
+
       const ai = await aiRes.json();
+      // expected: { title, dna, derivatives: [{format, content}] }
+
+      if (!ai?.dna || typeof ai.dna !== "string") {
+        throw new Error("Generate Project DNA failed: missing dna in response");
+      }
 
       // 3) Save DNA asset
       const dnaRes = await fetch("/api/project-assets", {
@@ -75,34 +146,49 @@ export default function NewProjectWizard() {
           project_id: project.id,
           kind: "dna",
           format: "dna",
-          title: ai.title,
+          title: ai.title ?? titleGuess,
           content: ai.dna,
           tone,
           version: 1,
         }),
       });
-      if (!dnaRes.ok) throw new Error("Failed to save DNA");
 
-      // 4) Save derivative assets
-      for (const d of ai.derivatives ?? []) {
-        await fetch("/api/project-assets", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            project_id: project.id,
-            kind: "derivative",
-            format: d.format,
-            title: d.title ?? null,
-            content: d.content,
-            tone,
-            version: 1,
-          }),
-        });
+      if (!dnaRes.ok) {
+        const t = await safeText(dnaRes);
+        throw new Error(`Save DNA failed (${dnaRes.status}): ${t}`);
       }
 
+      // 4) Save derivatives (if provided)
+      if (Array.isArray(ai.derivatives)) {
+        for (const d of ai.derivatives) {
+          if (!d?.format || !d?.content) continue;
+
+          const derRes = await fetch("/api/project-assets", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              project_id: project.id,
+              kind: "derivative",
+              format: d.format,
+              title: d.format,
+              content: d.content,
+              tone,
+              version: 1,
+            }),
+          });
+
+          if (!derRes.ok) {
+            const t = await safeText(derRes);
+            throw new Error(`Save derivative failed (${derRes.status}): ${t}`);
+          }
+        }
+      }
+
+      // 5) Go to Output screen
       router.push(`/dashboard/projects/${project.id}`);
     } catch (e: any) {
-      alert(e?.message ?? "Something went wrong");
+      const msg = e?.message ? String(e.message) : "Something went wrong";
+      setErrorMsg(msg);
     } finally {
       setBusy(false);
     }
@@ -111,7 +197,7 @@ export default function NewProjectWizard() {
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
       <div className="max-w-3xl mx-auto px-6 py-10">
-        <div className="flex items-start justify-between">
+        <div className="flex items-start justify-between gap-6">
           <div>
             <h1 className="text-2xl font-semibold">Describe a New Project</h1>
             <p className="text-zinc-400 mt-2">5 guided steps → Project DNA → 1-click formats.</p>
@@ -119,26 +205,32 @@ export default function NewProjectWizard() {
           <div className="text-sm text-zinc-500">Step {step}/5</div>
         </div>
 
+        {errorMsg && (
+          <div className="mt-6 border border-red-900 bg-red-950/40 text-red-200 rounded-2xl p-4 text-sm">
+            {errorMsg}
+          </div>
+        )}
+
         <div className="mt-8 border border-zinc-800 rounded-2xl p-6 bg-zinc-950">
+          <div className="text-zinc-200 font-medium">{stepTitle}</div>
+
           {step === 1 && (
             <>
-              <div className="text-zinc-200 font-medium">1) In 2–4 lines, what is this project?</div>
-              <div className="text-zinc-500 text-sm mt-2">
-                Explain it to a friend who doesn’t know your field.
-              </div>
+              <div className="text-zinc-500 text-sm mt-2">Explain it to a friend who doesn’t know your field.</div>
               <textarea
                 value={raw}
                 onChange={(e) => setRaw(e.target.value)}
-                className="mt-4 w-full min-h-[140px] bg-zinc-900 border border-zinc-800 rounded-xl p-4 focus:outline-none focus:border-zinc-600"
-                placeholder="Example: A ceramic collection exploring…"
+                className="mt-4 w-full min-h-[150px] bg-zinc-900 border border-zinc-800 rounded-xl p-4 focus:outline-none focus:border-zinc-600"
+                placeholder="Example: A ceramic collection exploring memory through everyday objects…"
               />
+              <p className="text-xs text-zinc-500 mt-2">
+                {raw.trim().length < 5 ? "Write a couple of lines to continue." : "Looks good — click Next."}
+              </p>
             </>
           )}
 
           {step === 2 && (
             <>
-              <div className="text-zinc-200 font-medium">2) Who is it for — and where will they encounter it?</div>
-
               <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs text-zinc-500">Field</label>
@@ -162,9 +254,10 @@ export default function NewProjectWizard() {
 
               <div className="mt-5">
                 <div className="text-xs text-zinc-500 mb-2">Audience (pick any)</div>
-                {["General public", "Clients", "Institutions", "Collectors", "Community", "Students", "Professionals"].map((x) => (
+                {AUDIENCE_OPTIONS.map((x) => (
                   <button
                     key={x}
+                    type="button"
                     onClick={() => setAudience(toggle(audience, x))}
                     className={`mr-2 mb-2 px-3 py-1.5 rounded-full text-sm border transition ${
                       audience.includes(x)
@@ -179,9 +272,10 @@ export default function NewProjectWizard() {
 
               <div className="mt-3">
                 <div className="text-xs text-zinc-500 mb-2">Contexts (where it will be used)</div>
-                {["Website", "Open call", "Email", "Social", "Press", "Portfolio"].map((x) => (
+                {CONTEXT_OPTIONS.map((x) => (
                   <button
                     key={x}
+                    type="button"
                     onClick={() => setContexts(toggle(contexts, x))}
                     className={`mr-2 mb-2 px-3 py-1.5 rounded-full text-sm border transition ${
                       contexts.includes(x)
@@ -198,12 +292,13 @@ export default function NewProjectWizard() {
 
           {step === 3 && (
             <>
-              <div className="text-zinc-200 font-medium">3) What should this description do?</div>
               <div className="text-zinc-500 text-sm mt-2">Pick 1–2.</div>
+
               <div className="mt-4">
-                {["Explain clearly", "Convince to collaborate", "Present professionally", "Make it compelling"].map((x) => (
+                {INTENTION_OPTIONS.map((x) => (
                   <button
                     key={x}
+                    type="button"
                     onClick={() => setIntention(toggle(intention, x))}
                     className={`mr-2 mb-2 px-3 py-1.5 rounded-full text-sm border transition ${
                       intention.includes(x)
@@ -218,97 +313,4 @@ export default function NewProjectWizard() {
 
               <div className="mt-6">
                 <div className="text-xs text-zinc-500 mb-2">Tone</div>
-                {(["neutral","professional","accessible","poetic","funder_ready"] as Tone[]).map((t) => (
-                  <button
-                    key={t}
-                    onClick={() => setTone(t)}
-                    className={`mr-2 mb-2 px-3 py-1.5 rounded-full text-sm border transition ${
-                      tone === t ? "bg-white text-black border-white" : "bg-zinc-900 text-zinc-300 border-zinc-700 hover:bg-zinc-800"
-                    }`}
-                  >
-                    {t}
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
-
-          {step === 4 && (
-            <>
-              <div className="text-zinc-200 font-medium">4) What changes because this project exists?</div>
-              <div className="text-zinc-500 text-sm mt-2">Choose up to 3 signals.</div>
-              <div className="mt-4">
-                {IMPACT.map((x) => (
-                  <button
-                    key={x}
-                    onClick={() => setImpactSignals(toggle(impactSignals, x))}
-                    className={`mr-2 mb-2 px-3 py-1.5 rounded-full text-sm border transition ${
-                      impactSignals.includes(x)
-                        ? "bg-white text-black border-white"
-                        : "bg-zinc-900 text-zinc-300 border-zinc-700 hover:bg-zinc-800"
-                    }`}
-                  >
-                    {x}
-                  </button>
-                ))}
-              </div>
-
-              <div className="mt-6">
-                <div className="text-xs text-zinc-500 mb-2">Accessibility notes (optional)</div>
-                <textarea
-                  value={accessibility}
-                  onChange={(e) => setAccessibility(e.target.value)}
-                  className="w-full min-h-[110px] bg-zinc-900 border border-zinc-800 rounded-xl p-4 focus:outline-none focus:border-zinc-600"
-                  placeholder="e.g., captions, physical access, language, pricing…"
-                />
-              </div>
-            </>
-          )}
-
-          {step === 5 && (
-            <>
-              <div className="text-zinc-200 font-medium">5) Any proof / assets to support it?</div>
-              <div className="text-zinc-500 text-sm mt-2">
-                Links, reviews, press, portfolio, collaborators — anything.
-              </div>
-              <textarea
-                value={evidence}
-                onChange={(e) => setEvidence(e.target.value)}
-                className="mt-4 w-full min-h-[140px] bg-zinc-900 border border-zinc-800 rounded-xl p-4 focus:outline-none focus:border-zinc-600"
-                placeholder="Paste links or short notes…"
-              />
-            </>
-          )}
-        </div>
-
-        <div className="mt-6 flex items-center justify-between">
-          <button
-            onClick={() => setStep((s) => Math.max(1, s - 1))}
-            disabled={step === 1 || busy}
-            className="px-4 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-300 disabled:opacity-50"
-          >
-            Back
-          </button>
-
-          {step < 5 ? (
-            <button
-              onClick={() => canNext && setStep((s) => s + 1)}
-              disabled={!canNext || busy}
-              className="px-5 py-2 rounded-lg bg-white text-black font-medium hover:bg-zinc-200 disabled:opacity-50"
-            >
-              Next
-            </button>
-          ) : (
-            <button
-              onClick={onCreate}
-              disabled={busy}
-              className="px-5 py-2 rounded-lg bg-white text-black font-medium hover:bg-zinc-200 disabled:opacity-50"
-            >
-              {busy ? "Creating…" : "Create Project DNA"}
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
+                {(["neutral", "professional"]()
