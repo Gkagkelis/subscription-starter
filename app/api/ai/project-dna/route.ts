@@ -1,95 +1,143 @@
-import { openai } from "@ai-sdk/openai";
-import { generateObject } from "ai";
-import { z } from "zod";
+import { NextResponse } from "next/server";
 
-const DerivativeFormat = z.enum([
-  "social_post",
-  "website_blurb",
-  "email_pitch",
-  "application_version",
-]);
+function detectLang(text: string): "el" | "en" {
+  return /[\u0370-\u03FF\u1F00-\u1FFF]/.test(text) ? "el" : "en";
+}
 
-const InputSchema = z.object({
-  raw_description: z.string(),
-  field: z.string().optional(),
-  format: z.string().optional(),
-  audience: z.array(z.string()).default([]),
-  contexts: z.array(z.string()).default([]),
-  tone: z.enum(["neutral","poetic","professional","accessible","funder_ready"]).default("neutral"),
-  intention: z.array(z.string()).default([]),
-  impact_signals: z.array(z.string()).default([]),
-  accessibility_notes: z.string().optional(),
-  evidence: z.string().optional(),
-});
-
-const OutputSchema = z.object({
-  title: z.string(),
-  dna: z.string(),
-  derivatives: z.array(z.object({
-    format: DerivativeFormat,
-    content: z.string(),
-  })),
-});
-
-function toneGuide(tone: string) {
-  switch (tone) {
-    case "poetic": return "Poetic but still clear. Avoid vague fluff.";
-    case "professional": return "Professional, direct, confident. No hype.";
-    case "accessible": return "Plain language, inclusive, easy to understand.";
-    case "funder_ready": return "Funder-ready: structured, outcomes-aware, credible, not corporate.";
-    default: return "Neutral, clear, human.";
+function extractJson(text: string) {
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+  if (start === -1 || end === -1 || end <= start) return null;
+  try {
+    return JSON.parse(text.slice(start, end + 1));
+  } catch {
+    return null;
   }
 }
 
-export async function POST(req: Request) {
-  const body = await req.json();
-  const parsed = InputSchema.safeParse(body);
-  if (!parsed.success) return Response.json({ error: "Bad input" }, { status: 400 });
+async function callOpenAIJSON(system: string, user: string) {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) throw new Error("Missing OPENAI_API_KEY in Vercel env vars");
 
-  const a = parsed.data;
-
-  const prompt = `
-You are Axiprova. Respond ONLY in English.
-
-Goal: Create "Project DNA" (150–220 words) that can be reused everywhere.
-Embed methodology subtly:
-- clear what it is
-- audience + context
-- intent (feel/understand/do)
-- impact signals (cultural/social/educational/economic/environmental)
-- accessibility consideration (human, simple)
-
-Tone: ${toneGuide(a.tone)}
-
-Inputs:
-Raw: ${a.raw_description}
-Field: ${a.field ?? "N/A"}
-Format: ${a.format ?? "N/A"}
-Audience: ${a.audience.join(", ") || "N/A"}
-Contexts: ${a.contexts.join(", ") || "N/A"}
-Intention: ${a.intention.join(", ") || "N/A"}
-Impact: ${a.impact_signals.join(", ") || "N/A"}
-Accessibility: ${a.accessibility_notes ?? "N/A"}
-Evidence: ${a.evidence ?? "N/A"}
-
-Also produce 4 derivatives from the DNA:
-- social_post
-- website_blurb
-- email_pitch
-- application_version
-
-Derivative rules:
-- social_post: hook + 2–4 short lines + optional CTA (no hashtags)
-- website_blurb: 80–120 words
-- email_pitch: subject line + short email (<=180 words)
-- application_version: structured paragraph with (what/why/audience/outcomes/accessibility)
-`;
-
-  const result = await generateObject({
-    model: openai("gpt-4o-2024-08-06"),
-    schema: OutputSchema,
-    prompt,
+  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "gpt-4o-mini",
+      temperature: 0.8,
+      messages: [
+        { role: "system", content: system },
+        { role: "user", content: user },
+      ],
+    }),
   });
 
-  return Response.json(result.object);
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(`OpenAI error (${res.status}): ${JSON.stringify(data)}`);
+  }
+
+  const content = data?.choices?.[0]?.message?.content ?? "";
+  const obj = extractJson(content);
+  if (!obj) throw new Error(`Could not parse JSON from model output: ${content}`);
+  return obj;
+}
+
+export async function POST(req: Request) {
+  try {
+    const body = await req.json();
+    const {
+      raw_description,
+      field,
+      format,
+      audience = [],
+      contexts = [],
+      tone = "neutral",
+      intention = [],
+      impact_signals = [],
+      accessibility_notes = "",
+      evidence = "",
+    } = body as {
+      raw_description: string;
+      field?: string;
+      format?: string;
+      audience?: string[];
+      contexts?: string[];
+      tone?: string;
+      intention?: string[];
+      impact_signals?: string[];
+      accessibility_notes?: string;
+      evidence?: string;
+    };
+
+    if (!raw_description || typeof raw_description !== "string") {
+      return NextResponse.json({ error: "Missing raw_description" }, { status: 400 });
+    }
+
+    const lang = detectLang(raw_description);
+    const langName = lang === "el" ? "Greek" : "English";
+
+    const system = `You are Axiprova — a warm, modern co-pilot for creatives.
+RESPOND ONLY IN ${langName}. Never mix languages.
+Be friendly, human, and practical (not robotic). Write like a great collaborator.
+
+Return STRICT JSON only (no markdown fences).
+Schema:
+{
+  "title": "short title",
+  "dna": "Project DNA text",
+  "derivatives": [
+    {"format":"Social Post","content":"..."},
+    {"format":"Website Blurb","content":"..."},
+    {"format":"Email Pitch","content":"..."}
+  ]
+}`;
+
+    const user = `Create a strong "Project DNA" from the inputs below. It must feel like a real human wrote it.
+It should be usable as the single source of truth to generate other formats.
+
+INPUTS
+Raw description:
+${raw_description}
+
+Field: ${field || ""}
+Format: ${format || ""}
+Audience: ${Array.isArray(audience) ? audience.join(", ") : ""}
+Contexts: ${Array.isArray(contexts) ? contexts.join(", ") : ""}
+Intention: ${Array.isArray(intention) ? intention.join(", ") : ""}
+Tone: ${tone}
+Impact signals: ${Array.isArray(impact_signals) ? impact_signals.join(", ") : ""}
+Accessibility notes: ${accessibility_notes || ""}
+Evidence/links/notes:
+${evidence || ""}
+
+OUTPUT RULES
+- "dna" should be ~160–260 words (or 120–220 if Greek) and not corporate.
+- Include 1–2 vivid specifics (without inventing fake facts).
+- Include impact + accessibility if provided (as normal human sentences).
+- Make it feel confident, not inflated.
+
+Also produce 3 "wow" derivatives:
+1) Social Post (hook + 3–6 lines + optional hashtags)
+2) Website Blurb (60–120 words)
+3) Email Pitch (subject + short email)
+
+Return JSON only.`;
+
+    const out = await callOpenAIJSON(system, user);
+
+    if (typeof out?.dna !== "string") {
+      return NextResponse.json({ error: "Invalid model output: missing dna" }, { status: 500 });
+    }
+
+    const title = typeof out?.title === "string" ? out.title : "Project";
+    const derivatives = Array.isArray(out?.derivatives) ? out.derivatives : [];
+
+    return NextResponse.json({ title, dna: out.dna, derivatives });
+  } catch (e: any) {
+    return NextResponse.json({ error: e?.message ?? "Unknown error" }, { status: 500 });
+  }
 }
