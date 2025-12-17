@@ -1,9 +1,8 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { useRouter, useSearchParams } from "next/navigation";
-
 
 type Mode = "chat" | "projects" | "grants" | "impact" | "trends";
 
@@ -89,15 +88,17 @@ const MODE_CONFIG: Record<
 
 export default function CopilotPage() {
   const router = useRouter();
-    const searchParams = useSearchParams();
 
   useEffect(() => {
-    const from = searchParams.get("from");
-    if (from !== "nav") {
-      router.replace("/dashboard/projects");
-    }
-  }, [router, searchParams]);
+    // client-only: δεν σπάει build / prerender
+    const params = new URLSearchParams(window.location.search);
+    const from = params.get("from");
 
+    // Αν δεν μπήκε επίτηδες, τον στέλνουμε στο dashboard home
+    if (from !== "nav") {
+      router.replace("/dashboard");
+    }
+  }, [router]);
 
   const [chats, setChats] = useState<Chat[]>([]);
   const chatsRef = useRef<Chat[]>([]);
@@ -240,10 +241,7 @@ export default function CopilotPage() {
     return (
       <div className="max-w-2xl mx-auto mb-2 flex flex-wrap gap-2 items-center">
         {entries.map(([k, v]) => (
-          <span
-            key={k}
-            className="text-xs px-2 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300"
-          >
+          <span key={k} className="text-xs px-2 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300">
             {k}: {String(v)}
           </span>
         ))}
