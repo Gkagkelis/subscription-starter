@@ -479,6 +479,7 @@ export async function POST(req: Request) {
     let snippetsContext = "";
     let knowledgeContext = "";
     let webSearchContext = "";
+    let projectsContext = ""; // ✅ NEW: Past projects memory
 
     let profileLocation: string | undefined;
     let needsCountry = false;
@@ -515,6 +516,47 @@ USER'S DATA:
 REVIEWS (${reviews.length} total):
 ${reviews.map((r) => `- [${r.source}, Rating: ${r.rating || "N/A"}] "${r.content}"`).join("\n")}
 `;
+      }
+
+      // ✅ NEW: Load past projects + their DNA
+      try {
+        const { data: projects } = await supabase
+          .from("projects")
+          .select("id, title, created_at, updated_at")
+          .eq("user_id", user.id)
+          .order("updated_at", { ascending: false })
+          .limit(10);
+
+        if (projects?.length) {
+          projectsContext = `\nPAST PROJECTS (${projects.length} total):\n`;
+          
+          for (const proj of projects) {
+            projectsContext += `\n- "${proj.title}" (updated ${new Date(proj.updated_at).toLocaleDateString()})\n`;
+            
+            // Load DNA for this project
+            const { data: dnaAssets } = await supabase
+              .from("project_assets")
+              .select("content, format")
+              .eq("project_id", proj.id)
+              .eq("kind", "dna")
+              .order("created_at", { ascending: false })
+              .limit(1);
+
+            if (dnaAssets?.[0]?.content) {
+              const preview = dnaAssets[0].content.slice(0, 200);
+              projectsContext += `  DNA preview: ${preview}${dnaAssets[0].content.length > 200 ? "..." : ""}\n`;
+            }
+          }
+
+          projectsContext += `\nUSE THIS MEMORY:
+- Reference past projects when relevant ("I see you worked on X before...")
+- Spot patterns ("All 3 projects involve community engagement...")
+- Build on previous work ("This is similar to your festival project but...")
+- Show continuity ("You've been moving from X toward Y...")
+`;
+        }
+      } catch (e) {
+        console.log("Projects memory skipped:", e);
       }
     }
 
@@ -652,6 +694,7 @@ ${countryClarificationInstruction}
 CONTEXT ABOUT THE USER:
 ${profileContext}
 ${snippetsContext}
+${projectsContext}
 ${knowledgeContext}
 ${webSearchContext}
 ${webSearchInstructions}
