@@ -25,9 +25,7 @@ export default async function PricingPage() {
       </h1>
 
       <p className="text-lg md:text-xl text-gray-400 max-w-3xl mb-14">
-        Describe your project once → get ready-to-use versions for website, social, email, press, and applications.
-        <br />
-        <span className="text-gray-500 text-base">Ελληνικά/English αυτόματα.</span>
+        Describe your project once — get versions for website, social, email, press, applications.
       </p>
 
       <Pricing
