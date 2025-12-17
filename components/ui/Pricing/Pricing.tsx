@@ -33,49 +33,50 @@ export default function Pricing({ user, products, subscription }: Props) {
   const currentPath = usePathname();
   const [priceIdLoading, setPriceIdLoading] = useState<string>();
 
-  // ✅ ΤΑ ΣΩΣΤΑ ROUTES ΠΟΥ ΜΟΥ ΕΔΩΣΕΣ
+  // ✅ ΚΛΕΙΔΩΜΕΝΗ ΤΙΜΗ UI (ώστε να μη δείξει ποτέ €79 λόγω σειράς DB)
+  const BETA_UI_PRICE_EUR = '8';
+
+  // ✅ ΣΩΣΤΑ ROUTES
   const SIGNUP_URL = '/signin/signup?next=/dashboard/projects/new';
-  const SIGNIN_URL = '/signin/password_signin?next=/dashboard/projects';
+  const SIGNIN_URL = '/signin/password_signin?next=/dashboard/projects/new';
   const DASH_ENTRY = '/dashboard/projects/new';
 
-  // (αν έχεις Stripe/DB prices, το διαβάζουμε· αλλιώς δείχνουμε €8)
-  const betaProduct = products?.[0];
-  const betaPrice = useMemo(
-    () => betaProduct?.prices?.find((p) => p.interval === 'month'),
-    [betaProduct]
-  );
+  // ✅ Checkout ΜΟΝΟ αν υπάρχει πραγματικό Stripe price για €8 (= 800 cents).
+  // Έτσι δεν υπάρχει πιθανότητα να χρεώσει λάθος (π.χ. Team €79).
+  const betaPrice = useMemo(() => {
+    const allPrices = (products ?? []).flatMap((p) => p.prices ?? []);
+    return allPrices.find((p) => p.interval === 'month' && p.unit_amount === 800);
+  }, [products]);
 
-  const displayMonthlyEuro = useMemo(() => {
-    const unit = betaPrice?.unit_amount;
-    if (typeof unit === 'number' && !Number.isNaN(unit)) {
-      const euro = Math.round(unit) / 100;
-      return euro.toFixed(euro % 1 === 0 ? 0 : 2);
-    }
-    return '8';
-  }, [betaPrice]);
+  // ✅ Η τιμή που εμφανίζουμε είναι πάντα €8
+  const displayMonthlyEuro = BETA_UI_PRICE_EUR;
 
   const handleStripeCheckout = async (price: Price) => {
     setPriceIdLoading(price.id);
 
+    // Αν δεν είναι logged-in → signup flow
     if (!user) {
       setPriceIdLoading(undefined);
       return router.push(SIGNUP_URL);
     }
 
-    // Αν Stripe δεν είναι πραγματικά ενεργό, κάνουμε fallback στο entry point
     try {
       const { errorRedirect, sessionId } = await checkoutWithStripe(price, currentPath);
+
       if (errorRedirect) {
         setPriceIdLoading(undefined);
         return router.push(errorRedirect);
       }
+
       if (!sessionId) {
         setPriceIdLoading(undefined);
         return router.push(getErrorRedirect(currentPath, 'Error', 'Please try again.'));
       }
+
       const stripe = await getStripe();
-      stripe?.redirectToCheckout({ sessionId });
+      await stripe?.redirectToCheckout({ sessionId });
     } catch {
+      // fallback: μην αφήσεις να σκάσει η σελίδα
       router.push(DASH_ENTRY);
     } finally {
       setPriceIdLoading(undefined);
@@ -90,9 +91,9 @@ export default function Pricing({ user, products, subscription }: Props) {
           <span className="inline-block px-4 py-1 mb-4 text-sm font-medium text-purple-400 bg-purple-900/30 rounded-full">
             Early Access Pricing
           </span>
-          <h2 className="text-3xl font-bold text-white mb-4">
-            Join the Axiprova Beta
-          </h2>
+
+          <h2 className="text-3xl font-bold text-white mb-4">Join the Axiprova Beta</h2>
+
           <p className="text-zinc-400 max-w-2xl mx-auto">
             Start with Project DNA (mass). Pro tools for grants & impact unlock later.
           </p>
@@ -104,6 +105,7 @@ export default function Pricing({ user, products, subscription }: Props) {
             >
               Join Beta — €{displayMonthlyEuro}/month
             </a>
+
             <a
               href={SIGNIN_URL}
               className="px-6 py-3 rounded-xl bg-zinc-900 text-white border border-zinc-700 hover:bg-zinc-800 transition"
@@ -168,6 +170,13 @@ export default function Pricing({ user, products, subscription }: Props) {
               >
                 {priceIdLoading === betaPrice.id ? 'Redirecting…' : 'Join Beta Now'}
               </button>
+            ) : user ? (
+              <a
+                href={DASH_ENTRY}
+                className="block w-full py-3 text-base font-semibold text-center text-white bg-purple-600 hover:bg-purple-700 rounded-lg"
+              >
+                Go to Projects
+              </a>
             ) : (
               <a
                 href={SIGNUP_URL}
@@ -177,18 +186,14 @@ export default function Pricing({ user, products, subscription }: Props) {
               </a>
             )}
 
-            <p className="text-center text-zinc-500 text-sm mt-4">
-              Cancel anytime. No questions asked.
-            </p>
+            <p className="text-center text-zinc-500 text-sm mt-4">Cancel anytime. No questions asked.</p>
           </div>
         </div>
 
         {/* Coming Soon */}
         <div className="text-center mb-8">
           <h3 className="text-xl font-semibold text-zinc-400 mb-2">Coming Soon</h3>
-          <p className="text-zinc-500 text-sm">
-            Creator → Pro (grants/impact) → Team workspace
-          </p>
+          <p className="text-zinc-500 text-sm">Creator → Pro (grants/impact) → Team workspace</p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
@@ -252,9 +257,7 @@ export default function Pricing({ user, products, subscription }: Props) {
         </div>
 
         <div className="text-center mt-12">
-          <p className="text-zinc-500">
-            Join the beta now and keep this price forever.
-          </p>
+          <p className="text-zinc-500">Join the beta now and keep this price forever.</p>
         </div>
       </div>
     </section>
