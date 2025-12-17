@@ -26,7 +26,8 @@ export default function DashboardHome() {
   // optional: κάνε σιγουριά ότι το "Continue" είναι το πιο πρόσφατο
   const sorted = useMemo(() => {
     return [...projects].sort(
-      (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+      (a, b) =>
+        new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
     );
   }, [projects]);
 
@@ -39,21 +40,30 @@ export default function DashboardHome() {
           <div>
             <h1 className="text-2xl font-semibold">Your Projects</h1>
             <p className="text-zinc-400 mt-2">
-              Create a <span className="text-zinc-200">Project DNA</span> once — reuse it everywhere.
+              Create a <span className="text-zinc-200">Project DNA</span> once —
+              reuse it everywhere.
             </p>
           </div>
 
-          <Link
-            href="/dashboard/projects/new"
-            className="px-5 py-3 rounded-xl bg-white text-black font-medium"
-          >
-            + Describe a New Project
-          </Link>
+          {/* ✅ ΒΗΜΑ 2: διπλό κουμπί */}
+          <div className="flex gap-3">
+            <Link
+              href="/dashboard/projects/new"
+              className="px-5 py-3 rounded-xl bg-white text-black font-medium"
+            >
+              + Describe a New Project
+            </Link>
+
+            <Link
+              href="/dashboard/copilot?from=nav"
+              className="px-5 py-3 rounded-xl bg-zinc-900 text-white border border-zinc-700 font-medium"
+            >
+              Open Copilot
+            </Link>
+          </div>
         </div>
 
-        {loading && (
-          <div className="mt-10 text-zinc-500">Loading…</div>
-        )}
+        {loading && <div className="mt-10 text-zinc-500">Loading…</div>}
 
         {!loading && last && (
           <div className="mt-8 border border-zinc-800 rounded-2xl p-5">
