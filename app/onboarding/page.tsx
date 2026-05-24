@@ -31,8 +31,16 @@ const steps: Array<{ id: StepId; title: string }> = [
   { id: "review", title: "Επιβεβαίωση" }
 ];
 
-function toggleValue(value: string, list: string[], setter: (next: string[]) => void) {
-  setter(list.includes(value) ? list.filter((item) => item !== value) : [...list, value]);
+function toggleValue(
+  value: string,
+  list: string[],
+  setter: (next: string[]) => void
+) {
+  setter(
+    list.includes(value)
+      ? list.filter((item) => item !== value)
+      : [...list, value]
+  );
 }
 
 function Chip({
@@ -61,7 +69,6 @@ function Chip({
 
 export default function OnboardingPage() {
   const router = useRouter();
-
   const [stepIndex, setStepIndex] = useState(0);
 
   const [orgName, setOrgName] = useState("");
@@ -138,10 +145,13 @@ export default function OnboardingPage() {
 
   const addCustomIssue = () => {
     const value = customIssue.trim();
+
     if (!value) return;
+
     if (!selectedIssues.includes(value)) {
       setSelectedIssues([...selectedIssues, value]);
     }
+
     setCustomIssue("");
   };
 
@@ -193,25 +203,18 @@ export default function OnboardingPage() {
       >
         <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-  <div className="mb-4 flex items-center gap-3">
-    <img
-      src="/noraya-eye.png"
-      alt="Noraya"
-      className="h-8 w-8 object-contain opacity-90"
-    />
-    <div>
-      <div className="text-xs uppercase tracking-[0.25em] text-cyan-300">
-        NORAYA SETUP
-      </div>
-      <div className="text-xs text-zinc-500">
-        Political Intelligence Platform
-      </div>
-    </div>
-  </div>
+            <div className="text-xs uppercase tracking-[0.25em] text-cyan-300">
+              NORAYA SETUP
+            </div>
 
-  <h1 className="mt-3 text-3xl font-semibold tracking-tight">
-    Προσαρμογή στον οργανισμό σας
+            <div className="mt-1 text-xs text-zinc-500">
+              Political Intelligence Platform
+            </div>
+
+            <h1 className="mt-4 text-3xl font-semibold tracking-tight">
+              Προσαρμογή στον οργανισμό σας
             </h1>
+
             <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
               Το Noraya χρειάζεται λίγα στοιχεία για να μετατρέψει τη γενική δημόσια εικόνα
               σε προσαρμοσμένη πολιτική πληροφόρηση για τον δικό σας οργανισμό.
@@ -317,6 +320,7 @@ export default function OnboardingPage() {
                 <h3 className="mb-3 text-sm font-semibold text-zinc-200">
                   Συγκεκριμένα ζητήματα
                 </h3>
+
                 <div className="flex flex-wrap gap-2">
                   {issueExamples.map((issue) => (
                     <Chip
@@ -335,6 +339,7 @@ export default function OnboardingPage() {
                     placeholder="Προσθέστε δικό σας ζήτημα, π.χ. φοιτητικές κινητοποιήσεις"
                     className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm outline-none transition focus:border-cyan-300/40"
                   />
+
                   <button
                     type="button"
                     onClick={addCustomIssue}
@@ -349,6 +354,7 @@ export default function OnboardingPage() {
                 <h3 className="mb-3 text-sm font-semibold text-zinc-200">
                   Γεγονότα / κρίσεις / signals
                 </h3>
+
                 <div className="flex flex-wrap gap-2">
                   {eventTypes.map((eventType) => (
                     <Chip
@@ -365,7 +371,9 @@ export default function OnboardingPage() {
 
           {currentStep.id === "stakeholders" && (
             <section>
-              <h2 className="text-2xl font-semibold">Ποια κοινά ή φορείς σας ενδιαφέρουν;</h2>
+              <h2 className="text-2xl font-semibold">
+                Ποια κοινά ή φορείς σας ενδιαφέρουν;
+              </h2>
               <p className="mt-2 text-sm leading-6 text-zinc-400">
                 Δεν είναι απλή λίστα “target groups”. Είναι ο χάρτης των ομάδων,
                 φορέων και παικτών που επηρεάζονται ή εμφανίζονται στον δημόσιο λόγο.
@@ -378,7 +386,9 @@ export default function OnboardingPage() {
                       key={item}
                       value={item}
                       selected={selectedAgeGroups.includes(item)}
-                      onClick={() => toggleValue(item, selectedAgeGroups, setSelectedAgeGroups)}
+                      onClick={() =>
+                        toggleValue(item, selectedAgeGroups, setSelectedAgeGroups)
+                      }
                     />
                   ))}
                 </Group>
@@ -389,7 +399,9 @@ export default function OnboardingPage() {
                       key={item}
                       value={item}
                       selected={selectedSocialGroups.includes(item)}
-                      onClick={() => toggleValue(item, selectedSocialGroups, setSelectedSocialGroups)}
+                      onClick={() =>
+                        toggleValue(item, selectedSocialGroups, setSelectedSocialGroups)
+                      }
                     />
                   ))}
                 </Group>
@@ -401,7 +413,11 @@ export default function OnboardingPage() {
                       value={item}
                       selected={selectedProfessionalGroups.includes(item)}
                       onClick={() =>
-                        toggleValue(item, selectedProfessionalGroups, setSelectedProfessionalGroups)
+                        toggleValue(
+                          item,
+                          selectedProfessionalGroups,
+                          setSelectedProfessionalGroups
+                        )
                       }
                     />
                   ))}
@@ -413,7 +429,9 @@ export default function OnboardingPage() {
                       key={item}
                       value={item}
                       selected={selectedInstitutions.includes(item)}
-                      onClick={() => toggleValue(item, selectedInstitutions, setSelectedInstitutions)}
+                      onClick={() =>
+                        toggleValue(item, selectedInstitutions, setSelectedInstitutions)
+                      }
                     />
                   ))}
                 </Group>
@@ -424,7 +442,9 @@ export default function OnboardingPage() {
                       key={item}
                       value={item}
                       selected={selectedPublicActors.includes(item)}
-                      onClick={() => toggleValue(item, selectedPublicActors, setSelectedPublicActors)}
+                      onClick={() =>
+                        toggleValue(item, selectedPublicActors, setSelectedPublicActors)
+                      }
                     />
                   ))}
                 </Group>
@@ -575,6 +595,7 @@ function ReviewCard({ title, items }: { title: string; items: string[] }) {
   return (
     <div className="rounded-2xl border border-white/10 bg-black/20 p-5">
       <h3 className="mb-3 text-sm font-semibold text-cyan-100">{title}</h3>
+
       <div className="flex flex-wrap gap-2">
         {items.slice(0, 18).map((item) => (
           <span
@@ -584,6 +605,7 @@ function ReviewCard({ title, items }: { title: string; items: string[] }) {
             {item}
           </span>
         ))}
+
         {items.length > 18 && (
           <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs text-zinc-500">
             +{items.length - 18} ακόμα
