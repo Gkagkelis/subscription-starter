@@ -193,11 +193,24 @@ export default function OnboardingPage() {
       >
         <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <div className="text-xs uppercase tracking-[0.25em] text-cyan-300">
-              NORAYA SETUP
-            </div>
-            <h1 className="mt-3 text-3xl font-semibold tracking-tight">
-              Προσαρμογή στον οργανισμό σας
+  <div className="mb-4 flex items-center gap-3">
+    <img
+      src="/noraya-eye.png"
+      alt="Noraya"
+      className="h-8 w-8 object-contain opacity-90"
+    />
+    <div>
+      <div className="text-xs uppercase tracking-[0.25em] text-cyan-300">
+        NORAYA SETUP
+      </div>
+      <div className="text-xs text-zinc-500">
+        Political Intelligence Platform
+      </div>
+    </div>
+  </div>
+
+  <h1 className="mt-3 text-3xl font-semibold tracking-tight">
+    Προσαρμογή στον οργανισμό σας
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
               Το Noraya χρειάζεται λίγα στοιχεία για να μετατρέψει τη γενική δημόσια εικόνα
