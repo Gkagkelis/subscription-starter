@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
@@ -28,11 +29,11 @@ type NorayaProfile = {
 const fallbackProfile: NorayaProfile = {
   organization: {
     name: "Free Preview",
-    type: "Γενική εικόνα"
+    type: "Γενική πολιτική εικόνα"
   },
-  themes: ["Ακρίβεια / κόστος ζωής", "Υγεία", "Στέγαση"],
-  issues: ["Ακρίβεια τροφίμων", "Ενοίκια", "ΕΣΥ"],
-  events: ["Κοινωνικές αντιδράσεις"],
+  themes: ["Ακρίβεια / κόστος ζωής", "Υγεία", "Αγροτικά", "Στέγαση"],
+  issues: ["Ακρίβεια τροφίμων", "Ενοίκια", "ΕΣΥ", "Τέμπη"],
+  events: ["Κοινωνικές αντιδράσεις", "Αγροτικές κινητοποιήσεις"],
   stakeholders: {
     ageGroups: ["18-24 / νέοι ενήλικες", "25-34", "35-44"],
     socialGroups: ["Φοιτητές", "Οικογένειες με παιδιά"],
@@ -47,103 +48,83 @@ const fallbackProfile: NorayaProfile = {
   }
 };
 
-const issueCards = [
+const freeIssues = [
   {
     title: "Ακρίβεια",
-    theme: "Ακρίβεια / κόστος ζωής",
     icon: "🛒",
-    status: "Υψηλή προσοχή",
-    trend: "Ανοδική",
-    risk: 78,
-    relevance: 86,
-    color: "red",
+    publicShare: "66%",
+    status: "Ουδέτερο",
     summary:
-      "Η πίεση παραμένει υψηλή σε τρόφιμα, ενέργεια και καθημερινό κόστος. Το θέμα συνδέεται με εισόδημα, εμπιστοσύνη και κοινωνική ένταση."
-  },
-  {
-    title: "Στέγαση",
-    theme: "Στέγαση",
-    icon: "🏠",
-    status: "Αναδυόμενο ρίσκο",
-    trend: "Ανοδική",
-    risk: 69,
-    relevance: 74,
-    color: "amber",
-    summary:
-      "Τα ενοίκια, η φοιτητική στέγη και η βραχυχρόνια μίσθωση εμφανίζουν αυξημένη ένταση στον δημόσιο λόγο."
+      "Το κόστος ζωής παραμένει το πιο σταθερά παρόν θέμα στη δημόσια συζήτηση."
   },
   {
     title: "Υγεία",
-    theme: "Υγεία",
     icon: "♡",
-    status: "Πιθανή κλιμάκωση",
-    trend: "Σταθερή",
-    risk: 62,
-    relevance: 71,
-    color: "amber",
+    publicShare: "48%",
+    status: "Ουδέτερο",
     summary:
-      "Αυξάνονται οι αναφορές σε αναμονές, ελλείψεις προσωπικού και πρόσβαση σε υπηρεσίες υγείας."
+      "Οι αναφορές σε νοσοκομεία, ραντεβού και προσωπικό παραμένουν αυξημένες."
   },
   {
     title: "Αγροτικά",
-    theme: "Αγροτικά",
     icon: "🌿",
-    status: "Σήμα κινητικότητας",
-    trend: "Ανοδική",
-    risk: 55,
-    relevance: 61,
-    color: "emerald",
+    publicShare: "41%",
+    status: "Ουδέτερο",
     summary:
-      "Η κινητικότητα στον αγροτικό χώρο δείχνει ανάγκη παρακολούθησης κόστους παραγωγής, ενέργειας και περιφερειακής πίεσης."
+      "Υπάρχει αυξημένη κινητικότητα σε κόστος παραγωγής και περιφερειακή πίεση."
   }
 ];
 
-const kpis = [
+const personalizedIssues = [
   {
-    label: "Δημόσιο κλίμα",
-    value: "+12",
-    sub: "μεταβολή 24ώρου"
+    title: "Ακρίβεια",
+    icon: "🛒",
+    importance: "Πολύ υψηλή σημασία",
+    risk: 78,
+    fit: 64,
+    color: "red",
+    why:
+      "Συνδέεται με βασικά κοινά και φορείς που δηλώσατε. Επηρεάζει εισόδημα, εμπιστοσύνη και δημόσια πίεση.",
+    recommendation:
+      "Χρειάζεται τεκμηριωμένη ανάλυση πηγών, κόστους και συνέπειας με τις δηλωμένες θέσεις."
   },
   {
-    label: "Ενεργά αφηγήματα",
-    value: "48",
-    sub: "σε δημόσιες πηγές"
+    title: "Υγεία",
+    icon: "♡",
+    importance: "Υψηλή σημασία",
+    risk: 62,
+    fit: 54,
+    color: "amber",
+    why:
+      "Οι αναφορές σε αναμονές, ελλείψεις και πρόσβαση σε υπηρεσίες υγείας δείχνουν πιθανή κλιμάκωση.",
+    recommendation:
+      "Παρακολουθήστε θεσμικές εξελίξεις, τοπικές αναφορές και αντιδράσεις φορέων."
   },
   {
-    label: "Risk alerts",
-    value: "4",
-    sub: "χρειάζονται έλεγχο"
+    title: "Αγροτικά",
+    icon: "🌿",
+    importance: "Μεσαία σημασία",
+    risk: 45,
+    fit: 43,
+    color: "emerald",
+    why:
+      "Η κινητικότητα στον αγροτικό χώρο λειτουργεί ως signal για περιφερειακή ένταση.",
+    recommendation:
+      "Συνδέστε το με ενέργεια, κόστος παραγωγής και τοπικές αντιδράσεις."
   },
   {
-    label: "Πηγές",
-    value: "500+",
-    sub: "ΜΜΕ / Βουλή / ανοικτά δεδομένα"
+    title: "Παιδεία",
+    icon: "🎓",
+    importance: "Μεσαία σημασία",
+    risk: 38,
+    fit: 41,
+    color: "blue",
+    why:
+      "Φοιτητικά και σχολικά ζητήματα συνδέονται με κοινωνικές ομάδες υψηλής ευαισθησίας.",
+    recommendation:
+      "Παρακολουθήστε φοιτητικές κινητοποιήσεις, θεσμικές παρεμβάσεις και δημόσιο λόγο."
   }
 ];
-
-function getColorClasses(color: string) {
-  if (color === "red") {
-    return {
-      badge: "border-red-400/30 bg-red-400/10 text-red-100",
-      panel: "border-red-400/20 bg-red-400/10",
-      text: "text-red-100"
-    };
-  }
-
-  if (color === "amber") {
-    return {
-      badge: "border-amber-400/30 bg-amber-400/10 text-amber-100",
-      panel: "border-amber-400/20 bg-amber-400/10",
-      text: "text-amber-100"
-    };
-  }
-
-  return {
-    badge: "border-emerald-400/30 bg-emerald-400/10 text-emerald-100",
-    panel: "border-emerald-400/20 bg-emerald-400/10",
-    text: "text-emerald-100"
-  };
-}
 
 function readProfile(): NorayaProfile | null {
   if (typeof window === "undefined") return null;
@@ -156,6 +137,42 @@ function readProfile(): NorayaProfile | null {
   }
 }
 
+function getRiskColor(color: string) {
+  if (color === "red") {
+    return {
+      border: "border-red-400/30",
+      bg: "bg-red-400/10",
+      text: "text-red-100",
+      badge: "border-red-400/30 bg-red-400/10 text-red-100"
+    };
+  }
+
+  if (color === "amber") {
+    return {
+      border: "border-amber-400/30",
+      bg: "bg-amber-400/10",
+      text: "text-amber-100",
+      badge: "border-amber-400/30 bg-amber-400/10 text-amber-100"
+    };
+  }
+
+  if (color === "emerald") {
+    return {
+      border: "border-emerald-400/30",
+      bg: "bg-emerald-400/10",
+      text: "text-emerald-100",
+      badge: "border-emerald-400/30 bg-emerald-400/10 text-emerald-100"
+    };
+  }
+
+  return {
+    border: "border-cyan-400/30",
+    bg: "bg-cyan-400/10",
+    text: "text-cyan-100",
+    badge: "border-cyan-400/30 bg-cyan-400/10 text-cyan-100"
+  };
+}
+
 export default function DashboardPage() {
   const [profile, setProfile] = useState<NorayaProfile | null>(null);
 
@@ -163,8 +180,8 @@ export default function DashboardPage() {
     setProfile(readProfile());
   }, []);
 
-  const isPersonalized = Boolean(profile);
   const activeProfile = profile ?? fallbackProfile;
+  const isPersonalized = Boolean(profile);
 
   const organizationName =
     activeProfile.organization?.name || fallbackProfile.organization?.name || "Free Preview";
@@ -172,12 +189,12 @@ export default function DashboardPage() {
   const organizationType =
     activeProfile.organization?.type || fallbackProfile.organization?.type || "Γενική εικόνα";
 
-  const selectedThemes = activeProfile.themes ?? fallbackProfile.themes ?? [];
-  const selectedIssues = activeProfile.issues ?? fallbackProfile.issues ?? [];
-  const selectedEvents = activeProfile.events ?? fallbackProfile.events ?? [];
+  const selectedThemes = activeProfile.themes ?? [];
+  const selectedIssues = activeProfile.issues ?? [];
+  const selectedEvents = activeProfile.events ?? [];
 
   const selectedStakeholders = useMemo(() => {
-    const stakeholders = activeProfile.stakeholders ?? fallbackProfile.stakeholders ?? {};
+    const stakeholders = activeProfile.stakeholders ?? {};
 
     return [
       ...(stakeholders.ageGroups ?? []),
@@ -188,65 +205,70 @@ export default function DashboardPage() {
     ];
   }, [activeProfile]);
 
-  const visibleCards = useMemo(() => {
-    const filtered = issueCards.filter((card) => selectedThemes.includes(card.theme));
-    return filtered.length > 0 ? filtered : issueCards.slice(0, 3);
-  }, [selectedThemes]);
+  const mission = activeProfile.positions?.mission;
+  const redLines = activeProfile.positions?.redLines;
+  const tone = activeProfile.positions?.tone;
 
   return (
     <div className="min-h-screen overflow-hidden bg-[#020617] text-white">
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_12%_10%,rgba(34,211,238,0.18),transparent_32%),radial-gradient(circle_at_85%_20%,rgba(16,185,129,0.10),transparent_28%),radial-gradient(circle_at_50%_80%,rgba(59,130,246,0.08),transparent_32%)]" />
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_12%_8%,rgba(34,211,238,0.18),transparent_28%),radial-gradient(circle_at_84%_20%,rgba(16,185,129,0.14),transparent_30%),radial-gradient(circle_at_50%_85%,rgba(59,130,246,0.10),transparent_34%)]" />
 
-      <div className="relative mx-auto grid max-w-7xl gap-6 px-5 py-8 lg:grid-cols-[250px_minmax(0,1fr)_380px]">
-        <aside className="rounded-3xl border border-cyan-300/10 bg-white/[0.035] p-5 shadow-2xl shadow-cyan-950/20 backdrop-blur">
+      <div className="relative mx-auto grid max-w-[1500px] gap-5 px-5 py-6 xl:grid-cols-[255px_minmax(0,1.15fr)_minmax(360px,0.85fr)]">
+        <aside className="rounded-[2rem] border border-cyan-300/10 bg-white/[0.035] p-6 shadow-2xl shadow-cyan-950/20 backdrop-blur">
           <div className="mb-8 flex items-center gap-3">
-            <div className="grid h-11 w-11 place-items-center rounded-2xl border border-cyan-300/30 bg-cyan-300/10 text-lg font-semibold text-cyan-100">
-              N
-            </div>
+            <Image
+              src="/noraya-eye.png"
+              alt="Noraya"
+              width={90}
+              height={46}
+              className="h-12 w-auto object-contain"
+              priority
+            />
             <div>
               <div className="tracking-[0.32em] text-zinc-100">NORAYA</div>
               <div className="text-xs text-zinc-500">Political Intelligence</div>
             </div>
           </div>
 
-          <nav className="space-y-2 text-sm">
-            {["Σήμερα", "Θέματα", "Υποθέσεις", "Σενάρια", "Αναφορές"].map(
-              (item, index) => (
-                <div
-                  key={item}
-                  className={`rounded-2xl px-4 py-3 ${
-                    index === 0
-                      ? "border border-cyan-300/20 bg-cyan-300/10 text-cyan-100"
-                      : "text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-100"
-                  }`}
-                >
-                  {item}
-                </div>
-              )
-            )}
-          </nav>
-
-          <div className="mt-8 rounded-2xl border border-white/10 bg-black/20 p-4">
-            <div className="text-xs uppercase tracking-[0.2em] text-zinc-500">
-              Οργανισμός
-            </div>
-            <div className="mt-2 font-medium text-zinc-100">{organizationName}</div>
-            <div className="mt-1 text-xs text-zinc-500">{organizationType}</div>
-
-            <Link
-              href="/onboarding"
-              className="mt-4 inline-flex w-full items-center justify-center rounded-xl border border-cyan-300/20 px-3 py-2 text-xs text-cyan-100 transition hover:bg-cyan-300/10"
-            >
-              {isPersonalized ? "Αλλαγή προσαρμογής" : "Προσαρμογή οργανισμού"}
-            </Link>
+          <div className="mb-8">
+            <h1 className="text-3xl font-semibold leading-tight">
+              AI Πολιτική Πληροφόρηση
+            </h1>
+            <p className="mt-4 text-lg leading-7 text-cyan-300">
+              Δωρεάν γενική εικόνα. Με είσοδο, στρατηγική προσαρμοσμένη στον οργανισμό σας.
+            </p>
           </div>
 
-          <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-4">
+          <div className="space-y-5">
+            <FeatureItem
+              icon="◉"
+              title="Γενική παρακολούθηση"
+              text="Ολοκληρωμένη εικόνα του δημόσιου πολιτικού περιβάλλοντος."
+            />
+            <FeatureItem
+              icon="◎"
+              title="Προσαρμογή σε οργανισμό"
+              text="Θεματικές, ζητήματα, κοινά, φορείς και κόκκινες γραμμές."
+            />
+            <FeatureItem
+              icon="◇"
+              title="Σενάρια & ρίσκο"
+              text="Ανάλυση κινδύνων, ενδείξεων και πιθανής κλιμάκωσης."
+            />
+            <FeatureItem
+              icon="▣"
+              title="Ιδιωτική γνώση"
+              text="Οι θέσεις του οργανισμού χρησιμοποιούνται για συνέπεια και τεκμηρίωση."
+            />
+          </div>
+
+          <div className="mt-8 rounded-3xl border border-white/10 bg-black/20 p-4">
             <div className="text-xs uppercase tracking-[0.2em] text-zinc-500">
-              Κατάσταση
+              Τρέχουσα κατάσταση
             </div>
+
             <div
-              className={`mt-3 inline-flex rounded-full border px-3 py-1 text-xs ${
+              className={`mt-3 inline-flex rounded-full border px-3 py-1.5 text-xs ${
                 isPersonalized
                   ? "border-emerald-300/30 bg-emerald-300/10 text-emerald-100"
                   : "border-cyan-300/30 bg-cyan-300/10 text-cyan-100"
@@ -254,188 +276,273 @@ export default function DashboardPage() {
             >
               {isPersonalized ? "Προσωποποιημένο" : "Free Preview"}
             </div>
+
+            <div className="mt-4 text-sm font-medium text-zinc-100">
+              {organizationName}
+            </div>
+            <div className="mt-1 text-xs text-zinc-500">{organizationType}</div>
+
+            <Link
+              href="/onboarding"
+              className="mt-4 inline-flex w-full items-center justify-center rounded-xl border border-cyan-300/20 px-3 py-2 text-xs text-cyan-100 transition hover:bg-cyan-300/10"
+            >
+              {isPersonalized ? "Αλλαγή προσαρμογής" : "Ρύθμιση οργανισμού"}
+            </Link>
           </div>
         </aside>
 
-        <main className="space-y-6">
-          <section className="rounded-3xl border border-white/10 bg-white/[0.045] p-6 shadow-2xl shadow-cyan-950/10 backdrop-blur">
-            <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+        <main className="space-y-5">
+          <section className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-5 shadow-2xl shadow-cyan-950/10 backdrop-blur">
+            <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
               <div>
                 <div className="mb-3 inline-flex rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1 text-xs text-cyan-100">
-                  {isPersonalized
-                    ? "Με προσαρμογή οργανισμού"
-                    : "Δωρεάν γενική εικόνα"}
+                  1 · Δωρεάν γενική εικόνα
                 </div>
 
-                <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
-                  {isPersonalized
-                    ? `Σήμερα για ${organizationName}`
-                    : "Γενική εικόνα σήμερα"}
-                </h1>
+                <h2 className="text-2xl font-semibold">Γενική εικόνα</h2>
 
-                <p className="mt-3 max-w-3xl text-sm leading-6 text-zinc-400">
-                  {isPersonalized
-                    ? "Το Noraya συνδέει δημόσια δεδομένα, θεματικές, γεγονότα, κοινά και δηλωμένες θέσεις για να δώσει καθαρή εικόνα ρίσκου και προτεραιοτήτων."
-                    : "Αυτή είναι η γενική εικόνα του πολιτικού περιβάλλοντος. Με προσαρμογή οργανισμού, το dashboard αποκτά δικές σας θεματικές, υποθέσεις και έλεγχο συνέπειας θέσεων."}
-                </p>
-              </div>
-
-              {!isPersonalized && (
-                <Link
-                  href="/onboarding"
-                  className="rounded-2xl bg-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-cyan-500/20 transition hover:bg-cyan-200"
-                >
-                  Προσαρμογή τώρα →
-                </Link>
-              )}
-            </div>
-
-            <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              {kpis.map((kpi) => (
-                <div
-                  key={kpi.label}
-                  className="rounded-2xl border border-white/10 bg-black/20 p-4"
-                >
-                  <div className="text-xs text-zinc-500">{kpi.label}</div>
-                  <div className="mt-2 text-2xl font-semibold text-white">
-                    {kpi.value}
-                  </div>
-                  <div className="mt-1 text-xs text-zinc-500">{kpi.sub}</div>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <span className="rounded-full border border-white/10 px-3 py-1 text-xs text-zinc-400">
+                    Γενικό πολιτικό τοπίο
+                  </span>
+                  <span className="rounded-full border border-white/10 px-3 py-1 text-xs text-zinc-400">
+                    Χωρίς προσαρμογή οργανισμού
+                  </span>
                 </div>
-              ))}
-            </div>
-          </section>
-
-          <section className="rounded-3xl border border-white/10 bg-white/[0.035] p-6 backdrop-blur">
-            <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-              <div>
-                <h2 className="text-xl font-semibold">
-                  {isPersonalized ? "Κρίσιμα ζητήματα για εσάς" : "Κύρια ζητήματα σήμερα"}
-                </h2>
-                <p className="mt-1 text-sm text-zinc-500">
-                  {isPersonalized
-                    ? "Ταξινόμηση με βάση τις θεματικές και τα ζητήματα που δηλώσατε."
-                    : "Γενική ταξινόμηση χωρίς προφίλ οργανισμού."}
-                </p>
               </div>
 
-              <span className="rounded-full border border-white/10 px-3 py-1 text-xs text-zinc-400">
-                Ενημερώθηκε τώρα
-              </span>
+              <div className="rounded-2xl border border-cyan-300/20 bg-cyan-300/10 px-4 py-2 text-xs text-cyan-100">
+                Free Preview
+              </div>
             </div>
 
-            <div className="grid gap-4 xl:grid-cols-2">
-              {visibleCards.map((card) => {
-                const colors = getColorClasses(card.color);
+            <div className="grid gap-3 md:grid-cols-4">
+              <Kpi label="Sentiment" value="+8" sub="ουδέτερο" />
+              <Kpi label="Narratives" value="52" sub="ενεργά αφηγήματα" />
+              <Kpi label="Risk alerts" value="6" sub="μεσαίου ρίσκου" />
+              <Kpi label="Βουλή" value="8" sub="ενεργές συζητήσεις" />
+            </div>
 
-                return (
-                  <article
-                    key={card.title}
-                    className="rounded-3xl border border-white/10 bg-slate-950/70 p-5 transition hover:border-cyan-300/30"
+            <div className="mt-5">
+              <h3 className="mb-3 text-sm font-semibold text-zinc-200">
+                Κύρια θέματα σήμερα
+              </h3>
+
+              <div className="grid gap-3 md:grid-cols-3">
+                {freeIssues.map((issue) => (
+                  <div
+                    key={issue.title}
+                    className="rounded-3xl border border-white/10 bg-slate-950/60 p-4"
                   >
-                    <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3">
-                        <div className="grid h-12 w-12 place-items-center rounded-2xl border border-white/10 bg-white/[0.04] text-xl">
-                          {card.icon}
+                        <div className="grid h-10 w-10 place-items-center rounded-2xl border border-white/10 bg-white/[0.04] text-lg">
+                          {issue.icon}
                         </div>
-
                         <div>
-                          <h3 className="text-lg font-semibold">{card.title}</h3>
-                          <div
-                            className={`mt-1 inline-flex rounded-full border px-2.5 py-1 text-[11px] ${colors.badge}`}
-                          >
-                            {card.status}
+                          <div className="font-semibold">{issue.title}</div>
+                          <div className="mt-1 inline-flex rounded-full border border-amber-300/20 bg-amber-300/10 px-2 py-0.5 text-[11px] text-amber-100">
+                            {issue.status}
                           </div>
                         </div>
                       </div>
 
-                      <div className="text-right text-xs text-zinc-500">
-                        Τάση
-                        <div className="mt-1 text-sm text-cyan-100">{card.trend}</div>
+                      <div className="text-right">
+                        <div className="text-xl font-semibold">{issue.publicShare}</div>
+                        <div className="text-[11px] text-zinc-500">δημόσια αναφορά</div>
                       </div>
                     </div>
 
-                    <p className="mt-5 min-h-[72px] text-sm leading-6 text-zinc-400">
-                      {card.summary}
+                    <p className="mt-4 text-xs leading-5 text-zinc-500">
+                      {issue.summary}
                     </p>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-                    <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
-                      <div className={`rounded-2xl border p-3 ${colors.panel}`}>
-                        <div className="text-zinc-400">Risk score</div>
-                        <div className={`mt-1 text-lg font-semibold ${colors.text}`}>
-                          {card.risk}/100
-                        </div>
-                      </div>
-
-                      <div className="rounded-2xl border border-emerald-400/20 bg-emerald-400/10 p-3">
-                        <div className="text-zinc-400">
-                          {isPersonalized ? "Συνάφεια" : "Δημόσια ένταση"}
-                        </div>
-                        <div className="mt-1 text-lg font-semibold text-emerald-100">
-                          {card.relevance}%
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="mt-5 flex flex-wrap gap-2">
-                      <button className="rounded-xl bg-white px-4 py-2 text-xs font-medium text-slate-950">
-                        Δες ανάλυση
-                      </button>
-
-                      <button className="rounded-xl border border-white/10 px-4 py-2 text-xs text-zinc-300">
-                        Δες πρόβλεψη
-                      </button>
-
-                      <button className="rounded-xl border border-cyan-300/20 px-4 py-2 text-xs text-cyan-100">
-                        Έλεγχος συνέπειας
-                      </button>
-                    </div>
-                  </article>
-                );
-              })}
+            <div className="mt-5 rounded-3xl border border-cyan-300/15 bg-cyan-300/[0.04] p-4">
+              <div className="text-sm font-semibold text-cyan-100">
+                AI σύνοψη γενικής εικόνας
+              </div>
+              <p className="mt-2 text-sm leading-6 text-zinc-400">
+                Σταθερό πολιτικό κλίμα. Η ακρίβεια παραμένει το κυρίαρχο θέμα,
+                ενώ υγεία και αγροτικά εμφανίζουν αυξημένη δημόσια αναφορά.
+                Για προσαρμοσμένη ανάλυση απαιτείται ρύθμιση οργανισμού.
+              </p>
             </div>
           </section>
 
-          <section className="rounded-3xl border border-cyan-300/15 bg-cyan-300/[0.04] p-6 backdrop-blur">
-            <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
+          <section className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-5 shadow-2xl shadow-cyan-950/10 backdrop-blur">
+            <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
               <div>
-                <h2 className="text-xl font-semibold">
+                <div className="mb-3 inline-flex rounded-full border border-emerald-300/20 bg-emerald-300/10 px-3 py-1 text-xs text-emerald-100">
+                  3 · Προσωποποιημένη στρατηγική ανάλυση
+                </div>
+
+                <h2 className="text-2xl font-semibold">
                   {isPersonalized
-                    ? "AI σύνοψη για τον οργανισμό σας"
-                    : "AI σύνοψη γενικής εικόνας"}
+                    ? `Σήμερα για ${organizationName}`
+                    : "Σήμερα για τον οργανισμό σας"}
                 </h2>
 
-                <p className="mt-3 max-w-3xl text-sm leading-6 text-zinc-400">
+                <p className="mt-2 text-sm text-zinc-500">
                   {isPersonalized
-                    ? `Το προφίλ σας περιλαμβάνει ${selectedThemes.length} θεματικές, ${selectedIssues.length} ζητήματα και ${selectedStakeholders.length} ομάδες ή φορείς. Το Noraya μπορεί να αρχίσει να ταξινομεί τι έχει μεγαλύτερη σημασία για εσάς.`
-                    : "Η γενική εικόνα δείχνει αυξημένη ένταση σε κόστος ζωής, στέγαση και υπηρεσίες υγείας. Για πιο ακριβή αξιολόγηση χρειάζεται προσαρμογή οργανισμού."}
+                    ? "Με βάση τις θεματικές, ζητήματα, φορείς και θέσεις που δηλώσατε."
+                    : "Συμπληρώστε το onboarding για να ενεργοποιηθεί πλήρως."}
                 </p>
-
-                {isPersonalized && (
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {selectedThemes.slice(0, 8).map((theme) => (
-                      <span
-                        key={theme}
-                        className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1.5 text-xs text-cyan-100"
-                      >
-                        {theme}
-                      </span>
-                    ))}
-                  </div>
-                )}
               </div>
 
               <Link
                 href="/onboarding"
-                className="rounded-2xl border border-cyan-300/30 px-5 py-3 text-sm text-cyan-100 transition hover:bg-cyan-300/10"
+                className="rounded-2xl border border-cyan-300/25 px-4 py-2 text-xs text-cyan-100 hover:bg-cyan-300/10"
               >
-                {isPersonalized ? "Ενημέρωση προφίλ" : "Ξεκλείδωσε προσαρμογή"}
+                {isPersonalized ? "Ενημέρωση προφίλ" : "Ρύθμιση οργανισμού"}
               </Link>
             </div>
+
+            <div className="grid gap-3 md:grid-cols-5">
+              <Kpi label="Συνολικό sentiment" value="+19" sub="θετικό" />
+              <Kpi label="Narrative fit" value="73%" sub="συνάφεια" />
+              <Kpi label="Κύρια ρίσκα" value="4" sub="υψηλής προτερ." />
+              <Kpi label="Επίδραση" value="68%" sub="ενεργή" />
+              <Kpi label="Ευκαιρίες" value="7" sub="ενεργές" />
+            </div>
+
+            <div className="mt-5 space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-zinc-200">
+                  Κρίσιμα θέματα για εσάς
+                </h3>
+                <span className="text-xs text-zinc-500">
+                  Ταξινόμηση: σημασία για εσάς
+                </span>
+              </div>
+
+              {personalizedIssues.map((issue, index) => {
+                const colors = getRiskColor(issue.color);
+
+                if (index === 0) {
+                  return (
+                    <div
+                      key={issue.title}
+                      className={`rounded-3xl border ${colors.border} ${colors.bg} p-4`}
+                    >
+                      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="grid h-11 w-11 place-items-center rounded-2xl border border-white/10 bg-black/20 text-lg">
+                            {issue.icon}
+                          </div>
+                          <div>
+                            <div className="text-lg font-semibold">{issue.title}</div>
+                            <div className={`mt-1 inline-flex rounded-full border px-2 py-0.5 text-[11px] ${colors.badge}`}>
+                              {issue.importance}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3 text-sm md:min-w-[260px]">
+                          <Metric label="Ρίσκο" value={`${issue.risk}/100`} color="text-red-100" />
+                          <Metric label="Narrative fit" value={`${issue.fit}%`} color="text-emerald-100" />
+                        </div>
+                      </div>
+
+                      <div className="mt-4 grid gap-3 md:grid-cols-[1fr_1fr]">
+                        <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                          <div className="text-xs text-zinc-500">Γιατί μας αφορά</div>
+                          <p className="mt-2 text-sm leading-6 text-zinc-300">
+                            {issue.why}
+                          </p>
+                        </div>
+
+                        <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                          <div className="text-xs text-zinc-500">Σύσταση ανάλυσης</div>
+                          <p className="mt-2 text-sm leading-6 text-zinc-300">
+                            {issue.recommendation}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 flex justify-end">
+                        <button className="rounded-xl border border-cyan-300/25 px-4 py-2 text-xs text-cyan-100 hover:bg-cyan-300/10">
+                          Προβολή ανάλυσης →
+                        </button>
+                      </div>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div
+                    key={issue.title}
+                    className="grid gap-3 rounded-2xl border border-white/10 bg-slate-950/60 p-4 md:grid-cols-[1fr_110px_110px_40px]"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white/[0.04]">
+                        {issue.icon}
+                      </div>
+                      <div>
+                        <div className="font-medium">{issue.title}</div>
+                        <div className={`mt-1 inline-flex rounded-full border px-2 py-0.5 text-[11px] ${colors.badge}`}>
+                          {issue.importance}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="text-sm text-red-100">{issue.risk}/100</div>
+                    <div className="text-sm text-emerald-100">{issue.fit}%</div>
+                    <div className="text-zinc-500">⌄</div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="mt-5 rounded-3xl border border-cyan-300/15 bg-cyan-300/[0.04] p-4">
+              <div className="text-sm font-semibold text-cyan-100">
+                AI σύνοψη για τον οργανισμό σας
+              </div>
+              <p className="mt-2 text-sm leading-6 text-zinc-400">
+                {isPersonalized
+                  ? `Το προφίλ περιλαμβάνει ${selectedThemes.length} θεματικές, ${selectedIssues.length} ζητήματα, ${selectedEvents.length} γεγονότα και ${selectedStakeholders.length} κοινά ή φορείς. Το Noraya μπορεί να ταξινομεί προτεραιότητες με βάση το δικό σας πλαίσιο.`
+                  : "Μετά τη ρύθμιση οργανισμού, εδώ θα εμφανίζεται εξατομικευμένη σύνοψη με βάση θεματικές, γεγονότα, ομάδες, φορείς και θέσεις."}
+              </p>
+
+              {isPersonalized && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {selectedThemes.slice(0, 8).map((theme) => (
+                    <span
+                      key={theme}
+                      className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1 text-xs text-cyan-100"
+                    >
+                      {theme}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
           </section>
+
+          <div className="grid gap-3 md:grid-cols-3">
+            <FlowStep
+              number="1"
+              title="Δωρεάν γενική εικόνα"
+              text="Παρακολουθήστε το γενικό πολιτικό τοπίο."
+            />
+            <FlowStep
+              number="2"
+              title="Ρύθμιση οργανισμού"
+              text="Πείτε μας ποιοι είστε και τι σας ενδιαφέρει."
+            />
+            <FlowStep
+              number="3"
+              title="Προσωποποιημένη ανάλυση"
+              text="Λάβετε στοχευμένη εικόνα από τον AI Σύμβουλο."
+              active
+            />
+          </div>
         </main>
 
-        <aside className="rounded-3xl border border-cyan-300/20 bg-slate-950/90 p-5 shadow-2xl shadow-cyan-950/20 backdrop-blur">
+        <aside className="rounded-[2rem] border border-cyan-300/20 bg-slate-950/90 p-5 shadow-2xl shadow-cyan-950/20 backdrop-blur">
           <div className="mb-5 flex items-start justify-between gap-4">
             <div>
               <div className="text-xs uppercase tracking-[0.2em] text-cyan-300">
@@ -446,9 +553,13 @@ export default function DashboardPage() {
               </h2>
             </div>
 
-            <div className="grid h-12 w-12 place-items-center rounded-2xl border border-cyan-300/20 bg-cyan-300/10 text-cyan-100">
-              ✦
-            </div>
+            <Image
+              src="/noraya-eye.png"
+              alt="Noraya"
+              width={110}
+              height={60}
+              className="h-12 w-auto object-contain opacity-90"
+            />
           </div>
 
           <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
@@ -464,25 +575,31 @@ export default function DashboardPage() {
               title="Τι σημαίνει"
               text={
                 isPersonalized
-                  ? `Το Noraya βλέπει αυξημένη συνάφεια στα ζητήματα: ${selectedIssues
+                  ? `Το Noraya συνδέει τα ζητήματα ${selectedIssues
                       .slice(0, 3)
-                      .join(", ")}. Αυτά πρέπει να παρακολουθούνται μαζί με πηγές, θεσμούς και γεγονότα.`
-                  : "Σε γενικό επίπεδο, το πολιτικό περιβάλλον δείχνει ένταση γύρω από κόστος ζωής, στέγαση και υγεία."
+                      .join(", ")} με τις θεματικές και τους φορείς που δηλώσατε.`
+                  : "Σε γενικό επίπεδο, το πολιτικό περιβάλλον δείχνει αυξημένη ένταση σε κόστος ζωής, υγεία και κινητοποιήσεις."
               }
             />
 
             <AdvisorSection
               icon="!"
               title="Κίνδυνοι"
-              text="Υπάρχει ρίσκο να ληφθούν αποφάσεις με αποσπασματική εικόνα, χωρίς σύνδεση με δεδομένα, θεσμικό πλαίσιο και προηγούμενες θέσεις."
+              text="Υπάρχει κίνδυνος αποσπασματικής εικόνας χωρίς σύνδεση με πηγές, γεγονότα, θεσμούς και προηγούμενες θέσεις."
+            />
+
+            <AdvisorSection
+              icon="+"
+              title="Ευκαιρίες"
+              text="Η οργανωμένη παρακολούθηση θεμάτων μπορεί να αποκαλύψει έγκαιρα κλιμάκωση, κενά πληροφόρησης και ανάγκες τεκμηρίωσης."
             />
 
             <AdvisorSection
               icon="✓"
               title="Συνέπεια θέσεων"
               text={
-                isPersonalized && activeProfile.positions?.mission
-                  ? `Η βασική γραμμή που δηλώσατε είναι: ${activeProfile.positions.mission}`
+                isPersonalized && (mission || redLines || tone)
+                  ? `Υπάρχει αρχικό πλαίσιο θέσεων. Το επόμενο βήμα είναι να συνδεθούν αρχεία, δηλώσεις και policy papers.`
                   : "Για πλήρη έλεγχο συνέπειας, προσθέστε αποστολή, κόκκινες γραμμές και αργότερα αρχεία θέσεων."
               }
             />
@@ -492,16 +609,15 @@ export default function DashboardPage() {
                 Προτεινόμενο επόμενο βήμα
               </div>
               <p className="text-sm leading-6 text-zinc-200">
-                Ανοίξτε ένα Issue Room για το πιο κρίσιμο θέμα και ελέγξτε:
-                πηγές, αφήγημα, θεσμικές εξελίξεις, ρίσκο και συνέπεια με τις
-                δηλωμένες θέσεις.
+                Ανοίξτε Issue Room για το σημαντικότερο θέμα και ελέγξτε:
+                πηγές, αφήγημα, κλιμάκωση, φορείς και συνέπεια με τις θέσεις.
               </p>
             </div>
           </div>
 
           <div className="mt-5 grid grid-cols-2 gap-2">
             <button className="rounded-xl border border-white/10 px-3 py-2 text-xs text-zinc-300">
-              Εξαγωγή
+              Εξαγωγή ανάλυσης
             </button>
 
             <button className="rounded-xl bg-cyan-300 px-3 py-2 text-xs font-semibold text-slate-950">
@@ -526,6 +642,63 @@ export default function DashboardPage() {
   );
 }
 
+function FeatureItem({
+  icon,
+  title,
+  text
+}: {
+  icon: string;
+  title: string;
+  text: string;
+}) {
+  return (
+    <div className="flex gap-3">
+      <div className="grid h-9 w-9 shrink-0 place-items-center rounded-2xl border border-cyan-300/25 bg-cyan-300/10 text-cyan-100">
+        {icon}
+      </div>
+      <div>
+        <div className="text-sm font-semibold text-zinc-100">{title}</div>
+        <p className="mt-1 text-xs leading-5 text-zinc-500">{text}</p>
+      </div>
+    </div>
+  );
+}
+
+function Kpi({
+  label,
+  value,
+  sub
+}: {
+  label: string;
+  value: string;
+  sub: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+      <div className="text-xs text-zinc-500">{label}</div>
+      <div className="mt-2 text-2xl font-semibold text-white">{value}</div>
+      <div className="mt-1 text-xs text-zinc-500">{sub}</div>
+    </div>
+  );
+}
+
+function Metric({
+  label,
+  value,
+  color
+}: {
+  label: string;
+  value: string;
+  color: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
+      <div className="text-xs text-zinc-500">{label}</div>
+      <div className={`mt-1 text-xl font-semibold ${color}`}>{value}</div>
+    </div>
+  );
+}
+
 function AdvisorSection({
   icon,
   title,
@@ -545,6 +718,42 @@ function AdvisorSection({
       </div>
 
       <p className="text-sm leading-6 text-zinc-400">{text}</p>
+    </div>
+  );
+}
+
+function FlowStep({
+  number,
+  title,
+  text,
+  active
+}: {
+  number: string;
+  title: string;
+  text: string;
+  active?: boolean;
+}) {
+  return (
+    <div
+      className={`rounded-3xl border p-4 ${
+        active
+          ? "border-emerald-300/30 bg-emerald-300/10"
+          : "border-cyan-300/20 bg-cyan-300/[0.05]"
+      }`}
+    >
+      <div className="mb-3 flex items-center gap-3">
+        <div
+          className={`grid h-9 w-9 place-items-center rounded-2xl border text-sm ${
+            active
+              ? "border-emerald-300/40 text-emerald-100"
+              : "border-cyan-300/30 text-cyan-100"
+          }`}
+        >
+          {number}
+        </div>
+        <div className="font-semibold text-zinc-100">{title}</div>
+      </div>
+      <p className="text-xs leading-5 text-zinc-500">{text}</p>
     </div>
   );
 }
