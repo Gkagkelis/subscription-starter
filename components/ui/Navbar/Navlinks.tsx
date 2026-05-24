@@ -14,7 +14,7 @@ export default function Navlinks({ user }: NavlinksProps) {
   return (
     <div className="relative flex flex-row justify-between py-4 align-center md:py-6">
       <div className="flex items-center flex-1 gap-2">
-        <Link href={user ? "/dashboard/copilot" : "/"} className={s.logo} aria-label="Logo">
+        <Link href={user ? "/dashboard" : "/"} className={s.logo} aria-label="Logo">
           <Image src="/noraya.png" alt="Noraya" width={32} height={32} />
         </Link>
         <span className="text-sm text-zinc-500 tracking-widest uppercase">Noraya</span>
