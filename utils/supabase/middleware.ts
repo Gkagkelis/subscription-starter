@@ -22,11 +22,13 @@ export const createClient = (request: NextRequest) => {
             value,
             ...options
           });
+
           response = NextResponse.next({
             request: {
               headers: request.headers
             }
           });
+
           response.cookies.set({
             name,
             value,
@@ -39,11 +41,13 @@ export const createClient = (request: NextRequest) => {
             value: '',
             ...options
           });
+
           response = NextResponse.next({
             request: {
               headers: request.headers
             }
           });
+
           response.cookies.set({
             name,
             value: '',
@@ -60,17 +64,40 @@ export const createClient = (request: NextRequest) => {
 export const updateSession = async (request: NextRequest) => {
   try {
     const { supabase, response } = createClient(request);
-    const { data: { user } } = await supabase.auth.getUser();
-    
+
+    const {
+      data: { user }
+    } = await supabase.auth.getUser();
+
     const path = request.nextUrl.pathname;
 
-    // If user is logged in and on homepage, redirect to copilot
+    // If user is logged in and visits homepage, send them to the main Noraya dashboard.
     if (user && path === '/') {
-      return NextResponse.redirect(new URL('/dashboard/copilot', request.url));
+      return NextResponse.redirect(new URL('/dashboard', request.url));
     }
 
-    // If NOT logged in and trying to access dashboard, redirect to signin
-    if (!user && path.startsWith('/dashboard')) {
+    // Noraya public/free product routes.
+    // These must stay accessible without login so users can see the free preview
+    // and complete the organization setup before we enforce paid/private access.
+    const publicNorayaRoutes = ['/dashboard', '/onboarding'];
+
+    if (publicNorayaRoutes.some((route) => path === route || path.startsWith(`${route}/`))) {
+      return response;
+    }
+
+    // Private dashboard subroutes can still require login later.
+    // Example: /dashboard/profile, /dashboard/data, /dashboard/settings.
+    const protectedDashboardRoutes = [
+      '/dashboard/profile',
+      '/dashboard/data',
+      '/dashboard/settings',
+      '/dashboard/billing'
+    ];
+
+    if (
+      !user &&
+      protectedDashboardRoutes.some((route) => path === route || path.startsWith(`${route}/`))
+    ) {
       return NextResponse.redirect(new URL('/signin', request.url));
     }
 
