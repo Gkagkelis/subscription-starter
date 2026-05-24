@@ -1,5 +1,4 @@
 "use client";
-
 import Link from "next/link";
 import Image from "next/image";
 import { SignOut } from "@/utils/auth-helpers/server";
@@ -7,24 +6,19 @@ import { handleRequest } from "@/utils/auth-helpers/client";
 import { usePathname, useRouter } from "next/navigation";
 import { getRedirectMethod } from "@/utils/auth-helpers/settings";
 import s from "./Navbar.module.css";
-
 interface NavlinksProps {
   user?: any;
 }
-
 export default function Navlinks({ user }: NavlinksProps) {
   const router = getRedirectMethod() === "client" ? useRouter() : null;
-
   return (
     <div className="relative flex flex-row justify-between py-4 align-center md:py-6">
-      {/* Left: Logo only */}
-      <div className="flex items-center flex-1">
+      <div className="flex items-center flex-1 gap-2">
         <Link href={user ? "/dashboard/copilot" : "/"} className={s.logo} aria-label="Logo">
-  <Image src="/axiprova-icon.png" alt="Axiprova" width={40} height={40} />
-</Link>
+          <Image src="/noraya.png" alt="Noraya" width={32} height={32} />
+        </Link>
+        <span className="text-sm text-zinc-500 tracking-widest uppercase">Noraya</span>
       </div>
-
-      {/* Right: Auth actions */}
       <div className="flex justify-end items-center space-x-4">
         {user ? (
           <>
@@ -41,7 +35,6 @@ export default function Navlinks({ user }: NavlinksProps) {
                 className="rounded-full"
               />
             </Link>
-
             <form onSubmit={(e) => handleRequest(e, SignOut, router)}>
               <input type="hidden" name="pathName" value={usePathname()} />
               <button type="submit" className={s.link}>
@@ -51,11 +44,11 @@ export default function Navlinks({ user }: NavlinksProps) {
           </>
         ) : (
           <>
-            <Link href="/signin/signup" className={s.link}>
-              Sign Up
-            </Link>
             <Link href="/signin" className={s.link}>
               Sign In
+            </Link>
+            <Link href="/signin/signup" className="text-sm bg-white text-black px-4 py-2 rounded-md hover:bg-zinc-200 transition">
+              Get Started
             </Link>
           </>
         )}
