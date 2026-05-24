@@ -34,9 +34,9 @@ export default function Navlinks({ user }: NavlinksProps) {
         <Image
           src="/noraya-eye.png"
           alt="Noraya"
-        width={180}
-  height={84}
-  className="h-14 w-auto object-contain opacity-95"
+      width={260}
+  height={120}
+  className="h-24 w-auto object-contain opacity-95"
           priority
         />
       </Link>
