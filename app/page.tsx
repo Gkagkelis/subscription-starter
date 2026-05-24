@@ -17,7 +17,7 @@ export default async function HomePage() {
         <h2 className="text-2xl md:text-3xl font-light text-white max-w-xl mx-auto mb-4 leading-relaxed">AI παρακολούθηση, ανάλυση και πρόβλεψη δημόσιου λόγου</h2>
         <p className="text-sm text-zinc-600 max-w-md mx-auto mb-12">Προσαρμοσμένη στις θέσεις του οργανισμού σας.</p>
         <div className="flex gap-3 justify-center mb-16">
-          <a href="/signin/signup" className="text-sm bg-white text-black px-6 py-2.5 rounded-md hover:bg-zinc-200 transition font-medium">Ζητήστε demo</a>
+          <a href="/signin/signup" className="text-sm bg-white text-black px-6 py-2.5 rounded-md hover:bg-zinc-200 transition font-medium">Ξεκινήστε δωρεάν</a>
           <a href="#features" className="text-sm text-zinc-500 px-6 py-2.5 rounded-md border border-zinc-800 hover:border-zinc-600 transition">Μάθετε περισσότερα</a>
         </div>
       </div>
