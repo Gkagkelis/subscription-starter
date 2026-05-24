@@ -1,14 +1,9 @@
-import Pricing from '@/components/ui/Pricing/Pricing';
 import { createClient } from '@/utils/supabase/server';
-import { getProducts, getSubscription, getUser } from '@/utils/supabase/queries';
+import { getUser } from '@/utils/supabase/queries';
 
-export default async function PricingPage() {
+export default async function HomePage() {
   const supabase = createClient();
-  const [user, products, subscription] = await Promise.all([
-    getUser(supabase),
-    getProducts(supabase),
-    getSubscription(supabase)
-  ]);
+  const user = await getUser(supabase);
 
   return (
     <div className="flex flex-col items-center text-center px-6">
@@ -53,7 +48,13 @@ export default async function PricingPage() {
           ))}
         </div>
       </div>
-      <Pricing user={user} products={products ?? []} subscription={subscription} />
+      <div className="mb-20 max-w-lg">
+        <div className="p-8 rounded-xl border border-zinc-800 bg-zinc-900/30">
+          <p className="text-lg text-white mb-2">Ενδιαφέρεστε;</p>
+          <p className="text-sm text-zinc-500 mb-6">Επικοινωνήστε μαζί μας για pilot ή demo.</p>
+          <a href="mailto:viewscoperesearch@gmail.com" className="text-sm bg-white text-black px-6 py-2.5 rounded-md hover:bg-zinc-200 transition font-medium">viewscoperesearch@gmail.com</a>
+        </div>
+      </div>
     </div>
   );
 }
