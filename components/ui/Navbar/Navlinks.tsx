@@ -47,9 +47,9 @@ export default function Navlinks({ user }: NavlinksProps) {
             <Link href="/signin" className={s.link}>
               Sign In
             </Link>
-            <Link href="/signin/signup" className="text-sm bg-white text-black px-4 py-2 rounded-md hover:bg-zinc-200 transition">
-              Ξεκινήστε δωρεάν
-            </Link>
+            <Link href="/onboarding" className="text-sm bg-white text-black px-4 py-2 rounded-md hover:bg-zinc-200 transition">
+  Ξεκινήστε δωρεάν
+</Link>
           </>
         )}
       </div>
