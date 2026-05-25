@@ -492,7 +492,7 @@ ${cleanSupportingText}`
   };
 
   return (
-    <section className="mb-6 rounded-[2rem] border border-white/10 bg-white/[0.035] p-4 md:p-6">
+    <section data-advisor className="mb-6 rounded-[2rem] border border-white/10 bg-white/[0.035] p-4 md:p-6">
       <div className="grid gap-5 lg:grid-cols-[250px_minmax(0,1fr)]">
         <aside className="rounded-3xl border border-white/10 bg-slate-950/70 p-4">
           <button
@@ -566,6 +566,7 @@ ${cleanSupportingText}`
             </label>
 
             <input
+              data-advisor-topic
               value={topic}
               onChange={(event) => setTopic(event.target.value)}
               placeholder="π.χ. μείωση ΦΠΑ στα τρόφιμα"
@@ -695,6 +696,7 @@ ${cleanSupportingText}`
             </label>
 
             <textarea
+              data-advisor-question
               value={customQuestion}
               onChange={(event) => setCustomQuestion(event.target.value)}
               rows={3}
