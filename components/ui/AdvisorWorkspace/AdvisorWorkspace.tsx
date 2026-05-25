@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { type ChangeEvent, useEffect, useMemo, useState } from "react";
 
 type AdvisorActionType =
   | "analysis"
@@ -127,6 +127,7 @@ export default function AdvisorWorkspace({
   const [customQuestion, setCustomQuestion] = useState("");
   const [supportingText, setSupportingText] = useState("");
   const [savedSupportingText, setSavedSupportingText] = useState("");
+  const [uploadedFileName, setUploadedFileName] = useState("");
   const [loadingThreads, setLoadingThreads] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [advisorLoading, setAdvisorLoading] = useState(false);
@@ -253,6 +254,7 @@ export default function AdvisorWorkspace({
     setCustomQuestion("");
     setSupportingText("");
     setSavedSupportingText("");
+    setUploadedFileName("");
     setError("");
   };
 
@@ -262,9 +264,46 @@ export default function AdvisorWorkspace({
     setCustomQuestion("");
     setSupportingText("");
     setSavedSupportingText("");
+    setUploadedFileName("");
     setError("");
     await loadMessages(thread.id);
     await loadFiles(thread.id);
+  };
+
+  const handleTextFileUpload = async (
+    event: ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    if (!file.name.toLowerCase().endsWith(".txt")) {
+      setError(
+        "Προς το παρόν υποστηρίζεται μόνο αρχείο .txt. Τα PDF/DOCX θα μπουν στο επόμενο βήμα."
+      );
+      event.target.value = "";
+      return;
+    }
+
+    try {
+      const text = await file.text();
+
+      if (!text.trim()) {
+        setError("Το αρχείο φαίνεται κενό.");
+        event.target.value = "";
+        return;
+      }
+
+      setSupportingText(text);
+      setUploadedFileName(file.name);
+      setError("");
+    } catch {
+      setError("Δεν μπόρεσε να διαβαστεί το αρχείο.");
+    } finally {
+      event.target.value = "";
+    }
   };
 
   const saveSupportingText = async (threadId: string, text: string) => {
@@ -275,9 +314,10 @@ export default function AdvisorWorkspace({
     }
 
     const title =
-      cleanText.length > 80
+      uploadedFileName ||
+      (cleanText.length > 80
         ? `${cleanText.substring(0, 80)}...`
-        : cleanText;
+        : cleanText);
 
     const res = await fetch("/api/advisor/files", {
       method: "POST",
@@ -287,7 +327,7 @@ export default function AdvisorWorkspace({
       body: JSON.stringify({
         threadId,
         fileName: title || "Επικολλημένο κείμενο",
-        fileType: "pasted_text",
+        fileType: uploadedFileName ? "txt" : "pasted_text",
         extractedText: cleanText
       })
     });
@@ -543,9 +583,28 @@ ${cleanSupportingText}`
               ομιλία ή κείμενο που θέλεις να λάβει υπόψη ο Noraya.
             </p>
 
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <label className="cursor-pointer rounded-2xl border border-cyan-300/20 bg-cyan-300/10 px-4 py-2 text-xs font-medium text-cyan-100 transition hover:bg-cyan-300/15">
+                Ανέβασμα TXT
+                <input
+                  type="file"
+                  accept=".txt,text/plain"
+                  onChange={handleTextFileUpload}
+                  className="hidden"
+                />
+              </label>
+
+              <div className="text-xs text-zinc-600">
+                Μπορείς επίσης να επικολλήσεις κείμενο χειροκίνητα.
+              </div>
+            </div>
+
             <textarea
               value={supportingText}
-              onChange={(event) => setSupportingText(event.target.value)}
+              onChange={(event) => {
+                setSupportingText(event.target.value);
+                setUploadedFileName("");
+              }}
               rows={5}
               placeholder="Επικόλλησε εδώ το κείμενο που θέλεις να αναλύσει ο Noraya..."
               className="mt-3 w-full resize-none rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-cyan-300/40"
@@ -553,7 +612,9 @@ ${cleanSupportingText}`
 
             {supportingText.trim() && (
               <div className="mt-2 text-xs text-emerald-300">
-                Το κείμενο θα χρησιμοποιηθεί και θα αποθηκευτεί στη συζήτηση.
+                {uploadedFileName
+                  ? `Το αρχείο “${uploadedFileName}” διαβάστηκε και θα αποθηκευτεί στη συζήτηση.`
+                  : "Το κείμενο θα χρησιμοποιηθεί και θα αποθηκευτεί στη συζήτηση."}
               </div>
             )}
           </div>
