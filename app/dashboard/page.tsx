@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import NewsFeed from "@/components/ui/NewsFeed/NewsFeed";
-import AiChat from "@/components/ui/AiChat/AiChat";
 
 type NorayaProfile = {
   organization?: {
@@ -659,23 +658,23 @@ export default function DashboardPage() {
               </div>
 
               <h2 className="text-xl font-semibold">
-                Ρώτα με βάση την ημερήσια εικόνα
+                Επόμενη κίνηση
               </h2>
 
               <p className="mt-2 text-sm leading-6 text-zinc-500">
-                Ο σύμβουλος πρέπει να χρησιμοποιείται όταν χρειάζεσαι απόφαση:
-                τι σημαίνει, τι ρίσκο έχει, ποια στάση είναι ασφαλής.
+                Με βάση το βασικό σήμα της ημέρας, ο Noraya προτείνει από πού να ξεκινήσετε.
+                Δεν χρειάζεται να ψάξετε τα πάντα — ξεκινήστε από την απόφαση που πρέπει να πάρετε.
               </p>
             </div>
 
             <div className="grid gap-3 md:grid-cols-2">
               <PromptCard
-                title="Σενάριο"
-                text={recommendedQuestion}
+                title="Ανάλυση θέματος"
+                text={`Τι συμβαίνει σήμερα στο θέμα "${topSignal?.theme || "επικαιρότητα"}" και γιατί έχει σημασία;`}
               />
               <PromptCard
-                title="Συνέπεια"
-                text="Αυτή η θέση συγκρούεται με τις δηλωμένες μας γραμμές;"
+                title="Σενάριο απόφασης"
+                text={recommendedQuestion}
               />
               <PromptCard
                 title="Κοινωνικός χάρτης"
@@ -683,7 +682,7 @@ export default function DashboardPage() {
               />
               <PromptCard
                 title="Ασφαλής διατύπωση"
-                text="Γράψε μια θεσμική διατύπωση που μειώνει το πολιτικό ρίσκο."
+                text="Πώς μπορούμε να τοποθετηθούμε θεσμικά, χωρίς να αυξήσουμε το πολιτικό ρίσκο;"
               />
             </div>
           </div>
@@ -699,8 +698,6 @@ export default function DashboardPage() {
 
           <NewsFeed />
         </section>
-
-        <AiChat />
       </main>
     </div>
   );
