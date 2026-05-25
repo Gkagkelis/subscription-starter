@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-
+import NewsFeed from "@/components/ui/NewsFeed/NewsFeed";
 type NorayaProfile = {
   organization?: {
     name?: string;
@@ -363,7 +363,7 @@ export default function DashboardPage() {
                 Free Preview
               </div>
             </div>
-
+ <NewsFeed />
             <div className="grid gap-3 md:grid-cols-4">
               <Kpi label="Sentiment" value="+8" sub="ουδέτερο" />
               <Kpi label="Narratives" value="52" sub="ενεργά αφηγήματα" />
