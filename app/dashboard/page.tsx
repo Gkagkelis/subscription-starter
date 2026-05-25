@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import NewsFeed from "@/components/ui/NewsFeed/NewsFeed";
+import AdvisorWorkspace from "@/components/ui/AdvisorWorkspace/AdvisorWorkspace";
 
 type NorayaProfile = {
   organization?: {
@@ -48,8 +49,6 @@ type ThemeSignal = {
   latestTitle: string;
   affectedGroups: string[];
 };
-
-type AdvisorMode = "analysis" | "scenario" | "stance";
 
 const DEFAULT_THEMES = [
   "Ακρίβεια / κόστος ζωής",
@@ -442,11 +441,6 @@ export default function DashboardPage() {
   const [profile, setProfile] = useState<NorayaProfile | null>(null);
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
-  const [advisorMode, setAdvisorMode] = useState<AdvisorMode>("analysis");
-  const [advisorQuestion, setAdvisorQuestion] = useState("");
-  const [advisorAnswer, setAdvisorAnswer] = useState("");
-  const [advisorLoading, setAdvisorLoading] = useState(false);
-  const [advisorError, setAdvisorError] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -520,51 +514,6 @@ export default function DashboardPage() {
   const recommendedQuestion = topSignal?.theme.includes("Ακρίβεια")
     ? "Αν προτείνουμε μείωση ΦΠΑ στα τρόφιμα ή στα καύσιμα, τι ρίσκο έχουμε;"
     : `Τι πρέπει να προσέξουμε σήμερα για το θέμα "${topSignal?.theme || "επικαιρότητα"}";`;
-
-  const askAdvisor = async (
-    questionOverride?: string,
-    modeOverride?: AdvisorMode
-  ) => {
-    const questionToAsk = (questionOverride || advisorQuestion).trim();
-    const modeToUse = modeOverride || advisorMode;
-
-    if (!questionToAsk) {
-      setAdvisorError("Γράψε μια ερώτηση ή διάλεξε μία από τις προτεινόμενες κινήσεις.");
-      return;
-    }
-
-    setAdvisorLoading(true);
-    setAdvisorError("");
-    setAdvisorAnswer("");
-
-    try {
-      const res = await fetch("/api/ai-chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          question: questionToAsk,
-          mode: modeToUse
-        })
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setAdvisorError(data.error || "Ο Noraya δεν μπόρεσε να απαντήσει.");
-        return;
-      }
-
-      setAdvisorAnswer(data.response || "Δεν ήρθε απάντηση.");
-      setAdvisorQuestion(questionToAsk);
-      setAdvisorMode(modeToUse);
-    } catch {
-      setAdvisorError("Υπήρξε σφάλμα σύνδεσης με τον σύμβουλο.");
-    } finally {
-      setAdvisorLoading(false);
-    }
-  };
 
   if (loading) {
     return (
@@ -702,164 +651,10 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        <section className="mb-6 rounded-[2rem] border border-white/10 bg-white/[0.035] p-6">
-          <div className="grid gap-6 lg:grid-cols-[0.72fr_1.28fr]">
-            <div>
-              <div className="mb-3 inline-flex rounded-full border border-emerald-300/20 bg-emerald-300/10 px-3 py-1 text-xs text-emerald-100">
-                Σύμβουλος Noraya
-              </div>
-
-              <h2 className="text-xl font-semibold">Επόμενη κίνηση</h2>
-
-              <p className="mt-2 text-sm leading-6 text-zinc-500">
-                Με βάση την ημερήσια εικόνα, διάλεξε τι χρειάζεσαι τώρα ή γράψε δική σου ερώτηση.
-                Ο Noraya θα απαντήσει ως σύμβουλος απόφασης, όχι ως απλό chat.
-              </p>
-
-              <div className="mt-5 grid gap-2">
-                <button
-                  type="button"
-                  onClick={() =>
-                    void askAdvisor(
-                      `Τι συμβαίνει σήμερα στο θέμα "${topSignal?.theme || "επικαιρότητα"}" και γιατί έχει σημασία;`,
-                      "analysis"
-                    )
-                  }
-                  className="rounded-2xl border border-white/10 bg-slate-950/60 p-4 text-left transition hover:border-cyan-300/30"
-                >
-                  <div className="text-sm font-semibold text-cyan-100">Ανάλυση θέματος</div>
-                  <div className="mt-1 text-xs leading-5 text-zinc-500">
-                    Τι συμβαίνει, γιατί έχει σημασία και τι χρειάζεται προσοχή.
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => void askAdvisor(recommendedQuestion, "scenario")}
-                  className="rounded-2xl border border-white/10 bg-slate-950/60 p-4 text-left transition hover:border-cyan-300/30"
-                >
-                  <div className="text-sm font-semibold text-cyan-100">Σενάριο απόφασης</div>
-                  <div className="mt-1 text-xs leading-5 text-zinc-500">
-                    Αν πάρουμε αυτή τη στάση, τι μπορεί να γίνει;
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    void askAdvisor(
-                      `Ποιες κοινωνικές ομάδες επηρεάζονται περισσότερο από το θέμα "${topSignal?.theme || "αυτό"}";`,
-                      "analysis"
-                    )
-                  }
-                  className="rounded-2xl border border-white/10 bg-slate-950/60 p-4 text-left transition hover:border-cyan-300/30"
-                >
-                  <div className="text-sm font-semibold text-cyan-100">Κοινωνικός χάρτης</div>
-                  <div className="mt-1 text-xs leading-5 text-zinc-500">
-                    Ποιες ομάδες επηρεάζονται και πώς.
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    void askAdvisor(
-                      "Πώς μπορούμε να τοποθετηθούμε θεσμικά, χωρίς να αυξήσουμε το πολιτικό ρίσκο;",
-                      "stance"
-                    )
-                  }
-                  className="rounded-2xl border border-white/10 bg-slate-950/60 p-4 text-left transition hover:border-cyan-300/30"
-                >
-                  <div className="text-sm font-semibold text-cyan-100">Ασφαλής διατύπωση</div>
-                  <div className="mt-1 text-xs leading-5 text-zinc-500">
-                    Βρες ανθρώπινη, θεσμική και ασφαλή γραμμή.
-                  </div>
-                </button>
-              </div>
-            </div>
-
-            <div className="rounded-3xl border border-cyan-300/15 bg-slate-950/70 p-5">
-              <div className="mb-4 flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => setAdvisorMode("analysis")}
-                  className={`rounded-full border px-3 py-1.5 text-xs ${
-                    advisorMode === "analysis"
-                      ? "border-cyan-300/40 bg-cyan-300/15 text-cyan-100"
-                      : "border-white/10 text-zinc-500"
-                  }`}
-                >
-                  Ανάλυση
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setAdvisorMode("scenario")}
-                  className={`rounded-full border px-3 py-1.5 text-xs ${
-                    advisorMode === "scenario"
-                      ? "border-cyan-300/40 bg-cyan-300/15 text-cyan-100"
-                      : "border-white/10 text-zinc-500"
-                  }`}
-                >
-                  Σενάριο
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setAdvisorMode("stance")}
-                  className={`rounded-full border px-3 py-1.5 text-xs ${
-                    advisorMode === "stance"
-                      ? "border-cyan-300/40 bg-cyan-300/15 text-cyan-100"
-                      : "border-white/10 text-zinc-500"
-                  }`}
-                >
-                  Συνέπεια
-                </button>
-              </div>
-
-              <textarea
-                value={advisorQuestion}
-                onChange={(event) => setAdvisorQuestion(event.target.value)}
-                rows={4}
-                placeholder="Γράψε εδώ την ερώτησή σου προς τον Noraya..."
-                className="w-full resize-none rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-cyan-300/40"
-              />
-
-              <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="text-xs text-zinc-600">
-                  Παράδειγμα: {recommendedQuestion}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => void askAdvisor()}
-                  disabled={advisorLoading}
-                  className="rounded-2xl bg-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {advisorLoading ? "Ο Noraya σκέφτεται..." : "Ρώτα τον Noraya"}
-                </button>
-              </div>
-
-              {advisorError && (
-                <div className="mt-4 rounded-2xl border border-red-400/20 bg-red-400/10 p-4 text-sm text-red-100">
-                  {advisorError}
-                </div>
-              )}
-
-              {advisorAnswer && (
-                <div className="mt-5 rounded-2xl border border-white/10 bg-black/25 p-5">
-                  <div className="mb-3 text-xs uppercase tracking-[0.2em] text-cyan-300">
-                    Απάντηση Noraya
-                  </div>
-
-                  <div className="whitespace-pre-wrap text-sm leading-7 text-zinc-200">
-                    {advisorAnswer}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
+        <AdvisorWorkspace
+          initialTopic={topSignal?.theme || ""}
+          recommendedQuestion={recommendedQuestion}
+        />
 
         <section className="mb-8 rounded-[2rem] border border-white/10 bg-white/[0.025] p-5">
           <div className="mb-4">
