@@ -301,9 +301,76 @@ ${cleanSupportingText}`
   const runCustomQuestion = () => {
     const cleanQuestion = customQuestion.trim();
     const cleanTopic = topic.trim();
+    const lowerQuestion = cleanQuestion.toLowerCase();
 
     if (!cleanQuestion && !cleanTopic) {
       setError("Γράψε ένα θέμα ή μια ερώτηση.");
+      return;
+    }
+
+    if (
+      ["ανάλυση", "αναλυση", "analysis"].includes(lowerQuestion) &&
+      cleanTopic
+    ) {
+      askNoraya(
+        `Κάνε μου καθαρή ανάλυση για το θέμα: ${cleanTopic}. Τι συμβαίνει, γιατί έχει σημασία και τι χρειάζεται προσοχή;`,
+        "analysis",
+        "analysis"
+      );
+      return;
+    }
+
+    if (
+      ["σενάριο", "σεναριο", "scenario"].includes(lowerQuestion) &&
+      cleanTopic
+    ) {
+      askNoraya(
+        `Αν κινηθούμε πολιτικά πάνω στο θέμα "${cleanTopic}", τι σενάρια ανοίγονται, ποιο είναι το ρίσκο και ποια είναι η ασφαλέστερη στάση;`,
+        "scenario",
+        "scenario"
+      );
+      return;
+    }
+
+    if (
+      [
+        "κοινωνικός χάρτης",
+        "κοινωνικος χαρτης",
+        "κοινωνικός",
+        "κοινωνικος",
+        "social map"
+      ].includes(lowerQuestion) &&
+      cleanTopic
+    ) {
+      askNoraya(
+        `Φτιάξε κοινωνικό χάρτη για το θέμα: ${cleanTopic}. Ποιες κοινωνικές ομάδες επηρεάζονται περισσότερο και με ποιον τρόπο;`,
+        "analysis",
+        "social_map"
+      );
+      return;
+    }
+
+    if (
+      ["συνέπεια", "συνεπεια", "stance"].includes(lowerQuestion) &&
+      cleanTopic
+    ) {
+      askNoraya(
+        `Έλεγξε τη συνέπεια της πιθανής στάσης μας για το θέμα "${cleanTopic}" με το προφίλ, τις θέσεις και τις κόκκινες γραμμές μας.`,
+        "stance",
+        "stance"
+      );
+      return;
+    }
+
+    if (
+      ["διατύπωση", "διατυπωση", "wording"].includes(lowerQuestion) &&
+      cleanTopic
+    ) {
+      askNoraya(
+        `Πρότεινε μια ανθρώπινη, θεσμική και πολιτικά ασφαλή διατύπωση για το θέμα: ${cleanTopic}.`,
+        "stance",
+        "wording"
+      );
       return;
     }
 
@@ -440,7 +507,7 @@ ${cleanSupportingText}`
 
           <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-4">
             <label className="text-xs uppercase tracking-[0.18em] text-zinc-600">
-              Ή γράψε δική σου ερώτηση
+              Γράψε ελεύθερα ή δώσε σύντομη εντολή
             </label>
 
             <textarea
@@ -449,7 +516,7 @@ ${cleanSupportingText}`
               rows={3}
               placeholder={
                 recommendedQuestion ||
-                "Γράψε εδώ την ερώτησή σου προς τον Noraya..."
+                "π.χ. σενάριο, συνέπεια, διατύπωση ή γράψε ελεύθερα την ερώτησή σου..."
               }
               className="mt-2 w-full resize-none rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-cyan-300/40"
             />
