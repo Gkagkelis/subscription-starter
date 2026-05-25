@@ -20,13 +20,13 @@ const SOURCE_COLORS: Record<string, string> = {
   "Το Βήμα": "border-emerald-400/30 bg-emerald-400/10 text-emerald-200",
   "Αυγή": "border-red-400/30 bg-red-400/10 text-red-200",
   "Εφ.Συν.": "border-purple-400/30 bg-purple-400/10 text-purple-200",
-  "Documento": "border-orange-400/30 bg-orange-400/10 text-orange-200",
+  Documento: "border-orange-400/30 bg-orange-400/10 text-orange-200",
   "Kontra News": "border-pink-400/30 bg-pink-400/10 text-pink-200",
-  "Protothema": "border-cyan-400/30 bg-cyan-400/10 text-cyan-200",
-  "SKAI": "border-sky-400/30 bg-sky-400/10 text-sky-200",
-  "Euro2day": "border-teal-400/30 bg-teal-400/10 text-teal-200",
-  "Newsbomb": "border-yellow-400/30 bg-yellow-400/10 text-yellow-200",
-  "Ethnos": "border-indigo-400/30 bg-indigo-400/10 text-indigo-200",
+  Protothema: "border-cyan-400/30 bg-cyan-400/10 text-cyan-200",
+  SKAI: "border-sky-400/30 bg-sky-400/10 text-sky-200",
+  Euro2day: "border-teal-400/30 bg-teal-400/10 text-teal-200",
+  Newsbomb: "border-yellow-400/30 bg-yellow-400/10 text-yellow-200",
+  Ethnos: "border-indigo-400/30 bg-indigo-400/10 text-indigo-200"
 };
 
 function timeAgo(dateStr: string): string {
@@ -40,6 +40,7 @@ function timeAgo(dateStr: string): string {
   if (diffMin < 1) return "μόλις τώρα";
   if (diffMin < 60) return `${diffMin} λεπτά πριν`;
   if (diffHr < 24) return `${diffHr} ώρ${diffHr === 1 ? "α" : "ες"} πριν`;
+
   return `${diffDay} ημέρ${diffDay === 1 ? "α" : "ες"} πριν`;
 }
 
@@ -59,10 +60,16 @@ export default function NewsFeed() {
 
   const fetchArticles = async () => {
     setLoading(true);
+
     try {
       let url = "/api/articles?limit=50";
-      if (activeSource) url += `&source=${encodeURIComponent(activeSource)}`;
+
+      if (activeSource) {
+        url += `&source=${encodeURIComponent(activeSource)}`;
+      }
+
       const res = await fetch(url);
+
       if (res.ok) {
         const data = await res.json();
         setArticles(data.articles || []);
@@ -74,20 +81,25 @@ export default function NewsFeed() {
     }
   };
 
-  const sources = [...new Set(articles.map((a) => a.source_name))].sort();
-
   const filtered = searchQuery
-    ? articles.filter(
-        (a) =>
-          a.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          (a.description || "").toLowerCase().includes(searchQuery.toLowerCase())
-      )
+    ? articles.filter((article) => {
+        const query = searchQuery.toLowerCase();
+
+        return (
+          article.title.toLowerCase().includes(query) ||
+          (article.description || "").toLowerCase().includes(query)
+        );
+      })
     : articles;
 
   const sourceCounts: Record<string, number> = {};
-  for (const a of articles) {
-    sourceCounts[a.source_name] = (sourceCounts[a.source_name] || 0) + 1;
+
+  for (const article of articles) {
+    sourceCounts[article.source_name] =
+      (sourceCounts[article.source_name] || 0) + 1;
   }
+
+  const sources = Array.from(new Set(articles.map((article) => article.source_name))).sort();
 
   return (
     <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-5 shadow-2xl shadow-cyan-950/10 backdrop-blur">
@@ -96,7 +108,9 @@ export default function NewsFeed() {
           <div className="mb-2 inline-flex rounded-full border border-emerald-300/20 bg-emerald-300/10 px-3 py-1 text-xs text-emerald-100">
             Live · {articles.length} άρθρα
           </div>
+
           <h2 className="text-2xl font-semibold">Ροή ΜΜΕ</h2>
+
           <p className="mt-1 text-sm text-zinc-500">
             Πραγματικά άρθρα από ελληνικά μέσα ενημέρωσης
           </p>
@@ -106,15 +120,16 @@ export default function NewsFeed() {
           <input
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(event) => setSearchQuery(event.target.value)}
             placeholder="Αναζήτηση..."
-            className="rounded-xl border border-white/10 bg-black/30 px-4 py-2 text-sm text-white outline-none transition focus:border-cyan-300/40 placeholder:text-zinc-600"
+            className="rounded-xl border border-white/10 bg-black/30 px-4 py-2 text-sm text-white outline-none transition placeholder:text-zinc-600 focus:border-cyan-300/40"
           />
         </div>
       </div>
 
       <div className="mb-5 flex flex-wrap gap-2">
         <button
+          type="button"
           onClick={() => setActiveSource(null)}
           className={`rounded-full border px-3 py-1.5 text-xs transition ${
             !activeSource
@@ -124,17 +139,20 @@ export default function NewsFeed() {
         >
           Όλες ({articles.length})
         </button>
-        {Object.entries(sourceCounts).map(([source, count]) => (
+
+        {sources.map((source) => (
           <button
             key={source}
+            type="button"
             onClick={() => setActiveSource(activeSource === source ? null : source)}
             className={`rounded-full border px-3 py-1.5 text-xs transition ${
               activeSource === source
-                ? SOURCE_COLORS[source] || "border-cyan-300/40 bg-cyan-300/15 text-cyan-100"
+                ? SOURCE_COLORS[source] ||
+                  "border-cyan-300/40 bg-cyan-300/15 text-cyan-100"
                 : "border-white/10 text-zinc-500 hover:border-white/20"
             }`}
           >
-            {source} ({count})
+            {source} ({sourceCounts[source] || 0})
           </button>
         ))}
       </div>
@@ -149,7 +167,7 @@ export default function NewsFeed() {
       {!loading && (
         <div className="space-y-3">
           {filtered.slice(0, 20).map((article) => (
-            
+            <a
               key={article.id}
               href={article.link}
               target="_blank"
@@ -157,7 +175,7 @@ export default function NewsFeed() {
               className="block rounded-2xl border border-white/10 bg-slate-950/60 p-4 transition hover:border-white/20 hover:bg-slate-950/80"
             >
               <div className="flex gap-4">
-                <div className="flex-1 min-w-0">
+                <div className="min-w-0 flex-1">
                   <div className="mb-2 flex flex-wrap items-center gap-2">
                     <span
                       className={`rounded-full border px-2 py-0.5 text-[10px] ${
@@ -167,11 +185,13 @@ export default function NewsFeed() {
                     >
                       {article.source_name}
                     </span>
+
                     {article.category && (
                       <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] text-zinc-500">
                         {article.category}
                       </span>
                     )}
+
                     {article.published_at && (
                       <span className="text-[10px] text-zinc-600">
                         {timeAgo(article.published_at)}
@@ -197,13 +217,13 @@ export default function NewsFeed() {
                 </div>
 
                 {article.image_url && (
-                  <div className="hidden sm:block shrink-0">
+                  <div className="hidden shrink-0 sm:block">
                     <img
                       src={article.image_url}
                       alt=""
                       className="h-20 w-28 rounded-xl object-cover"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = "none";
+                      onError={(event) => {
+                        (event.target as HTMLImageElement).style.display = "none";
                       }}
                     />
                   </div>
