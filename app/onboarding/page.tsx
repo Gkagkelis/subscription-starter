@@ -163,8 +163,13 @@ export default function OnboardingPage() {
     setStepIndex((current) => Math.max(current - 1, 0));
   };
 
-  const submit = (event: FormEvent<HTMLFormElement>) => {
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
+
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setSaving(true);
+    setSaveError("");
 
     const profile = {
       organization: {
@@ -185,12 +190,30 @@ export default function OnboardingPage() {
         mission: mission.trim(),
         redLines: redLines.trim(),
         tone: tone.trim()
-      },
-      createdAt: new Date().toISOString()
+      }
     };
 
-    window.localStorage.setItem("noraya_org_profile", JSON.stringify(profile));
-    router.push("/dashboard");
+    try {
+      const res = await fetch("/api/onboarding", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(profile)
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        setSaveError(data.error || "Κάτι πήγε στραβά. Δοκιμάστε ξανά.");
+        setSaving(false);
+        return;
+      }
+
+      // Also keep in localStorage as fallback for non-logged-in preview
+      window.localStorage.setItem("noraya_org_profile", JSON.stringify(profile));
+      router.push("/dashboard");
+    } catch (err) {
+      setSaveError("Σφάλμα σύνδεσης. Δοκιμάστε ξανά.");
+      setSaving(false);
+    }
   };
 
   return (
@@ -291,7 +314,7 @@ export default function OnboardingPage() {
             <section>
               <h2 className="text-2xl font-semibold">Τι θέλετε να παρακολουθείτε;</h2>
               <p className="mt-2 text-sm leading-6 text-zinc-400">
-                Επιλέξτε μεγάλες θεματικές περιοχές. Αυτές είναι τα μόνιμα “ράφια”
+                Επιλέξτε μεγάλες θεματικές περιοχές. Αυτές είναι τα μόνιμα "ράφια"
                 του Noraya.
               </p>
 
@@ -375,7 +398,7 @@ export default function OnboardingPage() {
                 Ποια κοινά ή φορείς σας ενδιαφέρουν;
               </h2>
               <p className="mt-2 text-sm leading-6 text-zinc-400">
-                Δεν είναι απλή λίστα “target groups”. Είναι ο χάρτης των ομάδων,
+                Δεν είναι απλή λίστα "target groups". Είναι ο χάρτης των ομάδων,
                 φορέων και παικτών που επηρεάζονται ή εμφανίζονται στον δημόσιο λόγο.
               </p>
 
@@ -549,7 +572,11 @@ export default function OnboardingPage() {
             Παράλειψη
           </button>
 
-          <div className="flex gap-3">
+          <div className="flex items-center gap-3">
+            {saveError && (
+              <span className="text-xs text-red-400">{saveError}</span>
+            )}
+
             <button
               type="button"
               onClick={goBack}
@@ -570,9 +597,10 @@ export default function OnboardingPage() {
             ) : (
               <button
                 type="submit"
-                className="rounded-2xl bg-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-200"
+                disabled={saving}
+                className="rounded-2xl bg-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-200 disabled:opacity-50"
               >
-                Δημιουργία προφίλ →
+                {saving ? "Αποθήκευση..." : "Δημιουργία προφίλ →"}
               </button>
             )}
           </div>
