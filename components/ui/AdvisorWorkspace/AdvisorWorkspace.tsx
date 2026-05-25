@@ -29,6 +29,15 @@ type AdvisorMessage = {
   created_at: string;
 };
 
+type AdvisorFile = {
+  id: string;
+  thread_id: string;
+  file_name: string;
+  file_type: string | null;
+  extracted_text: string | null;
+  created_at: string;
+};
+
 type AdvisorAction = {
   title: string;
   description: string;
@@ -112,6 +121,8 @@ export default function AdvisorWorkspace({
   const [threads, setThreads] = useState<AdvisorThread[]>([]);
   const [activeThread, setActiveThread] = useState<AdvisorThread | null>(null);
   const [messages, setMessages] = useState<AdvisorMessage[]>([]);
+  const [files, setFiles] = useState<AdvisorFile[]>([]);
+  const [loadingFiles, setLoadingFiles] = useState(false);
   const [topic, setTopic] = useState(initialTopic || "");
   const [customQuestion, setCustomQuestion] = useState("");
   const [supportingText, setSupportingText] = useState("");
@@ -157,11 +168,32 @@ export default function AdvisorWorkspace({
         setActiveThread(nextThreads[0]);
         setTopic(nextThreads[0].topic || nextThreads[0].title || "");
         await loadMessages(nextThreads[0].id);
+        await loadFiles(nextThreads[0].id);
       }
     } catch {
       setError("Υπήρξε σφάλμα στη φόρτωση συζητήσεων.");
     } finally {
       setLoadingThreads(false);
+    }
+  };
+
+  const loadFiles = async (threadId: string) => {
+    setLoadingFiles(true);
+
+    try {
+      const res = await fetch(`/api/advisor/files?threadId=${threadId}`);
+
+      if (!res.ok) {
+        setError("Δεν μπόρεσε να φορτωθεί το υλικό της συζήτησης.");
+        return;
+      }
+
+      const data = await res.json();
+      setFiles(data.files || []);
+    } catch {
+      setError("Υπήρξε σφάλμα στη φόρτωση υλικού.");
+    } finally {
+      setLoadingFiles(false);
     }
   };
 
@@ -208,6 +240,7 @@ export default function AdvisorWorkspace({
     setActiveThread(thread);
     setThreads((current) => [thread, ...current]);
     setMessages([]);
+    setFiles([]);
 
     return thread;
   };
@@ -215,6 +248,7 @@ export default function AdvisorWorkspace({
   const startNewThread = () => {
     setActiveThread(null);
     setMessages([]);
+    setFiles([]);
     setTopic("");
     setCustomQuestion("");
     setSupportingText("");
@@ -230,6 +264,7 @@ export default function AdvisorWorkspace({
     setSavedSupportingText("");
     setError("");
     await loadMessages(thread.id);
+    await loadFiles(thread.id);
   };
 
   const saveSupportingText = async (threadId: string, text: string) => {
@@ -259,6 +294,7 @@ export default function AdvisorWorkspace({
 
     if (res.ok) {
       setSavedSupportingText(cleanText);
+      await loadFiles(threadId);
     }
   };
 
@@ -313,6 +349,7 @@ ${cleanSupportingText}`
       }
 
       await loadMessages(thread.id);
+      await loadFiles(thread.id);
       await loadThreads();
       setCustomQuestion("");
     } catch {
@@ -517,6 +554,57 @@ ${cleanSupportingText}`
             {supportingText.trim() && (
               <div className="mt-2 text-xs text-emerald-300">
                 Το κείμενο θα χρησιμοποιηθεί και θα αποθηκευτεί στη συζήτηση.
+              </div>
+            )}
+          </div>
+
+          <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-4">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <div>
+                <div className="text-xs uppercase tracking-[0.18em] text-zinc-600">
+                  Υλικό συζήτησης
+                </div>
+                <p className="mt-1 text-xs leading-5 text-zinc-500">
+                  Κείμενα ή αρχεία που έχεις δώσει στον Noraya για αυτή τη
+                  συζήτηση.
+                </p>
+              </div>
+
+              {loadingFiles && (
+                <div className="text-xs text-zinc-600">Φόρτωση...</div>
+              )}
+            </div>
+
+            {files.length === 0 && (
+              <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 text-xs leading-5 text-zinc-500">
+                Δεν έχει προστεθεί ακόμη υλικό σε αυτή τη συζήτηση.
+              </div>
+            )}
+
+            {files.length > 0 && (
+              <div className="space-y-2">
+                {files.map((file) => (
+                  <div
+                    key={file.id}
+                    className="rounded-2xl border border-white/10 bg-slate-950/60 p-3"
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="text-sm font-medium text-zinc-100">
+                        {file.file_name || "Επικολλημένο κείμενο"}
+                      </div>
+
+                      <div className="text-[11px] text-zinc-600">
+                        {formatDate(file.created_at)}
+                      </div>
+                    </div>
+
+                    {file.extracted_text && (
+                      <p className="mt-2 line-clamp-2 text-xs leading-5 text-zinc-500">
+                        {file.extracted_text}
+                      </p>
+                    )}
+                  </div>
+                ))}
               </div>
             )}
           </div>
