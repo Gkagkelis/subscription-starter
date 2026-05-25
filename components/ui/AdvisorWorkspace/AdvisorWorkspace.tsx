@@ -115,6 +115,7 @@ export default function AdvisorWorkspace({
   const [topic, setTopic] = useState(initialTopic || "");
   const [customQuestion, setCustomQuestion] = useState("");
   const [supportingText, setSupportingText] = useState("");
+  const [savedSupportingText, setSavedSupportingText] = useState("");
   const [loadingThreads, setLoadingThreads] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [advisorLoading, setAdvisorLoading] = useState(false);
@@ -217,6 +218,7 @@ export default function AdvisorWorkspace({
     setTopic("");
     setCustomQuestion("");
     setSupportingText("");
+    setSavedSupportingText("");
     setError("");
   };
 
@@ -225,8 +227,39 @@ export default function AdvisorWorkspace({
     setTopic(thread.topic || thread.title || "");
     setCustomQuestion("");
     setSupportingText("");
+    setSavedSupportingText("");
     setError("");
     await loadMessages(thread.id);
+  };
+
+  const saveSupportingText = async (threadId: string, text: string) => {
+    const cleanText = text.trim();
+
+    if (!cleanText || cleanText === savedSupportingText) {
+      return;
+    }
+
+    const title =
+      cleanText.length > 80
+        ? `${cleanText.substring(0, 80)}...`
+        : cleanText;
+
+    const res = await fetch("/api/advisor/files", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        threadId,
+        fileName: title || "Επικολλημένο κείμενο",
+        fileType: "pasted_text",
+        extractedText: cleanText
+      })
+    });
+
+    if (res.ok) {
+      setSavedSupportingText(cleanText);
+    }
   };
 
   const askNoraya = async (
@@ -255,6 +288,8 @@ ${cleanSupportingText}`
 
     try {
       const thread = activeThread || (await createThread(cleanTopic));
+
+      await saveSupportingText(thread.id, cleanSupportingText);
 
       const res = await fetch("/api/ai-chat", {
         method: "POST",
@@ -481,7 +516,7 @@ ${cleanSupportingText}`
 
             {supportingText.trim() && (
               <div className="mt-2 text-xs text-emerald-300">
-                Το κείμενο θα χρησιμοποιηθεί στην επόμενη απάντηση του Noraya.
+                Το κείμενο θα χρησιμοποιηθεί και θα αποθηκευτεί στη συζήτηση.
               </div>
             )}
           </div>
