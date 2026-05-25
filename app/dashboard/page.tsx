@@ -1,14 +1,13 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import NewsFeed from "@/components/ui/NewsFeed/NewsFeed";
+
+/* ───── types ───── */
+
 type NorayaProfile = {
-  organization?: {
-    name?: string;
-    type?: string;
-  };
+  organization?: { name?: string; type?: string };
   themes?: string[];
   issues?: string[];
   events?: string[];
@@ -19,789 +18,344 @@ type NorayaProfile = {
     institutions?: string[];
     publicActors?: string[];
   };
-  positions?: {
-    mission?: string;
-    redLines?: string;
-    tone?: string;
-  };
+  positions?: { mission?: string; redLines?: string; tone?: string };
 };
 
-const fallbackProfile: NorayaProfile = {
-  organization: {
-    name: "Free Preview",
-    type: "Γενική πολιτική εικόνα"
-  },
-  themes: ["Ακρίβεια / κόστος ζωής", "Υγεία", "Αγροτικά", "Στέγαση"],
-  issues: ["Ακρίβεια τροφίμων", "Ενοίκια", "ΕΣΥ", "Τέμπη"],
-  events: ["Κοινωνικές αντιδράσεις", "Αγροτικές κινητοποιήσεις"],
-  stakeholders: {
-    ageGroups: ["18-24 / νέοι ενήλικες", "25-34", "35-44"],
-    socialGroups: ["Φοιτητές", "Οικογένειες με παιδιά"],
-    professionalGroups: ["Δημόσιοι υπάλληλοι", "Μικρομεσαίοι επιχειρηματίες"],
-    institutions: ["Βουλή", "Δήμοι"],
-    publicActors: ["Κυβέρνηση", "Αντιπολίτευση", "ΜΜΕ"]
-  },
-  positions: {
-    mission: "",
-    redLines: "",
-    tone: ""
-  }
-};
-
-const freeIssues = [
-  {
-    title: "Ακρίβεια",
-    icon: "🛒",
-    publicShare: "66%",
-    status: "Ουδέτερο",
-    summary:
-      "Το κόστος ζωής παραμένει το πιο σταθερά παρόν θέμα στη δημόσια συζήτηση."
-  },
-  {
-    title: "Υγεία",
-    icon: "♡",
-    publicShare: "48%",
-    status: "Ουδέτερο",
-    summary:
-      "Οι αναφορές σε νοσοκομεία, ραντεβού και προσωπικό παραμένουν αυξημένες."
-  },
-  {
-    title: "Αγροτικά",
-    icon: "🌿",
-    publicShare: "41%",
-    status: "Ουδέτερο",
-    summary:
-      "Υπάρχει αυξημένη κινητικότητα σε κόστος παραγωγής και περιφερειακή πίεση."
-  }
-];
-
-const personalizedIssues = [
-  {
-    title: "Ακρίβεια",
-    icon: "🛒",
-    importance: "Πολύ υψηλή σημασία",
-    risk: 78,
-    fit: 64,
-    color: "red",
-    why:
-      "Συνδέεται με βασικά κοινά και φορείς που δηλώσατε. Επηρεάζει εισόδημα, εμπιστοσύνη και δημόσια πίεση.",
-    recommendation:
-      "Χρειάζεται τεκμηριωμένη ανάλυση πηγών, κόστους και συνέπειας με τις δηλωμένες θέσεις."
-  },
-  {
-    title: "Υγεία",
-    icon: "♡",
-    importance: "Υψηλή σημασία",
-    risk: 62,
-    fit: 54,
-    color: "amber",
-    why:
-      "Οι αναφορές σε αναμονές, ελλείψεις και πρόσβαση σε υπηρεσίες υγείας δείχνουν πιθανή κλιμάκωση.",
-    recommendation:
-      "Παρακολουθήστε θεσμικές εξελίξεις, τοπικές αναφορές και αντιδράσεις φορέων."
-  },
-  {
-    title: "Αγροτικά",
-    icon: "🌿",
-    importance: "Μεσαία σημασία",
-    risk: 45,
-    fit: 43,
-    color: "emerald",
-    why:
-      "Η κινητικότητα στον αγροτικό χώρο λειτουργεί ως signal για περιφερειακή ένταση.",
-    recommendation:
-      "Συνδέστε το με ενέργεια, κόστος παραγωγής και τοπικές αντιδράσεις."
-  },
-  {
-    title: "Παιδεία",
-    icon: "🎓",
-    importance: "Μεσαία σημασία",
-    risk: 38,
-    fit: 41,
-    color: "blue",
-    why:
-      "Φοιτητικά και σχολικά ζητήματα συνδέονται με κοινωνικές ομάδες υψηλής ευαισθησίας.",
-    recommendation:
-      "Παρακολουθήστε φοιτητικές κινητοποιήσεις, θεσμικές παρεμβάσεις και δημόσιο λόγο."
-  }
-];
-
-function readLocalProfile(): NorayaProfile | null {
-  if (typeof window === "undefined") return null;
-
-  try {
-    const stored = window.localStorage.getItem("noraya_org_profile");
-    return stored ? (JSON.parse(stored) as NorayaProfile) : null;
-  } catch {
-    return null;
-  }
+interface Article {
+  id: string;
+  title: string;
+  description: string | null;
+  link: string;
+  source_name: string;
+  category: string | null;
+  published_at: string | null;
 }
 
-/**
- * Convert the Supabase DB row (flat columns) back to the
- * nested shape the dashboard already expects.
- */
+/* ───── keyword map: theme → search terms ───── */
+
+const THEME_KEYWORDS: Record<string, string[]> = {
+  "Ακρίβεια / κόστος ζωής": ["ακρίβεια", "τιμ", "κόστος", "πληθωρισμ", "αγορά", "καταναλωτ", "σούπερ μάρκετ", "καύσιμ", "ρεύμα"],
+  "Οικονομία": ["οικονομ", "ΑΕΠ", "ανάπτυξ", "επένδυσ", "χρέος", "δημοσιονομ", "προϋπολογισμ"],
+  "Φορολογία": ["φόρο", "φορολο", "ΕΝΦΙΑ", "ΦΠΑ", "εισόδημα", "φοροδιαφυγ"],
+  "Στέγαση": ["στέγασ", "ενοίκι", "κατοικ", "ακίνητ", "Airbnb", "πλειστηριασμ"],
+  "Εργασία": ["εργασ", "μισθ", "ανεργ", "απασχόλ", "συνδικ", "απεργ", "εργαζόμεν"],
+  "Ασφαλιστικό / συντάξεις": ["σύνταξ", "ασφαλιστικ", "ΕΦΚΑ", "συνταξιούχ"],
+  "Υγεία": ["υγεί", "νοσοκομεί", "ΕΣΥ", "γιατρ", "φάρμακ", "κλινικ", "ασθεν", "πανδημ"],
+  "Παιδεία": ["παιδεί", "σχολεί", "εκπαίδευσ", "μαθητ", "δάσκαλ", "καθηγητ"],
+  "Πανεπιστήμια": ["πανεπιστήμι", "φοιτητ", "ΑΕΙ", "ακαδημ", "πτυχί"],
+  "Νεολαία": ["νέο", "νεολαί", "brain drain", "γενιά"],
+  "Μεταναστευτικό": ["μεταναστ", "πρόσφυγ", "άσυλο", "προσφυγικ", "Frontex", "μετανάστ"],
+  "Ασφάλεια / εγκληματικότητα": ["αστυνομ", "εγκλημ", "ασφάλει", "δολοφον", "κλοπ", "ναρκωτ"],
+  "Δικαιοσύνη": ["δικαστ", "δικαιοσύν", "εισαγγελ", "ποινικ", "δίκη", "καταδίκ"],
+  "Θεσμοί / διαφάνεια": ["διαφάνει", "θεσμ", "Βουλή", "κοινοβουλ", "νομοσχέδι", "ψηφοφορ"],
+  "Άμυνα": ["αμυν", "στρατ", "ένοπλ", "θωρακισμ", "εξοπλισμ"],
+  "Γεωπολιτική": ["γεωπολιτικ", "NATO", "ΝΑΤΟ", "Τουρκία", "Ουκρανία", "πόλεμ"],
+  "Εξωτερική πολιτική": ["εξωτερικ", "διπλωματ", "πρεσβ", "ΟΗΕ", "ΕΕ", "Ευρωπαϊκ"],
+  "Ενέργεια": ["ενέργει", "ΔΕΗ", "φυσικό αέριο", "ηλεκτρ", "ανανεώσιμ", "πετρέλαι"],
+  "Περιβάλλον / κλιματική κρίση": ["περιβάλλον", "κλιματ", "ρύπ", "ανακύκλωσ", "πλημμύρ", "φωτι"],
+  "Αγροτικά": ["αγροτ", "αγρότ", "καλλιέργει", "κτηνοτροφ", "ΕΛΓΑ", "επιδοτ"],
+  "Υποδομές / μεταφορές": ["υποδομ", "μεταφορ", "αυτοκινητόδρομ", "μετρό", "σιδηρόδρομ", "Τέμπη"],
+  "Ψηφιακή πολιτική / τεχνολογία": ["ψηφιακ", "τεχνολογ", "AI", "gov.gr", "ηλεκτρονικ"],
+  "Πολιτισμός": ["πολιτισμ", "μουσεί", "θέατρο", "κινηματογράφ"],
+  "Αθλητισμός": ["αθλητ", "ολυμπιακ", "ποδοσφαίρ", "μπάσκετ", "γήπεδ"],
+  "Τοπική αυτοδιοίκηση": ["δήμο", "δημοτικ", "περιφέρει", "αυτοδιοίκησ"],
+  "Ευρωπαϊκή πολιτική": ["Ευρωπαϊκ", "Ευρωκοινοβούλι", "Κομισιόν", "Ευρωζών"],
+  "Ανθρώπινα δικαιώματα": ["δικαιώματ", "ελευθερί", "ρατσισμ", "διάκρισ"],
+  "Ισότητα / συμπερίληψη": ["ισότητ", "φεμινισμ", "ΛΟΑΤΚΙ", "συμπερίληψ", "έμφυλ"],
+  "Πολιτική προστασία": ["πολιτική προστασία", "σεισμ", "πυρκαγι", "πλημμύρ", "112", "ΕΜΑΚ"],
+};
+
+/* ───── helpers ───── */
+
+function matchTheme(article: Article, keywords: string[]): boolean {
+  const text = ((article.title || "") + " " + (article.description || "") + " " + (article.category || "")).toLowerCase();
+  return keywords.some((kw) => text.includes(kw.toLowerCase()));
+}
+
 function dbRowToProfile(row: any): NorayaProfile {
   return {
-    organization: {
-      name: row.org_name || "",
-      type: row.org_type || ""
-    },
+    organization: { name: row.org_name || "", type: row.org_type || "" },
     themes: row.themes || [],
     issues: row.issues || [],
     events: row.events || [],
     stakeholders: row.stakeholders || {
-      ageGroups: [],
-      socialGroups: [],
-      professionalGroups: [],
-      institutions: [],
-      publicActors: []
+      ageGroups: [], socialGroups: [], professionalGroups: [],
+      institutions: [], publicActors: [],
     },
-    positions: {
-      mission: row.mission || "",
-      redLines: row.red_lines || "",
-      tone: row.tone || ""
-    }
+    positions: { mission: row.mission || "", redLines: row.red_lines || "", tone: row.tone || "" },
   };
 }
 
-function getRiskColor(color: string) {
-  if (color === "red") {
-    return {
-      border: "border-red-400/30",
-      bg: "bg-red-400/10",
-      text: "text-red-100",
-      badge: "border-red-400/30 bg-red-400/10 text-red-100"
-    };
-  }
-
-  if (color === "amber") {
-    return {
-      border: "border-amber-400/30",
-      bg: "bg-amber-400/10",
-      text: "text-amber-100",
-      badge: "border-amber-400/30 bg-amber-400/10 text-amber-100"
-    };
-  }
-
-  if (color === "emerald") {
-    return {
-      border: "border-emerald-400/30",
-      bg: "bg-emerald-400/10",
-      text: "text-emerald-100",
-      badge: "border-emerald-400/30 bg-emerald-400/10 text-emerald-100"
-    };
-  }
-
-  return {
-    border: "border-cyan-400/30",
-    bg: "bg-cyan-400/10",
-    text: "text-cyan-100",
-    badge: "border-cyan-400/30 bg-cyan-400/10 text-cyan-100"
-  };
+function readLocalProfile(): NorayaProfile | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const stored = window.localStorage.getItem("noraya_org_profile");
+    return stored ? (JSON.parse(stored) as NorayaProfile) : null;
+  } catch { return null; }
 }
+
+/* ───── theme icon map ───── */
+
+const THEME_ICONS: Record<string, string> = {
+  "Ακρίβεια / κόστος ζωής": "🏷️",
+  "Οικονομία": "📊",
+  "Φορολογία": "🧾",
+  "Στέγαση": "🏠",
+  "Εργασία": "💼",
+  "Ασφαλιστικό / συντάξεις": "🏦",
+  "Υγεία": "🏥",
+  "Παιδεία": "📚",
+  "Πανεπιστήμια": "🎓",
+  "Νεολαία": "🧑‍🎓",
+  "Μεταναστευτικό": "🌍",
+  "Ασφάλεια / εγκληματικότητα": "🛡️",
+  "Δικαιοσύνη": "⚖️",
+  "Θεσμοί / διαφάνεια": "🏛️",
+  "Άμυνα": "🎖️",
+  "Γεωπολιτική": "🌐",
+  "Εξωτερική πολιτική": "🤝",
+  "Ενέργεια": "⚡",
+  "Περιβάλλον / κλιματική κρίση": "🌿",
+  "Αγροτικά": "🌾",
+  "Υποδομές / μεταφορές": "🚆",
+  "Ψηφιακή πολιτική / τεχνολογία": "💻",
+  "Πολιτισμός": "🎭",
+  "Αθλητισμός": "⚽",
+  "Τοπική αυτοδιοίκηση": "🏘️",
+  "Ευρωπαϊκή πολιτική": "🇪🇺",
+  "Ανθρώπινα δικαιώματα": "✊",
+  "Ισότητα / συμπερίληψη": "🤝",
+  "Πολιτική προστασία": "🚨",
+};
+
+/* ───── component ───── */
 
 export default function DashboardPage() {
   const [profile, setProfile] = useState<NorayaProfile | null>(null);
+  const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
+      let prof: NorayaProfile | null = null;
       try {
-        // Try API first (logged-in user with Supabase data)
         const res = await fetch("/api/onboarding");
         if (res.ok) {
           const data = await res.json();
           if (data && data.onboarding_completed) {
-            setProfile(dbRowToProfile(data));
-            setLoading(false);
-            return;
+            prof = dbRowToProfile(data);
           }
         }
-      } catch {
-        // API failed — fall through to localStorage
-      }
+      } catch {}
+      if (!prof) prof = readLocalProfile();
+      setProfile(prof);
 
-      // Fallback: try localStorage (non-logged-in or pre-migration data)
-      setProfile(readLocalProfile());
+      try {
+        const res = await fetch("/api/articles?limit=100");
+        if (res.ok) {
+          const data = await res.json();
+          setArticles(data.articles || []);
+        }
+      } catch {}
+
       setLoading(false);
     })();
   }, []);
 
-  const activeProfile = profile ?? fallbackProfile;
-  const isPersonalized = Boolean(profile);
+  const themeCounts: Record<string, { count: number; latestTitle: string }> = {};
+  const userThemes = profile?.themes || [];
 
-  const organizationName =
-    activeProfile.organization?.name || fallbackProfile.organization?.name || "Free Preview";
+  for (const theme of userThemes) {
+    const keywords = THEME_KEYWORDS[theme] || [];
+    const matched = articles.filter((a) => matchTheme(a, keywords));
+    themeCounts[theme] = {
+      count: matched.length,
+      latestTitle: matched[0]?.title || "Δεν βρέθηκαν ακόμα άρθρα",
+    };
+  }
 
-  const organizationType =
-    activeProfile.organization?.type || fallbackProfile.organization?.type || "Γενική εικόνα";
+  const sportsKeywords = THEME_KEYWORDS["Αθλητισμός"] || [];
+  const politicalArticles = articles.filter((a) => !matchTheme(a, sportsKeywords));
 
-  const selectedThemes = activeProfile.themes ?? [];
-  const selectedIssues = activeProfile.issues ?? [];
-  const selectedEvents = activeProfile.events ?? [];
+  const orgName = profile?.organization?.name || "Noraya";
+  const orgType = profile?.organization?.type || "";
+  const hasProfile = !!profile?.organization?.name;
 
-  const selectedStakeholders = useMemo(() => {
-    const stakeholders = activeProfile.stakeholders ?? {};
-
-    return [
-      ...(stakeholders.ageGroups ?? []),
-      ...(stakeholders.socialGroups ?? []),
-      ...(stakeholders.professionalGroups ?? []),
-      ...(stakeholders.institutions ?? []),
-      ...(stakeholders.publicActors ?? [])
-    ];
-  }, [activeProfile]);
-
-  const mission = activeProfile.positions?.mission;
-  const redLines = activeProfile.positions?.redLines;
-  const tone = activeProfile.positions?.tone;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#020617] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-zinc-700 border-t-cyan-300 rounded-full animate-spin" />
+          <span className="text-zinc-500 text-sm">Φόρτωση dashboard...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen overflow-hidden bg-[#020617] text-white">
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_12%_8%,rgba(34,211,238,0.18),transparent_28%),radial-gradient(circle_at_84%_20%,rgba(16,185,129,0.14),transparent_30%),radial-gradient(circle_at_50%_85%,rgba(59,130,246,0.10),transparent_34%)]" />
+    <div className="min-h-screen bg-[#020617] text-white">
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_15%_10%,rgba(34,211,238,0.12),transparent_30%),radial-gradient(circle_at_80%_20%,rgba(16,185,129,0.08),transparent_28%)]" />
 
-      <div className="relative mx-auto grid max-w-[1500px] gap-5 px-5 py-6 xl:grid-cols-[255px_minmax(0,1.15fr)_minmax(360px,0.85fr)]">
-        <aside className="rounded-[2rem] border border-cyan-300/10 bg-white/[0.035] p-6 shadow-2xl shadow-cyan-950/20 backdrop-blur">
-          <div className="mb-8 flex items-center gap-3">
-            <Image
-              src="/noraya-eye.png"
-              alt="Noraya"
-              width={90}
-              height={46}
-              className="h-12 w-auto object-contain"
-              priority
-            />
-            <div>
-              <div className="tracking-[0.32em] text-zinc-100">NORAYA</div>
-              <div className="text-xs text-zinc-500">Political Intelligence</div>
+      <div className="relative mx-auto max-w-6xl px-5 py-8">
+
+        {/* ═══ Header ═══ */}
+        <header className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <img src="/noraya-eye.png" alt="" className="h-10 w-10" />
+              <div>
+                <div className="text-xs tracking-[0.2em] text-cyan-300/70 uppercase">NORAYA</div>
+                <div className="text-xs text-zinc-600">Political Intelligence</div>
+              </div>
             </div>
-          </div>
 
-          <div className="mb-8">
-            <h1 className="text-3xl font-semibold leading-tight">
-              AI Πολιτική Πληροφόρηση
+            <h1 className="text-2xl font-semibold mt-4">
+              {hasProfile ? orgName : "Γενική εικόνα"}
             </h1>
-            <p className="mt-4 text-lg leading-7 text-cyan-300">
-              Δωρεάν γενική εικόνα. Με είσοδο, στρατηγική προσαρμοσμένη στον οργανισμό σας.
+
+            <p className="text-sm text-zinc-500 mt-1">
+              {hasProfile
+                ? `${orgType} · ${articles.length} άρθρα σε παρακολούθηση · ${userThemes.length} θεματικές`
+                : "Δωρεάν preview — ρυθμίστε τον οργανισμό σας για προσωποποιημένη ανάλυση"}
             </p>
           </div>
 
-          <div className="space-y-5">
-            <FeatureItem
-              icon="◉"
-              title="Γενική παρακολούθηση"
-              text="Ολοκληρωμένη εικόνα του δημόσιου πολιτικού περιβάλλοντος."
-            />
-            <FeatureItem
-              icon="◎"
-              title="Προσαρμογή σε οργανισμό"
-              text="Θεματικές, ζητήματα, κοινά, φορείς και κόκκινες γραμμές."
-            />
-            <FeatureItem
-              icon="◇"
-              title="Σενάρια & ρίσκο"
-              text="Ανάλυση κινδύνων, ενδείξεων και πιθανής κλιμάκωσης."
-            />
-            <FeatureItem
-              icon="▣"
-              title="Ιδιωτική γνώση"
-              text="Οι θέσεις του οργανισμού χρησιμοποιούνται για συνέπεια και τεκμηρίωση."
-            />
-          </div>
-
-          <div className="mt-8 rounded-3xl border border-white/10 bg-black/20 p-4">
-            <div className="text-xs uppercase tracking-[0.2em] text-zinc-500">
-              Τρέχουσα κατάσταση
-            </div>
-
-            <div
-              className={`mt-3 inline-flex rounded-full border px-3 py-1.5 text-xs ${
-                isPersonalized
-                  ? "border-emerald-300/30 bg-emerald-300/10 text-emerald-100"
-                  : "border-cyan-300/30 bg-cyan-300/10 text-cyan-100"
-              }`}
-            >
-              {isPersonalized ? "Προσωποποιημένο" : "Free Preview"}
-            </div>
-
-            <div className="mt-4 text-sm font-medium text-zinc-100">
-              {organizationName}
-            </div>
-            <div className="mt-1 text-xs text-zinc-500">{organizationType}</div>
-
-            <Link
-              href="/onboarding"
-              className="mt-4 inline-flex w-full items-center justify-center rounded-xl border border-cyan-300/20 px-3 py-2 text-xs text-cyan-100 transition hover:bg-cyan-300/10"
-            >
-              {isPersonalized ? "Αλλαγή προσαρμογής" : "Ρύθμιση οργανισμού"}
-            </Link>
-          </div>
-        </aside>
-
-        <main className="space-y-5">
-          <section className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-5 shadow-2xl shadow-cyan-950/10 backdrop-blur">
-            <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-              <div>
-                <div className="mb-3 inline-flex rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1 text-xs text-cyan-100">
-                  1 · Δωρεάν γενική εικόνα
-                </div>
-
-                <h2 className="text-2xl font-semibold">Γενική εικόνα</h2>
-
-                <div className="mt-2 flex flex-wrap gap-2">
-                  <span className="rounded-full border border-white/10 px-3 py-1 text-xs text-zinc-400">
-                    Γενικό πολιτικό τοπίο
-                  </span>
-                  <span className="rounded-full border border-white/10 px-3 py-1 text-xs text-zinc-400">
-                    Χωρίς προσαρμογή οργανισμού
-                  </span>
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-cyan-300/20 bg-cyan-300/10 px-4 py-2 text-xs text-cyan-100">
-                Free Preview
-              </div>
-            </div>
- <NewsFeed />
-            <div className="grid gap-3 md:grid-cols-4">
-              <Kpi label="Sentiment" value="+8" sub="ουδέτερο" />
-              <Kpi label="Narratives" value="52" sub="ενεργά αφηγήματα" />
-              <Kpi label="Risk alerts" value="6" sub="μεσαίου ρίσκου" />
-              <Kpi label="Βουλή" value="8" sub="ενεργές συζητήσεις" />
-            </div>
-
-            <div className="mt-5">
-              <h3 className="mb-3 text-sm font-semibold text-zinc-200">
-                Κύρια θέματα σήμερα
-              </h3>
-
-              <div className="grid gap-3 md:grid-cols-3">
-                {freeIssues.map((issue) => (
-                  <div
-                    key={issue.title}
-                    className="rounded-3xl border border-white/10 bg-slate-950/60 p-4"
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-3">
-                        <div className="grid h-10 w-10 place-items-center rounded-2xl border border-white/10 bg-white/[0.04] text-lg">
-                          {issue.icon}
-                        </div>
-                        <div>
-                          <div className="font-semibold">{issue.title}</div>
-                          <div className="mt-1 inline-flex rounded-full border border-amber-300/20 bg-amber-300/10 px-2 py-0.5 text-[11px] text-amber-100">
-                            {issue.status}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="text-right">
-                        <div className="text-xl font-semibold">{issue.publicShare}</div>
-                        <div className="text-[11px] text-zinc-500">δημόσια αναφορά</div>
-                      </div>
-                    </div>
-
-                    <p className="mt-4 text-xs leading-5 text-zinc-500">
-                      {issue.summary}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-5 rounded-3xl border border-cyan-300/15 bg-cyan-300/[0.04] p-4">
-              <div className="text-sm font-semibold text-cyan-100">
-                AI σύνοψη γενικής εικόνας
-              </div>
-              <p className="mt-2 text-sm leading-6 text-zinc-400">
-                Σταθερό πολιτικό κλίμα. Η ακρίβεια παραμένει το κυρίαρχο θέμα,
-                ενώ υγεία και αγροτικά εμφανίζουν αυξημένη δημόσια αναφορά.
-                Για προσαρμοσμένη ανάλυση απαιτείται ρύθμιση οργανισμού.
-              </p>
-            </div>
-          </section>
-
-          <section className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-5 shadow-2xl shadow-cyan-950/10 backdrop-blur">
-            <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-              <div>
-                <div className="mb-3 inline-flex rounded-full border border-emerald-300/20 bg-emerald-300/10 px-3 py-1 text-xs text-emerald-100">
-                  3 · Προσωποποιημένη στρατηγική ανάλυση
-                </div>
-
-                <h2 className="text-2xl font-semibold">
-                  {isPersonalized
-                    ? `Σήμερα για ${organizationName}`
-                    : "Σήμερα για τον οργανισμό σας"}
-                </h2>
-
-                <p className="mt-2 text-sm text-zinc-500">
-                  {isPersonalized
-                    ? "Με βάση τις θεματικές, ζητήματα, φορείς και θέσεις που δηλώσατε."
-                    : "Συμπληρώστε το onboarding για να ενεργοποιηθεί πλήρως."}
-                </p>
-              </div>
-
+          <div className="flex gap-3">
+            {!hasProfile && (
               <Link
                 href="/onboarding"
-                className="rounded-2xl border border-cyan-300/25 px-4 py-2 text-xs text-cyan-100 hover:bg-cyan-300/10"
+                className="rounded-2xl bg-cyan-300 px-5 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-200"
               >
-                {isPersonalized ? "Ενημέρωση προφίλ" : "Ρύθμιση οργανισμού"}
+                Ρύθμιση οργανισμού →
               </Link>
-            </div>
+            )}
+            {hasProfile && (
+              <Link
+                href="/onboarding"
+                className="rounded-2xl border border-white/10 px-4 py-2.5 text-sm text-zinc-400 transition hover:border-white/20 hover:text-zinc-200"
+              >
+                Ρυθμίσεις
+              </Link>
+            )}
+          </div>
+        </header>
 
-            <div className="grid gap-3 md:grid-cols-5">
-              <Kpi label="Συνολικό sentiment" value="+19" sub="θετικό" />
-              <Kpi label="Narrative fit" value="73%" sub="συνάφεια" />
-              <Kpi label="Κύρια ρίσκα" value="4" sub="υψηλής προτερ." />
-              <Kpi label="Επίδραση" value="68%" sub="ενεργή" />
-              <Kpi label="Ευκαιρίες" value="7" sub="ενεργές" />
-            </div>
+        {/* ═══ Stats bar ═══ */}
+        <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-4">
+          <StatCard label="Πηγές" value="7" sub="ελληνικά ΜΜΕ" />
+          <StatCard label="Άρθρα" value={String(articles.length)} sub="στη βάση" />
+          <StatCard label="Θεματικές" value={String(userThemes.length || "—")} sub={hasProfile ? "σε παρακολούθηση" : "ρυθμίστε πρώτα"} />
+          <StatCard label="Πολιτικά" value={String(politicalArticles.length)} sub="χωρίς αθλητικά" />
+        </div>
 
-            <div className="mt-5 space-y-3">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-zinc-200">
-                  Κρίσιμα θέματα για εσάς
-                </h3>
-                <span className="text-xs text-zinc-500">
-                  Ταξινόμηση: σημασία για εσάς
-                </span>
-              </div>
-
-              {personalizedIssues.map((issue, index) => {
-                const colors = getRiskColor(issue.color);
-
-                if (index === 0) {
-                  return (
-                    <div
-                      key={issue.title}
-                      className={`rounded-3xl border ${colors.border} ${colors.bg} p-4`}
-                    >
-                      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="grid h-11 w-11 place-items-center rounded-2xl border border-white/10 bg-black/20 text-lg">
-                            {issue.icon}
-                          </div>
-                          <div>
-                            <div className="text-lg font-semibold">{issue.title}</div>
-                            <div className={`mt-1 inline-flex rounded-full border px-2 py-0.5 text-[11px] ${colors.badge}`}>
-                              {issue.importance}
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-3 text-sm md:min-w-[260px]">
-                          <Metric label="Ρίσκο" value={`${issue.risk}/100`} color="text-red-100" />
-                          <Metric label="Narrative fit" value={`${issue.fit}%`} color="text-emerald-100" />
-                        </div>
-                      </div>
-
-                      <div className="mt-4 grid gap-3 md:grid-cols-[1fr_1fr]">
-                        <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                          <div className="text-xs text-zinc-500">Γιατί μας αφορά</div>
-                          <p className="mt-2 text-sm leading-6 text-zinc-300">
-                            {issue.why}
-                          </p>
-                        </div>
-
-                        <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                          <div className="text-xs text-zinc-500">Σύσταση ανάλυσης</div>
-                          <p className="mt-2 text-sm leading-6 text-zinc-300">
-                            {issue.recommendation}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="mt-4 flex justify-end">
-                        <button className="rounded-xl border border-cyan-300/25 px-4 py-2 text-xs text-cyan-100 hover:bg-cyan-300/10">
-                          Προβολή ανάλυσης →
-                        </button>
-                      </div>
-                    </div>
-                  );
-                }
-
+        {/* ═══ Theme cards ═══ */}
+        {hasProfile && userThemes.length > 0 && (
+          <section className="mb-8">
+            <h2 className="text-lg font-semibold mb-4">Τα θέματά σας</h2>
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+              {userThemes.map((theme) => {
+                const data = themeCounts[theme] || { count: 0, latestTitle: "" };
+                const icon = THEME_ICONS[theme] || "📌";
                 return (
                   <div
-                    key={issue.title}
-                    className="grid gap-3 rounded-2xl border border-white/10 bg-slate-950/60 p-4 md:grid-cols-[1fr_110px_110px_40px]"
+                    key={theme}
+                    className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition hover:border-white/20 hover:bg-white/[0.05]"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white/[0.04]">
-                        {issue.icon}
-                      </div>
-                      <div>
-                        <div className="font-medium">{issue.title}</div>
-                        <div className={`mt-1 inline-flex rounded-full border px-2 py-0.5 text-[11px] ${colors.badge}`}>
-                          {issue.importance}
+                    <div className="flex items-start gap-3">
+                      <span className="text-xl">{icon}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <h3 className="text-sm font-medium truncate">{theme}</h3>
+                          <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                            data.count > 5
+                              ? "bg-red-400/10 text-red-300 border border-red-400/20"
+                              : data.count > 0
+                              ? "bg-amber-400/10 text-amber-300 border border-amber-400/20"
+                              : "bg-zinc-400/10 text-zinc-500 border border-zinc-400/20"
+                          }`}>
+                            {data.count} άρθρα
+                          </span>
                         </div>
+                        <p className="text-xs text-zinc-500 mt-2 line-clamp-2 leading-5">
+                          {data.latestTitle}
+                        </p>
                       </div>
                     </div>
-
-                    <div className="text-sm text-red-100">{issue.risk}/100</div>
-                    <div className="text-sm text-emerald-100">{issue.fit}%</div>
-                    <div className="text-zinc-500">⌄</div>
                   </div>
                 );
               })}
             </div>
-
-            <div className="mt-5 rounded-3xl border border-cyan-300/15 bg-cyan-300/[0.04] p-4">
-              <div className="text-sm font-semibold text-cyan-100">
-                AI σύνοψη για τον οργανισμό σας
-              </div>
-              <p className="mt-2 text-sm leading-6 text-zinc-400">
-                {isPersonalized
-                  ? `Το προφίλ περιλαμβάνει ${selectedThemes.length} θεματικές, ${selectedIssues.length} ζητήματα, ${selectedEvents.length} γεγονότα και ${selectedStakeholders.length} κοινά ή φορείς. Το Noraya μπορεί να ταξινομεί προτεραιότητες με βάση το δικό σας πλαίσιο.`
-                  : "Μετά τη ρύθμιση οργανισμού, εδώ θα εμφανίζεται εξατομικευμένη σύνοψη με βάση θεματικές, γεγονότα, ομάδες, φορείς και θέσεις."}
-              </p>
-
-              {isPersonalized && (
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {selectedThemes.slice(0, 8).map((theme) => (
-                    <span
-                      key={theme}
-                      className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1 text-xs text-cyan-100"
-                    >
-                      {theme}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
           </section>
+        )}
 
-          <div className="grid gap-3 md:grid-cols-3">
-            <FlowStep
-              number="1"
-              title="Δωρεάν γενική εικόνα"
-              text="Παρακολουθήστε το γενικό πολιτικό τοπίο."
-            />
-            <FlowStep
-              number="2"
-              title="Ρύθμιση οργανισμού"
-              text="Πείτε μας ποιοι είστε και τι σας ενδιαφέρει."
-            />
-            <FlowStep
-              number="3"
-              title="Προσωποποιημένη ανάλυση"
-              text="Λάβετε στοχευμένη εικόνα από τον AI Σύμβουλο."
-              active
-            />
-          </div>
-        </main>
-
-        <aside className="rounded-[2rem] border border-cyan-300/20 bg-slate-950/90 p-5 shadow-2xl shadow-cyan-950/20 backdrop-blur">
-          <div className="mb-5 flex items-start justify-between gap-4">
-            <div>
-              <div className="text-xs uppercase tracking-[0.2em] text-cyan-300">
-                AI Σύμβουλος
-              </div>
-              <h2 className="mt-2 text-xl font-semibold">
-                Σύμβουλος Ανάλυσης
-              </h2>
-            </div>
-
-            <Image
-              src="/noraya-eye.png"
-              alt="Noraya"
-              width={110}
-              height={60}
-              className="h-12 w-auto object-contain opacity-90"
-            />
-          </div>
-
-          <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
-            <div className="mb-2 text-xs text-cyan-200">Ερώτηση</div>
-            <p className="text-sm leading-6 text-zinc-100">
-              Τι χρειάζεται προσοχή σήμερα με βάση το προφίλ μας;
+        {/* ═══ No profile CTA ═══ */}
+        {!hasProfile && (
+          <section className="mb-8 rounded-2xl border border-dashed border-cyan-300/25 bg-cyan-300/[0.04] p-8 text-center">
+            <div className="text-3xl mb-3">🏛️</div>
+            <h2 className="text-lg font-semibold mb-2">Ρυθμίστε τον οργανισμό σας</h2>
+            <p className="text-sm text-zinc-500 mb-5 max-w-md mx-auto">
+              Πείτε μας ποιοι είστε, ποια θέματα σας ενδιαφέρουν, και ποιες είναι οι θέσεις σας.
+              Το Noraya θα προσαρμόσει την ανάλυση στη δική σας οπτική.
             </p>
-          </div>
+            <Link
+              href="/onboarding"
+              className="inline-block rounded-2xl bg-cyan-300 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-200"
+            >
+              Ξεκινήστε τη ρύθμιση →
+            </Link>
+          </section>
+        )}
 
-          <div className="mt-5 space-y-4">
-            <AdvisorSection
-              icon="→"
-              title="Τι σημαίνει"
-              text={
-                isPersonalized
-                  ? `Το Noraya συνδέει τα ζητήματα ${selectedIssues
-                      .slice(0, 3)
-                      .join(", ")} με τις θεματικές και τους φορείς που δηλώσατε.`
-                  : "Σε γενικό επίπεδο, το πολιτικό περιβάλλον δείχνει αυξημένη ένταση σε κόστος ζωής, υγεία και κινητοποιήσεις."
-              }
-            />
+        {/* ═══ News Feed ═══ */}
+        <section className="mb-8">
+          <NewsFeed />
+        </section>
 
-            <AdvisorSection
-              icon="!"
-              title="Κίνδυνοι"
-              text="Υπάρχει κίνδυνος αποσπασματικής εικόνας χωρίς σύνδεση με πηγές, γεγονότα, θεσμούς και προηγούμενες θέσεις."
-            />
+        {/* ═══ Coming soon: AI features ═══ */}
+        <section className="mb-8 grid gap-3 md:grid-cols-3">
+          <ComingSoonCard
+            icon="🤖"
+            title="AI Σύμβουλος"
+            description="Ρωτήστε οτιδήποτε — σε ελληνικά, με context τον οργανισμό σας."
+          />
+          <ComingSoonCard
+            icon="🎯"
+            title="Σενάρια & Ρίσκο"
+            description="Τι γίνεται αν ψηφίσουμε υπέρ; Θεωρία παιγνίων & κόστος/όφελος."
+          />
+          <ComingSoonCard
+            icon="📄"
+            title="Reports & Alerts"
+            description="Αυτόματο εβδομαδιαίο report + morning brief + risk alerts."
+          />
+        </section>
 
-            <AdvisorSection
-              icon="+"
-              title="Ευκαιρίες"
-              text="Η οργανωμένη παρακολούθηση θεμάτων μπορεί να αποκαλύψει έγκαιρα κλιμάκωση, κενά πληροφόρησης και ανάγκες τεκμηρίωσης."
-            />
-
-            <AdvisorSection
-              icon="✓"
-              title="Συνέπεια θέσεων"
-              text={
-                isPersonalized && (mission || redLines || tone)
-                  ? `Υπάρχει αρχικό πλαίσιο θέσεων. Το επόμενο βήμα είναι να συνδεθούν αρχεία, δηλώσεις και policy papers.`
-                  : "Για πλήρη έλεγχο συνέπειας, προσθέστε αποστολή, κόκκινες γραμμές και αργότερα αρχεία θέσεων."
-              }
-            />
-
-            <div className="rounded-2xl border border-cyan-300/25 bg-cyan-300/10 p-4">
-              <div className="mb-2 text-sm font-semibold text-cyan-100">
-                Προτεινόμενο επόμενο βήμα
-              </div>
-              <p className="text-sm leading-6 text-zinc-200">
-                Ανοίξτε Issue Room για το σημαντικότερο θέμα και ελέγξτε:
-                πηγές, αφήγημα, κλιμάκωση, φορείς και συνέπεια με τις θέσεις.
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-5 grid grid-cols-2 gap-2">
-            <button className="rounded-xl border border-white/10 px-3 py-2 text-xs text-zinc-300">
-              Εξαγωγή ανάλυσης
-            </button>
-
-            <button className="rounded-xl bg-cyan-300 px-3 py-2 text-xs font-semibold text-slate-950">
-              Νέα ερώτηση
-            </button>
-          </div>
-
-          <div className="mt-5 grid grid-cols-3 gap-2 text-center text-[10px] text-zinc-500">
-            <div className="rounded-xl border border-white/10 p-2">
-              Ιδιωτικά δεδομένα
-            </div>
-            <div className="rounded-xl border border-white/10 p-2">
-              Citations
-            </div>
-            <div className="rounded-xl border border-white/10 p-2">
-              Audit-ready
-            </div>
-          </div>
-        </aside>
       </div>
     </div>
   );
 }
 
-function FeatureItem({
-  icon,
-  title,
-  text
-}: {
-  icon: string;
-  title: string;
-  text: string;
-}) {
+/* ═══ Sub-components ═══ */
+
+function StatCard({ label, value, sub }: { label: string; value: string; sub: string }) {
   return (
-    <div className="flex gap-3">
-      <div className="grid h-9 w-9 shrink-0 place-items-center rounded-2xl border border-cyan-300/25 bg-cyan-300/10 text-cyan-100">
-        {icon}
-      </div>
-      <div>
-        <div className="text-sm font-semibold text-zinc-100">{title}</div>
-        <p className="mt-1 text-xs leading-5 text-zinc-500">{text}</p>
-      </div>
+    <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
+      <div className="text-[10px] uppercase tracking-[0.15em] text-zinc-600 mb-1">{label}</div>
+      <div className="text-2xl font-semibold">{value}</div>
+      <div className="text-xs text-zinc-500 mt-0.5">{sub}</div>
     </div>
   );
 }
 
-function Kpi({
-  label,
-  value,
-  sub
-}: {
-  label: string;
-  value: string;
-  sub: string;
-}) {
+function ComingSoonCard({ icon, title, description }: { icon: string; title: string; description: string }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-      <div className="text-xs text-zinc-500">{label}</div>
-      <div className="mt-2 text-2xl font-semibold text-white">{value}</div>
-      <div className="mt-1 text-xs text-zinc-500">{sub}</div>
-    </div>
-  );
-}
-
-function Metric({
-  label,
-  value,
-  color
-}: {
-  label: string;
-  value: string;
-  color: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
-      <div className="text-xs text-zinc-500">{label}</div>
-      <div className={`mt-1 text-xl font-semibold ${color}`}>{value}</div>
-    </div>
-  );
-}
-
-function AdvisorSection({
-  icon,
-  title,
-  text
-}: {
-  icon: string;
-  title: string;
-  text: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-4">
-      <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-zinc-100">
-        <span className="grid h-6 w-6 place-items-center rounded-lg border border-cyan-300/20 text-cyan-200">
-          {icon}
-        </span>
-        {title}
+    <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 opacity-60">
+      <div className="text-xl mb-2">{icon}</div>
+      <h3 className="text-sm font-medium mb-1">{title}</h3>
+      <p className="text-xs text-zinc-600 leading-5">{description}</p>
+      <div className="mt-3 inline-block rounded-full border border-zinc-800 px-3 py-1 text-[10px] text-zinc-600">
+        Σύντομα
       </div>
-
-      <p className="text-sm leading-6 text-zinc-400">{text}</p>
-    </div>
-  );
-}
-
-function FlowStep({
-  number,
-  title,
-  text,
-  active
-}: {
-  number: string;
-  title: string;
-  text: string;
-  active?: boolean;
-}) {
-  return (
-    <div
-      className={`rounded-3xl border p-4 ${
-        active
-          ? "border-emerald-300/30 bg-emerald-300/10"
-          : "border-cyan-300/20 bg-cyan-300/[0.05]"
-      }`}
-    >
-      <div className="mb-3 flex items-center gap-3">
-        <div
-          className={`grid h-9 w-9 place-items-center rounded-2xl border text-sm ${
-            active
-              ? "border-emerald-300/40 text-emerald-100"
-              : "border-cyan-300/30 text-cyan-100"
-          }`}
-        >
-          {number}
-        </div>
-        <div className="font-semibold text-zinc-100">{title}</div>
-      </div>
-      <p className="text-xs leading-5 text-zinc-500">{text}</p>
     </div>
   );
 }
