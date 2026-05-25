@@ -60,6 +60,7 @@ export async function POST(req: Request) {
 
   let verifiedThreadId: string | null = null;
   let previousMessagesContext = "";
+  let filesContext = "";
 
   if (threadId) {
     const { data: thread } = await supabase
@@ -92,6 +93,29 @@ export async function POST(req: Request) {
           message.role === "assistant" ? "Noraya" : "Χρήστης";
 
         return `${roleLabel} (${message.action_type || "custom"}): ${message.content}`;
+      })
+      .join("\n\n");
+
+    const { data: files } = await supabase
+      .from("advisor_files")
+      .select("file_name, file_type, extracted_text, created_at")
+      .eq("thread_id", verifiedThreadId)
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(5);
+
+    filesContext = (files || [])
+      .filter((file) => file.extracted_text)
+      .map((file, index) => {
+        const text = (file.extracted_text || "")
+          .replace(/\s+/g, " ")
+          .trim()
+          .substring(0, 6000);
+
+        return `Υλικό ${index + 1}: ${file.file_name || "Επικολλημένο κείμενο"}
+Τύπος: ${file.file_type || "κείμενο"}
+Κείμενο:
+${text}`;
       })
       .join("\n\n");
   }
@@ -265,6 +289,12 @@ ${norayaMethodPrompt}
 
 Μην δίνεις ακριβείς αριθμούς κόστους, ποσοστά ή πιθανότητες αν δεν στηρίζονται σε διαθέσιμα δεδομένα.
 
+Αν υπάρχει υλικό που έχει δώσει ο χρήστης στη συζήτηση, να το λαμβάνεις σοβαρά υπόψη. Να ξεχωρίζεις όμως αν μιλάς με βάση:
+- το υλικό του χρήστη,
+- τα άρθρα / δημόσια δεδομένα,
+- το προφίλ οργανισμού,
+- ή δική σου εκτίμηση.
+
 Ξεχώριζε πάντα:
 τι ξέρουμε,
 τι εκτιμούμε,
@@ -284,6 +314,10 @@ ${orgContext || "Δεν υπάρχει διαθέσιμο προφίλ οργα�
 ΙΣΤΟΡΙΚΟ ΤΡΕΧΟΥΣΑΣ ΣΥΖΗΤΗΣΗΣ
 
 ${previousMessagesContext || "Δεν υπάρχει προηγούμενο ιστορικό σε αυτή τη συζήτηση."}
+
+ΥΛΙΚΟ ΠΟΥ ΕΧΕΙ ΔΩΣΕΙ Ο ΧΡΗΣΤΗΣ ΣΕ ΑΥΤΗ ΤΗ ΣΥΖΗΤΗΣΗ
+
+${filesContext || "Δεν υπάρχει αποθηκευμένο υλικό σε αυτή τη συζήτηση."}
 
 ΔΙΑΘΕΣΙΜΑ ΔΕΔΟΜΕΝΑ
 
