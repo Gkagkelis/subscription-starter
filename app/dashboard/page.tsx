@@ -126,7 +126,7 @@ const personalizedIssues = [
   }
 ];
 
-function readProfile(): NorayaProfile | null {
+function readLocalProfile(): NorayaProfile | null {
   if (typeof window === "undefined") return null;
 
   try {
@@ -135,6 +135,34 @@ function readProfile(): NorayaProfile | null {
   } catch {
     return null;
   }
+}
+
+/**
+ * Convert the Supabase DB row (flat columns) back to the
+ * nested shape the dashboard already expects.
+ */
+function dbRowToProfile(row: any): NorayaProfile {
+  return {
+    organization: {
+      name: row.org_name || "",
+      type: row.org_type || ""
+    },
+    themes: row.themes || [],
+    issues: row.issues || [],
+    events: row.events || [],
+    stakeholders: row.stakeholders || {
+      ageGroups: [],
+      socialGroups: [],
+      professionalGroups: [],
+      institutions: [],
+      publicActors: []
+    },
+    positions: {
+      mission: row.mission || "",
+      redLines: row.red_lines || "",
+      tone: row.tone || ""
+    }
+  };
 }
 
 function getRiskColor(color: string) {
@@ -175,9 +203,29 @@ function getRiskColor(color: string) {
 
 export default function DashboardPage() {
   const [profile, setProfile] = useState<NorayaProfile | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setProfile(readProfile());
+    (async () => {
+      try {
+        // Try API first (logged-in user with Supabase data)
+        const res = await fetch("/api/onboarding");
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.onboarding_completed) {
+            setProfile(dbRowToProfile(data));
+            setLoading(false);
+            return;
+          }
+        }
+      } catch {
+        // API failed — fall through to localStorage
+      }
+
+      // Fallback: try localStorage (non-logged-in or pre-migration data)
+      setProfile(readLocalProfile());
+      setLoading(false);
+    })();
   }, []);
 
   const activeProfile = profile ?? fallbackProfile;
