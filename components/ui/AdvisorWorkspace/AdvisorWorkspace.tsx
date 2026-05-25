@@ -114,6 +114,7 @@ export default function AdvisorWorkspace({
   const [messages, setMessages] = useState<AdvisorMessage[]>([]);
   const [topic, setTopic] = useState(initialTopic || "");
   const [customQuestion, setCustomQuestion] = useState("");
+  const [supportingText, setSupportingText] = useState("");
   const [loadingThreads, setLoadingThreads] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [advisorLoading, setAdvisorLoading] = useState(false);
@@ -208,6 +209,7 @@ export default function AdvisorWorkspace({
     setMessages([]);
     setTopic("");
     setCustomQuestion("");
+    setSupportingText("");
     setError("");
   };
 
@@ -215,6 +217,7 @@ export default function AdvisorWorkspace({
     setActiveThread(thread);
     setTopic(thread.topic || thread.title || "");
     setCustomQuestion("");
+    setSupportingText("");
     setError("");
     await loadMessages(thread.id);
   };
@@ -225,7 +228,15 @@ export default function AdvisorWorkspace({
     actionType: AdvisorActionType
   ) => {
     const cleanQuestion = question.trim();
+    const cleanSupportingText = supportingText.trim();
     const cleanTopic = topic.trim() || cleanQuestion.substring(0, 100);
+
+    const questionWithContext = cleanSupportingText
+      ? `${cleanQuestion}
+
+ΥΛΙΚΟ ΠΟΥ ΕΔΩΣΕ Ο ΧΡΗΣΤΗΣ ΓΙΑ ΑΝΑΛΥΣΗ:
+${cleanSupportingText}`
+      : cleanQuestion;
 
     if (!cleanQuestion) {
       setError("Γράψε ένα θέμα ή μια ερώτηση.");
@@ -246,7 +257,7 @@ export default function AdvisorWorkspace({
         body: JSON.stringify({
           threadId: thread.id,
           topic: cleanTopic,
-          question: cleanQuestion,
+          question: questionWithContext,
           mode,
           actionType
         })
@@ -376,6 +387,31 @@ export default function AdvisorWorkspace({
             />
           </div>
 
+          <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4">
+            <label className="text-xs uppercase tracking-[0.18em] text-zinc-600">
+              Κείμενο / πρόταση προς ανάλυση
+            </label>
+
+            <p className="mt-2 text-xs leading-5 text-zinc-500">
+              Προαιρετικό. Επικόλλησε εδώ ανακοίνωση, πρόταση, τροπολογία,
+              ομιλία ή κείμενο που θέλεις να λάβει υπόψη ο Noraya.
+            </p>
+
+            <textarea
+              value={supportingText}
+              onChange={(event) => setSupportingText(event.target.value)}
+              rows={5}
+              placeholder="Επικόλλησε εδώ το κείμενο που θέλεις να αναλύσει ο Noraya..."
+              className="mt-3 w-full resize-none rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-cyan-300/40"
+            />
+
+            {supportingText.trim() && (
+              <div className="mt-2 text-xs text-emerald-300">
+                Το κείμενο θα χρησιμοποιηθεί στην επόμενη απάντηση του Noraya.
+              </div>
+            )}
+          </div>
+
           <div className="mt-5 grid gap-3 md:grid-cols-5">
             {actions.map((action) => (
               <button
@@ -404,7 +440,10 @@ export default function AdvisorWorkspace({
               value={customQuestion}
               onChange={(event) => setCustomQuestion(event.target.value)}
               rows={3}
-              placeholder={recommendedQuestion || "Γράψε εδώ την ερώτησή σου προς τον Noraya..."}
+              placeholder={
+                recommendedQuestion ||
+                "Γράψε εδώ την ερώτησή σου προς τον Noraya..."
+              }
               className="mt-2 w-full resize-none rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-cyan-300/40"
             />
 
