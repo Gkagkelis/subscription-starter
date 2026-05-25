@@ -121,7 +121,14 @@ export default function AdvisorWorkspace({
   const [error, setError] = useState("");
 
   const visibleMessages = useMemo(
-    () => messages.filter((message) => message.role === "assistant"),
+    () =>
+      messages
+        .filter((message) => message.role === "assistant")
+        .slice()
+        .sort(
+          (a, b) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        ),
     [messages]
   );
 
