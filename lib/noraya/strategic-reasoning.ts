@@ -1,439 +1,345 @@
-import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
-import { createClient as createAuthClient } from "@/utils/supabase/server";
-import { createClient as createServiceClient } from "@supabase/supabase-js";
-import {
-  buildNorayaStrategicJsonInstruction,
-  buildNorayaStrategicSystemPrompt,
-  createFallbackStrategicBrief,
-  type UserPoliticalProfile,
-} from "@/lib/noraya/strategic-reasoning";
-
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
-
-const GUEST_COOKIE_NAME = "noraya_guest_profile";
-
-type AgendaRow = {
-  topic: string;
-  article_count: number | null;
-  source_count: number | null;
-  political_articles: number | null;
-  agenda_score: number | null;
-  documentation_level: string | null;
-  political_risk_level: string | null;
-  framing_summary: string | null;
-  recommended_action: string | null;
-  avoid_action: string | null;
-  top_sources: unknown;
-  top_evidence_articles: unknown;
-  evidence_summary: string | null;
+export type UserPoliticalProfile = {
+  org_name?: string | null;
+  org_type?: string | null;
+  role_type?: string | null;
+  party_key?: string | null;
+  selected_party_profile_id?: string | null;
+  party_profile_snapshot?: unknown;
+  profile_source?: string | null;
+  profile_review_status?: string | null;
+  themes?: unknown;
+  issues?: unknown;
+  events?: unknown;
+  stakeholders?: unknown;
+  mission?: string | null;
+  red_lines?: string | null;
+  tone?: string | null;
 };
 
-function cleanText(value: unknown, maxLength = 1000) {
-  return String(value || "")
-    .replace(/<[^>]*>/g, "")
-    .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, maxLength);
-}
-
-function safeJson(value: unknown, maxLength = 1800) {
-  try {
-    return JSON.stringify(value ?? null).slice(0, maxLength);
-  } catch {
-    return "null";
-  }
-}
-
-function parseAiJson(raw: string) {
-  try {
-    return JSON.parse(raw);
-  } catch {
-    const match = raw.match(/\{[\s\S]*\}/);
-
-    if (!match) {
-      return null;
-    }
-
-    try {
-      return JSON.parse(match[0]);
-    } catch {
-      return null;
-    }
-  }
-}
-
-function readGuestProfileCookie(): UserPoliticalProfile | null {
-  const raw = cookies().get(GUEST_COOKIE_NAME)?.value;
-
-  if (!raw) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(decodeURIComponent(raw)) as UserPoliticalProfile;
-  } catch {
-    return null;
-  }
-}
-
-function buildProfileContext(profile: UserPoliticalProfile | null) {
-  if (!profile) {
-    return `
-ΠΡΟΦΙΛ ΧΡΗΣΤΗ
-Δεν υπάρχει ακόμη αποθηκευμένο προφίλ χρήστη.
-
-Χειρίσου τον χρήστη ως γενικό πολιτικό οργανισμό.
-Κράτησε χαμηλότερη βεβαιότητα.
-Μην εφεύρεις κομματικές θέσεις.
-`;
-  }
-
+export function buildNorayaStrategicSystemPrompt() {
   return `
-ΠΡΟΦΙΛ ΧΡΗΣΤΗ
+Είσαι ο Noraya, AI Political Strategy Advisor.
 
-Όνομα:
-${profile.org_name || "Δεν έχει οριστεί"}
+Δεν είσαι απλό news dashboard.
+Δεν είσαι data analyst που δείχνει raw metrics.
+Δεν είσαι γενικό chatbot.
 
-Τύπος:
-${profile.org_type || profile.role_type || "Πολιτικός οργανισμός"}
+Είσαι πολιτικός σύμβουλος στρατηγικής.
 
-Party key:
-${profile.party_key || "Δεν έχει οριστεί"}
+Η αποστολή σου είναι να μετατρέπεις την τρέχουσα πολιτική ατζέντα σε:
+- πολιτική διάγνωση,
+- σενάρια,
+- στρατηγική γραμμή,
+- μηνύματα,
+- πλάνο δράσης,
+- βάση τεκμηρίωσης.
 
-Profile source:
-${profile.profile_source || "Δεν έχει οριστεί"}
+ΣΚΕΦΤΕΣΑΙ ΠΑΝΤΑ ΜΕ ΑΥΤΗ ΤΗΝ ΑΛΥΣΙΔΑ:
 
-Review status:
-${profile.profile_review_status || "Δεν έχει οριστεί"}
+Agenda → Framing → Priming → Audience → Persuasion → Scenarios → Mobilization → Recommendation
 
-Party profile snapshot:
-${safeJson(profile.party_profile_snapshot, 2600)}
+Δηλαδή απαντάς:
+1. Τι ανεβαίνει;
+2. Πώς πλαισιώνεται;
+3. Με ποιο κριτήριο θα κριθεί ο πολιτικός / οργανισμός;
+4. Ποιο κοινό αφορά;
+5. Τι μήνυμα και τι τόνος ταιριάζει;
+6. Ποια σενάρια υπάρχουν;
+7. Τι πρέπει να γίνει πρακτικά;
+8. Τι πρέπει να αποφευχθεί;
 
-Θεματικές προτεραιότητες:
-${safeJson(profile.themes, 1800)}
+ΚΑΝΟΝΕΣ:
+- Μη δείχνεις raw metrics στον τελικό χρήστη ως κύριο προϊόν.
+- Μην αναφέρεις τεχνικούς όρους όπως agenda_score, documentation_level, JSON, fallback ή model errors.
+- Μη γράφεις σαν dashboard.
+- Μη γράφεις σαν ακαδημαϊκή εργασία.
+- Μη λες γενικόλογα.
+- Μη βγάζεις ψευδή βεβαιότητα.
+- Κάθε απάντηση πρέπει να καταλήγει σε καθαρή σύσταση.
+- Πρώτα δίνεις απόφαση, μετά εξήγηση, μετά τεκμηρίωση.
+- Αν η τεκμηρίωση είναι περιορισμένη, το λες καθαρά.
+- Δεν κάνεις προπαγάνδα, παραπληροφόρηση ή κατασκευή γεγονότων.
+- Δεν εφευρίσκεις δημοσκοπικά ποσοστά.
+- Δεν ισχυρίζεσαι ότι γνωρίζεις πραγματική πρόθεση ψηφοφόρων χωρίς δεδομένα.
+- Προσαρμόζεις τη σύσταση στο προφίλ του χρήστη, στο κόμμα, στις κόκκινες γραμμές και στον τόνο του.
 
-Ζητήματα:
-${safeJson(profile.issues, 1800)}
-
-Κοινά / stakeholders:
-${safeJson(profile.stakeholders, 2200)}
-
-Αποστολή / πολιτική ταυτότητα:
-${cleanText(profile.mission, 1800) || "Δεν έχει οριστεί"}
-
-Κόκκινες γραμμές:
-${cleanText(profile.red_lines, 1800) || "Δεν έχουν οριστεί"}
-
-Προτιμώμενος τόνος:
-${cleanText(profile.tone, 1600) || "Δεν έχει οριστεί"}
+ΓΛΩΣΣΑ:
+- Ελληνικά.
+- Καθαρή, δυνατή, ανθρώπινη γλώσσα.
+- Σαν έμπειρος πολιτικός σύμβουλος.
+- Όχι database language.
+- Όχι φλυαρία.
+- Όχι υπερβολική τεχνικότητα.
 `;
 }
 
-function buildAgendaContext(signals: AgendaRow[]) {
-  return signals
-    .map((row, index) => {
-      return `
-ΣΗΜΑ ${index + 1}
+export function buildNorayaStrategicJsonInstruction() {
+  return `
+Πρέπει να επιστρέψεις ΜΟΝΟ έγκυρο JSON.
+Χωρίς markdown.
+Χωρίς επεξήγηση έξω από το JSON.
 
-Θέμα:
-${row.topic}
+Η δομή πρέπει να είναι ακριβώς:
 
-Εσωτερική ένταση:
-${row.agenda_score ?? "άγνωστη"}
-
-Εσωτερικό ρίσκο:
-${row.political_risk_level || "άγνωστο"}
-
-Εσωτερική τεκμηρίωση:
-${row.documentation_level || "άγνωστη"}
-
-Άρθρα:
-${row.article_count || 0}
-
-Πηγές:
-${row.source_count || 0}
-
-Πολιτικά άρθρα:
-${row.political_articles || 0}
-
-Framing summary:
-${cleanText(row.framing_summary, 1200)}
-
-Recommended action βάσης:
-${cleanText(row.recommended_action, 1000)}
-
-Avoid action βάσης:
-${cleanText(row.avoid_action, 1000)}
-
-Evidence summary:
-${cleanText(row.evidence_summary, 1000)}
-
-Top sources:
-${safeJson(row.top_sources, 1800)}
-
-Evidence articles:
-${safeJson(row.top_evidence_articles, 2800)}
+{
+  "model": "v1",
+  "issue": {
+    "topic": string,
+    "plain_title": string,
+    "agenda_status": string,
+    "urgency": "immediate" | "today" | "watch" | "low",
+    "media_signal": string,
+    "article_signal": string,
+    "locality_signal": string,
+    "public_attention_signal": string,
+    "dominant_frame": string,
+    "priming_risk": string,
+    "affected_audiences": string[],
+    "political_risk": string,
+    "opportunity": string,
+    "documentation_level": "initial" | "medium" | "strong"
+  },
+  "daily_brief": {
+    "headline": string,
+    "what_is_happening": string,
+    "why_it_matters_now": string,
+    "immediate_recommendation": string,
+    "avoid_today": string
+  },
+  "strategic_diagnosis": {
+    "agenda_reading": string,
+    "framing_diagnosis": string,
+    "priming_risk": string,
+    "audience_reading": string,
+    "persuasion_reading": string,
+    "strategic_opportunity": string,
+    "strategic_risk": string,
+    "recommended_posture": "institutional" | "human" | "technocratic" | "values_based" | "assertive" | "defensive" | "silent_watch" | "agenda_shift",
+    "recommended_posture_explanation": string
+  },
+  "scenarios": [
+    {
+      "name": string,
+      "move": string,
+      "likely_gain": string,
+      "likely_risk": string,
+      "audience_effect": string,
+      "opponent_response": string,
+      "media_response": string,
+      "recommendation": "prefer" | "acceptable" | "avoid"
+    }
+  ],
+  "message_package": {
+    "central_line": string,
+    "institutional_version": string,
+    "human_version": string,
+    "sharp_version": string,
+    "social_post": string,
+    "answer_if_attacked": string,
+    "words_to_use": string[],
+    "words_to_avoid": string[]
+  },
+  "action_plan": {
+    "now": string[],
+    "next_24h": string[],
+    "next_48h": string[],
+    "this_week": string[],
+    "owner_suggestion": string
+  },
+  "monitoring_plan": {
+    "watch_topics": string[],
+    "watch_actors": string[],
+    "watch_media": string[],
+    "escalation_triggers": string[]
+  },
+  "evidence": {
+    "basis": string,
+    "data_points": string[],
+    "uncertainty": string,
+    "documentation_level": "initial" | "medium" | "strong"
+  }
+}
 `;
-    })
-    .join("\n---\n");
 }
 
-function buildFallbackResponse(params: {
+export function createFallbackStrategicBrief(params: {
   profile: UserPoliticalProfile | null;
   topic: string;
-  agendaUsed: AgendaRow[];
-  processingStatus: string;
-  warning?: string;
+  processingStatus?: string;
 }) {
-  return NextResponse.json({
+  const topic = params.topic || "Τρέχουσα πολιτική ατζέντα";
+
+  return {
+    model: "v1",
     profile: params.profile,
-    strategic_brief: createFallbackStrategicBrief({
-      profile: params.profile,
-      topic: params.topic,
-      processingStatus: params.processingStatus,
-    }),
-    agenda_used: params.agendaUsed,
-    processing_status: params.processingStatus,
-    source: "fallback",
-    warning: params.warning || null,
-  });
-}
-
-export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-
-  const rawLimit = Number.parseInt(searchParams.get("limit") || "8", 10);
-  const limit = Number.isFinite(rawLimit)
-    ? Math.min(Math.max(rawLimit, 1), 12)
-    : 8;
-
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const anthropicKey = process.env.ANTHROPIC_API_KEY;
-
-  if (!supabaseUrl || !serviceRoleKey) {
-    return NextResponse.json(
-      { error: "Missing Supabase server environment variables." },
-      { status: 500 }
-    );
-  }
-
-  const authClient = createAuthClient();
-  const serviceClient = createServiceClient(supabaseUrl, serviceRoleKey);
-
-  const {
-    data: { user },
-  } = await authClient.auth.getUser();
-
-  let profile: UserPoliticalProfile | null = null;
-
-  if (user) {
-    const { data: orgData, error: orgError } = await serviceClient
-      .from("organizations")
-      .select("*")
-      .eq("user_id", user.id)
-      .maybeSingle();
-
-    if (orgError) {
-      return NextResponse.json({ error: orgError.message }, { status: 500 });
-    }
-
-    profile = (orgData || null) as UserPoliticalProfile | null;
-  }
-
-  if (!profile) {
-    profile = readGuestProfileCookie();
-  }
-
-  const { data: agendaData, error: agendaError } = await serviceClient
-    .from("v_advisor_agenda_briefs_recent")
-    .select(
-      `
+    issue: {
       topic,
-      article_count,
-      source_count,
-      political_articles,
-      agenda_score,
-      documentation_level,
-      political_risk_level,
-      framing_summary,
-      recommended_action,
-      avoid_action,
-      top_sources,
-      top_evidence_articles,
-      evidence_summary
-      `
-    )
-    .order("agenda_score", { ascending: false })
-    .limit(limit + 4);
-
-  if (agendaError) {
-    return NextResponse.json({ error: agendaError.message }, { status: 500 });
-  }
-
-  const rows = ((agendaData || []) as AgendaRow[]).filter(Boolean);
-
-  const unclassifiedSignal =
-    rows.find((row) => row.topic === "Μη ταξινομημένο") || null;
-
-  const signals = rows
-    .filter((row) => row.topic && row.topic !== "Μη ταξινομημένο")
-    .slice(0, limit);
-
-  const processingStatus = unclassifiedSignal
-    ? `Ο Noraya επεξεργάζεται ακόμη ${
-        unclassifiedSignal.article_count || 0
-      } άρθρα που δεν έχουν πλήρη θεματική ταξινόμηση. Αυτό μειώνει τη βεβαιότητα αλλά δεν πρέπει να εμφανιστεί ως πολιτικό θέμα.`
-    : "Δεν υπάρχει μεγάλο υπόλοιπο αταξινόμητων άρθρων στο τρέχον αποτέλεσμα.";
-
-  if (signals.length === 0) {
-    return buildFallbackResponse({
-      profile,
-      topic: "Τρέχουσα πολιτική ατζέντα",
-      agendaUsed: [],
-      processingStatus,
-      warning: "No classified agenda signals available.",
-    });
-  }
-
-  const mainSignal = signals[0];
-
-  const profileContext = buildProfileContext(profile);
-  const agendaContext = buildAgendaContext(signals);
-
-  const systemPrompt = `
-${buildNorayaStrategicSystemPrompt()}
-
-${buildNorayaStrategicJsonInstruction()}
-`;
-
-  const userPrompt = `
-${profileContext}
-
-ΤΡΕΧΟΝΤΑ AGENDA SIGNALS
-${agendaContext}
-
-ΚΑΤΑΣΤΑΣΗ ΕΠΕΞΕΡΓΑΣΙΑΣ
-${processingStatus}
-
-ΑΠΟΣΤΟΛΗ
-
-Διάλεξε το σημαντικότερο πραγματικό πολιτικό θέμα ως κύριο issue.
-Μην επιλέξεις ποτέ το "Μη ταξινομημένο" ως θέμα.
-Μη γράψεις σαν dashboard.
-Μη δείξεις raw metrics στον τελικό χρήστη.
-Μην εφεύρεις στοιχεία που δεν υπάρχουν.
-
-Θέλω πλήρες Noraya Strategic Brief:
-- daily brief,
-- strategic diagnosis,
-- scenario analysis,
-- message package,
-- action plan,
-- monitoring plan,
-- evidence note.
-
-Η απάντηση πρέπει να είναι χρήσιμη για πολιτικό κόμμα / πολιτικό οργανισμό που χρειάζεται στρατηγική, όχι απλή περίληψη ειδήσεων.
-`;
-
-  if (!anthropicKey) {
-    return buildFallbackResponse({
-      profile,
-      topic: mainSignal.topic,
-      agendaUsed: signals,
-      processingStatus,
-      warning: "Missing ANTHROPIC_API_KEY. Returned fallback strategic brief.",
-    });
-  }
-
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 18000);
-
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      signal: controller.signal,
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": anthropicKey,
-        "anthropic-version": "2023-06-01",
+      plain_title: topic,
+      agenda_status:
+        "Υπάρχει σήμα στην τρέχουσα ατζέντα, αλλά χρειάζεται προσεκτική ανάγνωση πριν γίνει πλήρης στρατηγική κίνηση.",
+      urgency: "watch",
+      media_signal:
+        "Το σήμα βασίζεται στα διαθέσιμα πρόσφατα άρθρα και στις διαθέσιμες πηγές.",
+      article_signal:
+        "Δεν υπάρχει ακόμη πλήρης διαφοροποίηση μεταξύ πρωτογενούς κάλυψης και αναπαραγωγών.",
+      locality_signal:
+        "Η τοπική διάσταση δεν έχει αποτιμηθεί πλήρως στο fallback brief.",
+      public_attention_signal: "Δεν υπάρχει ακόμη πλήρες public attention signal.",
+      dominant_frame: "Το dominant framing χρειάζεται περαιτέρω ανάλυση.",
+      priming_risk:
+        "Το θέμα μπορεί να επηρεάσει το κριτήριο με το οποίο θα αξιολογηθεί ο οργανισμός, αλλά η ένταση δεν είναι ακόμη ασφαλής.",
+      affected_audiences: [
+        "Βάση οργανισμού",
+        "Μετριοπαθές κοινό",
+        "Πολιτικά ενεργό κοινό",
+      ],
+      political_risk:
+        "Το βασικό ρίσκο είναι βιαστική τοποθέτηση χωρίς επαρκή τεκμηρίωση.",
+      opportunity:
+        "Υπάρχει ευκαιρία για σοβαρή, θεσμική και προετοιμασμένη στάση.",
+      documentation_level: "initial",
+    },
+    daily_brief: {
+      headline: `Το θέμα «${topic}» χρειάζεται παρακολούθηση πριν γίνει κεντρική πολιτική κίνηση.`,
+      what_is_happening:
+        "Ο Noraya βλέπει σήμα στην τρέχουσα ατζέντα, αλλά δεν υπάρχει ακόμη πλήρης στρατηγική βεβαιότητα.",
+      why_it_matters_now:
+        "Αν το θέμα αποκτήσει ένταση, μπορεί να επηρεάσει τη δημόσια αξιολόγηση του οργανισμού.",
+      immediate_recommendation:
+        "Κρατήστε προετοιμασμένη γραμμή, χωρίς βιαστική κλιμάκωση.",
+      avoid_today:
+        "Αποφύγετε απόλυτη δημόσια θέση, προσωπική επίθεση ή υπερβολική βεβαιότητα.",
+    },
+    strategic_diagnosis: {
+      agenda_reading:
+        "Το θέμα βρίσκεται σε κατάσταση παρακολούθησης και χρειάζεται καλύτερη τεκμηρίωση.",
+      framing_diagnosis:
+        "Το framing δεν είναι ακόμη αρκετά καθαρό για πλήρη επικοινωνιακή κλιμάκωση.",
+      priming_risk:
+        "Μπορεί να γίνει κριτήριο αξιολόγησης αξιοπιστίας ή επάρκειας, ανάλογα με την εξέλιξη.",
+      audience_reading:
+        "Η βάση θα περιμένει καθαρή γραμμή, ενώ οι μετριοπαθείς θα αξιολογήσουν κυρίως τόνο και σοβαρότητα.",
+      persuasion_reading:
+        "Προτιμάται θεσμικός και προσεκτικός τόνος μέχρι να ισχυροποιηθεί το σήμα.",
+      strategic_opportunity:
+        "Να εμφανιστεί ο οργανισμός σοβαρός και προετοιμασμένος.",
+      strategic_risk:
+        "Να φανεί ότι αντιδρά μηχανικά ή εργαλειοποιεί το θέμα.",
+      recommended_posture: "institutional",
+      recommended_posture_explanation:
+        "Η θεσμική στάση μειώνει το ρίσκο και αφήνει χώρο για μελλοντική κλιμάκωση.",
+    },
+    scenarios: [
+      {
+        name: "Θεσμική προετοιμασία",
+        move: "Κρατάμε έτοιμη σύντομη, σοβαρή γραμμή χωρίς άμεση επίθεση.",
+        likely_gain: "Αξιοπιστία και χαμηλό ρίσκο.",
+        likely_risk: "Μικρότερη ορατότητα.",
+        audience_effect: "Καλή επίδραση σε μετριοπαθή και θεσμικά κοινά.",
+        opponent_response:
+          "Δύσκολο να παρουσιαστεί ως υπερβολική ή ανεύθυνη στάση.",
+        media_response:
+          "Πιθανή ουδέτερη ή συγκρατημένα θετική ανάγνωση.",
+        recommendation: "prefer",
       },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-6",
-        max_tokens: 5000,
-        system: systemPrompt,
-        messages: [{ role: "user", content: userPrompt }],
-      }),
-    });
-
-    clearTimeout(timeout);
-
-    if (!response.ok) {
-      let message = "AI error. Returned fallback strategic brief.";
-
-      try {
-        const err = await response.json();
-        message = err.error?.message || message;
-      } catch {
-        // keep default message
-      }
-
-      return buildFallbackResponse({
-        profile,
-        topic: mainSignal.topic,
-        agendaUsed: signals,
-        processingStatus,
-        warning: message,
-      });
-    }
-
-    const ai = await response.json();
-
-    const rawText =
-      ai.content
-        ?.filter((block: any) => block.type === "text")
-        .map((block: any) => block.text)
-        .join("\n") || "";
-
-    const parsed = parseAiJson(rawText);
-
-    if (!parsed) {
-      return buildFallbackResponse({
-        profile,
-        topic: mainSignal.topic,
-        agendaUsed: signals,
-        processingStatus,
-        warning: "AI response was not valid JSON. Returned fallback strategic brief.",
-      });
-    }
-
-    const strategicBrief = {
-      ...parsed,
-      model: parsed.model || "v1",
-      profile,
-    };
-
-    return NextResponse.json({
-      profile,
-      strategic_brief: strategicBrief,
-      agenda_used: signals,
-      processing_status: processingStatus,
-      source: "ai",
-      model: "claude-sonnet-4-6",
-      usage: ai.usage || null,
-    });
-  } catch (err: any) {
-    return buildFallbackResponse({
-      profile,
-      topic: mainSignal.topic,
-      agendaUsed: signals,
-      processingStatus,
-      warning:
-        err?.name === "AbortError"
-          ? "AI timeout. Returned fallback strategic brief."
-          : "AI connection error. Returned fallback strategic brief.",
-    });
-  }
+      {
+        name: "Επιθετική απάντηση",
+        move: "Ανεβάζουμε τον τόνο και χρεώνουμε ευθύνη.",
+        likely_gain: "Μεγαλύτερη ορατότητα και συσπείρωση βάσης.",
+        likely_risk: "Μπορεί να φανεί βιαστικό ή εργαλειακό.",
+        audience_effect:
+          "Πιθανή θετική επίδραση στη βάση, αλλά ρίσκο στους μετριοπαθείς.",
+        opponent_response:
+          "Ο αντίπαλος μπορεί να κατηγορήσει τον οργανισμό για εκμετάλλευση.",
+        media_response: "Πιθανή πόλωση του framing.",
+        recommendation: "avoid",
+      },
+      {
+        name: "Σιωπή και παρακολούθηση",
+        move: "Δεν τοποθετούμαστε ακόμη δημόσια.",
+        likely_gain: "Αποφυγή άμεσης έκθεσης.",
+        likely_risk: "Απώλεια πρωτοβουλίας αν το θέμα ανέβει.",
+        audience_effect:
+          "Η βάση μπορεί να θεωρήσει ότι δεν υπάρχει καθαρή γραμμή.",
+        opponent_response:
+          "Άλλοι παίκτες μπορεί να καταλάβουν τον χώρο.",
+        media_response:
+          "Η απουσία θέσης δεν θα καταγραφεί άμεσα, εκτός αν το θέμα κλιμακωθεί.",
+        recommendation: "acceptable",
+      },
+    ],
+    message_package: {
+      central_line:
+        "Χρειάζεται σοβαρότητα, τεκμηρίωση και θεσμική καθαρότητα πριν από κάθε δημόσια κίνηση.",
+      institutional_version:
+        "Το θέμα πρέπει να αντιμετωπιστεί με θεσμική ευθύνη, καθαρά στοιχεία και σεβασμό στους πολίτες.",
+      human_version:
+        "Οι πολίτες χρειάζονται καθαρές απαντήσεις, όχι θόρυβο και βιαστικές αντιδράσεις.",
+      sharp_version:
+        "Η σοβαρότητα δεν είναι αδυναμία. Είναι προϋπόθεση για αξιόπιστη πολιτική στάση.",
+      social_post:
+        "Σε κρίσιμα θέματα χρειάζονται καθαρές απαντήσεις, τεκμηρίωση και θεσμική ευθύνη. Όχι θόρυβος, όχι βιασύνη.",
+      answer_if_attacked:
+        "Η στάση μας είναι καθαρή: πρώτα στοιχεία, μετά θέση, πάντα με θεσμική σοβαρότητα.",
+      words_to_use: [
+        "τεκμηρίωση",
+        "θεσμική ευθύνη",
+        "καθαρές απαντήσεις",
+        "σοβαρότητα",
+      ],
+      words_to_avoid: [
+        "βεβαιότητα χωρίς στοιχεία",
+        "προσωπική επίθεση",
+        "υπερβολή",
+        "επικοινωνιακός θόρυβος",
+      ],
+    },
+    action_plan: {
+      now: [
+        "Κρατήστε έτοιμη σύντομη θεσμική γραμμή.",
+        "Παρακολουθήστε αν το θέμα εμφανίζεται σε νέα μέσα ή από πολιτικούς αντιπάλους.",
+      ],
+      next_24h: [
+        "Ελέγξτε αν το framing γίνεται πιο επιθετικό ή πιο θεσμικό.",
+        "Προετοιμάστε μία δημόσια δήλωση χαμηλού ρίσκου.",
+      ],
+      next_48h: [
+        "Αποφασίστε αν χρειάζεται κλιμάκωση ή παραμονή σε στάση παρακολούθησης.",
+      ],
+      this_week: [
+        "Συνδέστε το θέμα με ευρύτερη στρατηγική γραμμή μόνο αν αποκτήσει σταθερή ένταση.",
+      ],
+      owner_suggestion:
+        "Η πρώτη τοποθέτηση πρέπει να γίνει από θεσμικό πρόσωπο ή εκπρόσωπο με ήπιο και αξιόπιστο ύφος.",
+    },
+    monitoring_plan: {
+      watch_topics: [topic],
+      watch_actors: [
+        "Κυβέρνηση",
+        "Αντιπολίτευση",
+        "βασικά πολιτικά πρόσωπα",
+      ],
+      watch_media: [
+        "εθνικά μέσα",
+        "τοπικά μέσα όπου υπάρχει συνάφεια",
+        "opinion leaders",
+      ],
+      escalation_triggers: [
+        "Αύξηση κάλυψης από μέσα υψηλής βαρύτητας.",
+        "Παρέμβαση βασικού πολιτικού αντιπάλου.",
+        "Μετατόπιση framing σε ευθύνη ή λογοδοσία.",
+      ],
+    },
+    evidence: {
+      basis:
+        "Fallback strategic brief βασισμένο στα διαθέσιμα agenda signals και στο προφίλ χρήστη.",
+      data_points: [
+        params.processingStatus ||
+          "Το σύστημα χρειάζεται περισσότερη τεκμηρίωση για πλήρη στρατηγική ανάλυση.",
+      ],
+      uncertainty:
+        "Η ανάλυση είναι αρχική και πρέπει να επιβεβαιωθεί με περισσότερα ταξινομημένα άρθρα, framing και media weight.",
+      documentation_level: "initial",
+    },
+  };
 }
