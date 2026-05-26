@@ -1,18 +1,137 @@
 import { createClient } from "@/utils/supabase/server";
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+
+const GUEST_COOKIE_NAME = "noraya_guest_profile";
+
+function readGuestProfileCookie() {
+  const raw = cookies().get(GUEST_COOKIE_NAME)?.value;
+
+  if (!raw) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(decodeURIComponent(raw));
+  } catch {
+    return null;
+  }
+}
+
+function compactPartyProfile(profile: any) {
+  if (!profile) {
+    return null;
+  }
+
+  return {
+    id: profile.id,
+    party_key: profile.party_key,
+    party_name: profile.party_name,
+    short_name: profile.short_name,
+    ideological_family: profile.ideological_family,
+    strategic_positioning: profile.strategic_positioning,
+    default_tone: profile.default_tone,
+    core_themes: profile.core_themes,
+    core_audiences: profile.core_audiences,
+    known_positions: profile.known_positions,
+    red_lines: profile.red_lines,
+    opportunity_frame: profile.opportunity_frame,
+    risk_frame: profile.risk_frame,
+    competitor_frame: profile.competitor_frame,
+    advisor_instructions: profile.advisor_instructions,
+  };
+}
+
+function buildProfile(body: any, partyProfile: any, isGuest: boolean) {
+  const partySnapshot = compactPartyProfile(partyProfile);
+
+  const orgName =
+    body.organization?.name?.trim() ||
+    partySnapshot?.party_name ||
+    "Πολιτικό κόμμα";
+
+  const orgType = body.organization?.type || "Πολιτικό κόμμα";
+
+  return {
+    role_type: orgType,
+
+    org_name: orgName,
+    org_type: orgType,
+
+    party_key: partySnapshot?.party_key || body.partyKey || body.organization?.partyKey || null,
+    selected_party_profile_id: partySnapshot?.id || null,
+    party_profile_snapshot: partySnapshot,
+
+    profile_source: isGuest
+      ? "guest"
+      : partySnapshot
+        ? "party_profile_registry"
+        : "manual_onboarding",
+
+    profile_review_status: isGuest
+      ? "demo"
+      : partySnapshot
+        ? "starter_requires_user_review"
+        : "user_editable",
+
+    themes:
+      body.themes && body.themes.length > 0
+        ? body.themes
+        : partySnapshot?.core_themes || [],
+
+    issues:
+      body.issues && body.issues.length > 0
+        ? body.issues
+        : partySnapshot?.known_positions || [],
+
+    events: body.events || [],
+
+    stakeholders:
+      body.stakeholders || {
+        ageGroups: [],
+        socialGroups: partySnapshot?.core_audiences || [],
+        professionalGroups: [],
+        institutions: [],
+        publicActors: [],
+      },
+
+    mission:
+      body.positions?.mission?.trim() ||
+      partySnapshot?.strategic_positioning ||
+      "",
+
+    red_lines:
+      body.positions?.redLines?.trim() ||
+      body.positions?.red_lines?.trim() ||
+      (Array.isArray(partySnapshot?.red_lines)
+        ? partySnapshot.red_lines.join("\n")
+        : ""),
+
+    tone:
+      body.positions?.tone?.trim() ||
+      partySnapshot?.default_tone ||
+      "",
+
+    onboarding_completed: true,
+    updated_at: new Date().toISOString(),
+  };
+}
 
 /**
  * GET /api/onboarding
- * Returns the current user's organization profile, or null if none exists.
+ * Returns the current user's organization profile.
+ * If there is no signed-in user, returns guest profile from cookie.
  */
 export async function GET() {
   const supabase = createClient();
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const guestProfile = readGuestProfileCookie();
+    return NextResponse.json(guestProfile || null);
   }
 
   const { data, error } = await supabase
@@ -31,17 +150,10 @@ export async function GET() {
 /**
  * POST /api/onboarding
  * Creates or updates the organization profile.
+ * For MVP/demo, also works without login by saving guest profile in cookie.
  */
 export async function POST(req: Request) {
   const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   const body = await req.json();
 
   const partyKey = body.partyKey || body.organization?.partyKey || null;
@@ -66,59 +178,45 @@ export async function POST(req: Request) {
     partyProfile = profile || null;
   }
 
-  const row = {
-    org_name:
-      body.organization?.name?.trim() ||
-      partyProfile?.party_name ||
-      "",
-    org_type: body.organization?.type || "Πολιτικό κόμμα",
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-    party_key: partyProfile?.party_key || partyKey,
-    selected_party_profile_id: partyProfile?.id || null,
-    party_profile_snapshot: partyProfile || null,
-    profile_source: partyProfile ? "party_profile_registry" : "manual_onboarding",
-    profile_review_status: partyProfile ? "starter_requires_user_review" : "user_editable",
+  /**
+   * GUEST / FREE USER PATH
+   * No login. No Unauthorized.
+   * Save profile in cookie so /api/advisor/agenda-brief can read it.
+   */
+  if (!user) {
+    const guestProfile = buildProfile(body, partyProfile, true);
 
-    themes:
-      body.themes && body.themes.length > 0
-        ? body.themes
-        : partyProfile?.core_themes || [],
+    const response = NextResponse.json({
+      success: true,
+      profile: guestProfile,
+    });
 
-    issues:
-      body.issues && body.issues.length > 0
-        ? body.issues
-        : partyProfile?.known_positions || [],
+    response.cookies.set(
+      GUEST_COOKIE_NAME,
+      encodeURIComponent(JSON.stringify(guestProfile)),
+      {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 7,
+      }
+    );
 
-    events: body.events || [],
+    return response;
+  }
 
-    stakeholders:
-      body.stakeholders || {
-        ageGroups: [],
-        socialGroups: partyProfile?.core_audiences || [],
-        professionalGroups: [],
-        institutions: [],
-        publicActors: [],
-      },
+  /**
+   * AUTHENTICATED USER PATH
+   * Keep normal Supabase organization save.
+   */
+  const profile = buildProfile(body, partyProfile, false);
 
-    mission:
-      body.positions?.mission?.trim() ||
-      partyProfile?.strategic_positioning ||
-      "",
-
-    red_lines:
-      body.positions?.redLines?.trim() ||
-      (Array.isArray(partyProfile?.red_lines)
-        ? partyProfile.red_lines.join("\n")
-        : ""),
-
-    tone:
-      body.positions?.tone?.trim() ||
-      partyProfile?.default_tone ||
-      "",
-
-    onboarding_completed: true,
-    updated_at: new Date().toISOString(),
-  };
+  const { role_type, ...row } = profile;
 
   const { data: existing } = await supabase
     .from("organizations")
@@ -138,7 +236,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json(data);
+    return NextResponse.json({
+      success: true,
+      profile: data,
+    });
   }
 
   const { data, error } = await supabase
@@ -154,5 +255,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json(data);
+  return NextResponse.json({
+    success: true,
+    profile: data,
+  });
 }
