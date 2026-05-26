@@ -136,10 +136,11 @@ export default function OnboardingPage() {
     "Οικογένειες με παιδιά"
   ]);
 
-  const [selectedProfessionalGroups, setSelectedProfessionalGroups] = useState<string[]>([
-    "Δημόσιοι υπάλληλοι",
-    "Μικρομεσαίοι επιχειρηματίες"
-  ]);
+  const [selectedProfessionalGroups, setSelectedProfessionalGroups] =
+    useState<string[]>([
+      "Δημόσιοι υπάλληλοι",
+      "Μικρομεσαίοι επιχειρηματίες"
+    ]);
 
   const [selectedInstitutions, setSelectedInstitutions] = useState<string[]>([
     "Βουλή",
@@ -445,16 +446,16 @@ export default function OnboardingPage() {
                   {selectedParty && (
                     <div className="mt-5 grid gap-3 md:grid-cols-3">
                       <InfoPill
-                        label="Προφίλ"
+                        label="Επιλεγμένο κόμμα"
                         value={selectedParty.short_name}
                       />
                       <InfoPill
-                        label="Τεκμηρίωση"
-                        value={selectedParty.documentation_level}
+                        label="Προφίλ Noraya"
+                        value="Έτοιμο αρχικό προφίλ"
                       />
                       <InfoPill
-                        label="Status"
-                        value={selectedParty.verification_status}
+                        label="Προσαρμογή"
+                        value="Μπορείτε να το διορθώσετε"
                       />
                     </div>
                   )}
@@ -462,7 +463,7 @@ export default function OnboardingPage() {
                   {selectedParty && (
                     <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-4">
                       <div className="text-xs uppercase tracking-[0.2em] text-zinc-500">
-                        Στρατηγική ανάγνωση
+                        Τι ξέρει ήδη ο Noraya για αυτό το κόμμα
                       </div>
                       <p className="mt-2 text-sm leading-6 text-zinc-300">
                         {selectedParty.strategic_positioning}
