@@ -338,7 +338,7 @@ export default function OnboardingPage() {
       }
 
       window.localStorage.setItem("noraya_org_profile", JSON.stringify(profile));
-      router.push("/agenda");
+      router.push("/strategy-room");
     } catch {
       setSaveError("Σφάλμα σύνδεσης. Δοκιμάστε ξανά.");
       setSaving(false);
