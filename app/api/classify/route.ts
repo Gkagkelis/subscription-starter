@@ -7,15 +7,35 @@ const supabase = createClient(
 );
 
 const TOPICS = [
-  "Ακρίβεια / κόστος ζωής", "Οικονομία", "Φορολογία", "Στέγαση",
-  "Εργασία", "Ασφαλιστικό / συντάξεις", "Υγεία", "Παιδεία",
-  "Πανεπιστήμια", "Νεολαία", "Μεταναστευτικό",
-  "Ασφάλεια / εγκληματικότητα", "Δικαιοσύνη", "Θεσμοί / διαφάνεια",
-  "Άμυνα", "Γεωπολιτική", "Εξωτερική πολιτική", "Ενέργεια",
-  "Περιβάλλον / κλιματική κρίση", "Αγροτικά", "Υποδομές / μεταφορές",
-  "Ψηφιακή πολιτική / τεχνολογία", "Πολιτισμός", "Αθλητισμός",
-  "Τοπική αυτοδιοίκηση", "Ευρωπαϊκή πολιτική",
-  "Ανθρώπινα δικαιώματα", "Ισότητα / συμπερίληψη", "Πολιτική προστασία"
+  "Ακρίβεια / κόστος ζωής",
+  "Οικονομία",
+  "Φορολογία",
+  "Στέγαση",
+  "Εργασία",
+  "Ασφαλιστικό / συντάξεις",
+  "Υγεία",
+  "Παιδεία",
+  "Πανεπιστήμια",
+  "Νεολαία",
+  "Μεταναστευτικό",
+  "Ασφάλεια / εγκληματικότητα",
+  "Δικαιοσύνη",
+  "Θεσμοί / διαφάνεια",
+  "Άμυνα",
+  "Γεωπολιτική",
+  "Εξωτερική πολιτική",
+  "Ενέργεια",
+  "Περιβάλλον / κλιματική κρίση",
+  "Αγροτικά",
+  "Υποδομές / μεταφορές",
+  "Ψηφιακή πολιτική / τεχνολογία",
+  "Πολιτισμός",
+  "Αθλητισμός",
+  "Τοπική αυτοδιοίκηση",
+  "Ευρωπαϊκή πολιτική",
+  "Ανθρώπινα δικαιώματα",
+  "Ισότητα / συμπερίληψη",
+  "Πολιτική προστασία",
 ];
 
 export async function GET(req: Request) {
@@ -39,14 +59,20 @@ export async function GET(req: Request) {
   }
 
   if (!articles || articles.length === 0) {
-    return NextResponse.json({ message: "Δεν υπάρχουν unclassified άρθρα", classified: 0 });
+    return NextResponse.json({
+      message: "Δεν υπάρχουν unclassified άρθρα",
+      classified: 0,
+    });
   }
 
   // Build the prompt
   const articlesList = articles
     .map(
       (a, i) =>
-        `[${i}] ΤΙΤΛΟΣ: ${a.title}\nΠΕΡΙΓΡΑΦΗ: ${(a.description || "").substring(0, 150)}\nΠΗΓΗ: ${a.source_name}\nΚΑΤΗΓΟΡΙΑ: ${a.category || "—"}`
+        `[${i}] ΤΙΤΛΟΣ: ${a.title}\nΠΕΡΙΓΡΑΦΗ: ${(a.description || "").substring(
+          0,
+          150
+        )}\nΠΗΓΗ: ${a.source_name}\nΚΑΤΗΓΟΡΙΑ: ${a.category || "—"}`
     )
     .join("\n\n");
 
@@ -79,28 +105,40 @@ ${articlesList}`;
 
     if (!response.ok) {
       const err = await response.json();
-      return NextResponse.json({ error: err.error?.message || "AI error" }, { status: 500 });
+
+      return NextResponse.json(
+        { error: err.error?.message || "AI error" },
+        { status: 500 }
+      );
     }
 
     const data = await response.json();
-    const text = data.content
-      ?.filter((c: any) => c.type === "text")
-      .map((c: any) => c.text)
-      .join("") || "[]";
+
+    const text =
+      data.content
+        ?.filter((c: any) => c.type === "text")
+        .map((c: any) => c.text)
+        .join("") || "[]";
 
     // Parse JSON response
     let classifications: any[];
+
     try {
       const cleaned = text.replace(/```json|```/g, "").trim();
       classifications = JSON.parse(cleaned);
     } catch {
-      return NextResponse.json({ error: "AI response not valid JSON", raw: text }, { status: 500 });
+      return NextResponse.json(
+        { error: "AI response not valid JSON", raw: text },
+        { status: 500 }
+      );
     }
 
     // Update each article
     let updated = 0;
+
     for (const c of classifications) {
       const article = articles[c.index];
+
       if (!article) continue;
 
       const { error: updateError } = await supabase
@@ -117,10 +155,42 @@ ${articlesList}`;
       if (!updateError) updated++;
     }
 
+    // Refresh scoring layer automatically after classification.
+    // Baseline covers all articles; classified score overrides baseline where AI classification exists.
+    const { data: baselineRefreshed, error: baselineScoreError } =
+      await supabase.rpc("refresh_article_scores_baseline");
+
+    if (baselineScoreError) {
+      return NextResponse.json(
+        {
+          error: baselineScoreError.message,
+          stage: "refresh_article_scores_baseline",
+        },
+        { status: 500 }
+      );
+    }
+
+    const { data: classifiedRefreshed, error: classifiedScoreError } =
+      await supabase.rpc("refresh_article_scores_classified");
+
+    if (classifiedScoreError) {
+      return NextResponse.json(
+        {
+          error: classifiedScoreError.message,
+          stage: "refresh_article_scores_classified",
+        },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json({
       success: true,
       total: articles.length,
       classified: updated,
+      scores: {
+        baseline_refreshed: baselineRefreshed,
+        classified_refreshed: classifiedRefreshed,
+      },
       results: classifications,
     });
   } catch (err: any) {
