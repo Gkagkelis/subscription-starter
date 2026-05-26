@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import type { ReactNode } from "react";
 
 type Scenario = {
   name?: string;
@@ -76,10 +77,23 @@ type StrategicBrief = {
   };
 };
 
+type Profile = {
+  org_name?: string;
+  party_profile_snapshot?: {
+    party_name?: string;
+  };
+  party_key?: string;
+  [key: string]: unknown;
+};
+
 type ApiResponse = {
-  profile?: any;
+  profile?: Profile | null;
   strategic_brief?: StrategicBrief;
   source?: string;
+};
+
+type StrategyChatResponse = {
+  answer?: string;
 };
 
 type TabId = "today" | "diagnosis" | "scenarios" | "messages" | "plan";
@@ -88,28 +102,28 @@ const tabs: Array<{ id: TabId; label: string; description: string }> = [
   {
     id: "today",
     label: "Σήμερα",
-    description: "Η άμεση πολιτική ανάγνωση."
+    description: "Η άμεση πολιτική ανάγνωση.",
   },
   {
     id: "diagnosis",
     label: "Διάγνωση",
-    description: "Τι σημαίνει στρατηγικά."
+    description: "Τι σημαίνει στρατηγικά.",
   },
   {
     id: "scenarios",
     label: "Σενάρια",
-    description: "Τι γίνεται αν κινηθούμε διαφορετικά."
+    description: "Τι γίνεται αν κινηθούμε διαφορετικά.",
   },
   {
     id: "messages",
     label: "Μηνύματα",
-    description: "Τι μπορούμε να πούμε δημόσια."
+    description: "Τι μπορούμε να πούμε δημόσια.",
   },
   {
     id: "plan",
     label: "Πλάνο",
-    description: "Τι κάνουμε τώρα και μετά."
-  }
+    description: "Τι κάνουμε τώρα και μετά.",
+  },
 ];
 
 function text(value: unknown, fallback: string) {
@@ -119,7 +133,10 @@ function text(value: unknown, fallback: string) {
 
 function list(values: unknown): string[] {
   return Array.isArray(values)
-    ? values.filter((item): item is string => typeof item === "string" && item.trim().length > 0)
+    ? values.filter(
+        (item): item is string =>
+          typeof item === "string" && item.trim().length > 0
+      )
     : [];
 }
 
@@ -131,9 +148,18 @@ function recommendationLabel(value?: string) {
 }
 
 function recommendationClass(value?: string) {
-  if (value === "prefer") return "border-emerald-300/25 bg-emerald-300/10 text-emerald-100";
-  if (value === "acceptable") return "border-cyan-300/25 bg-cyan-300/10 text-cyan-100";
-  if (value === "avoid") return "border-red-300/25 bg-red-300/10 text-red-100";
+  if (value === "prefer") {
+    return "border-emerald-300/25 bg-emerald-300/10 text-emerald-100";
+  }
+
+  if (value === "acceptable") {
+    return "border-cyan-300/25 bg-cyan-300/10 text-cyan-100";
+  }
+
+  if (value === "avoid") {
+    return "border-red-300/25 bg-red-300/10 text-red-100";
+  }
+
   return "border-white/10 bg-white/[0.04] text-zinc-200";
 }
 
@@ -143,13 +169,18 @@ export default function StrategyRoomPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const [chatQuestion, setChatQuestion] = useState("");
+  const [chatAnswer, setChatAnswer] = useState("");
+  const [chatLoading, setChatLoading] = useState(false);
+  const [chatError, setChatError] = useState("");
+
   async function loadStrategy() {
     setLoading(true);
     setError("");
 
     try {
       const response = await fetch("/api/advisor/strategy-brief", {
-        cache: "no-store"
+        cache: "no-store",
       });
 
       if (!response.ok) {
@@ -169,6 +200,50 @@ export default function StrategyRoomPage() {
     loadStrategy();
   }, []);
 
+  async function askNorayaAdvisor(questionOverride?: string) {
+    const question = (questionOverride || chatQuestion).trim();
+
+    if (!question) {
+      setChatError(
+        "Γράψε πρώτα την ερώτηση που θέλεις να κάνεις στον σύμβουλο Noraya."
+      );
+      return;
+    }
+
+    setChatLoading(true);
+    setChatError("");
+    setChatAnswer("");
+
+    try {
+      const response = await fetch("/api/advisor/strategy-chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          question,
+          profile: data?.profile || null,
+          strategic_brief: data?.strategic_brief || null,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Strategy chat API error: ${response.status}`);
+      }
+
+      const json = (await response.json()) as StrategyChatResponse;
+      setChatAnswer(json.answer || "Ο σύμβουλος Noraya δεν επέστρεψε απάντηση.");
+    } catch (err) {
+      setChatError(
+        err instanceof Error
+          ? err.message
+          : "Δεν μπόρεσε να απαντήσει ο σύμβουλος Noraya."
+      );
+    } finally {
+      setChatLoading(false);
+    }
+  }
+
   const brief = data?.strategic_brief || {};
   const issue = brief.issue || {};
   const daily = brief.daily_brief || {};
@@ -180,6 +255,7 @@ export default function StrategyRoomPage() {
 
   const profileName = useMemo(() => {
     const profile = data?.profile;
+
     return (
       profile?.org_name ||
       profile?.party_profile_snapshot?.party_name ||
@@ -202,8 +278,12 @@ export default function StrategyRoomPage() {
     return (
       <main className="min-h-screen bg-[#020617] px-5 py-8 text-white">
         <div className="mx-auto max-w-3xl rounded-3xl border border-red-400/25 bg-red-400/10 p-6">
-          <h1 className="text-xl font-semibold">Δεν φορτώθηκε το Strategy Room</h1>
+          <h1 className="text-xl font-semibold">
+            Δεν φορτώθηκε το Strategy Room
+          </h1>
+
           <p className="mt-3 text-sm text-red-100">{error}</p>
+
           <button
             type="button"
             onClick={loadStrategy}
@@ -223,11 +303,17 @@ export default function StrategyRoomPage() {
       <div className="relative mx-auto max-w-7xl">
         <header className="mb-8">
           <div className="mb-5 flex items-center gap-3">
-            <img src="/noraya-eye.png" alt="Noraya" className="h-11 w-11 object-contain" />
+            <img
+              src="/noraya-eye.png"
+              alt="Noraya"
+              className="h-11 w-11 object-contain"
+            />
+
             <div>
               <div className="text-xs uppercase tracking-[0.28em] text-cyan-300">
                 NORAYA
               </div>
+
               <div className="text-xs text-zinc-500">
                 Political Strategy Room
               </div>
@@ -243,7 +329,10 @@ export default function StrategyRoomPage() {
               <h1 className="max-w-5xl text-4xl font-semibold tracking-tight md:text-5xl">
                 {text(
                   daily.headline,
-                  text(issue.plain_title, "Στρατηγική ανάγνωση της πολιτικής ατζέντας")
+                  text(
+                    issue.plain_title,
+                    "Στρατηγική ανάγνωση της πολιτικής ατζέντας"
+                  )
                 )}
               </h1>
 
@@ -259,14 +348,23 @@ export default function StrategyRoomPage() {
               <div className="text-xs uppercase tracking-[0.22em] text-zinc-500">
                 Προφίλ
               </div>
+
               <div className="mt-2 text-lg font-semibold text-zinc-100">
                 {profileName}
               </div>
+
               <a
                 href="/onboarding"
                 className="mt-4 inline-flex rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-zinc-200 hover:bg-white/[0.06]"
               >
                 Αλλαγή προφίλ
+              </a>
+
+              <a
+                href="#noraya-advisor-chat"
+                className="mt-3 inline-flex rounded-2xl bg-cyan-300 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-cyan-200"
+              >
+                Ρώτησε τον σύμβουλο Noraya
               </a>
             </div>
           </div>
@@ -306,7 +404,10 @@ export default function StrategyRoomPage() {
                 }`}
               >
                 <div className="font-semibold">{tab.label}</div>
-                <div className="mt-1 text-xs leading-5 opacity-80">{tab.description}</div>
+
+                <div className="mt-1 text-xs leading-5 opacity-80">
+                  {tab.description}
+                </div>
               </button>
             ))}
           </div>
@@ -340,15 +441,27 @@ export default function StrategyRoomPage() {
         {activeTab === "diagnosis" && (
           <section className="grid gap-5 lg:grid-cols-2">
             <Card title="Ανάγνωση ατζέντας">
-              {text(diagnosis.agenda_reading, text(issue.agenda_status, "Δεν υπάρχει αρκετή στρατηγική ανάγνωση ακόμη."))}
+              {text(
+                diagnosis.agenda_reading,
+                text(
+                  issue.agenda_status,
+                  "Δεν υπάρχει αρκετή στρατηγική ανάγνωση ακόμη."
+                )
+              )}
             </Card>
 
             <Card title="Framing diagnosis">
-              {text(diagnosis.framing_diagnosis, "Το framing χρειάζεται περαιτέρω ανάλυση.")}
+              {text(
+                diagnosis.framing_diagnosis,
+                "Το framing χρειάζεται περαιτέρω ανάλυση."
+              )}
             </Card>
 
             <Card title="Priming risk">
-              {text(diagnosis.priming_risk, text(issue.priming_risk, "Δεν έχει υπολογιστεί ακόμη priming risk."))}
+              {text(
+                diagnosis.priming_risk,
+                text(issue.priming_risk, "Δεν έχει υπολογιστεί ακόμη priming risk.")
+              )}
             </Card>
 
             <Card title="Στρατηγική στάση">
@@ -358,6 +471,7 @@ export default function StrategyRoomPage() {
                   "Προτιμάται προσεκτική, θεσμική στάση μέχρι να ισχυροποιηθεί το σήμα."
                 )}
               </p>
+
               <div className="mt-4 inline-flex rounded-full border border-cyan-300/25 bg-cyan-300/10 px-3 py-1 text-xs text-cyan-100">
                 {text(diagnosis.recommended_posture, "institutional")}
               </div>
@@ -366,14 +480,21 @@ export default function StrategyRoomPage() {
             <Card title="Ποια κοινά επηρεάζονται">
               <BulletList
                 items={list(issue.affected_audiences)}
-                fallback={["Βάση οργανισμού", "Μετριοπαθές κοινό", "Πολιτικά ενεργό κοινό"]}
+                fallback={[
+                  "Βάση οργανισμού",
+                  "Μετριοπαθές κοινό",
+                  "Πολιτικά ενεργό κοινό",
+                ]}
               />
             </Card>
 
             <Card title="Ευκαιρία">
               {text(
                 diagnosis.strategic_opportunity,
-                text(issue.opportunity, "Υπάρχει ευκαιρία για σοβαρή και προετοιμασμένη στάση.")
+                text(
+                  issue.opportunity,
+                  "Υπάρχει ευκαιρία για σοβαρή και προετοιμασμένη στάση."
+                )
               )}
             </Card>
           </section>
@@ -391,21 +512,41 @@ export default function StrategyRoomPage() {
                     <h2 className="text-2xl font-semibold">
                       {text(scenario.name, `Σενάριο ${index + 1}`)}
                     </h2>
+
                     <p className="mt-2 max-w-4xl text-sm leading-6 text-zinc-400">
                       {text(scenario.move, "Δεν υπάρχει περιγραφή κίνησης.")}
                     </p>
                   </div>
 
-                  <div className={`w-fit rounded-full border px-3 py-1 text-xs ${recommendationClass(scenario.recommendation)}`}>
+                  <div
+                    className={`w-fit rounded-full border px-3 py-1 text-xs ${recommendationClass(
+                      scenario.recommendation
+                    )}`}
+                  >
                     {recommendationLabel(scenario.recommendation)}
                   </div>
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                  <MiniBox title="Όφελος" textValue={text(scenario.likely_gain, "—")} />
-                  <MiniBox title="Ρίσκο" textValue={text(scenario.likely_risk, "—")} />
-                  <MiniBox title="Κοινό" textValue={text(scenario.audience_effect, "—")} />
-                  <MiniBox title="Αντίδραση" textValue={text(scenario.opponent_response, "—")} />
+                  <MiniBox
+                    title="Όφελος"
+                    textValue={text(scenario.likely_gain, "—")}
+                  />
+
+                  <MiniBox
+                    title="Ρίσκο"
+                    textValue={text(scenario.likely_risk, "—")}
+                  />
+
+                  <MiniBox
+                    title="Κοινό"
+                    textValue={text(scenario.audience_effect, "—")}
+                  />
+
+                  <MiniBox
+                    title="Αντίδραση"
+                    textValue={text(scenario.opponent_response, "—")}
+                  />
                 </div>
               </article>
             ))}
@@ -418,6 +559,7 @@ export default function StrategyRoomPage() {
               <div className="text-xs uppercase tracking-[0.22em] text-cyan-200/80">
                 Κεντρική γραμμή
               </div>
+
               <p className="mt-4 text-2xl font-semibold leading-snug">
                 {text(
                   messages.central_line,
@@ -447,11 +589,21 @@ export default function StrategyRoomPage() {
             </Card>
 
             <Card title="Λέξεις που βοηθούν">
-              <BulletList items={list(messages.words_to_use)} fallback={["τεκμηρίωση", "σοβαρότητα", "θεσμική ευθύνη"]} />
+              <BulletList
+                items={list(messages.words_to_use)}
+                fallback={["τεκμηρίωση", "σοβαρότητα", "θεσμική ευθύνη"]}
+              />
             </Card>
 
             <Card title="Λέξεις που αποφεύγουμε">
-              <BulletList items={list(messages.words_to_avoid)} fallback={["υπερβολή", "προσωπική επίθεση", "βεβαιότητα χωρίς στοιχεία"]} />
+              <BulletList
+                items={list(messages.words_to_avoid)}
+                fallback={[
+                  "υπερβολή",
+                  "προσωπική επίθεση",
+                  "βεβαιότητα χωρίς στοιχεία",
+                ]}
+              />
             </Card>
           </section>
         )}
@@ -459,23 +611,40 @@ export default function StrategyRoomPage() {
         {activeTab === "plan" && (
           <section className="grid gap-5 lg:grid-cols-2">
             <Card title="Τώρα">
-              <BulletList items={list(actionPlan.now)} fallback={["Κρατήστε έτοιμη σύντομη θεσμική γραμμή."]} />
+              <BulletList
+                items={list(actionPlan.now)}
+                fallback={["Κρατήστε έτοιμη σύντομη θεσμική γραμμή."]}
+              />
             </Card>
 
             <Card title="Επόμενες 24 ώρες">
-              <BulletList items={list(actionPlan.next_24h)} fallback={["Παρακολουθήστε αν αλλάζει το framing."]} />
+              <BulletList
+                items={list(actionPlan.next_24h)}
+                fallback={["Παρακολουθήστε αν αλλάζει το framing."]}
+              />
             </Card>
 
             <Card title="Επόμενες 48 ώρες">
-              <BulletList items={list(actionPlan.next_48h)} fallback={["Αποφασίστε αν χρειάζεται κλιμάκωση."]} />
+              <BulletList
+                items={list(actionPlan.next_48h)}
+                fallback={["Αποφασίστε αν χρειάζεται κλιμάκωση."]}
+              />
             </Card>
 
             <Card title="Αυτή την εβδομάδα">
-              <BulletList items={list(actionPlan.this_week)} fallback={["Συνδέστε το θέμα με ευρύτερη στρατηγική μόνο αν αποκτήσει ένταση."]} />
+              <BulletList
+                items={list(actionPlan.this_week)}
+                fallback={[
+                  "Συνδέστε το θέμα με ευρύτερη στρατηγική μόνο αν αποκτήσει ένταση.",
+                ]}
+              />
             </Card>
 
             <Card title="Ποιος πρέπει να το σηκώσει">
-              {text(actionPlan.owner_suggestion, "Προτιμάται θεσμικό πρόσωπο με ήπιο και αξιόπιστο ύφος.")}
+              {text(
+                actionPlan.owner_suggestion,
+                "Προτιμάται θεσμικό πρόσωπο με ήπιο και αξιόπιστο ύφος."
+              )}
             </Card>
 
             <Card title="Triggers κλιμάκωσης">
@@ -484,24 +653,126 @@ export default function StrategyRoomPage() {
                 fallback={[
                   "Αύξηση κάλυψης από μέσα υψηλής βαρύτητας.",
                   "Παρέμβαση βασικού πολιτικού αντιπάλου.",
-                  "Μετατόπιση framing σε ευθύνη ή λογοδοσία."
+                  "Μετατόπιση framing σε ευθύνη ή λογοδοσία.",
                 ]}
               />
             </Card>
           </section>
         )}
 
+        <section
+          id="noraya-advisor-chat"
+          className="mt-8 rounded-[2rem] border border-cyan-300/20 bg-cyan-300/[0.045] p-6"
+        >
+          <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
+            <div>
+              <div className="text-xs uppercase tracking-[0.28em] text-cyan-200/80">
+                Noraya Advisor
+              </div>
+
+              <h2 className="mt-3 text-2xl font-semibold">
+                Ρώτησε τον σύμβουλο Noraya
+              </h2>
+
+              <p className="mt-3 text-sm leading-7 text-zinc-400">
+                Κάνε ερώτηση πάνω στο σημερινό θέμα, στα σενάρια, στη δημόσια
+                γραμμή ή στο πλάνο δράσης. Ο Noraya απαντά με βάση το Strategy
+                Room.
+              </p>
+
+              <div className="mt-5 grid gap-2">
+                {[
+                  "Ποιο σενάριο έχει το μικρότερο πολιτικό ρίσκο;",
+                  "Γράψε μου μια ασφαλή δημόσια δήλωση.",
+                  "Τι πρέπει να κάνουμε τις επόμενες 48 ώρες;",
+                  "Πώς μπορεί να απαντήσει ο αντίπαλος;",
+                ].map((question) => (
+                  <button
+                    key={question}
+                    type="button"
+                    onClick={() => {
+                      setChatQuestion(question);
+                      askNorayaAdvisor(question);
+                    }}
+                    className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-left text-sm text-zinc-300 transition hover:bg-white/[0.06]"
+                  >
+                    {question}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-[1.5rem] border border-white/10 bg-black/25 p-4">
+              <form
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  askNorayaAdvisor();
+                }}
+              >
+                <label className="text-xs uppercase tracking-[0.22em] text-zinc-500">
+                  Η ερώτησή σου
+                </label>
+
+                <textarea
+                  value={chatQuestion}
+                  onChange={(event) => setChatQuestion(event.target.value)}
+                  placeholder="Π.χ. Τι να πούμε δημόσια χωρίς να πάρουμε μεγάλο ρίσκο;"
+                  className="mt-3 min-h-32 w-full resize-none rounded-2xl border border-white/10 bg-[#020617] p-4 text-sm leading-6 text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-cyan-300/40"
+                />
+
+                {chatError ? (
+                  <p className="mt-3 text-sm text-red-200">{chatError}</p>
+                ) : null}
+
+                <button
+                  type="submit"
+                  disabled={chatLoading}
+                  className="mt-4 rounded-2xl bg-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {chatLoading
+                    ? "Ο σύμβουλος Noraya απαντά..."
+                    : "Ρώτησε τον σύμβουλο Noraya"}
+                </button>
+              </form>
+
+              {chatAnswer ? (
+                <div className="mt-5 rounded-2xl border border-cyan-300/20 bg-cyan-300/10 p-5">
+                  <div className="text-xs uppercase tracking-[0.22em] text-cyan-100/80">
+                    Απάντηση συμβούλου Noraya
+                  </div>
+
+                  <div className="mt-3 whitespace-pre-wrap text-sm leading-7 text-zinc-100">
+                    {chatAnswer}
+                  </div>
+                </div>
+              ) : (
+                <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-sm leading-7 text-zinc-500">
+                  Η απάντηση θα εμφανιστεί εδώ.
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
         <section className="mt-8 rounded-[2rem] border border-white/10 bg-white/[0.025] p-5">
           <details>
             <summary className="cursor-pointer text-sm font-medium text-zinc-300">
               Βάση τεκμηρίωσης
             </summary>
+
             <div className="mt-4 grid gap-4 lg:grid-cols-2">
               <Card title="Βάση">
-                {text(evidence.basis, "Η εκτίμηση βασίζεται στα διαθέσιμα agenda signals.")}
+                {text(
+                  evidence.basis,
+                  "Η εκτίμηση βασίζεται στα διαθέσιμα agenda signals."
+                )}
               </Card>
+
               <Card title="Αβεβαιότητα">
-                {text(evidence.uncertainty, "Η ανάλυση χρειάζεται περισσότερα ταξινομημένα δεδομένα.")}
+                {text(
+                  evidence.uncertainty,
+                  "Η ανάλυση χρειάζεται περισσότερα ταξινομημένα δεδομένα."
+                )}
               </Card>
             </div>
           </details>
@@ -514,7 +785,7 @@ export default function StrategyRoomPage() {
 function HeroDecision({
   label,
   textValue,
-  tone
+  tone,
 }: {
   label: string;
   textValue: string;
@@ -531,6 +802,7 @@ function HeroDecision({
       <div className="text-xs uppercase tracking-[0.25em] text-zinc-400">
         {label}
       </div>
+
       <p className="mt-4 text-lg font-medium leading-8 text-zinc-100">
         {textValue}
       </p>
@@ -538,12 +810,13 @@ function HeroDecision({
   );
 }
 
-function Card({ title, children }: { title: string; children: React.ReactNode }) {
+function Card({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="rounded-[2rem] border border-white/10 bg-white/[0.035] p-5">
       <div className="text-xs uppercase tracking-[0.22em] text-zinc-500">
         {title}
       </div>
+
       <div className="mt-3 text-sm leading-7 text-zinc-300">{children}</div>
     </section>
   );
@@ -555,18 +828,28 @@ function MiniBox({ title, textValue }: { title: string; textValue: string }) {
       <div className="text-xs uppercase tracking-[0.18em] text-zinc-500">
         {title}
       </div>
+
       <p className="mt-2 text-sm leading-6 text-zinc-300">{textValue}</p>
     </div>
   );
 }
 
-function BulletList({ items, fallback }: { items: string[]; fallback: string[] }) {
+function BulletList({
+  items,
+  fallback,
+}: {
+  items: string[];
+  fallback: string[];
+}) {
   const values = items.length > 0 ? items : fallback;
 
   return (
     <ul className="space-y-2">
       {values.map((item, index) => (
-        <li key={`${item}-${index}`} className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
+        <li
+          key={`${item}-${index}`}
+          className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3"
+        >
           {item}
         </li>
       ))}
