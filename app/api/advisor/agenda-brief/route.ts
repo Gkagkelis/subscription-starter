@@ -34,6 +34,22 @@ type OrganizationProfile = {
   tone?: string | null;
 };
 
+const GUEST_COOKIE_NAME = "noraya_guest_profile";
+
+function readGuestProfileCookie(): OrganizationProfile | null {
+  const raw = cookies().get(GUEST_COOKIE_NAME)?.value;
+
+  if (!raw) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(decodeURIComponent(raw)) as OrganizationProfile;
+  } catch {
+    return null;
+  }
+}
+
 function cleanText(value: unknown, maxLength = 900) {
   return String(value || "")
     .replace(/<[^>]*>/g, "")
@@ -236,6 +252,10 @@ export async function GET(req: Request) {
     }
 
     org = (orgData || null) as OrganizationProfile | null;
+  }
+
+  if (!org) {
+    org = readGuestProfileCookie();
   }
 
   const { data: agendaData, error: agendaError } = await serviceClient
