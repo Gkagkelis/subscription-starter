@@ -21,7 +21,6 @@ export async function GET() {
     .eq("user_id", user.id)
     .single();
 
-  // PGRST116 = no rows found — that's fine, means no org yet
   if (error && error.code !== "PGRST116") {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -45,28 +44,82 @@ export async function POST(req: Request) {
 
   const body = await req.json();
 
-  // Map the frontend data shape to the DB columns
+  const partyKey = body.partyKey || body.organization?.partyKey || null;
+
+  let partyProfile: any = null;
+
+  if (partyKey) {
+    const { data: profile, error: profileError } = await supabase
+      .from("political_party_profiles")
+      .select("*")
+      .eq("party_key", partyKey)
+      .eq("is_active", true)
+      .maybeSingle();
+
+    if (profileError) {
+      return NextResponse.json(
+        { error: profileError.message, source: "political_party_profiles" },
+        { status: 500 }
+      );
+    }
+
+    partyProfile = profile || null;
+  }
+
   const row = {
-    org_name: body.organization?.name?.trim() || "",
+    org_name:
+      body.organization?.name?.trim() ||
+      partyProfile?.party_name ||
+      "",
     org_type: body.organization?.type || "Πολιτικό κόμμα",
-    themes: body.themes || [],
-    issues: body.issues || [],
+
+    party_key: partyProfile?.party_key || partyKey,
+    selected_party_profile_id: partyProfile?.id || null,
+    party_profile_snapshot: partyProfile || null,
+    profile_source: partyProfile ? "party_profile_registry" : "manual_onboarding",
+    profile_review_status: partyProfile ? "starter_requires_user_review" : "user_editable",
+
+    themes:
+      body.themes && body.themes.length > 0
+        ? body.themes
+        : partyProfile?.core_themes || [],
+
+    issues:
+      body.issues && body.issues.length > 0
+        ? body.issues
+        : partyProfile?.known_positions || [],
+
     events: body.events || [],
-    stakeholders: body.stakeholders || {
-      ageGroups: [],
-      socialGroups: [],
-      professionalGroups: [],
-      institutions: [],
-      publicActors: [],
-    },
-    mission: body.positions?.mission?.trim() || "",
-    red_lines: body.positions?.redLines?.trim() || "",
-    tone: body.positions?.tone?.trim() || "",
+
+    stakeholders:
+      body.stakeholders || {
+        ageGroups: [],
+        socialGroups: partyProfile?.core_audiences || [],
+        professionalGroups: [],
+        institutions: [],
+        publicActors: [],
+      },
+
+    mission:
+      body.positions?.mission?.trim() ||
+      partyProfile?.strategic_positioning ||
+      "",
+
+    red_lines:
+      body.positions?.redLines?.trim() ||
+      (Array.isArray(partyProfile?.red_lines)
+        ? partyProfile.red_lines.join("\n")
+        : ""),
+
+    tone:
+      body.positions?.tone?.trim() ||
+      partyProfile?.default_tone ||
+      "",
+
     onboarding_completed: true,
     updated_at: new Date().toISOString(),
   };
 
-  // Check if org already exists for this user
   const { data: existing } = await supabase
     .from("organizations")
     .select("id")
@@ -74,7 +127,6 @@ export async function POST(req: Request) {
     .single();
 
   if (existing) {
-    // Update existing
     const { data, error } = await supabase
       .from("organizations")
       .update(row)
@@ -85,21 +137,22 @@ export async function POST(req: Request) {
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
-    return NextResponse.json(data);
-  } else {
-    // Insert new
-    const { data, error } = await supabase
-      .from("organizations")
-      .insert({
-        ...row,
-        user_id: user.id,
-      })
-      .select()
-      .single();
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
     return NextResponse.json(data);
   }
+
+  const { data, error } = await supabase
+    .from("organizations")
+    .insert({
+      ...row,
+      user_id: user.id,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json(data);
 }
