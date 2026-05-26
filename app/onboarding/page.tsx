@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import {
   ageGroups,
   eventTypes,
@@ -22,6 +22,26 @@ type StepId =
   | "positions"
   | "review";
 
+type PartyProfile = {
+  id: string;
+  party_key: string;
+  party_name: string;
+  short_name: string;
+  documentation_level: string;
+  verification_status: string;
+  ideological_family: string | null;
+  strategic_positioning: string | null;
+  default_tone: string | null;
+  core_themes: string[];
+  core_audiences: string[];
+  known_positions: string[];
+  red_lines: string[];
+  opportunity_frame: string | null;
+  risk_frame: string | null;
+  competitor_frame: string | null;
+  advisor_instructions: string | null;
+};
+
 const steps: Array<{ id: StepId; title: string }> = [
   { id: "organization", title: "Οργανισμός" },
   { id: "themes", title: "Θεματικές" },
@@ -41,6 +61,14 @@ function toggleValue(
       ? list.filter((item) => item !== value)
       : [...list, value]
   );
+}
+
+function unique(values: string[]) {
+  return Array.from(new Set(values.filter(Boolean)));
+}
+
+function asTextList(values: string[] | undefined | null) {
+  return Array.isArray(values) ? values.filter(Boolean) : [];
 }
 
 function Chip({
@@ -69,10 +97,14 @@ function Chip({
 
 export default function OnboardingPage() {
   const router = useRouter();
+
   const [stepIndex, setStepIndex] = useState(0);
+  const [partyProfiles, setPartyProfiles] = useState<PartyProfile[]>([]);
+  const [selectedPartyKey, setSelectedPartyKey] = useState("");
+  const [loadingParties, setLoadingParties] = useState(false);
 
   const [orgName, setOrgName] = useState("");
-  const [orgType, setOrgType] = useState(organizationTypes[0]);
+  const [orgType, setOrgType] = useState("Πολιτικό κόμμα");
 
   const [selectedThemes, setSelectedThemes] = useState<string[]>([
     "Ακρίβεια / κόστος ζωής",
@@ -124,7 +156,37 @@ export default function OnboardingPage() {
   const [redLines, setRedLines] = useState("");
   const [tone, setTone] = useState("");
 
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
+
   const currentStep = steps[stepIndex];
+  const isPoliticalParty = orgType === "Πολιτικό κόμμα";
+  const selectedParty = partyProfiles.find(
+    (profile) => profile.party_key === selectedPartyKey
+  );
+
+  useEffect(() => {
+    async function loadPartyProfiles() {
+      setLoadingParties(true);
+
+      try {
+        const res = await fetch("/api/party-profiles", {
+          cache: "no-store"
+        });
+
+        if (!res.ok) {
+          return;
+        }
+
+        const data = await res.json();
+        setPartyProfiles(data.profiles || []);
+      } finally {
+        setLoadingParties(false);
+      }
+    }
+
+    loadPartyProfiles();
+  }, []);
 
   const allSelectedStakeholders = useMemo(
     () => [
@@ -142,6 +204,44 @@ export default function OnboardingPage() {
       selectedPublicActors
     ]
   );
+
+  const applyPartyProfile = (partyKey: string) => {
+    setSelectedPartyKey(partyKey);
+
+    const profile = partyProfiles.find((item) => item.party_key === partyKey);
+
+    if (!profile) {
+      return;
+    }
+
+    setOrgName(profile.party_name);
+    setSelectedThemes(unique(asTextList(profile.core_themes)));
+    setSelectedIssues(unique(asTextList(profile.known_positions)));
+    setSelectedSocialGroups(unique(asTextList(profile.core_audiences)));
+
+    setMission(
+      [
+        profile.strategic_positioning,
+        profile.opportunity_frame
+          ? `Ευκαιρία: ${profile.opportunity_frame}`
+          : "",
+        profile.risk_frame ? `Βασικό ρίσκο: ${profile.risk_frame}` : ""
+      ]
+        .filter(Boolean)
+        .join("\n\n")
+    );
+
+    setRedLines(asTextList(profile.red_lines).join("\n"));
+    setTone(profile.default_tone || "");
+
+    if (profile.advisor_instructions) {
+      setTone(
+        [profile.default_tone || "", profile.advisor_instructions]
+          .filter(Boolean)
+          .join("\n\n")
+      );
+    }
+  };
 
   const addCustomIssue = () => {
     const value = customIssue.trim();
@@ -163,18 +263,17 @@ export default function OnboardingPage() {
     setStepIndex((current) => Math.max(current - 1, 0));
   };
 
-  const [saving, setSaving] = useState(false);
-  const [saveError, setSaveError] = useState("");
-
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSaving(true);
     setSaveError("");
 
     const profile = {
+      partyKey: selectedPartyKey || null,
       organization: {
-        name: orgName.trim() || "Οργανισμός Demo",
-        type: orgType
+        name: orgName.trim() || selectedParty?.party_name || "Οργανισμός Demo",
+        type: orgType,
+        partyKey: selectedPartyKey || null
       },
       themes: selectedThemes,
       issues: selectedIssues,
@@ -207,10 +306,9 @@ export default function OnboardingPage() {
         return;
       }
 
-      // Also keep in localStorage as fallback for non-logged-in preview
       window.localStorage.setItem("noraya_org_profile", JSON.stringify(profile));
-      router.push("/dashboard");
-    } catch (err) {
+      router.push("/agenda");
+    } catch {
       setSaveError("Σφάλμα σύνδεσης. Δοκιμάστε ξανά.");
       setSaving(false);
     }
@@ -239,8 +337,9 @@ export default function OnboardingPage() {
             </h1>
 
             <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
-              Το Noraya χρειάζεται λίγα στοιχεία για να μετατρέψει τη γενική δημόσια εικόνα
-              σε προσαρμοσμένη πολιτική πληροφόρηση για τον δικό σας οργανισμό.
+              Επιλέξτε προφίλ οργανισμού. Αν είστε πολιτικό κόμμα, ο Noraya μπορεί
+              να φορτώσει έτοιμο starter profile με θέσεις, κοινά, τόνο και κόκκινες
+              γραμμές.
             </p>
           </div>
 
@@ -276,29 +375,23 @@ export default function OnboardingPage() {
             <section>
               <h2 className="text-2xl font-semibold">Ποιος είστε;</h2>
               <p className="mt-2 text-sm leading-6 text-zinc-400">
-                Ξεκινάμε με τα βασικά στοιχεία του οργανισμού.
+                Ξεκινάμε με τον τύπο οργανισμού. Για πολιτικά κόμματα υπάρχει
+                έτοιμο profile registry.
               </p>
 
               <div className="mt-8 grid gap-5 md:grid-cols-2">
-                <div>
-                  <label className="text-sm font-medium text-zinc-200">
-                    Πώς λέγεται ο οργανισμός σας;
-                  </label>
-                  <input
-                    value={orgName}
-                    onChange={(event) => setOrgName(event.target.value)}
-                    placeholder="π.χ. Οργανισμός Demo"
-                    className="mt-3 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm outline-none transition focus:border-cyan-300/40"
-                  />
-                </div>
-
                 <div>
                   <label className="text-sm font-medium text-zinc-200">
                     Τι τύπος οργανισμού είστε;
                   </label>
                   <select
                     value={orgType}
-                    onChange={(event) => setOrgType(event.target.value)}
+                    onChange={(event) => {
+                      setOrgType(event.target.value);
+                      if (event.target.value !== "Πολιτικό κόμμα") {
+                        setSelectedPartyKey("");
+                      }
+                    }}
                     className="mt-3 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm outline-none transition focus:border-cyan-300/40"
                   >
                     {organizationTypes.map((type) => (
@@ -306,20 +399,93 @@ export default function OnboardingPage() {
                     ))}
                   </select>
                 </div>
+
+                <div>
+                  <label className="text-sm font-medium text-zinc-200">
+                    Πώς λέγεται ο οργανισμός σας;
+                  </label>
+                  <input
+                    value={orgName}
+                    onChange={(event) => setOrgName(event.target.value)}
+                    placeholder="π.χ. ΠΑΣΟΚ Demo"
+                    className="mt-3 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm outline-none transition focus:border-cyan-300/40"
+                  />
+                </div>
               </div>
+
+              {isPoliticalParty && (
+                <div className="mt-7 rounded-3xl border border-cyan-300/20 bg-cyan-300/[0.05] p-5">
+                  <div className="text-sm font-semibold text-cyan-100">
+                    Επιλέξτε πολιτικό κόμμα
+                  </div>
+
+                  <p className="mt-2 text-sm leading-6 text-zinc-400">
+                    Ο Noraya θα γεμίσει αυτόματα ένα starter profile. Μετά μπορείτε
+                    να το διορθώσετε πριν αποθηκευτεί.
+                  </p>
+
+                  <select
+                    value={selectedPartyKey}
+                    onChange={(event) => applyPartyProfile(event.target.value)}
+                    className="mt-4 w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm outline-none transition focus:border-cyan-300/40"
+                  >
+                    <option value="">
+                      {loadingParties
+                        ? "Φόρτωση κομμάτων..."
+                        : "Επιλέξτε κόμμα / πολιτικό project"}
+                    </option>
+
+                    {partyProfiles.map((profile) => (
+                      <option key={profile.party_key} value={profile.party_key}>
+                        {profile.party_name}
+                      </option>
+                    ))}
+                  </select>
+
+                  {selectedParty && (
+                    <div className="mt-5 grid gap-3 md:grid-cols-3">
+                      <InfoPill
+                        label="Προφίλ"
+                        value={selectedParty.short_name}
+                      />
+                      <InfoPill
+                        label="Τεκμηρίωση"
+                        value={selectedParty.documentation_level}
+                      />
+                      <InfoPill
+                        label="Status"
+                        value={selectedParty.verification_status}
+                      />
+                    </div>
+                  )}
+
+                  {selectedParty && (
+                    <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-4">
+                      <div className="text-xs uppercase tracking-[0.2em] text-zinc-500">
+                        Στρατηγική ανάγνωση
+                      </div>
+                      <p className="mt-2 text-sm leading-6 text-zinc-300">
+                        {selectedParty.strategic_positioning}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
             </section>
           )}
 
           {currentStep.id === "themes" && (
             <section>
-              <h2 className="text-2xl font-semibold">Τι θέλετε να παρακολουθείτε;</h2>
+              <h2 className="text-2xl font-semibold">
+                Τι θέλετε να παρακολουθείτε;
+              </h2>
               <p className="mt-2 text-sm leading-6 text-zinc-400">
-                Επιλέξτε μεγάλες θεματικές περιοχές. Αυτές είναι τα μόνιμα "ράφια"
-                του Noraya.
+                Οι θεματικές μπορούν να έρθουν αυτόματα από το κόμμα ή να
+                τροποποιηθούν χειροκίνητα.
               </p>
 
               <div className="mt-6 flex flex-wrap gap-2">
-                {themes.map((theme) => (
+                {unique([...themes, ...selectedThemes]).map((theme) => (
                   <Chip
                     key={theme}
                     value={theme}
@@ -333,19 +499,21 @@ export default function OnboardingPage() {
 
           {currentStep.id === "issues" && (
             <section>
-              <h2 className="text-2xl font-semibold">Ζητήματα, υποθέσεις και κρίσεις</h2>
+              <h2 className="text-2xl font-semibold">
+                Ζητήματα, θέσεις και κρίσεις
+              </h2>
               <p className="mt-2 text-sm leading-6 text-zinc-400">
-                Εδώ μπαίνουν πιο συγκεκριμένα ζητήματα ή γεγονότα: Τέμπη, στέγαση,
-                ακρίβεια τροφίμων, κινητοποιήσεις, νομοσχέδια υψηλής έντασης.
+                Εδώ εμφανίζονται συγκεκριμένα ζητήματα ή γνωστές θέσεις που θα
+                χρησιμοποιεί ο Noraya όταν μεταφράζει την ατζέντα για εσάς.
               </p>
 
               <div className="mt-7">
                 <h3 className="mb-3 text-sm font-semibold text-zinc-200">
-                  Συγκεκριμένα ζητήματα
+                  Ζητήματα / γνωστές θέσεις
                 </h3>
 
                 <div className="flex flex-wrap gap-2">
-                  {issueExamples.map((issue) => (
+                  {unique([...issueExamples, ...selectedIssues]).map((issue) => (
                     <Chip
                       key={issue}
                       value={issue}
@@ -359,7 +527,7 @@ export default function OnboardingPage() {
                   <input
                     value={customIssue}
                     onChange={(event) => setCustomIssue(event.target.value)}
-                    placeholder="Προσθέστε δικό σας ζήτημα, π.χ. φοιτητικές κινητοποιήσεις"
+                    placeholder="Προσθέστε δικό σας ζήτημα"
                     className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm outline-none transition focus:border-cyan-300/40"
                   />
 
@@ -398,8 +566,8 @@ export default function OnboardingPage() {
                 Ποια κοινά ή φορείς σας ενδιαφέρουν;
               </h2>
               <p className="mt-2 text-sm leading-6 text-zinc-400">
-                Δεν είναι απλή λίστα "target groups". Είναι ο χάρτης των ομάδων,
-                φορέων και παικτών που επηρεάζονται ή εμφανίζονται στον δημόσιο λόγο.
+                Αυτά είναι τα κοινά που θα εξετάζει ο Advisor όταν λέει πώς
+                επηρεάζεται η βάση, οι αναποφάσιστοι, οι νέοι, η μεσαία τάξη κτλ.
               </p>
 
               <div className="mt-7 space-y-7">
@@ -416,8 +584,8 @@ export default function OnboardingPage() {
                   ))}
                 </Group>
 
-                <Group title="Κοινωνικές ομάδες / κατάσταση ζωής">
-                  {socialGroups.map((item) => (
+                <Group title="Κοινωνικές ομάδες / πολιτικά κοινά">
+                  {unique([...socialGroups, ...selectedSocialGroups]).map((item) => (
                     <Chip
                       key={item}
                       value={item}
@@ -477,22 +645,24 @@ export default function OnboardingPage() {
 
           {currentStep.id === "positions" && (
             <section>
-              <h2 className="text-2xl font-semibold">Θέσεις και κόκκινες γραμμές</h2>
+              <h2 className="text-2xl font-semibold">
+                Θέσεις και κόκκινες γραμμές
+              </h2>
               <p className="mt-2 text-sm leading-6 text-zinc-400">
-                Αυτό είναι το πρώτο βήμα για να μπορεί το Noraya αργότερα να ελέγχει
-                συνέπεια θέσεων και να απαντά με βάση το δικό σας πλαίσιο.
+                Αυτά είναι τα στοιχεία που κάνουν τον Advisor προσωποποιημένο. Ελέγξτε
+                τα αυτόματα συμπληρωμένα πεδία και διορθώστε ό,τι δεν ταιριάζει.
               </p>
 
               <div className="mt-7 grid gap-5">
                 <div>
                   <label className="text-sm font-medium text-zinc-200">
-                    Βασική αποστολή / γραμμή
+                    Βασική αποστολή / στρατηγική γραμμή
                   </label>
                   <textarea
                     value={mission}
                     onChange={(event) => setMission(event.target.value)}
-                    rows={4}
-                    placeholder="π.χ. Θέλουμε τεκμηριωμένες δημόσιες παρεμβάσεις με έμφαση στη διαφάνεια, την κοινωνική επίδραση και τον θεσμικό λόγο."
+                    rows={5}
+                    placeholder="Περιγράψτε τη στρατηγική ταυτότητα του οργανισμού."
                     className="mt-3 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm outline-none transition focus:border-cyan-300/40"
                   />
                 </div>
@@ -504,33 +674,23 @@ export default function OnboardingPage() {
                   <textarea
                     value={redLines}
                     onChange={(event) => setRedLines(event.target.value)}
-                    rows={4}
-                    placeholder="π.χ. Θέσεις που δεν πρέπει να παραβιαστούν, θέματα υψηλής ευαισθησίας, σημεία που θέλουν προσοχή."
+                    rows={5}
+                    placeholder="Τι δεν πρέπει να παραβιάζει ο Noraya;"
                     className="mt-3 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm outline-none transition focus:border-cyan-300/40"
                   />
                 </div>
 
                 <div>
                   <label className="text-sm font-medium text-zinc-200">
-                    Προτιμώμενος τόνος
+                    Προτιμώμενος τόνος / οδηγίες Advisor
                   </label>
                   <textarea
                     value={tone}
                     onChange={(event) => setTone(event.target.value)}
-                    rows={3}
-                    placeholder="π.χ. Θεσμικός, τεκμηριωμένος, ήρεμος, χωρίς υπερβολές."
+                    rows={5}
+                    placeholder="π.χ. Θεσμικός, καθαρός, κοινωνικά ευαίσθητος."
                     className="mt-3 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm outline-none transition focus:border-cyan-300/40"
                   />
-                </div>
-
-                <div className="rounded-2xl border border-dashed border-cyan-300/25 bg-cyan-300/[0.04] p-5">
-                  <div className="text-sm font-medium text-cyan-100">
-                    Upload θέσεων / προγράμματος
-                  </div>
-                  <p className="mt-2 text-sm leading-6 text-zinc-400">
-                    Θα το ενεργοποιήσουμε στο επόμενο στάδιο. Εδώ θα μπαίνουν PDF, DOCX,
-                    ομιλίες, δελτία τύπου και policy papers.
-                  </p>
                 </div>
               </div>
             </section>
@@ -540,14 +700,23 @@ export default function OnboardingPage() {
             <section>
               <h2 className="text-2xl font-semibold">Επιβεβαίωση</h2>
               <p className="mt-2 text-sm leading-6 text-zinc-400">
-                Αυτή είναι η αρχική εικόνα που θα χρησιμοποιήσει το Noraya για να
-                προσαρμόσει το dashboard.
+                Αυτή είναι η αρχική εικόνα που θα χρησιμοποιήσει το Noraya για
+                personalized party advice.
               </p>
 
               <div className="mt-7 grid gap-4 md:grid-cols-2">
-                <ReviewCard title="Οργανισμός" items={[orgName || "Οργανισμός Demo", orgType]} />
+                <ReviewCard
+                  title="Οργανισμός"
+                  items={[
+                    orgName || selectedParty?.party_name || "Οργανισμός Demo",
+                    orgType,
+                    selectedParty
+                      ? `Party profile: ${selectedParty.short_name}`
+                      : "Χωρίς έτοιμο party profile"
+                  ]}
+                />
                 <ReviewCard title="Θεματικές" items={selectedThemes} />
-                <ReviewCard title="Ζητήματα" items={selectedIssues} />
+                <ReviewCard title="Ζητήματα / θέσεις" items={selectedIssues} />
                 <ReviewCard title="Γεγονότα / κρίσεις" items={selectedEvents} />
                 <ReviewCard title="Κοινά & φορείς" items={allSelectedStakeholders} />
                 <ReviewCard
@@ -566,7 +735,7 @@ export default function OnboardingPage() {
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <button
             type="button"
-            onClick={() => router.push("/dashboard")}
+            onClick={() => router.push("/agenda")}
             className="rounded-2xl border border-white/10 px-5 py-3 text-sm text-zinc-300 transition hover:border-white/20"
           >
             Παράλειψη
@@ -606,6 +775,17 @@ export default function OnboardingPage() {
           </div>
         </div>
       </form>
+    </div>
+  );
+}
+
+function InfoPill({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+      <div className="text-xs uppercase tracking-[0.18em] text-zinc-500">
+        {label}
+      </div>
+      <div className="mt-2 text-sm font-medium text-zinc-100">{value}</div>
     </div>
   );
 }
