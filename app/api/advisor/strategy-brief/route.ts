@@ -1,4 +1,3 @@
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { createClient as createAuthClient } from "@/utils/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
@@ -11,8 +10,6 @@ import {
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-const GUEST_COOKIE_NAME = "noraya_guest_profile";
 
 type AgendaRow = {
   topic: string;
@@ -82,20 +79,6 @@ function parseAiJson(raw: string) {
     } catch {
       return null;
     }
-  }
-}
-
-function readGuestProfileCookie(): UserPoliticalProfile | null {
-  const raw = cookies().get(GUEST_COOKIE_NAME)?.value;
-
-  if (!raw) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(decodeURIComponent(raw)) as UserPoliticalProfile;
-  } catch {
-    return null;
   }
 }
 
@@ -336,52 +319,69 @@ export async function GET(req: Request) {
     data: { user },
   } = await authClient.auth.getUser();
 
+  if (!user) {
+    return NextResponse.json(
+      {
+        auth_required: true,
+        redirect_to: "/signin/password_signin?next=/strategy-room",
+        message: "Συνδεθείτε για να φορτωθεί το κομματικό προφίλ.",
+      },
+      { status: 401 }
+    );
+  }
+
   let profile: UserPoliticalProfile | null = null;
 
-  if (user) {
-    const { data: orgData, error: orgError } = await serviceClient
-      .from("organizations")
+  const { data: orgData, error: orgError } = await serviceClient
+    .from("organizations")
+    .select("*")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (orgError) {
+    return NextResponse.json({ error: orgError.message }, { status: 500 });
+  }
+
+  profile = (orgData || null) as UserPoliticalProfile | null;
+
+  if (profile?.party_key) {
+    const { data: partyProfile } = await serviceClient
+      .from("political_party_profiles")
       .select("*")
-      .eq("user_id", user.id)
+      .eq("party_key", profile.party_key)
+      .eq("is_active", true)
       .maybeSingle();
 
-    if (orgError) {
-      return NextResponse.json({ error: orgError.message }, { status: 500 });
-    }
-
-    profile = (orgData || null) as UserPoliticalProfile | null;
-
-    if (profile?.party_key) {
-      const { data: partyProfile } = await serviceClient
-        .from("political_party_profiles")
-        .select("*")
-        .eq("party_key", profile.party_key)
-        .eq("is_active", true)
-        .maybeSingle();
-
-      if (partyProfile) {
-        profile = {
-          ...profile,
-          org_name: profile.org_name || partyProfile.party_name,
-          party_profile_snapshot: profile.party_profile_snapshot || partyProfile,
-          themes:
-            Array.isArray(profile.themes) && profile.themes.length
-              ? profile.themes
-              : partyProfile.core_themes || [],
-          tone: profile.tone || partyProfile.default_tone || "",
-          red_lines:
-            profile.red_lines ||
-            (Array.isArray(partyProfile.red_lines)
-              ? partyProfile.red_lines.join("\n")
-              : ""),
-          mission: profile.mission || partyProfile.strategic_positioning || "",
-        } as UserPoliticalProfile;
-      }
+    if (partyProfile) {
+      profile = {
+        ...profile,
+        org_name: profile.org_name || partyProfile.party_name,
+        party_profile_snapshot: profile.party_profile_snapshot || partyProfile,
+        themes:
+          Array.isArray(profile.themes) && profile.themes.length
+            ? profile.themes
+            : partyProfile.core_themes || [],
+        tone: profile.tone || partyProfile.default_tone || "",
+        red_lines:
+          profile.red_lines ||
+          (Array.isArray(partyProfile.red_lines)
+            ? partyProfile.red_lines.join("\n")
+            : ""),
+        mission: profile.mission || partyProfile.strategic_positioning || "",
+      } as UserPoliticalProfile;
     }
   }
 
   if (!profile) {
-    profile = readGuestProfileCookie();
+    return NextResponse.json(
+      {
+        profile_required: true,
+        redirect_to: "/onboarding",
+        message:
+          "Δεν βρέθηκε αποθηκευμένο κομματικό προφίλ. Ολοκληρώστε το onboarding.",
+      },
+      { status: 409 }
+    );
   }
 
   const { data: agendaData, error: agendaError } = await serviceClient
