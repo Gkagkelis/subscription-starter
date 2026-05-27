@@ -350,6 +350,34 @@ export async function GET(req: Request) {
     }
 
     profile = (orgData || null) as UserPoliticalProfile | null;
+
+    if (profile?.party_key) {
+      const { data: partyProfile } = await serviceClient
+        .from("political_party_profiles")
+        .select("*")
+        .eq("party_key", profile.party_key)
+        .eq("is_active", true)
+        .maybeSingle();
+
+      if (partyProfile) {
+        profile = {
+          ...profile,
+          org_name: profile.org_name || partyProfile.party_name,
+          party_profile_snapshot: profile.party_profile_snapshot || partyProfile,
+          themes:
+            Array.isArray(profile.themes) && profile.themes.length
+              ? profile.themes
+              : partyProfile.core_themes || [],
+          tone: profile.tone || partyProfile.default_tone || "",
+          red_lines:
+            profile.red_lines ||
+            (Array.isArray(partyProfile.red_lines)
+              ? partyProfile.red_lines.join("\n")
+              : ""),
+          mission: profile.mission || partyProfile.strategic_positioning || "",
+        } as UserPoliticalProfile;
+      }
+    }
   }
 
   if (!profile) {
