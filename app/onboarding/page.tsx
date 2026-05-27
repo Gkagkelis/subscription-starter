@@ -84,6 +84,7 @@ function toggleValue(
     setter(list.filter((item) => item !== value));
     return;
   }
+
   setter([...list, value]);
 }
 
@@ -181,12 +182,16 @@ export default function OnboardingPage() {
   useEffect(() => {
     async function loadPartyProfiles() {
       setLoadingParties(true);
+
       try {
         const response = await fetch("/api/party-profiles", {
           cache: "no-store"
         });
+
         if (!response.ok) return;
+
         const data = await response.json();
+
         setPartyProfiles(
           (data.profiles || []).filter(
             (p: PartyProfile) =>
@@ -200,6 +205,7 @@ export default function OnboardingPage() {
         setLoadingParties(false);
       }
     }
+
     loadPartyProfiles();
   }, []);
 
@@ -216,12 +222,15 @@ export default function OnboardingPage() {
 
   function applyPartyProfile(partyKey: string) {
     setSelectedPartyKey(partyKey);
+
     const profile = partyProfiles.find((item) => item.party_key === partyKey);
+
     if (!profile) return;
 
     setSelectedThemes(unique(asTextList(profile.core_themes)));
     setSelectedIssues(unique(asTextList(profile.known_positions)));
     setSelectedSocialGroups(unique(asTextList(profile.core_audiences)));
+
     setMission(
       [
         profile.strategic_positioning || "",
@@ -233,7 +242,9 @@ export default function OnboardingPage() {
         .filter(Boolean)
         .join("\n\n")
     );
+
     setRedLines(asTextList(profile.red_lines).join("\n"));
+
     setTone(
       [profile.default_tone || "", profile.advisor_instructions || ""]
         .filter(Boolean)
@@ -245,6 +256,7 @@ export default function OnboardingPage() {
     if (orgType === "Πολιτικό κόμμα") {
       return selectedParty?.party_name || "Πολιτικό κόμμα";
     }
+
     if (orgType === "Γραφείο Βουλευτή") {
       return [
         representativeName.trim() || "Γραφείο Βουλευτή",
@@ -254,6 +266,7 @@ export default function OnboardingPage() {
         .filter(Boolean)
         .join(" - ");
     }
+
     if (orgType === "Ευρωβουλευτής") {
       return [
         euroRepresentativeName.trim() || "Ευρωβουλευτής",
@@ -262,6 +275,7 @@ export default function OnboardingPage() {
         .filter(Boolean)
         .join(" - ");
     }
+
     return [
       municipalFactionName.trim() || "Δημοτική Παράταξη",
       municipality.trim() ? `Δήμος ${municipality.trim()}` : "",
@@ -273,10 +287,13 @@ export default function OnboardingPage() {
 
   function addCustomIssue() {
     const value = customIssue.trim();
+
     if (!value) return;
+
     if (!selectedIssues.includes(value)) {
       setSelectedIssues([...selectedIssues, value]);
     }
+
     setCustomIssue("");
   }
 
@@ -292,6 +309,17 @@ export default function OnboardingPage() {
     event.preventDefault();
     setSaving(true);
     setSaveError("");
+
+    if (
+      (orgType === "Πολιτικό κόμμα" ||
+        orgType === "Γραφείο Βουλευτή" ||
+        orgType === "Ευρωβουλευτής") &&
+      !selectedPartyKey
+    ) {
+      setSaveError("Επιλέξτε συγκεκριμένο κόμμα πριν ολοκληρώσετε το προφίλ.");
+      setSaving(false);
+      return;
+    }
 
     const profile = {
       partyKey: selectedPartyKey || null,
@@ -436,6 +464,7 @@ export default function OnboardingPage() {
                       onChange={setRepresentativeName}
                       placeholder="π.χ. Μαρία Παπαδοπούλου"
                     />
+
                     <Field
                       label="Εκλογική περιφέρεια"
                       value={district}
@@ -482,12 +511,14 @@ export default function OnboardingPage() {
                       onChange={setMunicipalFactionName}
                       placeholder="π.χ. Νέα Πόλη"
                     />
+
                     <Field
                       label="Δήμος"
                       value={municipality}
                       onChange={setMunicipality}
                       placeholder="π.χ. Αθηναίων"
                     />
+
                     <Field
                       label="Περιφέρεια"
                       value={region}
@@ -500,6 +531,7 @@ export default function OnboardingPage() {
                     <div className="mb-2 text-sm font-medium text-zinc-200">
                       Πολιτική συγγένεια / στήριξη, προαιρετικά
                     </div>
+
                     <PartySelector
                       profiles={partyProfiles}
                       selectedPartyKey={selectedPartyKey}
@@ -518,6 +550,7 @@ export default function OnboardingPage() {
               <h2 className="text-2xl font-semibold">
                 Τι πρέπει να παρακολουθεί ο Noraya;
               </h2>
+
               <p className="mt-2 text-sm leading-6 text-zinc-400">
                 Οι θεματικές μπορούν να έρθουν αυτόματα από το πολιτικό προφίλ
                 ή να διορθωθούν χειροκίνητα.
@@ -543,6 +576,7 @@ export default function OnboardingPage() {
               <h2 className="text-2xl font-semibold">
                 Ζητήματα, θέσεις και κρίσεις
               </h2>
+
               <p className="mt-2 text-sm leading-6 text-zinc-400">
                 Εδώ μπαίνουν συγκεκριμένες θέσεις, ζητήματα ή κρίσεις που θα
                 λαμβάνει υπόψη ο Advisor όταν μεταφράζει την ατζέντα.
@@ -573,6 +607,7 @@ export default function OnboardingPage() {
                     placeholder="Προσθέστε δικό σας ζήτημα"
                     className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm outline-none transition focus:border-cyan-300/40"
                   />
+
                   <button
                     type="button"
                     onClick={addCustomIssue}
@@ -587,6 +622,7 @@ export default function OnboardingPage() {
                 <h3 className="mb-3 text-sm font-semibold text-zinc-200">
                   Γεγονότα / κρίσεις / signals
                 </h3>
+
                 <div className="flex flex-wrap gap-2">
                   {eventTypes.map((eventType) => (
                     <Chip
@@ -608,6 +644,7 @@ export default function OnboardingPage() {
               <h2 className="text-2xl font-semibold">
                 Ποια κοινά ή φορείς έχουν σημασία;
               </h2>
+
               <p className="mt-2 text-sm leading-6 text-zinc-400">
                 Αυτά είναι τα κοινά που θα σκέφτεται ο Advisor όταν λέει ποιοι
                 επηρεάζονται και πώς πρέπει να μιλήσετε.
@@ -705,6 +742,7 @@ export default function OnboardingPage() {
               <h2 className="text-2xl font-semibold">
                 Θέσεις και κόκκινες γραμμές
               </h2>
+
               <p className="mt-2 text-sm leading-6 text-zinc-400">
                 Αυτά κάνουν τον Advisor προσωποποιημένο. Ελέγξτε τα αυτόματα
                 συμπληρωμένα πεδία και διορθώστε ό,τι δεν ταιριάζει.
@@ -717,12 +755,14 @@ export default function OnboardingPage() {
                   onChange={setMission}
                   placeholder="Περιγράψτε τη στρατηγική ταυτότητα."
                 />
+
                 <TextAreaField
                   label="Κόκκινες γραμμές / ευαίσθητα σημεία"
                   value={redLines}
                   onChange={setRedLines}
                   placeholder="Τι δεν πρέπει να παραβιάζει ο Noraya;"
                 />
+
                 <TextAreaField
                   label="Προτιμώμενος τόνος / οδηγίες Advisor"
                   value={tone}
@@ -736,6 +776,7 @@ export default function OnboardingPage() {
           {currentStep.id === "review" && (
             <section>
               <h2 className="text-2xl font-semibold">Επιβεβαίωση</h2>
+
               <p className="mt-2 text-sm leading-6 text-zinc-400">
                 Αυτή είναι η αρχική εικόνα που θα χρησιμοποιήσει ο Noraya για
                 προσωποποιημένες πολιτικές συστάσεις.
@@ -752,13 +793,18 @@ export default function OnboardingPage() {
                       : "Χωρίς έτοιμο κομματικό πλαίσιο"
                   ]}
                 />
+
                 <ReviewCard title="Θεματικές" items={selectedThemes} />
+
                 <ReviewCard title="Ζητήματα / θέσεις" items={selectedIssues} />
+
                 <ReviewCard title="Γεγονότα / κρίσεις" items={selectedEvents} />
+
                 <ReviewCard
                   title="Κοινά & φορείς"
                   items={allSelectedStakeholders}
                 />
+
                 <ReviewCard
                   title="Θέσεις"
                   items={[
@@ -832,17 +878,21 @@ function Header({
         <div className="text-xs uppercase tracking-[0.25em] text-cyan-300">
           NORAYA SETUP
         </div>
+
         <div className="mt-1 text-xs text-zinc-500">
           Political Intelligence Platform
         </div>
+
         <h1 className="mt-4 text-3xl font-semibold tracking-tight">
           Προσαρμογή στον πολιτικό σας ρόλο
         </h1>
+
         <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
           Ξεκινάμε από το ποιος είστε. Ο Noraya θα φορτώσει το σωστό πολιτικό
           πλαίσιο ώστε ο Advisor να μιλάει για εσάς και όχι γενικά.
         </p>
       </div>
+
       <div className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-4 py-2 text-xs text-cyan-100">
         Βήμα {stepIndex + 1} από {totalSteps}
       </div>
@@ -878,6 +928,7 @@ function IdentityCard({
       }`}
     >
       <div className="text-sm font-semibold">{title}</div>
+
       <div className="mt-2 text-xs leading-5 text-zinc-400">
         {descriptions[title]}
       </div>
@@ -926,6 +977,7 @@ function PartySelector({
         <option value="">
           {loading ? "Φόρτωση..." : "Επιλέξτε κόμμα / πολιτικό project"}
         </option>
+
         {profiles.map((profile) => (
           <option key={profile.party_key} value={profile.party_key}>
             {profile.party_name}
@@ -938,9 +990,11 @@ function PartySelector({
           <div className="text-xs uppercase tracking-[0.2em] text-zinc-500">
             Τι ξέρει ήδη ο Noraya
           </div>
+
           <p className="mt-2 text-sm leading-6 text-zinc-300">
             {selectedParty.strategic_positioning}
           </p>
+
           <p className="mt-3 text-xs leading-5 text-cyan-100">
             Ο Noraya γέμισε αυτόματα βασικές θέσεις, κοινά, τόνο και κόκκινες
             γραμμές. Μπορείτε να τα διορθώσετε στα επόμενα βήματα.
@@ -965,6 +1019,7 @@ function Field({
   return (
     <div>
       <label className="text-sm font-medium text-zinc-200">{label}</label>
+
       <input
         value={value}
         onChange={(event) => onChange(event.target.value)}
@@ -989,6 +1044,7 @@ function TextAreaField({
   return (
     <div>
       <label className="text-sm font-medium text-zinc-200">{label}</label>
+
       <textarea
         value={value}
         onChange={(event) => onChange(event.target.value)}
@@ -1037,6 +1093,7 @@ function ReviewCard({ title, items }: { title: string; items: string[] }) {
   return (
     <div className="rounded-2xl border border-white/10 bg-black/20 p-5">
       <h3 className="mb-3 text-sm font-semibold text-cyan-100">{title}</h3>
+
       <div className="flex flex-wrap gap-2">
         {items.slice(0, 18).map((item, index) => (
           <span
@@ -1046,6 +1103,7 @@ function ReviewCard({ title, items }: { title: string; items: string[] }) {
             {item}
           </span>
         ))}
+
         {items.length > 18 && (
           <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs text-zinc-500">
             +{items.length - 18} ακόμα
