@@ -354,9 +354,20 @@ function partyDisplayName(profile?: Profile | null) {
 }
 
 function partyShortName(profile?: Profile | null) {
+  if (profile?.party_profile_snapshot?.short_name) {
+    return profile.party_profile_snapshot.short_name;
+  }
+
+  if (profile?.party_key === "el_as") return "ΕΛ.ΑΣ";
+  if (profile?.party_key === "elpida_dimokratia") return "Ελπίδα";
+  if (profile?.party_key === "nd") return "ΝΔ";
+  if (profile?.party_key === "pasok") return "ΠΑΣΟΚ";
+  if (profile?.party_key === "syriza") return "ΣΥΡΙΖΑ";
+  if (profile?.party_key === "kke") return "ΚΚΕ";
+
   return (
-    profile?.party_profile_snapshot?.short_name ||
     profile?.party_profile_snapshot?.party_name ||
+    profile?.org_name ||
     profile?.party_key ||
     "—"
   );
@@ -379,7 +390,13 @@ function partyInitials(profile?: Profile | null) {
 }
 
 function hasConnectedPartyProfile(profile?: Profile | null) {
-  return Boolean(profile?.party_key && profile?.party_profile_snapshot?.party_name);
+  return Boolean(
+    profile?.party_key &&
+      (
+        profile?.party_profile_snapshot?.party_name ||
+        profile?.org_name
+      )
+  );
 }
 
 export default function StrategyRoomPage() {
