@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 
 type Scenario = {
@@ -79,8 +79,15 @@ type StrategicBrief = {
 
 type Profile = {
   org_name?: string;
+  org_type?: string;
+  profile_source?: string;
+  profile_review_status?: string;
   party_profile_snapshot?: {
+    party_key?: string;
     party_name?: string;
+    short_name?: string;
+    logo_url?: string | null;
+    brand_color?: string | null;
   };
   party_key?: string;
   [key: string]: unknown;
@@ -298,8 +305,11 @@ function formatPercent(value: unknown) {
 
 function shortDate(value?: string | null) {
   if (!value) return "—";
+
   const date = new Date(value);
+
   if (Number.isNaN(date.getTime())) return value;
+
   return date.toLocaleDateString("el-GR", {
     day: "2-digit",
     month: "2-digit",
@@ -334,6 +344,44 @@ function recentPolls(environment: PoliticalEnvironment | null | undefined) {
     : [];
 }
 
+function partyDisplayName(profile?: Profile | null) {
+  return (
+    profile?.party_profile_snapshot?.party_name ||
+    profile?.org_name ||
+    profile?.party_key ||
+    "Μη συνδεδεμένο προφίλ"
+  );
+}
+
+function partyShortName(profile?: Profile | null) {
+  return (
+    profile?.party_profile_snapshot?.short_name ||
+    profile?.party_profile_snapshot?.party_name ||
+    profile?.party_key ||
+    "—"
+  );
+}
+
+function partyInitials(profile?: Profile | null) {
+  const shortName = partyShortName(profile);
+
+  if (!shortName || shortName === "—") return "?";
+
+  if (shortName.length <= 6) return shortName;
+
+  return shortName
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 4)
+    .toUpperCase();
+}
+
+function hasConnectedPartyProfile(profile?: Profile | null) {
+  return Boolean(profile?.party_key && profile?.party_profile_snapshot?.party_name);
+}
+
 export default function StrategyRoomPage() {
   const [activeTab, setActiveTab] = useState<TabId>("today");
   const [data, setData] = useState<ApiResponse | null>(null);
@@ -348,9 +396,12 @@ export default function StrategyRoomPage() {
   async function loadStrategy() {
     setLoading(true);
     setError("");
+
     try {
       const response = await fetch("/api/advisor/strategy-brief", { cache: "no-store" });
+
       if (!response.ok) throw new Error(`Strategy brief API error: ${response.status}`);
+
       const json = (await response.json()) as ApiResponse;
       setData(json);
     } catch (err) {
@@ -402,6 +453,7 @@ export default function StrategyRoomPage() {
       });
 
       if (!response.ok) throw new Error(`Strategy chat API error: ${response.status}`);
+
       const json = (await response.json()) as StrategyChatResponse;
       setChatAnswer(json.answer || "Ο σύμβουλος Noraya δεν επέστρεψε απάντηση.");
     } catch (err) {
@@ -449,15 +501,11 @@ export default function StrategyRoomPage() {
     };
   });
 
-  const profileName = useMemo(() => {
-    const profile = data?.profile;
-    return (
-      profile?.org_name ||
-      profile?.party_profile_snapshot?.party_name ||
-      profile?.party_key ||
-      "Πολιτικός οργανισμός"
-    );
-  }, [data]);
+  const connectedProfile = data?.profile || null;
+  const connectedPartyName = partyDisplayName(connectedProfile);
+  const connectedPartyInitials = partyInitials(connectedProfile);
+  const connectedPartyLogo = connectedProfile?.party_profile_snapshot?.logo_url || "";
+  const isPartyConnected = hasConnectedPartyProfile(connectedProfile);
 
   if (loading) {
     return (
@@ -509,20 +557,60 @@ export default function StrategyRoomPage() {
             </div>
 
             <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-5">
-              <div className="text-xs uppercase tracking-[0.22em] text-zinc-500">Προφίλ</div>
-              <div className="mt-2 text-lg font-semibold text-zinc-100">{profileName}</div>
-              <a
-                href="/onboarding"
-                className="mt-4 inline-flex rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-zinc-200 hover:bg-white/[0.06]"
+              <div className="mb-4 flex items-start gap-4">
+                <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-3xl border border-cyan-300/25 bg-cyan-300/10">
+                  {connectedPartyLogo ? (
+                    <img
+                      src={connectedPartyLogo}
+                      alt={connectedPartyName}
+                      className="h-full w-full object-contain p-2"
+                    />
+                  ) : (
+                    <span className="px-2 text-center text-sm font-semibold text-cyan-100">
+                      {connectedPartyInitials}
+                    </span>
+                  )}
+                </div>
+
+                <div className="min-w-0">
+                  <div className="text-xs uppercase tracking-[0.22em] text-zinc-500">
+                    Συνδεδεμένο προφίλ
+                  </div>
+                  <div className="mt-2 text-lg font-semibold leading-6 text-zinc-100">
+                    {connectedPartyName}
+                  </div>
+                  <div className="mt-1 text-xs text-zinc-500">
+                    {text(connectedProfile?.org_type, "Πολιτικός οργανισμός")}
+                  </div>
+                </div>
+              </div>
+
+              <div
+                className={`mb-4 rounded-2xl border px-4 py-3 text-sm ${
+                  isPartyConnected
+                    ? "border-emerald-300/25 bg-emerald-300/10 text-emerald-100"
+                    : "border-amber-300/25 bg-amber-300/10 text-amber-100"
+                }`}
               >
-                Αλλαγή προφίλ
-              </a>
-              <a
-                href="#noraya-advisor-chat"
-                className="mt-3 inline-flex rounded-2xl bg-cyan-300 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-cyan-200"
-              >
-                Ρώτησε τον σύμβουλο Noraya
-              </a>
+                {isPartyConnected
+                  ? `Συνδεδεμένο με party profile (${connectedProfile?.party_key}).`
+                  : "Δεν έχει συνδεθεί συγκεκριμένο κόμμα. Ο Noraya θα απαντά με χαμηλότερη βεβαιότητα."}
+              </div>
+
+              <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
+                <a
+                  href="/onboarding"
+                  className="inline-flex justify-center rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-zinc-200 hover:bg-white/[0.06]"
+                >
+                  Αλλαγή προφίλ
+                </a>
+                <a
+                  href="#noraya-advisor-chat"
+                  className="inline-flex justify-center rounded-2xl bg-cyan-300 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-cyan-200"
+                >
+                  Ρώτησε τον σύμβουλο Noraya
+                </a>
+              </div>
             </div>
           </div>
         </header>
@@ -1216,6 +1304,7 @@ function MiniLine({ title, value }: { title: string; value: string }) {
 
 function BulletList({ items, fallback }: { items: string[]; fallback: string[] }) {
   const values = items.length > 0 ? items : fallback;
+
   return (
     <ul className="grid gap-2">
       {values.map((item, index) => (
