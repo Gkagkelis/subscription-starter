@@ -47,6 +47,8 @@ export async function GET() {
       question: "string",
       strategic_brief: "object",
       profile: "object | null",
+      party: "string | null",
+      articles: "array | null",
     },
   });
 }
@@ -66,6 +68,11 @@ export async function POST(req: Request) {
   const question = cleanText(body.question, 2000);
   const strategicBrief = body.strategic_brief || body.strategicBrief || null;
   const profile = body.profile || null;
+  const party = cleanText(
+    body.party || profile?.party_name || profile?.organization_type || "",
+    200
+  );
+  const articles = Array.isArray(body.articles) ? body.articles.slice(0, 8) : [];
 
   if (!question) {
     return NextResponse.json(
@@ -101,7 +108,13 @@ export async function POST(req: Request) {
 - τα σενάρια,
 - το message package,
 - το action plan,
-- το προφίλ του χρήστη.
+- το προφίλ και το κόμμα του χρήστη.
+
+ΚΡΙΣΙΜΟ: Η απάντησή σου αλλάζει ανάλογα με το κόμμα.
+- Αν είναι κυβερνητικό κόμμα: υπερασπίζεσαι θεσμική σοβαρότητα, αποφεύγεις επίθεση.
+- Αν είναι αντιπολίτευση: αναδεικνύεις ευκαιρίες κριτικής, χωρίς υπερβολή.
+- Αν είναι τοπικός φορέας/δήμαρχος: εστιάζεις σε τοπική επίδραση και πολίτες.
+Πάντα με βάση τα πραγματικά δεδομένα που έχεις.
 
 Κανόνες:
 - Μην εφευρίσκεις γεγονότα.
@@ -124,10 +137,25 @@ export async function POST(req: Request) {
 
   const userPrompt = `
 ΠΡΟΦΙΛ ΧΡΗΣΤΗ
-${safeJson(profile, 8000)}
+${safeJson(profile, 4000)}
+
+ΚΟΜΜΑ / ΟΡΓΑΝΙΣΜΟΣ
+${party || "Δεν έχει οριστεί"}
 
 STRATEGY BRIEF
-${safeJson(strategicBrief, 18000)}
+${safeJson(strategicBrief, 12000)}
+
+ΑΡΘΡΑ ΒΑΣΗΣ (έως 8)
+${
+  articles.length > 0
+    ? articles
+        .map(
+          (a: any, i: number) =>
+            `${i + 1}. [${a.source || ""}] ${a.title || ""}`
+        )
+        .join("\n")
+    : "Δεν υπάρχουν άρθρα."
+}
 
 ΕΡΩΤΗΣΗ ΧΡΗΣΤΗ
 ${question}
