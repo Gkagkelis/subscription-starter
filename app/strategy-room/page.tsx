@@ -86,9 +86,28 @@ type Profile = {
   [key: string]: unknown;
 };
 
+type AgendaUsedRow = {
+  topic?: string;
+  article_count?: number | null;
+  source_count?: number | null;
+  political_articles?: number | null;
+  agenda_score?: number | null;
+  documentation_level?: string | null;
+  political_risk_level?: string | null;
+  framing_summary?: string | null;
+  recommended_action?: string | null;
+  avoid_action?: string | null;
+  top_sources?: unknown;
+  top_evidence_articles?: unknown;
+  evidence_summary?: string | null;
+};
+
 type ApiResponse = {
   profile?: Profile | null;
   strategic_brief?: StrategicBrief;
+  agenda_used?: AgendaUsedRow[];
+  political_environment?: unknown;
+  political_environment_status?: string;
   source?: string;
 };
 
@@ -131,8 +150,92 @@ function recommendationClass(value?: string) {
   return "border-white/10 bg-white/[0.04] text-zinc-200";
 }
 
+function numberValue(value: unknown, fallback = 0) {
+  const parsed = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function documentationLabel(value?: string | null) {
+  const normalized = String(value || "").toLowerCase();
+
+  if (normalized.includes("high") || normalized.includes("strong") || normalized.includes("ισχυ")) {
+    return "Ισχυρή τεκμηρίωση";
+  }
+
+  if (normalized.includes("medium") || normalized.includes("μεσα")) {
+    return "Μεσαία τεκμηρίωση";
+  }
+
+  if (normalized.includes("low") || normalized.includes("initial") || normalized.includes("starter") || normalized.includes("αρχ")) {
+    return "Αρχική τεκμηρίωση";
+  }
+
+  return "Τεκμηρίωση υπό έλεγχο";
+}
+
+function riskLabel(value?: string | null) {
+  const normalized = String(value || "").toLowerCase();
+
+  if (normalized.includes("critical") || normalized.includes("high") || normalized.includes("υψη")) {
+    return "Υψηλή ένταση";
+  }
+
+  if (normalized.includes("medium") || normalized.includes("μεσα")) {
+    return "Μεσαία ένταση";
+  }
+
+  if (normalized.includes("low") || normalized.includes("χαμη")) {
+    return "Χαμηλή ένταση";
+  }
+
+  return "Ένταση υπό παρακολούθηση";
+}
+
+function signalToneClass(value?: string | null) {
+  const label = riskLabel(value);
+
+  if (label.includes("Υψηλή")) return "border-red-300/25 bg-red-300/10 text-red-100";
+  if (label.includes("Μεσαία")) return "border-amber-300/25 bg-amber-300/10 text-amber-100";
+  if (label.includes("Χαμηλή")) return "border-emerald-300/25 bg-emerald-300/10 text-emerald-100";
+
+  return "border-white/10 bg-white/[0.04] text-zinc-300";
+}
+
+function docToneClass(value?: string | null) {
+  const label = documentationLabel(value);
+
+  if (label.includes("Ισχυρή")) return "border-emerald-300/25 bg-emerald-300/10 text-emerald-100";
+  if (label.includes("Μεσαία")) return "border-cyan-300/25 bg-cyan-300/10 text-cyan-100";
+  if (label.includes("Αρχική")) return "border-amber-300/25 bg-amber-300/10 text-amber-100";
+
+  return "border-white/10 bg-white/[0.04] text-zinc-300";
+}
+
+function evidenceArticleItems(value: unknown): Array<{ title: string; source?: string; url?: string }> {
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .slice(0, 6)
+    .map((item) => {
+      if (typeof item === "string") return { title: item };
+
+      if (item && typeof item === "object") {
+        const record = item as Record<string, unknown>;
+
+        return {
+          title: String(record.title || record.headline || record.url || "Άρθρο τεκμηρίωσης"),
+          source: record.source ? String(record.source) : undefined,
+          url: record.url || record.link ? String(record.url || record.link) : undefined,
+        };
+      }
+
+      return null;
+    })
+    .filter((item): item is { title: string; source?: string; url?: string } => Boolean(item?.title));
+}
+
 export default function StrategyRoomPage() {
-  const [activeTab, setActiveTab] = useState("today");
+  const [activeTab, setActiveTab] = useState<TabId>("today");
   const [data, setData] = useState<ApiResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -161,7 +264,6 @@ export default function StrategyRoomPage() {
     loadStrategy();
   }, []);
 
-  // Εξάγουμε party και articles από τα δεδομένα
   const partyName =
     data?.profile?.party_profile_snapshot?.party_name ||
     data?.profile?.party_key ||
@@ -169,7 +271,7 @@ export default function StrategyRoomPage() {
     "";
 
   const evidenceArticles = Array.isArray(data?.strategic_brief?.evidence?.data_points)
-    ? (data!.strategic_brief!.evidence!.data_points as string[])
+    ? data.strategic_brief.evidence.data_points
         .slice(0, 8)
         .map((point) => ({ title: point, source: "" }))
     : [];
@@ -219,6 +321,29 @@ export default function StrategyRoomPage() {
   const actionPlan = brief.action_plan || {};
   const monitoring = brief.monitoring_plan || {};
   const evidence = brief.evidence || {};
+
+  const agendaRows = Array.isArray(data?.agenda_used)
+    ? data.agenda_used.filter((row) => row?.topic && row.topic !== "Μη ταξινομημένο").slice(0, 5)
+    : [];
+
+  const totalAgendaWeight = agendaRows.reduce((sum, row) => {
+    return sum + Math.max(numberValue(row.agenda_score, row.article_count || 0), 1);
+  }, 0);
+
+  const rankedAgenda = agendaRows.map((row, index) => {
+    const rawWeight = Math.max(numberValue(row.agenda_score, row.article_count || 0), 1);
+    const share = totalAgendaWeight > 0 ? Math.round((rawWeight / totalAgendaWeight) * 100) : 0;
+
+    return {
+      ...row,
+      rank: index + 1,
+      weight: rawWeight,
+      share,
+      signalLabel: riskLabel(row.political_risk_level),
+      documentationLabel: documentationLabel(row.documentation_level),
+      evidenceArticles: evidenceArticleItems(row.top_evidence_articles),
+    };
+  });
 
   const profileName = useMemo(() => {
     const profile = data?.profile;
@@ -310,6 +435,8 @@ export default function StrategyRoomPage() {
             tone="negative"
           />
         </section>
+
+        <AgendaRankingPanel items={rankedAgenda} />
 
         <section className="mb-8 rounded-[2rem] border border-cyan-300/20 bg-cyan-300/[0.045] p-5">
           <div className="grid gap-3 md:grid-cols-5">
@@ -474,7 +601,6 @@ export default function StrategyRoomPage() {
           </section>
         )}
 
-        {/* NORAYA ADVISOR CHAT */}
         <section
           id="noraya-advisor-chat"
           className="mt-8 rounded-[2rem] border border-cyan-300/20 bg-cyan-300/[0.045] p-6"
@@ -577,6 +703,187 @@ export default function StrategyRoomPage() {
         </section>
       </div>
     </main>
+  );
+}
+
+function AgendaRankingPanel({
+  items,
+}: {
+  items: Array<
+    AgendaUsedRow & {
+      rank: number;
+      share: number;
+      signalLabel: string;
+      documentationLabel: string;
+      evidenceArticles: Array<{ title: string; source?: string; url?: string }>;
+    }
+  >;
+}) {
+  if (!items.length) {
+    return (
+      <section className="mb-8 rounded-[2rem] border border-white/10 bg-white/[0.025] p-5">
+        <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+          <div>
+            <div className="text-xs uppercase tracking-[0.22em] text-cyan-200/80">
+              Ιεράρχηση ατζέντας
+            </div>
+            <h2 className="mt-2 text-2xl font-semibold">Δεν υπάρχουν ακόμη αρκετά ταξινομημένα θέματα</h2>
+          </div>
+          <div className="rounded-full border border-amber-300/25 bg-amber-300/10 px-3 py-1 text-xs text-amber-100">
+            Υπό επεξεργασία
+          </div>
+        </div>
+        <p className="mt-4 max-w-4xl text-sm leading-7 text-zinc-400">
+          Ο Noraya χρειάζεται περισσότερα ταξινομημένα άρθρα για να εμφανίσει αξιόπιστη ιεράρχηση ατζέντας,
+          ένταση σήματος και βάση τεκμηρίωσης.
+        </p>
+      </section>
+    );
+  }
+
+  return (
+    <section className="mb-8 rounded-[2rem] border border-cyan-300/20 bg-cyan-300/[0.045] p-5">
+      <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+        <div>
+          <div className="text-xs uppercase tracking-[0.22em] text-cyan-200/80">
+            Ιεράρχηση ατζέντας
+          </div>
+          <h2 className="mt-2 text-2xl font-semibold">Τι ανεβαίνει σήμερα</h2>
+          <p className="mt-2 max-w-3xl text-sm leading-7 text-zinc-400">
+            Η βαρύτητα δεν είναι εκλογικό ποσοστό. Είναι σχετική ένδειξη ατζέντας με βάση άρθρα,
+            πηγές, πολιτική συνάφεια, ένταση και διαθέσιμη τεκμηρίωση.
+          </p>
+        </div>
+
+        <div className="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-xs text-zinc-300">
+          Top {items.length} agenda signals
+        </div>
+      </div>
+
+      <div className="grid gap-4">
+        {items.map((item) => {
+          const barWidth = `${Math.max(item.share, 8)}%`;
+
+          return (
+            <article
+              key={`${item.topic}-${item.rank}`}
+              className="rounded-[1.5rem] border border-white/10 bg-black/20 p-4"
+            >
+              <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-cyan-300/25 bg-cyan-300/10 text-sm font-semibold text-cyan-100">
+                      #{item.rank}
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-zinc-100">
+                        {item.topic}
+                      </h3>
+                      <p className="mt-1 text-xs text-zinc-500">
+                        {item.article_count || 0} άρθρα · {item.source_count || 0} πηγές · {item.political_articles || 0} πολιτικά άρθρα
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-4">
+                    <div className="mb-2 flex items-center justify-between text-xs text-zinc-500">
+                      <span>Σχετική βαρύτητα ατζέντας</span>
+                      <span className="font-medium text-zinc-300">{item.share}%</span>
+                    </div>
+                    <div className="h-3 overflow-hidden rounded-full bg-white/10">
+                      <div
+                        className="h-full rounded-full bg-cyan-300"
+                        style={{ width: barWidth }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex shrink-0 flex-wrap gap-2 md:justify-end">
+                  <span className={`rounded-full border px-3 py-1 text-xs ${signalToneClass(item.political_risk_level)}`}>
+                    {item.signalLabel}
+                  </span>
+                  <span className={`rounded-full border px-3 py-1 text-xs ${docToneClass(item.documentation_level)}`}>
+                    {item.documentationLabel}
+                  </span>
+                </div>
+              </div>
+
+              <details className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                <summary className="cursor-pointer text-sm font-medium text-zinc-300">
+                  Από πού προκύπτει αυτό;
+                </summary>
+
+                <div className="mt-4 grid gap-4 lg:grid-cols-2">
+                  <div>
+                    <div className="text-xs uppercase tracking-[0.18em] text-zinc-500">
+                      Ανάγνωση / framing
+                    </div>
+                    <p className="mt-2 text-sm leading-7 text-zinc-300">
+                      {text(
+                        item.framing_summary,
+                        "Δεν υπάρχει ακόμη πλήρης framing ανάλυση για αυτό το θέμα."
+                      )}
+                    </p>
+                  </div>
+
+                  <div>
+                    <div className="text-xs uppercase tracking-[0.18em] text-zinc-500">
+                      Προτεινόμενη προσοχή
+                    </div>
+                    <p className="mt-2 text-sm leading-7 text-zinc-300">
+                      {text(
+                        item.evidence_summary || item.recommended_action,
+                        "Χρειάζεται παρακολούθηση μέχρι να ισχυροποιηθεί το σήμα."
+                      )}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-4">
+                  <div className="text-xs uppercase tracking-[0.18em] text-zinc-500">
+                    Άρθρα / στοιχεία βάσης
+                  </div>
+
+                  {item.evidenceArticles.length > 0 ? (
+                    <div className="mt-3 grid gap-2">
+                      {item.evidenceArticles.map((article, index) => (
+                        <div
+                          key={`${article.title}-${index}`}
+                          className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm leading-6 text-zinc-300"
+                        >
+                          {article.url ? (
+                            <a
+                              href={article.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-cyan-100 hover:text-cyan-200"
+                            >
+                              {article.title}
+                            </a>
+                          ) : (
+                            <span>{article.title}</span>
+                          )}
+                          {article.source ? (
+                            <div className="mt-1 text-xs text-zinc-500">
+                              {article.source}
+                            </div>
+                          ) : null}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="mt-3 text-sm leading-7 text-zinc-500">
+                      Δεν έχουν επιστραφεί ακόμη συγκεκριμένα άρθρα για αυτό το θέμα.
+                    </p>
+                  )}
+                </div>
+              </details>
+            </article>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
