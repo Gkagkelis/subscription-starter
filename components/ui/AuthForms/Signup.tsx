@@ -16,8 +16,8 @@ export default function SignUp({ allowEmail, redirectMethod }: SignUpProps) {
   const router = redirectMethod === 'client' ? useRouter() : null;
   const searchParams = useSearchParams();
 
-  // ✅ Αν δεν υπάρχει next, βάλε default που θες
-  const next = searchParams.get('next') || '/dashboard/projects/new';
+  // ✅ Αν δεν υπάρχει next, πήγαινε στο onboarding
+  const next = searchParams.get('next') || '/onboarding';
   const nextEncoded = encodeURIComponent(next);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -59,7 +59,12 @@ export default function SignUp({ allowEmail, redirectMethod }: SignUpProps) {
             />
           </div>
 
-          <Button variant="slim" type="submit" className="mt-1" loading={isSubmitting}>
+          <Button
+            variant="slim"
+            type="submit"
+            className="mt-1"
+            loading={isSubmitting}
+          >
             Sign up
           </Button>
         </div>
