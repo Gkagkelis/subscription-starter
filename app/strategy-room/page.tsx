@@ -102,11 +102,67 @@ type AgendaUsedRow = {
   evidence_summary?: string | null;
 };
 
+type ActorTrendRow = {
+  actor_key?: string | null;
+  party_key?: string | null;
+  party_label?: string | null;
+  poll_count?: number | null;
+  avg_value?: number | null;
+  min_value?: number | null;
+  max_value?: number | null;
+  avg_reported_change?: number | null;
+  best_rank?: number | null;
+  worst_rank?: number | null;
+  latest_value?: number | null;
+  latest_rank?: number | null;
+  latest_poll?: string | null;
+  latest_fieldwork_end?: string | null;
+  trend_reading?: string | null;
+  signal_strength?: string | null;
+};
+
+type RecentPollRow = {
+  survey_id?: string | null;
+  survey_label?: string | null;
+  pollster?: string | null;
+  commissioner?: string | null;
+  publication_name?: string | null;
+  fieldwork_start?: string | null;
+  fieldwork_end?: string | null;
+  published_at?: string | null;
+  sample_size?: number | null;
+  survey_type?: string | null;
+  documentation_level?: string | null;
+  verification_status?: string | null;
+  result_count?: number | null;
+  results?: unknown;
+};
+
+type PoliticalEnvironment = {
+  snapshot_id?: string | null;
+  snapshot_date?: string | null;
+  title?: string | null;
+  summary?: string | null;
+  plain_language_summary?: string | null;
+  source_type?: string | null;
+  government_momentum?: string | null;
+  opposition_structure?: string | null;
+  dominant_dynamic?: string | null;
+  party_momentum?: Record<string, unknown> | null;
+  party_specific_implications?: Record<string, unknown> | null;
+  strategic_implications?: unknown;
+  source_urls?: unknown;
+  documentation_level?: string | null;
+  verification_status?: string | null;
+  recent_polls?: RecentPollRow[] | null;
+  actor_trends?: ActorTrendRow[] | null;
+};
+
 type ApiResponse = {
   profile?: Profile | null;
   strategic_brief?: StrategicBrief;
   agenda_used?: AgendaUsedRow[];
-  political_environment?: unknown;
+  political_environment?: PoliticalEnvironment | null;
   political_environment_status?: string;
   source?: string;
 };
@@ -234,6 +290,50 @@ function evidenceArticleItems(value: unknown): Array<{ title: string; source?: s
     .filter((item): item is { title: string; source?: string; url?: string } => Boolean(item?.title));
 }
 
+function formatPercent(value: unknown) {
+  const parsed = numberValue(value, Number.NaN);
+  if (!Number.isFinite(parsed)) return "—";
+  return `${parsed.toFixed(1).replace(".", ",")}%`;
+}
+
+function shortDate(value?: string | null) {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString("el-GR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+}
+
+function partyImplicationText(
+  environment: PoliticalEnvironment | null | undefined,
+  partyKey?: string
+) {
+  if (!environment?.party_specific_implications || !partyKey) {
+    return "";
+  }
+
+  const value = environment.party_specific_implications[partyKey];
+
+  return typeof value === "string" ? value : "";
+}
+
+function topActorTrends(environment: PoliticalEnvironment | null | undefined) {
+  return Array.isArray(environment?.actor_trends)
+    ? environment.actor_trends
+        .filter((trend) => trend?.actor_key && trend.actor_key !== "undecided" && trend.actor_key !== "other")
+        .slice(0, 8)
+    : [];
+}
+
+function recentPolls(environment: PoliticalEnvironment | null | undefined) {
+  return Array.isArray(environment?.recent_polls)
+    ? environment.recent_polls.slice(0, 4)
+    : [];
+}
+
 export default function StrategyRoomPage() {
   const [activeTab, setActiveTab] = useState<TabId>("today");
   const [data, setData] = useState<ApiResponse | null>(null);
@@ -321,6 +421,10 @@ export default function StrategyRoomPage() {
   const actionPlan = brief.action_plan || {};
   const monitoring = brief.monitoring_plan || {};
   const evidence = brief.evidence || {};
+
+  const politicalEnvironment = data?.political_environment || null;
+  const selectedPartyKey = data?.profile?.party_key || "";
+  const selectedPartyImplication = partyImplicationText(politicalEnvironment, selectedPartyKey);
 
   const agendaRows = Array.isArray(data?.agenda_used)
     ? data.agenda_used.filter((row) => row?.topic && row.topic !== "Μη ταξινομημένο").slice(0, 5)
@@ -437,6 +541,13 @@ export default function StrategyRoomPage() {
         </section>
 
         <AgendaRankingPanel items={rankedAgenda} />
+
+        <PoliticalEnvironmentPanel
+          environment={politicalEnvironment}
+          partyName={partyName}
+          partyImplication={selectedPartyImplication}
+          status={data?.political_environment_status}
+        />
 
         <section className="mb-8 rounded-[2rem] border border-cyan-300/20 bg-cyan-300/[0.045] p-5">
           <div className="grid gap-3 md:grid-cols-5">
@@ -706,6 +817,182 @@ export default function StrategyRoomPage() {
   );
 }
 
+function PoliticalEnvironmentPanel({
+  environment,
+  partyName,
+  partyImplication,
+  status,
+}: {
+  environment: PoliticalEnvironment | null;
+  partyName: string;
+  partyImplication: string;
+  status?: string;
+}) {
+  const trends = topActorTrends(environment);
+  const polls = recentPolls(environment);
+
+  if (!environment) {
+    return (
+      <section className="mb-8 rounded-[2rem] border border-white/10 bg-white/[0.025] p-5">
+        <div className="text-xs uppercase tracking-[0.22em] text-cyan-200/80">
+          Πολιτικό περιβάλλον
+        </div>
+        <h2 className="mt-2 text-2xl font-semibold">Δεν έχει φορτωθεί ακόμη δημοσκοπικό περιβάλλον</h2>
+        <p className="mt-3 text-sm leading-7 text-zinc-400">
+          Ο Noraya θα συνεχίσει με βάση τα agenda signals, αλλά χωρίς πλήρη δημοσκοπική εικόνα.
+          {status ? ` ${status}` : ""}
+        </p>
+      </section>
+    );
+  }
+
+  return (
+    <section className="mb-8 rounded-[2rem] border border-white/10 bg-white/[0.03] p-5">
+      <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <div className="text-xs uppercase tracking-[0.22em] text-cyan-200/80">
+            Πολιτικό / δημοσκοπικό περιβάλλον
+          </div>
+          <h2 className="mt-2 text-2xl font-semibold">
+            {text(environment.title, "Τρέχον πολιτικό περιβάλλον")}
+          </h2>
+          <p className="mt-2 max-w-4xl text-sm leading-7 text-zinc-400">
+            {text(
+              environment.plain_language_summary || environment.summary,
+              "Δεν υπάρχει ακόμη διαθέσιμη σύνοψη πολιτικού περιβάλλοντος."
+            )}
+          </p>
+        </div>
+
+        <div className="flex shrink-0 flex-wrap gap-2">
+          <span className="rounded-full border border-cyan-300/25 bg-cyan-300/10 px-3 py-1 text-xs text-cyan-100">
+            {shortDate(environment.snapshot_date)}
+          </span>
+          <span className={`rounded-full border px-3 py-1 text-xs ${docToneClass(environment.documentation_level)}`}>
+            {documentationLabel(environment.documentation_level)}
+          </span>
+        </div>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="rounded-[1.5rem] border border-cyan-300/15 bg-cyan-300/[0.045] p-5">
+          <div className="text-xs uppercase tracking-[0.18em] text-cyan-200/80">
+            Τι σημαίνει για {partyName || "το κόμμα του χρήστη"}
+          </div>
+          <p className="mt-3 text-sm leading-7 text-zinc-200">
+            {text(
+              partyImplication,
+              "Δεν υπάρχει ακόμη ειδική ανάγνωση για αυτό το κόμμα. Ο Noraya χρησιμοποιεί το γενικό πολιτικό περιβάλλον με χαμηλότερη βεβαιότητα."
+            )}
+          </p>
+        </div>
+
+        <div className="rounded-[1.5rem] border border-white/10 bg-black/20 p-5">
+          <div className="text-xs uppercase tracking-[0.18em] text-zinc-500">
+            Βασική δυναμική
+          </div>
+          <p className="mt-3 text-sm leading-7 text-zinc-300">
+            {text(environment.dominant_dynamic, "Η βασική δυναμική δεν έχει ακόμη υπολογιστεί.")}
+          </p>
+          <div className="mt-4 grid gap-2">
+            <MiniLine title="Κυβερνητικό momentum" value={text(environment.government_momentum, "—")} />
+            <MiniLine title="Δομή αντιπολίτευσης" value={text(environment.opposition_structure, "—")} />
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-5 grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
+        <div className="rounded-[1.5rem] border border-white/10 bg-black/20 p-5">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div className="text-xs uppercase tracking-[0.18em] text-zinc-500">
+              Τελευταίες δημοσκοπήσεις
+            </div>
+            <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-zinc-400">
+              {polls.length} μετρήσεις
+            </div>
+          </div>
+
+          {polls.length ? (
+            <div className="grid gap-2">
+              {polls.map((poll, index) => (
+                <div
+                  key={`${poll.survey_id || poll.survey_label}-${index}`}
+                  className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3"
+                >
+                  <div className="text-sm font-medium text-zinc-200">
+                    {text(poll.survey_label, `${poll.pollster || "Δημοσκόπηση"} / ${poll.commissioner || "—"}`)}
+                  </div>
+                  <div className="mt-1 text-xs text-zinc-500">
+                    Δείγμα: {poll.sample_size || "—"} · αποτελέσματα: {poll.result_count || "—"} · έως {shortDate(poll.fieldwork_end)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm leading-7 text-zinc-500">
+              Δεν έχουν φορτωθεί ακόμη structured polling records.
+            </p>
+          )}
+        </div>
+
+        <div className="rounded-[1.5rem] border border-white/10 bg-black/20 p-5">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div className="text-xs uppercase tracking-[0.18em] text-zinc-500">
+              Τάσεις κομμάτων / actors
+            </div>
+            <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-zinc-400">
+              Top {trends.length}
+            </div>
+          </div>
+
+          {trends.length ? (
+            <div className="grid gap-2 md:grid-cols-2">
+              {trends.map((trend) => (
+                <div
+                  key={trend.actor_key || trend.party_label || "actor"}
+                  className="rounded-2xl border border-white/10 bg-white/[0.03] p-4"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="text-sm font-semibold text-zinc-100">
+                        {trend.party_label || trend.actor_key}
+                      </div>
+                      <div className="mt-1 text-xs text-zinc-500">
+                        {trend.trend_reading || "Χωρίς τάση"}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-lg font-semibold text-cyan-100">
+                        {formatPercent(trend.avg_value)}
+                      </div>
+                      <div className="text-xs text-zinc-500">
+                        μ.ό. {trend.poll_count || 0} μετρ.
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <span className="rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-xs text-zinc-400">
+                      τελευταία: {formatPercent(trend.latest_value)}
+                    </span>
+                    <span className="rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-xs text-zinc-400">
+                      θέση #{trend.latest_rank || "—"}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm leading-7 text-zinc-500">
+              Δεν έχουν υπολογιστεί ακόμη τάσεις κομμάτων.
+            </p>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function AgendaRankingPanel({
   items,
 }: {
@@ -914,6 +1201,15 @@ function MiniBox({ title, textValue }: { title: string; textValue: string }) {
     <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
       <div className="text-xs uppercase tracking-[0.22em] text-zinc-500">{title}</div>
       <p className="mt-2 text-sm leading-6 text-zinc-300">{textValue}</p>
+    </div>
+  );
+}
+
+function MiniLine({ title, value }: { title: string; value: string }) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
+      <div className="text-xs uppercase tracking-[0.18em] text-zinc-500">{title}</div>
+      <div className="mt-2 text-sm leading-6 text-zinc-300">{value}</div>
     </div>
   );
 }
