@@ -54,23 +54,25 @@ export default async function SignIn({
     <div className="flex justify-center height-screen-helper">
       <div className="flex flex-col justify-between max-w-lg p-3 m-auto w-80">
         <div className="flex justify-center pb-12">
-          <Image 
-            src="/axiprova.jpeg" 
-            alt="Axiprova" 
-            width={200} 
-            height={80}
+          <Image
+            src="/noraya.png"
+            alt="Noraya"
+            width={240}
+            height={110}
             style={{ objectFit: 'contain' }}
+            priority
           />
         </div>
+
         <Card
           title={
             viewProp === 'forgot_password'
-              ? 'Reset Password'
+              ? 'Επαναφορά κωδικού'
               : viewProp === 'update_password'
-                ? 'Update Password'
+                ? 'Νέος κωδικός'
                 : viewProp === 'signup'
-                  ? 'Sign Up'
-                  : 'Sign In'
+                  ? 'Δημιουργία λογαριασμού'
+                  : 'Σύνδεση'
           }
         >
           {viewProp === 'password_signin' && (
@@ -79,6 +81,7 @@ export default async function SignIn({
               redirectMethod={redirectMethod}
             />
           )}
+
           {viewProp === 'email_signin' && (
             <EmailSignIn
               allowPassword={allowPassword}
@@ -86,6 +89,7 @@ export default async function SignIn({
               disableButton={searchParams.disable_button}
             />
           )}
+
           {viewProp === 'forgot_password' && (
             <ForgotPassword
               allowEmail={allowEmail}
@@ -93,17 +97,20 @@ export default async function SignIn({
               disableButton={searchParams.disable_button}
             />
           )}
+
           {viewProp === 'update_password' && (
             <UpdatePassword redirectMethod={redirectMethod} />
           )}
+
           {viewProp === 'signup' && (
             <SignUp allowEmail={allowEmail} redirectMethod={redirectMethod} />
           )}
+
           {viewProp !== 'update_password' &&
             viewProp !== 'signup' &&
             allowOauth && (
               <>
-                <Separator text="Third-party sign-in" />
+                <Separator text="Σύνδεση μέσω τρίτης υπηρεσίας" />
                 <OauthSignIn />
               </>
             )}
