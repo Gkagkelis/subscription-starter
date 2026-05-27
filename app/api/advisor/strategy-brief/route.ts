@@ -30,6 +30,27 @@ type AgendaRow = {
   evidence_summary: string | null;
 };
 
+type PoliticalEnvironmentRow = {
+  snapshot_id?: string | null;
+  snapshot_date?: string | null;
+  title?: string | null;
+  summary?: string | null;
+  plain_language_summary?: string | null;
+  source_type?: string | null;
+  government_momentum?: string | null;
+  opposition_structure?: string | null;
+  dominant_dynamic?: string | null;
+  key_polling_findings?: unknown;
+  party_momentum?: Record<string, unknown> | null;
+  party_specific_implications?: Record<string, unknown> | null;
+  strategic_implications?: unknown;
+  source_urls?: unknown;
+  documentation_level?: string | null;
+  verification_status?: string | null;
+  recent_polls?: unknown;
+  actor_trends?: unknown;
+};
+
 function cleanText(value: unknown, maxLength = 1000) {
   return String(value || "")
     .replace(/<[^>]*>/g, "")
@@ -180,11 +201,97 @@ ${safeJson(row.top_evidence_articles, 2800)}
     .join("\n---\n");
 }
 
+function buildPoliticalEnvironmentContext(
+  environment: PoliticalEnvironmentRow | null,
+  partyKey?: string | null
+) {
+  if (!environment) {
+    return `
+ΤΡΕΧΟΝ ΠΟΛΙΤΙΚΟ ΠΕΡΙΒΑΛΛΟΝ
+
+Δεν υπάρχει ακόμη αποθηκευμένο political environment snapshot.
+Μην εφεύρεις δημοσκοπικά ποσοστά.
+Αν χρειαστεί, πες ότι η δημοσκοπική τεκμηρίωση δεν έχει φορτωθεί ακόμη.
+`;
+  }
+
+  const partyImplications = environment.party_specific_implications || {};
+  const selectedPartyImplication =
+    partyKey && typeof partyImplications === "object"
+      ? (partyImplications as Record<string, unknown>)[partyKey]
+      : null;
+
+  const partyMomentum = environment.party_momentum || {};
+  const selectedPartyMomentum =
+    partyKey && typeof partyMomentum === "object"
+      ? (partyMomentum as Record<string, unknown>)[partyKey]
+      : null;
+
+  return `
+ΤΡΕΧΟΝ ΠΟΛΙΤΙΚΟ ΠΕΡΙΒΑΛΛΟΝ
+
+Snapshot:
+${environment.title || "Δεν έχει τίτλο"}
+
+Ημερομηνία:
+${environment.snapshot_date || "Άγνωστη"}
+
+Σύνοψη:
+${cleanText(environment.summary, 2200)}
+
+Απλή πολιτική ανάγνωση:
+${cleanText(environment.plain_language_summary, 2200)}
+
+Κυβερνητικό momentum:
+${cleanText(environment.government_momentum, 1400)}
+
+Δομή αντιπολίτευσης:
+${cleanText(environment.opposition_structure, 1400)}
+
+Κύρια δυναμική:
+${cleanText(environment.dominant_dynamic, 1600)}
+
+Ειδική επίπτωση για το κόμμα του χρήστη (${partyKey || "χωρίς party_key"}):
+${
+  selectedPartyImplication
+    ? cleanText(selectedPartyImplication, 2200)
+    : "Δεν υπάρχει ειδική επίπτωση για αυτό το κόμμα. Χρησιμοποίησε το γενικό πολιτικό περιβάλλον με χαμηλότερη βεβαιότητα."
+}
+
+Momentum για το κόμμα του χρήστη:
+${
+  selectedPartyMomentum
+    ? safeJson(selectedPartyMomentum, 1800)
+    : "Δεν υπάρχει ειδικό momentum για αυτό το κόμμα."
+}
+
+Τελευταίες δημοσκοπήσεις:
+${safeJson(environment.recent_polls, 5000)}
+
+Τάσεις κομμάτων / actors:
+${safeJson(environment.actor_trends, 5000)}
+
+Στρατηγικές επιπτώσεις:
+${safeJson(environment.strategic_implications, 3500)}
+
+Πηγές:
+${safeJson(environment.source_urls, 1200)}
+
+Βαθμός τεκμηρίωσης πολιτικού περιβάλλοντος:
+${environment.documentation_level || "άγνωστος"}
+
+Verification status:
+${environment.verification_status || "άγνωστο"}
+`;
+}
+
 function buildFallbackResponse(params: {
   profile: UserPoliticalProfile | null;
   topic: string;
   agendaUsed: AgendaRow[];
   processingStatus: string;
+  politicalEnvironment?: PoliticalEnvironmentRow | null;
+  politicalEnvironmentStatus?: string;
   warning?: string;
 }) {
   return NextResponse.json({
@@ -195,6 +302,8 @@ function buildFallbackResponse(params: {
       processingStatus: params.processingStatus,
     }),
     agenda_used: params.agendaUsed,
+    political_environment: params.politicalEnvironment || null,
+    political_environment_status: params.politicalEnvironmentStatus || null,
     processing_status: params.processingStatus,
     source: "fallback",
     warning: params.warning || null,
@@ -273,6 +382,21 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: agendaError.message }, { status: 500 });
   }
 
+  const { data: politicalEnvironmentData, error: politicalEnvironmentError } =
+    await serviceClient
+      .from("v_advisor_political_environment")
+      .select("*")
+      .maybeSingle();
+
+  const politicalEnvironment = (politicalEnvironmentData ||
+    null) as PoliticalEnvironmentRow | null;
+
+  const politicalEnvironmentStatus = politicalEnvironmentError
+    ? `Δεν φορτώθηκε political environment snapshot: ${politicalEnvironmentError.message}`
+    : politicalEnvironment
+      ? "Το political environment snapshot φορτώθηκε επιτυχώς."
+      : "Δεν υπάρχει ακόμη political environment snapshot.";
+
   const rows = ((agendaData || []) as AgendaRow[]).filter(Boolean);
 
   const unclassifiedSignal =
@@ -294,6 +418,8 @@ export async function GET(req: Request) {
       topic: "Τρέχουσα πολιτική ατζέντα",
       agendaUsed: [],
       processingStatus,
+      politicalEnvironment,
+      politicalEnvironmentStatus,
       warning: "No classified agenda signals available.",
     });
   }
@@ -302,6 +428,10 @@ export async function GET(req: Request) {
 
   const profileContext = buildProfileContext(profile);
   const agendaContext = buildAgendaContext(signals);
+  const politicalEnvironmentContext = buildPoliticalEnvironmentContext(
+    politicalEnvironment,
+    profile?.party_key || null
+  );
 
   const systemPrompt = `
 ${buildNorayaStrategicSystemPrompt()}
@@ -312,11 +442,17 @@ ${buildNorayaStrategicJsonInstruction()}
   const userPrompt = `
 ${profileContext}
 
+ΤΡΕΧΟΝ ΠΟΛΙΤΙΚΟ / ΔΗΜΟΣΚΟΠΙΚΟ ΠΕΡΙΒΑΛΛΟΝ
+${politicalEnvironmentContext}
+
 ΤΡΕΧΟΝΤΑ AGENDA SIGNALS
 ${agendaContext}
 
 ΚΑΤΑΣΤΑΣΗ ΕΠΕΞΕΡΓΑΣΙΑΣ
 ${processingStatus}
+
+ΚΑΤΑΣΤΑΣΗ ΠΟΛΙΤΙΚΟΥ ΠΕΡΙΒΑΛΛΟΝΤΟΣ
+${politicalEnvironmentStatus}
 
 ΑΠΟΣΤΟΛΗ
 
@@ -325,6 +461,22 @@ ${processingStatus}
 Μη γράψεις σαν dashboard.
 Μη δείξεις raw metrics στον τελικό χρήστη.
 Μην εφεύρεις στοιχεία που δεν υπάρχουν.
+
+Χρησιμοποίησε το πολιτικό / δημοσκοπικό περιβάλλον μόνο για να εξηγήσεις τι σημαίνει το θέμα για το συγκεκριμένο κόμμα του χρήστη.
+
+Μη γράψεις γενική ανάλυση πολιτικού σκηνικού. Πάντα να απαντάς:
+- τι σημαίνει για το κόμμα του χρήστη,
+- ποιοι αντίπαλοι το πιέζουν,
+- ποιο κοινό μπορεί να κερδίσει ή να χάσει,
+- αν το θέμα είναι ευκαιρία ή απειλή,
+- τι πρέπει να κάνει σήμερα,
+- τι πρέπει να αποφύγει.
+
+Αν υπάρχουν πολλές δημοσκοπήσεις, μη βασιστείς σε μία ως απόλυτη αλήθεια. Διάβασε τάση, μέσο σήμα και διακύμανση.
+
+Μπορείς να αναφέρεις ποσοστά μόνο όταν υπάρχουν στα δεδομένα. Μην εφευρίσκεις ποσοστά.
+
+Μη χρησιμοποιείς τεχνικούς όρους όπως fragmentation. Γράφε απλά: «η αντιπολίτευση είναι κομμένη σε πολλά κέντρα».
 
 Θέλω πλήρες Noraya Strategic Brief:
 - daily brief,
@@ -344,6 +496,8 @@ ${processingStatus}
       topic: mainSignal.topic,
       agendaUsed: signals,
       processingStatus,
+      politicalEnvironment,
+      politicalEnvironmentStatus,
       warning: "Missing ANTHROPIC_API_KEY. Returned fallback strategic brief.",
     });
   }
@@ -385,6 +539,8 @@ ${processingStatus}
         topic: mainSignal.topic,
         agendaUsed: signals,
         processingStatus,
+        politicalEnvironment,
+        politicalEnvironmentStatus,
         warning: message,
       });
     }
@@ -405,6 +561,8 @@ ${processingStatus}
         topic: mainSignal.topic,
         agendaUsed: signals,
         processingStatus,
+        politicalEnvironment,
+        politicalEnvironmentStatus,
         warning: "AI response was not valid JSON. Returned fallback strategic brief.",
       });
     }
@@ -419,6 +577,8 @@ ${processingStatus}
       profile,
       strategic_brief: strategicBrief,
       agenda_used: signals,
+      political_environment: politicalEnvironment,
+      political_environment_status: politicalEnvironmentStatus,
       processing_status: processingStatus,
       source: "ai",
       model: "claude-sonnet-4-6",
@@ -430,6 +590,8 @@ ${processingStatus}
       topic: mainSignal.topic,
       agendaUsed: signals,
       processingStatus,
+      politicalEnvironment,
+      politicalEnvironmentStatus,
       warning:
         err?.name === "AbortError"
           ? "AI timeout. Returned fallback strategic brief."
