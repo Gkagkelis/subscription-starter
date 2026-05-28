@@ -4,6 +4,7 @@ import { createClient as createServiceClient } from "@supabase/supabase-js";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 function cleanText(value: unknown, maxLength = 12000) {
   return String(value || "")
@@ -510,7 +511,7 @@ ${question}`;
 
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 45000);
+    const timeout = setTimeout(() => controller.abort(), 55000);
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -529,7 +530,7 @@ ${question}`;
   {
     type: "web_search_20250305",
     name: "web_search",
-    max_uses: liveResearchRequired ? 5 : 2,
+    max_uses: liveResearchRequired ? 2 : 1,
   },
 ],
       }),
