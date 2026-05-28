@@ -420,36 +420,22 @@ export default function StrategyRoomPage() {
     try {
       const response = await fetch("/api/advisor/strategy-brief", { cache: "no-store" });
 
-if (response.status === 401) {
-  window.location.href = "/signin/password_signin?next=/strategy-room";
-  return;
-}
+      if (response.status === 401) {
+        window.location.href = "/signin/password_signin?next=/strategy-room";
+        return;
+      }
 
-if (response.status === 409) {
-  window.location.href = "/onboarding";
-  return;
-}
+      if (response.status === 409) {
+        window.location.href = "/onboarding";
+        return;
+      }
 
-if (!response.ok) {
-  let errorMessage = `Strategy chat API error: ${response.status}`;
+      if (!response.ok) {
+        throw new Error(`Strategy brief API error: ${response.status}`);
+      }
 
-  try {
-    const errorJson = await response.json();
-    errorMessage =
-      errorJson?.answer ||
-      errorJson?.error ||
-      errorJson?.debug?.details ||
-      errorMessage;
-  } catch {
-    // keep default error
-  }
-
-  throw new Error(errorMessage);
-}
-}
-
-const json = (await response.json()) as ApiResponse;
-setData(json);
+      const json = (await response.json()) as ApiResponse;
+      setData(json);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
@@ -504,7 +490,22 @@ setData(json);
 }),
       });
 
-      if (!response.ok) throw new Error(`Strategy chat API error: ${response.status}`);
+      if (!response.ok) {
+        let errorMessage = `Strategy chat API error: ${response.status}`;
+
+        try {
+          const errorJson = await response.json();
+          errorMessage =
+            errorJson?.answer ||
+            errorJson?.error ||
+            errorJson?.debug?.details ||
+            errorMessage;
+        } catch {
+          // keep default error
+        }
+
+        throw new Error(errorMessage);
+      }
 
       const json = (await response.json()) as StrategyChatResponse;
       const answer = json.answer || "Ο σύμβουλος Noraya δεν επέστρεψε απάντηση.";
