@@ -477,14 +477,17 @@ setData(json);
       const response = await fetch("/api/advisor/strategy-chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          question,
-          conversation_id: conversationId,
-          profile: data?.profile || null,
-          strategic_brief: data?.strategic_brief || null,
-          party: partyName,
-          articles: evidenceArticles,
-        }),
+       body: JSON.stringify({
+  question,
+  conversation_id: conversationId,
+  profile: data?.profile || null,
+  strategic_brief: data?.strategic_brief || null,
+  political_environment: data?.political_environment || null,
+  political_environment_status: data?.political_environment_status || "",
+  agenda_used: data?.agenda_used || [],
+  party: partyName,
+  articles: evidenceArticles,
+}),
       });
 
       if (!response.ok) throw new Error(`Strategy chat API error: ${response.status}`);
