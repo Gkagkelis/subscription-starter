@@ -431,7 +431,21 @@ if (response.status === 409) {
 }
 
 if (!response.ok) {
-  throw new Error(`Strategy brief API error: ${response.status}`);
+  let errorMessage = `Strategy chat API error: ${response.status}`;
+
+  try {
+    const errorJson = await response.json();
+    errorMessage =
+      errorJson?.answer ||
+      errorJson?.error ||
+      errorJson?.debug?.details ||
+      errorMessage;
+  } catch {
+    // keep default error
+  }
+
+  throw new Error(errorMessage);
+}
 }
 
 const json = (await response.json()) as ApiResponse;
