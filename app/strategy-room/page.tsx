@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 
 type Scenario = {
@@ -182,11 +182,11 @@ type StrategyChatResponse = {
 type TabId = "today" | "diagnosis" | "scenarios" | "messages" | "plan";
 
 const tabs: Array<{ id: TabId; label: string; description: string }> = [
-  { id: "today", label: "ΈΘΈ°ΈΦΈΒœ¹Έ±", description: "Έ½ Έ§ΈΦΈΒœÉΈΖ œÄΈΩΈΜΈΙœ³ΈΙΈΚΈ° Έ±ΈΫΈ§Έ≥ΈΫœâœÉΈΖ." },
-  { id: "diagnosis", label: "ΈîΈΙΈ§Έ≥ΈΫœâœÉΈΖ", description: "ΈΛΈΙ œÉΈΖΈΦΈ±Έ·ΈΫΈΒΈΙ œÉœ³œ¹Έ±œ³ΈΖΈ≥ΈΙΈΚΈ§." },
-  { id: "scenarios", label: "ΈΘΈΒΈΫΈ§œ¹ΈΙΈ±", description: "ΈΛΈΙ Έ≥Έ·ΈΫΈΒœ³Έ±ΈΙ Έ±ΈΫ ΈΚΈΙΈΫΈΖΈΗΈΩœçΈΦΈΒ Έ¥ΈΙΈ±œÜΈΩœ¹ΈΒœ³ΈΙΈΚΈ§." },
-  { id: "messages", label: "Έ€ΈΖΈΫœçΈΦΈ±œ³Έ±", description: "ΈΛΈΙ ΈΦœÄΈΩœ¹ΈΩœçΈΦΈΒ ΈΫΈ± œÄΈΩœçΈΦΈΒ Έ¥ΈΖΈΦœ¨œÉΈΙΈ±." },
-  { id: "plan", label: "Έ†ΈΜΈ§ΈΫΈΩ", description: "ΈΛΈΙ ΈΚΈ§ΈΫΈΩœÖΈΦΈΒ œ³œéœ¹Έ± ΈΚΈ±ΈΙ ΈΦΈΒœ³Έ§." },
+  { id: "today", label: "Σήμερα", description: "Η άμεση πολιτική ανάγνωση." },
+  { id: "diagnosis", label: "Διάγνωση", description: "Τι σημαίνει στρατηγικά." },
+  { id: "scenarios", label: "Σενάρια", description: "Τι γίνεται αν κινηθούμε διαφορετικά." },
+  { id: "messages", label: "Μηνύματα", description: "Τι μπορούμε να πούμε δημόσια." },
+  { id: "plan", label: "Πλάνο", description: "Τι κάνουμε τώρα και μετά." },
 ];
 
 function text(value: unknown, fallback: string) {
@@ -201,10 +201,10 @@ function list(values: unknown): string[] {
 }
 
 function recommendationLabel(value?: string) {
-  if (value === "prefer") return "Έ†œ¹ΈΩœ³ΈΒΈΙΈΫœ¨ΈΦΈΒΈΫΈΩ";
-  if (value === "acceptable") return "ΈëœÄΈΩΈ¥ΈΒΈΚœ³œ¨";
-  if (value === "avoid") return "ΈùΈ± Έ±œÄΈΩœÜΈΒœÖœ΅ΈΗΈΒΈ·";
-  return "ΈΘΈΒΈΫΈ§œ¹ΈΙΈΩ";
+  if (value === "prefer") return "Προτεινόμενο";
+  if (value === "acceptable") return "Αποδεκτό";
+  if (value === "avoid") return "Να αποφευχθεί";
+  return "Σενάριο";
 }
 
 function recommendationClass(value?: string) {
@@ -222,45 +222,45 @@ function numberValue(value: unknown, fallback = 0) {
 function documentationLabel(value?: string | null) {
   const normalized = String(value || "").toLowerCase();
 
-  if (normalized.includes("high") || normalized.includes("strong") || normalized.includes("ΈΙœÉœ΅œÖ")) {
-    return "ΈôœÉœ΅œÖœ¹Έ° œ³ΈΒΈΚΈΦΈΖœ¹Έ·œâœÉΈΖ";
+  if (normalized.includes("high") || normalized.includes("strong") || normalized.includes("ισχυ")) {
+    return "Ισχυρή τεκμηρίωση";
   }
 
-  if (normalized.includes("medium") || normalized.includes("ΈΦΈΒœÉΈ±")) {
-    return "Έ€ΈΒœÉΈ±Έ·Έ± œ³ΈΒΈΚΈΦΈΖœ¹Έ·œâœÉΈΖ";
+  if (normalized.includes("medium") || normalized.includes("μεσα")) {
+    return "Μεσαία τεκμηρίωση";
   }
 
-  if (normalized.includes("low") || normalized.includes("initial") || normalized.includes("starter") || normalized.includes("Έ±œ¹œ΅")) {
-    return "Έëœ¹œ΅ΈΙΈΚΈ° œ³ΈΒΈΚΈΦΈΖœ¹Έ·œâœÉΈΖ";
+  if (normalized.includes("low") || normalized.includes("initial") || normalized.includes("starter") || normalized.includes("αρχ")) {
+    return "Αρχική τεκμηρίωση";
   }
 
-  return "ΈΛΈΒΈΚΈΦΈΖœ¹Έ·œâœÉΈΖ œÖœÄœ¨ Έ≠ΈΜΈΒΈ≥œ΅ΈΩ";
+  return "Τεκμηρίωση υπό έλεγχο";
 }
 
 function riskLabel(value?: string | null) {
   const normalized = String(value || "").toLowerCase();
 
-  if (normalized.includes("critical") || normalized.includes("high") || normalized.includes("œÖœàΈΖ")) {
-    return "ΈΞœàΈΖΈΜΈ° Έ≠ΈΫœ³Έ±œÉΈΖ";
+  if (normalized.includes("critical") || normalized.includes("high") || normalized.includes("υψη")) {
+    return "Υψηλή ένταση";
   }
 
-  if (normalized.includes("medium") || normalized.includes("ΈΦΈΒœÉΈ±")) {
-    return "Έ€ΈΒœÉΈ±Έ·Έ± Έ≠ΈΫœ³Έ±œÉΈΖ";
+  if (normalized.includes("medium") || normalized.includes("μεσα")) {
+    return "Μεσαία ένταση";
   }
 
-  if (normalized.includes("low") || normalized.includes("œ΅Έ±ΈΦΈΖ")) {
-    return "ΈßΈ±ΈΦΈΖΈΜΈ° Έ≠ΈΫœ³Έ±œÉΈΖ";
+  if (normalized.includes("low") || normalized.includes("χαμη")) {
+    return "Χαμηλή ένταση";
   }
 
-  return "ΈàΈΫœ³Έ±œÉΈΖ œÖœÄœ¨ œÄΈ±œ¹Έ±ΈΚΈΩΈΜΈΩœçΈΗΈΖœÉΈΖ";
+  return "Ένταση υπό παρακολούθηση";
 }
 
 function signalToneClass(value?: string | null) {
   const label = riskLabel(value);
 
-  if (label.includes("ΈΞœàΈΖΈΜΈ°")) return "border-red-300/25 bg-red-300/10 text-red-100";
-  if (label.includes("Έ€ΈΒœÉΈ±Έ·Έ±")) return "border-amber-300/25 bg-amber-300/10 text-amber-100";
-  if (label.includes("ΈßΈ±ΈΦΈΖΈΜΈ°")) return "border-emerald-300/25 bg-emerald-300/10 text-emerald-100";
+  if (label.includes("Υψηλή")) return "border-red-300/25 bg-red-300/10 text-red-100";
+  if (label.includes("Μεσαία")) return "border-amber-300/25 bg-amber-300/10 text-amber-100";
+  if (label.includes("Χαμηλή")) return "border-emerald-300/25 bg-emerald-300/10 text-emerald-100";
 
   return "border-white/10 bg-white/[0.04] text-zinc-300";
 }
@@ -268,9 +268,9 @@ function signalToneClass(value?: string | null) {
 function docToneClass(value?: string | null) {
   const label = documentationLabel(value);
 
-  if (label.includes("ΈôœÉœ΅œÖœ¹Έ°")) return "border-emerald-300/25 bg-emerald-300/10 text-emerald-100";
-  if (label.includes("Έ€ΈΒœÉΈ±Έ·Έ±")) return "border-cyan-300/25 bg-cyan-300/10 text-cyan-100";
-  if (label.includes("Έëœ¹œ΅ΈΙΈΚΈ°")) return "border-amber-300/25 bg-amber-300/10 text-amber-100";
+  if (label.includes("Ισχυρή")) return "border-emerald-300/25 bg-emerald-300/10 text-emerald-100";
+  if (label.includes("Μεσαία")) return "border-cyan-300/25 bg-cyan-300/10 text-cyan-100";
+  if (label.includes("Αρχική")) return "border-amber-300/25 bg-amber-300/10 text-amber-100";
 
   return "border-white/10 bg-white/[0.04] text-zinc-300";
 }
@@ -287,7 +287,7 @@ function evidenceArticleItems(value: unknown): Array<{ title: string; source?: s
         const record = item as Record<string, unknown>;
 
         return {
-          title: String(record.title || record.headline || record.url || "ΈÜœ¹ΈΗœ¹ΈΩ œ³ΈΒΈΚΈΦΈΖœ¹Έ·œâœÉΈΖœ²"),
+          title: String(record.title || record.headline || record.url || "Άρθρο τεκμηρίωσης"),
           source: record.source ? String(record.source) : undefined,
           url: record.url || record.link ? String(record.url || record.link) : undefined,
         };
@@ -300,12 +300,12 @@ function evidenceArticleItems(value: unknown): Array<{ title: string; source?: s
 
 function formatPercent(value: unknown) {
   const parsed = numberValue(value, Number.NaN);
-  if (!Number.isFinite(parsed)) return "βÄî";
+  if (!Number.isFinite(parsed)) return "—";
   return `${parsed.toFixed(1).replace(".", ",")}%`;
 }
 
 function shortDate(value?: string | null) {
-  if (!value) return "βÄî";
+  if (!value) return "—";
 
   const date = new Date(value);
 
@@ -350,7 +350,7 @@ function partyDisplayName(profile?: Profile | null) {
     profile?.party_profile_snapshot?.party_name ||
     profile?.org_name ||
     profile?.party_key ||
-    "Έ€ΈΖ œÉœÖΈΫΈ¥ΈΒΈ¥ΈΒΈΦΈ≠ΈΫΈΩ œÄœ¹ΈΩœÜΈ·ΈΜ"
+    "Μη συνδεδεμένο προφίλ"
   );
 }
 
@@ -359,25 +359,25 @@ function partyShortName(profile?: Profile | null) {
     return profile.party_profile_snapshot.short_name;
   }
 
-  if (profile?.party_key === "el_as") return "ΈïΈ¦.ΈëΈΘ";
-  if (profile?.party_key === "elpida_dimokratia") return "ΈïΈΜœÄΈ·Έ¥Έ±";
-  if (profile?.party_key === "nd") return "ΈùΈî";
-  if (profile?.party_key === "pasok") return "Έ†ΈëΈΘΈüΈö";
-  if (profile?.party_key === "syriza") return "ΈΘΈΞΈΓΈôΈ•Έë";
-  if (profile?.party_key === "kke") return "ΈöΈöΈï";
+  if (profile?.party_key === "el_as") return "ΕΛ.ΑΣ";
+  if (profile?.party_key === "elpida_dimokratia") return "Ελπίδα";
+  if (profile?.party_key === "nd") return "ΝΔ";
+  if (profile?.party_key === "pasok") return "ΠΑΣΟΚ";
+  if (profile?.party_key === "syriza") return "ΣΥΡΙΖΑ";
+  if (profile?.party_key === "kke") return "ΚΚΕ";
 
   return (
     profile?.party_profile_snapshot?.party_name ||
     profile?.org_name ||
     profile?.party_key ||
-    "βÄî"
+    "—"
   );
 }
 
 function partyInitials(profile?: Profile | null) {
   const shortName = partyShortName(profile);
 
-  if (!shortName || shortName === "βÄî") return "?";
+  if (!shortName || shortName === "—") return "?";
 
   if (shortName.length <= 6) return shortName;
 
@@ -411,7 +411,7 @@ export default function StrategyRoomPage() {
   const [chatLoading, setChatLoading] = useState(false);
   const [chatError, setChatError] = useState("");
   const [conversationId, setConversationId] = useState<string | null>(null);
-  const chatEndRef = { current: null as HTMLDivElement | null };
+  const chatEndRef = useRef<HTMLDivElement | null>(null);
 
   async function loadStrategy() {
     setLoading(true);
@@ -463,7 +463,7 @@ setData(json);
     const question = (questionOverride || chatQuestion).trim();
 
     if (!question) {
-      setChatError("Έ™œ¹Έ§œàΈΒ œÄœ¹œéœ³Έ± œ³ΈΖΈΫ ΈΒœ¹œéœ³ΈΖœÉΈΖ œÄΈΩœÖ ΈΗΈ≠ΈΜΈΒΈΙœ² ΈΫΈ± ΈΚΈ§ΈΫΈΒΈΙœ² œÉœ³ΈΩΈΫ œÉœçΈΦΈ≤ΈΩœÖΈΜΈΩ Noraya.");
+      setChatError("Γράψε πρώτα την ερώτηση που θέλεις να κάνεις στον σύμβουλο Noraya.");
       return;
     }
 
@@ -490,7 +490,7 @@ setData(json);
       if (!response.ok) throw new Error(`Strategy chat API error: ${response.status}`);
 
       const json = (await response.json()) as StrategyChatResponse;
-      const answer = json.answer || "Έü œÉœçΈΦΈ≤ΈΩœÖΈΜΈΩœ² Noraya Έ¥ΈΒΈΫ ΈΒœÄΈ≠œÉœ³œ¹ΈΒœàΈΒ Έ±œÄΈ§ΈΫœ³ΈΖœÉΈΖ.";
+      const answer = json.answer || "Ο σύμβουλος Noraya δεν επέστρεψε απάντηση.";
 
       // Save conversation_id for continuity
       if (json.conversation_id) {
@@ -506,7 +506,7 @@ setData(json);
       }, 100);
     } catch (err) {
       setChatError(
-        err instanceof Error ? err.message : "ΈîΈΒΈΫ ΈΦœÄœ¨œ¹ΈΒœÉΈΒ ΈΫΈ± Έ±œÄΈ±ΈΫœ³Έ°œÉΈΒΈΙ ΈΩ œÉœçΈΦΈ≤ΈΩœÖΈΜΈΩœ² Noraya."
+        err instanceof Error ? err.message : "Δεν μπόρεσε να απαντήσει ο σύμβουλος Noraya."
       );
     } finally {
       setChatLoading(false);
@@ -527,7 +527,7 @@ setData(json);
   const selectedPartyImplication = partyImplicationText(politicalEnvironment, selectedPartyKey);
 
   const agendaRows = Array.isArray(data?.agenda_used)
-    ? data.agenda_used.filter((row) => row?.topic && row.topic !== "Έ€ΈΖ œ³Έ±ΈΨΈΙΈΫΈΩΈΦΈΖΈΦΈ≠ΈΫΈΩ").slice(0, 5)
+    ? data.agenda_used.filter((row) => row?.topic && row.topic !== "Μη ταξινομημένο").slice(0, 5)
     : [];
 
   const totalAgendaWeight = agendaRows.reduce((sum, row) => {
@@ -558,7 +558,7 @@ setData(json);
   if (loading) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-[#020617] text-zinc-300">
-        Έü Noraya ΈΒœ³ΈΩΈΙΈΦΈ§ΈΕΈΒΈΙ œ³ΈΩ Strategy Room...
+        Ο Noraya ετοιμάζει το Strategy Room...
       </main>
     );
   }
@@ -566,14 +566,14 @@ setData(json);
   if (error) {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center bg-[#020617] text-zinc-100">
-        <div className="text-xl font-semibold">ΈîΈΒΈΫ œÜΈΩœ¹œ³œéΈΗΈΖΈΚΈΒ œ³ΈΩ Strategy Room</div>
+        <div className="text-xl font-semibold">Δεν φορτώθηκε το Strategy Room</div>
         <p className="mt-3 text-sm text-red-100">{error}</p>
         <button
           type="button"
           onClick={loadStrategy}
           className="mt-5 rounded-2xl bg-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950"
         >
-          ΈîΈΩΈΚΈ·ΈΦΈ±œÉΈΒ ΈΨΈ±ΈΫΈ§
+          Δοκίμασε ξανά
         </button>
       </main>
     );
@@ -597,10 +597,10 @@ setData(json);
                 {text(issue.urgency, "watch").toUpperCase()}
               </div>
               <h1 className="max-w-5xl text-4xl font-semibold tracking-tight md:text-5xl">
-                {text(daily.headline, text(issue.plain_title, "ΈΘœ³œ¹Έ±œ³ΈΖΈ≥ΈΙΈΚΈ° Έ±ΈΫΈ§Έ≥ΈΫœâœÉΈΖ œ³ΈΖœ² œÄΈΩΈΜΈΙœ³ΈΙΈΚΈ°œ² Έ±œ³ΈΕΈ≠ΈΫœ³Έ±œ²"))}
+                {text(daily.headline, text(issue.plain_title, "Στρατηγική ανάγνωση της πολιτικής ατζέντας"))}
               </h1>
               <p className="mt-4 max-w-4xl text-base leading-7 text-zinc-400">
-                {text(daily.what_is_happening, "Έü Noraya Έ¥ΈΙΈ±Έ≤Έ§ΈΕΈΒΈΙ œ³ΈΖΈΫ œ³œ¹Έ≠œ΅ΈΩœÖœÉΈ± Έ±œ³ΈΕΈ≠ΈΫœ³Έ± ΈΚΈ±ΈΙ œ³ΈΖ ΈΦΈΒœ³Έ±œ³œ¹Έ≠œÄΈΒΈΙ œÉΈΒ œÉœ³œ¹Έ±œ³ΈΖΈ≥ΈΙΈΚΈ°, œÉΈΒΈΫΈ§œ¹ΈΙΈ±, ΈΦΈ°ΈΫœÖΈΦΈ± ΈΚΈ±ΈΙ œÄΈΜΈ§ΈΫΈΩ Έ¥œ¹Έ§œÉΈΖœ².")}
+                {text(daily.what_is_happening, "Ο Noraya διαβάζει την τρέχουσα ατζέντα και τη μετατρέπει σε στρατηγική, σενάρια, μήνυμα και πλάνο δράσης.")}
               </p>
             </div>
 
@@ -622,13 +622,13 @@ setData(json);
 
                 <div className="min-w-0">
                   <div className="text-xs uppercase tracking-[0.22em] text-zinc-500">
-                    ΈΘœÖΈΫΈ¥ΈΒΈ¥ΈΒΈΦΈ≠ΈΫΈΩ œÄœ¹ΈΩœÜΈ·ΈΜ
+                    Συνδεδεμένο προφίλ
                   </div>
                   <div className="mt-2 text-lg font-semibold leading-6 text-zinc-100">
                     {connectedPartyName}
                   </div>
                   <div className="mt-1 text-xs text-zinc-500">
-                    {text(connectedProfile?.org_type, "Έ†ΈΩΈΜΈΙœ³ΈΙΈΚœ¨œ² ΈΩœ¹Έ≥Έ±ΈΫΈΙœÉΈΦœ¨œ²")}
+                    {text(connectedProfile?.org_type, "Πολιτικός οργανισμός")}
                   </div>
                 </div>
               </div>
@@ -641,8 +641,8 @@ setData(json);
                 }`}
               >
                 {isPartyConnected
-                  ? `ΈΘœÖΈΫΈ¥ΈΒΈ¥ΈΒΈΦΈ≠ΈΫΈΩ ΈΦΈΒ party profile (${connectedProfile?.party_key}).`
-                  : "ΈîΈΒΈΫ Έ≠œ΅ΈΒΈΙ œÉœÖΈΫΈ¥ΈΒΈΗΈΒΈ· œÉœÖΈ≥ΈΚΈΒΈΚœ¹ΈΙΈΦΈ≠ΈΫΈΩ ΈΚœ¨ΈΦΈΦΈ±. Έü Noraya ΈΗΈ± Έ±œÄΈ±ΈΫœ³Έ§ ΈΦΈΒ œ΅Έ±ΈΦΈΖΈΜœ¨œ³ΈΒœ¹ΈΖ Έ≤ΈΒΈ≤Έ±ΈΙœ¨œ³ΈΖœ³Έ±."}
+                  ? `Συνδεδεμένο με party profile (${connectedProfile?.party_key}).`
+                  : "Δεν έχει συνδεθεί συγκεκριμένο κόμμα. Ο Noraya θα απαντά με χαμηλότερη βεβαιότητα."}
               </div>
 
               <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
@@ -650,13 +650,13 @@ setData(json);
                   href="/onboarding"
                   className="inline-flex justify-center rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-zinc-200 hover:bg-white/[0.06]"
                 >
-                  ΈëΈΜΈΜΈ±Έ≥Έ° œÄœ¹ΈΩœÜΈ·ΈΜ
+                  Αλλαγή προφίλ
                 </a>
                 <a
                   href="#noraya-advisor-chat"
                   className="inline-flex justify-center rounded-2xl bg-cyan-300 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-cyan-200"
                 >
-                  ΈΓœéœ³ΈΖœÉΈΒ œ³ΈΩΈΫ œÉœçΈΦΈ≤ΈΩœÖΈΜΈΩ Noraya
+                  Ρώτησε τον σύμβουλο Noraya
                 </a>
               </div>
             </div>
@@ -665,13 +665,13 @@ setData(json);
 
         <section className="mb-6 grid gap-4 lg:grid-cols-2">
           <HeroDecision
-            label="ΈΛΈΙ ΈΚΈ§ΈΫΈΩœÖΈΦΈΒ"
-            textValue={text(daily.immediate_recommendation, "Έöœ¹Έ±œ³Έ§ΈΦΈΒ ΈΚΈ±ΈΗΈ±œ¹Έ° œÉœ³œ¹Έ±œ³ΈΖΈ≥ΈΙΈΚΈ° Έ≥œ¹Έ±ΈΦΈΦΈ° ΈΚΈ±ΈΙ Έ±œÄΈΩœÜΈΒœçΈ≥ΈΩœÖΈΦΈΒ Έ≤ΈΙΈ±œÉœ³ΈΙΈΚΈ° ΈΚΈΜΈΙΈΦΈ§ΈΚœâœÉΈΖ.")}
+            label="Τι κάνουμε"
+            textValue={text(daily.immediate_recommendation, "Κρατάμε καθαρή στρατηγική γραμμή και αποφεύγουμε βιαστική κλιμάκωση.")}
             tone="positive"
           />
           <HeroDecision
-            label="ΈΛΈΙ Έ±œÄΈΩœÜΈΒœçΈ≥ΈΩœÖΈΦΈΒ"
-            textValue={text(daily.avoid_today, "ΈëœÄΈΩœÜΈΒœçΈ≥ΈΩœÖΈΦΈΒ Έ±œÄœ¨ΈΜœÖœ³ΈΖ Έ¥ΈΖΈΦœ¨œÉΈΙΈ± ΈΗΈ≠œÉΈΖ œ΅œâœ¹Έ·œ² ΈΒœÄΈ±œ¹ΈΚΈ° œ³ΈΒΈΚΈΦΈΖœ¹Έ·œâœÉΈΖ.")}
+            label="Τι αποφεύγουμε"
+            textValue={text(daily.avoid_today, "Αποφεύγουμε απόλυτη δημόσια θέση χωρίς επαρκή τεκμηρίωση.")}
             tone="negative"
           />
         </section>
@@ -707,43 +707,43 @@ setData(json);
 
         {activeTab === "today" && (
           <section className="grid gap-5 lg:grid-cols-3">
-            <Card title="Έ™ΈΙΈ±œ³Έ· Έ≠œ΅ΈΒΈΙ œÉΈΖΈΦΈ±œÉΈ·Έ± œ³œéœ¹Έ±">
-              {text(daily.why_it_matters_now, "ΈΛΈΩ ΈΗΈ≠ΈΦΈ± ΈΦœÄΈΩœ¹ΈΒΈ· ΈΫΈ± ΈΒœÄΈΖœ¹ΈΒΈ§œÉΈΒΈΙ œ³ΈΩ ΈΚœ¹ΈΙœ³Έ°œ¹ΈΙΈΩ ΈΦΈΒ œ³ΈΩ ΈΩœÄΈΩΈ·ΈΩ ΈΗΈ± Έ±ΈΨΈΙΈΩΈΜΈΩΈ≥ΈΖΈΗΈΒΈ· ΈΩ ΈΩœ¹Έ≥Έ±ΈΫΈΙœÉΈΦœ¨œ².")}
+            <Card title="Γιατί έχει σημασία τώρα">
+              {text(daily.why_it_matters_now, "Το θέμα μπορεί να επηρεάσει το κριτήριο με το οποίο θα αξιολογηθεί ο οργανισμός.")}
             </Card>
-            <Card title="ΈöœÖœ¹Έ·Έ±œ¹œ΅ΈΩ framing">
-              {text(issue.dominant_frame, "ΈΛΈΩ framing œ΅œ¹ΈΒΈΙΈ§ΈΕΈΒœ³Έ±ΈΙ œÄΈΒœ¹Έ±ΈΙœ³Έ≠œ¹œâ Έ±ΈΫΈ§ΈΜœÖœÉΈΖ œÄœ¹ΈΙΈΫ Έ≥Έ·ΈΫΈΒΈΙ œÄΈΜΈ°œ¹ΈΖœ² œÉœ³œ¹Έ±œ³ΈΖΈ≥ΈΙΈΚΈ° ΈΚΈΜΈΙΈΦΈ§ΈΚœâœÉΈΖ.")}
+            <Card title="Κυρίαρχο framing">
+              {text(issue.dominant_frame, "Το framing χρειάζεται περαιτέρω ανάλυση πριν γίνει πλήρης στρατηγική κλιμάκωση.")}
             </Card>
-            <Card title="Έ£Έ±œÉΈΙΈΚœ¨ œ¹Έ·œÉΈΚΈΩ">
-              {text(issue.political_risk, "ΈΛΈΩ Έ≤Έ±œÉΈΙΈΚœ¨ œ¹Έ·œÉΈΚΈΩ ΈΒΈ·ΈΫΈ±ΈΙ Έ≤ΈΙΈ±œÉœ³ΈΙΈΚΈ° œ³ΈΩœÄΈΩΈΗΈ≠œ³ΈΖœÉΈΖ œ΅œâœ¹Έ·œ² ΈΒœÄΈ±œ¹ΈΚΈ° œ³ΈΒΈΚΈΦΈΖœ¹Έ·œâœÉΈΖ.")}
+            <Card title="Βασικό ρίσκο">
+              {text(issue.political_risk, "Το βασικό ρίσκο είναι βιαστική τοποθέτηση χωρίς επαρκή τεκμηρίωση.")}
             </Card>
           </section>
         )}
 
         {activeTab === "diagnosis" && (
           <section className="grid gap-5 lg:grid-cols-2">
-            <Card title="ΈëΈΫΈ§Έ≥ΈΫœâœÉΈΖ Έ±œ³ΈΕΈ≠ΈΫœ³Έ±œ²">
-              {text(diagnosis.agenda_reading, text(issue.agenda_status, "ΈîΈΒΈΫ œÖœÄΈ§œ¹œ΅ΈΒΈΙ Έ±œ¹ΈΚΈΒœ³Έ° œÉœ³œ¹Έ±œ³ΈΖΈ≥ΈΙΈΚΈ° Έ±ΈΫΈ§Έ≥ΈΫœâœÉΈΖ Έ±ΈΚœ¨ΈΦΈΖ."))}
+            <Card title="Ανάγνωση ατζέντας">
+              {text(diagnosis.agenda_reading, text(issue.agenda_status, "Δεν υπάρχει αρκετή στρατηγική ανάγνωση ακόμη."))}
             </Card>
             <Card title="Framing diagnosis">
-              {text(diagnosis.framing_diagnosis, "ΈΛΈΩ framing œ΅œ¹ΈΒΈΙΈ§ΈΕΈΒœ³Έ±ΈΙ œÄΈΒœ¹Έ±ΈΙœ³Έ≠œ¹œâ Έ±ΈΫΈ§ΈΜœÖœÉΈΖ.")}
+              {text(diagnosis.framing_diagnosis, "Το framing χρειάζεται περαιτέρω ανάλυση.")}
             </Card>
             <Card title="Priming risk">
-              {text(diagnosis.priming_risk, text(issue.priming_risk, "ΈîΈΒΈΫ Έ≠œ΅ΈΒΈΙ œÖœÄΈΩΈΜΈΩΈ≥ΈΙœÉœ³ΈΒΈ· Έ±ΈΚœ¨ΈΦΈΖ priming risk."))}
+              {text(diagnosis.priming_risk, text(issue.priming_risk, "Δεν έχει υπολογιστεί ακόμη priming risk."))}
             </Card>
-            <Card title="ΈΘœ³œ¹Έ±œ³ΈΖΈ≥ΈΙΈΚΈ° œÉœ³Έ§œÉΈΖ">
-              <p>{text(diagnosis.recommended_posture_explanation, "Έ†œ¹ΈΩœ³ΈΙΈΦΈ§œ³Έ±ΈΙ œÄœ¹ΈΩœÉΈΒΈΚœ³ΈΙΈΚΈ°, ΈΗΈΒœÉΈΦΈΙΈΚΈ° œÉœ³Έ§œÉΈΖ ΈΦΈ≠œ΅œ¹ΈΙ ΈΫΈ± ΈΙœÉœ΅œÖœ¹ΈΩœÄΈΩΈΙΈΖΈΗΈΒΈ· œ³ΈΩ œÉΈ°ΈΦΈ±.")}</p>
+            <Card title="Στρατηγική στάση">
+              <p>{text(diagnosis.recommended_posture_explanation, "Προτιμάται προσεκτική, θεσμική στάση μέχρι να ισχυροποιηθεί το σήμα.")}</p>
               <div className="mt-4 inline-flex rounded-full border border-cyan-300/25 bg-cyan-300/10 px-3 py-1 text-xs text-cyan-100">
                 {text(diagnosis.recommended_posture, "institutional")}
               </div>
             </Card>
-            <Card title="Έ†ΈΩΈΙΈ± ΈΚΈΩΈΙΈΫΈ§ ΈΒœÄΈΖœ¹ΈΒΈ§ΈΕΈΩΈΫœ³Έ±ΈΙ">
+            <Card title="Ποια κοινά επηρεάζονται">
               <BulletList
                 items={list(issue.affected_audiences)}
-                fallback={["Έ£Έ§œÉΈΖ ΈΩœ¹Έ≥Έ±ΈΫΈΙœÉΈΦΈΩœç", "Έ€ΈΒœ³œ¹ΈΙΈΩœÄΈ±ΈΗΈ≠œ² ΈΚΈΩΈΙΈΫœ¨", "Έ†ΈΩΈΜΈΙœ³ΈΙΈΚΈ§ ΈΒΈΫΈΒœ¹Έ≥œ¨ ΈΚΈΩΈΙΈΫœ¨"]}
+                fallback={["Βάση οργανισμού", "Μετριοπαθές κοινό", "Πολιτικά ενεργό κοινό"]}
               />
             </Card>
-            <Card title="ΈïœÖΈΚΈ±ΈΙœ¹Έ·Έ±">
-              {text(diagnosis.strategic_opportunity, text(issue.opportunity, "ΈΞœÄΈ§œ¹œ΅ΈΒΈΙ ΈΒœÖΈΚΈ±ΈΙœ¹Έ·Έ± Έ≥ΈΙΈ± œÉΈΩΈ≤Έ±œ¹Έ° ΈΚΈ±ΈΙ œÄœ¹ΈΩΈΒœ³ΈΩΈΙΈΦΈ±œÉΈΦΈ≠ΈΫΈΖ œÉœ³Έ§œÉΈΖ."))}
+            <Card title="Ευκαιρία">
+              {text(diagnosis.strategic_opportunity, text(issue.opportunity, "Υπάρχει ευκαιρία για σοβαρή και προετοιμασμένη στάση."))}
             </Card>
           </section>
         )}
@@ -757,9 +757,9 @@ setData(json);
               >
                 <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                   <div>
-                    <h2 className="text-2xl font-semibold">{text(scenario.name, `ΈΘΈΒΈΫΈ§œ¹ΈΙΈΩ ${index + 1}`)}</h2>
+                    <h2 className="text-2xl font-semibold">{text(scenario.name, `Σενάριο ${index + 1}`)}</h2>
                     <p className="mt-2 max-w-4xl text-sm leading-6 text-zinc-400">
-                      {text(scenario.move, "ΈîΈΒΈΫ œÖœÄΈ§œ¹œ΅ΈΒΈΙ œÄΈΒœ¹ΈΙΈ≥œ¹Έ±œÜΈ° ΈΚΈ·ΈΫΈΖœÉΈΖœ².")}
+                      {text(scenario.move, "Δεν υπάρχει περιγραφή κίνησης.")}
                     </p>
                   </div>
                   <div className={`w-fit rounded-full border px-3 py-1 text-xs ${recommendationClass(scenario.recommendation)}`}>
@@ -767,10 +767,10 @@ setData(json);
                   </div>
                 </div>
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                  <MiniBox title="Έ¨œÜΈΒΈΜΈΩœ²" textValue={text(scenario.likely_gain, "βÄî")} />
-                  <MiniBox title="ΈΓΈ·œÉΈΚΈΩ" textValue={text(scenario.likely_risk, "βÄî")} />
-                  <MiniBox title="ΈöΈΩΈΙΈΫœ¨" textValue={text(scenario.audience_effect, "βÄî")} />
-                  <MiniBox title="ΈëΈΫœ³Έ·Έ¥œ¹Έ±œÉΈΖ" textValue={text(scenario.opponent_response, "βÄî")} />
+                  <MiniBox title="Όφελος" textValue={text(scenario.likely_gain, "—")} />
+                  <MiniBox title="Ρίσκο" textValue={text(scenario.likely_risk, "—")} />
+                  <MiniBox title="Κοινό" textValue={text(scenario.audience_effect, "—")} />
+                  <MiniBox title="Αντίδραση" textValue={text(scenario.opponent_response, "—")} />
                 </div>
               </article>
             ))}
@@ -780,36 +780,36 @@ setData(json);
         {activeTab === "messages" && (
           <section className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
             <div className="rounded-[2rem] border border-cyan-300/20 bg-cyan-300/[0.05] p-6">
-              <div className="text-xs uppercase tracking-[0.22em] text-cyan-200/80">ΈöΈΒΈΫœ³œ¹ΈΙΈΚΈ° Έ≥œ¹Έ±ΈΦΈΦΈ°</div>
+              <div className="text-xs uppercase tracking-[0.22em] text-cyan-200/80">Κεντρική γραμμή</div>
               <p className="mt-4 text-2xl font-semibold leading-snug">
-                {text(messages.central_line, "Έßœ¹ΈΒΈΙΈ§ΈΕΈΒœ³Έ±ΈΙ œÉΈΩΈ≤Έ±œ¹œ¨œ³ΈΖœ³Έ±, œ³ΈΒΈΚΈΦΈΖœ¹Έ·œâœÉΈΖ ΈΚΈ±ΈΙ ΈΗΈΒœÉΈΦΈΙΈΚΈ° ΈΚΈ±ΈΗΈ±œ¹œ¨œ³ΈΖœ³Έ±.")}
+                {text(messages.central_line, "Χρειάζεται σοβαρότητα, τεκμηρίωση και θεσμική καθαρότητα.")}
               </p>
             </div>
             <Card title="Social post">
-              {text(messages.social_post, "ΈîΈΒΈΫ œÖœÄΈ§œ¹œ΅ΈΒΈΙ Έ±ΈΚœ¨ΈΦΈΖ œÄœ¹ΈΩœ³ΈΒΈΙΈΫœ¨ΈΦΈΒΈΫΈΩ social post.")}
+              {text(messages.social_post, "Δεν υπάρχει ακόμη προτεινόμενο social post.")}
             </Card>
-            <Card title="Έ‰ΈΒœÉΈΦΈΙΈΚΈ° ΈΒΈΚΈ¥ΈΩœ΅Έ°">
-              {text(messages.institutional_version, "ΈîΈΒΈΫ œÖœÄΈ§œ¹œ΅ΈΒΈΙ Έ±ΈΚœ¨ΈΦΈΖ ΈΗΈΒœÉΈΦΈΙΈΚΈ° ΈΒΈΚΈ¥ΈΩœ΅Έ°.")}
+            <Card title="Θεσμική εκδοχή">
+              {text(messages.institutional_version, "Δεν υπάρχει ακόμη θεσμική εκδοχή.")}
             </Card>
-            <Card title="ΈëΈΫΈΗœ¹œéœÄΈΙΈΫΈΖ ΈΒΈΚΈ¥ΈΩœ΅Έ°">
-              {text(messages.human_version, "ΈîΈΒΈΫ œÖœÄΈ§œ¹œ΅ΈΒΈΙ Έ±ΈΚœ¨ΈΦΈΖ Έ±ΈΫΈΗœ¹œéœÄΈΙΈΫΈΖ ΈΒΈΚΈ¥ΈΩœ΅Έ°.")}
+            <Card title="Ανθρώπινη εκδοχή">
+              {text(messages.human_version, "Δεν υπάρχει ακόμη ανθρώπινη εκδοχή.")}
             </Card>
-            <Card title="Sharp ΈΒΈΚΈ¥ΈΩœ΅Έ°">
-              {text(messages.sharp_version, "ΈîΈΒΈΫ œÖœÄΈ§œ¹œ΅ΈΒΈΙ Έ±ΈΚœ¨ΈΦΈΖ sharp ΈΒΈΚΈ¥ΈΩœ΅Έ°.")}
+            <Card title="Sharp εκδοχή">
+              {text(messages.sharp_version, "Δεν υπάρχει ακόμη sharp εκδοχή.")}
             </Card>
-            <Card title="ΈëΈΫ ΈΦΈ±œ² ΈΒœÄΈΙœ³ΈΒΈΗΈΩœçΈΫ">
-              {text(messages.answer_if_attacked, "ΈîΈΒΈΫ œÖœÄΈ§œ¹œ΅ΈΒΈΙ Έ±ΈΚœ¨ΈΦΈΖ Έ±œÄΈ§ΈΫœ³ΈΖœÉΈΖ œÉΈΒ ΈΒœÄΈ·ΈΗΈΒœÉΈΖ.")}
+            <Card title="Αν μας επιτεθούν">
+              {text(messages.answer_if_attacked, "Δεν υπάρχει ακόμη απάντηση σε επίθεση.")}
             </Card>
-            <Card title="Έ¦Έ≠ΈΨΈΒΈΙœ² œÄΈΩœÖ Έ≤ΈΩΈΖΈΗΈΩœçΈΫ">
+            <Card title="Λέξεις που βοηθούν">
               <BulletList
                 items={list(messages.words_to_use)}
-                fallback={["œ³ΈΒΈΚΈΦΈΖœ¹Έ·œâœÉΈΖ", "œÉΈΩΈ≤Έ±œ¹œ¨œ³ΈΖœ³Έ±", "ΈΗΈΒœÉΈΦΈΙΈΚΈ° ΈΒœÖΈΗœçΈΫΈΖ"]}
+                fallback={["τεκμηρίωση", "σοβαρότητα", "θεσμική ευθύνη"]}
               />
             </Card>
-            <Card title="Έ¦Έ≠ΈΨΈΒΈΙœ² œÄΈΩœÖ Έ±œÄΈΩœÜΈΒœçΈ≥ΈΩœÖΈΦΈΒ">
+            <Card title="Λέξεις που αποφεύγουμε">
               <BulletList
                 items={list(messages.words_to_avoid)}
-                fallback={["œÖœÄΈΒœ¹Έ≤ΈΩΈΜΈ°", "œÄœ¹ΈΩœÉœâœÄΈΙΈΚΈ° ΈΒœÄΈ·ΈΗΈΒœÉΈΖ", "Έ≤ΈΒΈ≤Έ±ΈΙœ¨œ³ΈΖœ³Έ± œ΅œâœ¹Έ·œ² œÉœ³ΈΩΈΙœ΅ΈΒΈ·Έ±"]}
+                fallback={["υπερβολή", "προσωπική επίθεση", "βεβαιότητα χωρίς στοιχεία"]}
               />
             </Card>
           </section>
@@ -817,31 +817,31 @@ setData(json);
 
         {activeTab === "plan" && (
           <section className="grid gap-5 lg:grid-cols-2">
-            <Card title="ΈΛœéœ¹Έ±">
-              <BulletList items={list(actionPlan.now)} fallback={["Έöœ¹Έ±œ³Έ°œÉœ³ΈΒ Έ≠œ³ΈΩΈΙΈΦΈΖ œÉœçΈΫœ³ΈΩΈΦΈΖ ΈΗΈΒœÉΈΦΈΙΈΚΈ° Έ≥œ¹Έ±ΈΦΈΦΈ°."]} />
+            <Card title="Τώρα">
+              <BulletList items={list(actionPlan.now)} fallback={["Κρατήστε έτοιμη σύντομη θεσμική γραμμή."]} />
             </Card>
-            <Card title="ΈïœÄœ¨ΈΦΈΒΈΫΈΒœ² 24 œéœ¹ΈΒœ²">
-              <BulletList items={list(actionPlan.next_24h)} fallback={["Έ†Έ±œ¹Έ±ΈΚΈΩΈΜΈΩœÖΈΗΈ°œÉœ³ΈΒ Έ±ΈΫ Έ±ΈΜΈΜΈ§ΈΕΈΒΈΙ œ³ΈΩ framing."]} />
+            <Card title="Επόμενες 24 ώρες">
+              <BulletList items={list(actionPlan.next_24h)} fallback={["Παρακολουθήστε αν αλλάζει το framing."]} />
             </Card>
-            <Card title="ΈïœÄœ¨ΈΦΈΒΈΫΈΒœ² 48 œéœ¹ΈΒœ²">
-              <BulletList items={list(actionPlan.next_48h)} fallback={["ΈëœÄΈΩœÜΈ±œÉΈ·œÉœ³ΈΒ Έ±ΈΫ œ΅œ¹ΈΒΈΙΈ§ΈΕΈΒœ³Έ±ΈΙ ΈΚΈΜΈΙΈΦΈ§ΈΚœâœÉΈΖ."]} />
+            <Card title="Επόμενες 48 ώρες">
+              <BulletList items={list(actionPlan.next_48h)} fallback={["Αποφασίστε αν χρειάζεται κλιμάκωση."]} />
             </Card>
-            <Card title="ΈëœÖœ³Έ° œ³ΈΖΈΫ ΈΒΈ≤Έ¥ΈΩΈΦΈ§Έ¥Έ±">
+            <Card title="Αυτή την εβδομάδα">
               <BulletList
                 items={list(actionPlan.this_week)}
-                fallback={["ΈΘœÖΈΫΈ¥Έ≠œÉœ³ΈΒ œ³ΈΩ ΈΗΈ≠ΈΦΈ± ΈΦΈΒ ΈΒœÖœ¹œçœ³ΈΒœ¹ΈΖ œÉœ³œ¹Έ±œ³ΈΖΈ≥ΈΙΈΚΈ° ΈΦœ¨ΈΫΈΩ Έ±ΈΫ Έ±œÄΈΩΈΚœ³Έ°œÉΈΒΈΙ Έ≠ΈΫœ³Έ±œÉΈΖ."]}
+                fallback={["Συνδέστε το θέμα με ευρύτερη στρατηγική μόνο αν αποκτήσει ένταση."]}
               />
             </Card>
-            <Card title="Έ†ΈΩΈΙΈΩœ² œÄœ¹Έ≠œÄΈΒΈΙ ΈΫΈ± œ³ΈΩ œÉΈΖΈΚœéœÉΈΒΈΙ">
-              {text(actionPlan.owner_suggestion, "Έ†œ¹ΈΩœ³ΈΙΈΦΈ§œ³Έ±ΈΙ ΈΗΈΒœÉΈΦΈΙΈΚœ¨ œÄœ¹œ¨œÉœâœÄΈΩ ΈΦΈΒ Έ°œÄΈΙΈΩ ΈΚΈ±ΈΙ Έ±ΈΨΈΙœ¨œÄΈΙœÉœ³ΈΩ œçœÜΈΩœ².")}
+            <Card title="Ποιος πρέπει να το σηκώσει">
+              {text(actionPlan.owner_suggestion, "Προτιμάται θεσμικό πρόσωπο με ήπιο και αξιόπιστο ύφος.")}
             </Card>
-            <Card title="Triggers ΈΚΈΜΈΙΈΦΈ§ΈΚœâœÉΈΖœ²">
+            <Card title="Triggers κλιμάκωσης">
               <BulletList
                 items={list(monitoring.escalation_triggers)}
                 fallback={[
-                  "ΈëœçΈΨΈΖœÉΈΖ ΈΚΈ§ΈΜœÖœàΈΖœ² Έ±œÄœ¨ ΈΦΈ≠œÉΈ± œÖœàΈΖΈΜΈ°œ² Έ≤Έ±œ¹œçœ³ΈΖœ³Έ±œ².",
-                  "Έ†Έ±œ¹Έ≠ΈΦΈ≤Έ±œÉΈΖ Έ≤Έ±œÉΈΙΈΚΈΩœç œÄΈΩΈΜΈΙœ³ΈΙΈΚΈΩœç Έ±ΈΫœ³ΈΙœÄΈ§ΈΜΈΩœÖ.",
-                  "Έ€ΈΒœ³Έ±œ³œ¨œÄΈΙœÉΈΖ framing œÉΈΒ ΈΒœÖΈΗœçΈΫΈΖ Έ° ΈΜΈΩΈ≥ΈΩΈ¥ΈΩœÉΈ·Έ±.",
+                  "Αύξηση κάλυψης από μέσα υψηλής βαρύτητας.",
+                  "Παρέμβαση βασικού πολιτικού αντιπάλου.",
+                  "Μετατόπιση framing σε ευθύνη ή λογοδοσία.",
                 ]}
               />
             </Card>
@@ -855,9 +855,9 @@ setData(json);
           <div className="grid gap-6 lg:grid-cols-[0.7fr_1.3fr]">
             <div>
               <div className="text-xs uppercase tracking-[0.28em] text-cyan-200/80">Noraya Advisor</div>
-              <h2 className="mt-3 text-2xl font-semibold">ΈΘœçΈΦΈ≤ΈΩœÖΈΜΈΩœ² Noraya</h2>
+              <h2 className="mt-3 text-2xl font-semibold">Σύμβουλος Noraya</h2>
               <p className="mt-3 text-sm leading-7 text-zinc-400">
-                Έ€Έ·ΈΜΈ± ΈΒΈΜΈΒœçΈΗΈΒœ¹Έ±. Έ½ ΈΚΈΩœÖΈ≤Έ≠ΈΫœ³Έ± œÉœÖΈΫΈΒœ΅Έ·ΈΕΈΒœ³Έ±ΈΙ βÄî ΈΩ Noraya ΈΗœÖΈΦΈ§œ³Έ±ΈΙ œ³ΈΙ ΈΒΈ·œÄΈ±ΈΦΈΒ.
+                Μίλα ελεύθερα. Η κουβέντα συνεχίζεται — ο Noraya θυμάται τι είπαμε.
               </p>
 
               {partyName ? (
@@ -868,10 +868,10 @@ setData(json);
 
               <div className="mt-5 grid gap-2">
                 {[
-                  "Έ†ΈΩΈΙΈΩ œÉΈΒΈΫΈ§œ¹ΈΙΈΩ Έ≠œ΅ΈΒΈΙ œ³ΈΩ ΈΦΈΙΈΚœ¹œ¨œ³ΈΒœ¹ΈΩ œÄΈΩΈΜΈΙœ³ΈΙΈΚœ¨ œ¹Έ·œÉΈΚΈΩ;",
-                  "Έ™œ¹Έ§œàΈΒ ΈΦΈΩœÖ ΈΦΈΙΈ± Έ±œÉœÜΈ±ΈΜΈ° Έ¥ΈΖΈΦœ¨œÉΈΙΈ± Έ¥Έ°ΈΜœâœÉΈΖ.",
-                  "ΈΛΈΙ œÄœ¹Έ≠œÄΈΒΈΙ ΈΫΈ± ΈΚΈ§ΈΫΈΩœÖΈΦΈΒ œ³ΈΙœ² ΈΒœÄœ¨ΈΦΈΒΈΫΈΒœ² 48 œéœ¹ΈΒœ²;",
-                  "Έ†œéœ² ΈΦœÄΈΩœ¹ΈΒΈ· ΈΫΈ± Έ±œÄΈ±ΈΫœ³Έ°œÉΈΒΈΙ ΈΩ Έ±ΈΫœ³Έ·œÄΈ±ΈΜΈΩœ²;",
+                  "Ποιο σενάριο έχει το μικρότερο πολιτικό ρίσκο;",
+                  "Γράψε μου μια ασφαλή δημόσια δήλωση.",
+                  "Τι πρέπει να κάνουμε τις επόμενες 48 ώρες;",
+                  "Πώς μπορεί να απαντήσει ο αντίπαλος;",
                 ].map((question) => (
                   <button
                     key={question}
@@ -895,7 +895,7 @@ setData(json);
                   }}
                   className="mt-4 rounded-2xl border border-white/10 bg-black/20 px-4 py-2 text-xs text-zinc-500 transition hover:bg-white/[0.06]"
                 >
-                  ΈùΈ≠Έ± ΈΚΈΩœÖΈ≤Έ≠ΈΫœ³Έ±
+                  Νέα κουβέντα
                 </button>
               ) : null}
             </div>
@@ -905,7 +905,7 @@ setData(json);
               <div className="flex-1 overflow-y-auto p-4" style={{ maxHeight: "500px", minHeight: "300px" }}>
                 {chatMessages.length === 0 && !chatLoading ? (
                   <div className="flex h-full items-center justify-center text-sm text-zinc-600">
-                    ΈΓœéœ³ΈΖœÉΈΒ ΈΩœ³ΈΙΈ¥Έ°œÄΈΩœ³ΈΒ œ³ΈΩΈΫ œÉœçΈΦΈ≤ΈΩœÖΈΜΈΩ Noraya.
+                    Ρώτησε οτιδήποτε τον σύμβουλο Noraya.
                   </div>
                 ) : (
                   <div className="grid gap-3">
@@ -919,7 +919,7 @@ setData(json);
                         }`}
                       >
                         <div className="mb-1 text-xs uppercase tracking-[0.18em] text-zinc-500">
-                          {msg.role === "user" ? "ΈïœÉœç" : "Noraya"}
+                          {msg.role === "user" ? "Εσύ" : "Noraya"}
                         </div>
                         <div className="whitespace-pre-wrap">{msg.content}</div>
                       </div>
@@ -927,7 +927,7 @@ setData(json);
                     {chatLoading ? (
                       <div className="mr-4 rounded-2xl border border-cyan-300/20 bg-cyan-300/10 px-4 py-3 text-sm text-cyan-100">
                         <div className="mb-1 text-xs uppercase tracking-[0.18em] text-zinc-500">Noraya</div>
-                        <div className="animate-pulse">ΈΘΈΚΈ≠œÜœ³ΈΩΈΦΈ±ΈΙ...</div>
+                        <div className="animate-pulse">Σκέφτομαι...</div>
                       </div>
                     ) : null}
                     <div ref={(el) => { chatEndRef.current = el; }} />
@@ -949,7 +949,7 @@ setData(json);
                     type="text"
                     value={chatQuestion}
                     onChange={(event) => setChatQuestion(event.target.value)}
-                    placeholder="Έ™œ¹Έ§œàΈΒ ΈΒΈ¥œé..."
+                    placeholder="Γράψε εδώ..."
                     disabled={chatLoading}
                     className="flex-1 rounded-2xl border border-white/10 bg-[#020617] px-4 py-3 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-cyan-300/40 disabled:opacity-50"
                     onKeyDown={(event) => {
@@ -964,7 +964,7 @@ setData(json);
                     disabled={chatLoading}
                     className="shrink-0 rounded-2xl bg-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    {chatLoading ? "..." : "ΈΘœ³ΈΒΈ·ΈΜΈΒ"}
+                    {chatLoading ? "..." : "Στείλε"}
                   </button>
                 </form>
               </div>
@@ -975,14 +975,14 @@ setData(json);
         <section className="mt-8 rounded-[2rem] border border-white/10 bg-white/[0.025] p-5">
           <details>
             <summary className="cursor-pointer text-sm font-medium text-zinc-300">
-              β•Ε Έ£Έ§œÉΈΖ œ³ΈΒΈΚΈΦΈΖœ¹Έ·œâœÉΈΖœ²
+              ▶ Βάση τεκμηρίωσης
             </summary>
             <div className="mt-4 grid gap-4 lg:grid-cols-2">
-              <Card title="Έ£Έ§œÉΈΖ">
-                {text(evidence.basis, "Έ½ ΈΒΈΚœ³Έ·ΈΦΈΖœÉΈΖ Έ≤Έ±œÉΈ·ΈΕΈΒœ³Έ±ΈΙ œÉœ³Έ± Έ¥ΈΙΈ±ΈΗΈ≠œÉΈΙΈΦΈ± agenda signals.")}
+              <Card title="Βάση">
+                {text(evidence.basis, "Η εκτίμηση βασίζεται στα διαθέσιμα agenda signals.")}
               </Card>
-              <Card title="ΈëΈ≤ΈΒΈ≤Έ±ΈΙœ¨œ³ΈΖœ³Έ±">
-                {text(evidence.uncertainty, "Έ½ Έ±ΈΫΈ§ΈΜœÖœÉΈΖ œ΅œ¹ΈΒΈΙΈ§ΈΕΈΒœ³Έ±ΈΙ œÄΈΒœ¹ΈΙœÉœÉœ¨œ³ΈΒœ¹Έ± œ³Έ±ΈΨΈΙΈΫΈΩΈΦΈΖΈΦΈ≠ΈΫΈ± Έ¥ΈΒΈ¥ΈΩΈΦΈ≠ΈΫΈ±.")}
+              <Card title="Αβεβαιότητα">
+                {text(evidence.uncertainty, "Η ανάλυση χρειάζεται περισσότερα ταξινομημένα δεδομένα.")}
               </Card>
             </div>
           </details>
@@ -1010,11 +1010,11 @@ function PoliticalEnvironmentPanel({
     return (
       <section className="mb-8 rounded-[2rem] border border-white/10 bg-white/[0.025] p-5">
         <div className="text-xs uppercase tracking-[0.22em] text-cyan-200/80">
-          Έ†ΈΩΈΜΈΙœ³ΈΙΈΚœ¨ œÄΈΒœ¹ΈΙΈ≤Έ§ΈΜΈΜΈΩΈΫ
+          Πολιτικό περιβάλλον
         </div>
-        <h2 className="mt-2 text-2xl font-semibold">ΈîΈΒΈΫ Έ≠œ΅ΈΒΈΙ œÜΈΩœ¹œ³œâΈΗΈΒΈ· Έ±ΈΚœ¨ΈΦΈΖ Έ¥ΈΖΈΦΈΩœÉΈΚΈΩœÄΈΙΈΚœ¨ œÄΈΒœ¹ΈΙΈ≤Έ§ΈΜΈΜΈΩΈΫ</h2>
+        <h2 className="mt-2 text-2xl font-semibold">Δεν έχει φορτωθεί ακόμη δημοσκοπικό περιβάλλον</h2>
         <p className="mt-3 text-sm leading-7 text-zinc-400">
-          Έü Noraya ΈΗΈ± œÉœÖΈΫΈΒœ΅Έ·œÉΈΒΈΙ ΈΦΈΒ Έ≤Έ§œÉΈΖ œ³Έ± agenda signals, Έ±ΈΜΈΜΈ§ œ΅œâœ¹Έ·œ² œÄΈΜΈ°œ¹ΈΖ Έ¥ΈΖΈΦΈΩœÉΈΚΈΩœÄΈΙΈΚΈ° ΈΒΈΙΈΚœ¨ΈΫΈ±.
+          Ο Noraya θα συνεχίσει με βάση τα agenda signals, αλλά χωρίς πλήρη δημοσκοπική εικόνα.
           {status ? ` ${status}` : ""}
         </p>
       </section>
@@ -1026,15 +1026,15 @@ function PoliticalEnvironmentPanel({
       <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <div className="text-xs uppercase tracking-[0.22em] text-cyan-200/80">
-            Έ†ΈΩΈΜΈΙœ³ΈΙΈΚœ¨ / Έ¥ΈΖΈΦΈΩœÉΈΚΈΩœÄΈΙΈΚœ¨ œÄΈΒœ¹ΈΙΈ≤Έ§ΈΜΈΜΈΩΈΫ
+            Πολιτικό / δημοσκοπικό περιβάλλον
           </div>
           <h2 className="mt-2 text-2xl font-semibold">
-            {text(environment.title, "ΈΛœ¹Έ≠œ΅ΈΩΈΫ œÄΈΩΈΜΈΙœ³ΈΙΈΚœ¨ œÄΈΒœ¹ΈΙΈ≤Έ§ΈΜΈΜΈΩΈΫ")}
+            {text(environment.title, "Τρέχον πολιτικό περιβάλλον")}
           </h2>
           <p className="mt-2 max-w-4xl text-sm leading-7 text-zinc-400">
             {text(
               environment.plain_language_summary || environment.summary,
-              "ΈîΈΒΈΫ œÖœÄΈ§œ¹œ΅ΈΒΈΙ Έ±ΈΚœ¨ΈΦΈΖ Έ¥ΈΙΈ±ΈΗΈ≠œÉΈΙΈΦΈΖ œÉœçΈΫΈΩœàΈΖ œÄΈΩΈΜΈΙœ³ΈΙΈΚΈΩœç œÄΈΒœ¹ΈΙΈ≤Έ§ΈΜΈΜΈΩΈΫœ³ΈΩœ²."
+              "Δεν υπάρχει ακόμη διαθέσιμη σύνοψη πολιτικού περιβάλλοντος."
             )}
           </p>
         </div>
@@ -1052,26 +1052,26 @@ function PoliticalEnvironmentPanel({
       <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="rounded-[1.5rem] border border-cyan-300/15 bg-cyan-300/[0.045] p-5">
           <div className="text-xs uppercase tracking-[0.18em] text-cyan-200/80">
-            ΈΛΈΙ œÉΈΖΈΦΈ±Έ·ΈΫΈΒΈΙ Έ≥ΈΙΈ± {partyName || "œ³ΈΩ ΈΚœ¨ΈΦΈΦΈ± œ³ΈΩœÖ œ΅œ¹Έ°œÉœ³ΈΖ"}
+            Τι σημαίνει για {partyName || "το κόμμα του χρήστη"}
           </div>
           <p className="mt-3 text-sm leading-7 text-zinc-200">
             {text(
               partyImplication,
-              "ΈîΈΒΈΫ œÖœÄΈ§œ¹œ΅ΈΒΈΙ Έ±ΈΚœ¨ΈΦΈΖ ΈΒΈΙΈ¥ΈΙΈΚΈ° Έ±ΈΫΈ§Έ≥ΈΫœâœÉΈΖ Έ≥ΈΙΈ± Έ±œÖœ³œ¨ œ³ΈΩ ΈΚœ¨ΈΦΈΦΈ±. Έü Noraya œ΅œ¹ΈΖœÉΈΙΈΦΈΩœÄΈΩΈΙΈΒΈ· œ³ΈΩ Έ≥ΈΒΈΫΈΙΈΚœ¨ œÄΈΩΈΜΈΙœ³ΈΙΈΚœ¨ œÄΈΒœ¹ΈΙΈ≤Έ§ΈΜΈΜΈΩΈΫ ΈΦΈΒ œ΅Έ±ΈΦΈΖΈΜœ¨œ³ΈΒœ¹ΈΖ Έ≤ΈΒΈ≤Έ±ΈΙœ¨œ³ΈΖœ³Έ±."
+              "Δεν υπάρχει ακόμη ειδική ανάγνωση για αυτό το κόμμα. Ο Noraya χρησιμοποιεί το γενικό πολιτικό περιβάλλον με χαμηλότερη βεβαιότητα."
             )}
           </p>
         </div>
 
         <div className="rounded-[1.5rem] border border-white/10 bg-black/20 p-5">
           <div className="text-xs uppercase tracking-[0.18em] text-zinc-500">
-            Έ£Έ±œÉΈΙΈΚΈ° Έ¥œÖΈΫΈ±ΈΦΈΙΈΚΈ°
+            Βασική δυναμική
           </div>
           <p className="mt-3 text-sm leading-7 text-zinc-300">
-            {text(environment.dominant_dynamic, "Έ½ Έ≤Έ±œÉΈΙΈΚΈ° Έ¥œÖΈΫΈ±ΈΦΈΙΈΚΈ° Έ¥ΈΒΈΫ Έ≠œ΅ΈΒΈΙ Έ±ΈΚœ¨ΈΦΈΖ œÖœÄΈΩΈΜΈΩΈ≥ΈΙœÉœ³ΈΒΈ·.")}
+            {text(environment.dominant_dynamic, "Η βασική δυναμική δεν έχει ακόμη υπολογιστεί.")}
           </p>
           <div className="mt-4 grid gap-2">
-            <MiniLine title="ΈöœÖΈ≤ΈΒœ¹ΈΫΈΖœ³ΈΙΈΚœ¨ momentum" value={text(environment.government_momentum, "βÄî")} />
-            <MiniLine title="ΈîΈΩΈΦΈ° Έ±ΈΫœ³ΈΙœÄΈΩΈΜΈ·œ³ΈΒœÖœÉΈΖœ²" value={text(environment.opposition_structure, "βÄî")} />
+            <MiniLine title="Κυβερνητικό momentum" value={text(environment.government_momentum, "—")} />
+            <MiniLine title="Δομή αντιπολίτευσης" value={text(environment.opposition_structure, "—")} />
           </div>
         </div>
       </div>
@@ -1080,10 +1080,10 @@ function PoliticalEnvironmentPanel({
         <div className="rounded-[1.5rem] border border-white/10 bg-black/20 p-5">
           <div className="mb-3 flex items-center justify-between gap-3">
             <div className="text-xs uppercase tracking-[0.18em] text-zinc-500">
-              ΈΛΈΒΈΜΈΒœÖœ³Έ±Έ·ΈΒœ² Έ¥ΈΖΈΦΈΩœÉΈΚΈΩœÄΈ°œÉΈΒΈΙœ²
+              Τελευταίες δημοσκοπήσεις
             </div>
             <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-zinc-400">
-              {polls.length} ΈΦΈΒœ³œ¹Έ°œÉΈΒΈΙœ²
+              {polls.length} μετρήσεις
             </div>
           </div>
 
@@ -1095,17 +1095,17 @@ function PoliticalEnvironmentPanel({
                   className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3"
                 >
                   <div className="text-sm font-medium text-zinc-200">
-                    {text(poll.survey_label, `${poll.pollster || "ΈîΈΖΈΦΈΩœÉΈΚœ¨œÄΈΖœÉΈΖ"} / ${poll.commissioner || "βÄî"}`)}
+                    {text(poll.survey_label, `${poll.pollster || "Δημοσκόπηση"} / ${poll.commissioner || "—"}`)}
                   </div>
                   <div className="mt-1 text-xs text-zinc-500">
-                    ΈîΈΒΈ·Έ≥ΈΦΈ±: {poll.sample_size || "βÄî"} ¬Ζ Έ±œÄΈΩœ³ΈΒΈΜΈ≠œÉΈΦΈ±œ³Έ±: {poll.result_count || "βÄî"} ¬Ζ Έ≠œâœ² {shortDate(poll.fieldwork_end)}
+                    Δείγμα: {poll.sample_size || "—"} · αποτελέσματα: {poll.result_count || "—"} · έως {shortDate(poll.fieldwork_end)}
                   </div>
                 </div>
               ))}
             </div>
           ) : (
             <p className="text-sm leading-7 text-zinc-500">
-              ΈîΈΒΈΫ Έ≠œ΅ΈΩœÖΈΫ œÜΈΩœ¹œ³œâΈΗΈΒΈ· Έ±ΈΚœ¨ΈΦΈΖ structured polling records.
+              Δεν έχουν φορτωθεί ακόμη structured polling records.
             </p>
           )}
         </div>
@@ -1113,7 +1113,7 @@ function PoliticalEnvironmentPanel({
         <div className="rounded-[1.5rem] border border-white/10 bg-black/20 p-5">
           <div className="mb-3 flex items-center justify-between gap-3">
             <div className="text-xs uppercase tracking-[0.18em] text-zinc-500">
-              ΈΛΈ§œÉΈΒΈΙœ² ΈΚΈΩΈΦΈΦΈ§œ³œâΈΫ / actors
+              Τάσεις κομμάτων / actors
             </div>
             <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-zinc-400">
               Top {trends.length}
@@ -1133,7 +1133,7 @@ function PoliticalEnvironmentPanel({
                         {trend.party_label || trend.actor_key}
                       </div>
                       <div className="mt-1 text-xs text-zinc-500">
-                        {trend.trend_reading || "Έßœâœ¹Έ·œ² œ³Έ§œÉΈΖ"}
+                        {trend.trend_reading || "Χωρίς τάση"}
                       </div>
                     </div>
                     <div className="text-right">
@@ -1141,17 +1141,17 @@ function PoliticalEnvironmentPanel({
                         {formatPercent(trend.avg_value)}
                       </div>
                       <div className="text-xs text-zinc-500">
-                        ΈΦ.œ¨. {trend.poll_count || 0} ΈΦΈΒœ³œ¹.
+                        μ.ό. {trend.poll_count || 0} μετρ.
                       </div>
                     </div>
                   </div>
 
                   <div className="mt-3 flex flex-wrap gap-2">
                     <span className="rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-xs text-zinc-400">
-                      œ³ΈΒΈΜΈΒœÖœ³Έ±Έ·Έ±: {formatPercent(trend.latest_value)}
+                      τελευταία: {formatPercent(trend.latest_value)}
                     </span>
                     <span className="rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-xs text-zinc-400">
-                      ΈΗΈ≠œÉΈΖ #{trend.latest_rank || "βÄî"}
+                      θέση #{trend.latest_rank || "—"}
                     </span>
                   </div>
                 </div>
@@ -1159,7 +1159,7 @@ function PoliticalEnvironmentPanel({
             </div>
           ) : (
             <p className="text-sm leading-7 text-zinc-500">
-              ΈîΈΒΈΫ Έ≠œ΅ΈΩœÖΈΫ œÖœÄΈΩΈΜΈΩΈ≥ΈΙœÉœ³ΈΒΈ· Έ±ΈΚœ¨ΈΦΈΖ œ³Έ§œÉΈΒΈΙœ² ΈΚΈΩΈΦΈΦΈ§œ³œâΈΫ.
+              Δεν έχουν υπολογιστεί ακόμη τάσεις κομμάτων.
             </p>
           )}
         </div>
@@ -1187,17 +1187,17 @@ function AgendaRankingPanel({
         <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <div>
             <div className="text-xs uppercase tracking-[0.22em] text-cyan-200/80">
-              ΈôΈΒœ¹Έ§œ¹œ΅ΈΖœÉΈΖ Έ±œ³ΈΕΈ≠ΈΫœ³Έ±œ²
+              Ιεράρχηση ατζέντας
             </div>
-            <h2 className="mt-2 text-2xl font-semibold">ΈîΈΒΈΫ œÖœÄΈ§œ¹œ΅ΈΩœÖΈΫ Έ±ΈΚœ¨ΈΦΈΖ Έ±œ¹ΈΚΈΒœ³Έ§ œ³Έ±ΈΨΈΙΈΫΈΩΈΦΈΖΈΦΈ≠ΈΫΈ± ΈΗΈ≠ΈΦΈ±œ³Έ±</h2>
+            <h2 className="mt-2 text-2xl font-semibold">Δεν υπάρχουν ακόμη αρκετά ταξινομημένα θέματα</h2>
           </div>
           <div className="rounded-full border border-amber-300/25 bg-amber-300/10 px-3 py-1 text-xs text-amber-100">
-            ΈΞœÄœ¨ ΈΒœÄΈΒΈΨΈΒœ¹Έ≥Έ±œÉΈ·Έ±
+            Υπό επεξεργασία
           </div>
         </div>
         <p className="mt-4 max-w-4xl text-sm leading-7 text-zinc-400">
-          Έü Noraya œ΅œ¹ΈΒΈΙΈ§ΈΕΈΒœ³Έ±ΈΙ œÄΈΒœ¹ΈΙœÉœÉœ¨œ³ΈΒœ¹Έ± œ³Έ±ΈΨΈΙΈΫΈΩΈΦΈΖΈΦΈ≠ΈΫΈ± Έ§œ¹ΈΗœ¹Έ± Έ≥ΈΙΈ± ΈΫΈ± ΈΒΈΦœÜΈ±ΈΫΈ·œÉΈΒΈΙ Έ±ΈΨΈΙœ¨œÄΈΙœÉœ³ΈΖ ΈΙΈΒœ¹Έ§œ¹œ΅ΈΖœÉΈΖ Έ±œ³ΈΕΈ≠ΈΫœ³Έ±œ²,
-          Έ≠ΈΫœ³Έ±œÉΈΖ œÉΈ°ΈΦΈ±œ³ΈΩœ² ΈΚΈ±ΈΙ Έ≤Έ§œÉΈΖ œ³ΈΒΈΚΈΦΈΖœ¹Έ·œâœÉΈΖœ².
+          Ο Noraya χρειάζεται περισσότερα ταξινομημένα άρθρα για να εμφανίσει αξιόπιστη ιεράρχηση ατζέντας,
+          ένταση σήματος και βάση τεκμηρίωσης.
         </p>
       </section>
     );
@@ -1208,12 +1208,12 @@ function AgendaRankingPanel({
       <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
           <div className="text-xs uppercase tracking-[0.22em] text-cyan-200/80">
-            ΈôΈΒœ¹Έ§œ¹œ΅ΈΖœÉΈΖ Έ±œ³ΈΕΈ≠ΈΫœ³Έ±œ²
+            Ιεράρχηση ατζέντας
           </div>
-          <h2 className="mt-2 text-2xl font-semibold">ΈΛΈΙ Έ±ΈΫΈΒΈ≤Έ±Έ·ΈΫΈΒΈΙ œÉΈ°ΈΦΈΒœ¹Έ±</h2>
+          <h2 className="mt-2 text-2xl font-semibold">Τι ανεβαίνει σήμερα</h2>
           <p className="mt-2 max-w-3xl text-sm leading-7 text-zinc-400">
-            Έ½ Έ≤Έ±œ¹œçœ³ΈΖœ³Έ± Έ¥ΈΒΈΫ ΈΒΈ·ΈΫΈ±ΈΙ ΈΒΈΚΈΜΈΩΈ≥ΈΙΈΚœ¨ œÄΈΩœÉΈΩœÉœ³œ¨. ΈïΈ·ΈΫΈ±ΈΙ œÉœ΅ΈΒœ³ΈΙΈΚΈ° Έ≠ΈΫΈ¥ΈΒΈΙΈΨΈΖ Έ±œ³ΈΕΈ≠ΈΫœ³Έ±œ² ΈΦΈΒ Έ≤Έ§œÉΈΖ Έ§œ¹ΈΗœ¹Έ±,
-            œÄΈΖΈ≥Έ≠œ², œÄΈΩΈΜΈΙœ³ΈΙΈΚΈ° œÉœÖΈΫΈ§œÜΈΒΈΙΈ±, Έ≠ΈΫœ³Έ±œÉΈΖ ΈΚΈ±ΈΙ Έ¥ΈΙΈ±ΈΗΈ≠œÉΈΙΈΦΈΖ œ³ΈΒΈΚΈΦΈΖœ¹Έ·œâœÉΈΖ.
+            Η βαρύτητα δεν είναι εκλογικό ποσοστό. Είναι σχετική ένδειξη ατζέντας με βάση άρθρα,
+            πηγές, πολιτική συνάφεια, ένταση και διαθέσιμη τεκμηρίωση.
           </p>
         </div>
 
@@ -1242,14 +1242,14 @@ function AgendaRankingPanel({
                         {item.topic}
                       </h3>
                       <p className="mt-1 text-xs text-zinc-500">
-                        {item.article_count || 0} Έ§œ¹ΈΗœ¹Έ± ¬Ζ {item.source_count || 0} œÄΈΖΈ≥Έ≠œ² ¬Ζ {item.political_articles || 0} œÄΈΩΈΜΈΙœ³ΈΙΈΚΈ§ Έ§œ¹ΈΗœ¹Έ±
+                        {item.article_count || 0} άρθρα · {item.source_count || 0} πηγές · {item.political_articles || 0} πολιτικά άρθρα
                       </p>
                     </div>
                   </div>
 
                   <div className="mt-4">
                     <div className="mb-2 flex items-center justify-between text-xs text-zinc-500">
-                      <span>ΈΘœ΅ΈΒœ³ΈΙΈΚΈ° Έ≤Έ±œ¹œçœ³ΈΖœ³Έ± Έ±œ³ΈΕΈ≠ΈΫœ³Έ±œ²</span>
+                      <span>Σχετική βαρύτητα ατζέντας</span>
                       <span className="font-medium text-zinc-300">{item.share}%</span>
                     </div>
                     <div className="h-3 overflow-hidden rounded-full bg-white/10">
@@ -1273,30 +1273,30 @@ function AgendaRankingPanel({
 
               <details className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
                 <summary className="cursor-pointer text-sm font-medium text-zinc-300">
-                  ΈëœÄœ¨ œÄΈΩœç œÄœ¹ΈΩΈΚœçœÄœ³ΈΒΈΙ Έ±œÖœ³œ¨;
+                  Από πού προκύπτει αυτό;
                 </summary>
 
                 <div className="mt-4 grid gap-4 lg:grid-cols-2">
                   <div>
                     <div className="text-xs uppercase tracking-[0.18em] text-zinc-500">
-                      ΈëΈΫΈ§Έ≥ΈΫœâœÉΈΖ / framing
+                      Ανάγνωση / framing
                     </div>
                     <p className="mt-2 text-sm leading-7 text-zinc-300">
                       {text(
                         item.framing_summary,
-                        "ΈîΈΒΈΫ œÖœÄΈ§œ¹œ΅ΈΒΈΙ Έ±ΈΚœ¨ΈΦΈΖ œÄΈΜΈ°œ¹ΈΖœ² framing Έ±ΈΫΈ§ΈΜœÖœÉΈΖ Έ≥ΈΙΈ± Έ±œÖœ³œ¨ œ³ΈΩ ΈΗΈ≠ΈΦΈ±."
+                        "Δεν υπάρχει ακόμη πλήρης framing ανάλυση για αυτό το θέμα."
                       )}
                     </p>
                   </div>
 
                   <div>
                     <div className="text-xs uppercase tracking-[0.18em] text-zinc-500">
-                      Έ†œ¹ΈΩœ³ΈΒΈΙΈΫœ¨ΈΦΈΒΈΫΈΖ œÄœ¹ΈΩœÉΈΩœ΅Έ°
+                      Προτεινόμενη προσοχή
                     </div>
                     <p className="mt-2 text-sm leading-7 text-zinc-300">
                       {text(
                         item.evidence_summary || item.recommended_action,
-                        "Έßœ¹ΈΒΈΙΈ§ΈΕΈΒœ³Έ±ΈΙ œÄΈ±œ¹Έ±ΈΚΈΩΈΜΈΩœçΈΗΈΖœÉΈΖ ΈΦΈ≠œ΅œ¹ΈΙ ΈΫΈ± ΈΙœÉœ΅œÖœ¹ΈΩœÄΈΩΈΙΈΖΈΗΈΒΈ· œ³ΈΩ œÉΈ°ΈΦΈ±."
+                        "Χρειάζεται παρακολούθηση μέχρι να ισχυροποιηθεί το σήμα."
                       )}
                     </p>
                   </div>
@@ -1304,7 +1304,7 @@ function AgendaRankingPanel({
 
                 <div className="mt-4">
                   <div className="text-xs uppercase tracking-[0.18em] text-zinc-500">
-                    ΈÜœ¹ΈΗœ¹Έ± / œÉœ³ΈΩΈΙœ΅ΈΒΈ·Έ± Έ≤Έ§œÉΈΖœ²
+                    Άρθρα / στοιχεία βάσης
                   </div>
 
                   {item.evidenceArticles.length > 0 ? (
@@ -1336,7 +1336,7 @@ function AgendaRankingPanel({
                     </div>
                   ) : (
                     <p className="mt-3 text-sm leading-7 text-zinc-500">
-                      ΈîΈΒΈΫ Έ≠œ΅ΈΩœÖΈΫ ΈΒœÄΈΙœÉœ³œ¹Έ±œÜΈΒΈ· Έ±ΈΚœ¨ΈΦΈΖ œÉœÖΈ≥ΈΚΈΒΈΚœ¹ΈΙΈΦΈ≠ΈΫΈ± Έ§œ¹ΈΗœ¹Έ± Έ≥ΈΙΈ± Έ±œÖœ³œ¨ œ³ΈΩ ΈΗΈ≠ΈΦΈ±.
+                      Δεν έχουν επιστραφεί ακόμη συγκεκριμένα άρθρα για αυτό το θέμα.
                     </p>
                   )}
                 </div>
