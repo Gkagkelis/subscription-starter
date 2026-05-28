@@ -526,19 +526,12 @@ ${question}`;
         system: systemPrompt,
         messages: aiMessages,
         tools: [
-          {
-            type: "web_search_20250305",
-            name: "web_search",
-            max_uses: liveResearchRequired ? 5 : 2,
-            user_location: {
-              type: "approximate",
-              city: "Athens",
-              region: "Attica",
-              country: "GR",
-              timezone: "Europe/Athens",
-            },
-          },
-        ],
+  {
+    type: "web_search_20250305",
+    name: "web_search",
+    max_uses: liveResearchRequired ? 5 : 2,
+  },
+],
       }),
     });
 
