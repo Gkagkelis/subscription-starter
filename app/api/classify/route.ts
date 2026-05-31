@@ -52,10 +52,12 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const requestedLimit = Number(searchParams.get("limit") || "25");
+  // Keep each AI batch small and reliable.
+  // The radar endpoint will call this repeatedly.
+  const requestedLimit = Number(searchParams.get("limit") || "20");
   const limit = Math.min(
-    Math.max(Number.isFinite(requestedLimit) ? Math.trunc(requestedLimit) : 25, 1),
-    50
+    Math.max(Number.isFinite(requestedLimit) ? Math.trunc(requestedLimit) : 20, 1),
+    25
   );
 
   const { data: articles, error: fetchError } = await supabase
@@ -162,7 +164,7 @@ ${articlesList}`;
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-6",
-        max_tokens: 4000,
+        max_tokens: 8000,
         messages: [{ role: "user", content: prompt }],
       }),
     });
