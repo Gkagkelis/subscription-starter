@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import type { ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { MutableRefObject, ReactNode } from "react";
 
 type Scenario = {
   name?: string;
@@ -171,7 +171,9 @@ type ApiResponse = {
   agenda_used?: AgendaUsedRow[];
   political_environment?: PoliticalEnvironment | null;
   political_environment_status?: string;
+  processing_status?: string;
   source?: string;
+  warning?: string | null;
 };
 
 type StrategyChatResponse = {
@@ -179,15 +181,76 @@ type StrategyChatResponse = {
   conversation_id?: string;
 };
 
-type TabId = "today" | "diagnosis" | "scenarios" | "messages" | "plan";
+type LiveSituationRow = {
+  id?: string | null;
+  title?: string | null;
+  topic?: string | null;
+  plain_title?: string | null;
+  situation_title?: string | null;
+  category?: string | null;
+  status?: string | null;
+  urgency?: string | null;
+  confidence_score?: number | string | null;
+  documentation_level?: string | null;
+  documentation_basis?: string | null;
+  agenda_score?: number | string | null;
+  priority_score?: number | string | null;
+  political_risk_level?: string | null;
+  dominant_frame?: string | null;
+  framing_summary?: string | null;
+  recommended_action?: string | null;
+  avoid_action?: string | null;
+  evidence_summary?: string | null;
+  source_count?: number | string | null;
+  article_count?: number | string | null;
+  strategic_read?: unknown;
+  heresthetic_read?: unknown;
+  public_pulse?: unknown;
+  red_team?: unknown;
+  summary_assessment?: unknown;
+  escalation_level?: number | string | null;
+  escalation_recommended?: number | string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+  [key: string]: unknown;
+};
 
-const tabs: Array<{ id: TabId; label: string; description: string }> = [
-  { id: "today", label: "Σήμερα", description: "Η άμεση πολιτική ανάγνωση." },
-  { id: "diagnosis", label: "Διάγνωση", description: "Τι σημαίνει στρατηγικά." },
-  { id: "scenarios", label: "Σενάρια", description: "Τι γίνεται αν κινηθούμε διαφορετικά." },
-  { id: "messages", label: "Μηνύματα", description: "Τι μπορούμε να πούμε δημόσια." },
-  { id: "plan", label: "Πλάνο", description: "Τι κάνουμε τώρα και μετά." },
+type SituationEngineResponse = {
+  success?: boolean;
+  timestamp?: string;
+  count?: number;
+  returned_count?: number;
+  source?: string;
+  fallback_used?: boolean;
+  situations?: LiveSituationRow[];
+  error?: string;
+};
+
+type RankedAgenda = AgendaUsedRow & {
+  rank: number;
+  score: number;
+  share: number;
+  signalLabel: string;
+  documentationLabel: string;
+  evidenceArticles: Array<{ title: string; source?: string; url?: string }>;
+};
+
+type SituationTab = "strategic" | "why" | "drivers" | "pulse" | "win" | "options" | "comms";
+
+type ChatMessage = { role: "user" | "assistant"; content: string };
+
+const situationTabs: Array<{ id: SituationTab; label: string }> = [
+  { id: "strategic", label: "Στρατηγική εικόνα" },
+  { id: "why", label: "Γιατί υπάρχει" },
+  { id: "drivers", label: "Drivers & πηγές" },
+  { id: "pulse", label: "Public Pulse" },
+  { id: "win", label: "Πώς κερδίζεται" },
+  { id: "options", label: "Επιλογές δράσης" },
+  { id: "comms", label: "Υλικό" },
 ];
+
+const navTabs = ["Σήμερα", "Ατζέντα", "Καταστάσεις", "Σενάρια", "Πρόσωπα", "Αρχεία", "Δεδομένα"];
+const cognitiveStages = ["Agenda", "Framing", "Priming", "Audience", "Persuasion", "Mobilization", "Recommendation"];
 
 function text(value: unknown, fallback: string) {
   if (typeof value === "string" && value.trim()) return value.trim();
@@ -200,23 +263,44 @@ function list(values: unknown): string[] {
     : [];
 }
 
-function recommendationLabel(value?: string) {
-  if (value === "prefer") return "Προτεινόμενο";
-  if (value === "acceptable") return "Αποδεκτό";
-  if (value === "avoid") return "Να αποφευχθεί";
-  return "Σενάριο";
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
 }
 
-function recommendationClass(value?: string) {
-  if (value === "prefer") return "border-emerald-300/25 bg-emerald-300/10 text-emerald-100";
-  if (value === "acceptable") return "border-cyan-300/25 bg-cyan-300/10 text-cyan-100";
-  if (value === "avoid") return "border-red-300/25 bg-red-300/10 text-red-100";
-  return "border-white/10 bg-white/[0.04] text-zinc-200";
+function pickString(source: unknown, keys: string[], fallback = "") {
+  if (typeof source === "string" && source.trim()) return source.trim();
+  const record = asRecord(source);
+  if (!record) return fallback;
+
+  for (const key of keys) {
+    const value = record[key];
+    if (typeof value === "string" && value.trim()) return value.trim();
+  }
+
+  return fallback;
 }
 
 function numberValue(value: unknown, fallback = 0) {
   const parsed = typeof value === "number" ? value : Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function clamp(value: number, min = 0, max = 100) {
+  return Math.min(Math.max(value, min), max);
+}
+
+function shortDate(value?: string | null) {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+
+  return date.toLocaleDateString("el-GR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
 }
 
 function documentationLabel(value?: string | null) {
@@ -232,6 +316,10 @@ function documentationLabel(value?: string | null) {
 
   if (normalized.includes("low") || normalized.includes("initial") || normalized.includes("starter") || normalized.includes("αρχ")) {
     return "Αρχική τεκμηρίωση";
+  }
+
+  if (normalized.includes("insufficient") || normalized.includes("weak") || normalized.includes("ανεπαρκ")) {
+    return "Ανεπαρκής τεκμηρίωση";
   }
 
   return "Τεκμηρίωση υπό έλεγχο";
@@ -252,26 +340,46 @@ function riskLabel(value?: string | null) {
     return "Χαμηλή ένταση";
   }
 
-  return "Ένταση υπό παρακολούθηση";
+  return "Υπό παρακολούθηση";
 }
 
 function signalToneClass(value?: string | null) {
   const label = riskLabel(value);
-
-  if (label.includes("Υψηλή")) return "border-red-300/25 bg-red-300/10 text-red-100";
-  if (label.includes("Μεσαία")) return "border-amber-300/25 bg-amber-300/10 text-amber-100";
-  if (label.includes("Χαμηλή")) return "border-emerald-300/25 bg-emerald-300/10 text-emerald-100";
-
+  if (label.includes("Υψηλή")) return "border-red-400/30 bg-red-400/10 text-red-100";
+  if (label.includes("Μεσαία")) return "border-amber-400/30 bg-amber-400/10 text-amber-100";
+  if (label.includes("Χαμηλή")) return "border-cyan-300/25 bg-cyan-300/10 text-cyan-100";
   return "border-white/10 bg-white/[0.04] text-zinc-300";
 }
 
 function docToneClass(value?: string | null) {
   const label = documentationLabel(value);
-
   if (label.includes("Ισχυρή")) return "border-emerald-300/25 bg-emerald-300/10 text-emerald-100";
   if (label.includes("Μεσαία")) return "border-cyan-300/25 bg-cyan-300/10 text-cyan-100";
   if (label.includes("Αρχική")) return "border-amber-300/25 bg-amber-300/10 text-amber-100";
+  if (label.includes("Ανεπαρκής")) return "border-red-300/25 bg-red-300/10 text-red-100";
+  return "border-white/10 bg-white/[0.04] text-zinc-300";
+}
 
+function statusToneClass(value?: string | null) {
+  const normalized = String(value || "").toLowerCase();
+  if (normalized.includes("active")) return "border-emerald-300/25 bg-emerald-300/10 text-emerald-100";
+  if (normalized.includes("new") || normalized.includes("candidate")) return "border-cyan-300/25 bg-cyan-300/10 text-cyan-100";
+  if (normalized.includes("monitor")) return "border-amber-300/25 bg-amber-300/10 text-amber-100";
+  if (normalized.includes("resolved") || normalized.includes("archived")) return "border-white/10 bg-white/[0.04] text-zinc-400";
+  return "border-white/10 bg-white/[0.04] text-zinc-300";
+}
+
+function recommendationLabel(value?: string) {
+  if (value === "prefer") return "Προτεινόμενη";
+  if (value === "acceptable") return "Αποδεκτή";
+  if (value === "avoid") return "Να αποφευχθεί";
+  return "Επιλογή";
+}
+
+function recommendationClass(value?: string) {
+  if (value === "prefer") return "border-emerald-300/30 bg-emerald-300/10 text-emerald-100";
+  if (value === "acceptable") return "border-cyan-300/25 bg-cyan-300/10 text-cyan-100";
+  if (value === "avoid") return "border-red-300/25 bg-red-300/10 text-red-100";
   return "border-white/10 bg-white/[0.04] text-zinc-300";
 }
 
@@ -279,70 +387,20 @@ function evidenceArticleItems(value: unknown): Array<{ title: string; source?: s
   if (!Array.isArray(value)) return [];
 
   return value
-    .slice(0, 6)
-    .map((item) => {
+    .slice(0, 5)
+    .map((item): { title: string; source?: string; url?: string } | null => {
       if (typeof item === "string") return { title: item };
 
-      if (item && typeof item === "object") {
-        const record = item as Record<string, unknown>;
+      const record = asRecord(item);
+      if (!record) return null;
 
-        return {
-          title: String(record.title || record.headline || record.url || "Άρθρο τεκμηρίωσης"),
-          source: record.source ? String(record.source) : undefined,
-          url: record.url || record.link ? String(record.url || record.link) : undefined,
-        };
-      }
-
-      return null;
+      return {
+        title: String(record.title || record.headline || record.url || "Άρθρο τεκμηρίωσης"),
+        source: record.source ? String(record.source) : undefined,
+        url: record.url || record.link ? String(record.url || record.link) : undefined,
+      };
     })
     .filter((item): item is { title: string; source?: string; url?: string } => Boolean(item?.title));
-}
-
-function formatPercent(value: unknown) {
-  const parsed = numberValue(value, Number.NaN);
-  if (!Number.isFinite(parsed)) return "—";
-  return `${parsed.toFixed(1).replace(".", ",")}%`;
-}
-
-function shortDate(value?: string | null) {
-  if (!value) return "—";
-
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) return value;
-
-  return date.toLocaleDateString("el-GR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
-}
-
-function partyImplicationText(
-  environment: PoliticalEnvironment | null | undefined,
-  partyKey?: string
-) {
-  if (!environment?.party_specific_implications || !partyKey) {
-    return "";
-  }
-
-  const value = environment.party_specific_implications[partyKey];
-
-  return typeof value === "string" ? value : "";
-}
-
-function topActorTrends(environment: PoliticalEnvironment | null | undefined) {
-  return Array.isArray(environment?.actor_trends)
-    ? environment.actor_trends
-        .filter((trend) => trend?.actor_key && trend.actor_key !== "undecided" && trend.actor_key !== "other")
-        .slice(0, 8)
-    : [];
-}
-
-function recentPolls(environment: PoliticalEnvironment | null | undefined) {
-  return Array.isArray(environment?.recent_polls)
-    ? environment.recent_polls.slice(0, 4)
-    : [];
 }
 
 function partyDisplayName(profile?: Profile | null) {
@@ -355,30 +413,20 @@ function partyDisplayName(profile?: Profile | null) {
 }
 
 function partyShortName(profile?: Profile | null) {
-  if (profile?.party_profile_snapshot?.short_name) {
-    return profile.party_profile_snapshot.short_name;
-  }
-
-  if (profile?.party_key === "el_as") return "ΕΛ.ΑΣ";
+  if (profile?.party_profile_snapshot?.short_name) return profile.party_profile_snapshot.short_name;
+  if (profile?.party_key === "elas" || profile?.party_key === "el_as") return "ΕΛΑΣ";
   if (profile?.party_key === "elpida_dimokratia") return "Ελπίδα";
   if (profile?.party_key === "nd") return "ΝΔ";
   if (profile?.party_key === "pasok") return "ΠΑΣΟΚ";
   if (profile?.party_key === "syriza") return "ΣΥΡΙΖΑ";
   if (profile?.party_key === "kke") return "ΚΚΕ";
 
-  return (
-    profile?.party_profile_snapshot?.party_name ||
-    profile?.org_name ||
-    profile?.party_key ||
-    "—"
-  );
+  return profile?.party_profile_snapshot?.party_name || profile?.org_name || profile?.party_key || "—";
 }
 
 function partyInitials(profile?: Profile | null) {
   const shortName = partyShortName(profile);
-
   if (!shortName || shortName === "—") return "?";
-
   if (shortName.length <= 6) return shortName;
 
   return shortName
@@ -390,52 +438,162 @@ function partyInitials(profile?: Profile | null) {
     .toUpperCase();
 }
 
-function hasConnectedPartyProfile(profile?: Profile | null) {
-  return Boolean(
-    profile?.party_key &&
-      (
-        profile?.party_profile_snapshot?.party_name ||
-        profile?.org_name
-      )
+function topActorTrends(environment: PoliticalEnvironment | null | undefined) {
+  return Array.isArray(environment?.actor_trends)
+    ? environment.actor_trends
+        .filter((trend) => trend?.actor_key && trend.actor_key !== "undecided" && trend.actor_key !== "other")
+        .slice(0, 5)
+    : [];
+}
+
+function recentPolls(environment: PoliticalEnvironment | null | undefined) {
+  return Array.isArray(environment?.recent_polls) ? environment.recent_polls.slice(0, 4) : [];
+}
+
+function partyImplicationText(environment: PoliticalEnvironment | null | undefined, partyKey?: string) {
+  if (!environment?.party_specific_implications || !partyKey) return "";
+  const value = environment.party_specific_implications[partyKey];
+  return typeof value === "string" ? value : "";
+}
+
+function situationId(situation: LiveSituationRow, index: number) {
+  return String(situation.id || `${situation.title || situation.topic || "situation"}-${index}`);
+}
+
+function situationTitle(situation?: LiveSituationRow | null, fallback = "Ενεργή πολιτική κατάσταση") {
+  if (!situation) return fallback;
+  return text(
+    situation.title || situation.situation_title || situation.plain_title || situation.topic,
+    fallback
   );
 }
 
+function situationScore(situation?: LiveSituationRow | null, fallback = 0) {
+  if (!situation) return fallback;
+  return clamp(
+    numberValue(
+      situation.priority_score ?? situation.agenda_score ?? situation.confidence_score,
+      fallback
+    )
+  );
+}
+
+function readStrategicText(situation: LiveSituationRow | null | undefined, brief: StrategicBrief) {
+  const strategicRead = situation?.strategic_read;
+
+  return text(
+    pickString(strategicRead, ["summary", "text", "strategic_read", "diagnosis", "what_it_means", "assessment"]),
+    text(
+      brief.strategic_diagnosis?.agenda_reading,
+      text(
+        brief.daily_brief?.why_it_matters_now,
+        "Δεν υπάρχει ακόμη πλήρης Strategic Read για αυτή την κατάσταση. Το cockpit κρατά το panel έτοιμο και εμφανίζει μόνο τα διαθέσιμα live δεδομένα."
+      )
+    )
+  );
+}
+
+function readWhyText(situation: LiveSituationRow | null | undefined, brief: StrategicBrief) {
+  return text(
+    situation?.documentation_basis || situation?.evidence_summary || situation?.framing_summary,
+    text(
+      brief.evidence?.basis,
+      "Η κατάσταση εμφανίζεται επειδή υπάρχει σήμα ατζέντας ή live row στο situation engine. Δεν έχει ακόμη πλήρη τεκμηρίωση basis στο UI."
+    )
+  );
+}
+
+function publicPulseScore(situation: LiveSituationRow | null | undefined) {
+  const pulse = asRecord(situation?.public_pulse);
+  return clamp(numberValue(pulse?.social_mood_score ?? pulse?.mood_score ?? pulse?.score, 0));
+}
+
+function redTeamItems(value: unknown) {
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .slice(0, 5)
+    .map((item, index) => {
+      if (typeof item === "string") {
+        return {
+          attack_text: item,
+          risk_level: "medium",
+          likely_actor: "—",
+          suggested_defense: "Να προετοιμαστεί ασφαλής απάντηση πριν από δημόσια κλιμάκωση.",
+        };
+      }
+
+      const record = asRecord(item);
+      if (!record) return null;
+
+      return {
+        attack_text: pickString(record, ["attack_text", "attack", "text"], `Αντεπίθεση ${index + 1}`),
+        risk_level: pickString(record, ["risk_level", "risk"], "medium"),
+        likely_actor: pickString(record, ["likely_actor", "actor"], "—"),
+        suggested_defense: pickString(record, ["suggested_defense", "defense", "response"], "Να ετοιμαστεί γραμμή άμυνας."),
+      };
+    })
+    .filter((item): item is { attack_text: string; risk_level: string; likely_actor: string; suggested_defense: string } => Boolean(item));
+}
+
+function confidenceFromDocLevel(level?: string | null, fallbackScore = 0) {
+  const normalized = String(level || "").toLowerCase();
+  if (normalized.includes("strong") || normalized.includes("high") || normalized.includes("ισχυ")) return Math.max(fallbackScore, 76);
+  if (normalized.includes("medium") || normalized.includes("μεσα")) return Math.max(fallbackScore, 56);
+  if (normalized.includes("initial") || normalized.includes("low") || normalized.includes("αρχ")) return Math.max(fallbackScore, 34);
+  return fallbackScore;
+}
+
 export default function StrategyRoomPage() {
-  const [activeTab, setActiveTab] = useState<TabId>("today");
   const [data, setData] = useState<ApiResponse | null>(null);
+  const [situationEngine, setSituationEngine] = useState<SituationEngineResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [situationWarning, setSituationWarning] = useState("");
+  const [activeSituationId, setActiveSituationId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<SituationTab>("strategic");
 
   const [chatQuestion, setChatQuestion] = useState("");
-  const [chatMessages, setChatMessages] = useState<Array<{ role: string; content: string }>>([]);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatLoading, setChatLoading] = useState(false);
   const [chatError, setChatError] = useState("");
   const [conversationId, setConversationId] = useState<string | null>(null);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
 
-  async function loadStrategy() {
+  async function loadCockpit() {
     setLoading(true);
     setError("");
+    setSituationWarning("");
 
     try {
-      const response = await fetch("/api/advisor/strategy-brief", { cache: "no-store" });
+      const briefResponse = await fetch("/api/advisor/strategy-brief?limit=8", { cache: "no-store" });
 
-      if (response.status === 401) {
+      if (briefResponse.status === 401) {
         window.location.href = "/signin/password_signin?next=/strategy-room";
         return;
       }
 
-      if (response.status === 409) {
+      if (briefResponse.status === 409) {
         window.location.href = "/onboarding";
         return;
       }
 
-      if (!response.ok) {
-        throw new Error(`Strategy brief API error: ${response.status}`);
+      if (!briefResponse.ok) {
+        throw new Error(`Strategy brief API error: ${briefResponse.status}`);
       }
 
-      const json = (await response.json()) as ApiResponse;
-      setData(json);
+      const briefJson = (await briefResponse.json()) as ApiResponse;
+      setData(briefJson);
+
+      const situationResponse = await fetch("/api/situation-engine?token=dev", { cache: "no-store" });
+
+      if (situationResponse.ok) {
+        const situationJson = (await situationResponse.json()) as SituationEngineResponse;
+        setSituationEngine(situationJson);
+      } else {
+        setSituationEngine(null);
+        setSituationWarning(`Situation engine API error: ${situationResponse.status}`);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
@@ -444,19 +602,84 @@ export default function StrategyRoomPage() {
   }
 
   useEffect(() => {
-    loadStrategy();
+    loadCockpit();
   }, []);
 
-  const partyName =
-    data?.profile?.party_profile_snapshot?.party_name ||
-    data?.profile?.party_key ||
-    data?.profile?.org_name ||
-    "";
+  const brief = data?.strategic_brief || {};
+  const issue = brief.issue || {};
+  const daily = brief.daily_brief || {};
+  const diagnosis = brief.strategic_diagnosis || {};
+  const messages = brief.message_package || {};
+  const actionPlan = brief.action_plan || {};
+  const monitoring = brief.monitoring_plan || {};
+  const evidence = brief.evidence || {};
+  const politicalEnvironment = data?.political_environment || null;
+  const selectedPartyKey = data?.profile?.party_key || "";
+  const selectedPartyImplication = partyImplicationText(politicalEnvironment, selectedPartyKey);
 
-  const evidenceArticles = Array.isArray(data?.strategic_brief?.evidence?.data_points)
-    ? data.strategic_brief.evidence.data_points
-        .slice(0, 8)
-        .map((point) => ({ title: point, source: "" }))
+  const rankedAgenda = useMemo<RankedAgenda[]>(() => {
+    const agendaRows = Array.isArray(data?.agenda_used)
+      ? data.agenda_used.filter((row) => row?.topic && row.topic !== "Μη ταξινομημένο").slice(0, 8)
+      : [];
+
+    const totalAgendaWeight = agendaRows.reduce((sum, row) => {
+      return sum + Math.max(numberValue(row.agenda_score, row.article_count || 0), 1);
+    }, 0);
+
+    return agendaRows.map((row, index) => {
+      const rawWeight = Math.max(numberValue(row.agenda_score, row.article_count || 0), 1);
+      const share = totalAgendaWeight > 0 ? Math.round((rawWeight / totalAgendaWeight) * 100) : 0;
+
+      return {
+        ...row,
+        rank: index + 1,
+        score: rawWeight,
+        share,
+        signalLabel: riskLabel(row.political_risk_level),
+        documentationLabel: documentationLabel(row.documentation_level),
+        evidenceArticles: evidenceArticleItems(row.top_evidence_articles),
+      };
+    });
+  }, [data?.agenda_used]);
+
+  const liveSituations = useMemo(() => {
+    const rows = Array.isArray(situationEngine?.situations) ? situationEngine.situations : [];
+    return rows.slice(0, 25);
+  }, [situationEngine?.situations]);
+
+  useEffect(() => {
+    if (!activeSituationId && liveSituations.length > 0) {
+      setActiveSituationId(situationId(liveSituations[0], 0));
+    }
+  }, [activeSituationId, liveSituations]);
+
+  const activeSituation = useMemo(() => {
+    if (!liveSituations.length) return null;
+    return (
+      liveSituations.find((situation, index) => situationId(situation, index) === activeSituationId) ||
+      liveSituations.find((situation) => String(situation.status || "").toLowerCase() === "active") ||
+      liveSituations[0]
+    );
+  }, [activeSituationId, liveSituations]);
+
+  const profile = data?.profile || null;
+  const partyName = partyDisplayName(profile);
+  const partyLogo = profile?.party_profile_snapshot?.logo_url || "";
+  const partyInitial = partyInitials(profile);
+
+  const activeTitle = situationTitle(
+    activeSituation,
+    text(daily.headline, text(issue.plain_title, rankedAgenda[0]?.topic || "Στρατηγική εικόνα ημέρας"))
+  );
+  const activeCategory = text(activeSituation?.category || activeSituation?.topic || issue.topic, "Πολιτική ατζέντα");
+  const activeStatus = text(activeSituation?.status, liveSituations.length ? "active" : "derived");
+  const activeUrgency = text(activeSituation?.urgency || issue.urgency, "watch");
+  const activeScore = situationScore(activeSituation, numberValue(rankedAgenda[0]?.score, 0));
+  const activeDocLevel = activeSituation?.documentation_level || issue.documentation_level || evidence.documentation_level || null;
+  const activeDocScore = confidenceFromDocLevel(activeDocLevel, numberValue(activeSituation?.confidence_score, 0));
+
+  const evidenceArticles = Array.isArray(brief.evidence?.data_points)
+    ? brief.evidence.data_points.slice(0, 8).map((point) => ({ title: point, source: "" }))
     : [];
 
   async function askNorayaAdvisor(questionOverride?: string) {
@@ -467,7 +690,6 @@ export default function StrategyRoomPage() {
       return;
     }
 
-    // Add user message to chat immediately
     setChatMessages((prev) => [...prev, { role: "user", content: question }]);
     setChatQuestion("");
     setChatLoading(true);
@@ -477,17 +699,18 @@ export default function StrategyRoomPage() {
       const response = await fetch("/api/advisor/strategy-chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-       body: JSON.stringify({
-  question,
-  conversation_id: conversationId,
-  profile: data?.profile || null,
-  strategic_brief: data?.strategic_brief || null,
-  political_environment: data?.political_environment || null,
-  political_environment_status: data?.political_environment_status || "",
-  agenda_used: data?.agenda_used || [],
-  party: partyName,
-  articles: evidenceArticles,
-}),
+        body: JSON.stringify({
+          question,
+          conversation_id: conversationId,
+          profile: data?.profile || null,
+          strategic_brief: data?.strategic_brief || null,
+          political_environment: data?.political_environment || null,
+          political_environment_status: data?.political_environment_status || "",
+          agenda_used: data?.agenda_used || [],
+          party: partyName,
+          articles: evidenceArticles,
+          active_situation: activeSituation || null,
+        }),
       });
 
       if (!response.ok) {
@@ -495,13 +718,9 @@ export default function StrategyRoomPage() {
 
         try {
           const errorJson = await response.json();
-          errorMessage =
-            errorJson?.answer ||
-            errorJson?.error ||
-            errorJson?.debug?.details ||
-            errorMessage;
+          errorMessage = errorJson?.answer || errorJson?.error || errorJson?.debug?.details || errorMessage;
         } catch {
-          // keep default error
+          // Keep default error.
         }
 
         throw new Error(errorMessage);
@@ -510,904 +729,933 @@ export default function StrategyRoomPage() {
       const json = (await response.json()) as StrategyChatResponse;
       const answer = json.answer || "Ο σύμβουλος Noraya δεν επέστρεψε απάντηση.";
 
-      // Save conversation_id for continuity
-      if (json.conversation_id) {
-        setConversationId(json.conversation_id);
-      }
-
-      // Add assistant message to chat
+      if (json.conversation_id) setConversationId(json.conversation_id);
       setChatMessages((prev) => [...prev, { role: "assistant", content: answer }]);
 
-      // Scroll to bottom
       setTimeout(() => {
         chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
       }, 100);
     } catch (err) {
-      setChatError(
-        err instanceof Error ? err.message : "Δεν μπόρεσε να απαντήσει ο σύμβουλος Noraya."
-      );
+      setChatError(err instanceof Error ? err.message : "Δεν μπόρεσε να απαντήσει ο σύμβουλος Noraya.");
     } finally {
       setChatLoading(false);
     }
   }
 
-  const brief = data?.strategic_brief || {};
-  const issue = brief.issue || {};
-  const daily = brief.daily_brief || {};
-  const diagnosis = brief.strategic_diagnosis || {};
-  const messages = brief.message_package || {};
-  const actionPlan = brief.action_plan || {};
-  const monitoring = brief.monitoring_plan || {};
-  const evidence = brief.evidence || {};
-
-  const politicalEnvironment = data?.political_environment || null;
-  const selectedPartyKey = data?.profile?.party_key || "";
-  const selectedPartyImplication = partyImplicationText(politicalEnvironment, selectedPartyKey);
-
-  const agendaRows = Array.isArray(data?.agenda_used)
-    ? data.agenda_used.filter((row) => row?.topic && row.topic !== "Μη ταξινομημένο").slice(0, 5)
-    : [];
-
-  const totalAgendaWeight = agendaRows.reduce((sum, row) => {
-    return sum + Math.max(numberValue(row.agenda_score, row.article_count || 0), 1);
-  }, 0);
-
-  const rankedAgenda = agendaRows.map((row, index) => {
-    const rawWeight = Math.max(numberValue(row.agenda_score, row.article_count || 0), 1);
-    const share = totalAgendaWeight > 0 ? Math.round((rawWeight / totalAgendaWeight) * 100) : 0;
-
-    return {
-      ...row,
-      rank: index + 1,
-      weight: rawWeight,
-      share,
-      signalLabel: riskLabel(row.political_risk_level),
-      documentationLabel: documentationLabel(row.documentation_level),
-      evidenceArticles: evidenceArticleItems(row.top_evidence_articles),
-    };
-  });
-
-  const connectedProfile = data?.profile || null;
-  const connectedPartyName = partyDisplayName(connectedProfile);
-  const connectedPartyInitials = partyInitials(connectedProfile);
-  const connectedPartyLogo = connectedProfile?.party_profile_snapshot?.logo_url || "";
-  const isPartyConnected = hasConnectedPartyProfile(connectedProfile);
-
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#020617] text-zinc-300">
-        Ο Noraya ετοιμάζει το Strategy Room...
+      <main className="flex h-screen items-center justify-center bg-[#060a14] font-mono text-zinc-300">
+        <div className="rounded-[2rem] border border-cyan-300/20 bg-[#0c1220] px-6 py-5 shadow-2xl shadow-cyan-950/20">
+          <div className="text-xs uppercase tracking-[0.28em] text-cyan-300">NORAYA</div>
+          <div className="mt-2 text-sm text-zinc-400">Φορτώνει cockpit shell με live δεδομένα...</div>
+        </div>
       </main>
     );
   }
 
   if (error) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center bg-[#020617] text-zinc-100">
-        <div className="text-xl font-semibold">Δεν φορτώθηκε το Strategy Room</div>
-        <p className="mt-3 text-sm text-red-100">{error}</p>
-        <button
-          type="button"
-          onClick={loadStrategy}
-          className="mt-5 rounded-2xl bg-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950"
-        >
-          Δοκίμασε ξανά
-        </button>
+      <main className="flex h-screen flex-col items-center justify-center bg-[#060a14] px-6 font-mono text-zinc-100">
+        <div className="max-w-xl rounded-[2rem] border border-red-300/25 bg-red-300/10 p-6">
+          <div className="text-xs uppercase tracking-[0.22em] text-red-100">Strategy Room</div>
+          <h1 className="mt-3 text-2xl font-semibold">Δεν φορτώθηκε το cockpit</h1>
+          <p className="mt-3 text-sm leading-7 text-red-100/90">{error}</p>
+          <button
+            type="button"
+            onClick={loadCockpit}
+            className="mt-5 rounded-2xl bg-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-200"
+          >
+            Δοκίμασε ξανά
+          </button>
+        </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#020617] px-4 py-10 text-zinc-100 md:px-8">
-      <div className="relative mx-auto max-w-7xl">
-        <header className="mb-8">
-          <div className="mb-5 flex items-center gap-3">
-            <img src="/noraya-eye.png" alt="Noraya" className="h-11 w-11 object-contain" />
-            <div>
-              <div className="text-xs uppercase tracking-[0.28em] text-cyan-300">NORAYA</div>
-              <div className="text-xs text-zinc-500">Political Strategy Room</div>
-            </div>
-          </div>
+    <main className="h-screen overflow-hidden bg-[#060a14] font-mono text-zinc-100">
+      <TopNavigation
+        partyName={partyName}
+        partyLogo={partyLogo}
+        partyInitial={partyInitial}
+        source={data?.source || "strategy-brief"}
+        situationSource={situationEngine?.source || "situation-engine"}
+      />
 
-          <div className="grid gap-6 lg:grid-cols-[1.3fr_0.7fr] lg:items-end">
-            <div>
-              <div className="mb-3 inline-flex rounded-full border border-amber-300/25 bg-amber-300/10 px-3 py-1 text-xs text-amber-100">
-                {text(issue.urgency, "watch").toUpperCase()}
-              </div>
-              <h1 className="max-w-5xl text-4xl font-semibold tracking-tight md:text-5xl">
-                {text(daily.headline, text(issue.plain_title, "Στρατηγική ανάγνωση της πολιτικής ατζέντας"))}
-              </h1>
-              <p className="mt-4 max-w-4xl text-base leading-7 text-zinc-400">
-                {text(daily.what_is_happening, "Ο Noraya διαβάζει την τρέχουσα ατζέντα και τη μετατρέπει σε στρατηγική, σενάρια, μήνυμα και πλάνο δράσης.")}
-              </p>
-            </div>
-
-            <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-5">
-              <div className="mb-4 flex items-start gap-4">
-                <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-3xl border border-cyan-300/25 bg-cyan-300/10">
-                  {connectedPartyLogo ? (
-                    <img
-                      src={connectedPartyLogo}
-                      alt={connectedPartyName}
-                      className="h-full w-full object-contain p-2"
-                    />
-                  ) : (
-                    <span className="px-2 text-center text-sm font-semibold text-cyan-100">
-                      {connectedPartyInitials}
-                    </span>
-                  )}
-                </div>
-
-                <div className="min-w-0">
-                  <div className="text-xs uppercase tracking-[0.22em] text-zinc-500">
-                    Συνδεδεμένο προφίλ
-                  </div>
-                  <div className="mt-2 text-lg font-semibold leading-6 text-zinc-100">
-                    {connectedPartyName}
-                  </div>
-                  <div className="mt-1 text-xs text-zinc-500">
-                    {text(connectedProfile?.org_type, "Πολιτικός οργανισμός")}
-                  </div>
-                </div>
-              </div>
-
-              <div
-                className={`mb-4 rounded-2xl border px-4 py-3 text-sm ${
-                  isPartyConnected
-                    ? "border-emerald-300/25 bg-emerald-300/10 text-emerald-100"
-                    : "border-amber-300/25 bg-amber-300/10 text-amber-100"
-                }`}
-              >
-                {isPartyConnected
-                  ? `Συνδεδεμένο με party profile (${connectedProfile?.party_key}).`
-                  : "Δεν έχει συνδεθεί συγκεκριμένο κόμμα. Ο Noraya θα απαντά με χαμηλότερη βεβαιότητα."}
-              </div>
-
-              <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
-                <a
-                  href="/onboarding"
-                  className="inline-flex justify-center rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-zinc-200 hover:bg-white/[0.06]"
-                >
-                  Αλλαγή προφίλ
-                </a>
-                <a
-                  href="#noraya-advisor-chat"
-                  className="inline-flex justify-center rounded-2xl bg-cyan-300 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-cyan-200"
-                >
-                  Ρώτησε τον σύμβουλο Noraya
-                </a>
-              </div>
-            </div>
-          </div>
-        </header>
-
-        <section className="mb-6 grid gap-4 lg:grid-cols-2">
-          <HeroDecision
-            label="Τι κάνουμε"
-            textValue={text(daily.immediate_recommendation, "Κρατάμε καθαρή στρατηγική γραμμή και αποφεύγουμε βιαστική κλιμάκωση.")}
-            tone="positive"
-          />
-          <HeroDecision
-            label="Τι αποφεύγουμε"
-            textValue={text(daily.avoid_today, "Αποφεύγουμε απόλυτη δημόσια θέση χωρίς επαρκή τεκμηρίωση.")}
-            tone="negative"
-          />
-        </section>
-
-        <AgendaRankingPanel items={rankedAgenda} />
-
-        <PoliticalEnvironmentPanel
-          environment={politicalEnvironment}
-          partyName={partyName}
-          partyImplication={selectedPartyImplication}
-          status={data?.political_environment_status}
+      <div className="flex h-[calc(100vh-64px)] min-w-[1180px] overflow-hidden border-t border-[#1a2640]">
+        <LeftSidebar
+          agenda={rankedAgenda}
+          situations={liveSituations}
+          activeSituationId={activeSituationId}
+          onSelectSituation={(id) => {
+            setActiveSituationId(id);
+            setActiveTab("strategic");
+          }}
+          situationSource={situationEngine?.source || "—"}
+          situationCount={situationEngine?.count || liveSituations.length}
+          situationWarning={situationWarning}
+          politicalEnvironment={politicalEnvironment}
         />
 
-        <section className="mb-8 rounded-[2rem] border border-cyan-300/20 bg-cyan-300/[0.045] p-5">
-          <div className="grid gap-3 md:grid-cols-5">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={`rounded-2xl border p-4 text-left transition ${
-                  activeTab === tab.id
-                    ? "border-cyan-300/40 bg-cyan-300/15 text-cyan-50"
-                    : "border-white/10 bg-black/20 text-zinc-400 hover:bg-white/[0.05]"
-                }`}
-              >
-                <div className="font-semibold">{tab.label}</div>
-                <div className="mt-1 text-xs leading-5 opacity-80">{tab.description}</div>
-              </button>
-            ))}
+        <section className="flex min-w-0 flex-1 flex-col overflow-hidden border-x border-[#1a2640] bg-[#070d18]">
+          <div className="flex-1 overflow-y-auto px-5 py-4">
+            <PriorityStrip
+              agenda={rankedAgenda}
+              activeTitle={activeTitle}
+              immediateRecommendation={daily.immediate_recommendation}
+              avoidToday={daily.avoid_today}
+            />
+
+            <ActiveSituationWorkspace
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              situation={activeSituation}
+              title={activeTitle}
+              category={activeCategory}
+              status={activeStatus}
+              urgency={activeUrgency}
+              score={activeScore}
+              documentationScore={activeDocScore}
+              documentationLevel={activeDocLevel}
+              brief={brief}
+              agenda={rankedAgenda}
+              selectedPartyImplication={selectedPartyImplication}
+            />
           </div>
+
+          <AdvisorDock
+            partyName={partyName}
+            chatQuestion={chatQuestion}
+            setChatQuestion={setChatQuestion}
+            chatMessages={chatMessages}
+            chatLoading={chatLoading}
+            chatError={chatError}
+            conversationId={conversationId}
+            onAsk={askNorayaAdvisor}
+            onReset={() => {
+              setChatMessages([]);
+              setConversationId(null);
+              setChatError("");
+            }}
+            chatEndRef={chatEndRef}
+          />
         </section>
 
-        {activeTab === "today" && (
-          <section className="grid gap-5 lg:grid-cols-3">
-            <Card title="Γιατί έχει σημασία τώρα">
-              {text(daily.why_it_matters_now, "Το θέμα μπορεί να επηρεάσει το κριτήριο με το οποίο θα αξιολογηθεί ο οργανισμός.")}
-            </Card>
-            <Card title="Κυρίαρχο framing">
-              {text(issue.dominant_frame, "Το framing χρειάζεται περαιτέρω ανάλυση πριν γίνει πλήρης στρατηγική κλιμάκωση.")}
-            </Card>
-            <Card title="Βασικό ρίσκο">
-              {text(issue.political_risk, "Το βασικό ρίσκο είναι βιαστική τοποθέτηση χωρίς επαρκή τεκμηρίωση.")}
-            </Card>
-          </section>
-        )}
-
-        {activeTab === "diagnosis" && (
-          <section className="grid gap-5 lg:grid-cols-2">
-            <Card title="Ανάγνωση ατζέντας">
-              {text(diagnosis.agenda_reading, text(issue.agenda_status, "Δεν υπάρχει αρκετή στρατηγική ανάγνωση ακόμη."))}
-            </Card>
-            <Card title="Framing diagnosis">
-              {text(diagnosis.framing_diagnosis, "Το framing χρειάζεται περαιτέρω ανάλυση.")}
-            </Card>
-            <Card title="Priming risk">
-              {text(diagnosis.priming_risk, text(issue.priming_risk, "Δεν έχει υπολογιστεί ακόμη priming risk."))}
-            </Card>
-            <Card title="Στρατηγική στάση">
-              <p>{text(diagnosis.recommended_posture_explanation, "Προτιμάται προσεκτική, θεσμική στάση μέχρι να ισχυροποιηθεί το σήμα.")}</p>
-              <div className="mt-4 inline-flex rounded-full border border-cyan-300/25 bg-cyan-300/10 px-3 py-1 text-xs text-cyan-100">
-                {text(diagnosis.recommended_posture, "institutional")}
-              </div>
-            </Card>
-            <Card title="Ποια κοινά επηρεάζονται">
-              <BulletList
-                items={list(issue.affected_audiences)}
-                fallback={["Βάση οργανισμού", "Μετριοπαθές κοινό", "Πολιτικά ενεργό κοινό"]}
-              />
-            </Card>
-            <Card title="Ευκαιρία">
-              {text(diagnosis.strategic_opportunity, text(issue.opportunity, "Υπάρχει ευκαιρία για σοβαρή και προετοιμασμένη στάση."))}
-            </Card>
-          </section>
-        )}
-
-        {activeTab === "scenarios" && (
-          <section className="grid gap-5">
-            {(brief.scenarios || []).map((scenario, index) => (
-              <article
-                key={`${scenario.name}-${index}`}
-                className="rounded-[2rem] border border-white/10 bg-white/[0.035] p-5"
-              >
-                <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                  <div>
-                    <h2 className="text-2xl font-semibold">{text(scenario.name, `Σενάριο ${index + 1}`)}</h2>
-                    <p className="mt-2 max-w-4xl text-sm leading-6 text-zinc-400">
-                      {text(scenario.move, "Δεν υπάρχει περιγραφή κίνησης.")}
-                    </p>
-                  </div>
-                  <div className={`w-fit rounded-full border px-3 py-1 text-xs ${recommendationClass(scenario.recommendation)}`}>
-                    {recommendationLabel(scenario.recommendation)}
-                  </div>
-                </div>
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                  <MiniBox title="Όφελος" textValue={text(scenario.likely_gain, "—")} />
-                  <MiniBox title="Ρίσκο" textValue={text(scenario.likely_risk, "—")} />
-                  <MiniBox title="Κοινό" textValue={text(scenario.audience_effect, "—")} />
-                  <MiniBox title="Αντίδραση" textValue={text(scenario.opponent_response, "—")} />
-                </div>
-              </article>
-            ))}
-          </section>
-        )}
-
-        {activeTab === "messages" && (
-          <section className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
-            <div className="rounded-[2rem] border border-cyan-300/20 bg-cyan-300/[0.05] p-6">
-              <div className="text-xs uppercase tracking-[0.22em] text-cyan-200/80">Κεντρική γραμμή</div>
-              <p className="mt-4 text-2xl font-semibold leading-snug">
-                {text(messages.central_line, "Χρειάζεται σοβαρότητα, τεκμηρίωση και θεσμική καθαρότητα.")}
-              </p>
-            </div>
-            <Card title="Social post">
-              {text(messages.social_post, "Δεν υπάρχει ακόμη προτεινόμενο social post.")}
-            </Card>
-            <Card title="Θεσμική εκδοχή">
-              {text(messages.institutional_version, "Δεν υπάρχει ακόμη θεσμική εκδοχή.")}
-            </Card>
-            <Card title="Ανθρώπινη εκδοχή">
-              {text(messages.human_version, "Δεν υπάρχει ακόμη ανθρώπινη εκδοχή.")}
-            </Card>
-            <Card title="Sharp εκδοχή">
-              {text(messages.sharp_version, "Δεν υπάρχει ακόμη sharp εκδοχή.")}
-            </Card>
-            <Card title="Αν μας επιτεθούν">
-              {text(messages.answer_if_attacked, "Δεν υπάρχει ακόμη απάντηση σε επίθεση.")}
-            </Card>
-            <Card title="Λέξεις που βοηθούν">
-              <BulletList
-                items={list(messages.words_to_use)}
-                fallback={["τεκμηρίωση", "σοβαρότητα", "θεσμική ευθύνη"]}
-              />
-            </Card>
-            <Card title="Λέξεις που αποφεύγουμε">
-              <BulletList
-                items={list(messages.words_to_avoid)}
-                fallback={["υπερβολή", "προσωπική επίθεση", "βεβαιότητα χωρίς στοιχεία"]}
-              />
-            </Card>
-          </section>
-        )}
-
-        {activeTab === "plan" && (
-          <section className="grid gap-5 lg:grid-cols-2">
-            <Card title="Τώρα">
-              <BulletList items={list(actionPlan.now)} fallback={["Κρατήστε έτοιμη σύντομη θεσμική γραμμή."]} />
-            </Card>
-            <Card title="Επόμενες 24 ώρες">
-              <BulletList items={list(actionPlan.next_24h)} fallback={["Παρακολουθήστε αν αλλάζει το framing."]} />
-            </Card>
-            <Card title="Επόμενες 48 ώρες">
-              <BulletList items={list(actionPlan.next_48h)} fallback={["Αποφασίστε αν χρειάζεται κλιμάκωση."]} />
-            </Card>
-            <Card title="Αυτή την εβδομάδα">
-              <BulletList
-                items={list(actionPlan.this_week)}
-                fallback={["Συνδέστε το θέμα με ευρύτερη στρατηγική μόνο αν αποκτήσει ένταση."]}
-              />
-            </Card>
-            <Card title="Ποιος πρέπει να το σηκώσει">
-              {text(actionPlan.owner_suggestion, "Προτιμάται θεσμικό πρόσωπο με ήπιο και αξιόπιστο ύφος.")}
-            </Card>
-            <Card title="Triggers κλιμάκωσης">
-              <BulletList
-                items={list(monitoring.escalation_triggers)}
-                fallback={[
-                  "Αύξηση κάλυψης από μέσα υψηλής βαρύτητας.",
-                  "Παρέμβαση βασικού πολιτικού αντιπάλου.",
-                  "Μετατόπιση framing σε ευθύνη ή λογοδοσία.",
-                ]}
-              />
-            </Card>
-          </section>
-        )}
-
-        <section
-          id="noraya-advisor-chat"
-          className="mt-8 rounded-[2rem] border border-cyan-300/20 bg-cyan-300/[0.045] p-6"
-        >
-          <div className="grid gap-6 lg:grid-cols-[0.7fr_1.3fr]">
-            <div>
-              <div className="text-xs uppercase tracking-[0.28em] text-cyan-200/80">Noraya Advisor</div>
-              <h2 className="mt-3 text-2xl font-semibold">Σύμβουλος Noraya</h2>
-              <p className="mt-3 text-sm leading-7 text-zinc-400">
-                Μίλα ελεύθερα. Η κουβέντα συνεχίζεται — ο Noraya θυμάται τι είπαμε.
-              </p>
-
-              {partyName ? (
-                <div className="mt-4 inline-flex rounded-full border border-cyan-300/25 bg-cyan-300/10 px-3 py-1 text-xs text-cyan-100">
-                  {partyName}
-                </div>
-              ) : null}
-
-              <div className="mt-5 grid gap-2">
-                {[
-                  "Ποιο σενάριο έχει το μικρότερο πολιτικό ρίσκο;",
-                  "Γράψε μου μια ασφαλή δημόσια δήλωση.",
-                  "Τι πρέπει να κάνουμε τις επόμενες 48 ώρες;",
-                  "Πώς μπορεί να απαντήσει ο αντίπαλος;",
-                ].map((question) => (
-                  <button
-                    key={question}
-                    type="button"
-                    onClick={() => askNorayaAdvisor(question)}
-                    disabled={chatLoading}
-                    className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-left text-sm text-zinc-300 transition hover:bg-white/[0.06] disabled:opacity-50"
-                  >
-                    {question}
-                  </button>
-                ))}
-              </div>
-
-              {conversationId ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setChatMessages([]);
-                    setConversationId(null);
-                    setChatError("");
-                  }}
-                  className="mt-4 rounded-2xl border border-white/10 bg-black/20 px-4 py-2 text-xs text-zinc-500 transition hover:bg-white/[0.06]"
-                >
-                  Νέα κουβέντα
-                </button>
-              ) : null}
-            </div>
-
-            <div className="flex flex-col rounded-[1.5rem] border border-white/10 bg-black/25">
-              {/* Chat messages */}
-              <div className="flex-1 overflow-y-auto p-4" style={{ maxHeight: "500px", minHeight: "300px" }}>
-                {chatMessages.length === 0 && !chatLoading ? (
-                  <div className="flex h-full items-center justify-center text-sm text-zinc-600">
-                    Ρώτησε οτιδήποτε τον σύμβουλο Noraya.
-                  </div>
-                ) : (
-                  <div className="grid gap-3">
-                    {chatMessages.map((msg, index) => (
-                      <div
-                        key={`msg-${index}`}
-                        className={`rounded-2xl px-4 py-3 text-sm leading-7 ${
-                          msg.role === "user"
-                            ? "ml-8 border border-white/10 bg-white/[0.06] text-zinc-200"
-                            : "mr-4 border border-cyan-300/20 bg-cyan-300/10 text-zinc-100"
-                        }`}
-                      >
-                        <div className="mb-1 text-xs uppercase tracking-[0.18em] text-zinc-500">
-                          {msg.role === "user" ? "Εσύ" : "Noraya"}
-                        </div>
-                        <div className="whitespace-pre-wrap">{msg.content}</div>
-                      </div>
-                    ))}
-                    {chatLoading ? (
-                      <div className="mr-4 rounded-2xl border border-cyan-300/20 bg-cyan-300/10 px-4 py-3 text-sm text-cyan-100">
-                        <div className="mb-1 text-xs uppercase tracking-[0.18em] text-zinc-500">Noraya</div>
-                        <div className="animate-pulse">Σκέφτομαι...</div>
-                      </div>
-                    ) : null}
-                    <div ref={(el) => { chatEndRef.current = el; }} />
-                  </div>
-                )}
-              </div>
-
-              {/* Input */}
-              <div className="border-t border-white/10 p-4">
-                {chatError ? <p className="mb-3 text-sm text-red-200">{chatError}</p> : null}
-                <form
-                  onSubmit={(event) => {
-                    event.preventDefault();
-                    askNorayaAdvisor();
-                  }}
-                  className="flex gap-3"
-                >
-                  <input
-                    type="text"
-                    value={chatQuestion}
-                    onChange={(event) => setChatQuestion(event.target.value)}
-                    placeholder="Γράψε εδώ..."
-                    disabled={chatLoading}
-                    className="flex-1 rounded-2xl border border-white/10 bg-[#020617] px-4 py-3 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-cyan-300/40 disabled:opacity-50"
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter" && !event.shiftKey) {
-                        event.preventDefault();
-                        askNorayaAdvisor();
-                      }
-                    }}
-                  />
-                  <button
-                    type="submit"
-                    disabled={chatLoading}
-                    className="shrink-0 rounded-2xl bg-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {chatLoading ? "..." : "Στείλε"}
-                  </button>
-                </form>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="mt-8 rounded-[2rem] border border-white/10 bg-white/[0.025] p-5">
-          <details>
-            <summary className="cursor-pointer text-sm font-medium text-zinc-300">
-              ▶ Βάση τεκμηρίωσης
-            </summary>
-            <div className="mt-4 grid gap-4 lg:grid-cols-2">
-              <Card title="Βάση">
-                {text(evidence.basis, "Η εκτίμηση βασίζεται στα διαθέσιμα agenda signals.")}
-              </Card>
-              <Card title="Αβεβαιότητα">
-                {text(evidence.uncertainty, "Η ανάλυση χρειάζεται περισσότερα ταξινομημένα δεδομένα.")}
-              </Card>
-            </div>
-          </details>
-        </section>
+        <RightInspector
+          situation={activeSituation}
+          title={activeTitle}
+          score={activeScore}
+          documentationLevel={activeDocLevel}
+          brief={brief}
+          agenda={rankedAgenda}
+          politicalEnvironment={politicalEnvironment}
+        />
       </div>
     </main>
   );
 }
 
-function PoliticalEnvironmentPanel({
-  environment,
+function TopNavigation({
   partyName,
-  partyImplication,
-  status,
+  partyLogo,
+  partyInitial,
+  source,
+  situationSource,
 }: {
-  environment: PoliticalEnvironment | null;
   partyName: string;
-  partyImplication: string;
-  status?: string;
+  partyLogo: string;
+  partyInitial: string;
+  source: string;
+  situationSource: string;
 }) {
-  const trends = topActorTrends(environment);
-  const polls = recentPolls(environment);
-
-  if (!environment) {
-    return (
-      <section className="mb-8 rounded-[2rem] border border-white/10 bg-white/[0.025] p-5">
-        <div className="text-xs uppercase tracking-[0.22em] text-cyan-200/80">
-          Πολιτικό περιβάλλον
-        </div>
-        <h2 className="mt-2 text-2xl font-semibold">Δεν έχει φορτωθεί ακόμη δημοσκοπικό περιβάλλον</h2>
-        <p className="mt-3 text-sm leading-7 text-zinc-400">
-          Ο Noraya θα συνεχίσει με βάση τα agenda signals, αλλά χωρίς πλήρη δημοσκοπική εικόνα.
-          {status ? ` ${status}` : ""}
-        </p>
-      </section>
-    );
-  }
-
   return (
-    <section className="mb-8 rounded-[2rem] border border-white/10 bg-white/[0.03] p-5">
-      <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-        <div>
-          <div className="text-xs uppercase tracking-[0.22em] text-cyan-200/80">
-            Πολιτικό / δημοσκοπικό περιβάλλον
+    <header className="flex h-16 items-center justify-between bg-[#060a14] px-4 text-zinc-100">
+      <div className="flex min-w-0 items-center gap-4">
+        <div className="flex items-center gap-3">
+          <div className="relative flex h-9 w-9 items-center justify-center rounded-2xl border border-cyan-300/25 bg-cyan-300/10 shadow-lg shadow-cyan-950/30">
+            <span className="absolute h-2.5 w-2.5 rounded-full bg-cyan-300 shadow-[0_0_18px_#00c8ff]" />
           </div>
-          <h2 className="mt-2 text-2xl font-semibold">
-            {text(environment.title, "Τρέχον πολιτικό περιβάλλον")}
-          </h2>
-          <p className="mt-2 max-w-4xl text-sm leading-7 text-zinc-400">
-            {text(
-              environment.plain_language_summary || environment.summary,
-              "Δεν υπάρχει ακόμη διαθέσιμη σύνοψη πολιτικού περιβάλλοντος."
-            )}
-          </p>
-        </div>
-
-        <div className="flex shrink-0 flex-wrap gap-2">
-          <span className="rounded-full border border-cyan-300/25 bg-cyan-300/10 px-3 py-1 text-xs text-cyan-100">
-            {shortDate(environment.snapshot_date)}
-          </span>
-          <span className={`rounded-full border px-3 py-1 text-xs ${docToneClass(environment.documentation_level)}`}>
-            {documentationLabel(environment.documentation_level)}
-          </span>
-        </div>
-      </div>
-
-      <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-        <div className="rounded-[1.5rem] border border-cyan-300/15 bg-cyan-300/[0.045] p-5">
-          <div className="text-xs uppercase tracking-[0.18em] text-cyan-200/80">
-            Τι σημαίνει για {partyName || "το κόμμα του χρήστη"}
-          </div>
-          <p className="mt-3 text-sm leading-7 text-zinc-200">
-            {text(
-              partyImplication,
-              "Δεν υπάρχει ακόμη ειδική ανάγνωση για αυτό το κόμμα. Ο Noraya χρησιμοποιεί το γενικό πολιτικό περιβάλλον με χαμηλότερη βεβαιότητα."
-            )}
-          </p>
-        </div>
-
-        <div className="rounded-[1.5rem] border border-white/10 bg-black/20 p-5">
-          <div className="text-xs uppercase tracking-[0.18em] text-zinc-500">
-            Βασική δυναμική
-          </div>
-          <p className="mt-3 text-sm leading-7 text-zinc-300">
-            {text(environment.dominant_dynamic, "Η βασική δυναμική δεν έχει ακόμη υπολογιστεί.")}
-          </p>
-          <div className="mt-4 grid gap-2">
-            <MiniLine title="Κυβερνητικό momentum" value={text(environment.government_momentum, "—")} />
-            <MiniLine title="Δομή αντιπολίτευσης" value={text(environment.opposition_structure, "—")} />
+          <div className="leading-tight">
+            <div className="text-sm font-bold tracking-[0.22em] text-cyan-100">NORAYA</div>
+            <div className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Political Intelligence</div>
           </div>
         </div>
-      </div>
 
-      <div className="mt-5 grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
-        <div className="rounded-[1.5rem] border border-white/10 bg-black/20 p-5">
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <div className="text-xs uppercase tracking-[0.18em] text-zinc-500">
-              Τελευταίες δημοσκοπήσεις
-            </div>
-            <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-zinc-400">
-              {polls.length} μετρήσεις
-            </div>
-          </div>
-
-          {polls.length ? (
-            <div className="grid gap-2">
-              {polls.map((poll, index) => (
-                <div
-                  key={`${poll.survey_id || poll.survey_label}-${index}`}
-                  className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3"
-                >
-                  <div className="text-sm font-medium text-zinc-200">
-                    {text(poll.survey_label, `${poll.pollster || "Δημοσκόπηση"} / ${poll.commissioner || "—"}`)}
-                  </div>
-                  <div className="mt-1 text-xs text-zinc-500">
-                    Δείγμα: {poll.sample_size || "—"} · αποτελέσματα: {poll.result_count || "—"} · έως {shortDate(poll.fieldwork_end)}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm leading-7 text-zinc-500">
-              Δεν έχουν φορτωθεί ακόμη structured polling records.
-            </p>
-          )}
-        </div>
-
-        <div className="rounded-[1.5rem] border border-white/10 bg-black/20 p-5">
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <div className="text-xs uppercase tracking-[0.18em] text-zinc-500">
-              Τάσεις κομμάτων / actors
-            </div>
-            <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-zinc-400">
-              Top {trends.length}
-            </div>
-          </div>
-
-          {trends.length ? (
-            <div className="grid gap-2 md:grid-cols-2">
-              {trends.map((trend) => (
-                <div
-                  key={trend.actor_key || trend.party_label || "actor"}
-                  className="rounded-2xl border border-white/10 bg-white/[0.03] p-4"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <div className="text-sm font-semibold text-zinc-100">
-                        {trend.party_label || trend.actor_key}
-                      </div>
-                      <div className="mt-1 text-xs text-zinc-500">
-                        {trend.trend_reading || "Χωρίς τάση"}
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-lg font-semibold text-cyan-100">
-                        {formatPercent(trend.avg_value)}
-                      </div>
-                      <div className="text-xs text-zinc-500">
-                        μ.ό. {trend.poll_count || 0} μετρ.
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    <span className="rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-xs text-zinc-400">
-                      τελευταία: {formatPercent(trend.latest_value)}
-                    </span>
-                    <span className="rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-xs text-zinc-400">
-                      θέση #{trend.latest_rank || "—"}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm leading-7 text-zinc-500">
-              Δεν έχουν υπολογιστεί ακόμη τάσεις κομμάτων.
-            </p>
-          )}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function AgendaRankingPanel({
-  items,
-}: {
-  items: Array<
-    AgendaUsedRow & {
-      rank: number;
-      share: number;
-      signalLabel: string;
-      documentationLabel: string;
-      evidenceArticles: Array<{ title: string; source?: string; url?: string }>;
-    }
-  >;
-}) {
-  if (!items.length) {
-    return (
-      <section className="mb-8 rounded-[2rem] border border-white/10 bg-white/[0.025] p-5">
-        <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-          <div>
-            <div className="text-xs uppercase tracking-[0.22em] text-cyan-200/80">
-              Ιεράρχηση ατζέντας
-            </div>
-            <h2 className="mt-2 text-2xl font-semibold">Δεν υπάρχουν ακόμη αρκετά ταξινομημένα θέματα</h2>
-          </div>
-          <div className="rounded-full border border-amber-300/25 bg-amber-300/10 px-3 py-1 text-xs text-amber-100">
-            Υπό επεξεργασία
-          </div>
-        </div>
-        <p className="mt-4 max-w-4xl text-sm leading-7 text-zinc-400">
-          Ο Noraya χρειάζεται περισσότερα ταξινομημένα άρθρα για να εμφανίσει αξιόπιστη ιεράρχηση ατζέντας,
-          ένταση σήματος και βάση τεκμηρίωσης.
-        </p>
-      </section>
-    );
-  }
-
-  return (
-    <section className="mb-8 rounded-[2rem] border border-cyan-300/20 bg-cyan-300/[0.045] p-5">
-      <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-        <div>
-          <div className="text-xs uppercase tracking-[0.22em] text-cyan-200/80">
-            Ιεράρχηση ατζέντας
-          </div>
-          <h2 className="mt-2 text-2xl font-semibold">Τι ανεβαίνει σήμερα</h2>
-          <p className="mt-2 max-w-3xl text-sm leading-7 text-zinc-400">
-            Η βαρύτητα δεν είναι εκλογικό ποσοστό. Είναι σχετική ένδειξη ατζέντας με βάση άρθρα,
-            πηγές, πολιτική συνάφεια, ένταση και διαθέσιμη τεκμηρίωση.
-          </p>
-        </div>
-
-        <div className="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-xs text-zinc-300">
-          Top {items.length} agenda signals
-        </div>
-      </div>
-
-      <div className="grid gap-4">
-        {items.map((item) => {
-          const barWidth = `${Math.max(item.share, 8)}%`;
-
-          return (
-            <article
-              key={`${item.topic}-${item.rank}`}
-              className="rounded-[1.5rem] border border-white/10 bg-black/20 p-4"
+        <nav className="hidden items-center gap-1 xl:flex">
+          {navTabs.map((tab, index) => (
+            <button
+              key={tab}
+              type="button"
+              className={`rounded-2xl px-3 py-2 text-xs transition ${
+                index === 0
+                  ? "border border-cyan-300/25 bg-cyan-300/10 text-cyan-100"
+                  : "text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-300"
+              }`}
             >
-              <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-cyan-300/25 bg-cyan-300/10 text-sm font-semibold text-cyan-100">
-                      #{item.rank}
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-zinc-100">
+              {tab}
+            </button>
+          ))}
+        </nav>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <div className="hidden rounded-2xl border border-[#1a2640] bg-[#0c1220] px-3 py-2 text-[11px] text-zinc-500 2xl:block">
+          {source} · {situationSource}
+        </div>
+
+        <div className="rounded-2xl border border-[#1a2640] bg-[#0c1220] px-3 py-2 text-xs text-zinc-300">
+          {new Date().toLocaleDateString("el-GR", { day: "2-digit", month: "2-digit", year: "numeric" })}
+        </div>
+
+        <div className="flex max-w-[280px] items-center gap-3 rounded-2xl border border-[#1a2640] bg-[#0c1220] px-3 py-2">
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-cyan-300/20 bg-cyan-300/10 text-[10px] font-semibold text-cyan-100">
+            {partyLogo ? <img src={partyLogo} alt={partyName} className="h-full w-full object-contain p-1" /> : partyInitial}
+          </div>
+          <div className="truncate text-xs text-zinc-200">{partyName}</div>
+          <span className="text-zinc-600">▾</span>
+        </div>
+
+        <button type="button" className="rounded-2xl border border-[#1a2640] bg-[#0c1220] px-3 py-2 text-xs text-zinc-400">
+          ⚙
+        </button>
+      </div>
+    </header>
+  );
+}
+
+function LeftSidebar({
+  agenda,
+  situations,
+  activeSituationId,
+  onSelectSituation,
+  situationSource,
+  situationCount,
+  situationWarning,
+  politicalEnvironment,
+}: {
+  agenda: RankedAgenda[];
+  situations: LiveSituationRow[];
+  activeSituationId: string | null;
+  onSelectSituation: (id: string) => void;
+  situationSource: string;
+  situationCount: number;
+  situationWarning: string;
+  politicalEnvironment: PoliticalEnvironment | null;
+}) {
+  const polls = recentPolls(politicalEnvironment);
+
+  return (
+    <aside className="flex w-[220px] shrink-0 flex-col overflow-hidden bg-[#060a14]">
+      <div className="flex-1 overflow-y-auto p-3">
+        <SidebarPanel
+          title="AGENDA MAP"
+          action="Δες όλη την ατζέντα"
+          footer={agenda.length ? `${agenda.length} classified signals` : "awaiting agenda"}
+        >
+          {agenda.length ? (
+            <div className="grid gap-2">
+              {agenda.slice(0, 6).map((item) => (
+                <button
+                  key={`${item.topic}-${item.rank}`}
+                  type="button"
+                  className="group rounded-2xl border border-[#1a2640] bg-[#0c1220] p-3 text-left transition hover:border-cyan-300/30 hover:bg-cyan-300/[0.04]"
+                >
+                  <div className="flex items-start gap-2">
+                    <div className={`mt-1 h-9 w-1.5 rounded-full ${agendaBarClass(item.score)}`} />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[10px] text-zinc-500">#{item.rank}</span>
+                        <span className="text-[10px] text-cyan-100">{Math.round(item.score)}</span>
+                      </div>
+                      <div className="mt-1 line-clamp-2 text-xs font-medium leading-5 text-zinc-200 group-hover:text-cyan-100">
                         {item.topic}
-                      </h3>
-                      <p className="mt-1 text-xs text-zinc-500">
-                        {item.article_count || 0} άρθρα · {item.source_count || 0} πηγές · {item.political_articles || 0} πολιτικά άρθρα
-                      </p>
+                      </div>
+                      <div className="mt-2 text-[10px] text-zinc-500">
+                        {item.article_count || 0} άρθρα · {item.source_count || 0} πηγές
+                      </div>
                     </div>
                   </div>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <EmptyState small>Δεν υπάρχουν ακόμη classified agenda signals.</EmptyState>
+          )}
+        </SidebarPanel>
 
-                  <div className="mt-4">
-                    <div className="mb-2 flex items-center justify-between text-xs text-zinc-500">
-                      <span>Σχετική βαρύτητα ατζέντας</span>
-                      <span className="font-medium text-zinc-300">{item.share}%</span>
+        <SidebarPanel title="LIVE SITUATIONS" footer={`${situationCount || situations.length} rows · ${situationSource}`}>
+          {situationWarning ? <TinyWarning>{situationWarning}</TinyWarning> : null}
+          {situations.length ? (
+            <div className="grid gap-2">
+              {situations.slice(0, 7).map((situation, index) => {
+                const id = situationId(situation, index);
+                const selected = id === activeSituationId;
+                const score = situationScore(situation, 0);
+
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => onSelectSituation(id)}
+                    className={`rounded-2xl border p-3 text-left transition ${
+                      selected
+                        ? "border-cyan-300/40 bg-cyan-300/10"
+                        : "border-[#1a2640] bg-[#0c1220] hover:border-cyan-300/25"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className={`rounded-full border px-2 py-0.5 text-[9px] ${statusToneClass(situation.status)}`}>
+                        {text(situation.status, "live")}
+                      </span>
+                      <span className="text-[10px] text-zinc-500">{score ? Math.round(score) : "—"}</span>
                     </div>
-                    <div className="h-3 overflow-hidden rounded-full bg-white/10">
-                      <div
-                        className="h-full rounded-full bg-cyan-300"
-                        style={{ width: barWidth }}
-                      />
+                    <div className="mt-2 line-clamp-2 text-xs font-medium leading-5 text-zinc-200">
+                      {situationTitle(situation)}
                     </div>
-                  </div>
-                </div>
+                    <div className="mt-2 text-[10px] text-zinc-500">{shortDate(situation.updated_at || situation.created_at)}</div>
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <EmptyState small>Δεν επέστρεψαν live situations. Το κέντρο χρησιμοποιεί το strategy brief.</EmptyState>
+          )}
+        </SidebarPanel>
 
-                <div className="flex shrink-0 flex-wrap gap-2 md:justify-end">
-                  <span className={`rounded-full border px-3 py-1 text-xs ${signalToneClass(item.political_risk_level)}`}>
-                    {item.signalLabel}
-                  </span>
-                  <span className={`rounded-full border px-3 py-1 text-xs ${docToneClass(item.documentation_level)}`}>
-                    {item.documentationLabel}
-                  </span>
-                </div>
-              </div>
+        <SidebarPanel title="ΕΣΩΤΕΡΙΚΑ ΔΕΔΟΜΕΝΑ">
+          <div className="grid gap-2 text-[11px] text-zinc-400">
+            <DataRow label="Δημοσκοπήσεις" value={String(polls.length)} badge={polls.length ? "Νέο" : undefined} />
+            <DataRow label="Focus Groups" value="—" />
+            <DataRow label="Briefings" value={politicalEnvironment?.snapshot_date ? "1" : "—"} />
+            <DataRow label="Κόκκινες γραμμές" value="profile" />
+          </div>
+        </SidebarPanel>
 
-              <details className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                <summary className="cursor-pointer text-sm font-medium text-zinc-300">
-                  Από πού προκύπτει αυτό;
-                </summary>
+        <SidebarPanel title="QUICK CAPTURE">
+          <div className="grid grid-cols-2 gap-2">
+            {["Σημείωση", "URL", "Στιγμιότυπο", "Ηχητικό"].map((label) => (
+              <button
+                key={label}
+                type="button"
+                className="rounded-2xl border border-[#1a2640] bg-[#0c1220] px-2 py-3 text-[10px] text-zinc-400 transition hover:border-cyan-300/25 hover:text-cyan-100"
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </SidebarPanel>
 
-                <div className="mt-4 grid gap-4 lg:grid-cols-2">
-                  <div>
-                    <div className="text-xs uppercase tracking-[0.18em] text-zinc-500">
-                      Ανάγνωση / framing
-                    </div>
-                    <p className="mt-2 text-sm leading-7 text-zinc-300">
-                      {text(
-                        item.framing_summary,
-                        "Δεν υπάρχει ακόμη πλήρης framing ανάλυση για αυτό το θέμα."
-                      )}
-                    </p>
-                  </div>
+        <SidebarPanel title="ΕΣΩΤΕΡΙΚΗ ΜΝΗΜΗ" action="Όλες οι σημειώσεις">
+          <div className="grid gap-2">
+            <MemoryLine date="Σήμερα" title="Cockpit shell checkpoint" />
+            <MemoryLine date="Live" title="Situation engine συνδεδεμένο" />
+          </div>
+        </SidebarPanel>
+      </div>
 
-                  <div>
-                    <div className="text-xs uppercase tracking-[0.18em] text-zinc-500">
-                      Προτεινόμενη προσοχή
-                    </div>
-                    <p className="mt-2 text-sm leading-7 text-zinc-300">
-                      {text(
-                        item.evidence_summary || item.recommended_action,
-                        "Χρειάζεται παρακολούθηση μέχρι να ισχυροποιηθεί το σήμα."
-                      )}
-                    </p>
-                  </div>
-                </div>
+      <div className="grid grid-cols-4 border-t border-[#1a2640] bg-[#060a14] text-[10px] text-zinc-600">
+        {[
+          "UX",
+          "Αρχεία",
+          "Σημειώσεις",
+          "Θεωρήσεις",
+        ].map((item) => (
+          <button key={item} type="button" className="px-1 py-3 hover:bg-white/[0.03] hover:text-zinc-300">
+            {item}
+          </button>
+        ))}
+      </div>
+    </aside>
+  );
+}
 
-                <div className="mt-4">
-                  <div className="text-xs uppercase tracking-[0.18em] text-zinc-500">
-                    Άρθρα / στοιχεία βάσης
-                  </div>
+function PriorityStrip({
+  agenda,
+  activeTitle,
+  immediateRecommendation,
+  avoidToday,
+}: {
+  agenda: RankedAgenda[];
+  activeTitle: string;
+  immediateRecommendation?: string;
+  avoidToday?: string;
+}) {
+  const cards = [
+    {
+      label: "ΠΡΟΤΕΡΑΙΟΤΗΤΑ 1",
+      title: activeTitle,
+      textValue: text(immediateRecommendation, agenda[0]?.recommended_action || "Παρακολούθηση και ασφαλής γραμμή πριν από κλιμάκωση."),
+    },
+    {
+      label: "ΣΗΜΑ ΑΤΖΕΝΤΑΣ",
+      title: agenda[1]?.topic || "Δεύτερο σήμα υπό ταξινόμηση",
+      textValue: text(agenda[1]?.evidence_summary, "Κρατάμε το θέμα σε παρακολούθηση μέχρι να ισχυροποιηθεί η τεκμηρίωση."),
+    },
+    {
+      label: "ΝΑ ΑΠΟΦΥΓΟΥΜΕ",
+      title: "Πρόωρη κλιμάκωση",
+      textValue: text(avoidToday, agenda[0]?.avoid_action || "Όχι υπερβολική δημόσια βεβαιότητα χωρίς επαρκή στοιχεία."),
+    },
+  ];
 
-                  {item.evidenceArticles.length > 0 ? (
-                    <div className="mt-3 grid gap-2">
-                      {item.evidenceArticles.map((article, index) => (
-                        <div
-                          key={`${article.title}-${index}`}
-                          className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm leading-6 text-zinc-300"
-                        >
-                          {article.url ? (
-                            <a
-                              href={article.url}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="text-cyan-100 hover:text-cyan-200"
-                            >
-                              {article.title}
-                            </a>
-                          ) : (
-                            <span>{article.title}</span>
-                          )}
-                          {article.source ? (
-                            <div className="mt-1 text-xs text-zinc-500">
-                              {article.source}
-                            </div>
-                          ) : null}
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="mt-3 text-sm leading-7 text-zinc-500">
-                      Δεν έχουν επιστραφεί ακόμη συγκεκριμένα άρθρα για αυτό το θέμα.
-                    </p>
-                  )}
-                </div>
-              </details>
-            </article>
-          );
-        })}
+  return (
+    <section className="mb-4">
+      <div className="mb-3 flex items-center justify-between">
+        <div>
+          <div className="text-[10px] uppercase tracking-[0.26em] text-cyan-200/70">ΠΡΟΤΕΡΑΙΟΤΗΤΕΣ ΣΗΜΕΡΑ</div>
+          <div className="mt-1 text-sm text-zinc-500">Τρία πράγματα που πρέπει να βλέπει το επιτελείο με την πρώτη ματιά.</div>
+        </div>
+        <button type="button" className="rounded-2xl border border-cyan-300/25 bg-cyan-300/10 px-3 py-2 text-xs text-cyan-100">
+          + Καταγραφή νέου συμβάντος
+        </button>
+      </div>
+
+      <div className="grid gap-3 xl:grid-cols-3">
+        {cards.map((card) => (
+          <article key={card.label} className="rounded-[1.5rem] border border-[#1a2640] bg-[#0c1220] p-4">
+            <div className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">{card.label}</div>
+            <h2 className="mt-2 line-clamp-2 text-sm font-semibold leading-6 text-zinc-100">{card.title}</h2>
+            <p className="mt-2 line-clamp-3 text-xs leading-5 text-zinc-400">{card.textValue}</p>
+          </article>
+        ))}
       </div>
     </section>
   );
 }
 
-function HeroDecision({ label, textValue, tone }: { label: string; textValue: string; tone: "positive" | "negative" }) {
-  return (
-    <div
-      className={`rounded-[2rem] border p-6 ${
-        tone === "positive" ? "border-emerald-300/25 bg-emerald-300/10" : "border-red-300/20 bg-red-300/10"
-      }`}
-    >
-      <div className="text-xs uppercase tracking-[0.22em] text-zinc-500">{label}</div>
-      <p className="mt-4 text-lg font-medium leading-8 text-zinc-100">{textValue}</p>
-    </div>
-  );
-}
+function ActiveSituationWorkspace({
+  activeTab,
+  onTabChange,
+  situation,
+  title,
+  category,
+  status,
+  urgency,
+  score,
+  documentationScore,
+  documentationLevel,
+  brief,
+  agenda,
+  selectedPartyImplication,
+}: {
+  activeTab: SituationTab;
+  onTabChange: (tab: SituationTab) => void;
+  situation: LiveSituationRow | null;
+  title: string;
+  category: string;
+  status: string;
+  urgency: string;
+  score: number;
+  documentationScore: number;
+  documentationLevel?: string | null;
+  brief: StrategicBrief;
+  agenda: RankedAgenda[];
+  selectedPartyImplication: string;
+}) {
+  const issue = brief.issue || {};
+  const daily = brief.daily_brief || {};
+  const diagnosis = brief.strategic_diagnosis || {};
+  const actionPlan = brief.action_plan || {};
+  const monitoring = brief.monitoring_plan || {};
+  const messages = brief.message_package || {};
+  const evidence = brief.evidence || {};
 
-function Card({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="rounded-[2rem] border border-white/10 bg-white/[0.025] p-5">
-      <div className="text-xs uppercase tracking-[0.22em] text-zinc-500">{title}</div>
-      <div className="mt-3 text-sm leading-7 text-zinc-300">{children}</div>
+    <section className="rounded-[2rem] border border-[#1a2640] bg-[#0c1220] shadow-2xl shadow-black/20">
+      <div className="border-b border-[#1a2640] p-5">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+          <div className="min-w-0">
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+              <StatusChip className={statusToneClass(status)}>{status.toUpperCase()}</StatusChip>
+              <StatusChip className={signalToneClass(urgency)}>{riskLabel(urgency)}</StatusChip>
+              <StatusChip className={docToneClass(documentationLevel)}>{documentationLabel(documentationLevel)}</StatusChip>
+            </div>
+            <h1 className="text-2xl font-semibold leading-tight text-zinc-50 xl:text-3xl">{title}</h1>
+            <p className="mt-2 text-sm text-zinc-500">{category}</p>
+          </div>
+
+          <div className="grid shrink-0 grid-cols-2 gap-3">
+            <MiniMetric label="Agenda score" value={score ? Math.round(score).toString() : "—"} />
+            <MiniMetric label="Βαθμός τεκμηρίωσης" value={documentationScore ? `${Math.round(documentationScore)}%` : "—"} />
+          </div>
+        </div>
+
+        <div className="mt-5 flex flex-wrap gap-2">
+          {situationTabs.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => onTabChange(tab.id)}
+              className={`rounded-2xl border px-3 py-2 text-[11px] transition ${
+                activeTab === tab.id
+                  ? "border-cyan-300/30 bg-cyan-300/10 text-cyan-100"
+                  : "border-[#1a2640] bg-black/15 text-zinc-500 hover:text-zinc-300"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="p-5">
+        {activeTab === "strategic" ? (
+          <div className="grid gap-4">
+            <CockpitSection title="STRATEGIC READ — Τι σημαίνει" subtitle="Agenda Formation → Framing Diagnosis → Priming Risk">
+              <div className="grid gap-5 xl:grid-cols-[1fr_150px]">
+                <p className="text-sm leading-7 text-zinc-300">{readStrategicText(situation, brief)}</p>
+                <Gauge score={documentationScore} label="Βαθμός τεκμηρίωσης" />
+              </div>
+            </CockpitSection>
+
+            <div className="grid gap-4 xl:grid-cols-2">
+              <CockpitSection title="ΤΙ ΚΑΝΟΥΜΕ ΤΩΡΑ" subtitle="Action recommendation">
+                <BulletList
+                  compact
+                  items={list(actionPlan.now)}
+                  fallback={[text(daily.immediate_recommendation, "Κρατάμε θεσμική γραμμή και παρακολουθούμε αν αλλάζει η ένταση.")]}
+                />
+              </CockpitSection>
+
+              <CockpitSection title="WHAT WOULD CHANGE MY MIND" subtitle="Triggers παρακολούθησης">
+                <BulletList
+                  compact
+                  items={list(monitoring.escalation_triggers)}
+                  fallback={[
+                    "Νέο δημοσκοπικό εύρημα ή verified internal poll.",
+                    "Θεσμική αντίδραση που αλλάζει το επίπεδο κλιμάκωσης.",
+                    "Μετατόπιση framing σε προσωπική ή ηθική στόχευση.",
+                  ]}
+                />
+                <div className="mt-3 rounded-2xl border border-amber-300/25 bg-amber-300/10 px-4 py-3 text-xs leading-6 text-amber-100">
+                  Το κοινό αλλάζει γρήγορα. Η σύσταση πρέπει να αναθεωρείται όταν ενεργοποιηθούν triggers.
+                </div>
+              </CockpitSection>
+            </div>
+
+            <CockpitSection title="ΕΝΤΑΣΗ & ΔΥΝΑΜΙΚΗ" subtitle="6 gauges — αρχικά από διαθέσιμα live signals">
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+                <Gauge score={clamp(numberValue(situation?.article_count, agenda[0]?.article_count || 0) * 8)} label="Media" small />
+                <Gauge score={clamp(score)} label="Agenda" small />
+                <Gauge score={clamp(numberValue(situation?.confidence_score, documentationScore))} label="Political" small />
+                <Gauge score={clamp(numberValue(situation?.priority_score, score))} label="Emotion" small />
+                <Gauge score={clamp(numberValue(situation?.source_count, agenda[0]?.source_count || 0) * 15)} label="Elite" small />
+                <Gauge score={clamp(Math.max(score, documentationScore))} label="Potential" small />
+              </div>
+            </CockpitSection>
+
+            <CockpitSection title="ESCALATION LADDER" subtitle="Αποφυγή πρόωρης κλιμάκωσης">
+              <EscalationLadder
+                current={clamp(numberValue(situation?.escalation_level, score >= 70 ? 3 : score >= 50 ? 2 : 1), 1, 6)}
+                recommended={clamp(numberValue(situation?.escalation_recommended, score >= 75 ? 3 : 2), 1, 6)}
+              />
+            </CockpitSection>
+          </div>
+        ) : null}
+
+        {activeTab === "why" ? (
+          <div className="grid gap-4 xl:grid-cols-2">
+            <CockpitSection title="Γιατί υπάρχει αυτή η κατάσταση" subtitle="Basis / documentation">
+              <p className="text-sm leading-7 text-zinc-300">{readWhyText(situation, brief)}</p>
+            </CockpitSection>
+            <CockpitSection title="Τι δεν ξέρουμε ακόμη" subtitle="Uncertainty">
+              <p className="text-sm leading-7 text-zinc-300">
+                {text(evidence.uncertainty, "Δεν υπάρχει ακόμη πλήρης αβεβαιότητα καταγεγραμμένη. Μέχρι να υπάρξει verified internal data, δεν παρουσιάζουμε ισχυρή σύσταση ως βεβαιότητα.")}
+              </p>
+            </CockpitSection>
+          </div>
+        ) : null}
+
+        {activeTab === "drivers" ? (
+          <div className="grid gap-4">
+            <CockpitSection title="Drivers & Πηγές" subtitle="Signals behind the situation">
+              <div className="grid gap-3">
+                {(agenda.length ? agenda.slice(0, 5) : []).map((item) => (
+                  <DriverBar key={`${item.topic}-${item.rank}`} label={item.topic || "Θέμα"} score={item.score} trend={item.signalLabel} />
+                ))}
+                {!agenda.length ? <EmptyState>Δεν υπάρχουν διαθέσιμα agenda drivers.</EmptyState> : null}
+              </div>
+            </CockpitSection>
+          </div>
+        ) : null}
+
+        {activeTab === "pulse" ? <PublicPulsePanel situation={situation} brief={brief} /> : null}
+
+        {activeTab === "win" ? (
+          <CockpitSection title="ΠΩΣ ΚΕΡΔΙΖΕΤΑΙ ΤΟ ΘΕΜΑ" subtitle="HERESTHETIC / RIKER LAYER — UI label κρατά πολιτική γλώσσα">
+            <div className="grid gap-3 xl:grid-cols-5">
+              <WinCard title="Το παιχνίδι σήμερα" tone="red" textValue={text(diagnosis.agenda_reading, text(issue.dominant_frame, "Το παιχνίδι δεν έχει ακόμη πλήρως οριστεί."))} />
+              <WinCard title="Η παγίδα" tone="amber" textValue={text(diagnosis.strategic_risk, text(issue.priming_risk, "Το ρίσκο είναι πρόωρη ή άστοχη αντίδραση."))} />
+              <WinCard title="Ευνοϊκή διάσταση" tone="emerald" textValue={text(diagnosis.strategic_opportunity, text(issue.opportunity, "Να εισαχθεί διάσταση θεσμικής σοβαρότητας και λύσης."))} />
+              <WinCard title="Κίνηση αναδιάταξης" tone="purple" textValue={text(diagnosis.recommended_posture, "Μετατόπιση από άμυνα σε τεκμηριωμένη πρόταση.")} />
+              <WinCard title="Ακολουθία" tone="zinc" textValue={list(actionPlan.next_24h)[0] || "Πρώτα παρακολούθηση, μετά ασφαλής δημόσια γραμμή, μετά κλιμάκωση μόνο με νέα στοιχεία."} />
+            </div>
+          </CockpitSection>
+        ) : null}
+
+        {activeTab === "options" ? (
+          <CockpitSection title="ΕΠΙΛΟΓΕΣ ΔΡΑΣΗΣ" subtitle="Πάντα A / B / Γ — όταν δεν υπάρχουν AI options, εμφανίζονται ως pending">
+            <div className="grid gap-3 xl:grid-cols-3">
+              {decisionOptions(brief).map((option) => (
+                <DecisionCard key={option.label} {...option} />
+              ))}
+            </div>
+          </CockpitSection>
+        ) : null}
+
+        {activeTab === "comms" ? (
+          <div className="grid gap-4 xl:grid-cols-[1fr_1fr]">
+            <CockpitSection title="Κεντρική γραμμή" subtitle="Communication material">
+              <p className="text-lg font-semibold leading-8 text-zinc-100">
+                {text(messages.central_line, "Δεν υπάρχει ακόμη κεντρική γραμμή από το strategy brief.")}
+              </p>
+            </CockpitSection>
+            <CockpitSection title="Θεσμική εκδοχή" subtitle="Safe public version">
+              <p className="text-sm leading-7 text-zinc-300">
+                {text(messages.institutional_version, "Εκκρεμεί θεσμική εκδοχή.")}
+              </p>
+            </CockpitSection>
+            <CockpitSection title="Αν μας επιτεθούν" subtitle="Response seed">
+              <p className="text-sm leading-7 text-zinc-300">
+                {text(messages.answer_if_attacked, "Εκκρεμεί απάντηση σε πιθανή επίθεση.")}
+              </p>
+            </CockpitSection>
+            <CockpitSection title="Για το συγκεκριμένο κόμμα" subtitle="Party implication">
+              <p className="text-sm leading-7 text-zinc-300">
+                {text(selectedPartyImplication, "Δεν υπάρχει ειδική επίπτωση για το επιλεγμένο party profile στο political environment snapshot.")}
+              </p>
+            </CockpitSection>
+          </div>
+        ) : null}
+      </div>
     </section>
   );
 }
 
-function MiniBox({ title, textValue }: { title: string; textValue: string }) {
+function PublicPulsePanel({ situation, brief }: { situation: LiveSituationRow | null; brief: StrategicBrief }) {
+  const pulse = asRecord(situation?.public_pulse);
+  const score = publicPulseScore(situation);
+
   return (
-    <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-      <div className="text-xs uppercase tracking-[0.22em] text-zinc-500">{title}</div>
-      <p className="mt-2 text-sm leading-6 text-zinc-300">{textValue}</p>
+    <CockpitSection title="PUBLIC PULSE – ΕΝΔΕΙΞΕΙΣ ΚΟΙΝΟΥ" subtitle="Signal, όχι δημοσκόπηση">
+      <div className="grid gap-4 xl:grid-cols-[170px_1fr]">
+        <Gauge score={score} label="Κοινωνική διάθεση" />
+        <div className="grid gap-3">
+          <MiniBox title="Κυρίαρχο συναίσθημα" textValue={pickString(pulse, ["dominant_emotion", "emotion"], text(brief.issue?.political_risk, "Δεν έχει υπολογιστεί ακόμη."))} />
+          <MiniBox title="Κυρίαρχο framing" textValue={pickString(pulse, ["dominant_public_frame", "dominant_frame", "frame"], text(brief.issue?.dominant_frame, "Δεν υπάρχει ακόμη public pulse framing."))} />
+          <MiniBox title="Bias warning" textValue={pickString(pulse, ["bias_warning", "warning"], "Οι ενδείξεις κοινού δεν υποκαθιστούν verified δημοσκόπηση.")} />
+        </div>
+      </div>
+    </CockpitSection>
+  );
+}
+
+function RightInspector({
+  situation,
+  title,
+  score,
+  documentationLevel,
+  brief,
+  agenda,
+  politicalEnvironment,
+}: {
+  situation: LiveSituationRow | null;
+  title: string;
+  score: number;
+  documentationLevel?: string | null;
+  brief: StrategicBrief;
+  agenda: RankedAgenda[];
+  politicalEnvironment: PoliticalEnvironment | null;
+}) {
+  const diagnosis = brief.strategic_diagnosis || {};
+  const issue = brief.issue || {};
+  const daily = brief.daily_brief || {};
+  const pulse = asRecord(situation?.public_pulse);
+  const summary = asRecord(situation?.summary_assessment);
+  const redTeam = redTeamItems(situation?.red_team);
+  const polls = recentPolls(politicalEnvironment);
+  const actors = topActorTrends(politicalEnvironment);
+
+  return (
+    <aside className="flex w-[240px] shrink-0 flex-col overflow-hidden bg-[#060a14]">
+      <div className="flex-1 overflow-y-auto p-3">
+        <InspectorPanel title="INSPECTOR">
+          <div className="text-xs font-semibold leading-5 text-zinc-100">{title}</div>
+          <p className="mt-3 text-[11px] leading-6 text-zinc-400">{readWhyText(situation, brief)}</p>
+          <button type="button" className="mt-3 text-[11px] text-cyan-200 hover:text-cyan-100">
+            Άνοιγμα αναλυτικής →
+          </button>
+        </InspectorPanel>
+
+        <InspectorPanel title="KEY DRIVERS">
+          <div className="grid gap-3">
+            {(agenda.length ? agenda.slice(0, 4) : [{ topic: title, score, signalLabel: riskLabel(situation?.political_risk_level) }]).map((item, index) => (
+              <DriverBar
+                key={`${item.topic}-${index}`}
+                label={item.topic || "Driver"}
+                score={numberValue((item as RankedAgenda).score ?? score, score)}
+                trend={(item as RankedAgenda).signalLabel || riskLabel(situation?.political_risk_level)}
+                compact
+              />
+            ))}
+          </div>
+        </InspectorPanel>
+
+        <InspectorPanel title="PUBLIC PULSE">
+          <div className="space-y-3">
+            <MiniBox compact title="Κοινωνικό framing" textValue={pickString(pulse, ["dominant_public_frame", "frame"], text(issue.dominant_frame, "Δεν έχει υπολογιστεί."))} />
+            <MiniBox compact title="Διάθεση" textValue={pickString(pulse, ["dominant_emotion", "emotion"], "Signal υπό επεξεργασία")} />
+            <BarMeter score={publicPulseScore(situation)} label="mood" />
+            <TinyWarning>{pickString(pulse, ["bias_warning"], "Public pulse = ένδειξη, όχι κοινή γνώμη χωρίς δημοσκόπηση.")}</TinyWarning>
+          </div>
+        </InspectorPanel>
+
+        <InspectorPanel title="RED TEAM">
+          {redTeam.length ? (
+            <div className="grid gap-2">
+              {redTeam.map((item, index) => (
+                <div key={`${item.attack_text}-${index}`} className="rounded-2xl border border-red-300/20 bg-red-300/[0.06] p-3">
+                  <div className="text-[10px] text-red-100">#{index + 1} · {item.risk_level}</div>
+                  <div className="mt-1 text-[11px] leading-5 text-zinc-200">{item.attack_text}</div>
+                  <div className="mt-2 text-[10px] leading-5 text-zinc-500">{item.suggested_defense}</div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <EmptyState small>Δεν υπάρχει ακόμη red team object για αυτή την κατάσταση.</EmptyState>
+          )}
+          <button type="button" className="mt-3 text-[11px] text-cyan-200 hover:text-cyan-100">
+            Προετοιμάσου σήμερα →
+          </button>
+        </InspectorPanel>
+
+        <InspectorPanel title="ΣΥΝΟΠΤΙΚΗ ΑΞΙΟΛΟΓΗΣΗ">
+          <div className="grid gap-2">
+            <SummaryLine label="Στρατηγική σημασία" value={pickString(summary, ["strategic_importance", "importance"], text(daily.why_it_matters_now, "Υπό αξιολόγηση"))} />
+            <SummaryLine label="Ευκαιρία" value={pickString(summary, ["opportunity"], text(diagnosis.strategic_opportunity, text(issue.opportunity, "—")))} />
+            <SummaryLine label="Κίνδυνος" value={pickString(summary, ["risk"], text(diagnosis.strategic_risk, text(issue.political_risk, "—")))} />
+            <SummaryLine label="Χρονικό παράθυρο" value={pickString(summary, ["time_window", "window"], "24–48 ώρες αν ενισχυθεί το σήμα")} />
+            <SummaryLine label="Βαθμός τεκμηρίωσης" value={documentationLabel(documentationLevel)} />
+          </div>
+        </InspectorPanel>
+
+        <InspectorPanel title="ΔΗΜΟΣΚΟΠΗΣΕΙΣ">
+          <div className="grid grid-cols-2 gap-2">
+            <MiniMetric label="Loaded" value={String(polls.length)} small />
+            <MiniMetric label="Actors" value={String(actors.length)} small />
+            <MiniMetric label="Verified" value={String(polls.filter((poll) => String(poll.verification_status || "").includes("verified")).length)} small />
+            <MiniMetric label="Review" value={String(polls.filter((poll) => String(poll.verification_status || "").includes("review")).length)} small />
+          </div>
+          <div className="mt-3 text-[10px] leading-5 text-zinc-500">
+            Τελευταία ενημέρωση: {shortDate(polls[0]?.published_at || polls[0]?.fieldwork_end || politicalEnvironment?.snapshot_date)}
+          </div>
+        </InspectorPanel>
+      </div>
+
+      <footer className="border-t border-[#1a2640] bg-[#060a14] p-3">
+        <div className="mb-2 text-[9px] uppercase tracking-[0.2em] text-zinc-600">Noraya Cognitive Model</div>
+        <div className="grid grid-cols-7 gap-1">
+          {cognitiveStages.map((stage, index) => (
+            <div key={stage} title={stage} className="flex h-7 items-center justify-center rounded-xl border border-[#1a2640] bg-[#0c1220] text-[10px] text-cyan-100">
+              {index + 1}
+            </div>
+          ))}
+        </div>
+      </footer>
+    </aside>
+  );
+}
+
+function AdvisorDock({
+  partyName,
+  chatQuestion,
+  setChatQuestion,
+  chatMessages,
+  chatLoading,
+  chatError,
+  conversationId,
+  onAsk,
+  onReset,
+  chatEndRef,
+}: {
+  partyName: string;
+  chatQuestion: string;
+  setChatQuestion: (value: string) => void;
+  chatMessages: ChatMessage[];
+  chatLoading: boolean;
+  chatError: string;
+  conversationId: string | null;
+  onAsk: (questionOverride?: string) => void;
+  onReset: () => void;
+  chatEndRef: MutableRefObject<HTMLDivElement | null>;
+}) {
+  return (
+    <section className="h-[218px] shrink-0 border-t border-[#1a2640] bg-[#060a14] p-3">
+      <div className="flex h-full overflow-hidden rounded-[1.5rem] border border-cyan-300/20 bg-cyan-300/[0.045]">
+        <div className="hidden w-[260px] shrink-0 border-r border-cyan-300/10 p-4 xl:block">
+          <div className="text-[10px] uppercase tracking-[0.28em] text-cyan-200/80">NORAYA ADVISOR</div>
+          <div className="mt-2 text-sm font-semibold text-zinc-100">Context-aware chat</div>
+          <div className="mt-2 line-clamp-2 text-xs leading-5 text-zinc-500">{partyName}</div>
+          <div className="mt-3 grid gap-2">
+            {["Τι κάνουμε τις επόμενες 24 ώρες;", "Ποια είναι η ασφαλέστερη δημόσια γραμμή;"].map((question) => (
+              <button
+                key={question}
+                type="button"
+                onClick={() => onAsk(question)}
+                disabled={chatLoading}
+                className="rounded-2xl border border-white/10 bg-black/20 px-3 py-2 text-left text-[11px] leading-5 text-zinc-400 transition hover:text-cyan-100 disabled:opacity-50"
+              >
+                {question}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex min-w-0 flex-1 flex-col">
+          <div className="flex-1 overflow-y-auto p-3">
+            {chatMessages.length === 0 && !chatLoading ? (
+              <div className="flex h-full items-center justify-center text-xs text-zinc-600">
+                Ρώτησε τον σύμβουλο Noraya με context από το active situation.
+              </div>
+            ) : (
+              <div className="grid gap-2">
+                {chatMessages.map((message, index) => (
+                  <div
+                    key={`${message.role}-${index}`}
+                    className={`rounded-2xl px-3 py-2 text-xs leading-6 ${
+                      message.role === "user"
+                        ? "ml-10 border border-white/10 bg-white/[0.06] text-zinc-200"
+                        : "mr-10 border border-cyan-300/20 bg-cyan-300/10 text-zinc-100"
+                    }`}
+                  >
+                    <div className="mb-1 text-[9px] uppercase tracking-[0.18em] text-zinc-500">
+                      {message.role === "user" ? "Εσύ" : "Noraya"}
+                    </div>
+                    <div className="whitespace-pre-wrap">{message.content}</div>
+                  </div>
+                ))}
+                {chatLoading ? (
+                  <div className="mr-10 rounded-2xl border border-cyan-300/20 bg-cyan-300/10 px-3 py-2 text-xs text-cyan-100">
+                    <div className="animate-pulse">Σκέφτομαι...</div>
+                  </div>
+                ) : null}
+                <div ref={(el) => { chatEndRef.current = el; }} />
+              </div>
+            )}
+          </div>
+
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              onAsk();
+            }}
+            className="border-t border-cyan-300/10 p-3"
+          >
+            {chatError ? <p className="mb-2 text-xs text-red-200">{chatError}</p> : null}
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={chatQuestion}
+                onChange={(event) => setChatQuestion(event.target.value)}
+                placeholder="Γράψε εδώ..."
+                disabled={chatLoading}
+                className="min-w-0 flex-1 rounded-2xl border border-white/10 bg-[#060a14] px-4 py-3 text-xs text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-cyan-300/40 disabled:opacity-50"
+              />
+              {conversationId ? (
+                <button
+                  type="button"
+                  onClick={onReset}
+                  className="rounded-2xl border border-white/10 bg-black/20 px-3 py-3 text-xs text-zinc-500 transition hover:text-zinc-300"
+                >
+                  Νέα
+                </button>
+              ) : null}
+              <button
+                type="submit"
+                disabled={chatLoading}
+                className="rounded-2xl bg-cyan-300 px-5 py-3 text-xs font-semibold text-slate-950 transition hover:bg-cyan-200 disabled:opacity-50"
+              >
+                Αποστολή
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function SidebarPanel({
+  title,
+  action,
+  footer,
+  children,
+}: {
+  title: string;
+  action?: string;
+  footer?: string;
+  children: ReactNode;
+}) {
+  return (
+    <section className="mb-3 rounded-[1.5rem] border border-[#1a2640] bg-[#080f1c] p-3">
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-500">{title}</div>
+      </div>
+      {children}
+      {action || footer ? (
+        <div className="mt-3 flex items-center justify-between gap-2 text-[10px]">
+          {action ? <button type="button" className="text-cyan-200 hover:text-cyan-100">{action}</button> : <span />}
+          {footer ? <span className="truncate text-zinc-600">{footer}</span> : null}
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+function InspectorPanel({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <section className="mb-3 rounded-[1.5rem] border border-[#1a2640] bg-[#080f1c] p-3">
+      <div className="mb-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-500">{title}</div>
+      {children}
+    </section>
+  );
+}
+
+function CockpitSection({ title, subtitle, children }: { title: string; subtitle?: string; children: ReactNode }) {
+  return (
+    <section className="rounded-[1.5rem] border border-[#1a2640] bg-[#060a14] p-4">
+      <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+        <div className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-100">{title}</div>
+        {subtitle ? <div className="text-[10px] text-zinc-600">{subtitle}</div> : null}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function StatusChip({ className, children }: { className: string; children: ReactNode }) {
+  return <span className={`rounded-full border px-3 py-1 text-[10px] ${className}`}>{children}</span>;
+}
+
+function MiniMetric({ label, value, small }: { label: string; value: string; small?: boolean }) {
+  return (
+    <div className={`rounded-2xl border border-[#1a2640] bg-[#060a14] ${small ? "px-3 py-2" : "px-4 py-3"}`}>
+      <div className="text-[9px] uppercase tracking-[0.18em] text-zinc-600">{label}</div>
+      <div className={`${small ? "mt-1 text-sm" : "mt-2 text-xl"} font-semibold text-cyan-100`}>{value}</div>
     </div>
   );
 }
 
-function MiniLine({ title, value }: { title: string; value: string }) {
+function MiniBox({ title, textValue, compact }: { title: string; textValue: string; compact?: boolean }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
-      <div className="text-xs uppercase tracking-[0.18em] text-zinc-500">{title}</div>
-      <div className="mt-2 text-sm leading-6 text-zinc-300">{value}</div>
+    <div className={`rounded-2xl border border-[#1a2640] bg-black/20 ${compact ? "p-3" : "p-4"}`}>
+      <div className="text-[10px] uppercase tracking-[0.18em] text-zinc-600">{title}</div>
+      <p className={`${compact ? "mt-1 text-[11px] leading-5" : "mt-2 text-sm leading-6"} text-zinc-300`}>{textValue}</p>
     </div>
   );
 }
 
-function BulletList({ items, fallback }: { items: string[]; fallback: string[] }) {
+function BulletList({ items, fallback, compact }: { items: string[]; fallback: string[]; compact?: boolean }) {
   const values = items.length > 0 ? items : fallback;
 
   return (
@@ -1415,11 +1663,211 @@ function BulletList({ items, fallback }: { items: string[]; fallback: string[] }
       {values.map((item, index) => (
         <li
           key={`${item}-${index}`}
-          className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3"
+          className={`rounded-2xl border border-[#1a2640] bg-black/20 ${compact ? "px-3 py-2 text-xs leading-6" : "px-4 py-3 text-sm leading-7"} text-zinc-300`}
         >
           {item}
         </li>
       ))}
     </ul>
   );
+}
+
+function Gauge({ score, label, small }: { score: number; label: string; small?: boolean }) {
+  const value = clamp(score);
+  const color = value >= 70 ? "#ef4444" : value >= 50 ? "#f59e0b" : "#00c8ff";
+  const size = small ? "h-20 w-20" : "h-28 w-28";
+
+  return (
+    <div className="flex flex-col items-center justify-center gap-2">
+      <div
+        className={`${size} rounded-full p-2`}
+        style={{ background: `conic-gradient(${color} ${value * 3.6}deg, rgba(255,255,255,0.08) 0deg)` }}
+      >
+        <div className="flex h-full w-full items-center justify-center rounded-full bg-[#060a14]">
+          <span className={`${small ? "text-lg" : "text-2xl"} font-semibold text-zinc-100`}>{Math.round(value)}</span>
+        </div>
+      </div>
+      <div className="text-center text-[10px] leading-4 text-zinc-500">{label}</div>
+    </div>
+  );
+}
+
+function BarMeter({ score, label }: { score: number; label: string }) {
+  const value = clamp(score);
+
+  return (
+    <div>
+      <div className="mb-1 flex items-center justify-between text-[10px] text-zinc-600">
+        <span>{label}</span>
+        <span>{Math.round(value)}%</span>
+      </div>
+      <div className="h-2 overflow-hidden rounded-full bg-white/10">
+        <div className="h-full rounded-full bg-cyan-300" style={{ width: `${value}%` }} />
+      </div>
+    </div>
+  );
+}
+
+function DriverBar({ label, score, trend, compact }: { label: string; score: number; trend?: string; compact?: boolean }) {
+  const value = clamp(score);
+
+  return (
+    <div className={compact ? "" : "rounded-2xl border border-[#1a2640] bg-black/20 p-3"}>
+      <div className="flex items-start justify-between gap-3">
+        <div className={`${compact ? "line-clamp-2 text-[11px]" : "text-xs"} min-w-0 font-medium leading-5 text-zinc-300`}>{label}</div>
+        <div className="shrink-0 text-[10px] text-cyan-100">{Math.round(value)}</div>
+      </div>
+      <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/10">
+        <div className="h-full rounded-full bg-cyan-300" style={{ width: `${Math.max(value, 4)}%` }} />
+      </div>
+      {trend ? <div className="mt-1 text-[10px] text-zinc-600">{trend}</div> : null}
+    </div>
+  );
+}
+
+function WinCard({ title, textValue, tone }: { title: string; textValue: string; tone: "red" | "amber" | "emerald" | "purple" | "zinc" }) {
+  const className = {
+    red: "border-red-300/25 bg-red-300/[0.07]",
+    amber: "border-amber-300/25 bg-amber-300/[0.07]",
+    emerald: "border-emerald-300/25 bg-emerald-300/[0.07]",
+    purple: "border-purple-300/25 bg-purple-300/[0.07]",
+    zinc: "border-white/10 bg-white/[0.04]",
+  }[tone];
+
+  return (
+    <div className={`rounded-2xl border p-4 ${className}`}>
+      <div className="text-[10px] uppercase tracking-[0.16em] text-zinc-500">{title}</div>
+      <p className="mt-3 text-xs leading-6 text-zinc-200">{textValue}</p>
+    </div>
+  );
+}
+
+function DecisionCard({
+  label,
+  title,
+  gain,
+  risk,
+  recommendation,
+}: {
+  label: string;
+  title: string;
+  gain: string;
+  risk: string;
+  recommendation: string;
+}) {
+  return (
+    <article className={`rounded-[1.5rem] border p-4 ${recommendationClass(recommendation)}`}>
+      <div className="flex items-center justify-between gap-2">
+        <div className="text-lg font-semibold">{label}</div>
+        <span className="rounded-full border border-current/20 px-2 py-1 text-[10px]">{recommendationLabel(recommendation)}</span>
+      </div>
+      <h3 className="mt-3 text-sm font-semibold leading-6 text-zinc-100">{title}</h3>
+      <div className="mt-4 grid gap-2">
+        <MiniBox compact title="Κέρδος" textValue={gain} />
+        <MiniBox compact title="Ρίσκο" textValue={risk} />
+      </div>
+    </article>
+  );
+}
+
+function decisionOptions(brief: StrategicBrief) {
+  const scenarios = Array.isArray(brief.scenarios) ? brief.scenarios.slice(0, 3) : [];
+  const labels = ["A", "B", "Γ"];
+
+  return labels.map((label, index) => {
+    const scenario = scenarios[index];
+    return {
+      label,
+      title: text(scenario?.name, index === 0 ? "Συντηρητική — χαμηλό ρίσκο" : index === 1 ? "Ισορροπημένη — προτεινόμενη" : "Τολμηρή — υψηλότερο ρίσκο"),
+      gain: text(scenario?.likely_gain, "Δεν έχει παραχθεί ακόμη πλήρες gain για αυτή την επιλογή."),
+      risk: text(scenario?.likely_risk, "Δεν έχει παραχθεί ακόμη πλήρες risk για αυτή την επιλογή."),
+      recommendation: scenario?.recommendation || (index === 1 ? "prefer" : "acceptable"),
+    };
+  });
+}
+
+function EscalationLadder({ current, recommended }: { current: number; recommended: number }) {
+  const steps = [
+    "Παρακολούθηση",
+    "Χαμηλή επίπτωση",
+    "Θεσμική πρόκληση",
+    "Κοινωνική πίεση",
+    "Παρέμβαση αρχηγού",
+    "Σύγκρουση",
+  ];
+
+  return (
+    <div className="grid gap-2 md:grid-cols-6">
+      {steps.map((step, index) => {
+        const level = index + 1;
+        const isCurrent = level === Math.round(current);
+        const isRecommended = level === Math.round(recommended);
+
+        return (
+          <div
+            key={step}
+            className={`rounded-2xl border p-3 text-center ${
+              isCurrent
+                ? "border-cyan-300/35 bg-cyan-300/10 text-cyan-100"
+                : isRecommended
+                  ? "border-amber-300/30 bg-amber-300/10 text-amber-100"
+                  : "border-[#1a2640] bg-black/20 text-zinc-500"
+            }`}
+          >
+            <div className="text-sm font-semibold">{level}</div>
+            <div className="mt-2 text-[10px] leading-4">{step}</div>
+            {level >= 5 ? <div className="mt-2 text-[9px] text-red-200">human approval</div> : null}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function DataRow({ label, value, badge }: { label: string; value: string; badge?: string }) {
+  return (
+    <div className="flex items-center justify-between gap-2 rounded-2xl border border-[#1a2640] bg-[#0c1220] px-3 py-2">
+      <span>{label}</span>
+      <span className="flex items-center gap-2 text-zinc-500">
+        {badge ? <span className="rounded-full border border-emerald-300/25 bg-emerald-300/10 px-2 py-0.5 text-[9px] text-emerald-100">{badge}</span> : null}
+        {value}
+      </span>
+    </div>
+  );
+}
+
+function MemoryLine({ date, title }: { date: string; title: string }) {
+  return (
+    <div className="rounded-2xl border border-[#1a2640] bg-[#0c1220] px-3 py-2">
+      <div className="text-[10px] text-zinc-600">{date}</div>
+      <div className="mt-1 line-clamp-2 text-[11px] leading-5 text-zinc-400">{title}</div>
+    </div>
+  );
+}
+
+function SummaryLine({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl border border-[#1a2640] bg-black/20 px-3 py-2">
+      <div className="text-[9px] uppercase tracking-[0.16em] text-zinc-600">{label}</div>
+      <div className="mt-1 line-clamp-3 text-[11px] leading-5 text-zinc-300">{value}</div>
+    </div>
+  );
+}
+
+function TinyWarning({ children }: { children: ReactNode }) {
+  return <div className="rounded-2xl border border-amber-300/20 bg-amber-300/10 px-3 py-2 text-[10px] leading-5 text-amber-100">{children}</div>;
+}
+
+function EmptyState({ children, small }: { children: ReactNode; small?: boolean }) {
+  return (
+    <div className={`rounded-2xl border border-dashed border-[#1a2640] bg-black/10 ${small ? "px-3 py-3 text-[11px]" : "px-4 py-5 text-sm"} leading-6 text-zinc-600`}>
+      {children}
+    </div>
+  );
+}
+
+function agendaBarClass(score: number) {
+  if (score >= 70) return "bg-red-400";
+  if (score >= 50) return "bg-amber-400";
+  return "bg-cyan-300";
 }
