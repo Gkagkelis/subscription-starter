@@ -5,7 +5,7 @@ export default async function HomePage() {
         <img
           src="/noraya.png"
           alt="Noraya"
-          style={{ height: '280px', width: 'auto' }}
+          style={{ height: "280px", width: "auto" }}
           className="mx-auto mb-2"
         />
 
@@ -26,17 +26,10 @@ export default async function HomePage() {
           Προσαρμοσμένη στις θέσεις του οργανισμού σας.
         </p>
 
-        <div className="flex gap-3 justify-center mb-16">
-          <a
-            href="/signin/signup?next=/onboarding"
-            className="text-sm bg-white text-black px-6 py-2.5 rounded-md hover:bg-zinc-200 transition font-medium"
-          >
-            Ξεκινήστε δωρεάν
-          </a>
-
+        <div className="flex justify-center mb-16">
           <a
             href="#features"
-            className="text-sm text-zinc-500 px-6 py-2.5 rounded-md border border-zinc-800 hover:border-zinc-600 transition"
+            className="text-sm text-zinc-300 px-7 py-2.5 rounded-md border border-zinc-800 hover:border-zinc-500 hover:text-white transition"
           >
             Μάθετε περισσότερα
           </a>
@@ -86,12 +79,12 @@ export default async function HomePage() {
 
         <div className="flex flex-wrap justify-center gap-2">
           {[
-            'Πολιτικά Κόμματα',
-            'Βουλευτές',
-            'Think Tanks',
-            'NGOs',
-            'Public Affairs',
-            'Συνδικάτα'
+            "Πολιτικά Κόμματα",
+            "Βουλευτές",
+            "Think Tanks",
+            "NGOs",
+            "Public Affairs",
+            "Συνδικάτα"
           ].map((item) => (
             <span
               key={item}
