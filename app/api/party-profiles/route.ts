@@ -19,33 +19,7 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from("political_party_profiles")
-    .select(
-      `
-      id,
-      party_key,
-      party_name,
-      short_name,
-      country_code,
-      profile_type,
-      profile_version,
-      is_active,
-      documentation_level,
-      verification_status,
-      ideological_family,
-      strategic_positioning,
-      default_tone,
-      core_themes,
-      core_audiences,
-      known_positions,
-      red_lines,
-      opportunity_frame,
-      risk_frame,
-      competitor_frame,
-      advisor_instructions,
-      sources,
-      updated_at
-      `
-    )
+    .select("*")
     .eq("is_active", true)
     .order("party_name", { ascending: true });
 
