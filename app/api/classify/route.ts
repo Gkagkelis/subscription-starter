@@ -52,13 +52,20 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Keep each AI batch small and reliable.
-  // The radar endpoint will call this repeatedly.
-  const requestedLimit = Number(searchParams.get("limit") || "20");
+  // Reliable serverless-sized AI batch.
+  // Product throughput comes from many calls, not one huge call.
+  const requestedLimit = Number(searchParams.get("limit") || "10");
   const limit = Math.min(
-    Math.max(Number.isFinite(requestedLimit) ? Math.trunc(requestedLimit) : 20, 1),
-    25
+    Math.max(Number.isFinite(requestedLimit) ? Math.trunc(requestedLimit) : 10, 1),
+    10
   );
+
+  // Default compact response prevents large browser/serverless responses.
+  // Add debug=1 only when you explicitly want full classifier output.
+  const debug = searchParams.get("debug") === "1";
+
+  const classifierModel =
+    process.env.ANTHROPIC_CLASSIFIER_MODEL || "claude-sonnet-4-6";
 
   const { data: articles, error: fetchError } = await supabase
     .from("articles")
@@ -74,8 +81,14 @@ export async function GET(req: Request) {
   if (!articles || articles.length === 0) {
     return NextResponse.json({
       success: true,
+      classifier_version: "noraya_public_reality_radar_v2_compact",
       message: "Δεν υπάρχουν unclassified άρθρα",
+      requested_limit: requestedLimit,
+      effective_limit: limit,
+      total: 0,
       classified: 0,
+      public_relevant: 0,
+      noise: 0,
     });
   }
 
@@ -84,7 +97,7 @@ export async function GET(req: Request) {
       (a, i) =>
         `[${i}]
 ΤΙΤΛΟΣ: ${a.title}
-ΠΕΡΙΓΡΑΦΗ: ${(a.description || "").substring(0, 500)}
+ΠΕΡΙΓΡΑΦΗ: ${(a.description || "").substring(0, 350)}
 ΠΗΓΗ: ${a.source_name || "—"}
 ΚΑΤΗΓΟΡΙΑ RSS: ${a.category || "—"}
 ΔΗΜΟΣΙΕΥΣΗ: ${a.published_at || "—"}`
@@ -96,7 +109,7 @@ export async function GET(req: Request) {
 ΔΕΝ ταξινομείς μόνο στενή κομματική πολιτική.
 Θέλουμε να πιάνεις τη δημόσια πραγματικότητα που μπορεί να επηρεάσει πολιτική ατζέντα, κοινωνική ένταση, κράτος, θεσμούς, εμπιστοσύνη, στρατηγική επικοινωνία ή κυβερνητική/αντιπολιτευτική ευθύνη.
 
-Θεώρησε relevant αν αφορά ένα από τα παρακάτω:
+Relevant αν αφορά:
 - κόμματα, κυβέρνηση, αντιπολίτευση, Βουλή, υπουργεία
 - κράτος, δημόσια διοίκηση, ΕΛ.ΑΣ, δημόσια ασφάλεια
 - δικαιοσύνη, θεσμοί, διαφάνεια, σκάνδαλα, λογοδοσία
@@ -110,7 +123,7 @@ export async function GET(req: Request) {
 - φυσικές καταστροφές, πολιτική προστασία
 - failures του κράτους, ατυχήματα, αστοχίες υπηρεσιών
 
-Θεώρησε noise αν είναι καθαρά:
+Noise αν είναι καθαρά:
 - αθλητικά χωρίς δημόσια/θεσμική προέκταση
 - lifestyle, celebrities, τηλεόραση, ψυχαγωγία
 - συνταγές, ζώδια, κουτσομπολιό
@@ -119,14 +132,14 @@ export async function GET(req: Request) {
 Για κάθε άρθρο δώσε:
 - topic: ΕΝΑ από αυτά: ${TOPICS.join(", ")}
 - sentiment: "θετικό", "αρνητικό", ή "ουδέτερο"
-- relevance: 1-10, γενική δημόσια/πολιτική σημασία
+- relevance: 1-10
 - is_political: true αν αφορά δημόσια πολιτική/κοινωνία/θεσμούς/κράτος/οικονομία, όχι μόνο κόμματα
 - public_relevance: true/false
-- relevance_domain: σύντομη κατηγορία, π.χ. "Κράτος / ασφάλεια", "Οικονομία / ακρίβεια", "Θεσμοί / δικαιοσύνη"
-- situation_potential: 1-10, πιθανότητα να γίνει situation στο Noraya
-- agenda_potential: 1-10, πιθανότητα να επηρεάσει δημόσια/πολιτική ατζέντα
-- urgency: 1-10, πόσο άμεσο/επείγον είναι
-- affected_groups: array με 1-5 ομάδες/θεσμούς που επηρεάζονται
+- relevance_domain: σύντομη κατηγορία
+- situation_potential: 1-10
+- agenda_potential: 1-10
+- urgency: 1-10
+- affected_groups: array με 1-5 ομάδες/θεσμούς
 - why_it_matters: μία σύντομη πρόταση στα ελληνικά
 - is_noise: true/false
 - noise_reason: σύντομο reason ή null
@@ -163,8 +176,8 @@ ${articlesList}`;
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-6",
-        max_tokens: 8000,
+        model: classifierModel,
+        max_tokens: 3500,
         messages: [{ role: "user", content: prompt }],
       }),
     });
@@ -202,7 +215,7 @@ ${articlesList}`;
           success: false,
           stage: "parse_ai_json",
           error: "AI response not valid JSON",
-          raw: text,
+          raw: debug ? text : undefined,
         },
         { status: 500 }
       );
@@ -240,9 +253,9 @@ ${articlesList}`;
           is_noise: isNoise,
           noise_reason: c.noise_reason || null,
           classification_status: "classified",
-          classifier_version: "noraya_public_reality_radar_v1",
+          classifier_version: "noraya_public_reality_radar_v2_compact",
           classified_at: new Date().toISOString(),
-          model_used: "claude-sonnet-4-6",
+          model_used: classifierModel,
         })
         .eq("id", article.id);
 
@@ -283,7 +296,7 @@ ${articlesList}`;
 
     return NextResponse.json({
       success: true,
-      classifier_version: "noraya_public_reality_radar_v1",
+      classifier_version: "noraya_public_reality_radar_v2_compact",
       requested_limit: requestedLimit,
       effective_limit: limit,
       total: articles.length,
@@ -294,7 +307,7 @@ ${articlesList}`;
         baseline_refreshed: baselineRefreshed,
         classified_refreshed: classifiedRefreshed,
       },
-      results: classifications,
+      ...(debug ? { results: classifications } : {}),
     });
   } catch (err: any) {
     return NextResponse.json(
