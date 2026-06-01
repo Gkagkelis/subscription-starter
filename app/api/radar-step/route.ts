@@ -170,7 +170,7 @@ export async function GET(req: Request) {
 
       return NextResponse.json({
         success: true,
-        radar_step_version: "noraya_radar_step_v1",
+        radar_step_version: "noraya_radar_step_v2_compact",
         step,
         status,
       });
@@ -203,7 +203,7 @@ export async function GET(req: Request) {
 
       return NextResponse.json({
         success: true,
-        radar_step_version: "noraya_radar_step_v1",
+        radar_step_version: "noraya_radar_step_v2_compact",
         step,
         reset_count: data?.length ?? 0,
         reset_runs: data ?? [],
@@ -220,7 +220,10 @@ export async function GET(req: Request) {
       );
     }
 
-    const limit = safeInt(searchParams.get("limit"), 20, 1, 25);
+    // Each classify step is intentionally small and reliable.
+    // Product throughput comes from many step calls per radar cycle.
+    const limit = safeInt(searchParams.get("limit"), 10, 1, 10);
+
     const settings = {
       step,
       limit,
@@ -269,7 +272,7 @@ export async function GET(req: Request) {
 
         return NextResponse.json({
           success: true,
-          radar_step_version: "noraya_radar_step_v1",
+          radar_step_version: "noraya_radar_step_v2_compact",
           run_id: runId,
           ...summary,
         });
@@ -316,7 +319,7 @@ export async function GET(req: Request) {
 
         return NextResponse.json({
           success: true,
-          radar_step_version: "noraya_radar_step_v1",
+          radar_step_version: "noraya_radar_step_v2_compact",
           run_id: runId,
           ...summary,
         });
@@ -358,7 +361,7 @@ export async function GET(req: Request) {
 
         return NextResponse.json({
           success: true,
-          radar_step_version: "noraya_radar_step_v1",
+          radar_step_version: "noraya_radar_step_v2_compact",
           run_id: runId,
           ...summary,
         });
