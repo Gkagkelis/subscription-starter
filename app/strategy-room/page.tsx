@@ -744,7 +744,10 @@ export default function StrategyRoomPage() {
 
   if (loading) {
     return (
-      <main className="flex h-screen items-center justify-center bg-[#060a14] font-mono text-zinc-300">
+      <main
+        style={{ fontFamily: "Inter, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif" }}
+        className="flex h-screen items-center justify-center bg-[#060a14] text-zinc-300"
+      >
         <div className="rounded-[2rem] border border-cyan-300/20 bg-[#0c1220] px-6 py-5 shadow-2xl shadow-cyan-950/20">
           <div className="text-xs uppercase tracking-[0.28em] text-cyan-300">NORAYA</div>
           <div className="mt-2 text-sm text-zinc-400">Φορτώνει cockpit shell με live δεδομένα...</div>
@@ -755,7 +758,10 @@ export default function StrategyRoomPage() {
 
   if (error) {
     return (
-      <main className="flex h-screen flex-col items-center justify-center bg-[#060a14] px-6 font-mono text-zinc-100">
+      <main
+        style={{ fontFamily: "Inter, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif" }}
+        className="flex h-screen flex-col items-center justify-center bg-[#060a14] px-6 text-zinc-100"
+      >
         <div className="max-w-xl rounded-[2rem] border border-red-300/25 bg-red-300/10 p-6">
           <div className="text-xs uppercase tracking-[0.22em] text-red-100">Strategy Room</div>
           <h1 className="mt-3 text-2xl font-semibold">Δεν φορτώθηκε το cockpit</h1>
@@ -773,7 +779,10 @@ export default function StrategyRoomPage() {
   }
 
   return (
-    <main className="h-screen overflow-hidden bg-[#060a14] font-mono text-zinc-100">
+    <main
+      style={{ fontFamily: "Inter, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif" }}
+      className="h-screen overflow-hidden bg-[#060a14] text-zinc-100"
+    >
       <TopNavigation
         partyName={partyName}
         partyLogo={partyLogo}
@@ -903,21 +912,31 @@ function TopNavigation({
           {source} · {situationSource}
         </div>
 
-        <div className="rounded-2xl border border-[#1a2640] bg-[#0c1220] px-3 py-2 text-xs text-zinc-300">
-          {new Date().toLocaleDateString("el-GR", { day: "2-digit", month: "2-digit", year: "numeric" })}
-        </div>
-
         <div className="flex max-w-[280px] items-center gap-3 rounded-2xl border border-[#1a2640] bg-[#0c1220] px-3 py-2">
           <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-cyan-300/20 bg-cyan-300/10 text-[10px] font-semibold text-cyan-100">
             {partyLogo ? <img src={partyLogo} alt={partyName} className="h-full w-full object-contain p-1" /> : partyInitial}
           </div>
           <div className="truncate text-xs text-zinc-200">{partyName}</div>
-          <span className="text-zinc-600">▾</span>
+          <IconChevron className="h-4 w-4 text-zinc-600" />
         </div>
 
-        <button type="button" className="rounded-2xl border border-[#1a2640] bg-[#0c1220] px-3 py-2 text-xs text-zinc-400">
-          ⚙
+        <div className="flex items-center gap-2 rounded-2xl border border-[#1a2640] bg-[#0c1220] px-3 py-2 text-xs text-zinc-300">
+          <IconCalendar className="h-4 w-4 text-zinc-500" />
+          {new Date().toLocaleDateString("el-GR", { day: "2-digit", month: "2-digit", year: "numeric" })}
+          <IconChevron className="h-4 w-4 text-zinc-600" />
+        </div>
+
+        <button type="button" className="rounded-2xl border border-[#1a2640] bg-[#0c1220] p-2 text-zinc-400 transition hover:text-cyan-100">
+          <IconSun className="h-4 w-4" />
         </button>
+
+        <button type="button" className="rounded-2xl border border-[#1a2640] bg-[#0c1220] p-2 text-zinc-400 transition hover:text-cyan-100">
+          <IconSettings className="h-4 w-4" />
+        </button>
+
+        <div className="flex h-9 w-9 items-center justify-center rounded-full border border-cyan-300/25 bg-cyan-300/10 text-xs font-semibold text-cyan-100">
+          N
+        </div>
       </div>
     </header>
   );
@@ -949,34 +968,40 @@ function LeftSidebar({
       <div className="flex-1 overflow-y-auto p-3">
         <SidebarPanel
           title="AGENDA MAP"
+          info
           action="Δες όλη την ατζέντα"
           footer={agenda.length ? `${agenda.length} classified signals` : "awaiting agenda"}
         >
           {agenda.length ? (
             <div className="grid gap-2">
-              {agenda.slice(0, 6).map((item) => (
-                <button
-                  key={`${item.topic}-${item.rank}`}
-                  type="button"
-                  className="group rounded-2xl border border-[#1a2640] bg-[#0c1220] p-3 text-left transition hover:border-cyan-300/30 hover:bg-cyan-300/[0.04]"
-                >
-                  <div className="flex items-start gap-2">
-                    <div className={`mt-1 h-9 w-1.5 rounded-full ${agendaBarClass(item.score)}`} />
+              {agenda.slice(0, 6).map((item) => {
+                const tone = item.score >= 70 ? "red" : item.score >= 50 ? "amber" : "emerald";
+                return (
+                  <button
+                    key={`${item.topic}-${item.rank}`}
+                    type="button"
+                    className="group flex items-center gap-2 rounded-2xl border border-[#1a2640] bg-[#0c1220] p-3 text-left transition hover:border-cyan-300/30 hover:bg-cyan-300/[0.04]"
+                  >
+                    <NumberBadge value={item.rank} tone={tone} />
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-[10px] text-zinc-500">#{item.rank}</span>
-                        <span className="text-[10px] text-cyan-100">{Math.round(item.score)}</span>
-                      </div>
-                      <div className="mt-1 line-clamp-2 text-xs font-medium leading-5 text-zinc-200 group-hover:text-cyan-100">
+                      <div className="line-clamp-2 text-xs font-medium leading-5 text-zinc-200 group-hover:text-cyan-100">
                         {item.topic}
                       </div>
-                      <div className="mt-2 text-[10px] text-zinc-500">
-                        {item.article_count || 0} άρθρα · {item.source_count || 0} πηγές
+                      <div className={`mt-0.5 text-[10px] ${
+                        tone === "red" ? "text-red-300/80" : tone === "amber" ? "text-amber-300/80" : "text-emerald-300/80"
+                      }`}>
+                        {item.signalLabel}
                       </div>
                     </div>
-                  </div>
-                </button>
-              ))}
+                    <Sparkline
+                      seed={`agenda-${item.topic}-${item.rank}`}
+                      score={item.score}
+                      color={sparkColor(item.score)}
+                      className="h-7 w-12 shrink-0"
+                    />
+                  </button>
+                );
+              })}
             </div>
           ) : (
             <EmptyState small>Δεν υπάρχουν ακόμη classified agenda signals.</EmptyState>
@@ -1033,13 +1058,19 @@ function LeftSidebar({
 
         <SidebarPanel title="QUICK CAPTURE">
           <div className="grid grid-cols-2 gap-2">
-            {["Σημείωση", "URL", "Στιγμιότυπο", "Ηχητικό"].map((label) => (
+            {[
+              { label: "Σημείωση / Ιδέα", Glyph: IconNote },
+              { label: "URL / Άρθρο", Glyph: IconLink },
+              { label: "Στιγμιότυπο", Glyph: IconCamera },
+              { label: "Ηχητική σημείωση", Glyph: IconMic },
+            ].map(({ label, Glyph }) => (
               <button
                 key={label}
                 type="button"
-                className="rounded-2xl border border-[#1a2640] bg-[#0c1220] px-2 py-3 text-[10px] text-zinc-400 transition hover:border-cyan-300/25 hover:text-cyan-100"
+                className="flex items-center gap-2 rounded-2xl border border-[#1a2640] bg-[#0c1220] px-2.5 py-3 text-[10px] leading-4 text-zinc-400 transition hover:border-cyan-300/25 hover:text-cyan-100"
               >
-                {label}
+                <Glyph className="h-4 w-4 shrink-0" />
+                <span className="text-left">{label}</span>
               </button>
             ))}
           </div>
@@ -1084,38 +1115,73 @@ function PriorityStrip({
     {
       label: "ΠΡΟΤΕΡΑΙΟΤΗΤΑ 1",
       title: activeTitle,
+      badge: "Υψηλή προτεραιότητα",
+      tone: "red" as const,
+      score: numberValue(agenda[0]?.score, 78),
       textValue: text(immediateRecommendation, agenda[0]?.recommended_action || "Παρακολούθηση και ασφαλής γραμμή πριν από κλιμάκωση."),
     },
     {
       label: "ΣΗΜΑ ΑΤΖΕΝΤΑΣ",
       title: agenda[1]?.topic || "Δεύτερο σήμα υπό ταξινόμηση",
+      badge: "Μεσαία",
+      tone: "amber" as const,
+      score: numberValue(agenda[1]?.score, 58),
       textValue: text(agenda[1]?.evidence_summary, "Κρατάμε το θέμα σε παρακολούθηση μέχρι να ισχυροποιηθεί η τεκμηρίωση."),
     },
     {
       label: "ΝΑ ΑΠΟΦΥΓΟΥΜΕ",
       title: "Πρόωρη κλιμάκωση",
+      badge: "Χαμηλή προς Μεσαία",
+      tone: "emerald" as const,
+      score: numberValue(agenda[2]?.score, 42),
       textValue: text(avoidToday, agenda[0]?.avoid_action || "Όχι υπερβολική δημόσια βεβαιότητα χωρίς επαρκή στοιχεία."),
     },
   ];
+
+  const badgeTone = {
+    red: "border-red-400/30 bg-red-400/10 text-red-200",
+    amber: "border-amber-400/30 bg-amber-400/10 text-amber-200",
+    emerald: "border-emerald-400/30 bg-emerald-400/10 text-emerald-200",
+  };
 
   return (
     <section className="mb-4">
       <div className="mb-3 flex items-center justify-between">
         <div>
-          <div className="text-[10px] uppercase tracking-[0.26em] text-cyan-200/70">ΠΡΟΤΕΡΑΙΟΤΗΤΕΣ ΣΗΜΕΡΑ</div>
+          <div className="flex items-center gap-2">
+            <div className="text-[10px] uppercase tracking-[0.26em] text-cyan-200/70">ΠΡΟΤΕΡΑΙΟΤΗΤΕΣ ΣΗΜΕΡΑ</div>
+            <IconInfo className="h-3.5 w-3.5 text-zinc-600" />
+          </div>
           <div className="mt-1 text-sm text-zinc-500">Τρία πράγματα που πρέπει να βλέπει το επιτελείο με την πρώτη ματιά.</div>
         </div>
-        <button type="button" className="rounded-2xl border border-cyan-300/25 bg-cyan-300/10 px-3 py-2 text-xs text-cyan-100">
-          + Καταγραφή νέου συμβάντος
+        <button type="button" className="flex items-center gap-2 rounded-2xl border border-cyan-300/25 bg-cyan-300/10 px-3 py-2 text-xs text-cyan-100">
+          <IconPlus className="h-4 w-4" />
+          Καταγραφή νέου συμβάντος
         </button>
       </div>
 
       <div className="grid gap-3 xl:grid-cols-3">
-        {cards.map((card) => (
+        {cards.map((card, index) => (
           <article key={card.label} className="rounded-[1.5rem] border border-[#1a2640] bg-[#0c1220] p-4">
-            <div className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">{card.label}</div>
-            <h2 className="mt-2 line-clamp-2 text-sm font-semibold leading-6 text-zinc-100">{card.title}</h2>
-            <p className="mt-2 line-clamp-3 text-xs leading-5 text-zinc-400">{card.textValue}</p>
+            <div className="flex items-start gap-3">
+              <NumberBadge value={index + 1} tone={card.tone} size="lg" />
+              <div className="min-w-0 flex-1">
+                <div className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">{card.label}</div>
+                <h2 className="mt-1 line-clamp-2 text-sm font-semibold leading-6 text-zinc-100">{card.title}</h2>
+                <span className={`mt-2 inline-block rounded-full border px-2 py-0.5 text-[10px] ${badgeTone[card.tone]}`}>
+                  {card.badge}
+                </span>
+              </div>
+            </div>
+            <div className="mt-3 flex items-end justify-between gap-3">
+              <p className="line-clamp-3 flex-1 text-xs leading-5 text-zinc-400">{card.textValue}</p>
+              <Sparkline
+                seed={`priority-${card.label}`}
+                score={card.score}
+                color={sparkColor(card.score)}
+                className="h-8 w-20 shrink-0"
+              />
+            </div>
           </article>
         ))}
       </div>
@@ -1589,17 +1655,20 @@ function SidebarPanel({
   title,
   action,
   footer,
+  info,
   children,
 }: {
   title: string;
   action?: string;
   footer?: string;
+  info?: boolean;
   children: ReactNode;
 }) {
   return (
     <section className="mb-3 rounded-[1.5rem] border border-[#1a2640] bg-[#080f1c] p-3">
       <div className="mb-3 flex items-center justify-between gap-2">
         <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-500">{title}</div>
+        {info ? <IconInfo className="h-3.5 w-3.5 text-zinc-600" /> : null}
       </div>
       {children}
       {action || footer ? (
@@ -1870,4 +1939,181 @@ function agendaBarClass(score: number) {
   if (score >= 70) return "bg-red-400";
   if (score >= 50) return "bg-amber-400";
   return "bg-cyan-300";
+}
+
+/* ---------------------------------------------------------------------------
+   Εικονίδια (inline SVG — χωρίς external dependency)
+   Όλα δέχονται className για μέγεθος/χρώμα (currentColor).
+--------------------------------------------------------------------------- */
+
+type IconProps = { className?: string };
+const iconBase = "h-4 w-4";
+
+function Icon({ className, children }: IconProps & { children: ReactNode }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.6}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className || iconBase}
+      aria-hidden="true"
+    >
+      {children}
+    </svg>
+  );
+}
+
+const IconInfo = (p: IconProps) => (
+  <Icon {...p}><circle cx="12" cy="12" r="9" /><path d="M12 11v5" /><path d="M12 7.5h.01" /></Icon>
+);
+const IconSettings = (p: IconProps) => (
+  <Icon {...p}><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 7 19.4a1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 2.6 14H2.5a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.6 7l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 10 4.6V4.5a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.1a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.6 1z" /></Icon>
+);
+const IconChevron = (p: IconProps) => (<Icon {...p}><path d="m6 9 6 6 6-6" /></Icon>);
+const IconArrowRight = (p: IconProps) => (<Icon {...p}><path d="M5 12h14" /><path d="m13 6 6 6-6 6" /></Icon>);
+const IconPlus = (p: IconProps) => (<Icon {...p}><path d="M12 5v14" /><path d="M5 12h14" /></Icon>);
+const IconCalendar = (p: IconProps) => (
+  <Icon {...p}><rect x="3" y="4.5" width="18" height="16" rx="2.5" /><path d="M3 9h18" /><path d="M8 3v3" /><path d="M16 3v3" /></Icon>
+);
+const IconSun = (p: IconProps) => (
+  <Icon {...p}><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></Icon>
+);
+const IconSave = (p: IconProps) => (
+  <Icon {...p}><path d="M5 3.5h11l3 3V19a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 19V5A1.5 1.5 0 0 1 5.5 3.5z" /><path d="M8 3.5V8h7V3.5" /><path d="M8 20v-6h8v6" /></Icon>
+);
+const IconShare = (p: IconProps) => (
+  <Icon {...p}><circle cx="6.5" cy="12" r="2.5" /><circle cx="17.5" cy="6" r="2.5" /><circle cx="17.5" cy="18" r="2.5" /><path d="m8.7 10.8 6.6-3.6M8.7 13.2l6.6 3.6" /></Icon>
+);
+const IconMore = (p: IconProps) => (
+  <Icon {...p}><circle cx="5" cy="12" r="1.2" /><circle cx="12" cy="12" r="1.2" /><circle cx="19" cy="12" r="1.2" /></Icon>
+);
+const IconNote = (p: IconProps) => (
+  <Icon {...p}><path d="M5 4.5h14V19a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 19z" /><path d="M9 9h6M9 12.5h6M9 16h3" /></Icon>
+);
+const IconLink = (p: IconProps) => (
+  <Icon {...p}><path d="M10 13.5a3.5 3.5 0 0 0 5 0l3-3a3.5 3.5 0 0 0-5-5l-1.5 1.5" /><path d="M14 10.5a3.5 3.5 0 0 0-5 0l-3 3a3.5 3.5 0 0 0 5 5l1.5-1.5" /></Icon>
+);
+const IconCamera = (p: IconProps) => (
+  <Icon {...p}><path d="M4 8.5h3l1.5-2h7L17 8.5h3a1.5 1.5 0 0 1 1.5 1.5v8A1.5 1.5 0 0 1 20 19.5H4A1.5 1.5 0 0 1 2.5 18v-8A1.5 1.5 0 0 1 4 8.5z" /><circle cx="12" cy="13.5" r="3" /></Icon>
+);
+const IconMic = (p: IconProps) => (
+  <Icon {...p}><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M5.5 11a6.5 6.5 0 0 0 13 0" /><path d="M12 17.5V21" /><path d="M9 21h6" /></Icon>
+);
+const IconAttach = (p: IconProps) => (
+  <Icon {...p}><path d="M20 11.5 11.8 19.7a4.5 4.5 0 0 1-6.4-6.4l8.5-8.5a3 3 0 0 1 4.2 4.2l-8.5 8.5a1.5 1.5 0 0 1-2.1-2.1l7.8-7.8" /></Icon>
+);
+const IconSend = (p: IconProps) => (
+  <Icon {...p}><path d="M4.5 12 20 4.5 14.5 20l-3-6.5z" /><path d="m11.5 13.5 8.5-9" /></Icon>
+);
+const IconWallet = (p: IconProps) => (
+  <Icon {...p}><rect x="3" y="6" width="18" height="13" rx="2.5" /><path d="M3 10h18" /><circle cx="16.5" cy="14" r="1.2" /></Icon>
+);
+const IconChartUp = (p: IconProps) => (
+  <Icon {...p}><path d="M4 19V5M4 19h16" /><path d="m7 14 3-3 3 2 4-5" /></Icon>
+);
+const IconScale = (p: IconProps) => (
+  <Icon {...p}><path d="M12 4v16M7 20h10" /><path d="M6 7h12" /><path d="M6 7 3.5 13a3 3 0 0 0 5 0z" /><path d="M18 7l-2.5 6a3 3 0 0 0 5 0z" /></Icon>
+);
+const IconUser = (p: IconProps) => (
+  <Icon {...p}><circle cx="12" cy="8" r="3.5" /><path d="M5 20a7 7 0 0 1 14 0" /></Icon>
+);
+const IconBuilding = (p: IconProps) => (
+  <Icon {...p}><rect x="5" y="3.5" width="14" height="17" rx="1.5" /><path d="M9 8h2M13 8h2M9 12h2M13 12h2M10 20v-3.5h4V20" /></Icon>
+);
+
+const driverIcons = [IconWallet, IconChartUp, IconScale, IconUser, IconBuilding];
+
+/* ---------------------------------------------------------------------------
+   Sparkline — μικρό γράφημα τάσης (deterministic από seed, σταθερό σε render).
+--------------------------------------------------------------------------- */
+
+function seededPoints(seed: string, score = 50, count = 14) {
+  let h = 0;
+  for (let i = 0; i < seed.length; i += 1) h = (h * 31 + seed.charCodeAt(i)) % 100000;
+
+  const base = clamp(score, 12, 88);
+  const points: number[] = [];
+  for (let i = 0; i < count; i += 1) {
+    h = (h * 9301 + 49297) % 233280;
+    const noise = (h / 233280) * 26 - 13;
+    const drift = (i / (count - 1)) * (base - 50) * 0.5;
+    points.push(clamp(base + noise + drift, 6, 96));
+  }
+  return points;
+}
+
+function Sparkline({
+  seed,
+  score = 50,
+  color = "#00c8ff",
+  className = "h-7 w-20",
+}: {
+  seed: string;
+  score?: number;
+  color?: string;
+  className?: string;
+}) {
+  const points = seededPoints(seed, score);
+  const max = Math.max(...points);
+  const min = Math.min(...points);
+  const range = Math.max(max - min, 1);
+  const w = 100;
+  const h = 32;
+
+  const path = points
+    .map((value, index) => {
+      const x = (index / (points.length - 1)) * w;
+      const y = h - ((value - min) / range) * (h - 6) - 3;
+      return `${index === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`;
+    })
+    .join(" ");
+
+  const gradientId = `spark-${seed.replace(/[^a-zA-Z0-9]/g, "").slice(0, 12) || "x"}-${Math.round(score)}`;
+
+  return (
+    <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" className={className} aria-hidden="true">
+      <defs>
+        <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity="0.28" />
+          <stop offset="100%" stopColor={color} stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path d={`${path} L${w},${h} L0,${h} Z`} fill={`url(#${gradientId})`} stroke="none" />
+      <path d={path} fill="none" stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function sparkColor(score: number) {
+  if (score >= 70) return "#f87171";
+  if (score >= 50) return "#fbbf24";
+  return "#34d399";
+}
+
+function NumberBadge({
+  value,
+  tone = "cyan",
+  size = "sm",
+}: {
+  value: number | string;
+  tone?: "red" | "amber" | "emerald" | "cyan";
+  size?: "sm" | "lg";
+}) {
+  const tones = {
+    red: "border-red-400/40 bg-red-400/15 text-red-200",
+    amber: "border-amber-400/40 bg-amber-400/15 text-amber-200",
+    emerald: "border-emerald-400/40 bg-emerald-400/15 text-emerald-200",
+    cyan: "border-cyan-300/40 bg-cyan-300/15 text-cyan-100",
+  }[tone];
+
+  const dims = size === "lg" ? "h-9 w-9 text-lg" : "h-5 w-5 text-[11px]";
+
+  return (
+    <span className={`flex shrink-0 items-center justify-center rounded-full border font-semibold ${dims} ${tones}`}>
+      {value}
+    </span>
+  );
 }
