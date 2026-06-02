@@ -114,7 +114,7 @@ Review status:
 ${profile.profile_review_status || "Δεν έχει οριστεί"}
 
 Party profile snapshot:
-${safeJson(profile.party_profile_snapshot, 2600)}
+${safeJson(profile.party_profile_snapshot, 1200)}
 
 Θεματικές προτεραιότητες:
 ${safeJson(profile.themes, 1800)}
@@ -176,10 +176,10 @@ Evidence summary:
 ${cleanText(row.evidence_summary, 1000)}
 
 Top sources:
-${safeJson(row.top_sources, 1800)}
+${safeJson(row.top_sources, 400)}
 
 Evidence articles:
-${safeJson(row.top_evidence_articles, 2800)}
+${safeJson(row.top_evidence_articles, 700)}
 `;
     })
     .join("\n---\n");
@@ -250,13 +250,13 @@ ${
 }
 
 Τελευταίες δημοσκοπήσεις:
-${safeJson(environment.recent_polls, 5000)}
+${safeJson(environment.recent_polls, 1200)}
 
 Τάσεις κομμάτων / actors:
-${safeJson(environment.actor_trends, 5000)}
+${safeJson(environment.actor_trends, 1200)}
 
 Στρατηγικές επιπτώσεις:
-${safeJson(environment.strategic_implications, 3500)}
+${safeJson(environment.strategic_implications, 1200)}
 
 Πηγές:
 ${safeJson(environment.source_urls, 1200)}
@@ -456,7 +456,7 @@ export async function GET(req: Request) {
   const mainSignal = signals[0];
 
   const profileContext = buildProfileContext(profile);
-  const agendaContext = buildAgendaContext(signals);
+  const agendaContext = buildAgendaContext(signals.slice(0, 4)); // λιγότερο context = ταχύτερη AI απάντηση, χωρίς timeout
   const politicalEnvironmentContext = buildPoliticalEnvironmentContext(
     politicalEnvironment,
     profile?.party_key || null
@@ -528,6 +528,8 @@ ${politicalEnvironmentStatus}
 Συγκεκριμένα ονόματα δυναμικών, συγκεκριμένα κοινά, συγκεκριμένες κινήσεις.
 Ισορροπημένος αλλά με καθαρή θέση. Ποτέ νερόβραστα. Κάθε πεδίο να είναι κάτι που θα ΕΝΤΥΠΩΣΙΑΖΕ
 έναν πραγματικό αρχηγό κόμματος και θα τον έκανε να πει "αυτό είναι σωστό".
+
+ΣΥΝΤΟΜΙΑ: Κάθε πεδίο 1-3 δυνατές προτάσεις. Όχι σεντόνια. Πυκνό, κοφτό, ουσιαστικό — ώστε να απαντήσεις γρήγορα.
 `;
 
   if (!anthropicKey) {
@@ -544,7 +546,7 @@ ${politicalEnvironmentStatus}
 
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 55000);
+    const timeout = setTimeout(() => controller.abort(), 25000);
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -556,7 +558,7 @@ ${politicalEnvironmentStatus}
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-6",
-        max_tokens: 6000,
+        max_tokens: 3500,
         system: systemPrompt,
         messages: [{ role: "user", content: userPrompt }],
       }),
