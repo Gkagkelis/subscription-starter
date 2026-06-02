@@ -46,6 +46,7 @@ function parseAiJson(raw: string) {
 }
 
 export async function GET(req: Request) {
+  const _t0 = Date.now();
   const token = new URL(req.url).searchParams.get("token");
   const userAgent = req.headers.get("user-agent") || "";
   const isVercelCron = userAgent.includes("vercel-cron/1.0");
@@ -71,7 +72,7 @@ export async function GET(req: Request) {
 
   const signals = ((agendaData || []) as any[])
     .filter((r) => r.topic && r.topic !== "Μη ταξινομημένο")
-    .slice(0, 5);
+    .slice(0, 3); // λιγότερα signals = ταχύτερο
 
   if (signals.length === 0) {
     return NextResponse.json({ ok: false, message: "Δεν υπάρχουν ταξινομημένα signals." }, { status: 200 });
@@ -88,7 +89,7 @@ export async function GET(req: Request) {
 Ένταση: ${row.agenda_score ?? "?"} | Ρίσκο: ${row.political_risk_level || "?"} | Τεκμηρίωση: ${row.documentation_level || "?"}
 Άρθρα: ${row.article_count || 0} | Πηγές: ${row.source_count || 0}
 Framing: ${cleanText(row.framing_summary, 400)}
-Άρθρα-στοιχεία: ${safeJson(row.top_evidence_articles, 900)}
+Άρθρα-στοιχεία: ${safeJson(row.top_evidence_articles, 350)}
 `).join("\n---\n");
 
   const profileContext = profile ? `
@@ -124,14 +125,14 @@ ${agendaContext}
   let warning: string | null = null;
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 55000);
+    const timeout = setTimeout(() => controller.abort(), 50000);
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       signal: controller.signal,
       headers: { "Content-Type": "application/json", "x-api-key": anthropicKey, "anthropic-version": "2023-06-01" },
       body: JSON.stringify({
         model: process.env.ANTHROPIC_MODEL || "claude-sonnet-4-6",
-        max_tokens: 4000,
+        max_tokens: 2800,
         system: systemPrompt,
         messages: [{ role: "user", content: userPrompt }],
       }),
@@ -152,7 +153,7 @@ ${agendaContext}
   }
 
   if (!aiOk) {
-    return NextResponse.json({ ok: false, source: "fallback", stored: false, warning });
+    return NextResponse.json({ ok: false, source: "fallback", stored: false, warning, elapsed_ms: Date.now() - _t0 });
   }
 
   // 5) Αποθήκευσε στο analysis_cache (global, situation_id null).
@@ -174,5 +175,5 @@ ${agendaContext}
     return NextResponse.json({ ok: true, source: "ai", stored: false, store_error: String(err?.message || err).slice(0, 200), preview: parsed?.issue?.topic });
   }
 
-  return NextResponse.json({ ok: true, source: "ai", stored: true, topic: parsed?.issue?.topic || parsed?.daily_brief?.headline });
+  return NextResponse.json({ ok: true, source: "ai", stored: true, topic: parsed?.issue?.topic || parsed?.daily_brief?.headline, elapsed_ms: Date.now() - _t0 });
 }
