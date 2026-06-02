@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { articlesLabel } from "@/lib/noraya/ui-format";
 
 interface Article {
   id: string;
@@ -106,7 +107,7 @@ export default function NewsFeed() {
       <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
           <div className="mb-2 inline-flex rounded-full border border-emerald-300/20 bg-emerald-300/10 px-3 py-1 text-xs text-emerald-100">
-            Live · {articles.length} άρθρα
+            Live · {articlesLabel(articles.length)}
           </div>
 
           <h2 className="text-2xl font-semibold">Ροή ΜΜΕ</h2>
@@ -234,7 +235,7 @@ export default function NewsFeed() {
 
           {filtered.length > 20 && (
             <div className="py-3 text-center text-xs text-zinc-600">
-              +{filtered.length - 20} ακόμα άρθρα
+              +{articlesLabel(filtered.length - 20)} ακόμα
             </div>
           )}
 
