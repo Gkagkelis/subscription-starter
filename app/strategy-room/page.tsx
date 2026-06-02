@@ -479,26 +479,41 @@ function situationScore(situation?: LiveSituationRow | null, fallback = 0) {
 }
 
 function readStrategicText(situation: LiveSituationRow | null | undefined, brief: StrategicBrief) {
+  const detail = asRecord((situation as Record<string, unknown> | null | undefined)?.situation_detail);
   const strategicRead = situation?.strategic_read;
 
   return text(
-    pickString(strategicRead, ["summary", "text", "strategic_read", "diagnosis", "what_it_means", "assessment"]),
+    // 1) Πραγματική ανάλυση από το brain (situation_detail)
+    pickString(detail, ["strategic_read", "why_this_exists"]),
     text(
-      brief.strategic_diagnosis?.agenda_reading,
+      // 2) framing_summary (το brain γράφει κι εδώ)
+      pickString(situation as unknown, ["framing_summary"]),
       text(
-        brief.daily_brief?.why_it_matters_now,
-        "Δεν υπάρχει ακόμη πλήρης Strategic Read για αυτή την κατάσταση. Το cockpit κρατά το panel έτοιμο και εμφανίζει μόνο τα διαθέσιμα live δεδομένα."
+        pickString(strategicRead, ["summary", "text", "strategic_read", "diagnosis", "what_it_means", "assessment"]),
+        text(
+          brief.strategic_diagnosis?.agenda_reading,
+          text(
+            brief.daily_brief?.why_it_matters_now,
+            "Δεν υπάρχει ακόμη πλήρης Strategic Read για αυτή την κατάσταση. Τρέξε ανάλυση για να γεμίσει."
+          )
+        )
       )
     )
   );
 }
 
 function readWhyText(situation: LiveSituationRow | null | undefined, brief: StrategicBrief) {
+  const detail = asRecord((situation as Record<string, unknown> | null | undefined)?.situation_detail);
+
   return text(
-    situation?.documentation_basis || situation?.evidence_summary || situation?.framing_summary,
+    // 1) Πραγματική ανάλυση από το brain
+    pickString(detail, ["why_this_exists", "strategic_read"]),
     text(
-      brief.evidence?.basis,
-      "Η κατάσταση εμφανίζεται επειδή υπάρχει σήμα ατζέντας ή live row στο situation engine. Δεν έχει ακόμη πλήρη τεκμηρίωση basis στο UI."
+      situation?.documentation_basis || situation?.evidence_summary || situation?.framing_summary,
+      text(
+        brief.evidence?.basis,
+        "Η κατάσταση εμφανίζεται επειδή υπάρχει σήμα ατζέντας ή live row στο situation engine. Δεν έχει ακόμη πλήρη τεκμηρίωση basis."
+      )
     )
   );
 }
