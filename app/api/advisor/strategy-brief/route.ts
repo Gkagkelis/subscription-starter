@@ -10,6 +10,7 @@ import {
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 60; // δώσε χρόνο στο AI να τρέξει αντί να πέφτει σε fallback
 
 type AgendaRow = {
   topic: string;
@@ -516,6 +517,17 @@ ${politicalEnvironmentStatus}
 - evidence note.
 
 Η απάντηση πρέπει να είναι χρήσιμη για πολιτικό κόμμα / πολιτικό οργανισμό που χρειάζεται στρατηγική, όχι απλή περίληψη ειδήσεων.
+
+ΥΦΟΣ — ΠΟΛΥ ΣΗΜΑΝΤΙΚΟ:
+Γράψε σαν κορυφαίος πολιτικός σύμβουλος που έχει καθίσει σε πραγματικά war rooms.
+Κάθε πρόταση να έχει ΑΠΟΨΗ και ΕΝΤΑΣΗ — όχι ουδέτερες, generic διατυπώσεις.
+ΑΠΑΓΟΡΕΥΟΝΤΑΙ φράσεις-κλισέ όπως: "χρειάζεται καλύτερη τεκμηρίωση", "χρειάζεται περαιτέρω ανάλυση",
+"το θέμα βρίσκεται σε κατάσταση παρακολούθησης", "institutional", ή οποιοδήποτε μισό/κενό κείμενο.
+Αντί για αυτά, πες ΣΥΓΚΕΚΡΙΜΕΝΑ: ποιος κερδίζει, ποιος χάνει, ποια είναι η παγίδα,
+τι ακριβώς λέμε, τι ΔΕΝ λέμε, ποια κίνηση μας βάζει μπροστά.
+Συγκεκριμένα ονόματα δυναμικών, συγκεκριμένα κοινά, συγκεκριμένες κινήσεις.
+Ισορροπημένος αλλά με καθαρή θέση. Ποτέ νερόβραστα. Κάθε πεδίο να είναι κάτι που θα ΕΝΤΥΠΩΣΙΑΖΕ
+έναν πραγματικό αρχηγό κόμματος και θα τον έκανε να πει "αυτό είναι σωστό".
 `;
 
   if (!anthropicKey) {
@@ -532,7 +544,7 @@ ${politicalEnvironmentStatus}
 
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 18000);
+    const timeout = setTimeout(() => controller.abort(), 55000);
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -544,7 +556,7 @@ ${politicalEnvironmentStatus}
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-6",
-        max_tokens: 5000,
+        max_tokens: 6000,
         system: systemPrompt,
         messages: [{ role: "user", content: userPrompt }],
       }),
