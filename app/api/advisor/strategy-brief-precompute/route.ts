@@ -2,67 +2,144 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 /* ---------------------------------------------------------------------------
- * app/api/advisor/strategy-brief-precompute/route.ts  (LITE — γρήγορο, σίγουρο)
+ * app/api/advisor/strategy-brief-precompute/route.ts
  *
- * Αντί για ένα τεράστιο brief που θέλει >60s, ζητάμε ΜΙΑ κοφτή, δυνατή ανάλυση
- * του κορυφαίου θέματος. Τελειώνει σε ~15-25s. Αποθηκεύεται στο analysis_cache
- * και το UI τη διαβάζει ακαριαία.
+ * Production-safe version:
+ * - Δεν κόβει την AI κλήση στα 48s.
+ * - Δίνει αρκετό χρόνο στη Vercel Function.
+ * - Δεν σβήνει ποτέ το παλιό cache πριν αποθηκευτεί επιτυχώς το νέο.
+ * - Επιστρέφει καθαρά provider / database errors για debugging.
  * ------------------------------------------------------------------------- */
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+export const maxDuration = 300;
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!supabaseUrl || !supabaseServiceRoleKey) {
+  throw new Error("Missing Supabase environment variables.");
+}
+
+const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 
 const CACHE_KEY = "strategy_brief_latest";
+const DEFAULT_MODEL = "claude-sonnet-4-6";
+const AI_TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS || 120_000);
 
 function parseAiJson(raw: string) {
-  try { return JSON.parse(raw); } catch {
+  try {
+    return JSON.parse(raw);
+  } catch {
     const m = raw.match(/\{[\s\S]*\}/);
     if (!m) return null;
-    try { return JSON.parse(m[0]); } catch { return null; }
+
+    try {
+      return JSON.parse(m[0]);
+    } catch {
+      return null;
+    }
   }
+}
+
+function trimForLog(value: unknown, max = 200) {
+  return String(value || "").slice(0, max);
 }
 
 export async function GET(req: Request) {
   const t0 = Date.now();
   const token = new URL(req.url).searchParams.get("token");
   const ua = req.headers.get("user-agent") || "";
-  const ok = token === process.env.CRON_SECRET || token === "dev" || ua.includes("vercel-cron/1.0");
-  if (!ok) return NextResponse.json({ ok: false, message: "Μη εξουσιοδοτημένο." }, { status: 401 });
+
+  const authorized =
+    token === process.env.CRON_SECRET ||
+    token === "dev" ||
+    ua.includes("vercel-cron/1.0");
+
+  if (!authorized) {
+    return NextResponse.json(
+      { ok: false, message: "Μη εξουσιοδοτημένο." },
+      { status: 401 }
+    );
+  }
 
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
-  if (!anthropicKey) return NextResponse.json({ ok: false, message: "Λείπει το ANTHROPIC_API_KEY." }, { status: 503 });
+  if (!anthropicKey) {
+    return NextResponse.json(
+      { ok: false, message: "Λείπει το ANTHROPIC_API_KEY." },
+      { status: 503 }
+    );
+  }
 
-  // Top signals (μόνο 3, μόνο τα ουσιώδη πεδία).
-  const { data: agendaData } = await supabase
+  const { data: agendaData, error: agendaError } = await supabase
     .from("v_advisor_agenda_briefs_recent")
     .select("topic, article_count, source_count, agenda_score, political_risk_level, documentation_level")
     .order("agenda_score", { ascending: false })
     .limit(6);
 
+  if (agendaError) {
+    return NextResponse.json(
+      {
+        ok: false,
+        source: "database",
+        stored: false,
+        warning: `agenda_query_error: ${trimForLog(agendaError.message)}`,
+        elapsed_ms: Date.now() - t0,
+      },
+      { status: 500 }
+    );
+  }
+
   const signals = ((agendaData || []) as any[])
     .filter((r) => r.topic && r.topic !== "Μη ταξινομημένο")
     .slice(0, 3);
-  if (signals.length === 0) return NextResponse.json({ ok: false, message: "Δεν υπάρχουν signals." });
 
-  const { data: orgData } = await supabase.from("organizations").select("org_name, org_type, tone, red_lines").limit(1).maybeSingle();
+  if (signals.length === 0) {
+    return NextResponse.json({
+      ok: false,
+      source: "database",
+      stored: false,
+      message: "Δεν υπάρχουν signals.",
+      elapsed_ms: Date.now() - t0,
+    });
+  }
+
+  const { data: orgData, error: orgError } = await supabase
+    .from("organizations")
+    .select("org_name, org_type, tone, red_lines")
+    .limit(1)
+    .maybeSingle();
+
+  if (orgError) {
+    return NextResponse.json(
+      {
+        ok: false,
+        source: "database",
+        stored: false,
+        warning: `organization_query_error: ${trimForLog(orgError.message)}`,
+        elapsed_ms: Date.now() - t0,
+      },
+      { status: 500 }
+    );
+  }
+
   const profileLine = orgData
-    ? `Κόμμα: ${orgData.org_name} (${orgData.org_type}). Τόνος: ${String(orgData.tone || "").slice(0,200)}. Κόκκινες γραμμές: ${String(orgData.red_lines || "").slice(0,200)}.`
+    ? `Κόμμα: ${orgData.org_name} (${orgData.org_type}). Τόνος: ${String(orgData.tone || "").slice(0, 200)}. Κόκκινες γραμμές: ${String(orgData.red_lines || "").slice(0, 200)}.`
     : "Γενικός πολιτικός οργανισμός.";
 
   const main = signals[0];
-  const others = signals.slice(1).map((s) => `${s.topic} (ένταση ${s.agenda_score})`).join(", ");
+  const others = signals
+    .slice(1)
+    .map((s) => `${s.topic} (ένταση ${s.agenda_score})`)
+    .join(", ");
 
-  const system = `Είσαι ο κορυφαίος πολιτικός σύμβουλος στρατηγικής στην Ελλάδα — επιπέδου war room.
+  const system = `Είσαι κορυφαίος πολιτικός σύμβουλος στρατηγικής στην Ελλάδα — επιπέδου war room.
 Γράφεις με ΑΠΟΨΗ και ΕΝΤΑΣΗ. Ισορροπημένος αλλά με καθαρή θέση. ΠΟΤΕ generic.
-ΑΠΑΓΟΡΕΥΟΝΤΑΙ: "χρειάζεται τεκμηρίωση", "περαιτέρω ανάλυση", "κατάσταση παρακολούθησης", "institutional".
+Μη χρησιμοποιείς στις ΤΙΜΕΣ του JSON τις φράσεις: "χρειάζεται τεκμηρίωση", "περαιτέρω ανάλυση", "κατάσταση παρακολούθησης".
 Πες ΣΥΓΚΕΚΡΙΜΕΝΑ: ποιος κερδίζει, ποιος χάνει, η παγίδα, τι λέμε, τι ΔΕΝ λέμε, ποια κίνηση μας βάζει μπροστά.
-Απάντησε ΜΟΝΟ με έγκυρο JSON (όχι markdown) σε αυτό ΑΚΡΙΒΩΣ το σχήμα:
+Απάντησε ΜΟΝΟ με έγκυρο JSON. Όχι markdown. Όχι εισαγωγικό κείμενο. Όχι σχόλια.
+Χρησιμοποίησε ΑΚΡΙΒΩΣ αυτό το σχήμα:
 {
  "issue": {"topic": string, "plain_title": string, "urgency": "watch|act|monitor", "dominant_frame": string, "opportunity": string, "political_risk": string},
  "daily_brief": {"headline": string, "what_is_happening": string, "why_it_matters_now": string, "immediate_recommendation": string, "avoid_today": string},
@@ -76,7 +153,7 @@ export async function GET(req: Request) {
  "action_plan": {"now": [string, string], "next_24h": [string, string]},
  "evidence": {"basis": string, "uncertainty": string}
 }
-Κάθε πεδίο 1-2 πυκνές, αιχμηρές προτάσεις. Στα ελληνικά.`;
+Κάθε string να είναι 1 σύντομη, πυκνή πρόταση. Στα ελληνικά.`;
 
   const user = `${profileLine}
 Κορυφαίο θέμα ατζέντας: "${main.topic}" (ένταση ${main.agenda_score}, ρίσκο ${main.political_risk_level}, ${main.article_count} άρθρα/${main.source_count} πηγές).
@@ -85,50 +162,115 @@ export async function GET(req: Request) {
 
   let parsed: any = null;
   let warning: string | null = null;
+  const model = process.env.ANTHROPIC_MODEL || DEFAULT_MODEL;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
+
   try {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 48000);
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       signal: controller.signal,
-      headers: { "Content-Type": "application/json", "x-api-key": anthropicKey, "anthropic-version": "2023-06-01" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": anthropicKey,
+        "anthropic-version": "2023-06-01",
+      },
       body: JSON.stringify({
-        model: process.env.ANTHROPIC_MODEL || "claude-sonnet-4-6",
-        max_tokens: 2000,
+        model,
+        max_tokens: 2600,
+        temperature: 0.2,
         system,
         messages: [{ role: "user", content: user }],
       }),
     });
-    clearTimeout(timer);
-    if (!res.ok) { warning = `provider_${res.status}: ${(await res.text()).slice(0,200)}`; }
-    else {
+
+    if (!res.ok) {
+      warning = `provider_${res.status}: ${trimForLog(await res.text())}`;
+    } else {
       const ai = await res.json();
-      const txt = (ai.content || []).filter((b: any) => b.type === "text").map((b: any) => b.text).join("\n");
+      const txt = (ai.content || [])
+        .filter((b: any) => b.type === "text")
+        .map((b: any) => b.text)
+        .join("\n");
+
       parsed = parseAiJson(txt);
       if (!parsed) warning = "AI response not JSON.";
     }
   } catch (e: any) {
-    warning = e?.name === "AbortError" ? "AI timeout (precompute)." : `AI error: ${String(e?.message || e).slice(0,150)}`;
+    warning =
+      e?.name === "AbortError"
+        ? `AI timeout after ${AI_TIMEOUT_MS}ms.`
+        : `AI error: ${trimForLog(e?.message || e, 150)}`;
+  } finally {
+    clearTimeout(timer);
   }
 
-  if (!parsed) return NextResponse.json({ ok: false, source: "fallback", stored: false, warning, elapsed_ms: Date.now() - t0 });
-
-  const payload = { ...parsed, profile: orgData || null, agenda_used: signals, generated_at: new Date().toISOString() };
-  try {
-    await supabase.from("analysis_cache").delete().is("situation_id", null).eq("analysis_kind", CACHE_KEY);
-    const { error } = await supabase.from("analysis_cache").insert({
-      situation_id: null,
-      organization_id: null,
-      analysis_kind: CACHE_KEY,
-      input_hash: "global",
-      model_used: process.env.ANTHROPIC_MODEL || "claude-sonnet-4-6",
-      result: payload,
-      evidence_basis: signals.map((s) => ({ topic: s.topic })),
+  if (!parsed) {
+    return NextResponse.json({
+      ok: false,
+      source: "ai",
+      stored: false,
+      warning,
+      elapsed_ms: Date.now() - t0,
     });
-    if (error) throw error;
-  } catch (e: any) {
-    return NextResponse.json({ ok: true, source: "ai", stored: false, store_error: String(e?.message || e).slice(0,200), elapsed_ms: Date.now() - t0 });
   }
 
-  return NextResponse.json({ ok: true, source: "ai", stored: true, topic: parsed?.issue?.topic, elapsed_ms: Date.now() - t0 });
+  const payload = {
+    ...parsed,
+    profile: orgData || null,
+    agenda_used: signals,
+    generated_at: new Date().toISOString(),
+  };
+
+  const cacheRow = {
+    situation_id: null,
+    organization_id: null,
+    analysis_kind: CACHE_KEY,
+    input_hash: "global",
+    model_used: model,
+    result: payload,
+    evidence_basis: signals.map((s) => ({ topic: s.topic })),
+  };
+
+  try {
+    // Safety-first: update existing cache instead of delete-then-insert.
+    // Έτσι δεν χάνεται ποτέ το τελευταίο καλό brief αν κάτι πάει στραβά.
+    const { data: updatedRows, error: updateError } = await supabase
+      .from("analysis_cache")
+      .update(cacheRow)
+      .is("situation_id", null)
+      .eq("analysis_kind", CACHE_KEY)
+      .select("analysis_kind");
+
+    if (updateError) throw updateError;
+
+    if (!updatedRows || updatedRows.length === 0) {
+      const { error: insertError } = await supabase
+        .from("analysis_cache")
+        .insert(cacheRow);
+
+      if (insertError) throw insertError;
+    }
+  } catch (e: any) {
+    return NextResponse.json(
+      {
+        ok: true,
+        source: "ai",
+        stored: false,
+        store_error: trimForLog(e?.message || e),
+        elapsed_ms: Date.now() - t0,
+      },
+      { status: 500 }
+    );
+  }
+
+  return NextResponse.json({
+    ok: true,
+    source: "ai",
+    stored: true,
+    topic: parsed?.issue?.topic,
+    model,
+    elapsed_ms: Date.now() - t0,
+  });
 }
