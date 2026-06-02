@@ -29,18 +29,51 @@ const DEFAULT_MODEL = "claude-sonnet-4-6";
 const AI_TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS || 120_000);
 
 function parseAiJson(raw: string) {
-  try {
-    return JSON.parse(raw);
-  } catch {
-    const m = raw.match(/\{[\s\S]*\}/);
-    if (!m) return null;
+  if (!raw) return null;
+  // 1) Καθάρισε code fences / προοίμια.
+  let t = raw.trim()
+    .replace(/^```json\s*/i, "")
+    .replace(/^```\s*/i, "")
+    .replace(/```\s*$/i, "")
+    .trim();
 
-    try {
-      return JSON.parse(m[0]);
-    } catch {
-      return null;
+  // 2) Δοκίμασε απευθείας.
+  try { return JSON.parse(t); } catch {}
+
+  // 3) Κράτα από το πρώτο { ως το τελευταίο } και δοκίμασε.
+  const start = t.indexOf("{");
+  const lastEnd = t.lastIndexOf("}");
+  if (start !== -1 && lastEnd !== -1 && lastEnd > start) {
+    const candidate = t.slice(start, lastEnd + 1);
+    try { return JSON.parse(candidate); } catch {}
+  }
+
+  // 4) Truncated JSON repair: ξεκίνα από το πρώτο { και κλείσε όσα braces/brackets έμειναν ανοιχτά.
+  if (start !== -1) {
+    let body = t.slice(start);
+    // κόψε τυχόν μισό-γραμμένο τελευταίο πεδίο μετά το τελευταίο πλήρες "
+    const stack: string[] = [];
+    let inString = false, escaped = false, lastSafe = -1;
+    for (let i = 0; i < body.length; i++) {
+      const ch = body[i];
+      if (escaped) { escaped = false; continue; }
+      if (ch === "\\") { escaped = true; continue; }
+      if (ch === '"') { inString = !inString; if (!inString) lastSafe = i; continue; }
+      if (inString) continue;
+      if (ch === "{" || ch === "[") stack.push(ch);
+      else if (ch === "}" || ch === "]") { stack.pop(); lastSafe = i; }
+      else if (ch === "," || ch === ":") { /* δομικά */ }
+    }
+    if (lastSafe > 0) {
+      let repaired = body.slice(0, lastSafe + 1);
+      // κλείσε ό,τι έμεινε ανοιχτό
+      for (let i = stack.length - 1; i >= 0; i--) {
+        repaired += stack[i] === "{" ? "}" : "]";
+      }
+      try { return JSON.parse(repaired); } catch {}
     }
   }
+  return null;
 }
 
 function trimForLog(value: unknown, max = 200) {
@@ -178,7 +211,7 @@ export async function GET(req: Request) {
       },
       body: JSON.stringify({
         model,
-        max_tokens: 2600,
+        max_tokens: 4096,
         temperature: 0.2,
         system,
         messages: [{ role: "user", content: user }],
