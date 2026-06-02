@@ -453,6 +453,34 @@ export async function GET(req: Request) {
     });
   }
 
+  // ── ΓΡΗΓΟΡΗ ΑΝΑΓΝΩΣΗ ΑΠΟ CACHE ──────────────────────────────────────────
+  // Αν υπάρχει προ-υπολογισμένο brief (από /strategy-brief-precompute), δώσ' το
+  // ΑΜΕΣΩΣ χωρίς να καλέσουμε AI (που σκάει στο Vercel timeout).
+  try {
+    const { data: cachedRow } = await serviceClient
+      .from("analysis_cache")
+      .select("result, created_at")
+      .is("situation_id", null)
+      .eq("analysis_kind", "strategy_brief_latest")
+      .maybeSingle();
+    if (cachedRow?.result) {
+      const cached = cachedRow.result as any;
+      return NextResponse.json({
+        profile,
+        strategic_brief: { ...cached, profile },
+        agenda_used: cached.agenda_used || signals,
+        political_environment: politicalEnvironment,
+        political_environment_status: politicalEnvironmentStatus,
+        processing_status: processingStatus,
+        source: "ai",
+        model: "claude-sonnet-4-6 (precomputed)",
+        generated_at: cached.generated_at || cachedRow.created_at,
+      });
+    }
+  } catch {
+    // αν δεν υπάρχει cache, συνέχισε σε live (που μπορεί να κάνει timeout).
+  }
+
   const mainSignal = signals[0];
 
   const profileContext = buildProfileContext(profile);
