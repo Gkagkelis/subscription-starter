@@ -718,7 +718,10 @@ export default function StrategyRoomPage() {
 
         try {
           const errorJson = await response.json();
-          errorMessage = errorJson?.answer || errorJson?.error || errorJson?.debug?.details || errorMessage;
+          errorMessage =
+            (typeof errorJson?.answer === "string" && errorJson.answer.trim())
+              ? errorJson.answer
+              : "Ο σύμβουλος Noraya δεν είναι διαθέσιμος αυτή τη στιγμή. Δοκιμάστε ξανά σε λίγο.";
         } catch {
           // Keep default error.
         }
@@ -736,7 +739,8 @@ export default function StrategyRoomPage() {
         chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
       }, 100);
     } catch (err) {
-      setChatError(err instanceof Error ? err.message : "Δεν μπόρεσε να απαντήσει ο σύμβουλος Noraya.");
+      const known = err instanceof Error && /Noraya|διαθέσιμ|Δοκιμάστε/.test(err.message);
+      setChatError(known ? (err as Error).message : "Δεν μπόρεσε να απαντήσει ο σύμβουλος Noraya. Δοκιμάστε ξανά.");
     } finally {
       setChatLoading(false);
     }
@@ -2050,13 +2054,16 @@ function Sparkline({
   score = 50,
   color = "#00c8ff",
   className = "h-7 w-20",
+  hasHistory = false,
 }: {
   seed: string;
   score?: number;
   color?: string;
   className?: string;
+  hasHistory?: boolean;
 }) {
-  const points = seededPoints(seed, score);
+  // Χωρίς ιστορικό: σταθερή, αχνή βάση — όχι ψεύτικη τάση.
+  const points = hasHistory ? seededPoints(seed, score) : new Array(14).fill(clamp(score, 12, 88));
   const max = Math.max(...points);
   const min = Math.min(...points);
   const range = Math.max(max - min, 1);
