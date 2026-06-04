@@ -42,6 +42,9 @@ function eventToSituationRow(ev: any) {
     last_seen_at: ev.last_article_at ?? null,
     created_at: ev.first_seen_at ?? null,
     updated_at: ev.last_computed_at ?? null,
+
+    // Η πλήρης ανάλυση συμβούλου (v1) αυτού του γεγονότος — το cockpit τη χρησιμοποιεί.
+    advisor_brief: ev.advisor_brief ?? null,
   };
 }
 
