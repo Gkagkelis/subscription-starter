@@ -620,14 +620,6 @@ export default function StrategyRoomPage() {
     loadCockpit();
   }, []);
 
-  const brief = data?.strategic_brief || {};
-  const issue = brief.issue || {};
-  const daily = brief.daily_brief || {};
-  const diagnosis = brief.strategic_diagnosis || {};
-  const messages = brief.message_package || {};
-  const actionPlan = brief.action_plan || {};
-  const monitoring = brief.monitoring_plan || {};
-  const evidence = brief.evidence || {};
   const politicalEnvironment = data?.political_environment || null;
   const selectedPartyKey = data?.profile?.party_key || "";
   const selectedPartyImplication = partyImplicationText(politicalEnvironment, selectedPartyKey);
@@ -676,6 +668,20 @@ export default function StrategyRoomPage() {
       liveSituations[0]
     );
   }, [activeSituationId, liveSituations]);
+
+  // Το brief προτιμά την ΑΝΑΛΥΣΗ ΤΟΥ ΕΠΙΛΕΓΜΕΝΟΥ ΓΕΓΟΝΟΤΟΣ (advisor_brief).
+  // Αν το γεγονός δεν έχει ακόμη ανάλυση, πέφτει πίσω στο γενικό strategy-brief.
+  const brief =
+    (activeSituation as any)?.advisor_brief ||
+    data?.strategic_brief ||
+    {};
+  const issue = brief.issue || {};
+  const daily = brief.daily_brief || {};
+  const diagnosis = brief.strategic_diagnosis || {};
+  const messages = brief.message_package || {};
+  const actionPlan = brief.action_plan || {};
+  const monitoring = brief.monitoring_plan || {};
+  const evidence = brief.evidence || {};
 
   const profile = data?.profile || null;
   const partyName = partyDisplayName(profile);
