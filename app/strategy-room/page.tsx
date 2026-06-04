@@ -671,8 +671,8 @@ export default function StrategyRoomPage() {
 
   // Το brief προτιμά την ΑΝΑΛΥΣΗ ΤΟΥ ΕΠΙΛΕΓΜΕΝΟΥ ΓΕΓΟΝΟΤΟΣ (advisor_brief).
   // Αν το γεγονός δεν έχει ακόμη ανάλυση, πέφτει πίσω στο γενικό strategy-brief.
-  const brief =
-    (activeSituation as any)?.advisor_brief ||
+  const brief: StrategicBrief =
+    ((activeSituation as Record<string, unknown> | null)?.advisor_brief as StrategicBrief | undefined) ||
     data?.strategic_brief ||
     {};
   const issue = brief.issue || {};
@@ -700,7 +700,7 @@ export default function StrategyRoomPage() {
   const activeDocScore = confidenceFromDocLevel(activeDocLevel, numberValue(activeSituation?.confidence_score, 0));
 
   const evidenceArticles = Array.isArray(brief.evidence?.data_points)
-    ? brief.evidence.data_points.slice(0, 8).map((point) => ({ title: point, source: "" }))
+    ? brief.evidence.data_points.slice(0, 8).map((point: string) => ({ title: point, source: "" }))
     : [];
 
   async function askNorayaAdvisor(questionOverride?: string) {
