@@ -173,7 +173,8 @@ export async function POST() {
     const summary: Array<{ topic: string; events: number; method: string }> = [];
 
     // 3) Για κάθε θεματική με αρκετά άρθρα, ζήτα από το AI να βρει τα γεγονότα.
-    for (const [topic, list] of byTopic.entries()) {
+    // (Array.from ώστε να μη χρειάζεται downlevelIteration στο tsconfig)
+    for (const [topic, list] of Array.from(byTopic.entries())) {
       if (list.length < 2) continue; // 1 άρθρο = δεν είναι ακόμη "γεγονός" προς ομαδοποίηση
 
       const validIds = new Set(list.map((a) => a.id));
