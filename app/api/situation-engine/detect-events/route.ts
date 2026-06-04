@@ -6,18 +6,23 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 // ============================================================
-// NORAYA — AI Event Detection
+// NORAYA — AI Event Detection (ΜΙΑ θεματική ανά κλήση)
 //
-// ΣΚΟΠΟΣ:
-// Παίρνει τα πρόσφατα άρθρα κάθε ΘΕΜΑΤΙΚΗΣ και τα χωρίζει σε διακριτά
-// ΓΕΓΟΝΟΤΑ με πραγματική κατανόηση (όχι keyword matching).
-// Για κάθε γεγονός γράφει: κοφτό τίτλο, μία σύνοψη, και τα άρθρα-στοιχεία του,
-// καλώντας τη συνάρτηση upsert_political_event() της βάσης.
+// ΤΙ ΚΑΝΕΙ:
+// Παίρνει ΜΙΑ θεματική, διαβάζει τα πρόσφατα άρθρα της, και ζητά από το AI
+// να τα χωρίσει σε διακριτά ΓΕΓΟΝΟΤΑ (π.χ. "Χειμάρρα" ≠ "NAVTEX"), που
+// γράφονται στη βάση μέσω upsert_political_event().
 //
-// ΑΥΤΟ αντικαθιστά το "1 situation = όλη η θεματική" με
-// "πολλά συγκεκριμένα γεγονότα ανά θεματική".
+// ΓΙΑΤΙ ΜΙΑ ΤΗ ΦΟΡΑ:
+// Έτσι κάθε κλήση τελειώνει γρήγορα και ΔΕΝ σκάει σε 504 timeout.
+// Ένα cron (βλ. vercel.json) χτυπάει αυτό το endpoint τακτικά. Κάθε χτύπημα:
+//   - GET χωρίς παράμετρο  -> διαλέγει αυτόματα την ΕΠΟΜΕΝΗ θεματική που εκκρεμεί
+//   - αν δεν εκκρεμεί καμία -> δεν κάνει AI κλήση (μηδέν κόστος)
+// Έτσι σε λίγα λεπτά καλύπτονται όλες οι θεματικές, αυτόματα, σε rotation.
 //
-// Καλείται scheduled (π.χ. μετά το ingestion/classify), ΟΧΙ live ανά user question.
+// ΧΕΙΡΟΚΙΝΗΤΑ (προαιρετικό):
+//   GET/POST  /api/situation-engine/detect-events?topic=Οικονομία
+//   -> δουλεύει μόνο αυτή τη θεματική τώρα.
 // ============================================================
 
 type ArticleRow = {
@@ -137,90 +142,112 @@ async function callAnthropic(system: string, user: string): Promise<string | nul
 }
 
 function stableEventKey(topic: string, title: string) {
-  // απλό σταθερό κλειδί ανά (topic|title) — η βάση κάνει upsert πάνω σε αυτό
   const norm = (title || "").toLowerCase().replace(/\s+/g, " ").trim().slice(0, 80);
   return `evt:ai:${topic.toLowerCase()}|${norm}`;
 }
 
-export async function POST() {
+// Επεξεργάζεται ΜΙΑ θεματική. Επιστρέφει πόσα γεγονότα γράφτηκαν + τη μέθοδο.
+async function processTopic(
+  supabase: ReturnType<typeof svc>,
+  topic: string
+): Promise<{ topic: string; events: number; method: string }> {
+  const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
+  const { data: articles } = await supabase
+    .from("articles")
+    .select("id,title,source_name,topic,published_at,ingested_at")
+    .eq("topic", topic)
+    .gte("published_at", since)
+    .order("published_at", { ascending: false })
+    .limit(60);
+
+  const list = (articles || []) as ArticleRow[];
+  if (list.length < 2) {
+    return { topic, events: 0, method: "skipped_too_few" };
+  }
+
+  const validIds = new Set(list.map((a) => a.id));
+  const raw = await callAnthropic(buildSystemPrompt(), buildUserPrompt(topic, list));
+  const parsed = raw ? parseAiJson(raw) : null;
+
+  if (!parsed) {
+    // Fallback: αν αποτύχει το AI, το baseline SQL detection καλύπτει.
+    await supabase.rpc("detect_political_events_baseline");
+    return { topic, events: 0, method: "baseline_fallback" };
+  }
+
+  let count = 0;
+  for (const ev of parsed.events) {
+    const ids = (ev.article_ids || []).filter((id) => validIds.has(id));
+    if (ids.length === 0) continue;
+    const title = (ev.title || "").trim();
+    if (!title) continue;
+
+    const { error: rpcErr } = await supabase.rpc("upsert_political_event", {
+      p_organization_id: null,
+      p_topic: topic,
+      p_event_key: stableEventKey(topic, title),
+      p_title: title,
+      p_summary: (ev.summary || "").trim() || null,
+      p_article_ids: ids,
+      p_detection_method: "ai",
+      p_detection_terms: []
+    });
+    if (!rpcErr) count += 1;
+  }
+
+  return { topic, events: count, method: "ai" };
+}
+
+// Κοινός handler για GET (cron) και POST (χειροκίνητο).
+async function handle(request: Request) {
   try {
     const supabase = svc();
+    const url = new URL(request.url);
+    const requestedTopic = url.searchParams.get("topic");
 
-    // 1) Πάρε πρόσφατα ταξινομημένα άρθρα (7 ημέρες), ανά θεματική.
-    const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-    const { data: articles, error } = await supabase
-      .from("articles")
-      .select("id,title,source_name,topic,published_at,ingested_at")
-      .gte("published_at", since)
-      .not("topic", "is", null)
-      .order("published_at", { ascending: false })
-      .limit(400);
-
-    if (error) {
-      return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    // 1) Διάλεξε θεματική: είτε αυτή που ζητήθηκε, είτε η επόμενη που εκκρεμεί.
+    let topic = requestedTopic;
+    if (!topic) {
+      const { data: next } = await supabase.rpc("pick_next_topic_for_detection");
+      topic = (next as string) || null;
     }
 
-    // 2) Ομαδοποίησε ανά θεματική.
-    const byTopic = new Map<string, ArticleRow[]>();
-    for (const a of (articles || []) as ArticleRow[]) {
-      const t = (a.topic || "").trim();
-      if (!t || t === "Μη ταξινομημένο") continue;
-      if (!byTopic.has(t)) byTopic.set(t, []);
-      byTopic.get(t)!.push(a);
+    // 2) Αν δεν εκκρεμεί καμία -> idle, μηδέν κόστος.
+    if (!topic) {
+      return NextResponse.json({
+        ok: true,
+        processed: null,
+        message: "Δεν εκκρεμεί καμία θεματική για ανίχνευση γεγονότων.",
+        live_first: true
+      });
     }
 
-    const system = buildSystemPrompt();
-    const summary: Array<{ topic: string; events: number; method: string }> = [];
+    // 3) Επεξεργάσου τη μία θεματική.
+    const result = await processTopic(supabase, topic);
 
-    // 3) Για κάθε θεματική με αρκετά άρθρα, ζήτα από το AI να βρει τα γεγονότα.
-    // (Array.from ώστε να μη χρειάζεται downlevelIteration στο tsconfig)
-    for (const [topic, list] of Array.from(byTopic.entries())) {
-      if (list.length < 2) continue; // 1 άρθρο = δεν είναι ακόμη "γεγονός" προς ομαδοποίηση
+    // 4) Σφράγισέ την ως ανιχνευμένη (ώστε να μη ξαναπιαστεί χωρίς νέα άρθρα).
+    await supabase.rpc("mark_topic_detected", { p_topic: topic });
 
-      const validIds = new Set(list.map((a) => a.id));
-      const raw = await callAnthropic(system, buildUserPrompt(topic, list));
-      const parsed = raw ? parseAiJson(raw) : null;
-
-      if (!parsed) {
-        // Fallback: αν αποτύχει το AI, αφήνουμε το baseline SQL detection
-        // (detect_political_events_baseline) να καλύψει αυτή τη θεματική.
-        await supabase.rpc("detect_political_events_baseline");
-        summary.push({ topic, events: 0, method: "baseline_fallback" });
-        continue;
-      }
-
-      let count = 0;
-      for (const ev of parsed.events) {
-        const ids = (ev.article_ids || []).filter((id) => validIds.has(id));
-        if (ids.length === 0) continue;
-        const title = (ev.title || "").trim();
-        if (!title) continue;
-
-        const { error: rpcErr } = await supabase.rpc("upsert_political_event", {
-          p_organization_id: null,
-          p_topic: topic,
-          p_event_key: stableEventKey(topic, title),
-          p_title: title,
-          p_summary: (ev.summary || "").trim() || null,
-          p_article_ids: ids,
-          p_detection_method: "ai",
-          p_detection_terms: []
-        });
-
-        if (!rpcErr) count += 1;
-      }
-
-      summary.push({ topic, events: count, method: "ai" });
-    }
+    // 5) Δες αν εκκρεμεί κι άλλη (μόνο για ενημέρωση, δεν την τρέχει τώρα).
+    const { data: more } = await supabase.rpc("pick_next_topic_for_detection");
 
     return NextResponse.json({
       ok: true,
-      topics_processed: summary.length,
-      detail: summary,
+      processed: result,
+      remaining_topic: (more as string) || null,
       live_first: true,
       demo_data: false
     });
   } catch (e: any) {
     return NextResponse.json({ ok: false, error: String(e?.message || e) }, { status: 500 });
   }
+}
+
+export async function GET(request: Request) {
+  return handle(request);
+}
+
+export async function POST(request: Request) {
+  return handle(request);
 }
