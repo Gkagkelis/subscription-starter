@@ -8,7 +8,7 @@ import {
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+export const maxDuration = 300; // Pro: μέχρι 5 λεπτά. Η πλήρης ανάλυση 7 σταδίων θέλει χρόνο.
 
 // ============================================================
 // NORAYA — Per-Event Advisor Brief (ΜΙΑ ανάλυση ανά κλήση)
@@ -72,32 +72,47 @@ ${lines || "—"}
 `;
 }
 
-async function callAnthropic(system: string, user: string): Promise<string | null> {
+async function callAnthropic(
+  system: string,
+  user: string
+): Promise<{ text: string | null; status: number | null; error: string | null }> {
   const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) return null;
+  if (!key) return { text: null, status: null, error: "MISSING ANTHROPIC_API_KEY" };
 
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "x-api-key": key,
-      "anthropic-version": "2023-06-01",
-    },
-    body: JSON.stringify({
-      model: "claude-sonnet-4-6",
-      max_tokens: 3000,
-      system,
-      messages: [{ role: "user", content: user }],
-    }),
-  });
+  let res: Response;
+  try {
+    res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-api-key": key,
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 3000,
+        system,
+        messages: [{ role: "user", content: user }],
+      }),
+    });
+  } catch (e: any) {
+    return { text: null, status: null, error: "FETCH_THREW: " + String(e?.message || e) };
+  }
 
-  if (!res.ok) return null;
+  if (!res.ok) {
+    let body = "";
+    try {
+      body = await res.text();
+    } catch {}
+    return { text: null, status: res.status, error: (body || "").slice(0, 300) };
+  }
+
   const data = await res.json();
   const text = (data?.content || [])
     .filter((b: any) => b?.type === "text")
     .map((b: any) => b.text)
     .join("\n");
-  return text || null;
+  return { text: text || null, status: res.status, error: text ? null : "EMPTY_AI_TEXT" };
 }
 
 async function handle(request: Request) {
@@ -138,8 +153,8 @@ async function handle(request: Request) {
     // 3) Παρήγαγε το brief (AI -> v1 schema, με fallback)
     const system = buildNorayaStrategicSystemPrompt() + "\n" + buildNorayaStrategicJsonInstruction();
     const userPrompt = buildEventContext(ev);
-    const raw = await callAnthropic(system, userPrompt);
-    const parsed = raw ? parseAiJson(raw) : null;
+    const ai = await callAnthropic(system, userPrompt);
+    const parsed = ai.text ? parseAiJson(ai.text) : null;
 
     const brief =
       parsed && parsed.issue
@@ -199,6 +214,9 @@ async function handle(request: Request) {
         topic: ev.topic,
         method: usedFallback ? "fallback" : "ai",
       },
+      ai_status: ai.status,
+      ai_error: ai.error,
+      parsed_ok: !!(parsed && parsed.issue),
       remaining_event: (more as string) || null,
     });
   } catch (e: any) {
