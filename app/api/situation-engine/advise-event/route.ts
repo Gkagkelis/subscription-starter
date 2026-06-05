@@ -35,16 +35,19 @@ function svc() {
 }
 
 function parseAiJson(raw: string): any | null {
-  const tryParse = (s: string) => {
+  let s = (raw || "").trim();
+  // Ξετύλιγμα markdown code fences: ```json ... ``` ή ``` ... ```
+  s = s.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim();
+  const tryParse = (str: string) => {
     try {
-      return JSON.parse(s);
+      return JSON.parse(str);
     } catch {
       return null;
     }
   };
-  let parsed = tryParse(raw);
+  let parsed = tryParse(s);
   if (!parsed) {
-    const match = raw.match(/\{[\s\S]*\}/);
+    const match = s.match(/\{[\s\S]*\}/);
     if (match) parsed = tryParse(match[0]);
   }
   return parsed || null;
@@ -69,7 +72,11 @@ function buildEventContext(ev: any) {
 ${lines || "—"}
 
 Ανάλυσε ΑΥΤΟ το συγκεκριμένο γεγονός (όχι γενικά τη θεματική).
-Χρησιμοποίησε ΜΟΝΟ τα παραπάνω στοιχεία. Μην εφευρίσκεις γεγονότα ή ποσοστά.`;
+Χρησιμοποίησε ΜΟΝΟ τα παραπάνω στοιχεία. Μην εφευρίσκεις γεγονότα ή ποσοστά.
+
+ΣΗΜΑΝΤΙΚΟ ΓΙΑ ΤΗ ΜΟΡΦΗ:
+- Επίστρεψε ΣΥΜΠΑΓΕΣ JSON, ΧΩΡΙΣ markdown, ΧΩΡΙΣ \`\`\` code fences, ΧΩΡΙΣ σχόλια.
+- Κράτα κάθε πεδίο κειμένου ΣΥΝΤΟΜΟ (1-2 προτάσεις) ώστε να ολοκληρώνεται η απάντηση.`;
 }
 
 // Sonnet + prompt caching στο σταθερό system prompt.
@@ -91,7 +98,7 @@ async function callAnthropic(
       },
       body: JSON.stringify({
         model: ANALYSIS_MODEL,
-        max_tokens: 4096,
+        max_tokens: 6000,
         system: [{ type: "text", text: system, cache_control: { type: "ephemeral" } }],
         messages: [{ role: "user", content: user }],
       }),
