@@ -195,6 +195,14 @@ type LiveSituationRow = {
   documentation_basis?: string | null;
   agenda_score?: number | string | null;
   priority_score?: number | string | null;
+  raw_signal_score?: number | string | null;
+  search_interest_score?: number | string | null;
+  search_interest_status?: string | null;
+  search_interest_queries?: string[] | null;
+  search_interest_fetched_at?: string | null;
+  strategic_boost_score?: number | string | null;
+  strategic_index_score?: number | string | null;
+  strategic_index_label?: string | null;
   political_risk_level?: string | null;
   dominant_frame?: string | null;
   framing_summary?: string | null;
@@ -242,7 +250,22 @@ type AgendaOverviewRow = {
   topic: string;
   category?: string | null;
   agenda_score?: number | string | null;
+  raw_signal_score?: number | string | null;
   signal_label?: string | null;
+  search_interest_score?: number | string | null;
+  search_interest_status?: string | null;
+  search_interest_queries?: string[] | null;
+  search_interest_fetched_at?: string | null;
+  strategic_boost_score?: number | string | null;
+  strategic_index_score?: number | string | null;
+  strategic_index_label?: string | null;
+  strategic_index_components?: {
+    raw_signal?: number | string | null;
+    search_interest?: number | string | null;
+    strategic_boost?: number | string | null;
+    opportunity_bonus?: number | string | null;
+    formula?: string | null;
+  } | null;
   coverage_level?: string | null;
   source_diversity?: number | string | null;
   documentation_level?: string | null;
@@ -599,6 +622,34 @@ function cockpitIntensityScore(situation?: LiveSituationRow | null, fallback = 0
   return clamp(Math.round(raw + articleBonus + sourceBonus + docBonus + riskBonus + freshnessBonus));
 }
 
+function strategicIndexFromSituation(situation?: LiveSituationRow | null, fallback = 0) {
+  return clamp(Math.round(numberValue(situation?.strategic_index_score, cockpitIntensityScore(situation, fallback))));
+}
+
+function strategicIndexFromAgenda(row?: AgendaOverviewRow | null) {
+  return clamp(Math.round(numberValue(row?.strategic_index_score, numberValue(row?.agenda_score, 0))));
+}
+
+function rawSignalFromSituation(situation?: LiveSituationRow | null, fallback = 0) {
+  return clamp(Math.round(numberValue(situation?.raw_signal_score, situationScore(situation, fallback))));
+}
+
+function rawSignalFromAgenda(row?: AgendaOverviewRow | null) {
+  return clamp(Math.round(numberValue(row?.raw_signal_score, numberValue(row?.agenda_score, 0))));
+}
+
+function searchInterestLabel(score?: unknown, status?: string | null) {
+  const normalizedStatus = String(status || "").toLowerCase();
+  if (normalizedStatus.includes("pending") || normalizedStatus.includes("fallback") || normalizedStatus.includes("unavailable") || normalizedStatus.includes("error")) {
+    return `Search · ${numberValue(score, 50)} (pending)`;
+  }
+  return `Search · ${numberValue(score, 50)}`;
+}
+
+function strategicIndexExplanation(raw: number, search: number, boost: number, bonus = 0) {
+  return `55% Raw Signal (${raw}) + 25% Search Interest (${search}) + 20% Strategic Boost (${boost})${bonus ? ` + bonus ευκαιρίας (${bonus})` : ""}.`;
+}
+
 function EventEvidenceList({ articles, compact = false }: { articles: EvidenceArticleItem[]; compact?: boolean }) {
   const rows = articles.slice(0, compact ? 4 : 8);
 
@@ -900,7 +951,10 @@ export default function StrategyRoomPage() {
   const activeStatus = text(activeSituation?.status, liveSituations.length ? "active" : "derived");
   const activeUrgency = text(activeSituation?.urgency || issue.urgency, "watch");
   const activeScore = situationScore(activeSituation, numberValue(rankedAgenda[0]?.score, 0));
-  const activeIntensityScore = cockpitIntensityScore(activeSituation, activeScore);
+  const activeIntensityScore = strategicIndexFromSituation(activeSituation, activeScore);
+  const activeRawSignal = rawSignalFromSituation(activeSituation, activeScore);
+  const activeSearchInterest = numberValue(activeSituation?.search_interest_score, 50);
+  const activeStrategicBoost = numberValue(activeSituation?.strategic_boost_score, cockpitIntensityScore(activeSituation, activeScore));
   const activeEvidenceArticles = evidenceArticlesFromSituation(activeSituation);
   const activeDocLevel = activeSituation?.documentation_level || issue.documentation_level || evidence.documentation_level || null;
   const activeDocScore = confidenceFromDocLevel(activeDocLevel, numberValue(activeSituation?.confidence_score, 0));
@@ -1261,7 +1315,7 @@ function LeftSidebar({
                 const id = situationId(situation, index);
                 const selected = id === activeSituationId;
                 const score = situationScore(situation, 0);
-                const intensity = cockpitIntensityScore(situation, score);
+                const strategicIndex = strategicIndexFromSituation(situation, score);
                 const sourcesAvailable = evidenceArticlesFromSituation(situation).length > 0;
 
                 return (
@@ -1288,7 +1342,7 @@ function LeftSidebar({
                     </div>
                     <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-zinc-500">
                       <span className="text-cyan-200">{scoreSignalText(score)}</span>
-                      <span className="text-amber-200">Cockpit ένταση · {intensity}</span>
+                      <span className="text-amber-200">Στρατηγικός Δείκτης · {strategicIndex}</span>
                       <span>{numberValue(situation.article_count, 0)} άρθρα · {numberValue(situation.source_count, 0)} πηγές</span>
                     </div>
                     <div className="mt-1 flex flex-wrap items-center gap-2 text-[10px] text-zinc-600">
@@ -1710,6 +1764,10 @@ function AgendaOverviewPanel({
   const relatedEvents = Array.isArray(selected?.related_events) ? selected.related_events : [];
   const evidenceArticles = Array.isArray(selected?.evidence_articles) ? selected.evidence_articles : [];
   const selectedScore = numberValue(selected?.agenda_score, 0);
+  const selectedStrategicIndex = strategicIndexFromAgenda(selected);
+  const selectedSearchInterest = numberValue(selected?.search_interest_score, 50);
+  const selectedStrategicBoost = numberValue(selected?.strategic_boost_score, 50);
+  const selectedOpportunityBonus = numberValue(selected?.strategic_index_components?.opportunity_bonus, 0);
 
   return (
     <div className="grid gap-4">
@@ -1724,7 +1782,7 @@ function AgendaOverviewPanel({
             <div className="overflow-hidden rounded-3xl border border-[#1a2640] bg-black/10">
               <div className="grid min-w-[860px] grid-cols-[minmax(170px,1.4fr)_150px_90px_80px_120px_90px_minmax(150px,1fr)] gap-2 border-b border-[#1a2640] px-4 py-3 text-[10px] uppercase tracking-[0.16em] text-zinc-500">
                 <div>Θεματική</div>
-                <div>Σήμα</div>
+                <div>Στρατηγικός Δείκτης</div>
                 <div>Κάλυψη</div>
                 <div>Πηγές</div>
                 <div>Τεκμηρίωση</div>
@@ -1734,6 +1792,7 @@ function AgendaOverviewPanel({
               <div className="max-h-[460px] min-w-[860px] overflow-y-auto">
                 {overview.map((row) => {
                   const score = numberValue(row.agenda_score, 0);
+                  const strategicIndex = strategicIndexFromAgenda(row);
                   const isActive = row.topic === activeTopic;
                   return (
                     <button
@@ -1745,7 +1804,7 @@ function AgendaOverviewPanel({
                       }`}
                     >
                       <div className="font-medium leading-5">{row.topic}</div>
-                      <div className="text-cyan-100">{scoreSignalText(score)}</div>
+                      <div className="text-cyan-100">{scoreSignalText(strategicIndex)}</div>
                       <div>{coverageLabel(row.coverage_level)}</div>
                       <div>{numberValue(row.source_diversity, 0)}</div>
                       <div>{documentationLabel(row.documentation_level)}</div>
@@ -1764,7 +1823,7 @@ function AgendaOverviewPanel({
                     <div className="text-[10px] uppercase tracking-[0.22em] text-cyan-300">Θεματική</div>
                     <h3 className="mt-2 text-lg font-semibold leading-7 text-zinc-50">{selected.topic}</h3>
                     <div className="mt-3 flex flex-wrap gap-2">
-                      <StatusChip className="border-cyan-300/25 bg-cyan-300/10 text-cyan-100">{scoreSignalText(selectedScore)}</StatusChip>
+                      <StatusChip className="border-cyan-300/25 bg-cyan-300/10 text-cyan-100">Στρατηγικός Δείκτης · {selectedStrategicIndex}</StatusChip>
                       <StatusChip className="border-white/10 bg-white/[0.04] text-zinc-300">Κάλυψη: {coverageLabel(selected.coverage_level)}</StatusChip>
                       <StatusChip className={docToneClass(selected.documentation_level)}>{documentationLabel(selected.documentation_level)}</StatusChip>
                     </div>
@@ -1772,11 +1831,17 @@ function AgendaOverviewPanel({
 
                   <MiniBox title="Γιατί έχει σημασία" textValue={topicWhyText(selected)} />
 
-                  <div className="grid grid-cols-3 gap-2">
-                    <MiniMetric label="Πηγές" value={String(numberValue(selected.source_diversity, 0))} small />
-                    <MiniMetric label="Ρίσκο" value={riskLabel(selected.political_risk_level)} small />
+                  <div className="grid grid-cols-2 gap-2 xl:grid-cols-4">
+                    <MiniMetric label="Raw Signal" value={String(selectedScore)} small />
+                    <MiniMetric label="Search Interest" value={searchInterestLabel(selectedSearchInterest, selected.search_interest_status)} small />
+                    <MiniMetric label="Strategic Boost" value={String(selectedStrategicBoost)} small />
                     <MiniMetric label="Ευκαιρία" value={opportunityText(selected)} small />
                   </div>
+
+                  <MiniBox
+                    title="Από τι βγαίνει ο Στρατηγικός Δείκτης"
+                    textValue={strategicIndexExplanation(selectedScore, selectedSearchInterest, selectedStrategicBoost, selectedOpportunityBonus)}
+                  />
 
                   <div className="rounded-2xl border border-[#1a2640] bg-black/10 p-3">
                     <div className="mb-2 text-[10px] uppercase tracking-[0.18em] text-zinc-500">Σχετικά γεγονότα</div>
@@ -1888,12 +1953,17 @@ function RightInspector({
             <div className="mt-2 text-xs font-semibold leading-5 text-zinc-100">{title}</div>
             <div className="mt-3 flex flex-wrap gap-2">
               <span className="rounded-full border border-cyan-300/25 bg-cyan-300/10 px-2 py-1 text-[10px] text-cyan-100">{scoreSignalText(score)}</span>
-              <span className="rounded-full border border-amber-300/25 bg-amber-300/10 px-2 py-1 text-[10px] text-amber-100">Cockpit ένταση · {intensityScore}</span>
+              <span className="rounded-full border border-amber-300/25 bg-amber-300/10 px-2 py-1 text-[10px] text-amber-100">Στρατηγικός Δείκτης · {intensityScore}</span>
               <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-1 text-[10px] text-zinc-300">{inspectorArticleCount} άρθρα · {inspectorSourceCount} πηγές</span>
             </div>
           </div>
           <p className="mt-3 text-[11px] leading-6 text-zinc-400">{readWhyText(situation, brief)}</p>
           <div className="mt-3 text-[10px] leading-5 text-zinc-500">Τεκμηρίωση: {documentationLabel(documentationLevel)}</div>
+          {situation ? (
+            <div className="mt-1 text-[10px] leading-5 text-zinc-500">
+              Raw {rawSignalFromSituation(situation, score)} · {searchInterestLabel(situation.search_interest_score, situation.search_interest_status)} · Boost {numberValue(situation.strategic_boost_score, 50)}
+            </div>
+          ) : null}
         </InspectorPanel>
 
         <InspectorPanel title="ΠΗΓΕΣ ΓΕΓΟΝΟΤΟΣ">
