@@ -1490,6 +1490,7 @@ function ActiveSituationWorkspace({
   const monitoring = brief.monitoring_plan || {};
   const messages = brief.message_package || {};
   const evidence = brief.evidence || {};
+  const activeEvidenceArticles = evidenceArticlesFromSituation(situation);
 
   return (
     <section className="rounded-[2rem] border border-[#1a2640] bg-[#0c1220] shadow-2xl shadow-black/20">
