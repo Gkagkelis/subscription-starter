@@ -557,7 +557,92 @@ function evidenceRoleLabel(role?: string | null) {
   const normalized = String(role || "").toLowerCase();
   if (normalized.includes("primary")) return "Κύριο άρθρο";
   if (normalized.includes("support")) return "Υποστηρικτικό άρθρο";
+  if (normalized.includes("fallback")) return "Συμπληρωματικό άρθρο";
   return role || "Άρθρο τεκμηρίωσης";
+}
+
+function evidenceArticlesFromSituation(situation?: LiveSituationRow | null): EvidenceArticleItem[] {
+  return Array.isArray(situation?.evidence_articles) ? situation.evidence_articles : [];
+}
+
+function articleDate(article?: EvidenceArticleItem | null) {
+  return shortDate(article?.published_at || null);
+}
+
+function cockpitIntensityScore(situation?: LiveSituationRow | null, fallback = 0) {
+  const raw = situationScore(situation, fallback);
+  const articleCount = numberValue(situation?.article_count, 0);
+  const sourceCount = numberValue(situation?.source_count, 0);
+  const doc = String(situation?.documentation_level || "").toLowerCase();
+  const risk = String(situation?.political_risk_level || situation?.urgency || situation?.status || "").toLowerCase();
+  const last = new Date(String(situation?.updated_at || situation?.created_at || ""));
+  const hoursOld = Number.isNaN(last.getTime()) ? null : (Date.now() - last.getTime()) / 36e5;
+
+  const articleBonus = Math.min(8, Math.max(0, articleCount) * 1.5);
+  const sourceBonus = Math.min(8, Math.max(0, sourceCount) * 2);
+  const docBonus = doc.includes("strong") || doc.includes("high") || doc.includes("ισχυ")
+    ? 8
+    : doc.includes("medium") || doc.includes("μεσα")
+      ? 4
+      : doc.includes("initial") || doc.includes("low") || doc.includes("αρχ")
+        ? 1
+        : 0;
+  const riskBonus = risk.includes("critical") || risk.includes("high") || risk.includes("υψη") || risk.includes("active")
+    ? 8
+    : risk.includes("medium") || risk.includes("μεσα")
+      ? 4
+      : risk.includes("low") || risk.includes("χαμη")
+        ? 1
+        : 0;
+  const freshnessBonus = hoursOld === null ? 0 : hoursOld <= 24 ? 6 : hoursOld <= 48 ? 3 : 0;
+
+  return clamp(Math.round(raw + articleBonus + sourceBonus + docBonus + riskBonus + freshnessBonus));
+}
+
+function EventEvidenceList({ articles, compact = false }: { articles: EvidenceArticleItem[]; compact?: boolean }) {
+  const rows = articles.slice(0, compact ? 4 : 8);
+
+  if (!rows.length) {
+    return <EmptyState small>Δεν υπάρχουν ακόμη διαθέσιμες πηγές για αυτό το γεγονός.</EmptyState>;
+  }
+
+  return (
+    <div className="grid gap-2">
+      {rows.map((article, index) => {
+        const score = numberValue(article.score, 0);
+        const body = (
+          <>
+            <div className="text-[10px] uppercase tracking-[0.16em] text-cyan-300">{article.source || "Πηγή"}</div>
+            <div className="mt-1 text-xs font-medium leading-5 text-zinc-100">{article.title || "Άρθρο"}</div>
+            <div className="mt-2 flex flex-wrap gap-2 text-[10px] text-zinc-500">
+              <span>Score {score ? Math.round(score) : "—"}</span>
+              <span>·</span>
+              <span>{evidenceRoleLabel(article.role)}</span>
+              <span>·</span>
+              <span>{articleDate(article)}</span>
+            </div>
+            {article.url ? <div className="mt-2 text-[10px] text-cyan-200">Άνοιγμα άρθρου ↗</div> : null}
+          </>
+        );
+
+        return article.url ? (
+          <a
+            key={article.article_id || article.url || `${article.title}-${index}`}
+            href={article.url}
+            target="_blank"
+            rel="noreferrer"
+            className="block rounded-2xl border border-[#1a2640] bg-[#0c1220] p-3 transition hover:border-cyan-300/25 hover:bg-cyan-300/[0.04]"
+          >
+            {body}
+          </a>
+        ) : (
+          <div key={article.article_id || `${article.title}-${index}`} className="rounded-2xl border border-[#1a2640] bg-[#0c1220] p-3">
+            {body}
+          </div>
+        );
+      })}
+    </div>
+  );
 }
 
 function topicWhyText(row: AgendaOverviewRow | null | undefined) {
@@ -815,12 +900,23 @@ export default function StrategyRoomPage() {
   const activeStatus = text(activeSituation?.status, liveSituations.length ? "active" : "derived");
   const activeUrgency = text(activeSituation?.urgency || issue.urgency, "watch");
   const activeScore = situationScore(activeSituation, numberValue(rankedAgenda[0]?.score, 0));
+  const activeIntensityScore = cockpitIntensityScore(activeSituation, activeScore);
+  const activeEvidenceArticles = evidenceArticlesFromSituation(activeSituation);
   const activeDocLevel = activeSituation?.documentation_level || issue.documentation_level || evidence.documentation_level || null;
   const activeDocScore = confidenceFromDocLevel(activeDocLevel, numberValue(activeSituation?.confidence_score, 0));
 
-  const evidenceArticles = Array.isArray(brief.evidence?.data_points)
-    ? brief.evidence.data_points.slice(0, 8).map((point: string) => ({ title: point, source: "" }))
-    : [];
+  const evidenceArticles = activeEvidenceArticles.length
+    ? activeEvidenceArticles.map((article) => ({
+        title: article.title || "Άρθρο",
+        source: article.source || "",
+        url: article.url || undefined,
+        score: article.score,
+        role: article.role,
+        published_at: article.published_at,
+      }))
+    : Array.isArray(brief.evidence?.data_points)
+      ? brief.evidence.data_points.slice(0, 8).map((point: string) => ({ title: point, source: "" }))
+      : [];
 
   async function askNorayaAdvisor(questionOverride?: string) {
     const question = (questionOverride || chatQuestion).trim();
@@ -1002,6 +1098,7 @@ export default function StrategyRoomPage() {
           situation={activeSituation}
           title={activeTitle}
           score={activeScore}
+          intensityScore={activeIntensityScore}
           documentationLevel={activeDocLevel}
           brief={brief}
           agenda={rankedAgenda}
@@ -1164,6 +1261,8 @@ function LeftSidebar({
                 const id = situationId(situation, index);
                 const selected = id === activeSituationId;
                 const score = situationScore(situation, 0);
+                const intensity = cockpitIntensityScore(situation, score);
+                const sourcesAvailable = evidenceArticlesFromSituation(situation).length > 0;
 
                 return (
                   <button
@@ -1189,9 +1288,13 @@ function LeftSidebar({
                     </div>
                     <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-zinc-500">
                       <span className="text-cyan-200">{scoreSignalText(score)}</span>
+                      <span className="text-amber-200">Cockpit ένταση · {intensity}</span>
                       <span>{numberValue(situation.article_count, 0)} άρθρα · {numberValue(situation.source_count, 0)} πηγές</span>
                     </div>
-                    <div className="mt-1 text-[10px] text-zinc-600">{shortDate(situation.updated_at || situation.created_at)}</div>
+                    <div className="mt-1 flex flex-wrap items-center gap-2 text-[10px] text-zinc-600">
+                      <span>{shortDate(situation.updated_at || situation.created_at)}</span>
+                      {sourcesAvailable ? <span className="text-cyan-300/80">Πηγές διαθέσιμες</span> : null}
+                    </div>
                   </button>
                 );
               })}
@@ -1504,14 +1607,17 @@ function ActiveSituationWorkspace({
         ) : null}
 
         {activeTab === "drivers" ? (
-          <div className="grid gap-4">
-            <CockpitSection title="Drivers & Πηγές" subtitle="Signals behind the situation">
+          <div className="grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
+            <CockpitSection title="Drivers" subtitle="Agenda signals behind the selected situation">
               <div className="grid gap-3">
                 {(agenda.length ? agenda.slice(0, 5) : []).map((item) => (
                   <DriverBar key={`${item.topic}-${item.rank}`} label={item.topic || "Θέμα"} score={item.score} trend={item.signalLabel} />
                 ))}
                 {!agenda.length ? <EmptyState>Δεν υπάρχουν διαθέσιμα agenda drivers.</EmptyState> : null}
               </div>
+            </CockpitSection>
+            <CockpitSection title="Πηγές γεγονότος" subtitle="Άρθρα που στηρίζουν το επιλεγμένο Live Situation">
+              <EventEvidenceList articles={activeEvidenceArticles} />
             </CockpitSection>
           </div>
         ) : null}
@@ -1744,6 +1850,7 @@ function RightInspector({
   situation,
   title,
   score,
+  intensityScore,
   documentationLevel,
   brief,
   agenda,
@@ -1752,6 +1859,7 @@ function RightInspector({
   situation: LiveSituationRow | null;
   title: string;
   score: number;
+  intensityScore: number;
   documentationLevel?: string | null;
   brief: StrategicBrief;
   agenda: RankedAgenda[];
@@ -1768,6 +1876,7 @@ function RightInspector({
   const inspectorTopic = text(situation?.topic || situation?.category || issue.topic, "Πολιτική ατζέντα");
   const inspectorArticleCount = numberValue(situation?.article_count, 0);
   const inspectorSourceCount = numberValue(situation?.source_count, 0);
+  const inspectorEvidenceArticles = evidenceArticlesFromSituation(situation);
 
   return (
     <aside className="flex w-[240px] shrink-0 flex-col overflow-hidden bg-[#060a14]">
@@ -1778,11 +1887,16 @@ function RightInspector({
             <div className="mt-2 text-xs font-semibold leading-5 text-zinc-100">{title}</div>
             <div className="mt-3 flex flex-wrap gap-2">
               <span className="rounded-full border border-cyan-300/25 bg-cyan-300/10 px-2 py-1 text-[10px] text-cyan-100">{scoreSignalText(score)}</span>
+              <span className="rounded-full border border-amber-300/25 bg-amber-300/10 px-2 py-1 text-[10px] text-amber-100">Cockpit ένταση · {intensityScore}</span>
               <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-1 text-[10px] text-zinc-300">{inspectorArticleCount} άρθρα · {inspectorSourceCount} πηγές</span>
             </div>
           </div>
           <p className="mt-3 text-[11px] leading-6 text-zinc-400">{readWhyText(situation, brief)}</p>
           <div className="mt-3 text-[10px] leading-5 text-zinc-500">Τεκμηρίωση: {documentationLabel(documentationLevel)}</div>
+        </InspectorPanel>
+
+        <InspectorPanel title="ΠΗΓΕΣ ΓΕΓΟΝΟΤΟΣ">
+          <EventEvidenceList articles={inspectorEvidenceArticles} compact />
         </InspectorPanel>
 
         <InspectorPanel title="KEY DRIVERS">
