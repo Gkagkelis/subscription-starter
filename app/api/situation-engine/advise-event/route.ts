@@ -91,7 +91,7 @@ async function callAnthropic(
       },
       body: JSON.stringify({
         model: ANALYSIS_MODEL,
-        max_tokens: 3000,
+        max_tokens: 4096,
         system: [{ type: "text", text: system, cache_control: { type: "ephemeral" } }],
         messages: [{ role: "user", content: user }],
       }),
@@ -135,7 +135,10 @@ async function processOneEvent(
 
   // Αν δεν βγήκε κανονικό brief -> ΜΗΝ αποθηκεύσεις placeholder. Σταμάτα.
   if (!(parsed && parsed.issue)) {
-    return { status: "ai_down", title: ev.title, ai_error: ai.error };
+    const diag =
+      ai.error ||
+      (ai.text ? "UNPARSEABLE_AI_TEXT: " + ai.text.slice(0, 220) : "NO_AI_TEXT");
+    return { status: "ai_down", title: ev.title, ai_error: diag };
   }
 
   const brief = parsed;
