@@ -3,25 +3,28 @@ import { createClient as createServiceClient } from "@supabase/supabase-js";
 import {
   buildNorayaStrategicSystemPrompt,
   buildNorayaStrategicJsonInstruction,
-  createFallbackStrategicBrief,
 } from "@/lib/noraya/strategic-reasoning";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export const maxDuration = 300; // Pro: μέχρι 5 λεπτά. Η πλήρης ανάλυση 7 σταδίων θέλει χρόνο.
+export const maxDuration = 300;
 
 // ============================================================
-// NORAYA — Per-Event Advisor Brief (ΜΙΑ ανάλυση ανά κλήση)
+// NORAYA — Per-Event Advisor Brief (η ΤΕΛΙΚΗ ανάλυση = SONNET)
 //
-// Παίρνει ΕΝΑ γεγονός, διαβάζει τα άρθρα-στοιχεία του, και παράγει την ΠΛΗΡΗ
-// ανάλυση συμβούλου (v1: 7 στάδια) με τον εγκέφαλο του Noraya.
-// Την αποθηκεύει στο political_events.advisor_brief (+ flat πεδία).
+// Ένα τρέξιμο αναλύει ΜΕΧΡΙ 8 ΣΗΜΑΝΤΙΚΑ γεγονότα (loop + time-budget),
+// ώστε να καλείται ΛΙΓΕΣ φορές τη μέρα (βλ. vercel.json).
 //
-// ΜΙΑ τη φορά -> ποτέ timeout. Ένα cron το χτυπάει τακτικά (βλ. vercel.json):
-//   GET χωρίς παράμετρο  -> επόμενο γεγονός που χρειάζεται ανάλυση
-//   αν δεν εκκρεμεί κανένα -> δεν καλεί AI (μηδέν κόστος)
-//   ?event_id=...        -> ανάλυση συγκεκριμένου γεγονότος (χειροκίνητο)
+// PROMPT CACHING: το μεγάλο system prompt γίνεται cache -> δραστική μείωση
+// input-token κόστους στις επαναλήψεις.
+//
+// Αν πέσει το AI (π.χ. χωρίς credits) ΔΕΝ αποθηκεύει placeholder — σταματά,
+// ώστε όταν επανέλθει το AI να γράψει κανονική ανάλυση.
 // ============================================================
+
+const ANALYSIS_MODEL = "claude-sonnet-4-6";
+const MAX_EVENTS_PER_RUN = 8;
+const BUDGET_MS = 220000;
 
 function svc() {
   return createServiceClient(
@@ -53,25 +56,23 @@ function buildEventContext(ev: any) {
     .slice(0, 12)
     .map((a: any) => `- (${a.source || "—"}) ${a.title || ""}`)
     .join("\n");
-
-  return `
-ΠΟΛΙΤΙΚΟ ΓΕΓΟΝΟΣ ΠΡΟΣ ΑΝΑΛΥΣΗ
+  return `ΠΟΛΙΤΙΚΟ ΓΕΓΟΝΟΣ ΠΡΟΣ ΑΝΑΛΥΣΗ
 
 Θεματική: ${ev.topic || "—"}
 Γεγονός: ${ev.title || "—"}
 Σύνοψη: ${ev.summary || "—"}
 Κατάσταση: ${ev.status || "—"}
 Βαθμός τεκμηρίωσης: ${ev.documentation_level || "initial"}
-Αριθμός άρθρων: ${ev.article_count ?? 0} από ${ev.source_count ?? 0} πηγές
+Άρθρα: ${ev.article_count ?? 0} από ${ev.source_count ?? 0} πηγές
 
-ΣΤΟΙΧΕΙΑ (τίτλοι άρθρων):
+ΣΤΟΙΧΕΙΑ (τίτλοι):
 ${lines || "—"}
 
 Ανάλυσε ΑΥΤΟ το συγκεκριμένο γεγονός (όχι γενικά τη θεματική).
-Χρησιμοποίησε ΜΟΝΟ τα παραπάνω στοιχεία. Μην εφευρίσκεις γεγονότα ή ποσοστά.
-`;
+Χρησιμοποίησε ΜΟΝΟ τα παραπάνω στοιχεία. Μην εφευρίσκεις γεγονότα ή ποσοστά.`;
 }
 
+// Sonnet + prompt caching στο σταθερό system prompt.
 async function callAnthropic(
   system: string,
   user: string
@@ -89,9 +90,9 @@ async function callAnthropic(
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-6",
+        model: ANALYSIS_MODEL,
         max_tokens: 3000,
-        system,
+        system: [{ type: "text", text: system, cache_control: { type: "ephemeral" } }],
         messages: [{ role: "user", content: user }],
       }),
     });
@@ -115,109 +116,102 @@ async function callAnthropic(
   return { text: text || null, status: res.status, error: text ? null : "EMPTY_AI_TEXT" };
 }
 
+// Επιστρέφει: 'ai' (γράφτηκε), 'none' (δεν εκκρεμεί), 'ai_down' (πέσε το AI)
+async function processOneEvent(
+  supabase: ReturnType<typeof svc>,
+  system: string,
+  eventId: string
+): Promise<{ status: "ai" | "ai_down"; title?: string; ai_error?: string | null }> {
+  const { data: ev } = await supabase
+    .from("v_political_events_live")
+    .select("*")
+    .eq("id", eventId)
+    .single();
+
+  if (!ev) return { status: "ai_down", ai_error: "event_not_found" };
+
+  const ai = await callAnthropic(system, buildEventContext(ev));
+  const parsed = ai.text ? parseAiJson(ai.text) : null;
+
+  // Αν δεν βγήκε κανονικό brief -> ΜΗΝ αποθηκεύσεις placeholder. Σταμάτα.
+  if (!(parsed && parsed.issue)) {
+    return { status: "ai_down", title: ev.title, ai_error: ai.error };
+  }
+
+  const brief = parsed;
+  const framing =
+    brief?.strategic_diagnosis?.framing_diagnosis || brief?.issue?.dominant_frame || ev.summary || null;
+  const recommended =
+    brief?.daily_brief?.immediate_recommendation ||
+    brief?.strategic_diagnosis?.recommended_posture_explanation ||
+    null;
+  const avoid = brief?.daily_brief?.avoid_today || null;
+  const redTeam = brief?.strategic_diagnosis?.strategic_risk || brief?.issue?.political_risk || null;
+  const summary = brief?.daily_brief?.what_is_happening || ev.summary || null;
+
+  await supabase
+    .from("political_events")
+    .update({
+      advisor_brief: brief,
+      framing_summary: framing,
+      recommended_action: recommended,
+      avoid_action: avoid,
+      red_team_warning: redTeam,
+      summary,
+      brief_generated_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", eventId);
+
+  await supabase.rpc("mark_event_briefed", { p_event_id: eventId });
+  return { status: "ai", title: ev.title };
+}
+
 async function handle(request: Request) {
   try {
     const supabase = svc();
     const url = new URL(request.url);
     const requestedId = url.searchParams.get("event_id");
 
-    // 1) Διάλεξε γεγονός
-    let eventId = requestedId;
-    if (!eventId) {
-      const { data: next } = await supabase.rpc("pick_next_event_for_brief");
-      eventId = (next as string) || null;
+    const system =
+      buildNorayaStrategicSystemPrompt() + "\n" + buildNorayaStrategicJsonInstruction();
+
+    // Χειροκίνητο: ένα συγκεκριμένο γεγονός
+    if (requestedId) {
+      const r = await processOneEvent(supabase, system, requestedId);
+      return NextResponse.json({ ok: true, mode: "single", processed: r });
     }
 
-    if (!eventId) {
-      return NextResponse.json({
-        ok: true,
-        processed: null,
-        message: "Δεν εκκρεμεί κανένα γεγονός για ανάλυση.",
-      });
+    // Αυτόματο: ανάλυσε μέχρι MAX_EVENTS_PER_RUN σημαντικά γεγονότα
+    const startedAt = Date.now();
+    const done: Array<{ title?: string }> = [];
+    let aiError: string | null = null;
+    let count = 0;
+
+    while (count < MAX_EVENTS_PER_RUN && Date.now() - startedAt < BUDGET_MS) {
+      const { data: nextId } = await supabase.rpc("pick_next_event_for_brief");
+      const eventId = (nextId as string) || null;
+      if (!eventId) break;
+
+      const r = await processOneEvent(supabase, system, eventId);
+      if (r.status === "ai_down") {
+        // Το AI δεν δουλεύει (π.χ. χωρίς credits) -> σταμάτα, μην κάψεις/μην γράψεις placeholder
+        aiError = r.ai_error || "ai_down";
+        break;
+      }
+      done.push({ title: r.title });
+      count += 1;
     }
-
-    // 2) Φόρτωσε το γεγονός + τα άρθρα-στοιχεία του
-    const { data: ev, error: evErr } = await supabase
-      .from("v_political_events_live")
-      .select("*")
-      .eq("id", eventId)
-      .single();
-
-    if (evErr || !ev) {
-      return NextResponse.json(
-        { ok: false, error: evErr?.message || "Event not found" },
-        { status: 404 }
-      );
-    }
-
-    // 3) Παρήγαγε το brief (AI -> v1 schema, με fallback)
-    const system = buildNorayaStrategicSystemPrompt() + "\n" + buildNorayaStrategicJsonInstruction();
-    const userPrompt = buildEventContext(ev);
-    const ai = await callAnthropic(system, userPrompt);
-    const parsed = ai.text ? parseAiJson(ai.text) : null;
-
-    const brief =
-      parsed && parsed.issue
-        ? parsed
-        : createFallbackStrategicBrief({
-            profile: null,
-            topic: ev.title || ev.topic || "Πολιτικό γεγονός",
-          });
-
-    const usedFallback = !(parsed && parsed.issue);
-
-    // 4) Flat πεδία (για inspector/λίστα) από το v1
-    const framing =
-      brief?.strategic_diagnosis?.framing_diagnosis ||
-      brief?.issue?.dominant_frame ||
-      ev.summary ||
-      null;
-    const recommended =
-      brief?.daily_brief?.immediate_recommendation ||
-      brief?.strategic_diagnosis?.recommended_posture_explanation ||
-      null;
-    const avoid = brief?.daily_brief?.avoid_today || null;
-    const redTeam =
-      brief?.strategic_diagnosis?.strategic_risk ||
-      brief?.issue?.political_risk ||
-      null;
-    const summary = brief?.daily_brief?.what_is_happening || ev.summary || null;
-
-    // 5) Γράψε στο γεγονός
-    const { error: upErr } = await supabase
-      .from("political_events")
-      .update({
-        advisor_brief: brief,
-        framing_summary: framing,
-        recommended_action: recommended,
-        avoid_action: avoid,
-        red_team_warning: redTeam,
-        summary,
-        brief_generated_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", eventId);
-
-    if (upErr) {
-      return NextResponse.json({ ok: false, error: upErr.message }, { status: 500 });
-    }
-
-    await supabase.rpc("mark_event_briefed", { p_event_id: eventId });
 
     const { data: more } = await supabase.rpc("pick_next_event_for_brief");
 
     return NextResponse.json({
       ok: true,
-      processed: {
-        event_id: eventId,
-        title: ev.title,
-        topic: ev.topic,
-        method: usedFallback ? "fallback" : "ai",
-      },
-      ai_status: ai.status,
-      ai_error: ai.error,
-      parsed_ok: !!(parsed && parsed.issue),
+      mode: "batch",
+      analyzed: done.length,
+      ai_error: aiError,
       remaining_event: (more as string) || null,
+      detail: done,
     });
   } catch (e: any) {
     return NextResponse.json({ ok: false, error: String(e?.message || e) }, { status: 500 });
@@ -227,7 +221,6 @@ async function handle(request: Request) {
 export async function GET(request: Request) {
   return handle(request);
 }
-
 export async function POST(request: Request) {
   return handle(request);
 }
