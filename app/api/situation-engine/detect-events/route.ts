@@ -3,27 +3,22 @@ import { createClient as createServiceClient } from "@supabase/supabase-js";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 // ============================================================
-// NORAYA — AI Event Detection (ΜΙΑ θεματική ανά κλήση)
+// NORAYA — Event Detection (φιλτράρισμα = ΦΘΗΝΟ μοντέλο)
 //
-// ΤΙ ΚΑΝΕΙ:
-// Παίρνει ΜΙΑ θεματική, διαβάζει τα πρόσφατα άρθρα της, και ζητά από το AI
-// να τα χωρίσει σε διακριτά ΓΕΓΟΝΟΤΑ (π.χ. "Χειμάρρα" ≠ "NAVTEX"), που
-// γράφονται στη βάση μέσω upsert_political_event().
+// Ένα τρέξιμο ΑΔΕΙΑΖΕΙ όλες τις εκκρεμείς θεματικές (loop με time-budget),
+// ώστε να καλείται ΛΙΓΕΣ φορές τη μέρα (βλ. vercel.json), όχι συνεχώς.
 //
-// ΓΙΑΤΙ ΜΙΑ ΤΗ ΦΟΡΑ:
-// Έτσι κάθε κλήση τελειώνει γρήγορα και ΔΕΝ σκάει σε 504 timeout.
-// Ένα cron (βλ. vercel.json) χτυπάει αυτό το endpoint τακτικά. Κάθε χτύπημα:
-//   - GET χωρίς παράμετρο  -> διαλέγει αυτόματα την ΕΠΟΜΕΝΗ θεματική που εκκρεμεί
-//   - αν δεν εκκρεμεί καμία -> δεν κάνει AI κλήση (μηδέν κόστος)
-// Έτσι σε λίγα λεπτά καλύπτονται όλες οι θεματικές, αυτόματα, σε rotation.
+// Χρησιμοποιεί ΦΘΗΝΟ μοντέλο (Haiku) για το φιλτράρισμα/clustering.
+// Αν το φθηνό μοντέλο δεν είναι διαθέσιμο, κάνει ΑΣΦΑΛΕΣ fallback σε Sonnet.
 //
-// ΧΕΙΡΟΚΙΝΗΤΑ (προαιρετικό):
-//   GET/POST  /api/situation-engine/detect-events?topic=Οικονομία
-//   -> δουλεύει μόνο αυτή τη θεματική τώρα.
+// Κρατά ΜΟΝΟ πολιτικά σημαντικά γεγονότα που δένουν με τις θεματικές του προφίλ.
 // ============================================================
+
+const FILTER_MODEL = process.env.ANTHROPIC_FILTER_MODEL || "claude-haiku-4-5";
+const FALLBACK_MODEL = "claude-sonnet-4-6";
 
 type ArticleRow = {
   id: string;
@@ -38,6 +33,7 @@ type DetectedEvent = {
   title: string;
   summary: string;
   article_ids: string[];
+  matched_theme?: string;
 };
 
 function svc() {
@@ -46,6 +42,23 @@ function svc() {
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     { auth: { persistSession: false } }
   );
+}
+
+async function loadActiveThemes(supabase: ReturnType<typeof svc>): Promise<string[]> {
+  const { data } = await supabase
+    .from("organizations")
+    .select("themes, issues, updated_at, onboarding_completed")
+    .order("updated_at", { ascending: false })
+    .limit(5);
+  const rows = (data || []) as any[];
+  const org = rows.find((r) => r?.onboarding_completed) || rows[0];
+  const themes: string[] = [];
+  const push = (v: unknown) => {
+    if (Array.isArray(v)) v.forEach((x) => typeof x === "string" && themes.push(x));
+  };
+  push(org?.themes);
+  push(org?.issues);
+  return Array.from(new Set(themes));
 }
 
 function parseAiJson(raw: string): { events: DetectedEvent[] } | null {
@@ -65,74 +78,74 @@ function parseAiJson(raw: string): { events: DetectedEvent[] } | null {
   return parsed as { events: DetectedEvent[] };
 }
 
-function buildSystemPrompt() {
-  return `
-Είσαι ο μηχανισμός ανίχνευσης γεγονότων του Noraya.
+function buildSystemPrompt(themes: string[]) {
+  const themesText = themes.length
+    ? themes.map((t) => `- ${t}`).join("\n")
+    : "- (δεν έχουν οριστεί θεματικές — κράτα μόνο ό,τι έχει σαφή πολιτική σημασία)";
+  return `Είσαι ο μηχανισμός ανίχνευσης γεγονότων του Noraya, για ΠΟΛΙΤΙΚΟ ΚΟΜΜΑ.
 
-Σου δίνεται μια ΘΕΜΑΤΙΚΗ (π.χ. "Άμυνα/Εθνικά") και μια λίστα πρόσφατων άρθρων
-(τίτλος + πηγή + id) που έχουν ταξινομηθεί σε αυτή τη θεματική.
+Σου δίνεται μια ΘΕΜΑΤΙΚΗ και πρόσφατα άρθρα. Χώρισέ τα σε διακριτά ΓΕΓΟΝΟΤΑ.
 
-ΔΟΥΛΕΙΑ ΣΟΥ:
-Χώρισε τα άρθρα σε ΔΙΑΚΡΙΤΑ ΓΕΓΟΝΟΤΑ. Ένα γεγονός = ένα συγκεκριμένο συμβάν/
-εξέλιξη με δικό του πυρήνα (π.χ. "ο τραυματισμός ομογενή στη Χειμάρρα" είναι
-ΑΛΛΟ γεγονός από "η τουρκική NAVTEX"), ακόμη κι αν ανήκουν στην ίδια θεματική.
+ΘΕΜΑΤΙΚΕΣ ΠΟΥ ΕΝΔΙΑΦΕΡΟΥΝ ΤΟΝ ΦΟΡΕΑ:
+${themesText}
 
-ΚΑΝΟΝΕΣ:
-- Μη συγχωνεύεις άσχετα συμβάντα επειδή μοιράζονται θεματική.
-- Μη σπας το ίδιο συμβάν σε πολλά γεγονότα.
-- Άρθρα που δεν ανήκουν σε κανένα σαφές γεγονός: άφησέ τα εκτός.
-- Ο τίτλος κάθε γεγονότος: κοφτός, συγκεκριμένος, σαν τίτλος ενημερωτικού briefing.
-  ΟΧΙ το όνομα της θεματικής. ΟΧΙ γενικότητες.
-- Η σύνοψη: ΜΙΑ πρόταση, τι ακριβώς συνέβη, με βάση ΜΟΝΟ τους τίτλους που σου δόθηκαν.
-- Μην εφευρίσκεις γεγονότα ή λεπτομέρειες που δεν στηρίζονται στους τίτλους.
-`;
+ΚΡΑΤΑ ΜΟΝΟ γεγονότα με ΠΟΛΙΤΙΚΗ ΣΗΜΑΣΙΑ για κόμμα (κυβέρνηση/κόμματα/θεσμοί/
+πολιτική ευθύνη/ζητήματα πολιτών/δημόσια ατζέντα) που συνδέονται με τις θεματικές.
+
+ΚΟΨΕ τελείως: μεμονωμένες συλλήψεις/αστυνομικό δελτίο/τροχαία/εγκλήματα χωρίς
+πολιτική διάσταση, showbiz/lifestyle/celebrities/πορνογραφία/κουτσομπολιό,
+αθλητικά, διεθνή ψιλά χωρίς ελληνικό/πολιτικό αντίκτυπο, εμπορικά/διαφημιστικά.
+Αν είναι οριακό, ΚΟΨΕ το. Λίγα και σημαντικά.
+
+Τίτλος: κοφτός, συγκεκριμένος, σαν briefing — ΟΧΙ το όνομα της θεματικής.
+Σύνοψη: ΜΙΑ πρόταση με βάση ΜΟΝΟ τους τίτλους. Μην εφευρίσκεις.`;
 }
 
 function buildUserPrompt(topic: string, articles: ArticleRow[]) {
   const lines = articles
     .map((a) => `- [id:${a.id}] (${a.source_name || "—"}) ${a.title}`)
     .join("\n");
-
-  return `
-ΘΕΜΑΤΙΚΗ: ${topic}
+  return `ΘΕΜΑΤΙΚΗ: ${topic}
 
 ΑΡΘΡΑ:
 ${lines}
 
-Επίστρεψε ΜΟΝΟ έγκυρο JSON, χωρίς markdown, ακριβώς αυτή τη δομή:
+Επίστρεψε ΜΟΝΟ έγκυρο JSON, χωρίς markdown:
+{ "events": [ { "title": "...", "summary": "...", "matched_theme": "...", "article_ids": ["id1"] } ] }
 
-{
-  "events": [
-    {
-      "title": "κοφτός τίτλος του γεγονότος",
-      "summary": "μία πρόταση για το τι συνέβη",
-      "article_ids": ["id1", "id2"]
-    }
-  ]
-}
-`;
+Αν ΚΑΝΕΝΑ άρθρο δεν είναι πολιτικά σημαντικό: { "events": [] }`;
 }
 
+// Καλεί το AI με ΦΘΗΝΟ μοντέλο + prompt caching· αν το μοντέλο δεν υπάρχει,
+// επαναλαμβάνει ΜΙΑ φορά με το σίγουρο Sonnet.
 async function callAnthropic(system: string, user: string): Promise<string | null> {
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) return null;
 
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "x-api-key": key,
-      "anthropic-version": "2023-06-01"
-    },
-    body: JSON.stringify({
-      model: "claude-sonnet-4-6",
-      max_tokens: 1500,
-      system,
-      messages: [{ role: "user", content: user }]
-    })
-  });
+  const doCall = async (model: string) => {
+    return fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-api-key": key,
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: 1500,
+        system: [{ type: "text", text: system, cache_control: { type: "ephemeral" } }],
+        messages: [{ role: "user", content: user }],
+      }),
+    });
+  };
 
+  let res = await doCall(FILTER_MODEL);
+  if (!res.ok && (res.status === 404 || res.status === 400)) {
+    // πιθανό λάθος όνομα φθηνού μοντέλου -> ασφαλές fallback
+    res = await doCall(FALLBACK_MODEL);
+  }
   if (!res.ok) return null;
+
   const data = await res.json();
   const text = (data?.content || [])
     .filter((b: any) => b?.type === "text")
@@ -146,13 +159,12 @@ function stableEventKey(topic: string, title: string) {
   return `evt:ai:${topic.toLowerCase()}|${norm}`;
 }
 
-// Επεξεργάζεται ΜΙΑ θεματική. Επιστρέφει πόσα γεγονότα γράφτηκαν + τη μέθοδο.
 async function processTopic(
   supabase: ReturnType<typeof svc>,
-  topic: string
-): Promise<{ topic: string; events: number; method: string }> {
+  topic: string,
+  themes: string[]
+): Promise<{ topic: string; events: number }> {
   const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-
   const { data: articles } = await supabase
     .from("articles")
     .select("id,title,source_name,topic,published_at,ingested_at")
@@ -162,19 +174,12 @@ async function processTopic(
     .limit(60);
 
   const list = (articles || []) as ArticleRow[];
-  if (list.length < 2) {
-    return { topic, events: 0, method: "skipped_too_few" };
-  }
+  if (list.length < 2) return { topic, events: 0 };
 
   const validIds = new Set(list.map((a) => a.id));
-  const raw = await callAnthropic(buildSystemPrompt(), buildUserPrompt(topic, list));
+  const raw = await callAnthropic(buildSystemPrompt(themes), buildUserPrompt(topic, list));
   const parsed = raw ? parseAiJson(raw) : null;
-
-  if (!parsed) {
-    // Fallback: αν αποτύχει το AI, το baseline SQL detection καλύπτει.
-    await supabase.rpc("detect_political_events_baseline");
-    return { topic, events: 0, method: "baseline_fallback" };
-  }
+  if (!parsed) return { topic, events: 0 };
 
   let count = 0;
   for (const ev of parsed.events) {
@@ -182,7 +187,6 @@ async function processTopic(
     if (ids.length === 0) continue;
     const title = (ev.title || "").trim();
     if (!title) continue;
-
     const { error: rpcErr } = await supabase.rpc("upsert_political_event", {
       p_organization_id: null,
       p_topic: topic,
@@ -191,53 +195,51 @@ async function processTopic(
       p_summary: (ev.summary || "").trim() || null,
       p_article_ids: ids,
       p_detection_method: "ai",
-      p_detection_terms: []
+      p_detection_terms: ev.matched_theme ? [ev.matched_theme] : [],
     });
     if (!rpcErr) count += 1;
   }
-
-  return { topic, events: count, method: "ai" };
+  return { topic, events: count };
 }
 
-// Κοινός handler για GET (cron) και POST (χειροκίνητο).
 async function handle(request: Request) {
   try {
     const supabase = svc();
     const url = new URL(request.url);
     const requestedTopic = url.searchParams.get("topic");
+    const themes = await loadActiveThemes(supabase);
 
-    // 1) Διάλεξε θεματική: είτε αυτή που ζητήθηκε, είτε η επόμενη που εκκρεμεί.
-    let topic = requestedTopic;
-    if (!topic) {
+    // Χειροκίνητο: μία συγκεκριμένη θεματική
+    if (requestedTopic) {
+      const r = await processTopic(supabase, requestedTopic, themes);
+      await supabase.rpc("mark_topic_detected", { p_topic: requestedTopic });
+      return NextResponse.json({ ok: true, mode: "single", processed: [r], themes_loaded: themes.length });
+    }
+
+    // Αυτόματο: ΑΔΕΙΑΣΕ όλες τις εκκρεμείς θεματικές σε αυτό το τρέξιμο
+    const startedAt = Date.now();
+    const BUDGET_MS = 120000; // 2 λεπτά ασφάλεια κάτω από το maxDuration 300
+    const results: Array<{ topic: string; events: number }> = [];
+
+    while (Date.now() - startedAt < BUDGET_MS) {
       const { data: next } = await supabase.rpc("pick_next_topic_for_detection");
-      topic = (next as string) || null;
+      const topic = (next as string) || null;
+      if (!topic) break;
+      const r = await processTopic(supabase, topic, themes);
+      await supabase.rpc("mark_topic_detected", { p_topic: topic });
+      results.push(r);
     }
 
-    // 2) Αν δεν εκκρεμεί καμία -> idle, μηδέν κόστος.
-    if (!topic) {
-      return NextResponse.json({
-        ok: true,
-        processed: null,
-        message: "Δεν εκκρεμεί καμία θεματική για ανίχνευση γεγονότων.",
-        live_first: true
-      });
-    }
-
-    // 3) Επεξεργάσου τη μία θεματική.
-    const result = await processTopic(supabase, topic);
-
-    // 4) Σφράγισέ την ως ανιχνευμένη (ώστε να μη ξαναπιαστεί χωρίς νέα άρθρα).
-    await supabase.rpc("mark_topic_detected", { p_topic: topic });
-
-    // 5) Δες αν εκκρεμεί κι άλλη (μόνο για ενημέρωση, δεν την τρέχει τώρα).
     const { data: more } = await supabase.rpc("pick_next_topic_for_detection");
 
     return NextResponse.json({
       ok: true,
-      processed: result,
+      mode: "drain",
+      topics_processed: results.length,
+      events_created: results.reduce((s, r) => s + r.events, 0),
+      themes_loaded: themes.length,
       remaining_topic: (more as string) || null,
-      live_first: true,
-      demo_data: false
+      detail: results,
     });
   } catch (e: any) {
     return NextResponse.json({ ok: false, error: String(e?.message || e) }, { status: 500 });
@@ -247,7 +249,6 @@ async function handle(request: Request) {
 export async function GET(request: Request) {
   return handle(request);
 }
-
 export async function POST(request: Request) {
   return handle(request);
 }
