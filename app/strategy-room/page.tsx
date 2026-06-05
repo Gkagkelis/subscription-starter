@@ -212,7 +212,46 @@ type LiveSituationRow = {
   escalation_recommended?: number | string | null;
   created_at?: string | null;
   updated_at?: string | null;
+  evidence_articles?: EvidenceArticleItem[];
   [key: string]: unknown;
+};
+
+type EvidenceArticleItem = {
+  article_id?: string | null;
+  title?: string | null;
+  source?: string | null;
+  url?: string | null;
+  published_at?: string | null;
+  score?: number | string | null;
+  role?: string | null;
+};
+
+type AgendaRelatedEvent = {
+  id?: string | null;
+  title?: string | null;
+  topic?: string | null;
+  event_score?: number | string | null;
+  status?: string | null;
+  article_count?: number | string | null;
+  source_count?: number | string | null;
+  last_article_at?: string | null;
+};
+
+type AgendaOverviewRow = {
+  id?: string | null;
+  topic: string;
+  category?: string | null;
+  agenda_score?: number | string | null;
+  signal_label?: string | null;
+  coverage_level?: string | null;
+  source_diversity?: number | string | null;
+  documentation_level?: string | null;
+  political_risk_level?: string | null;
+  opportunity_label?: string | null;
+  events_detected_at?: string | null;
+  updated_at?: string | null;
+  related_events?: AgendaRelatedEvent[];
+  evidence_articles?: EvidenceArticleItem[];
 };
 
 type SituationEngineResponse = {
@@ -223,6 +262,8 @@ type SituationEngineResponse = {
   source?: string;
   fallback_used?: boolean;
   situations?: LiveSituationRow[];
+  agenda_overview?: AgendaOverviewRow[];
+  agenda_overview_error?: string | null;
   error?: string;
 };
 
@@ -235,12 +276,13 @@ type RankedAgenda = AgendaUsedRow & {
   evidenceArticles: Array<{ title: string; source?: string; url?: string }>;
 };
 
-type SituationTab = "strategic" | "why" | "drivers" | "pulse" | "win" | "options" | "comms";
+type SituationTab = "strategic" | "overview" | "why" | "drivers" | "pulse" | "win" | "options" | "comms";
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
 
 const situationTabs: Array<{ id: SituationTab; label: string }> = [
   { id: "strategic", label: "Στρατηγική εικόνα" },
+  { id: "overview", label: "Συνολική εικόνα" },
   { id: "why", label: "Γιατί υπάρχει" },
   { id: "drivers", label: "Drivers & πηγές" },
   { id: "pulse", label: "Public Pulse" },
@@ -478,6 +520,67 @@ function situationScore(situation?: LiveSituationRow | null, fallback = 0) {
   );
 }
 
+function signalLabelFromScore(score: number) {
+  if (score >= 70) return "Ισχυρό σήμα";
+  if (score >= 55) return "Ανερχόμενο σήμα";
+  if (score >= 35) return "Υπό παρακολούθηση";
+  return "Χαμηλό σήμα";
+}
+
+function scoreSignalText(score: number) {
+  return `${signalLabelFromScore(score)} · ${score ? Math.round(score) : "—"}`;
+}
+
+function coverageLabel(value?: string | null) {
+  const normalized = String(value || "").toLowerCase();
+  if (normalized === "high") return "Υψηλή";
+  if (normalized === "medium") return "Μεσαία";
+  if (normalized === "low") return "Χαμηλή";
+  return value || "—";
+}
+
+function opportunityLabel(score: number, coverageLevel?: string | null, fallback?: string | null) {
+  if (fallback && fallback.trim()) return fallback.trim();
+  const coverage = String(coverageLevel || "").toLowerCase();
+  if (score >= 60 && coverage === "low") return "Ευκαιρία ανάδειξης";
+  if (score >= 60 && coverage === "medium") return "Χώρος για πλαισίωση";
+  if (score >= 60 && coverage === "high") return "Ήδη στο κέντρο";
+  return "Παρακολούθηση";
+}
+
+function opportunityText(row: AgendaOverviewRow | null | undefined) {
+  if (!row) return "Παρακολούθηση";
+  return opportunityLabel(numberValue(row.agenda_score, 0), row.coverage_level, row.opportunity_label);
+}
+
+function evidenceRoleLabel(role?: string | null) {
+  const normalized = String(role || "").toLowerCase();
+  if (normalized.includes("primary")) return "Κύριο άρθρο";
+  if (normalized.includes("support")) return "Υποστηρικτικό άρθρο";
+  return role || "Άρθρο τεκμηρίωσης";
+}
+
+function topicWhyText(row: AgendaOverviewRow | null | undefined) {
+  if (!row) return "Δεν έχει επιλεγεί θεματική.";
+  const score = numberValue(row.agenda_score, 0);
+  const opportunity = opportunityText(row);
+  const coverage = String(row.coverage_level || "").toLowerCase();
+  if (opportunity === "Ευκαιρία ανάδειξης") {
+    return "Υπάρχει αξιόλογο σήμα, αλλά η κάλυψη παραμένει χαμηλή. Αυτό μπορεί να είναι παράθυρο για έγκαιρη πρωτοβουλία και καθαρό πλαίσιο πριν το ορίσουν άλλοι.";
+  }
+  if (opportunity === "Χώρος για πλαισίωση") {
+    return "Το θέμα έχει ήδη αρκετό σήμα, αλλά δεν έχει κλειδώσει πλήρως το κυρίαρχο πλαίσιο. Υπάρχει χώρος για στοχευμένη παρέμβαση.";
+  }
+  if (opportunity === "Ήδη στο κέντρο") {
+    return "Το θέμα είναι ήδη στο κέντρο της δημόσιας ατζέντας. Η προτεραιότητα είναι καθαρή θέση, τεκμηρίωση και αποφυγή άστοχης κλιμάκωσης.";
+  }
+  if (score >= 50 || coverage === "high") {
+    return "Το θέμα κινείται στην ατζέντα και χρειάζεται παρακολούθηση, ώστε να φανεί αν δημιουργείται πολιτικό παράθυρο παρέμβασης.";
+  }
+  return "Το θέμα δεν είναι ακόμη ώριμο για μεγάλη δημόσια πρωτοβουλία, αλλά παραμένει χρήσιμο ως σήμα παρακολούθησης.";
+}
+
+
 function readStrategicText(situation: LiveSituationRow | null | undefined, brief: StrategicBrief) {
   const detail = asRecord((situation as Record<string, unknown> | null | undefined)?.situation_detail);
   const strategicRead = situation?.strategic_read;
@@ -567,6 +670,7 @@ export default function StrategyRoomPage() {
   const [situationWarning, setSituationWarning] = useState("");
   const [activeSituationId, setActiveSituationId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<SituationTab>("strategic");
+  const [activeOverviewTopic, setActiveOverviewTopic] = useState<string | null>(null);
 
   const [chatQuestion, setChatQuestion] = useState("");
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
@@ -653,6 +757,21 @@ export default function StrategyRoomPage() {
     const rows = Array.isArray(situationEngine?.situations) ? situationEngine.situations : [];
     return rows.slice(0, 25);
   }, [situationEngine?.situations]);
+  const agendaOverview = useMemo<AgendaOverviewRow[]>(() => {
+    const rows = Array.isArray(situationEngine?.agenda_overview) ? situationEngine.agenda_overview : [];
+    return rows.filter((row) => row?.topic && row.topic !== "Μη ταξινομημένο");
+  }, [situationEngine?.agenda_overview]);
+
+  useEffect(() => {
+    if (!activeOverviewTopic && agendaOverview.length > 0) {
+      setActiveOverviewTopic(agendaOverview[0].topic);
+    }
+  }, [activeOverviewTopic, agendaOverview]);
+
+  const selectedAgendaOverview = useMemo(() => {
+    if (!agendaOverview.length) return null;
+    return agendaOverview.find((row) => row.topic === activeOverviewTopic) || agendaOverview[0];
+  }, [activeOverviewTopic, agendaOverview]);
 
   useEffect(() => {
     if (!activeSituationId && liveSituations.length > 0) {
@@ -671,8 +790,8 @@ export default function StrategyRoomPage() {
 
   // Το brief προτιμά την ΑΝΑΛΥΣΗ ΤΟΥ ΕΠΙΛΕΓΜΕΝΟΥ ΓΕΓΟΝΟΤΟΣ (advisor_brief).
   // Αν το γεγονός δεν έχει ακόμη ανάλυση, πέφτει πίσω στο γενικό strategy-brief.
-  const brief: StrategicBrief =
-    ((activeSituation as Record<string, unknown> | null)?.advisor_brief as StrategicBrief | undefined) ||
+  const brief =
+    (activeSituation as any)?.advisor_brief ||
     data?.strategic_brief ||
     {};
   const issue = brief.issue || {};
@@ -700,7 +819,7 @@ export default function StrategyRoomPage() {
   const activeDocScore = confidenceFromDocLevel(activeDocLevel, numberValue(activeSituation?.confidence_score, 0));
 
   const evidenceArticles = Array.isArray(brief.evidence?.data_points)
-    ? brief.evidence.data_points.slice(0, 8).map((point: string) => ({ title: point, source: "" }))
+    ? brief.evidence.data_points.slice(0, 8).map((point) => ({ title: point, source: "" }))
     : [];
 
   async function askNorayaAdvisor(questionOverride?: string) {
@@ -853,6 +972,10 @@ export default function StrategyRoomPage() {
               documentationLevel={activeDocLevel}
               brief={brief}
               agenda={rankedAgenda}
+              agendaOverview={agendaOverview}
+              selectedAgendaOverview={selectedAgendaOverview}
+              activeOverviewTopic={activeOverviewTopic}
+              onSelectOverviewTopic={setActiveOverviewTopic}
               selectedPartyImplication={selectedPartyImplication}
             />
           </div>
@@ -1057,12 +1180,18 @@ function LeftSidebar({
                       <span className={`rounded-full border px-2 py-0.5 text-[9px] ${statusToneClass(situation.status)}`}>
                         {text(situation.status, "live")}
                       </span>
-                      <span className="text-[10px] text-zinc-500">{score ? Math.round(score) : "—"}</span>
+                      <span className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-2 py-0.5 text-[9px] text-cyan-100">
+                        {text(situation.topic || situation.category, "Θεματική")}
+                      </span>
                     </div>
                     <div className="mt-2 line-clamp-2 text-xs font-medium leading-5 text-zinc-200">
                       {situationTitle(situation)}
                     </div>
-                    <div className="mt-2 text-[10px] text-zinc-500">{shortDate(situation.updated_at || situation.created_at)}</div>
+                    <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-zinc-500">
+                      <span className="text-cyan-200">{scoreSignalText(score)}</span>
+                      <span>{numberValue(situation.article_count, 0)} άρθρα · {numberValue(situation.source_count, 0)} πηγές</span>
+                    </div>
+                    <div className="mt-1 text-[10px] text-zinc-600">{shortDate(situation.updated_at || situation.created_at)}</div>
                   </button>
                 );
               })}
@@ -1227,6 +1356,10 @@ function ActiveSituationWorkspace({
   documentationLevel,
   brief,
   agenda,
+  agendaOverview,
+  selectedAgendaOverview,
+  activeOverviewTopic,
+  onSelectOverviewTopic,
   selectedPartyImplication,
 }: {
   activeTab: SituationTab;
@@ -1241,6 +1374,10 @@ function ActiveSituationWorkspace({
   documentationLevel?: string | null;
   brief: StrategicBrief;
   agenda: RankedAgenda[];
+  agendaOverview: AgendaOverviewRow[];
+  selectedAgendaOverview: AgendaOverviewRow | null;
+  activeOverviewTopic: string | null;
+  onSelectOverviewTopic: (topic: string) => void;
   selectedPartyImplication: string;
 }) {
   const issue = brief.issue || {};
@@ -1290,6 +1427,15 @@ function ActiveSituationWorkspace({
       </div>
 
       <div className="p-5">
+        {activeTab === "overview" ? (
+          <AgendaOverviewPanel
+            overview={agendaOverview}
+            selectedRow={selectedAgendaOverview}
+            activeTopic={activeOverviewTopic}
+            onSelectTopic={onSelectOverviewTopic}
+          />
+        ) : null}
+
         {activeTab === "strategic" ? (
           <div className="grid gap-4">
             <CockpitSection title="STRATEGIC READ — Τι σημαίνει" subtitle="Agenda Formation → Framing Diagnosis → Priming Risk">
@@ -1441,6 +1587,159 @@ function PublicPulsePanel({ situation, brief }: { situation: LiveSituationRow | 
   );
 }
 
+
+function AgendaOverviewPanel({
+  overview,
+  selectedRow,
+  activeTopic,
+  onSelectTopic,
+}: {
+  overview: AgendaOverviewRow[];
+  selectedRow: AgendaOverviewRow | null;
+  activeTopic: string | null;
+  onSelectTopic: (topic: string) => void;
+}) {
+  const selected = selectedRow || overview[0] || null;
+  const relatedEvents = Array.isArray(selected?.related_events) ? selected.related_events : [];
+  const evidenceArticles = Array.isArray(selected?.evidence_articles) ? selected.evidence_articles : [];
+  const selectedScore = numberValue(selected?.agenda_score, 0);
+
+  return (
+    <div className="grid gap-4">
+      <CockpitSection
+        title="ΣΥΝΟΛΙΚΗ ΕΙΚΟΝΑ ΑΤΖΕΝΤΑΣ"
+        subtitle="Όλες οι θεματικές που παρακολουθεί σήμερα ο Noraya — τι είναι ήδη ψηλά και πού υπάρχει χώρος να ορίσεις εσύ την ατζέντα."
+      >
+        {!overview.length ? (
+          <EmptyState>Δεν υπάρχουν διαθέσιμες θεματικές από το agenda overview.</EmptyState>
+        ) : (
+          <div className="grid gap-4 xl:grid-cols-[1.35fr_0.9fr]">
+            <div className="overflow-hidden rounded-3xl border border-[#1a2640] bg-black/10">
+              <div className="grid min-w-[860px] grid-cols-[minmax(170px,1.4fr)_150px_90px_80px_120px_90px_minmax(150px,1fr)] gap-2 border-b border-[#1a2640] px-4 py-3 text-[10px] uppercase tracking-[0.16em] text-zinc-500">
+                <div>Θεματική</div>
+                <div>Σήμα</div>
+                <div>Κάλυψη</div>
+                <div>Πηγές</div>
+                <div>Τεκμηρίωση</div>
+                <div>Ρίσκο</div>
+                <div>Ευκαιρία</div>
+              </div>
+              <div className="max-h-[460px] min-w-[860px] overflow-y-auto">
+                {overview.map((row) => {
+                  const score = numberValue(row.agenda_score, 0);
+                  const isActive = row.topic === activeTopic;
+                  return (
+                    <button
+                      key={row.id || row.topic}
+                      type="button"
+                      onClick={() => onSelectTopic(row.topic)}
+                      className={`grid w-full grid-cols-[minmax(170px,1.4fr)_150px_90px_80px_120px_90px_minmax(150px,1fr)] gap-2 border-b border-[#111a2b] px-4 py-3 text-left text-xs transition ${
+                        isActive ? "bg-cyan-300/10 text-cyan-50" : "text-zinc-300 hover:bg-white/[0.03]"
+                      }`}
+                    >
+                      <div className="font-medium leading-5">{row.topic}</div>
+                      <div className="text-cyan-100">{scoreSignalText(score)}</div>
+                      <div>{coverageLabel(row.coverage_level)}</div>
+                      <div>{numberValue(row.source_diversity, 0)}</div>
+                      <div>{documentationLabel(row.documentation_level)}</div>
+                      <div>{riskLabel(row.political_risk_level)}</div>
+                      <div className="text-amber-100">{opportunityText(row)}</div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="grid content-start gap-3 rounded-3xl border border-[#1a2640] bg-[#080f1c] p-4">
+              {selected ? (
+                <>
+                  <div>
+                    <div className="text-[10px] uppercase tracking-[0.22em] text-cyan-300">Θεματική</div>
+                    <h3 className="mt-2 text-lg font-semibold leading-7 text-zinc-50">{selected.topic}</h3>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <StatusChip className="border-cyan-300/25 bg-cyan-300/10 text-cyan-100">{scoreSignalText(selectedScore)}</StatusChip>
+                      <StatusChip className="border-white/10 bg-white/[0.04] text-zinc-300">Κάλυψη: {coverageLabel(selected.coverage_level)}</StatusChip>
+                      <StatusChip className={docToneClass(selected.documentation_level)}>{documentationLabel(selected.documentation_level)}</StatusChip>
+                    </div>
+                  </div>
+
+                  <MiniBox title="Γιατί έχει σημασία" textValue={topicWhyText(selected)} />
+
+                  <div className="grid grid-cols-3 gap-2">
+                    <MiniMetric label="Πηγές" value={String(numberValue(selected.source_diversity, 0))} small />
+                    <MiniMetric label="Ρίσκο" value={riskLabel(selected.political_risk_level)} small />
+                    <MiniMetric label="Ευκαιρία" value={opportunityText(selected)} small />
+                  </div>
+
+                  <div className="rounded-2xl border border-[#1a2640] bg-black/10 p-3">
+                    <div className="mb-2 text-[10px] uppercase tracking-[0.18em] text-zinc-500">Σχετικά γεγονότα</div>
+                    {relatedEvents.length ? (
+                      <div className="grid gap-2">
+                        {relatedEvents.slice(0, 5).map((event, index) => {
+                          const eventScore = numberValue(event.event_score, 0);
+                          return (
+                            <div key={event.id || `${event.title}-${index}`} className="rounded-2xl border border-[#1a2640] bg-[#0c1220] p-3">
+                              <div className="text-xs font-medium leading-5 text-zinc-100">{event.title || "Γεγονός"}</div>
+                              <div className="mt-1 text-[10px] text-zinc-500">
+                                {scoreSignalText(eventScore)} · {numberValue(event.article_count, 0)} άρθρα · {numberValue(event.source_count, 0)} πηγές
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <EmptyState small>Δεν υπάρχουν ακόμη συνδεδεμένα γεγονότα για αυτή τη θεματική.</EmptyState>
+                    )}
+                  </div>
+
+                  <div className="rounded-2xl border border-[#1a2640] bg-black/10 p-3">
+                    <div className="mb-2 text-[10px] uppercase tracking-[0.18em] text-zinc-500">Κύρια άρθρα</div>
+                    {evidenceArticles.length ? (
+                      <div className="grid gap-2">
+                        {evidenceArticles.slice(0, 5).map((article, index) => {
+                          const articleScore = numberValue(article.score, 0);
+                          const body = (
+                            <>
+                              <div className="text-xs font-medium leading-5 text-zinc-100">{article.title || "Άρθρο"}</div>
+                              <div className="mt-1 text-[10px] text-zinc-500">
+                                {article.source || "Πηγή"} · Score {articleScore ? Math.round(articleScore) : "—"} · {evidenceRoleLabel(article.role)}
+                              </div>
+                            </>
+                          );
+
+                          return article.url ? (
+                            <a
+                              key={article.article_id || article.url || `${article.title}-${index}`}
+                              href={article.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="block rounded-2xl border border-[#1a2640] bg-[#0c1220] p-3 transition hover:border-cyan-300/25 hover:bg-cyan-300/[0.04]"
+                            >
+                              {body}
+                            </a>
+                          ) : (
+                            <div key={article.article_id || `${article.title}-${index}`} className="rounded-2xl border border-[#1a2640] bg-[#0c1220] p-3">
+                              {body}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <EmptyState small>Δεν υπάρχουν διαθέσιμα κύρια άρθρα για αυτή τη θεματική.</EmptyState>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <EmptyState>Επίλεξε θεματική για να δεις λεπτομέρειες.</EmptyState>
+              )}
+            </div>
+          </div>
+        )}
+      </CockpitSection>
+    </div>
+  );
+}
+
 function RightInspector({
   situation,
   title,
@@ -1466,16 +1765,24 @@ function RightInspector({
   const redTeam = redTeamItems(situation?.red_team);
   const polls = recentPolls(politicalEnvironment);
   const actors = topActorTrends(politicalEnvironment);
+  const inspectorTopic = text(situation?.topic || situation?.category || issue.topic, "Πολιτική ατζέντα");
+  const inspectorArticleCount = numberValue(situation?.article_count, 0);
+  const inspectorSourceCount = numberValue(situation?.source_count, 0);
 
   return (
     <aside className="flex w-[240px] shrink-0 flex-col overflow-hidden bg-[#060a14]">
       <div className="flex-1 overflow-y-auto p-3">
-        <InspectorPanel title="INSPECTOR">
-          <div className="text-xs font-semibold leading-5 text-zinc-100">{title}</div>
+        <InspectorPanel title="ΓΙΑΤΙ ΤΟ ΒΛΕΠΕΙ Ο NORAYA">
+          <div className="rounded-2xl border border-cyan-300/20 bg-cyan-300/[0.06] p-3">
+            <div className="text-[10px] uppercase tracking-[0.18em] text-cyan-300">{inspectorTopic}</div>
+            <div className="mt-2 text-xs font-semibold leading-5 text-zinc-100">{title}</div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <span className="rounded-full border border-cyan-300/25 bg-cyan-300/10 px-2 py-1 text-[10px] text-cyan-100">{scoreSignalText(score)}</span>
+              <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-1 text-[10px] text-zinc-300">{inspectorArticleCount} άρθρα · {inspectorSourceCount} πηγές</span>
+            </div>
+          </div>
           <p className="mt-3 text-[11px] leading-6 text-zinc-400">{readWhyText(situation, brief)}</p>
-          <button type="button" className="mt-3 text-[11px] text-cyan-200 hover:text-cyan-100">
-            Άνοιγμα αναλυτικής →
-          </button>
+          <div className="mt-3 text-[10px] leading-5 text-zinc-500">Τεκμηρίωση: {documentationLabel(documentationLevel)}</div>
         </InspectorPanel>
 
         <InspectorPanel title="KEY DRIVERS">
