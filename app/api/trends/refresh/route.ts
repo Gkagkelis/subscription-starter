@@ -5,42 +5,64 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
 
-const REGION = "GR";
-const TIMEFRAME = "now 7-d";
-const NEUTRAL_SEARCH_INTEREST = 50;
-const MAX_TOPICS_PER_RUN = 35;
+// ============================================================
+// NORAYA — Public Attention Signal (Wikipedia pageviews)
+//
+// ΑΝΤΙΚΑΘΙΣΤΑ το απευθείας scraping του Google Trends (που έδινε 429).
+// Πηγή: επίσημο Wikimedia Pageviews API (δωρεάν, χωρίς key, χωρίς 429).
+// Μετράει ΠΟΣΟΙ διαβάζουν το άρθρο ενός θέματος -> σήμα δημόσιας προσοχής.
+//
+// ΣΗΜΑ = momentum: μέσος όρος τελευταίων 7 ημερών vs baseline 30 ημερών.
+//   ratio 1.0 -> 50 (σταθερό), 1.5 -> 75, 2.0 -> 100, 0.5 -> 25 κ.ο.κ.
+// Έτσι δείχνει αν η προσοχή ΑΝΕΒΑΙΝΕΙ, όχι απλώς απόλυτο όγκο.
+//
+// Γράφει στον ΙΔΙΟ πίνακα/κλειδιά (region=GR, timeframe="now 7-d") ώστε το
+// situation-engine να το διαβάζει χωρίς καμία αλλαγή.
+//
+// ΕΤΟΙΜΟ ΓΙΑ SerpApi (Google Trends) ΑΡΓΟΤΕΡΑ: αρκεί να προστεθεί
+// fetchSerpApiTrendScore() και να αλλάξει το TREND_PROVIDER. Τίποτα άλλο.
+// ============================================================
 
-const TOPIC_QUERIES: Record<string, string[]> = {
-  "Κοινωνία": ["κοινωνία", "κοινωνικά θέματα", "εγκληματικότητα", "κοινωνική βία"],
-  "Πολιτική": ["πολιτική", "κυβέρνηση", "κόμματα", "βουλή"],
-  "Στέγαση": ["ενοίκια", "στεγαστικό", "πρώτη κατοικία", "σπίτι ενοίκιο"],
-  "Ακρίβεια / κόστος ζωής": ["ακρίβεια", "κόστος ζωής", "τιμές σούπερ μάρκετ", "ρεύμα"],
-  "Οικονομία": ["οικονομία", "φόροι", "ανάπτυξη", "πληθωρισμός"],
-  "Δικαιοσύνη": ["δικαιοσύνη", "δικαστήρια", "ποινικός κώδικας", "αποφυλάκιση"],
-  "Θεσμοί / διαφάνεια": ["θεσμοί", "διαφάνεια", "σκάνδαλο", "ανεξάρτητες αρχές"],
-  "Άμυνα": ["άμυνα", "ελληνοτουρκικά", "navtex", "ένοπλες δυνάμεις"],
-  "Άμυνα / Εθνικά": ["άμυνα", "ελληνοτουρκικά", "navtex", "ένοπλες δυνάμεις"],
-  "Εξωτερική πολιτική": ["εξωτερική πολιτική", "ελλάδα τουρκία", "ευρωπαϊκή ένωση", "state department"],
-  "Γεωπολιτική": ["γεωπολιτική", "ουκρανία", "μέση ανατολή", "τουρκία"],
-  "Υγεία": ["υγεία", "νοσοκομεία", "ΕΣΥ", "γιατροί"],
-  "Παιδεία": ["παιδεία", "σχολεία", "εκπαίδευση", "πανελλήνιες"],
-  "Πανεπιστήμια": ["πανεπιστήμια", "φοιτητές", "ιδιωτικά πανεπιστήμια", "πανεπιστημιακή αστυνομία"],
-  "Εργασία": ["εργασία", "μισθοί", "ανεργία", "εργασιακά"],
-  "Αγροτικά": ["αγρότες", "αγροτικά", "ΟΠΕΚΕΠΕ", "επιδοτήσεις"],
-  "Ενέργεια": ["ρεύμα", "τιμή ρεύματος", "ενέργεια", "λογαριασμοί ρεύματος"],
-  "Μεταναστευτικό": ["μεταναστευτικό", "μετανάστες", "άσυλο", "προσφυγικό"],
-  "Ασφάλεια / εγκληματικότητα": ["εγκληματικότητα", "ασφάλεια", "αστυνομία", "ΕΛΑΣ"],
-  "Περιβάλλον / κλιματική κρίση": ["κλιματική κρίση", "περιβάλλον", "πυρκαγιές", "πλημμύρες"],
-  "Πολιτική προστασία": ["πολιτική προστασία", "πυρκαγιές", "112", "κακοκαιρία"],
-  "Υποδομές / μεταφορές": ["μετρό", "τρένα", "συγκοινωνίες", "υποδομές"],
-  "Ψηφιακή πολιτική / τεχνολογία": ["τεχνολογία", "ψηφιακή πολιτική", "AI", "κυβερνοασφάλεια"],
-  "Φορολογία": ["φόροι", "φορολογία", "τεκμήρια", "εφορία"],
-  "Ασφαλιστικό / συντάξεις": ["συντάξεις", "ασφαλιστικό", "ΕΦΚΑ", "συνταξιούχοι"],
-  "Νεολαία": ["νέοι", "νεολαία", "φοιτητές", "εργασία νέων"],
-  "Ισότητα / συμπερίληψη": ["ισότητα", "δικαιώματα", "ΛΟΑΤΚΙ", "συμπερίληψη"],
-  "Τοπική αυτοδιοίκηση": ["δήμος", "περιφέρεια", "αυτοδιοίκηση", "δήμαρχος"],
-  "Πολιτισμός": ["πολιτισμός", "υπουργείο πολιτισμού", "μουσεία", "καλλιτέχνες"],
-  "Αθλητισμός": ["αθλητισμός", "ποδόσφαιρο", "μπάσκετ", "οπαδική βία"],
+const REGION = "GR";
+const TIMEFRAME = "now 7-d"; // κλειδί συμβατότητας με το situation-engine
+const WIKI_PROJECT = "el.wikipedia";
+const NEUTRAL = 50;
+const MAX_TOPICS_PER_RUN = 35;
+const WINDOW_DAYS = 30;
+const TREND_PROVIDER = process.env.TREND_PROVIDER || "wikipedia"; // μελλοντικά: "serpapi"
+
+// Θέμα -> υποψήφια άρθρα ελληνικής Wikipedia (όποιο δεν υπάρχει, αγνοείται)
+const TOPIC_WIKI: Record<string, string[]> = {
+  "Κοινωνία": ["Κοινωνία"],
+  "Πολιτική": ["Πολιτική"],
+  "Στέγαση": ["Στέγαση", "Κατοικία"],
+  "Ακρίβεια / κόστος ζωής": ["Πληθωρισμός", "Ακρίβεια"],
+  "Οικονομία": ["Οικονομία της Ελλάδας", "Οικονομία"],
+  "Δικαιοσύνη": ["Δικαιοσύνη"],
+  "Θεσμοί / διαφάνεια": ["Διαφθορά", "Διαφάνεια"],
+  "Άμυνα": ["Ελληνοτουρκικές σχέσεις", "Ένοπλες Δυνάμεις"],
+  "Άμυνα / Εθνικά": ["Ελληνοτουρκικές σχέσεις", "Ένοπλες Δυνάμεις"],
+  "Εξωτερική πολιτική": ["Εξωτερική πολιτική της Ελλάδας", "Διπλωματία"],
+  "Γεωπολιτική": ["Γεωπολιτική", "Ρωσοουκρανικός πόλεμος"],
+  "Υγεία": ["Εθνικό Σύστημα Υγείας", "Σύστημα υγείας"],
+  "Παιδεία": ["Εκπαίδευση στην Ελλάδα", "Εκπαίδευση"],
+  "Πανεπιστήμια": ["Πανεπιστήμιο"],
+  "Εργασία": ["Ανεργία", "Εργασία"],
+  "Αγροτικά": ["Γεωργία", "Αγρότης"],
+  "Ενέργεια": ["Ηλεκτρική ενέργεια", "Ενέργεια"],
+  "Μεταναστευτικό": ["Μετανάστευση", "Προσφυγική κρίση"],
+  "Ασφάλεια / εγκληματικότητα": ["Εγκληματικότητα", "Έγκλημα"],
+  "Περιβάλλον / κλιματική κρίση": ["Κλιματική αλλαγή", "Περιβάλλον"],
+  "Πολιτική προστασία": ["Πολιτική προστασία", "Δασική πυρκαγιά"],
+  "Υποδομές / μεταφορές": ["Μεταφορά", "Υποδομή"],
+  "Ψηφιακή πολιτική / τεχνολογία": ["Τεχνητή νοημοσύνη", "Τεχνολογία"],
+  "Φορολογία": ["Φόρος", "Φορολογία"],
+  "Ασφαλιστικό / συντάξεις": ["Σύνταξη", "Κοινωνική ασφάλιση"],
+  "Νεολαία": ["Νεολαία"],
+  "Ισότητα / συμπερίληψη": ["Ισότητα των φύλων", "ΛΟΑΤ"],
+  "Τοπική αυτοδιοίκηση": ["Τοπική αυτοδιοίκηση"],
+  "Πολιτισμός": ["Πολιτισμός"],
+  "Αθλητισμός": ["Αθλητισμός", "Ποδόσφαιρο"],
 };
 
 function svc() {
@@ -51,123 +73,135 @@ function svc() {
   );
 }
 
-function stripGooglePrefix(raw: string) {
-  return raw.replace(/^\)\]\}',?\s*/, "").trim();
-}
-
-function safeJsonParse(raw: string) {
-  try {
-    return JSON.parse(stripGooglePrefix(raw));
-  } catch {
-    return null;
-  }
-}
-
-function clampScore(value: number, fallback = NEUTRAL_SEARCH_INTEREST) {
-  if (!Number.isFinite(value)) return fallback;
+function clamp(value: number) {
+  if (!Number.isFinite(value)) return NEUTRAL;
   return Math.min(100, Math.max(0, Math.round(value)));
 }
 
-function normalizeQueries(topic: string) {
-  const mapped = TOPIC_QUERIES[topic] || [topic];
-  return Array.from(new Set(mapped.map((q) => q.trim()).filter(Boolean))).slice(0, 5);
+function ratioToScore(ratio: number): number {
+  if (!Number.isFinite(ratio) || ratio <= 0) return NEUTRAL;
+  if (ratio >= 1) return clamp(50 + Math.min(50, (ratio - 1) * 50));
+  return clamp(Math.max(0, 50 * ratio));
 }
 
-function recentAverage(values: number[], take = 7) {
-  const recent = values.slice(-take).filter((n) => Number.isFinite(n));
-  if (!recent.length) return null;
-  return recent.reduce((sum, n) => sum + n, 0) / recent.length;
+function fmtDate(d: Date): string {
+  const y = d.getUTCFullYear();
+  const m = String(d.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(d.getUTCDate()).padStart(2, "0");
+  return `${y}${m}${day}`;
 }
 
-async function fetchGoogleTrendsScore(topic: string): Promise<{
+function titlesFor(topic: string): string[] {
+  const mapped = TOPIC_WIKI[topic] || [topic];
+  return Array.from(new Set(mapped.map((t) => t.trim()).filter(Boolean))).slice(0, 3);
+}
+
+// Καθημερινές προβολές ενός άρθρου τις τελευταίες WINDOW_DAYS μέρες.
+async function fetchArticleDailyViews(title: string): Promise<number[]> {
+  const end = new Date();
+  const start = new Date();
+  start.setUTCDate(start.getUTCDate() - WINDOW_DAYS);
+
+  const encoded = encodeURIComponent(title.replace(/\s+/g, "_"));
+  const url =
+    `https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/` +
+    `${WIKI_PROJECT}/all-access/all-agents/${encoded}/daily/${fmtDate(start)}/${fmtDate(end)}`;
+
+  const res = await fetch(url, {
+    headers: {
+      "user-agent": "Noraya/1.0 (political-intelligence; https://noraya.vercel.app)",
+      accept: "application/json",
+    },
+    cache: "no-store",
+  });
+  if (!res.ok) return []; // 404 = δεν υπάρχει άρθρο -> αγνόησέ το
+  const data = await res.json().catch(() => null);
+  const items = Array.isArray(data?.items) ? data.items : [];
+  return items.map((it: any) => Number(it?.views) || 0);
+}
+
+async function fetchWikipediaAttentionScore(topic: string): Promise<{
   score: number;
   status: string;
   queries: string[];
   rawPayload: any;
   error?: string;
 }> {
-  const queries = normalizeQueries(topic);
+  const titles = titlesFor(topic);
 
-  const comparisonItem = queries.map((keyword) => ({ keyword, geo: REGION, time: TIMEFRAME }));
-  const exploreReq = { comparisonItem, category: 0, property: "" };
-  const exploreUrl =
-    "https://trends.google.com/trends/api/explore?" +
-    new URLSearchParams({
-      hl: "el-GR",
-      tz: "-180",
-      req: JSON.stringify(exploreReq),
-    }).toString();
+  // Άθροισε καθημερινές προβολές σε όλα τα άρθρα του θέματος (ευθυγραμμισμένα στο τέλος)
+  const seriesList = await Promise.all(titles.map((t) => fetchArticleDailyViews(t)));
+  const usable = seriesList.filter((s) => s.length > 0);
 
-  const headers = {
-    "user-agent":
-      "Mozilla/5.0 (compatible; NorayaTrendRefresh/1.0; +https://noraya.vercel.app)",
-    accept: "application/json,text/plain,*/*",
-  };
-
-  const exploreRes = await fetch(exploreUrl, { headers, cache: "no-store" });
-  const exploreRaw = await exploreRes.text();
-  if (!exploreRes.ok) {
-    return { score: NEUTRAL_SEARCH_INTEREST, status: `unavailable_${exploreRes.status}`, queries, rawPayload: {}, error: exploreRaw.slice(0, 200) };
+  if (!usable.length) {
+    return {
+      score: NEUTRAL,
+      status: "wikipedia_pending_no_article",
+      queries: titles,
+      rawPayload: { topic, project: WIKI_PROJECT, note: "Δεν βρέθηκαν άρθρα/δεδομένα." },
+    };
   }
 
-  const explore = safeJsonParse(exploreRaw);
-  const widget = explore?.widgets?.find((w: any) => w?.id === "TIMESERIES" || w?.type === "fe_line_chart");
-  if (!widget?.request || !widget?.token) {
-    return { score: NEUTRAL_SEARCH_INTEREST, status: "unavailable_no_widget", queries, rawPayload: { explore }, error: "No TIMESERIES widget" };
+  const len = Math.max(...usable.map((s) => s.length));
+  const totalByDay: number[] = [];
+  for (let i = 0; i < len; i++) {
+    let sum = 0;
+    for (const s of usable) {
+      const v = s[s.length - len + i];
+      if (Number.isFinite(v)) sum += v;
+    }
+    totalByDay.push(sum);
   }
 
-  const dataUrl =
-    "https://trends.google.com/trends/api/widgetdata/multiline?" +
-    new URLSearchParams({
-      hl: "el-GR",
-      tz: "-180",
-      req: JSON.stringify(widget.request),
-      token: widget.token,
-    }).toString();
+  const recent = totalByDay.slice(-7);
+  const baseline = totalByDay.length > 7 ? totalByDay.slice(0, -7) : totalByDay;
+  const avg = (arr: number[]) => (arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0);
+  const recentAvg = avg(recent);
+  const baselineAvg = avg(baseline);
 
-  const dataRes = await fetch(dataUrl, { headers, cache: "no-store" });
-  const dataRaw = await dataRes.text();
-  if (!dataRes.ok) {
-    return { score: NEUTRAL_SEARCH_INTEREST, status: `unavailable_${dataRes.status}`, queries, rawPayload: { explore }, error: dataRaw.slice(0, 200) };
+  const totalViews = totalByDay.reduce((a, b) => a + b, 0);
+  if (totalViews < 30) {
+    // πολύ λίγα δεδομένα -> ειλικρινές pending, όχι ψεύτικη μέτρηση
+    return {
+      score: NEUTRAL,
+      status: "wikipedia_pending_low_data",
+      queries: titles,
+      rawPayload: { topic, totalViews, recentAvg, baselineAvg },
+    };
   }
 
-  const data = safeJsonParse(dataRaw);
-  const timeline = Array.isArray(data?.default?.timelineData) ? data.default.timelineData : [];
-  if (!timeline.length) {
-    return { score: NEUTRAL_SEARCH_INTEREST, status: "unavailable_no_timeline", queries, rawPayload: { explore, data }, error: "No timeline" };
-  }
-
-  const perQueryValues: number[][] = queries.map(() => []);
-  for (const point of timeline) {
-    const values = Array.isArray(point?.value) ? point.value : [];
-    values.forEach((value: any, index: number) => {
-      if (perQueryValues[index]) perQueryValues[index].push(Number(value));
-    });
-  }
-
-  const queryAverages = perQueryValues
-    .map((values) => recentAverage(values, 7))
-    .filter((n): n is number => typeof n === "number" && Number.isFinite(n));
-
-  const average = queryAverages.length
-    ? queryAverages.reduce((sum, n) => sum + n, 0) / queryAverages.length
-    : NEUTRAL_SEARCH_INTEREST;
-
+  const ratio = baselineAvg > 0 ? recentAvg / baselineAvg : 1;
   return {
-    score: clampScore(average),
-    status: "google_trends",
-    queries,
+    score: ratioToScore(ratio),
+    status: "wikipedia_attention",
+    queries: titles,
     rawPayload: {
-      note: "Google Trends returns relative search interest 0-100 for the selected queries, region and timeframe.",
       topic,
-      region: REGION,
-      timeframe: TIMEFRAME,
-      queryAverages,
+      project: WIKI_PROJECT,
+      note: "Σήμα δημόσιας προσοχής: αναγνώσεις Wikipedia, 7 μέρες vs baseline 30 ημερών.",
+      recentAvg: Math.round(recentAvg),
+      baselineAvg: Math.round(baselineAvg),
+      ratio: Number(ratio.toFixed(2)),
+      titlesUsed: titles,
     },
   };
 }
 
-async function upsertTrendSignal(supabase: ReturnType<typeof svc>, topic: string, result: Awaited<ReturnType<typeof fetchGoogleTrendsScore>>) {
+async function fetchAttentionScore(topic: string) {
+  // Σημείο επέκτασης: αν TREND_PROVIDER === "serpapi" -> fetchSerpApiTrendScore(topic)
+  // Προς το παρόν, μόνο Wikipedia (δωρεάν, αξιόπιστο).
+  if (TREND_PROVIDER === "serpapi") {
+    // Μελλοντικά: εδώ μπαίνει η κλήση SerpApi με process.env.SERPAPI_KEY.
+    // Μέχρι να υλοποιηθεί, πέφτουμε με ασφάλεια στο Wikipedia.
+  }
+  return fetchWikipediaAttentionScore(topic);
+}
+
+async function upsertTrendSignal(
+  supabase: ReturnType<typeof svc>,
+  topic: string,
+  result: Awaited<ReturnType<typeof fetchAttentionScore>>
+) {
   const { error } = await supabase.from("topic_trend_signals").upsert(
     {
       topic,
@@ -183,7 +217,6 @@ async function upsertTrendSignal(supabase: ReturnType<typeof svc>, topic: string
     },
     { onConflict: "topic,region,timeframe" }
   );
-
   if (error) throw new Error(error.message);
 }
 
@@ -210,34 +243,35 @@ async function handle(request: Request) {
         .map((row: any) => String(row?.name || "").trim())
         .filter(Boolean);
 
-  const done: Array<{ topic: string; score: number; status: string; queries: string[]; error?: string }> = [];
+  const done: Array<{ topic: string; score: number; status: string; error?: string }> = [];
 
   for (const topic of topics) {
     try {
-      const result = await fetchGoogleTrendsScore(topic);
+      const result = await fetchAttentionScore(topic);
       await upsertTrendSignal(supabase, topic, result);
-      done.push({ topic, score: result.score, status: result.status, queries: result.queries, error: result.error });
+      done.push({ topic, score: result.score, status: result.status, error: result.error });
     } catch (e: any) {
       const fallback = {
-        score: NEUTRAL_SEARCH_INTEREST,
+        score: NEUTRAL,
         status: "error_fallback_50",
-        queries: normalizeQueries(topic),
+        queries: titlesFor(topic),
         rawPayload: {},
         error: String(e?.message || e),
       };
       try {
         await upsertTrendSignal(supabase, topic, fallback);
       } catch {}
-      done.push({ topic, score: fallback.score, status: fallback.status, queries: fallback.queries, error: fallback.error });
+      done.push({ topic, score: fallback.score, status: fallback.status, error: fallback.error });
     }
   }
 
   return NextResponse.json({
     ok: true,
+    provider: TREND_PROVIDER,
     region: REGION,
     timeframe: TIMEFRAME,
     processed: done.length,
-    note: "Google Trends is relative search interest, not polling or absolute search volume. Fallback score is 50.",
+    note: "Σήμα δημόσιας προσοχής από Wikipedia pageviews (momentum 7d vs 30d). Δεν είναι Google Trends.",
     results: done,
   });
 }
@@ -245,7 +279,6 @@ async function handle(request: Request) {
 export async function GET(request: Request) {
   return handle(request);
 }
-
 export async function POST(request: Request) {
   return handle(request);
 }
