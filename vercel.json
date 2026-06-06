@@ -10,6 +10,10 @@
       "schedule": "20 */3 * * *"
     },
     {
+      "path": "/api/trends/refresh?token=dev",
+      "schedule": "0 4 * * *"
+    },
+    {
       "path": "/api/situation-engine/detect-events",
       "schedule": "0 5,13 * * *"
     },
