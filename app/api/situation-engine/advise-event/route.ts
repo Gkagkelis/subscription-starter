@@ -47,6 +47,35 @@ function parseAiJson(raw: string): any | null {
     const match = s.match(/\{[\s\S]*\}/);
     if (match) parsed = tryParse(match[0]);
   }
+
+  // Σωσίβιο: αν το JSON κόπηκε (truncated), κλείσε ό,τι έμεινε ανοιχτό
+  // ώστε να σωθούν τα πρώτα (και σημαντικότερα) τμήματα της ανάλυσης.
+  if (!parsed) {
+    const start = s.indexOf("{");
+    if (start >= 0) {
+      let body = s.slice(start);
+      let depthCurly = 0;
+      let depthSquare = 0;
+      let inStr = false;
+      let esc = false;
+      for (const ch of body) {
+        if (esc) { esc = false; continue; }
+        if (ch === "\\") { esc = true; continue; }
+        if (ch === '"') { inStr = !inStr; continue; }
+        if (inStr) continue;
+        if (ch === "{") depthCurly++;
+        else if (ch === "}") depthCurly--;
+        else if (ch === "[") depthSquare++;
+        else if (ch === "]") depthSquare--;
+      }
+      if (inStr) body += '"';
+      body = body.replace(/,\s*$/, "");
+      while (depthSquare-- > 0) body += "]";
+      while (depthCurly-- > 0) body += "}";
+      parsed = tryParse(body);
+    }
+  }
+
   return parsed || null;
 }
 
@@ -121,7 +150,7 @@ ${evidence || "—"}
 - Επίστρεψε ΜΟΝΟ έγκυρο JSON.
 - ΧΩΡΙΣ markdown.
 - ΧΩΡΙΣ \`\`\` code fences.
-- Κράτα κάθε πεδίο κειμένου σύντομο αλλά συγκεκριμένο.`;
+- Κράτα κάθε πεδίο κειμένου ζεστό αλλά ΣΥΝΤΟΜΟ: 1-3 προτάσεις, χωρίς φλυαρία.`;
 }
 
 function buildSystem() {
@@ -164,7 +193,7 @@ async function callAnthropic(
       },
       body: JSON.stringify({
         model: ANALYSIS_MODEL,
-        max_tokens: 6000,
+        max_tokens: 8000,
         system: [{ type: "text", text: system, cache_control: { type: "ephemeral" } }],
         messages: [{ role: "user", content: user }],
       }),
