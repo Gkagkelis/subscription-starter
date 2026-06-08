@@ -21,6 +21,9 @@ type StrategicBrief = {
     agenda_status?: string;
     urgency?: string;
     dominant_frame?: string;
+    dominant_emotion?: string;
+    emotion_intensity?: number;
+    social_spread?: string;
     priming_risk?: string;
     political_risk?: string;
     opportunity?: string;
@@ -1732,16 +1735,23 @@ function ActiveSituationWorkspace({
 
 function PublicPulsePanel({ situation, brief }: { situation: LiveSituationRow | null; brief: StrategicBrief }) {
   const pulse = asRecord(situation?.public_pulse);
-  const score = publicPulseScore(situation);
+  const emotion = pickString(pulse, ["dominant_emotion", "emotion"], text(brief.issue?.dominant_emotion, "Υπό αξιολόγηση"));
+  const frame = pickString(pulse, ["dominant_public_frame", "dominant_frame", "frame"], text(brief.issue?.dominant_frame, "Υπό αξιολόγηση"));
+  const intensityRaw =
+    typeof brief.issue?.emotion_intensity === "number" ? brief.issue.emotion_intensity : publicPulseScore(situation);
+  const intensity = Math.min(100, Math.max(0, Math.round(intensityRaw)));
+  const spreadKey = String(brief.issue?.social_spread || pickString(pulse, ["social_spread"], "")).toLowerCase();
+  const spreadLabel =
+    spreadKey === "high" ? "Υψηλή" : spreadKey === "medium" ? "Μεσαία" : spreadKey === "low" ? "Χαμηλή" : "Υπό αξιολόγηση";
 
   return (
-    <CockpitSection title="PUBLIC PULSE – ΕΝΔΕΙΞΕΙΣ ΚΟΙΝΟΥ" subtitle="Signal, όχι δημοσκόπηση">
+    <CockpitSection title="PUBLIC PULSE – ΕΝΔΕΙΞΕΙΣ ΚΟΙΝΟΥ" subtitle="Signal από την κάλυψη, όχι δημοσκόπηση">
       <div className="grid gap-4 xl:grid-cols-[170px_1fr]">
-        <Gauge score={score} label="Κοινωνική διάθεση" />
+        <Gauge score={intensity} label="Ένταση συναισθήματος" />
         <div className="grid gap-3">
-          <MiniBox title="Κυρίαρχο συναίσθημα" textValue={pickString(pulse, ["dominant_emotion", "emotion"], text(brief.issue?.political_risk, "Δεν έχει υπολογιστεί ακόμη."))} />
-          <MiniBox title="Κυρίαρχο framing" textValue={pickString(pulse, ["dominant_public_frame", "dominant_frame", "frame"], text(brief.issue?.dominant_frame, "Δεν υπάρχει ακόμη public pulse framing."))} />
-          <MiniBox title="Bias warning" textValue={pickString(pulse, ["bias_warning", "warning"], "Οι ενδείξεις κοινού δεν υποκαθιστούν verified δημοσκόπηση.")} />
+          <MiniBox title="Κυρίαρχο συναίσθημα" textValue={emotion} />
+          <MiniBox title="Κυρίαρχο framing" textValue={frame} />
+          <MiniBox title="Κοινωνική διάδοση" textValue={spreadLabel} />
         </div>
       </div>
     </CockpitSection>
