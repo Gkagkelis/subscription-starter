@@ -63,6 +63,14 @@ Agenda → Framing → Priming → Audience → Persuasion → Scenarios → Mob
 - Δεν ισχυρίζεσαι ότι γνωρίζεις πραγματική πρόθεση ψηφοφόρων χωρίς δεδομένα.
 - Προσαρμόζεις τη σύσταση στο προφίλ του χρήστη, στο κόμμα, στις κόκκινες γραμμές και στον τόνο του.
 
+ΕΝΔΕΙΞΕΙΣ ΚΟΙΝΟΥ & ΟΔΗΓΟΙ (τίμιες, από τα δεδομένα — όχι αυθαίρετες):
+- dominant_emotion: ο κυρίαρχος συναισθηματικός τόνος της κάλυψης (π.χ. Θυμός, Οργή, Αγανάκτηση, Ανησυχία, Απογοήτευση, Ικανοποίηση, Θαυμασμός). Διάλεξε ό,τι ταιριάζει στα άρθρα — ΟΧΙ πάντα αρνητικό.
+- emotion_intensity: 0-100, η ένταση βάσει όγκου άρθρων, ταχύτητας κάλυψης και έντασης του framing.
+- social_spread: "low"/"medium"/"high", πόσο διαδίδεται/τραβάει προσοχή το θέμα (public attention signal + πλήθος πηγών).
+- key_drivers: 3-5 παράγοντες που κινούν ΑΥΤΟ το θέμα, ο καθένας με ανθρώπινη ετικέτα (π.χ. "Κόστος διαβίωσης", "Αίσθηση αδικίας") και value 0-100. Διαφορετικές ετικέτες ανά θέμα.
+- red_team: 3-5 τρόποι με τους οποίους ο αντίπαλος μπορεί να σε χτυπήσει σε αυτό το θέμα.
+- escalation_stage: 1-6 (1=παρακολούθηση, 6=σύγκρουση) — πού βρίσκεται τώρα το θέμα.
+
 ΓΛΩΣΣΑ:
 - Ελληνικά.
 - Καθαρή, δυνατή, ανθρώπινη γλώσσα.
@@ -93,6 +101,9 @@ export function buildNorayaStrategicJsonInstruction() {
     "locality_signal": string,
     "public_attention_signal": string,
     "dominant_frame": string,
+    "dominant_emotion": string,
+    "emotion_intensity": number,
+    "social_spread": "low" | "medium" | "high",
     "priming_risk": string,
     "affected_audiences": string[],
     "political_risk": string,
@@ -152,6 +163,11 @@ export function buildNorayaStrategicJsonInstruction() {
     "watch_media": string[],
     "escalation_triggers": string[]
   },
+  "key_drivers": [
+    { "label": string, "value": number }
+  ],
+  "red_team": string[],
+  "escalation_stage": number,
   "evidence": {
     "basis": string,
     "data_points": string[],
@@ -186,6 +202,9 @@ export function createFallbackStrategicBrief(params: {
         "Η τοπική διάσταση δεν έχει αποτιμηθεί πλήρως στο fallback brief.",
       public_attention_signal: "Δεν υπάρχει ακόμη πλήρες public attention signal.",
       dominant_frame: "Το dominant framing χρειάζεται περαιτέρω ανάλυση.",
+      dominant_emotion: "Ουδέτερο / υπό αξιολόγηση",
+      emotion_intensity: 30,
+      social_spread: "low",
       priming_risk:
         "Το θέμα μπορεί να επηρεάσει το κριτήριο με το οποίο θα αξιολογηθεί ο οργανισμός, αλλά η ένταση δεν είναι ακόμη ασφαλής.",
       affected_audiences: [
@@ -330,6 +349,16 @@ export function createFallbackStrategicBrief(params: {
         "Μετατόπιση framing σε ευθύνη ή λογοδοσία.",
       ],
     },
+    key_drivers: [
+      { label: "Δημόσια προσοχή στο θέμα", value: 40 },
+      { label: "Πίεση στην ατζέντα", value: 35 },
+      { label: "Ανάγκη τεκμηρίωσης", value: 30 },
+    ],
+    red_team: [
+      "Ο αντίπαλος μπορεί να εκμεταλλευτεί τυχόν βιαστική τοποθέτηση.",
+      "Μπορεί να κατηγορήσει για έλλειψη συγκεκριμένης πρότασης.",
+    ],
+    escalation_stage: 1,
     evidence: {
       basis:
         "Fallback strategic brief βασισμένο στα διαθέσιμα agenda signals και στο προφίλ χρήστη.",
