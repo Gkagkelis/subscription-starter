@@ -268,7 +268,7 @@ async function processOneEvent(
   return { status: "ai", title: ev.title };
 }
 
-async function pickForceEventIds(supabase: ReturnType<typeof svc>, requestedId: string | null) {
+async function pickForceEventIds(supabase: ReturnType<typeof svc>, requestedId: string | null, limit: number) {
   if (requestedId) return [requestedId];
 
   const { data } = await supabase
@@ -276,7 +276,7 @@ async function pickForceEventIds(supabase: ReturnType<typeof svc>, requestedId: 
     .select("id")
     .order("event_score", { ascending: false })
     .order("last_article_at", { ascending: false, nullsFirst: false })
-    .limit(MAX_EVENTS_PER_RUN);
+    .limit(limit);
 
   return Array.isArray(data) ? data.map((row: any) => row.id).filter(Boolean) : [];
 }
@@ -290,11 +290,17 @@ async function handle(request: Request) {
     const system = buildSystem();
 
     if (force) {
-      const ids = await pickForceEventIds(supabase, requestedId);
+      // Λίγα τη φορά + όριο χρόνου, ώστε να μην ξεπερνά τον χρόνο του Vercel (504).
+      const forceLimit = requestedId
+        ? 1
+        : Math.max(1, Math.min(MAX_EVENTS_PER_RUN, Number(url.searchParams.get("limit")) || 2));
+      const ids = await pickForceEventIds(supabase, requestedId, forceLimit);
       const done: Array<{ title?: string }> = [];
       let aiError: string | null = null;
+      const startedAt = Date.now();
 
       for (const id of ids) {
+        if (Date.now() - startedAt > BUDGET_MS) break;
         const r = await processOneEvent(supabase, system, id);
         if (r.status === "ai_down") {
           aiError = r.ai_error || "ai_down";
