@@ -153,6 +153,31 @@ ${evidence || "—"}
 - Κράτα κάθε πεδίο κειμένου ζεστό αλλά ΣΥΝΤΟΜΟ: 1-3 προτάσεις, χωρίς φλυαρία.`;
 }
 
+async function loadPartyProfile(supabase: ReturnType<typeof svc>, partyKey: string) {
+  if (!partyKey) return null;
+  try {
+    const { data } = await supabase
+      .from("political_party_profiles")
+      .select("*")
+      .eq("party_key", partyKey)
+      .maybeSingle();
+    return data || null;
+  } catch {
+    return null;
+  }
+}
+
+function buildPartySystem(base: string, partyProfile: any, partyKey: string) {
+  if (!partyProfile) return base;
+  return `${base}
+
+ΓΙΑ ΠΟΙΟΝ ΔΟΥΛΕΥΕΙΣ — ΚΡΙΣΙΜΟ:
+Είσαι ο ΠΡΟΣΩΠΙΚΟΣ σύμβουλος του κόμματος με key "${partyKey}". ΟΛΕΣ οι συμβουλές δίνονται ΑΠΟ ΤΗ ΔΙΚΗ ΤΟΥ ΣΚΟΠΙΑ: τι κάνει, τι λέει, πώς τοποθετείται ΑΥΤΟ το κόμμα — ΟΧΙ "τι πρέπει να κάνει η κυβέρνηση" (εκτός αν αυτό το κόμμα ΕΙΝΑΙ η κυβέρνηση). Σέβεσαι απόλυτα τη θέση, τον τόνο, τις κόκκινες γραμμές και τις advisor_instructions του προφίλ. Αν το γεγονός αφορά αντίπαλο ή την κυβέρνηση, η σύστασή σου είναι πώς το εκμεταλλεύεται ή απαντά ΑΥΤΟ το κόμμα.
+
+ΠΡΟΦΙΛ ΚΟΜΜΑΤΟΣ (JSON):
+${JSON.stringify(partyProfile)}`;
+}
+
 function buildSystem() {
   return `${buildNorayaStrategicSystemPrompt()}
 
@@ -221,7 +246,8 @@ async function callAnthropic(
 async function processOneEvent(
   supabase: ReturnType<typeof svc>,
   system: string,
-  eventId: string
+  eventId: string,
+  partyKey: string
 ): Promise<{ status: "ai" | "ai_down"; title?: string; ai_error?: string | null }> {
   const { data: ev, error } = await supabase
     .from("v_political_events_live")
@@ -251,20 +277,23 @@ async function processOneEvent(
   const summary = brief?.daily_brief?.what_is_happening || ev.summary || null;
 
   await supabase
-    .from("political_events")
-    .update({
-      advisor_brief: brief,
-      framing_summary: framing,
-      recommended_action: recommended,
-      avoid_action: avoid,
-      red_team_warning: redTeam,
-      summary,
-      brief_generated_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", eventId);
+    .from("event_party_briefs")
+    .upsert(
+      {
+        event_id: eventId,
+        party_key: partyKey,
+        advisor_brief: brief,
+        framing_summary: framing,
+        recommended_action: recommended,
+        avoid_action: avoid,
+        red_team_warning: redTeam,
+        summary,
+        brief_generated_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "event_id,party_key" }
+    );
 
-  await supabase.rpc("mark_event_briefed", { p_event_id: eventId });
   return { status: "ai", title: ev.title };
 }
 
@@ -287,7 +316,9 @@ async function handle(request: Request) {
     const url = new URL(request.url);
     const requestedId = url.searchParams.get("event_id");
     const force = url.searchParams.get("force") === "1" || url.searchParams.get("force") === "true";
-    const system = buildSystem();
+    const partyKey = url.searchParams.get("party") || "elas";
+    const partyProfile = await loadPartyProfile(supabase, partyKey);
+    const system = buildPartySystem(buildSystem(), partyProfile, partyKey);
 
     if (force) {
       // Λίγα τη φορά + όριο χρόνου, ώστε να μην ξεπερνά τον χρόνο του Vercel (504).
@@ -301,7 +332,7 @@ async function handle(request: Request) {
 
       for (const id of ids) {
         if (Date.now() - startedAt > BUDGET_MS) break;
-        const r = await processOneEvent(supabase, system, id);
+        const r = await processOneEvent(supabase, system, id, partyKey);
         if (r.status === "ai_down") {
           aiError = r.ai_error || "ai_down";
           break;
@@ -319,7 +350,7 @@ async function handle(request: Request) {
     }
 
     if (requestedId) {
-      const r = await processOneEvent(supabase, system, requestedId);
+      const r = await processOneEvent(supabase, system, requestedId, partyKey);
       return NextResponse.json({ ok: true, mode: "single", analyzed: r.status === "ai" ? 1 : 0, ai_error: r.ai_error || null, processed: r });
     }
 
@@ -329,11 +360,11 @@ async function handle(request: Request) {
     let count = 0;
 
     while (count < MAX_EVENTS_PER_RUN && Date.now() - startedAt < BUDGET_MS) {
-      const { data: nextId } = await supabase.rpc("pick_next_event_for_brief");
+      const { data: nextId } = await supabase.rpc("pick_next_event_for_party_brief", { p_party_key: partyKey });
       const eventId = (nextId as string) || null;
       if (!eventId) break;
 
-      const r = await processOneEvent(supabase, system, eventId);
+      const r = await processOneEvent(supabase, system, eventId, partyKey);
       if (r.status === "ai_down") {
         aiError = r.ai_error || "ai_down";
         break;
@@ -342,7 +373,7 @@ async function handle(request: Request) {
       count += 1;
     }
 
-    const { data: more } = await supabase.rpc("pick_next_event_for_brief");
+    const { data: more } = await supabase.rpc("pick_next_event_for_party_brief", { p_party_key: partyKey });
 
     return NextResponse.json({
       ok: true,
