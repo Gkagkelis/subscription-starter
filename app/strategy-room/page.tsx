@@ -30,6 +30,9 @@ type StrategicBrief = {
     affected_audiences?: string[];
     documentation_level?: string;
   };
+  key_drivers?: { label?: string; value?: number }[];
+  red_team?: string[];
+  escalation_stage?: number;
   daily_brief?: {
     headline?: string;
     what_is_happening?: string;
@@ -1982,15 +1985,27 @@ function RightInspector({
 
         <InspectorPanel title="KEY DRIVERS">
           <div className="grid gap-3">
-            {(agenda.length ? agenda.slice(0, 4) : [{ topic: title, score, signalLabel: riskLabel(situation?.political_risk_level) }]).map((item, index) => (
-              <DriverBar
-                key={`${item.topic}-${index}`}
-                label={item.topic || "Driver"}
-                score={numberValue((item as RankedAgenda).score ?? score, score)}
-                trend={(item as RankedAgenda).signalLabel || riskLabel(situation?.political_risk_level)}
-                compact
-              />
-            ))}
+            {Array.isArray(brief.key_drivers) && brief.key_drivers.length ? (
+              brief.key_drivers.slice(0, 5).map((d, index) => (
+                <DriverBar
+                  key={`${d?.label || "driver"}-${index}`}
+                  label={text(d?.label, "Παράγοντας")}
+                  score={numberValue(d?.value, score)}
+                  trend=""
+                  compact
+                />
+              ))
+            ) : (
+              (agenda.length ? agenda.slice(0, 4) : [{ topic: title, score, signalLabel: riskLabel(situation?.political_risk_level) }]).map((item, index) => (
+                <DriverBar
+                  key={`${item.topic}-${index}`}
+                  label={item.topic || "Driver"}
+                  score={numberValue((item as RankedAgenda).score ?? score, score)}
+                  trend={(item as RankedAgenda).signalLabel || riskLabel(situation?.political_risk_level)}
+                  compact
+                />
+              ))
+            )}
           </div>
         </InspectorPanel>
 
@@ -2004,7 +2019,16 @@ function RightInspector({
         </InspectorPanel>
 
         <InspectorPanel title="RED TEAM">
-          {redTeam.length ? (
+          {Array.isArray(brief.red_team) && brief.red_team.length ? (
+            <div className="grid gap-2">
+              {brief.red_team.slice(0, 5).map((item, index) => (
+                <div key={index} className="rounded-2xl border border-red-300/20 bg-red-300/[0.06] p-3">
+                  <div className="text-[10px] text-red-100">#{index + 1}</div>
+                  <div className="mt-1 text-[11px] leading-5 text-zinc-200">{item}</div>
+                </div>
+              ))}
+            </div>
+          ) : redTeam.length ? (
             <div className="grid gap-2">
               {redTeam.map((item, index) => (
                 <div key={`${item.attack_text}-${index}`} className="rounded-2xl border border-red-300/20 bg-red-300/[0.06] p-3">
