@@ -1752,6 +1752,8 @@ function PublicPulsePanel({ situation, brief }: { situation: LiveSituationRow | 
   const spreadKey = String(brief.issue?.social_spread || pickString(pulse, ["social_spread"], "")).toLowerCase();
   const spreadLabel =
     spreadKey === "high" ? "Υψηλή" : spreadKey === "medium" ? "Μεσαία" : spreadKey === "low" ? "Χαμηλή" : "Υπό αξιολόγηση";
+  const spreadScore =
+    spreadKey === "high" ? 82 : spreadKey === "medium" ? 56 : spreadKey === "low" ? 30 : 50;
 
   return (
     <CockpitSection title="PUBLIC PULSE – ΕΝΔΕΙΞΕΙΣ ΚΟΙΝΟΥ" subtitle="Signal από την κάλυψη, όχι δημοσκόπηση">
@@ -1760,7 +1762,32 @@ function PublicPulsePanel({ situation, brief }: { situation: LiveSituationRow | 
         <div className="grid gap-3">
           <MiniBox title="Κυρίαρχο συναίσθημα" textValue={emotion} />
           <MiniBox title="Κυρίαρχο framing" textValue={frame} />
-          <MiniBox title="Κοινωνική διάδοση" textValue={spreadLabel} />
+          <div className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-2">
+            <span className="text-[11px] text-zinc-400">Συναίσθημα</span>
+            <div className="flex items-center gap-2">
+              <Sparkline
+                seed={`pulse-emotion-${emotion}`}
+                score={intensity}
+                series={deterministicTrendSeries(intensity, undefined, intensity)}
+                color={sparkColor(intensity)}
+                className="h-6 w-24 shrink-0"
+              />
+              <span className="text-xs font-semibold text-zinc-100">{intensity}%</span>
+            </div>
+          </div>
+          <div className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-2">
+            <span className="text-[11px] text-zinc-400">Κοινωνική διάδοση</span>
+            <div className="flex items-center gap-2">
+              <Sparkline
+                seed={`pulse-spread-${spreadKey}`}
+                score={spreadScore}
+                series={deterministicTrendSeries(spreadScore, undefined, spreadScore)}
+                color={sparkColor(spreadScore)}
+                className="h-6 w-24 shrink-0"
+              />
+              <span className="text-xs font-semibold text-zinc-100">{spreadLabel}</span>
+            </div>
+          </div>
         </div>
       </div>
     </CockpitSection>
