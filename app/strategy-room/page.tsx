@@ -1616,12 +1616,21 @@ function ActiveSituationWorkspace({
             </CockpitSection>
 
             <div className="grid gap-4 xl:grid-cols-2">
-              <CockpitSection title="2. ΤΙ ΚΑΝΟΥΜΕ ΤΩΡΑ" subtitle="Action recommendation">
-                <BulletList
-                  compact
-                  items={list(actionPlan.now)}
-                  fallback={[text(daily.immediate_recommendation, "Κρατάμε θεσμική γραμμή και παρακολουθούμε αν αλλάζει η ένταση.")]}
-                />
+              <CockpitSection title="2. ΤΙ ΚΑΝΟΥΜΕ ΤΩΡΑ — ΕΠΙΛΟΓΕΣ" subtitle="Επιλογές δράσης Α/Β/Γ από scenarios">
+                <div className="grid gap-3 md:grid-cols-3">
+                  {decisionOptions(brief).map((opt) => (
+                    <DecisionCard
+                      key={opt.label}
+                      label={opt.label}
+                      title={opt.title}
+                      move={opt.move}
+                      gain={opt.gain}
+                      risk={opt.risk}
+                      recommendation={opt.recommendation}
+                      success={opt.success}
+                    />
+                  ))}
+                </div>
               </CockpitSection>
 
               <CockpitSection title="3. WHAT WOULD CHANGE MY MIND" subtitle="Triggers παρακολούθησης">
@@ -2392,15 +2401,19 @@ function WinCard({ title, textValue, tone }: { title: string; textValue: string;
 function DecisionCard({
   label,
   title,
+  move,
   gain,
   risk,
   recommendation,
+  success,
 }: {
   label: string;
   title: string;
+  move?: string;
   gain: string;
   risk: string;
   recommendation: string;
+  success?: number;
 }) {
   return (
     <article className={`rounded-[1.5rem] border p-4 ${recommendationClass(recommendation)}`}>
@@ -2409,10 +2422,22 @@ function DecisionCard({
         <span className="rounded-full border border-current/20 px-2 py-1 text-[10px]">{recommendationLabel(recommendation)}</span>
       </div>
       <h3 className="mt-3 text-sm font-semibold leading-6 text-zinc-100">{title}</h3>
+      {move ? <p className="mt-1 text-[11px] leading-5 text-zinc-400">{move}</p> : null}
       <div className="mt-4 grid gap-2">
         <MiniBox compact title="Κέρδος" textValue={gain} />
         <MiniBox compact title="Ρίσκο" textValue={risk} />
       </div>
+      {typeof success === "number" ? (
+        <div className="mt-3">
+          <div className="flex items-center justify-between text-[10px] text-zinc-400">
+            <span>Βεβαιότητα επιτυχίας</span>
+            <span className="font-semibold text-zinc-100">{success}%</span>
+          </div>
+          <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+            <div className="h-full rounded-full bg-current/60" style={{ width: `${clamp(success)}%` }} />
+          </div>
+        </div>
+      ) : null}
     </article>
   );
 }
@@ -2423,12 +2448,17 @@ function decisionOptions(brief: StrategicBrief) {
 
   return labels.map((label, index) => {
     const scenario = scenarios[index];
+    const rec = scenario?.recommendation || (index === 1 ? "prefer" : "acceptable");
+    // Βεβαιότητα επιτυχίας: deterministic από το recommendation (όχι random).
+    const success = rec === "prefer" ? 65 : rec === "acceptable" ? 45 : rec === "avoid" ? 25 : 40;
     return {
       label,
       title: text(scenario?.name, index === 0 ? "Συντηρητική — χαμηλό ρίσκο" : index === 1 ? "Ισορροπημένη — προτεινόμενη" : "Τολμηρή — υψηλότερο ρίσκο"),
+      move: text(scenario?.move, ""),
       gain: text(scenario?.likely_gain, "Δεν έχει παραχθεί ακόμη πλήρες gain για αυτή την επιλογή."),
       risk: text(scenario?.likely_risk, "Δεν έχει παραχθεί ακόμη πλήρες risk για αυτή την επιλογή."),
-      recommendation: scenario?.recommendation || (index === 1 ? "prefer" : "acceptable"),
+      recommendation: rec,
+      success,
     };
   });
 }
