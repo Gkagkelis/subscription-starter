@@ -1661,12 +1661,12 @@ function ActiveSituationWorkspace({
 
             <CockpitSection title="5. ΕΝΤΑΣΗ & ΔΥΝΑΜΙΚΗ" subtitle="6 gauges — αρχικά από διαθέσιμα live signals">
               <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-                <Gauge score={clamp(numberValue(situation?.article_count, agenda[0]?.article_count || 0) * 8)} label="Media" small />
-                <Gauge score={clamp(score)} label="Agenda" small />
-                <Gauge score={clamp(numberValue(situation?.confidence_score, documentationScore))} label="Political" small />
-                <Gauge score={clamp(numberValue(situation?.priority_score, score))} label="Emotion" small />
-                <Gauge score={clamp(numberValue(situation?.source_count, agenda[0]?.source_count || 0) * 15)} label="Elite" small />
-                <Gauge score={clamp(Math.max(score, documentationScore))} label="Potential" small />
+                <Gauge score={clamp(numberValue(situation?.article_count, agenda[0]?.article_count || 0) * 8)} label="Media ένταση" small />
+                <Gauge score={clamp(numberValue(situation?.source_count, agenda[0]?.source_count || 0) * 15)} label="Social ένταση" small />
+                <Gauge score={clamp(numberValue(situation?.confidence_score, documentationScore))} label="Πολιτική ένταση" small />
+                <Gauge score={clamp(numberValue(issue.emotion_intensity, publicPulseScore(situation)))} label="Συναισθηματική ένταση" small />
+                <Gauge score={clamp(Math.round(numberValue(issue.emotion_intensity, publicPulseScore(situation)) * 0.6 + (score >= 70 ? 20 : score >= 50 ? 10 : 0)))} label="Κίνδυνος υπερβολής" small />
+                <Gauge score={clamp(Math.max(score, documentationScore))} label="Agenda potential" small />
               </div>
             </CockpitSection>
 
