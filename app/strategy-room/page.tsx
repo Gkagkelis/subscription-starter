@@ -1354,7 +1354,7 @@ function LeftSidebar({
   }, [situations, agenda]);
 
   return (
-    <aside className="flex w-[220px] shrink-0 flex-col overflow-hidden bg-[#060a14]">
+    <aside className="flex w-[256px] shrink-0 flex-col overflow-hidden bg-[#060a14]">
       <div className="flex-1 overflow-y-auto p-3">
         <SidebarPanel
           title="AGENDA MAP"
@@ -1367,7 +1367,7 @@ function LeftSidebar({
             <div className="grid gap-2">
               {agendaItems.map((item) => {
                 const tone = item.score >= 70 ? "red" : item.score >= 50 ? "amber" : "emerald";
-                const priorityLabel = item.score >= 70 ? "Υψηλή προτεραιότητα" : item.score >= 50 ? "Μεσαία" : "Χαμηλή";
+                const priorityLabel = item.score >= 70 ? "Υψηλή" : item.score >= 50 ? "Μεσαία" : "Χαμηλή";
                 const isExpanded = expandedTopic === item.topic;
                 const hasActiveChild = item.events.some((e) => e.id === activeSituationId);
                 return (
@@ -1402,7 +1402,7 @@ function LeftSidebar({
                         score={item.score}
                         series={deterministicTrendSeries(item.score, undefined)}
                         color={sparkColor(item.score)}
-                        className="h-7 w-12 shrink-0"
+                        className="h-6 w-9 shrink-0"
                       />
                       {item.events.length ? (
                         <span className="shrink-0 text-[10px] text-zinc-500">{isExpanded ? "▾" : "▸"}</span>
