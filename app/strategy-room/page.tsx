@@ -1343,7 +1343,8 @@ function LeftSidebar({
                     <button
                       type="button"
                       onClick={() => {
-                        setExpandedTopic((prev) => (prev === item.topic ? null : item.topic));
+                        const topicKey: string | null = item.topic ?? null;
+                        setExpandedTopic((prev) => (prev === topicKey ? null : topicKey));
                         if (item.events[0]?.id) onSelectSituation(item.events[0].id);
                       }}
                       className="group flex w-full items-center gap-2 p-3 text-left transition hover:bg-cyan-300/[0.04]"
