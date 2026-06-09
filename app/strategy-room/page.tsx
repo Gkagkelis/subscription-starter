@@ -811,6 +811,8 @@ export default function StrategyRoomPage() {
   const [error, setError] = useState("");
   const [situationWarning, setSituationWarning] = useState("");
   const [activeSituationId, setActiveSituationId] = useState<string | null>(null);
+  const [analyzingId, setAnalyzingId] = useState<string | null>(null);
+  const requestedBriefRef = useRef<Set<string>>(new Set());
   const [activeTab, setActiveTab] = useState<SituationTab>("strategic");
   const [activeOverviewTopic, setActiveOverviewTopic] = useState<string | null>(null);
 
@@ -933,6 +935,34 @@ export default function StrategyRoomPage() {
       liveSituations[0]
     );
   }, [activeSituationId, liveSituations]);
+
+  // Α: On-demand ανάλυση — αν το επιλεγμένο γεγονός δεν έχει ακόμη άποψη, ζήτα την τώρα (cached μετά).
+  useEffect(() => {
+    if (!activeSituation) return;
+    if ((activeSituation as any).advisor_brief) return;
+    const id = String((activeSituation as any).id || "");
+    if (!id || requestedBriefRef.current.has(id)) return;
+    requestedBriefRef.current.add(id);
+    const party = (data as any)?.profile?.party_key || "elas";
+    setAnalyzingId(id);
+    (async () => {
+      try {
+        await fetch(
+          `/api/situation-engine/advise-event?force=1&event_id=${encodeURIComponent(id)}&party=${encodeURIComponent(party)}`,
+          { cache: "no-store" }
+        );
+        const r = await fetch(
+          `/api/situation-engine?token=dev&party=${encodeURIComponent(party)}`,
+          { cache: "no-store" }
+        );
+        if (r.ok) setSituationEngine((await r.json()) as SituationEngineResponse);
+      } catch {
+        // αφήνουμε το id σημειωμένο ώστε να μη μπει σε loop· retry με reload
+      } finally {
+        setAnalyzingId((cur) => (cur === id ? null : cur));
+      }
+    })();
+  }, [activeSituation, data]);
 
   // Το brief προτιμά την ΑΝΑΛΥΣΗ ΤΟΥ ΕΠΙΛΕΓΜΕΝΟΥ ΓΕΓΟΝΟΤΟΣ (advisor_brief).
   // Αν το γεγονός δεν έχει ακόμη ανάλυση, πέφτει πίσω στο γενικό strategy-brief.
@@ -1118,6 +1148,13 @@ export default function StrategyRoomPage() {
               immediateRecommendation={daily.immediate_recommendation}
               avoidToday={daily.avoid_today}
             />
+
+            {analyzingId && activeSituation && String((activeSituation as any).id) === analyzingId ? (
+              <div className="mb-3 flex items-center gap-2 rounded-2xl border border-cyan-300/30 bg-cyan-300/[0.06] px-4 py-3 text-xs text-cyan-100">
+                <span className="h-2 w-2 animate-pulse rounded-full bg-cyan-300" />
+                Ο Noraya αναλύει αυτό το γεγονός για το κόμμα σου… (λίγα δευτερόλεπτα)
+              </div>
+            ) : null}
 
             <ActiveSituationWorkspace
               activeTab={activeTab}
