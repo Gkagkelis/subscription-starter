@@ -1970,17 +1970,11 @@ function RightInspector({
             <div className="mt-2 text-xs font-semibold leading-5 text-zinc-100">{title}</div>
             <div className="mt-3 flex flex-wrap gap-2">
               <span className="rounded-full border border-cyan-300/25 bg-cyan-300/10 px-2 py-1 text-[10px] text-cyan-100">{scoreSignalText(score)}</span>
-              <span className="rounded-full border border-amber-300/25 bg-amber-300/10 px-2 py-1 text-[10px] text-amber-100">Στρατηγικός Δείκτης · {intensityScore}</span>
               <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-1 text-[10px] text-zinc-300">{inspectorArticleCount} άρθρα · {inspectorSourceCount} πηγές</span>
             </div>
           </div>
           <p className="mt-3 text-[11px] leading-6 text-zinc-400">{readWhyText(situation, brief)}</p>
           <div className="mt-3 text-[10px] leading-5 text-zinc-500">Τεκμηρίωση: {documentationLabel(documentationLevel)}</div>
-          {situation ? (
-            <div className="mt-1 text-[10px] leading-5 text-zinc-500">
-              Raw {rawSignalFromSituation(situation, score)} · {searchInterestLabel(situation.search_interest_score, situation.search_interest_status)} · Boost {numberValue(situation.strategic_boost_score, 50)}
-            </div>
-          ) : null}
         </InspectorPanel>
 
         <InspectorPanel title="ΠΗΓΕΣ ΓΕΓΟΝΟΤΟΣ">
