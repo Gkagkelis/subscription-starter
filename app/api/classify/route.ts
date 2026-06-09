@@ -65,7 +65,7 @@ export async function GET(req: Request) {
   const debug = searchParams.get("debug") === "1";
 
   const classifierModel =
-    process.env.ANTHROPIC_CLASSIFIER_MODEL || "claude-sonnet-4-6";
+    process.env.ANTHROPIC_CLASSIFIER_MODEL || "claude-haiku-4-5-20251001";
 
   const { data: articles, error: fetchError } = await supabase
     .from("articles")
