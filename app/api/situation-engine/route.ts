@@ -453,15 +453,40 @@ export async function GET(req: Request) {
     totalCount = fallbackCount ?? situations.length;
   }
 
+  // ── ΦΡΕΣΚΑΔΑ 48ΩΡΟΥ στην ΠΡΑΓΜΑΤΙΚΗ πηγή ──────────────────────────────
+  // Κρίνεται από την ημερομηνία του ΠΙΟ ΠΡΟΣΦΑΤΟΥ ΑΡΘΡΟΥ του γεγονότος
+  // (όχι από updated_at/last_seen_at που τα τσιμπάει το radar).
+  const newestArticleMs = (sit: any): number => {
+    const arr = Array.isArray(sit?.evidence_articles)
+      ? sit.evidence_articles
+      : Array.isArray(sit?.evidence_snapshot)
+      ? sit.evidence_snapshot
+      : [];
+    let max = 0;
+    for (const ev of arr) {
+      const raw = ev?.published_at ?? ev?.article_published_at ?? null;
+      const t = raw ? new Date(String(raw)).getTime() : 0;
+      if (Number.isFinite(t) && t > max) max = t;
+    }
+    if (!max) {
+      const cand = sit?.last_seen_at || sit?.updated_at || sit?.created_at;
+      const t = cand ? new Date(String(cand)).getTime() : 0;
+      if (Number.isFinite(t)) max = t;
+    }
+    return max;
+  };
+  const FRESH_MS = 48 * 60 * 60 * 1000;
+  const nowMs = Date.now();
+  const rankedByArticle = [...situations].sort((a, b) => newestArticleMs(b) - newestArticleMs(a));
+  const freshOnly = rankedByArticle.filter((s) => {
+    const t = newestArticleMs(s);
+    return t > 0 && nowMs - t <= FRESH_MS;
+  });
+  situations = (freshOnly.length > 0 ? freshOnly : rankedByArticle).slice(0, 25);
+  totalCount = situations.length;
+  // ──────────────────────────────────────────────────────────────────────
+
   return NextResponse.json({
-    success: true,
-    timestamp: new Date().toISOString(),
-    refreshed: refresh === "1" || refresh === "true",
-    refresh_result: refreshResult,
-    count: totalCount,
-    returned_count: situations.length,
-    source,
-    fallback_used: fallbackUsed,
     agenda_overview: agendaOverview,
     agenda_overview_error: agendaError?.message ?? null,
     trends_error: trendError?.message ?? null,
