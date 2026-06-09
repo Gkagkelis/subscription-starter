@@ -2160,7 +2160,7 @@ function AdvisorDock({
           <div className="mt-2 text-sm font-semibold text-zinc-100">Context-aware chat</div>
           <div className="mt-2 line-clamp-2 text-xs leading-5 text-zinc-500">{partyName}</div>
           <div className="mt-3 grid gap-2">
-            {["Τι κάνουμε τις επόμενες 24 ώρες;", "Ποια είναι η ασφαλέστερη δημόσια γραμμή;"].map((question) => (
+            {["Τι κινεί το κοινό;", "Σε ποιο κοινό να μιλήσουμε;", "Ποιες διατυπώσεις μειώνουν ρίσκο;", "Πρότεινε 3 μηνύματα"].map((question) => (
               <button
                 key={question}
                 type="button"
@@ -2482,31 +2482,47 @@ function EscalationLadder({ current, recommended }: { current: number; recommend
     "Παρέμβαση αρχηγού",
     "Σύγκρουση",
   ];
+  const cur = Math.min(6, Math.max(1, Math.round(current)));
+  const rec = Math.min(6, Math.max(1, Math.round(recommended)));
 
   return (
-    <div className="grid gap-2 md:grid-cols-6">
-      {steps.map((step, index) => {
-        const level = index + 1;
-        const isCurrent = level === Math.round(current);
-        const isRecommended = level === Math.round(recommended);
-
-        return (
-          <div
-            key={step}
-            className={`rounded-2xl border p-3 text-center ${
-              isCurrent
-                ? "border-cyan-300/35 bg-cyan-300/10 text-cyan-100"
-                : isRecommended
-                  ? "border-amber-300/30 bg-amber-300/10 text-amber-100"
-                  : "border-[#1a2640] bg-black/20 text-zinc-500"
-            }`}
-          >
-            <div className="text-sm font-semibold">{level}</div>
-            <div className="mt-2 text-[10px] leading-4">{step}</div>
-            {level >= 5 ? <div className="mt-2 text-[9px] text-red-200">human approval</div> : null}
-          </div>
-        );
-      })}
+    <div>
+      <div className="flex items-start justify-between gap-1">
+        {steps.map((step, index) => {
+          const level = index + 1;
+          const isCurrent = level === cur;
+          const isRecommended = level === rec;
+          const reached = level <= cur;
+          return (
+            <div key={step} className="flex flex-1 flex-col items-center text-center">
+              <div className="flex w-full items-center">
+                <div className={`h-[2px] flex-1 ${index === 0 ? "opacity-0" : reached ? "bg-cyan-300/50" : "bg-[#1a2640]"}`} />
+                <div
+                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-xs font-semibold ${
+                    isCurrent
+                      ? "border-cyan-300 bg-cyan-300 text-slate-950"
+                      : isRecommended
+                        ? "border-amber-300/60 bg-amber-300/15 text-amber-100"
+                        : reached
+                          ? "border-cyan-300/40 bg-cyan-300/10 text-cyan-100"
+                          : "border-[#1a2640] bg-black/20 text-zinc-500"
+                  }`}
+                >
+                  {level}
+                </div>
+                <div className={`h-[2px] flex-1 ${index === steps.length - 1 ? "opacity-0" : level < cur ? "bg-cyan-300/50" : "bg-[#1a2640]"}`} />
+              </div>
+              <div className={`mt-2 text-[9px] leading-3 ${isCurrent ? "text-cyan-100" : "text-zinc-500"}`}>{step}</div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="mt-3 flex items-center gap-2 rounded-2xl border border-[#1a2640] bg-black/20 px-3 py-2 text-[11px] text-zinc-400">
+        <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-cyan-300" />
+        <span>
+          Βρισκόμαστε στο στάδιο <span className="font-semibold text-cyan-100">{steps[cur - 1]}</span>. Παρακολουθούμε τάσεις.
+        </span>
+      </div>
     </div>
   );
 }
