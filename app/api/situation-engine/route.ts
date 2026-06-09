@@ -310,7 +310,6 @@ export async function GET(req: Request) {
   const {
     data: eventRows,
     error: eventError,
-    count: eventCount,
   } = await supabase
     .from("v_political_events_live")
     .select("*", { count: "exact" })
@@ -391,14 +390,14 @@ export async function GET(req: Request) {
     }
   }
 
-  if (!eventError && eventRows && eventRows.length > 0) {
-    const situations = eventRows.map((ev) => eventToSituationRow(ev, trendMap));
+  if (!eventError && safeEventRows.length > 0) {
+    const situations = safeEventRows.map((ev) => eventToSituationRow(ev, trendMap));
     return NextResponse.json({
       success: true,
       timestamp: new Date().toISOString(),
       refreshed: refresh === "1" || refresh === "true",
       refresh_result: refreshResult,
-      count: eventCount ?? situations.length,
+      count: situations.length,
       returned_count: situations.length,
       source: "v_political_events_live",
       fallback_used: false,
