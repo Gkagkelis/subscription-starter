@@ -1615,8 +1615,18 @@ function ActiveSituationWorkspace({
               </div>
             </CockpitSection>
 
+            <CockpitSection title="2. ΠΩΣ ΚΕΡΔΙΖΕΤΑΙ ΤΟ ΘΕΜΑ" subtitle="HERESTHETIC / RIKER LAYER">
+              <div className="grid gap-3 xl:grid-cols-5">
+                <WinCard title="Το παιχνίδι σήμερα" tone="red" textValue={text(diagnosis.agenda_reading, text(issue.dominant_frame, "Το παιχνίδι δεν έχει ακόμη πλήρως οριστεί."))} />
+                <WinCard title="Η παγίδα" tone="amber" textValue={text(diagnosis.strategic_risk, text(issue.priming_risk, "Το ρίσκο είναι πρόωρη ή άστοχη αντίδραση."))} />
+                <WinCard title="Ευνοϊκή διάσταση" tone="emerald" textValue={text(diagnosis.strategic_opportunity, text(issue.opportunity, "Να εισαχθεί διάσταση θεσμικής σοβαρότητας και λύσης."))} />
+                <WinCard title="Κίνηση αναδιάταξης" tone="purple" textValue={text(diagnosis.recommended_posture, "Μετατόπιση από άμυνα σε τεκμηριωμένη πρόταση.")} />
+                <WinCard title="Ακολουθία" tone="zinc" textValue={list(actionPlan.next_24h)[0] || "Πρώτα παρακολούθηση, μετά ασφαλής δημόσια γραμμή, μετά κλιμάκωση μόνο με νέα στοιχεία."} />
+              </div>
+            </CockpitSection>
+
             <div className="grid gap-4 xl:grid-cols-2">
-              <CockpitSection title="2. ΤΙ ΚΑΝΟΥΜΕ ΤΩΡΑ — ΕΠΙΛΟΓΕΣ" subtitle="Επιλογές δράσης Α/Β/Γ από scenarios">
+              <CockpitSection title="3. ΤΙ ΚΑΝΟΥΜΕ ΤΩΡΑ — ΕΠΙΛΟΓΕΣ" subtitle="Επιλογές δράσης Α/Β/Γ από scenarios">
                 <div className="grid gap-3 md:grid-cols-3">
                   {decisionOptions(brief).map((opt) => (
                     <DecisionCard
@@ -1633,7 +1643,7 @@ function ActiveSituationWorkspace({
                 </div>
               </CockpitSection>
 
-              <CockpitSection title="3. WHAT WOULD CHANGE MY MIND" subtitle="Triggers παρακολούθησης">
+              <CockpitSection title="4. WHAT WOULD CHANGE MY MIND" subtitle="Triggers παρακολούθησης">
                 <BulletList
                   compact
                   items={list(monitoring.escalation_triggers)}
@@ -1649,7 +1659,7 @@ function ActiveSituationWorkspace({
               </CockpitSection>
             </div>
 
-            <CockpitSection title="4. ΕΝΤΑΣΗ & ΔΥΝΑΜΙΚΗ" subtitle="6 gauges — αρχικά από διαθέσιμα live signals">
+            <CockpitSection title="5. ΕΝΤΑΣΗ & ΔΥΝΑΜΙΚΗ" subtitle="6 gauges — αρχικά από διαθέσιμα live signals">
               <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
                 <Gauge score={clamp(numberValue(situation?.article_count, agenda[0]?.article_count || 0) * 8)} label="Media" small />
                 <Gauge score={clamp(score)} label="Agenda" small />
@@ -1660,7 +1670,7 @@ function ActiveSituationWorkspace({
               </div>
             </CockpitSection>
 
-            <CockpitSection title="5. ESCALATION LADDER" subtitle="Αποφυγή πρόωρης κλιμάκωσης">
+            <CockpitSection title="6. ESCALATION LADDER" subtitle="Αποφυγή πρόωρης κλιμάκωσης">
               <EscalationLadder
                 current={clamp(numberValue(situation?.escalation_level, score >= 70 ? 3 : score >= 50 ? 2 : 1), 1, 6)}
                 recommended={clamp(numberValue(situation?.escalation_recommended, score >= 75 ? 3 : 2), 1, 6)}
