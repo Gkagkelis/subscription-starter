@@ -1606,7 +1606,7 @@ function ActiveSituationWorkspace({
 
         {activeTab === "strategic" ? (
           <div className="grid gap-4">
-            <CockpitSection title="STRATEGIC READ — Τι σημαίνει" subtitle="Agenda Formation → Framing Diagnosis → Priming Risk">
+            <CockpitSection title="1. STRATEGIC READ — Τι σημαίνει" subtitle="Agenda Formation → Framing Diagnosis → Priming Risk">
               <div className="grid gap-5 xl:grid-cols-[1fr_150px]">
                 <p className="text-sm leading-7 text-zinc-300">{readStrategicText(situation, brief)}</p>
                 <Gauge score={documentationScore} label="Βαθμός τεκμηρίωσης" />
@@ -1614,7 +1614,7 @@ function ActiveSituationWorkspace({
             </CockpitSection>
 
             <div className="grid gap-4 xl:grid-cols-2">
-              <CockpitSection title="ΤΙ ΚΑΝΟΥΜΕ ΤΩΡΑ" subtitle="Action recommendation">
+              <CockpitSection title="2. ΤΙ ΚΑΝΟΥΜΕ ΤΩΡΑ" subtitle="Action recommendation">
                 <BulletList
                   compact
                   items={list(actionPlan.now)}
@@ -1622,7 +1622,7 @@ function ActiveSituationWorkspace({
                 />
               </CockpitSection>
 
-              <CockpitSection title="WHAT WOULD CHANGE MY MIND" subtitle="Triggers παρακολούθησης">
+              <CockpitSection title="3. WHAT WOULD CHANGE MY MIND" subtitle="Triggers παρακολούθησης">
                 <BulletList
                   compact
                   items={list(monitoring.escalation_triggers)}
@@ -1638,7 +1638,7 @@ function ActiveSituationWorkspace({
               </CockpitSection>
             </div>
 
-            <CockpitSection title="ΕΝΤΑΣΗ & ΔΥΝΑΜΙΚΗ" subtitle="6 gauges — αρχικά από διαθέσιμα live signals">
+            <CockpitSection title="4. ΕΝΤΑΣΗ & ΔΥΝΑΜΙΚΗ" subtitle="6 gauges — αρχικά από διαθέσιμα live signals">
               <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
                 <Gauge score={clamp(numberValue(situation?.article_count, agenda[0]?.article_count || 0) * 8)} label="Media" small />
                 <Gauge score={clamp(score)} label="Agenda" small />
@@ -1649,7 +1649,7 @@ function ActiveSituationWorkspace({
               </div>
             </CockpitSection>
 
-            <CockpitSection title="ESCALATION LADDER" subtitle="Αποφυγή πρόωρης κλιμάκωσης">
+            <CockpitSection title="5. ESCALATION LADDER" subtitle="Αποφυγή πρόωρης κλιμάκωσης">
               <EscalationLadder
                 current={clamp(numberValue(situation?.escalation_level, score >= 70 ? 3 : score >= 50 ? 2 : 1), 1, 6)}
                 recommended={clamp(numberValue(situation?.escalation_recommended, score >= 75 ? 3 : 2), 1, 6)}
@@ -1690,7 +1690,7 @@ function ActiveSituationWorkspace({
         {activeTab === "pulse" ? <PublicPulsePanel situation={situation} brief={brief} /> : null}
 
         {activeTab === "win" ? (
-          <CockpitSection title="ΠΩΣ ΚΕΡΔΙΖΕΤΑΙ ΤΟ ΘΕΜΑ" subtitle="HERESTHETIC / RIKER LAYER — UI label κρατά πολιτική γλώσσα">
+          <CockpitSection title="ΠΩΣ ΚΕΡΔΙΖΕΤΑΙ ΤΟ ΘΕΜΑ (HERESTHETIC)" subtitle="HERESTHETIC / RIKER LAYER — UI label κρατά πολιτική γλώσσα">
             <div className="grid gap-3 xl:grid-cols-5">
               <WinCard title="Το παιχνίδι σήμερα" tone="red" textValue={text(diagnosis.agenda_reading, text(issue.dominant_frame, "Το παιχνίδι δεν έχει ακόμη πλήρως οριστεί."))} />
               <WinCard title="Η παγίδα" tone="amber" textValue={text(diagnosis.strategic_risk, text(issue.priming_risk, "Το ρίσκο είναι πρόωρη ή άστοχη αντίδραση."))} />
