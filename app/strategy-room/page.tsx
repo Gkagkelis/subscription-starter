@@ -846,7 +846,11 @@ export default function StrategyRoomPage() {
       const briefJson = (await briefResponse.json()) as ApiResponse;
       setData(briefJson);
 
-      const situationResponse = await fetch("/api/situation-engine?token=dev", { cache: "no-store" });
+      const activeParty = briefJson?.profile?.party_key || "elas";
+      const situationResponse = await fetch(
+        `/api/situation-engine?token=dev&party=${encodeURIComponent(activeParty)}`,
+        { cache: "no-store" }
+      );
 
       if (situationResponse.ok) {
         const situationJson = (await situationResponse.json()) as SituationEngineResponse;
