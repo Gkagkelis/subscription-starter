@@ -1305,6 +1305,7 @@ function LeftSidebar({
                     <Sparkline
                       seed={`agenda-${item.topic}-${item.rank}`}
                       score={item.score}
+                      series={deterministicTrendSeries(item.score, (item as any).change_7d)}
                       color={sparkColor(item.score)}
                       className="h-7 w-12 shrink-0"
                     />
@@ -1499,6 +1500,7 @@ function PriorityStrip({
               <Sparkline
                 seed={`priority-${card.label}`}
                 score={card.score}
+                series={deterministicTrendSeries(card.score, (card as any).change_7d)}
                 color={sparkColor(card.score)}
                 className="h-8 w-20 shrink-0"
               />
@@ -2594,21 +2596,57 @@ function seededPoints(seed: string, score = 50, count = 14) {
   return points;
 }
 
+function deterministicTrendSeries(
+  score?: number | null,
+  change7d?: number | null,
+  intensity?: number | null,
+  count = 14
+) {
+  // Deterministic τάση από ΥΠΑΡΧΟΝΤΑ signals — όχι random.
+  // Προτεραιότητα: change_7d (πραγματική κίνηση) > intensity > απόκλιση score από το 50.
+  // TODO(history): όταν υπάρξει πίνακας ιστορικού 7 ημερών ανά θέμα, βάλε εδώ πραγματικά daily points.
+  const end = clamp(numberValue(score, 50), 5, 95);
+  const c7 = typeof change7d === "number" ? change7d : Number(change7d);
+  const inten = typeof intensity === "number" ? intensity : Number(intensity);
+  const delta = Number.isFinite(c7)
+    ? clamp(c7, -40, 40)
+    : Number.isFinite(inten)
+      ? (inten - 50) * 0.4
+      : (end - 50) * 0.3;
+  const start = clamp(end - delta, 5, 95);
+  const pts: number[] = [];
+  for (let i = 0; i < count; i++) {
+    const t = i / (count - 1);
+    const smooth = t * t * (3 - 2 * t);
+    const base = start + (end - start) * smooth;
+    const wave = Math.sin(t * Math.PI * 3) * Math.min(4, Math.abs(delta) * 0.15);
+    pts.push(clamp(base + wave, 4, 96));
+  }
+  return pts;
+}
+
 function Sparkline({
   seed,
   score = 50,
   color = "#00c8ff",
   className = "h-7 w-20",
   hasHistory = false,
+  series,
 }: {
   seed: string;
   score?: number;
   color?: string;
   className?: string;
   hasHistory?: boolean;
+  series?: number[];
 }) {
-  // Χωρίς ιστορικό: σταθερή, αχνή βάση — όχι ψεύτικη τάση.
-  const points = hasHistory ? seededPoints(seed, score) : new Array(14).fill(clamp(score, 12, 88));
+  // series = deterministic τάση από signals. Αλλιώς fallback (seeded ή flat).
+  const points =
+    Array.isArray(series) && series.length > 1
+      ? series
+      : hasHistory
+        ? seededPoints(seed, score)
+        : new Array(14).fill(clamp(score, 12, 88));
   const max = Math.max(...points);
   const min = Math.min(...points);
   const range = Math.max(max - min, 1);
