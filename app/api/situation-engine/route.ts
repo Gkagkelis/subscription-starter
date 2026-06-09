@@ -342,7 +342,7 @@ export async function GET(req: Request) {
     }
   }
 
-  const safeEventRows = (!eventError && Array.isArray(eventRows) ? eventRows : [])
+  const rankedEventRows = (!eventError && Array.isArray(eventRows) ? eventRows : [])
     .slice()
     .sort((a, b) => {
       const fa = freshnessScore((a as any).last_article_at || (a as any).updated_at || (a as any).first_seen_at);
@@ -350,8 +350,14 @@ export async function GET(req: Request) {
       const sa = numberValue((a as any).event_score, 0) * 0.45 + fa * 0.55;
       const sb = numberValue((b as any).event_score, 0) * 0.45 + fb * 0.55;
       return sb - sa;
-    })
-    .slice(0, 25);
+    });
+  // ΠΕΤΑΜΕ ΕΚΤΟΣ ό,τι είναι παλιότερο από 48 ΩΡΕΣ (κανόνας προϊόντος: φρέσκια ατζέντα).
+  // Αν τυχόν δεν μείνει τίποτα εντός 48ώρου, κρατάμε το re-ranked ώστε να μην αδειάσει η οθόνη.
+  const freshEventRows = rankedEventRows.filter((r) => {
+    const f = freshnessScore((r as any).last_article_at || (r as any).updated_at || (r as any).first_seen_at);
+    return f >= 75;
+  });
+  const safeEventRows = (freshEventRows.length > 0 ? freshEventRows : rankedEventRows).slice(0, 25);
   const agendaOverview = !agendaError && Array.isArray(agendaRows)
     ? buildAgendaOverview(agendaRows, safeEventRows, trendMap)
     : [];
