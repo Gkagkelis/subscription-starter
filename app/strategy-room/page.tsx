@@ -1326,7 +1326,6 @@ function LeftSidebar({
                 const id = situationId(situation, index);
                 const selected = id === activeSituationId;
                 const score = situationScore(situation, 0);
-                const strategicIndex = strategicIndexFromSituation(situation, score);
                 const sourcesAvailable = evidenceArticlesFromSituation(situation).length > 0;
 
                 return (
@@ -1353,7 +1352,6 @@ function LeftSidebar({
                     </div>
                     <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-zinc-500">
                       <span className="text-cyan-200">{scoreSignalText(score)}</span>
-                      <span className="text-amber-200">Στρατηγικός Δείκτης · {strategicIndex}</span>
                       <span>{numberValue(situation.article_count, 0)} άρθρα · {numberValue(situation.source_count, 0)} πηγές</span>
                     </div>
                     <div className="mt-1 flex flex-wrap items-center gap-2 text-[10px] text-zinc-600">
