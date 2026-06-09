@@ -341,22 +341,21 @@ export async function GET(req: Request) {
     }
   }
 
-  const rankedEventRows = (!eventError && Array.isArray(eventRows) ? eventRows : [])
-    .slice()
-    .sort((a, b) => {
-      const fa = freshnessScore((a as any).last_article_at || (a as any).updated_at || (a as any).first_seen_at);
-      const fb = freshnessScore((b as any).last_article_at || (b as any).updated_at || (b as any).first_seen_at);
-      const sa = numberValue((a as any).event_score, 0) * 0.45 + fa * 0.55;
-      const sb = numberValue((b as any).event_score, 0) * 0.45 + fb * 0.55;
-      return sb - sa;
-    });
-  // ΠΕΤΑΜΕ ΕΚΤΟΣ ό,τι είναι παλιότερο από 48 ΩΡΕΣ (κανόνας προϊόντος: φρέσκια ατζέντα).
-  // Αν τυχόν δεν μείνει τίποτα εντός 48ώρου, κρατάμε το re-ranked ώστε να μην αδειάσει η οθόνη.
-  const freshEventRows = rankedEventRows.filter((r) => {
+  const allEventRows = !eventError && Array.isArray(eventRows) ? eventRows : [];
+  // ΒΗΜΑ 1 — ΦΙΛΤΡΟ (gate): μόνο ΦΡΕΣΚΑ θέματα (≤48 ώρες, βάσει ημερομηνίας πιο πρόσφατου άρθρου).
+  //          Η φρεσκάδα ΔΕΝ είναι κριτήριο σημαντικότητας — μόνο "ποιος μπαίνει στο γήπεδο".
+  const FRESH_GATE = 75; // freshnessScore >= 75  ⇔  ≤48 ώρες
+  const eligibleEventRows = allEventRows.filter((r) => {
     const f = freshnessScore((r as any).last_article_at || (r as any).updated_at || (r as any).first_seen_at);
-    return f >= 75;
+    return f >= FRESH_GATE;
   });
-  const safeEventRows = (freshEventRows.length > 0 ? freshEventRows : rankedEventRows).slice(0, 25);
+  // Δίχτυ ασφαλείας: αν ΚΑΝΕΝΑ θέμα δεν είναι ≤48ώρου, δείχνουμε όλα (καλύτερα κάτι παρά κενή οθόνη).
+  const gatedPool = eligibleEventRows.length > 0 ? eligibleEventRows : allEventRows;
+  // ΒΗΜΑ 2 — ΚΑΤΑΤΑΞΗ (ranking): ΚΑΘΑΡΑ κατά Agenda Score (σημαντικότητα). Η φρεσκάδα δεν αλλάζει τη σειρά.
+  const safeEventRows = gatedPool
+    .slice()
+    .sort((a, b) => numberValue((b as any).event_score, 0) - numberValue((a as any).event_score, 0))
+    .slice(0, 25);
   const agendaOverview = !agendaError && Array.isArray(agendaRows)
     ? buildAgendaOverview(agendaRows, safeEventRows, trendMap)
     : [];
