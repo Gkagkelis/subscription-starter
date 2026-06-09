@@ -347,6 +347,35 @@ export async function GET(req: Request) {
     ? buildAgendaOverview(agendaRows, safeEventRows, trendMap)
     : [];
 
+  // Δρόμος Β: ανάλυση ΑΝΑ ΚΟΜΜΑ — φέρε το brief του ενεργού κόμματος και μπόλιασέ το στα γεγονότα.
+  const party = searchParams.get("party") || "elas";
+  if (safeEventRows.length) {
+    const eventIds = safeEventRows.map((e: any) => e.id).filter(Boolean);
+    if (eventIds.length) {
+      const { data: pbRows } = await supabase
+        .from("event_party_briefs")
+        .select("event_id,advisor_brief,framing_summary,recommended_action,avoid_action,red_team_warning,summary,brief_generated_at")
+        .eq("party_key", party)
+        .in("event_id", eventIds);
+      if (Array.isArray(pbRows)) {
+        const pbMap = new Map<string, any>();
+        for (const r of pbRows) pbMap.set(String((r as any).event_id), r);
+        for (const ev of safeEventRows as any[]) {
+          const pb = pbMap.get(String(ev.id));
+          if (pb) {
+            ev.advisor_brief = pb.advisor_brief ?? ev.advisor_brief;
+            ev.framing_summary = pb.framing_summary ?? ev.framing_summary;
+            ev.recommended_action = pb.recommended_action ?? ev.recommended_action;
+            ev.avoid_action = pb.avoid_action ?? ev.avoid_action;
+            ev.red_team_warning = pb.red_team_warning ?? ev.red_team_warning;
+            ev.summary = pb.summary ?? ev.summary;
+            ev.brief_generated_at = pb.brief_generated_at ?? ev.brief_generated_at;
+          }
+        }
+      }
+    }
+  }
+
   if (!eventError && eventRows && eventRows.length > 0) {
     const situations = eventRows.map((ev) => eventToSituationRow(ev, trendMap));
     return NextResponse.json({
