@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { RSS_FEEDS } from "@/lib/noraya/feeds";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 // Use service role key for inserts (bypasses RLS)
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -102,6 +105,7 @@ async function fetchFeed(
     const timeout = setTimeout(() => controller.abort(), 10000);
 
     const res = await fetch(feedUrl, {
+      cache: "no-store",
       signal: controller.signal,
       headers: {
         "User-Agent": "Noraya/1.0 (Political Intelligence Platform)",
