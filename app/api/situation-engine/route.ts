@@ -315,7 +315,7 @@ export async function GET(req: Request) {
     .from("v_political_events_live")
     .select("*", { count: "exact" })
     .order("event_score", { ascending: false })
-    .limit(25);
+    .limit(60);
 
   const {
     data: agendaRows,
@@ -342,7 +342,16 @@ export async function GET(req: Request) {
     }
   }
 
-  const safeEventRows = !eventError && Array.isArray(eventRows) ? eventRows : [];
+  const safeEventRows = (!eventError && Array.isArray(eventRows) ? eventRows : [])
+    .slice()
+    .sort((a, b) => {
+      const fa = freshnessScore((a as any).last_article_at || (a as any).updated_at || (a as any).first_seen_at);
+      const fb = freshnessScore((b as any).last_article_at || (b as any).updated_at || (b as any).first_seen_at);
+      const sa = numberValue((a as any).event_score, 0) * 0.45 + fa * 0.55;
+      const sb = numberValue((b as any).event_score, 0) * 0.45 + fb * 0.55;
+      return sb - sa;
+    })
+    .slice(0, 25);
   const agendaOverview = !agendaError && Array.isArray(agendaRows)
     ? buildAgendaOverview(agendaRows, safeEventRows, trendMap)
     : [];
