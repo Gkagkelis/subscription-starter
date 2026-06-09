@@ -2,6 +2,10 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "crons": [
     {
+      "path": "/api/ingest?token=dev",
+      "schedule": "*/30 * * * *"
+    },
+    {
       "path": "/api/radar-tick",
       "schedule": "0 */3 * * *"
     },
