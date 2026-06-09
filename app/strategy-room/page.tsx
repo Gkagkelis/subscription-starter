@@ -1339,6 +1339,7 @@ function LeftSidebar({
           count: g.events.length,
           events: g.events.sort((a, b) => b.score - a.score),
         }))
+        // Κατάταξη κατά Agenda Score (σημαντικότητα) — ΙΔΙΟ κριτήριο με τη μηχανή, άρα συμφωνεί με το κέντρο.
         .sort((a, b) => b.score - a.score)
         .slice(0, 8)
         .map((g, i) => ({ ...g, rank: i + 1 }));
