@@ -1271,6 +1271,50 @@ function LeftSidebar({
   politicalEnvironment: PoliticalEnvironment | null;
 }) {
   const polls = recentPolls(politicalEnvironment);
+  const [expandedTopic, setExpandedTopic] = useState<string | null>(null);
+
+  // #1: Θέματα (επισκόπηση) που ανοίγουν σε ΣΥΓΚΕΚΡΙΜΕΝΑ γεγονότα. Καμία αλληλοκάλυψη, τίποτα generic.
+  type AgendaEvent = { id: string; title: string; score: number; status: string };
+  const agendaItems = useMemo(() => {
+    if (situations && situations.length) {
+      const groups = new Map<string, { topic: string; score: number; events: AgendaEvent[] }>();
+      situations.forEach((s, index) => {
+        const topic = String((s as any).topic || (s as any).category || "Γενικά").trim() || "Γενικά";
+        const sc = situationScore(s, 0);
+        const ev: AgendaEvent = {
+          id: situationId(s, index),
+          title: situationTitle(s),
+          score: sc,
+          status: String((s as any).status || "live"),
+        };
+        const ex = groups.get(topic);
+        if (!ex) {
+          groups.set(topic, { topic, score: sc, events: [ev] });
+        } else {
+          ex.events.push(ev);
+          if (sc > ex.score) ex.score = sc;
+        }
+      });
+      return Array.from(groups.values())
+        .map((g) => ({
+          topic: g.topic,
+          score: g.score,
+          count: g.events.length,
+          events: g.events.sort((a, b) => b.score - a.score),
+        }))
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 8)
+        .map((g, i) => ({ ...g, rank: i + 1 }));
+    }
+    // Fallback: classified θέματα όταν δεν υπάρχουν ακόμη live γεγονότα.
+    return (agenda || []).slice(0, 8).map((a, i) => ({
+      topic: a.topic,
+      score: a.score,
+      count: 0,
+      rank: i + 1,
+      events: [] as AgendaEvent[],
+    }));
+  }, [situations, agenda]);
 
   return (
     <aside className="flex w-[220px] shrink-0 flex-col overflow-hidden bg-[#060a14]">
@@ -1279,91 +1323,80 @@ function LeftSidebar({
           title="AGENDA MAP"
           info
           action="Δες όλη την ατζέντα"
-          footer={agenda.length ? `${agenda.length} classified signals` : "awaiting agenda"}
+          footer={agendaItems.length ? `${situationCount || situations.length} γεγονότα · ${situationSource}` : "awaiting agenda"}
         >
-          {agenda.length ? (
-            <div className="grid gap-2">
-              {agenda.slice(0, 6).map((item) => {
-                const tone = item.score >= 70 ? "red" : item.score >= 50 ? "amber" : "emerald";
-                return (
-                  <button
-                    key={`${item.topic}-${item.rank}`}
-                    type="button"
-                    className="group flex items-center gap-2 rounded-2xl border border-[#1a2640] bg-[#0c1220] p-3 text-left transition hover:border-cyan-300/30 hover:bg-cyan-300/[0.04]"
-                  >
-                    <NumberBadge value={item.rank} tone={tone} />
-                    <div className="min-w-0 flex-1">
-                      <div className="line-clamp-2 text-xs font-medium leading-5 text-zinc-200 group-hover:text-cyan-100">
-                        {item.topic}
-                      </div>
-                      <div className={`mt-0.5 text-[10px] ${
-                        tone === "red" ? "text-red-300/80" : tone === "amber" ? "text-amber-300/80" : "text-emerald-300/80"
-                      }`}>
-                        {item.signalLabel}
-                      </div>
-                    </div>
-                    <Sparkline
-                      seed={`agenda-${item.topic}-${item.rank}`}
-                      score={item.score}
-                      series={deterministicTrendSeries(item.score, (item as any).change_7d)}
-                      color={sparkColor(item.score)}
-                      className="h-7 w-12 shrink-0"
-                    />
-                  </button>
-                );
-              })}
-            </div>
-          ) : (
-            <EmptyState small>Δεν υπάρχουν ακόμη classified agenda signals.</EmptyState>
-          )}
-        </SidebarPanel>
-
-        <SidebarPanel title="LIVE SITUATIONS" footer={`${situationCount || situations.length} rows · ${situationSource}`}>
           {situationWarning ? <TinyWarning>{situationWarning}</TinyWarning> : null}
-          {situations.length ? (
+          {agendaItems.length ? (
             <div className="grid gap-2">
-              {situations.slice(0, 7).map((situation, index) => {
-                const id = situationId(situation, index);
-                const selected = id === activeSituationId;
-                const score = situationScore(situation, 0);
-                const sourcesAvailable = evidenceArticlesFromSituation(situation).length > 0;
-
+              {agendaItems.map((item) => {
+                const tone = item.score >= 70 ? "red" : item.score >= 50 ? "amber" : "emerald";
+                const priorityLabel = item.score >= 70 ? "Υψηλή προτεραιότητα" : item.score >= 50 ? "Μεσαία" : "Χαμηλή";
+                const isExpanded = expandedTopic === item.topic;
+                const hasActiveChild = item.events.some((e) => e.id === activeSituationId);
                 return (
-                  <button
-                    key={id}
-                    type="button"
-                    onClick={() => onSelectSituation(id)}
-                    className={`rounded-2xl border p-3 text-left transition ${
-                      selected
-                        ? "border-cyan-300/40 bg-cyan-300/10"
-                        : "border-[#1a2640] bg-[#0c1220] hover:border-cyan-300/25"
+                  <div
+                    key={`${item.topic}-${item.rank}`}
+                    className={`overflow-hidden rounded-2xl border transition ${
+                      hasActiveChild ? "border-cyan-300/40 bg-cyan-300/[0.06]" : "border-[#1a2640] bg-[#0c1220]"
                     }`}
                   >
-                    <div className="flex items-center justify-between gap-2">
-                      <span className={`rounded-full border px-2 py-0.5 text-[9px] ${statusToneClass(situation.status)}`}>
-                        {text(situation.status, "live")}
-                      </span>
-                      <span className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-2 py-0.5 text-[9px] text-cyan-100">
-                        {text(situation.topic || situation.category, "Θεματική")}
-                      </span>
-                    </div>
-                    <div className="mt-2 line-clamp-2 text-xs font-medium leading-5 text-zinc-200">
-                      {situationTitle(situation)}
-                    </div>
-                    <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-zinc-500">
-                      <span className="text-cyan-200">{scoreSignalText(score)}</span>
-                      <span>{numberValue(situation.article_count, 0)} άρθρα · {numberValue(situation.source_count, 0)} πηγές</span>
-                    </div>
-                    <div className="mt-1 flex flex-wrap items-center gap-2 text-[10px] text-zinc-600">
-                      <span>{shortDate(situation.updated_at || situation.created_at)}</span>
-                      {sourcesAvailable ? <span className="text-cyan-300/80">Πηγές διαθέσιμες</span> : null}
-                    </div>
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setExpandedTopic((prev) => (prev === item.topic ? null : item.topic));
+                        if (item.events[0]?.id) onSelectSituation(item.events[0].id);
+                      }}
+                      className="group flex w-full items-center gap-2 p-3 text-left transition hover:bg-cyan-300/[0.04]"
+                    >
+                      <NumberBadge value={item.rank} tone={tone} />
+                      <div className="min-w-0 flex-1">
+                        <div className="line-clamp-2 text-xs font-medium leading-5 text-zinc-200 group-hover:text-cyan-100">
+                          {item.topic}
+                        </div>
+                        <div className={`mt-0.5 text-[10px] ${
+                          tone === "red" ? "text-red-300/80" : tone === "amber" ? "text-amber-300/80" : "text-emerald-300/80"
+                        }`}>
+                          {priorityLabel}{item.count ? ` · ${item.count} ${item.count === 1 ? "γεγονός" : "γεγονότα"}` : ""}
+                        </div>
+                      </div>
+                      <Sparkline
+                        seed={`agenda-${item.topic}-${item.rank}`}
+                        score={item.score}
+                        series={deterministicTrendSeries(item.score, undefined)}
+                        color={sparkColor(item.score)}
+                        className="h-7 w-12 shrink-0"
+                      />
+                      {item.events.length ? (
+                        <span className="shrink-0 text-[10px] text-zinc-500">{isExpanded ? "▾" : "▸"}</span>
+                      ) : null}
+                    </button>
+                    {isExpanded && item.events.length ? (
+                      <div className="grid gap-1 border-t border-[#1a2640] px-2 pb-2 pt-2">
+                        {item.events.map((ev) => {
+                          const selected = ev.id === activeSituationId;
+                          return (
+                            <button
+                              key={ev.id}
+                              type="button"
+                              onClick={() => onSelectSituation(ev.id)}
+                              className={`rounded-xl px-2 py-1.5 text-left text-[11px] leading-4 transition ${
+                                selected
+                                  ? "bg-cyan-300/15 text-cyan-100"
+                                  : "text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
+                              }`}
+                            >
+                              <span className="line-clamp-2">{ev.title}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    ) : null}
+                  </div>
                 );
               })}
             </div>
           ) : (
-            <EmptyState small>Δεν επέστρεψαν live situations. Το κέντρο χρησιμοποιεί το strategy brief.</EmptyState>
+            <EmptyState small>Δεν υπάρχουν ακόμη ενεργές καταστάσεις.</EmptyState>
           )}
         </SidebarPanel>
 
