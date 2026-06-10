@@ -964,12 +964,12 @@ export default function StrategyRoomPage() {
     })();
   }, [activeSituation, data]);
 
-  // Το brief προτιμά την ΑΝΑΛΥΣΗ ΤΟΥ ΕΠΙΛΕΓΜΕΝΟΥ ΓΕΓΟΝΟΤΟΣ (advisor_brief).
-  // Αν το γεγονός δεν έχει ακόμη ανάλυση, πέφτει πίσω στο γενικό strategy-brief.
-  const brief =
-    (activeSituation as any)?.advisor_brief ||
-    data?.strategic_brief ||
-    {};
+  // Το brief έρχεται ΜΟΝΟ από την ανάλυση ΤΟΥ ΕΠΙΛΕΓΜΕΝΟΥ ΓΕΓΟΝΟΤΟΣ.
+  // ΠΟΤΕ δεν πέφτουμε στο global strategy-brief: θα έδειχνε περιεχόμενο ΑΛΛΟΥ θέματος
+  // (π.χ. γεωπολιτική σε ένα περιβαλλοντικό γεγονός). Αν δεν υπάρχει ακόμη ανάλυση,
+  // δείχνουμε ουδέτερα placeholders και το on-demand (Α) τη γεμίζει με τη σωστή ανάλυση.
+  const brief: StrategicBrief =
+    (((activeSituation as any)?.advisor_brief as StrategicBrief) || ({} as StrategicBrief));
   const issue = brief.issue || {};
   const daily = brief.daily_brief || {};
   const diagnosis = brief.strategic_diagnosis || {};
