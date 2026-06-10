@@ -1237,19 +1237,25 @@ function TopNavigation({
         </div>
 
         <nav className="hidden items-center gap-1 xl:flex">
-          {navTabs.map((tab, index) => (
-            <button
-              key={tab}
-              type="button"
-              className={`rounded-2xl px-3 py-2 text-xs transition ${
-                index === 0
-                  ? "border border-cyan-300/25 bg-cyan-300/10 text-cyan-100"
-                  : "text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-300"
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
+          {navTabs.map((tab, index) => {
+            const cls = `rounded-2xl px-3 py-2 text-xs transition ${
+              index === 0
+                ? "border border-cyan-300/25 bg-cyan-300/10 text-cyan-100"
+                : "text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-300"
+            }`;
+            if (tab === "Ατζέντα") {
+              return (
+                <a key={tab} href="/agenda" className={cls}>
+                  {tab}
+                </a>
+              );
+            }
+            return (
+              <button key={tab} type="button" className={cls}>
+                {tab}
+              </button>
+            );
+          })}
         </nav>
       </div>
 
