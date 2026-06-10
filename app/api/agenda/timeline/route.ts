@@ -34,6 +34,42 @@ export async function GET(request: Request) {
   }
   const supabase = createServiceClient(supabaseUrl, serviceRoleKey);
 
+  // ── DEBUG: δείξε τι ΑΛΗΘΙΝΑ έχουν τα πρόσφατα άρθρα (ημερομηνίες/topic) ──
+  if (searchParams.get("debug") === "1") {
+    const out: any = {};
+    try {
+      const { data: byPub } = await supabase
+        .from("articles")
+        .select("title, topic, is_political, published_at, fetched_at, classified_at")
+        .order("published_at", { ascending: false })
+        .limit(12);
+      out.most_recent_by_published_at = byPub || [];
+    } catch (e: any) { out.published_err = String(e?.message || e); }
+    try {
+      const { data: byClass } = await supabase
+        .from("articles")
+        .select("title, topic, is_political, published_at, fetched_at, classified_at")
+        .order("classified_at", { ascending: false })
+        .limit(12);
+      out.most_recent_by_classified_at = byClass || [];
+    } catch (e: any) { out.classified_err = String(e?.message || e); }
+    try {
+      const { count: total } = await supabase.from("articles").select("*", { count: "exact", head: true });
+      out.total_articles = total ?? null;
+    } catch { /* */ }
+    try {
+      const { count: cls } = await supabase
+        .from("articles").select("*", { count: "exact", head: true }).not("topic", "is", null);
+      out.classified_articles = cls ?? null;
+    } catch { /* */ }
+    try {
+      const { count: hasFetched } = await supabase
+        .from("articles").select("*", { count: "exact", head: true }).not("fetched_at", "is", null);
+      out.with_fetched_at = hasFetched ?? null;
+    } catch { /* */ }
+    return NextResponse.json({ debug: true, ...out });
+  }
+
   // ── Προφίλ κόμματος (best-effort) — για στοχευμένη ανάγνωση, ΟΧΙ generic ──
   let partyProfile: any = null;
   try {
