@@ -5,7 +5,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-type ArticleRow = { topic: string | null; published_at: string | null };
+type ArticleRow = { topic: string | null; published_at: string | null; fetched_at: string | null };
 type TopicAgg = {
   topic: string;
   total: number;
@@ -54,8 +54,8 @@ export async function GET(request: Request) {
   try {
     const { data } = await supabase
       .from("articles")
-      .select("topic, published_at")
-      .gte("published_at", sinceIso)
+      .select("topic, published_at, fetched_at")
+      .gte("fetched_at", sinceIso)
       .not("topic", "is", null)
       .eq("is_political", true)
       .limit(8000);
@@ -75,8 +75,9 @@ export async function GET(request: Request) {
   for (const a of articles) {
     const topic = (a.topic || "").trim();
     if (!topic || topic === "Μη ταξινομημένο") continue;
-    if (!a.published_at) continue;
-    const k = String(a.published_at).slice(0, 10);
+    const when = a.fetched_at || a.published_at;
+    if (!when) continue;
+    const k = String(when).slice(0, 10);
     const di = idxOf.get(k);
     if (di === undefined) continue;
     let g = groups.get(topic);
