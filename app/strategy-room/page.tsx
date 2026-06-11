@@ -1271,6 +1271,13 @@ function TopNavigation({
                 </a>
               );
             }
+            if (tab === "Σενάρια") {
+              return (
+                <a key={tab} href="/scenarios" className={cls}>
+                  {tab}
+                </a>
+              );
+            }
             return (
               <button key={tab} type="button" className={cls}>
                 {tab}
