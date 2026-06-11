@@ -923,7 +923,21 @@ export default function StrategyRoomPage() {
 
   useEffect(() => {
     if (!activeSituationId && liveSituations.length > 0) {
-      setActiveSituationId(situationId(liveSituations[0], 0));
+      // Αν ήρθαμε από την Ατζέντα με ?topic=, προεπίλεξε το αντίστοιχο θέμα· αλλιώς το πρώτο.
+      let targetId = situationId(liveSituations[0], 0);
+      try {
+        const wanted = (new URLSearchParams(window.location.search).get("topic") || "").trim().toLowerCase();
+        if (wanted) {
+          const idx = liveSituations.findIndex((s) => {
+            const tp = String((s as any).topic || (s as any).category || "").trim().toLowerCase();
+            return tp === wanted;
+          });
+          if (idx >= 0) targetId = situationId(liveSituations[idx], idx);
+        }
+      } catch {
+        /* αγνοούμε — fallback στο πρώτο */
+      }
+      setActiveSituationId(targetId);
     }
   }, [activeSituationId, liveSituations]);
 
