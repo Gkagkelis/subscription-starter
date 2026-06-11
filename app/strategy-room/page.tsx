@@ -1278,6 +1278,13 @@ function TopNavigation({
                 </a>
               );
             }
+            if (tab === "Πρόσωπα") {
+              return (
+                <a key={tab} href="/people" className={cls}>
+                  {tab}
+                </a>
+              );
+            }
             return (
               <button key={tab} type="button" className={cls}>
                 {tab}
