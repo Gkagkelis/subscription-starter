@@ -1264,6 +1264,13 @@ function TopNavigation({
                 </a>
               );
             }
+            if (tab === "Καταστάσεις") {
+              return (
+                <a key={tab} href="/situations" className={cls}>
+                  {tab}
+                </a>
+              );
+            }
             return (
               <button key={tab} type="button" className={cls}>
                 {tab}
