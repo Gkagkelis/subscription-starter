@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { IBM_Plex_Sans } from "next/font/google";
@@ -66,26 +66,63 @@ function changeLabel(t: Topic): string {
   return `${sign}${t.change_pct}%`;
 }
 
-function Sparkline({ data, color = "#22d3ee", className = "", maxY }: { data: number[]; color?: string; className?: string; maxY?: number }) {
+function LiveSparkline({ data, color = "#22d3ee", className = "" }: { data: number[]; color?: string; className?: string }) {
+  const uid = useId().replace(/[:]/g, "");
+  const [hover, setHover] = useState(false);
   const w = 240;
   const h = 56;
   const pts = data && data.length ? data : [0];
-  const max = maxY && maxY > 0 ? maxY : Math.max(1, ...pts);
+  const allZero = pts.every((v) => v === 0);
+  const localMax = Math.max(1, ...pts);
   const step = pts.length > 1 ? w / (pts.length - 1) : w;
-  const coords = pts.map((v, i) => [i * step, h - (Math.min(v, max) / max) * (h - 6) - 3] as [number, number]);
+  const coords = pts.map((v, i) => [i * step, allZero ? h - 5 : h - (v / localMax) * (h - 9) - 5] as [number, number]);
   const line = coords.map(([x, y], i) => `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
   const area = `${line} L${w},${h} L0,${h} Z`;
-  const id = `g-${Math.abs(pts.reduce((a, v, i) => a + v * (i + 1), 0)) % 100000}`;
+  const gradId = `lsg-${uid}`;
+  const pathId = `lsp-${uid}`;
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} className={className} preserveAspectRatio="none">
+    <svg
+      viewBox={`0 0 ${w} ${h}`}
+      className={className}
+      preserveAspectRatio="none"
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+    >
+      <style>{`@keyframes norayaDraw{to{stroke-dashoffset:0}}@keyframes norayaFade{from{opacity:0}to{opacity:1}}`}</style>
       <defs>
-        <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor={color} stopOpacity="0.26" />
           <stop offset="100%" stopColor={color} stopOpacity="0" />
         </linearGradient>
       </defs>
-      <path d={area} fill={`url(#${id})`} />
-      <path d={line} fill="none" stroke={color} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+      {!allZero ? (
+        <path d={area} fill={`url(#${gradId})`} style={{ animation: "norayaFade 1.2s ease forwards" }} />
+      ) : null}
+      <path
+        id={pathId}
+        d={line}
+        fill="none"
+        stroke={allZero ? "#2a3650" : color}
+        strokeWidth="2"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+        pathLength={1}
+        strokeDasharray={1}
+        strokeDashoffset={allZero ? 0 : 1}
+        style={allZero ? undefined : { animation: "norayaDraw 1.1s ease forwards" }}
+      />
+      {!allZero ? (
+        <circle r="2.6" fill={color}>
+          <animateMotion dur="2.6s" repeatCount="indefinite" begin="1s">
+            <mpath href={`#${pathId}`} />
+          </animateMotion>
+        </circle>
+      ) : null}
+      {hover
+        ? coords.map(([cx, cy], i) => (
+            <circle key={i} cx={cx} cy={cy} r="2" fill={color} stroke="#0a0f1c" strokeWidth="1" />
+          ))
+        : null}
     </svg>
   );
 }
@@ -168,7 +205,6 @@ export default function AgendaPage() {
   }, []);
 
   const topics = useMemo(() => (data?.topics || []).slice(), [data]);
-  const globalDailyMax = useMemo(() => Math.max(1, ...topics.flatMap((t) => (t.daily && t.daily.length ? t.daily : [0]))), [topics]);
   const hasRising = useMemo(() => topics.some((t) => t.change_pct > 0), [topics]);
 
   const rising = useMemo(() => {
@@ -277,7 +313,7 @@ export default function AgendaPage() {
                       </div>
 
                       <div className="mt-3 h-12">
-                        <Sparkline data={t.daily} color={m.dot} maxY={globalDailyMax} className="h-full w-full" />
+                        <LiveSparkline data={t.daily} color={m.dot} className="h-full w-full" />
                       </div>
 
                       {t.angle ? <p className="mt-3 text-xs leading-5 text-zinc-400">{t.angle}</p> : null}
@@ -396,7 +432,7 @@ export default function AgendaPage() {
                       </div>
                       <div className="mt-2 flex items-center gap-2">
                         <div className="h-8 flex-1">
-                          <Sparkline data={t.daily} color={m.dot} maxY={globalDailyMax} className="h-full w-full" />
+                          <LiveSparkline data={t.daily} color={m.dot} className="h-full w-full" />
                         </div>
                         <div className={`shrink-0 text-xs font-semibold ${t.change_pct >= 0 ? "text-emerald-300" : "text-zinc-400"}`}>{changeLabel(t)}</div>
                       </div>
