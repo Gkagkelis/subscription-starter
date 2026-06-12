@@ -35,6 +35,24 @@ type Comment = {
   channelId?: string | null;
 };
 
+function isGreek(text: string): boolean {
+  const greek = (text.match(/[\u0370-\u03FF\u1F00-\u1FFF]/g) || []).length;
+  const latin = (text.match(/[A-Za-z]/g) || []).length;
+  if (greek < 3) return false;
+  return greek >= latin;
+}
+
+const GR_STOP = new Set(["και","με","για","της","του","των","στο","στη","στην","στις","στους","στον","το","τη","την","τον","οι","τα","σε","από","που","ως","κατά","μετά","προς","ένα","μία","έναν","είναι","θα","να","δεν","ο","η"]);
+
+function keyphrase(title: string): string {
+  return String(title || "")
+    .replace(/[«»"".,:!?·\-—()]/g, " ")
+    .split(/\s+/)
+    .filter((w) => w.length > 2 && !GR_STOP.has(w.toLowerCase()))
+    .slice(0, 7)
+    .join(" ");
+}
+
 function cleanText(raw: string): string {
   return String(raw || "").replace(/<[^>]+>/g, " ").replace(/https?:\/\/\S+/g, "").replace(/\s+/g, " ").trim();
 }
@@ -62,7 +80,7 @@ async function ytComments(key: string, videoId: string): Promise<Partial<Comment
         const sn = it?.snippet?.topLevelComment?.snippet;
         if (!sn) return null;
         const text = cleanText(sn.textDisplay || "");
-        if (text.length < 8) return null;
+        if (text.length < 8 || !isGreek(text)) return null;
         return {
           text: text.slice(0, 400),
           name: String(sn.authorDisplayName || "Πολίτης").replace(/^@+/, "").trim() || "Πολίτης",
@@ -121,9 +139,10 @@ async function collectYouTube(query: string, newsQuery: string): Promise<Partial
   return trimmed;
 }
 
-async function collectApify(query: string): Promise<Partial<Comment>[]> {
+async function collectApify(query: string, diag?: Record<string, unknown>): Promise<Partial<Comment>[]> {
   const token = process.env.APIFY_API_TOKEN;
-  if (!token) return [];
+  if (diag) { diag.token_present = !!token; diag.actor = process.env.APIFY_TWITTER_ACTOR || "apidojo/tweet-scraper"; }
+  if (!token) { if (diag) diag.error = "NO_APIFY_API_TOKEN"; return []; }
   const actor = (process.env.APIFY_TWITTER_ACTOR || "apidojo/tweet-scraper").replace("/", "~");
   const url = `https://api.apify.com/v2/acts/${actor}/run-sync-get-dataset-items?token=${token}`;
   const controller = new AbortController();
@@ -137,13 +156,16 @@ async function collectApify(query: string): Promise<Partial<Comment>[]> {
       cache: "no-store",
     });
     clearTimeout(timer);
-    if (!r.ok) return [];
+    if (diag) diag.status = r.status;
+    if (!r.ok) { if (diag) diag.error = (await r.text().catch(() => "")).slice(0, 400); return []; }
     const items = await r.json();
-    if (!Array.isArray(items)) return [];
+    if (diag) diag.raw_count = Array.isArray(items) ? items.length : 0;
+    if (!Array.isArray(items)) { if (diag) diag.error = "NOT_ARRAY"; return []; }
+    if (diag && items[0]) diag.sample_keys = Object.keys(items[0]).slice(0, 20);
     return items
       .map((it: any) => {
         const text = cleanText(it?.text || it?.full_text || it?.content || it?.tweet || "");
-        if (text.length < 8) return null;
+        if (text.length < 8 || !isGreek(text)) return null;
         const name = it?.author?.userName || it?.author?.name || it?.username || it?.user?.username || it?.user?.name || "Πολίτης";
         const followers = it?.author?.followers ?? it?.author?.followersCount ?? it?.followers_count ?? it?.user?.followers_count ?? null;
         return {
@@ -157,8 +179,9 @@ async function collectApify(query: string): Promise<Partial<Comment>[]> {
       })
       .filter(Boolean)
       .slice(0, 30) as Partial<Comment>[];
-  } catch {
+  } catch (e: any) {
     clearTimeout(timer);
+    if (diag) diag.error = "THREW: " + String(e?.message || e);
     return [];
   }
 }
@@ -348,10 +371,29 @@ async function handle(request: Request) {
     const partyKey = url.searchParams.get("party") || "elas";
     if (!topic && !extra) return NextResponse.json({ error: "missing topic" }, { status: 400 });
 
-    const baseQuery = [topic, extra].filter(Boolean).join(" ").slice(0, 120);
-    const newsQuery = `${topic || extra} ειδήσεις`.slice(0, 120);
+    // ΣΥΓΚΕΚΡΙΜΕΝΗ αναζήτηση: ο τίτλος του άρθρου είναι το κύριο query (όχι generic θεματική)
+    const headline = (extra || topic).trim();
+    const mainQuery = headline.slice(0, 120);
+    const tightQuery = (keyphrase(headline) || headline).slice(0, 120);
+    const debug = url.searchParams.get("debug") === "1";
+    const apifyDiag: Record<string, unknown> = {};
 
-    const [yt, tw] = await Promise.all([collectYouTube(baseQuery, newsQuery), collectApify(baseQuery)]);
+    const [yt, tw] = await Promise.all([
+      collectYouTube(mainQuery, tightQuery),
+      collectApify(mainQuery, debug ? apifyDiag : undefined),
+    ]);
+
+    if (debug) {
+      return NextResponse.json({
+        debug: true,
+        queries: { mainQuery, tightQuery },
+        youtube_key_present: !!process.env.YOUTUBE_API_KEY,
+        youtube_found: yt.length,
+        twitter_found: tw.length,
+        apify: apifyDiag,
+        sample_youtube: yt.slice(0, 3).map((c) => ({ name: c.name, text: (c.text || "").slice(0, 80) })),
+      });
+    }
     const comments = finalizeComments([...yt, ...tw]);
     const counts = { youtube: yt.length, twitter: tw.length, total: comments.length };
 
