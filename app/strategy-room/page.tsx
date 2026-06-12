@@ -3571,7 +3571,7 @@ function AdvisorDock({
 
           <div className="mt-5 border-t border-cyan-300/10 pt-5">
             <div className="mb-3 text-xs font-semibold tracking-[-0.01em] text-zinc-300">
-              Σύμβουλος σήμερα
+              Σύμβουλος Σήμερα
             </div>
             <div className="grid gap-2.5">
               {advisorPrompts.map((item) => (
@@ -3633,20 +3633,14 @@ function AdvisorDock({
           <div className="min-h-0 flex-1 overflow-y-auto p-6">
             {chatMessages.length === 0 && !chatLoading ? (
               <div className="flex h-full flex-col items-center justify-center px-8 text-center">
-                <div className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-4 py-2 text-[10px] uppercase tracking-[0.24em] text-cyan-100">
-                  Έτοιμο με context
-                </div>
-                <div className="mt-5 text-2xl font-semibold tracking-[-0.02em] text-zinc-100">
+                <div className="text-2xl font-semibold tracking-[-0.02em] text-zinc-100">
                   Ρώτησε τον σύμβουλο Noraya
                 </div>
-                <div className="mt-3 max-w-2xl text-sm leading-7 text-zinc-500">
-                  Η απάντηση θα πατήσει στο ενεργό γεγονός, στο πολιτικό
-                  περιβάλλον, στις πηγές και στα σήματα του dashboard — όχι σε
-                  γενικές απαντήσεις.
-                </div>
-                <div className="mt-7 max-w-2xl rounded-[1.5rem] border border-cyan-300/12 bg-cyan-300/[0.04] px-5 py-4 text-sm leading-7 text-zinc-400">
-                  Διάλεξε μία κίνηση από τη στήλη «Σύμβουλος σήμερα» ή γράψε ελεύθερα.
-                  Ο Noraya θα απαντήσει πάνω στο συγκεκριμένο γεγονός, όχι γενικά.
+                <div className="mt-4 max-w-2xl rounded-[1.5rem] border border-cyan-300/12 bg-cyan-300/[0.04] px-6 py-5 text-sm leading-7 text-zinc-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+                  Ξεκίνα όπως σε βολεύει: από τον «Σύμβουλο Σήμερα», από το
+                  «Workspace Συμβούλου» ή γράφοντας ελεύθερα τι συνέβη. Ο Noraya
+                  θα κατανοήσει την κατάσταση, θα αξιολογήσει τα δεδομένα και θα
+                  σου προτείνει τα επόμενα βήματα.
                 </div>
               </div>
             ) : (
