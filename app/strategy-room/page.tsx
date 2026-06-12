@@ -3506,8 +3506,8 @@ function AdvisorDock({
 
           <div className="mt-5 rounded-[1.5rem] border border-cyan-300/15 bg-cyan-300/[0.055] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
             <div className="flex items-center justify-between gap-3">
-              <div className="text-[9px] uppercase tracking-[0.26em] text-cyan-200/70">
-                Ενεργό γεγονός
+              <div className="text-[11px] font-semibold tracking-[0.08em] text-cyan-200/80">
+                Ενεργό Γεγονός
               </div>
               <span className="rounded-full border border-emerald-300/20 bg-emerald-300/10 px-2 py-1 text-[9px] font-semibold text-emerald-100">
                 Ζωντανό
@@ -3601,11 +3601,8 @@ function AdvisorDock({
           <div className="border-b border-cyan-300/10 bg-black/10 px-6 py-5">
             <div className="flex flex-col gap-4 2xl:flex-row 2xl:items-start 2xl:justify-between">
               <div className="min-w-0">
-                <div className="text-[10px] uppercase tracking-[0.34em] text-cyan-200/70">
-                  Χώρος συμβούλου
-                </div>
-                <div className="mt-2 line-clamp-2 text-lg font-semibold tracking-[-0.01em] text-zinc-50">
-                  {activeTitle}
+                <div className="text-[12px] font-semibold tracking-[0.08em] text-cyan-200/85">
+                  Workspace Συμβούλου
                 </div>
               </div>
               <div className="grid min-w-[420px] gap-2 sm:grid-cols-5 2xl:w-[650px]">
@@ -3706,7 +3703,7 @@ function AdvisorDock({
                     onAsk();
                   }
                 }}
-                placeholder="Γράψε εδώ... Shift+Enter για νέα γραμμή"
+                placeholder="Γράψε εδώ..."
                 disabled={chatLoading}
                 className="min-h-[132px] max-h-[240px] min-w-0 flex-1 resize-y rounded-[1.45rem] border border-white/[0.08] bg-[#040813] px-5 py-4 text-sm leading-7 text-zinc-100 outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] placeholder:text-zinc-600 focus:border-cyan-300/45 disabled:opacity-50"
               />
