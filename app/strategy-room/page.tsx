@@ -1874,19 +1874,28 @@ function ActiveSituationWorkspace({
 
 function PublicPulsePanel({ situation, brief }: { situation: LiveSituationRow | null; brief: StrategicBrief }) {
   const pulse = asRecord(situation?.public_pulse);
-  const emotion = pickString(pulse, ["dominant_emotion", "emotion"], text(brief.issue?.dominant_emotion, "Υπό αξιολόγηση"));
-  const frame = pickString(pulse, ["dominant_public_frame", "dominant_frame", "frame"], text(brief.issue?.dominant_frame, "Υπό αξιολόγηση"));
-  const intensityRaw =
-    typeof brief.issue?.emotion_intensity === "number" ? brief.issue.emotion_intensity : publicPulseScore(situation);
+  const voices = asRecord((brief as unknown as Record<string, unknown>)?.voices_pulse);
+  const hasVoices = !!voices && (voices.social_mood_score != null || !!voices.dominant_emotion);
+  const emotion = hasVoices
+    ? String(voices.dominant_emotion_label || voices.dominant_emotion)
+    : pickString(pulse, ["dominant_emotion", "emotion"], text(brief.issue?.dominant_emotion, "Υπό αξιολόγηση"));
+  const frame = hasVoices
+    ? String(voices.dominant_public_frame || pickString(pulse, ["dominant_public_frame", "dominant_frame", "frame"], text(brief.issue?.dominant_frame, "Υπό αξιολόγηση")))
+    : pickString(pulse, ["dominant_public_frame", "dominant_frame", "frame"], text(brief.issue?.dominant_frame, "Υπό αξιολόγηση"));
+  const intensityRaw = hasVoices
+    ? numberValue(voices.social_mood_score, 0)
+    : typeof brief.issue?.emotion_intensity === "number"
+    ? brief.issue.emotion_intensity
+    : publicPulseScore(situation);
   const intensity = Math.min(100, Math.max(0, Math.round(intensityRaw)));
-  const spreadKey = String(brief.issue?.social_spread || pickString(pulse, ["social_spread"], "")).toLowerCase();
+  const spreadKey = String(hasVoices ? voices.social_spread || "" : brief.issue?.social_spread || pickString(pulse, ["social_spread"], "")).toLowerCase();
   const spreadLabel =
     spreadKey === "high" ? "Υψηλή" : spreadKey === "medium" ? "Μεσαία" : spreadKey === "low" ? "Χαμηλή" : "Υπό αξιολόγηση";
   const spreadScore =
     spreadKey === "high" ? 82 : spreadKey === "medium" ? 56 : spreadKey === "low" ? 30 : 50;
 
   return (
-    <CockpitSection title="PUBLIC PULSE – ΕΝΔΕΙΞΕΙΣ ΚΟΙΝΟΥ" subtitle="Signal από την κάλυψη, όχι δημοσκόπηση">
+    <CockpitSection title="PUBLIC PULSE – ΕΝΔΕΙΞΕΙΣ ΚΟΙΝΟΥ" subtitle={hasVoices ? "Πραγματικές φωνές πολιτών (YouTube + Twitter)" : "Signal από την κάλυψη, όχι δημοσκόπηση"}>
       <div className="grid gap-4 xl:grid-cols-[170px_1fr]">
         <Gauge score={intensity} label="Ένταση συναισθήματος" />
         <div className="grid gap-3">
