@@ -440,6 +440,30 @@ async function handle(request: Request) {
     const token = url.searchParams.get("token");
     if (token !== process.env.CRON_SECRET && token !== "dev") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+    // ---- ΔΩΡΕΑΝ DEBUG: γράφει & ξαναδιαβάζει voices_pulse (χωρίς AI/scraping) ----
+    if (url.searchParams.get("debug_store") === "1") {
+      const dbgParty = url.searchParams.get("party") || "elas";
+      const dbgTopic = (url.searchParams.get("topic") || "").trim();
+      const dbgQ = (url.searchParams.get("q") || "").trim();
+      let eid = url.searchParams.get("event_id") || "";
+      const sb = svc();
+      let matchedTitle = "";
+      if (!eid) {
+        const { data: evs } = await sb.from("v_political_events_live").select("id,title,topic").order("event_score", { ascending: false }).limit(60);
+        const needle = (dbgQ || dbgTopic).toLowerCase();
+        const hit = (evs || []).find((e: any) => String(e.title || "").toLowerCase().includes(needle) || String(e.topic || "").toLowerCase().includes(needle)) || (evs || [])[0];
+        if (hit) { eid = String((hit as any).id); matchedTitle = String((hit as any).title || ""); }
+      }
+      if (!eid) return NextResponse.json({ debug_store: true, error: "no_event_found" });
+      const dummy = { social_mood_score: 77, dominant_emotion: "debug", dominant_emotion_label: "DEBUG-PULSE", dominant_public_frame: "debug", social_spread: "high", total: 99, source: "voices_debug", generated_at: new Date().toISOString() };
+      const { data: existing } = await sb.from("event_party_briefs").select("advisor_brief").eq("event_id", eid).eq("party_key", dbgParty).maybeSingle();
+      const prev = existing?.advisor_brief && typeof existing.advisor_brief === "object" ? existing.advisor_brief : {};
+      const { error: upErr } = await sb.from("event_party_briefs").upsert({ event_id: eid, party_key: dbgParty, advisor_brief: { ...prev, voices_pulse: dummy }, updated_at: new Date().toISOString() }, { onConflict: "event_id,party_key" });
+      const { data: back } = await sb.from("event_party_briefs").select("advisor_brief").eq("event_id", eid).eq("party_key", dbgParty).maybeSingle();
+      const readbackPulse = (back?.advisor_brief as any)?.voices_pulse ?? null;
+      return NextResponse.json({ debug_store: true, used_event_id: eid, matched_title: matchedTitle, party: dbgParty, upsert_error: upErr ? String(upErr.message || upErr) : null, readback_has_voices_pulse: !!readbackPulse, readback_pulse: readbackPulse });
+    }
+
     const topic = (url.searchParams.get("topic") || "").trim();
     const extra = (url.searchParams.get("q") || "").trim();
     const partyKey = url.searchParams.get("party") || "elas";
