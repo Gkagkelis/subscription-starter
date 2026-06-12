@@ -1483,6 +1483,36 @@ export default function StrategyRoomPage() {
     }, 80);
   }
 
+  function renameAdvisorConversation(id: string, title: string) {
+    const cleanTitle = title.trim();
+    if (!cleanTitle) return;
+
+    setAdvisorConversations((prev) =>
+      prev.map((conversation) =>
+        conversation.id === id
+          ? {
+              ...conversation,
+              title: cleanTitle.length > 90 ? `${cleanTitle.slice(0, 90)}…` : cleanTitle,
+              updatedAt: new Date().toISOString(),
+            }
+          : conversation,
+      ),
+    );
+  }
+
+  function deleteAdvisorConversation(id: string) {
+    const remaining = advisorConversations.filter((conversation) => conversation.id !== id);
+    setAdvisorConversations(remaining);
+
+    if (conversationId === id) {
+      const next = remaining[0];
+      setConversationId(next?.id || null);
+      setChatMessages(next?.messages || []);
+      setChatQuestion("");
+      setChatError("");
+    }
+  }
+
   function startNewAdvisorConversation() {
     setConversationId(null);
     setChatMessages([]);
@@ -1711,6 +1741,8 @@ export default function StrategyRoomPage() {
               conversationId={conversationId}
               conversations={advisorConversations}
               onSelectConversation={openAdvisorConversation}
+              onRenameConversation={renameAdvisorConversation}
+              onDeleteConversation={deleteAdvisorConversation}
               onAsk={askNorayaAdvisor}
               onReset={startNewAdvisorConversation}
               chatEndRef={chatEndRef}
@@ -3406,6 +3438,8 @@ function AdvisorDock({
   conversationId,
   conversations,
   onSelectConversation,
+  onRenameConversation,
+  onDeleteConversation,
   onAsk,
   onReset,
   chatEndRef,
@@ -3421,6 +3455,8 @@ function AdvisorDock({
   conversationId: string | null;
   conversations: AdvisorConversation[];
   onSelectConversation: (id: string) => void;
+  onRenameConversation: (id: string, title: string) => void;
+  onDeleteConversation: (id: string) => void;
   onAsk: (questionOverride?: string) => void;
   onReset: () => void;
   chatEndRef: MutableRefObject<HTMLDivElement | null>;
@@ -3497,6 +3533,29 @@ function AdvisorDock({
     },
   ];
 
+  const [editingConversationId, setEditingConversationId] = useState<string | null>(null);
+  const [renameDraft, setRenameDraft] = useState("");
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+
+  function beginRenameConversation(conversation: AdvisorConversation) {
+    setEditingConversationId(conversation.id);
+    setRenameDraft(conversation.title);
+    setDeleteConfirmId(null);
+  }
+
+  function finishRenameConversation(id: string) {
+    const cleanTitle = renameDraft.trim();
+    if (!cleanTitle) return;
+    onRenameConversation(id, cleanTitle);
+    setEditingConversationId(null);
+    setRenameDraft("");
+  }
+
+  function cancelRenameConversation() {
+    setEditingConversationId(null);
+    setRenameDraft("");
+  }
+
   return (
     <section className="mt-5 h-[calc(100vh-110px)] max-h-[940px] min-h-[760px] rounded-[2.25rem] border border-cyan-300/20 bg-[#050914] p-[1px] shadow-[0_36px_140px_rgba(8,145,178,0.16)]">
       <div className="flex h-full min-h-0 overflow-hidden rounded-[2.2rem] border border-white/[0.06] bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.14),transparent_32%),linear-gradient(180deg,rgba(8,17,30,0.98),rgba(3,7,18,0.98))]">
@@ -3540,51 +3599,145 @@ function AdvisorDock({
             </div>
           </div>
 
-          <div className="mt-5 min-h-0 flex-1 overflow-y-auto pr-1">
-            <div className="mb-2 flex items-center justify-between gap-3">
-              <div className="text-[9px] uppercase tracking-[0.26em] text-zinc-500">
+          <div className="mt-5 border-t border-cyan-300/10 pt-5">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <div className="text-[12px] font-semibold tracking-[0.08em] text-cyan-200/85">
                 Συζητήσεις
               </div>
-              <div className="text-[9px] text-zinc-600">
-                {conversations.length}/20
-              </div>
+              <span className="rounded-full border border-white/[0.07] bg-white/[0.03] px-2 py-1 text-[10px] text-zinc-500">
+                {conversations.length}
+              </span>
             </div>
-            {conversations.length ? (
-              <div className="grid gap-2.5">
-                {conversations.map((conversation) => {
-                  const active = conversation.id === conversationId;
-                  return (
-                    <button
-                      key={conversation.id}
-                      type="button"
-                      onClick={() => onSelectConversation(conversation.id)}
-                      className={`group rounded-[1.25rem] border px-3.5 py-3 text-left transition ${
-                        active
-                          ? "border-cyan-300/40 bg-cyan-300/[0.11] text-cyan-50 shadow-[0_16px_60px_rgba(8,145,178,0.12)]"
-                          : "border-white/[0.07] bg-white/[0.03] text-zinc-400 hover:border-cyan-300/25 hover:bg-cyan-300/[0.055] hover:text-cyan-100"
-                      }`}
-                    >
-                      <div className="line-clamp-2 text-[12px] font-medium leading-5">
-                        {conversation.title}
-                      </div>
-                      <div className="mt-2 flex items-center justify-between gap-2 text-[9px] text-zinc-600">
-                        <span>
-                          {new Date(conversation.updatedAt).toLocaleDateString(
-                            "el-GR",
-                            { day: "2-digit", month: "2-digit" },
-                          )}
-                        </span>
-                        <span>{conversation.messages.length} μηνύματα</span>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="rounded-[1.25rem] border border-white/[0.07] bg-white/[0.03] px-3.5 py-5 text-[11px] leading-5 text-zinc-500">
-                Δεν υπάρχει ακόμη αποθηκευμένη συνομιλία για αυτό το γεγονός.
-              </div>
-            )}
+
+            <div className="max-h-[230px] overflow-y-auto pr-1">
+              {conversations.length ? (
+                <div className="grid gap-2.5">
+                  {conversations.map((conversation) => {
+                    const active = conversation.id === conversationId;
+                    const editing = editingConversationId === conversation.id;
+                    const confirmingDelete = deleteConfirmId === conversation.id;
+
+                    return (
+                      <article
+                        key={conversation.id}
+                        className={`rounded-[1.25rem] border px-3.5 py-3 transition ${
+                          active
+                            ? "border-cyan-300/40 bg-cyan-300/[0.11] text-cyan-50 shadow-[0_16px_60px_rgba(8,145,178,0.12)]"
+                            : "border-white/[0.07] bg-white/[0.03] text-zinc-400 hover:border-cyan-300/25 hover:bg-cyan-300/[0.055]"
+                        }`}
+                      >
+                        {editing ? (
+                          <div className="grid gap-2">
+                            <input
+                              value={renameDraft}
+                              onChange={(event) => setRenameDraft(event.target.value)}
+                              onKeyDown={(event) => {
+                                if (event.key === "Enter") {
+                                  event.preventDefault();
+                                  finishRenameConversation(conversation.id);
+                                }
+                                if (event.key === "Escape") {
+                                  event.preventDefault();
+                                  cancelRenameConversation();
+                                }
+                              }}
+                              autoFocus
+                              className="w-full rounded-xl border border-cyan-300/25 bg-black/30 px-3 py-2 text-[12px] text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-cyan-200/50"
+                            />
+                            <div className="flex gap-2">
+                              <button
+                                type="button"
+                                onClick={() => finishRenameConversation(conversation.id)}
+                                className="rounded-xl border border-cyan-300/25 bg-cyan-300/10 px-3 py-1.5 text-[10px] font-semibold text-cyan-100 transition hover:bg-cyan-300/15"
+                              >
+                                Αποθήκευση
+                              </button>
+                              <button
+                                type="button"
+                                onClick={cancelRenameConversation}
+                                className="rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-[10px] text-zinc-500 transition hover:text-zinc-200"
+                              >
+                                Άκυρο
+                              </button>
+                            </div>
+                          </div>
+                        ) : confirmingDelete ? (
+                          <div className="grid gap-2">
+                            <div className="text-[12px] font-semibold text-zinc-100">
+                              Να διαγραφεί αυτή η συζήτηση;
+                            </div>
+                            <div className="flex gap-2">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  onDeleteConversation(conversation.id);
+                                  setDeleteConfirmId(null);
+                                }}
+                                className="rounded-xl border border-red-300/25 bg-red-300/10 px-3 py-1.5 text-[10px] font-semibold text-red-100 transition hover:bg-red-300/15"
+                              >
+                                Διαγραφή
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setDeleteConfirmId(null)}
+                                className="rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-[10px] text-zinc-500 transition hover:text-zinc-200"
+                              >
+                                Άκυρο
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="grid gap-2">
+                            <button
+                              type="button"
+                              onClick={() => onSelectConversation(conversation.id)}
+                              className="min-w-0 text-left"
+                            >
+                              <div className="line-clamp-2 text-[12px] font-medium leading-5 text-zinc-100">
+                                {conversation.title}
+                              </div>
+                              <div className="mt-2 flex items-center justify-between gap-2 text-[9px] text-zinc-600">
+                                <span>
+                                  {new Date(conversation.updatedAt).toLocaleDateString("el-GR", {
+                                    day: "2-digit",
+                                    month: "2-digit",
+                                  })}
+                                </span>
+                                <span>{conversation.messages.length} μηνύματα</span>
+                              </div>
+                            </button>
+
+                            <div className="flex items-center justify-end gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => beginRenameConversation(conversation)}
+                                className="rounded-lg px-2 py-1 text-[9px] text-zinc-600 transition hover:bg-white/[0.05] hover:text-cyan-100"
+                              >
+                                Μετονομασία
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setEditingConversationId(null);
+                                  setDeleteConfirmId(conversation.id);
+                                }}
+                                className="rounded-lg px-2 py-1 text-[9px] text-zinc-600 transition hover:bg-red-300/10 hover:text-red-100"
+                              >
+                                Διαγραφή
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </article>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="rounded-[1.25rem] border border-white/[0.07] bg-white/[0.03] px-3.5 py-5 text-[11px] leading-5 text-zinc-500">
+                  Οι συνομιλίες για το ενεργό γεγονός θα εμφανίζονται εδώ.
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="mt-5 border-t border-cyan-300/10 pt-5">
