@@ -3570,7 +3570,7 @@ function AdvisorDock({
           </div>
 
           <div className="mt-5 border-t border-cyan-300/10 pt-5">
-            <div className="mb-3 text-xs font-semibold tracking-[-0.01em] text-zinc-300">
+            <div className="mb-3 text-[12px] font-semibold tracking-[0.08em] text-cyan-200/85">
               Σύμβουλος Σήμερα
             </div>
             <div className="grid gap-2.5">
@@ -3634,10 +3634,10 @@ function AdvisorDock({
                   Ρώτησε τον σύμβουλο Noraya
                 </div>
                 <div className="mt-4 max-w-2xl rounded-[1.5rem] border border-cyan-300/12 bg-cyan-300/[0.04] px-6 py-5 text-sm leading-7 text-zinc-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-                  Ξεκίνα όπως σε βολεύει: από τον «Σύμβουλο Σήμερα», από το
-                  «Workspace Συμβούλου» ή γράφοντας ελεύθερα τι συνέβη. Ο Noraya
-                  θα κατανοήσει την κατάσταση, θα αξιολογήσει τα δεδομένα και θα
-                  σου προτείνει τα επόμενα βήματα.
+                  Ξεκίνα όπως σε βολεύει: από τις επιλογές της ενότητας
+                  «Σύμβουλος Σήμερα», από το «Workspace Συμβούλου» ή γράφοντας
+                  ελεύθερα τι συνέβη. Ο Noraya θα κατανοήσει την κατάσταση, θα
+                  αξιολογήσει τα δεδομένα και θα σου προτείνει τα επόμενα βήματα.
                 </div>
               </div>
             ) : (
