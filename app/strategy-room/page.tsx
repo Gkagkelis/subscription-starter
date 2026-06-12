@@ -3559,7 +3559,7 @@ function AdvisorDock({
   return (
     <section className="mt-5 h-[calc(100vh-110px)] max-h-[940px] min-h-[760px] rounded-[2.25rem] border border-cyan-300/20 bg-[#050914] p-[1px] shadow-[0_36px_140px_rgba(8,145,178,0.16)]">
       <div className="flex h-full min-h-0 overflow-hidden rounded-[2.2rem] border border-white/[0.06] bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.14),transparent_32%),linear-gradient(180deg,rgba(8,17,30,0.98),rgba(3,7,18,0.98))]">
-        <aside className="hidden w-[360px] shrink-0 flex-col border-r border-cyan-300/10 bg-black/20 p-5 xl:flex">
+        <aside className="hidden w-[360px] shrink-0 flex-col overflow-y-auto border-r border-cyan-300/10 bg-black/20 p-5 xl:flex">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
               <div className="text-[10px] uppercase tracking-[0.34em] text-cyan-200/75">
@@ -3600,6 +3600,33 @@ function AdvisorDock({
           </div>
 
           <div className="mt-5 border-t border-cyan-300/10 pt-5">
+            <div className="mb-3 text-[12px] font-semibold tracking-[0.08em] text-cyan-200/85">
+              Σύμβουλος Σήμερα
+            </div>
+            <div className="grid gap-2.5">
+              {advisorPrompts.map((item) => (
+                <button
+                  key={item.title}
+                  type="button"
+                  onClick={() => onAsk(item.question)}
+                  disabled={chatLoading}
+                  className="rounded-[1.25rem] border border-white/[0.07] bg-white/[0.035] px-3.5 py-3 text-left transition hover:border-cyan-300/30 hover:bg-cyan-300/[0.07] disabled:opacity-50"
+                >
+                  <div className="text-[9px] font-medium tracking-[0.08em] text-cyan-200/60">
+                    {item.eyebrow}
+                  </div>
+                  <div className="mt-1 text-[12px] font-semibold leading-5 text-zinc-100">
+                    {item.title}
+                  </div>
+                  <div className="mt-1 line-clamp-2 text-[10px] leading-4 text-zinc-500">
+                    {item.body}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-5 border-t border-cyan-300/10 pt-5">
             <div className="mb-3 flex items-center justify-between gap-3">
               <div className="text-[12px] font-semibold tracking-[0.08em] text-cyan-200/85">
                 Συζητήσεις
@@ -3609,9 +3636,9 @@ function AdvisorDock({
               </span>
             </div>
 
-            <div className="max-h-[230px] overflow-y-auto pr-1">
+            <div className="max-h-[300px] overflow-y-auto rounded-[1.35rem] border border-white/[0.06] bg-black/15 p-2 pr-1">
               {conversations.length ? (
-                <div className="grid gap-2.5">
+                <div className="grid gap-2">
                   {conversations.map((conversation) => {
                     const active = conversation.id === conversationId;
                     const editing = editingConversationId === conversation.id;
@@ -3620,14 +3647,14 @@ function AdvisorDock({
                     return (
                       <article
                         key={conversation.id}
-                        className={`rounded-[1.25rem] border px-3.5 py-3 transition ${
+                        className={`rounded-[1rem] border transition ${
                           active
-                            ? "border-cyan-300/40 bg-cyan-300/[0.11] text-cyan-50 shadow-[0_16px_60px_rgba(8,145,178,0.12)]"
-                            : "border-white/[0.07] bg-white/[0.03] text-zinc-400 hover:border-cyan-300/25 hover:bg-cyan-300/[0.055]"
+                            ? "border-cyan-300/40 bg-cyan-300/[0.11] shadow-[0_14px_50px_rgba(8,145,178,0.10)]"
+                            : "border-white/[0.07] bg-white/[0.025] hover:border-cyan-300/25 hover:bg-cyan-300/[0.045]"
                         }`}
                       >
                         {editing ? (
-                          <div className="grid gap-2">
+                          <div className="grid gap-2 p-2.5">
                             <input
                               value={renameDraft}
                               onChange={(event) => setRenameDraft(event.target.value)}
@@ -3662,7 +3689,7 @@ function AdvisorDock({
                             </div>
                           </div>
                         ) : confirmingDelete ? (
-                          <div className="grid gap-2">
+                          <div className="grid gap-2 p-2.5">
                             <div className="text-[12px] font-semibold text-zinc-100">
                               Να διαγραφεί αυτή η συζήτηση;
                             </div>
@@ -3687,29 +3714,31 @@ function AdvisorDock({
                             </div>
                           </div>
                         ) : (
-                          <div className="grid gap-2">
+                          <div className="flex items-center gap-2 p-2.5">
                             <button
                               type="button"
                               onClick={() => onSelectConversation(conversation.id)}
-                              className="min-w-0 text-left"
+                              className="min-w-0 flex-1 text-left"
                             >
-                              <div className="line-clamp-2 text-[12px] font-medium leading-5 text-zinc-100">
+                              <div className="line-clamp-1 text-[12px] font-medium leading-5 text-zinc-100">
                                 {conversation.title}
                               </div>
-                              <div className="mt-2 flex items-center justify-between gap-2 text-[9px] text-zinc-600">
+                              <div className="mt-1 flex items-center gap-2 text-[9px] text-zinc-600">
                                 <span>
                                   {new Date(conversation.updatedAt).toLocaleDateString("el-GR", {
                                     day: "2-digit",
                                     month: "2-digit",
                                   })}
                                 </span>
+                                <span>·</span>
                                 <span>{conversation.messages.length} μηνύματα</span>
                               </div>
                             </button>
 
-                            <div className="flex items-center justify-end gap-1.5">
+                            <div className="flex shrink-0 items-center gap-1">
                               <button
                                 type="button"
+                                title="Μετονομασία"
                                 onClick={() => beginRenameConversation(conversation)}
                                 className="rounded-lg px-2 py-1 text-[9px] text-zinc-600 transition hover:bg-white/[0.05] hover:text-cyan-100"
                               >
@@ -3717,6 +3746,7 @@ function AdvisorDock({
                               </button>
                               <button
                                 type="button"
+                                title="Διαγραφή"
                                 onClick={() => {
                                   setEditingConversationId(null);
                                   setDeleteConfirmId(conversation.id);
@@ -3733,39 +3763,13 @@ function AdvisorDock({
                   })}
                 </div>
               ) : (
-                <div className="rounded-[1.25rem] border border-white/[0.07] bg-white/[0.03] px-3.5 py-5 text-[11px] leading-5 text-zinc-500">
+                <div className="rounded-[1rem] border border-white/[0.07] bg-white/[0.03] px-3.5 py-5 text-[11px] leading-5 text-zinc-500">
                   Οι συνομιλίες για το ενεργό γεγονός θα εμφανίζονται εδώ.
                 </div>
               )}
             </div>
           </div>
 
-          <div className="mt-5 border-t border-cyan-300/10 pt-5">
-            <div className="mb-3 text-[12px] font-semibold tracking-[0.08em] text-cyan-200/85">
-              Σύμβουλος Σήμερα
-            </div>
-            <div className="grid gap-2.5">
-              {advisorPrompts.map((item) => (
-                <button
-                  key={item.title}
-                  type="button"
-                  onClick={() => onAsk(item.question)}
-                  disabled={chatLoading}
-                  className="rounded-[1.25rem] border border-white/[0.07] bg-white/[0.035] px-3.5 py-3 text-left transition hover:border-cyan-300/30 hover:bg-cyan-300/[0.07] disabled:opacity-50"
-                >
-                  <div className="text-[9px] font-medium tracking-[0.08em] text-cyan-200/60">
-                    {item.eyebrow}
-                  </div>
-                  <div className="mt-1 text-[12px] font-semibold leading-5 text-zinc-100">
-                    {item.title}
-                  </div>
-                  <div className="mt-1 line-clamp-2 text-[10px] leading-4 text-zinc-500">
-                    {item.body}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
         </aside>
 
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
