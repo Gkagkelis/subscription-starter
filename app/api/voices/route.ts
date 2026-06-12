@@ -151,7 +151,14 @@ async function collectApify(query: string, diag?: Record<string, unknown>): Prom
     const r = await fetch(url, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ searchTerms: [query], searchQueries: [query], maxItems: 25, maxTweets: 25, tweetsDesired: 25, language: "el" }),
+      body: JSON.stringify({
+        query: `${query} lang:el`,
+        searchTerms: [`${query} lang:el`],
+        maxItems: 25,
+        maxTweets: 25,
+        sort: "Latest",
+        language: "el",
+      }),
       signal: controller.signal,
       cache: "no-store",
     });
@@ -164,15 +171,20 @@ async function collectApify(query: string, diag?: Record<string, unknown>): Prom
     if (diag && items[0]) diag.sample_keys = Object.keys(items[0]).slice(0, 20);
     return items
       .map((it: any) => {
-        const text = cleanText(it?.text || it?.full_text || it?.content || it?.tweet || "");
+        const text = cleanText(it?.text || it?.full_text || it?.rawContent || it?.content || it?.tweet || "");
         if (text.length < 8 || !isGreek(text)) return null;
-        const name = it?.author?.userName || it?.author?.name || it?.username || it?.user?.username || it?.user?.name || "Πολίτης";
-        const followers = it?.author?.followers ?? it?.author?.followersCount ?? it?.followers_count ?? it?.user?.followers_count ?? null;
+        const name =
+          it?.author?.userName || it?.author?.username || it?.author?.screenName || it?.author?.screen_name || it?.author?.name ||
+          it?.user?.userName || it?.user?.username || it?.user?.screen_name || it?.user?.name ||
+          it?.username || it?.screenName || it?.screen_name || "Πολίτης";
+        const followers =
+          it?.author?.followers ?? it?.author?.followersCount ?? it?.author?.followers_count ??
+          it?.user?.followers ?? it?.user?.followers_count ?? it?.followersCount ?? it?.followers_count ?? null;
         return {
           text: text.slice(0, 400),
           name: String(name).replace(/^@+/, "").trim() || "Πολίτης",
           source: "twitter" as const,
-          likes: Number(it?.likeCount ?? it?.favorite_count ?? it?.likes) || 0,
+          likes: Number(it?.likeCount ?? it?.favoriteCount ?? it?.favorite_count ?? it?.likes ?? it?.likes_count) || 0,
           followers: followers != null ? Number(followers) || 0 : null,
           channelId: null,
         };
