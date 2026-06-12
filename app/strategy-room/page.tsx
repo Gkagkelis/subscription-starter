@@ -1320,60 +1320,60 @@ export default function StrategyRoomPage() {
           politicalEnvironment={politicalEnvironment}
         />
 
-        <section className="flex min-w-0 flex-1 flex-col overflow-hidden border-x border-[#1a2640] bg-[#070d18]">
-          <div className="flex-1 overflow-y-auto px-5 py-4">
-            <PriorityStrip
-              agenda={rankedAgenda}
-              activeTitle={activeTitle}
-              immediateRecommendation={daily.immediate_recommendation}
-              avoidToday={daily.avoid_today}
-            />
+        <section className="min-w-0 flex-1 overflow-hidden border-x border-[#1a2640] bg-[#070d18]">
+  <div className="h-full overflow-y-auto px-5 py-4">
+    <PriorityStrip
+      agenda={rankedAgenda}
+      activeTitle={activeTitle}
+      immediateRecommendation={daily.immediate_recommendation}
+      avoidToday={daily.avoid_today}
+    />
 
-            {analyzingId && activeSituation && String((activeSituation as any).id) === analyzingId ? (
-              <div className="mb-3 flex items-center gap-2 rounded-2xl border border-cyan-300/30 bg-cyan-300/[0.06] px-4 py-3 text-xs text-cyan-100">
-                <span className="h-2 w-2 animate-pulse rounded-full bg-cyan-300" />
-                Ο Noraya αναλύει αυτό το γεγονός για το κόμμα σου… (λίγα δευτερόλεπτα)
-              </div>
-            ) : null}
+    {analyzingId && activeSituation && String((activeSituation as any).id) === analyzingId ? (
+      <div className="mb-3 flex items-center gap-2 rounded-2xl border border-cyan-300/30 bg-cyan-300/[0.06] px-4 py-3 text-xs text-cyan-100">
+        <span className="h-2 w-2 animate-pulse rounded-full bg-cyan-300" />
+        Ο Noraya αναλύει αυτό το γεγονός για το κόμμα σου… (λίγα δευτερόλεπτα)
+      </div>
+    ) : null}
 
-            <ActiveSituationWorkspace
-              activeTab={activeTab}
-              onTabChange={setActiveTab}
-              situation={activeSituation}
-              title={activeTitle}
-              category={activeCategory}
-              status={activeStatus}
-              urgency={activeUrgency}
-              score={activeScore}
-              documentationScore={activeDocScore}
-              documentationLevel={activeDocLevel}
-              brief={brief}
-              agenda={rankedAgenda}
-              agendaOverview={agendaOverview}
-              selectedAgendaOverview={selectedAgendaOverview}
-              activeOverviewTopic={activeOverviewTopic}
-              onSelectOverviewTopic={setActiveOverviewTopic}
-              selectedPartyImplication={selectedPartyImplication}
-            />
-          </div>
+    <ActiveSituationWorkspace
+      activeTab={activeTab}
+      onTabChange={setActiveTab}
+      situation={activeSituation}
+      title={activeTitle}
+      category={activeCategory}
+      status={activeStatus}
+      urgency={activeUrgency}
+      score={activeScore}
+      documentationScore={activeDocScore}
+      documentationLevel={activeDocLevel}
+      brief={brief}
+      agenda={rankedAgenda}
+      agendaOverview={agendaOverview}
+      selectedAgendaOverview={selectedAgendaOverview}
+      activeOverviewTopic={activeOverviewTopic}
+      onSelectOverviewTopic={setActiveOverviewTopic}
+      selectedPartyImplication={selectedPartyImplication}
+    />
 
-          <AdvisorDock
-            partyName={partyName}
-            activeTitle={activeTitle}
-            chatQuestion={chatQuestion}
-            setChatQuestion={setChatQuestion}
-            chatMessages={chatMessages}
-            chatLoading={chatLoading}
-            chatError={chatError}
-            conversationId={conversationId}
-            conversations={activeSituationChats}
-            activeChatId={activeChatId}
-            onAsk={askNorayaAdvisor}
-            onSelectConversation={openAdvisorConversation}
-            onReset={startNewAdvisorConversation}
-            chatEndRef={chatEndRef}
-          />
-        </section>
+    <AdvisorDock
+      partyName={partyName}
+      chatQuestion={chatQuestion}
+      setChatQuestion={setChatQuestion}
+      chatMessages={chatMessages}
+      chatLoading={chatLoading}
+      chatError={chatError}
+      conversationId={conversationId}
+      onAsk={askNorayaAdvisor}
+      onReset={() => {
+        setChatMessages([]);
+        setConversationId(null);
+        setChatError("");
+      }}
+      chatEndRef={chatEndRef}
+    />
+  </div>
+</section>
 
         <RightInspector
           situation={activeSituation}
