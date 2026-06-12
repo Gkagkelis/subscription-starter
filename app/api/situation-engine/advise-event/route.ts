@@ -276,13 +276,28 @@ async function processOneEvent(
   const redTeam = brief?.strategic_diagnosis?.strategic_risk || brief?.issue?.political_risk || null;
   const summary = brief?.daily_brief?.what_is_happening || ev.summary || null;
 
+  // Διατήρησε τυχόν voices_pulse (από τα Πρόσωπα) ώστε να μη χαθεί όταν ξαναγράφεται το brief.
+  let mergedBrief: any = brief;
+  try {
+    const { data: existingRow } = await supabase
+      .from("event_party_briefs")
+      .select("advisor_brief")
+      .eq("event_id", eventId)
+      .eq("party_key", partyKey)
+      .maybeSingle();
+    const prevPulse = (existingRow?.advisor_brief as any)?.voices_pulse;
+    if (prevPulse) mergedBrief = { ...brief, voices_pulse: prevPulse };
+  } catch {
+    /* αν αποτύχει, γράφουμε το brief κανονικά */
+  }
+
   await supabase
     .from("event_party_briefs")
     .upsert(
       {
         event_id: eventId,
         party_key: partyKey,
-        advisor_brief: brief,
+        advisor_brief: mergedBrief,
         framing_summary: framing,
         recommended_action: recommended,
         avoid_action: avoid,
