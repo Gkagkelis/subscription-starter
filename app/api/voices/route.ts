@@ -397,6 +397,43 @@ function enrichQuotes(parsed: any, byRef: Map<number, Comment>) {
   }
 }
 
+const EMO_BASE: Record<string, number> = { anger: 85, frustration: 75, worry: 65, mixed: 50, support: 45, hope: 55 };
+
+async function storePulse(supabase: ReturnType<typeof svc>, eventId: string, partyKey: string, parsed: any, total: number) {
+  try {
+    const emotion = String(parsed?.summary?.dominant_emotion || "mixed").toLowerCase();
+    const label = String(parsed?.summary?.emotion_label || "");
+    const score = EMO_BASE[emotion] ?? 55;
+    const spread = total >= 40 ? "high" : total >= 15 ? "medium" : "low";
+    const frame = String(parsed?.themes?.[0]?.label || "");
+    const pulse = {
+      social_mood_score: score,
+      dominant_emotion: emotion,
+      dominant_emotion_label: label,
+      dominant_public_frame: frame,
+      social_spread: spread,
+      total,
+      source: "voices",
+      generated_at: new Date().toISOString(),
+    };
+    const { data: existing } = await supabase
+      .from("event_party_briefs")
+      .select("advisor_brief")
+      .eq("event_id", eventId)
+      .eq("party_key", partyKey)
+      .maybeSingle();
+    const prevBrief = existing?.advisor_brief && typeof existing.advisor_brief === "object" ? existing.advisor_brief : {};
+    await supabase
+      .from("event_party_briefs")
+      .upsert(
+        { event_id: eventId, party_key: partyKey, advisor_brief: { ...prevBrief, voices_pulse: pulse }, updated_at: new Date().toISOString() },
+        { onConflict: "event_id,party_key" }
+      );
+  } catch {
+    /* μη-κρίσιμο: αν αποτύχει η αποθήκευση, η ανάλυση επιστρέφεται κανονικά */
+  }
+}
+
 async function handle(request: Request) {
   try {
     const url = new URL(request.url);
@@ -453,6 +490,9 @@ async function handle(request: Request) {
 
     const byRef = new Map<number, Comment>(comments.map((c) => [c.ref, c]));
     enrichQuotes(parsed, byRef);
+
+    const eventId = url.searchParams.get("event_id");
+    if (eventId) await storePulse(supabase, eventId, partyKey, parsed, counts.total);
 
     return NextResponse.json({
       success: true,
