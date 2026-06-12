@@ -7,7 +7,7 @@ import { IBM_Plex_Sans } from "next/font/google";
 const plex = IBM_Plex_Sans({ subsets: ["greek", "latin"], weight: ["400", "500", "600", "700"], display: "swap" });
 
 type Situation = Record<string, unknown>;
-type Quote = { text: string; name: string; source: string; likes: number; followers: number | null; influence: number };
+type Quote = { text: string; name: string; source: string; likes: number; followers: number | null; influence: number; retweets?: number; quotes?: number; replies?: number };
 type Theme = { label: string; gist: string; share_hint: string; quotes: Quote[] };
 type Voices = {
   summary: { dominant_emotion: string; emotion_label: string; one_liner: string };
@@ -423,9 +423,19 @@ function QuoteBubble({ q, fullNames }: { q: Quote; fullNames: boolean }): ReactN
         </span>
       </div>
       <p className="mt-1.5 text-[12px] leading-5 text-zinc-200">«{q.text}»</p>
-      <div className="mt-1.5 flex items-center gap-3 text-[10px] text-zinc-600">
-        <span>♥ {formatNum(q.likes)}</span>
-        {q.followers != null ? <span>{formatNum(q.followers)} followers</span> : null}
+      <div className="mt-1.5 flex flex-wrap items-center gap-3 text-[10px] text-zinc-600">
+        {String(q.source).toLowerCase() === "twitter" ? (
+          <>
+            <span>↻ {formatNum(q.retweets || 0)}</span>
+            {(q.quotes || 0) > 0 ? <span>❝ {formatNum(q.quotes || 0)}</span> : null}
+            {(q.replies || 0) > 0 ? <span>💬 {formatNum(q.replies || 0)}</span> : null}
+          </>
+        ) : (
+          <>
+            <span>♥ {formatNum(q.likes)}</span>
+            {q.followers != null ? <span>{formatNum(q.followers)} followers</span> : null}
+          </>
+        )}
         <span style={{ color: inf.color }}>{inf.label}</span>
       </div>
     </div>
