@@ -1084,6 +1084,7 @@ export default function StrategyRoomPage() {
   >([]);
   const [advisorStorageReady, setAdvisorStorageReady] = useState(false);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
+  const chatScrollRef = useRef<HTMLDivElement | null>(null);
 
   async function loadCockpit() {
     setLoading(true);
@@ -1465,7 +1466,8 @@ export default function StrategyRoomPage() {
     setChatError("");
 
     setTimeout(() => {
-      chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      const node = chatScrollRef.current;
+      node?.scrollTo({ top: node.scrollHeight, behavior: "smooth" });
     }, 80);
   }
 
@@ -1550,7 +1552,8 @@ export default function StrategyRoomPage() {
       );
 
       setTimeout(() => {
-        chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        const node = chatScrollRef.current;
+        node?.scrollTo({ top: node.scrollHeight, behavior: "smooth" });
       }, 100);
     } catch (err) {
       const known =
@@ -1699,6 +1702,7 @@ export default function StrategyRoomPage() {
               onAsk={askNorayaAdvisor}
               onReset={startNewAdvisorConversation}
               chatEndRef={chatEndRef}
+              chatScrollRef={chatScrollRef}
             />
           </div>
         </section>
@@ -3393,6 +3397,7 @@ function AdvisorDock({
   onAsk,
   onReset,
   chatEndRef,
+  chatScrollRef,
 }: {
   partyName: string;
   activeTitle: string;
@@ -3407,6 +3412,7 @@ function AdvisorDock({
   onAsk: (questionOverride?: string) => void;
   onReset: () => void;
   chatEndRef: MutableRefObject<HTMLDivElement | null>;
+  chatScrollRef: MutableRefObject<HTMLDivElement | null>;
 }) {
   const advisorPrompts = [
     {
@@ -3627,7 +3633,12 @@ function AdvisorDock({
             </div>
           </div>
 
-          <div className="min-h-0 flex-1 overflow-y-auto p-6">
+          <div
+            ref={(el) => {
+              chatScrollRef.current = el;
+            }}
+            className="min-h-0 flex-1 overflow-y-auto p-6"
+          >
             {chatMessages.length === 0 && !chatLoading ? (
               <div className="flex h-full flex-col items-center justify-center px-8 text-center">
                 <div className="text-2xl font-semibold tracking-[-0.02em] text-zinc-100">
