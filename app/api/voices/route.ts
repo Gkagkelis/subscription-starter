@@ -58,13 +58,20 @@ function isGreek(text: string): boolean {
 
 const GR_STOP = new Set(["και","με","για","της","του","των","στο","στη","στην","στις","στους","στον","το","τη","την","τον","οι","τα","σε","από","που","ως","κατά","μετά","προς","ένα","μία","έναν","είναι","θα","να","δεν","ο","η"]);
 
-function keyphrase(title: string): string {
-  return String(title || "")
-    .replace(/[«»"".,:!?·\-—()]/g, " ")
+function coreTerms(title: string, max: number): string {
+  const words = String(title || "")
+    .replace(/[«»""''.,:!?·\-—()\/]/g, " ")
     .split(/\s+/)
-    .filter((w) => w.length > 2 && !GR_STOP.has(w.toLowerCase()))
-    .slice(0, 7)
-    .join(" ");
+    .filter((w) => w.length > 2 && !GR_STOP.has(w.toLowerCase()));
+  const caps = words.filter((w) => /^[\u0391-\u03A9\u0386-\u038FA-Z]/.test(w));
+  const seen = new Set<string>();
+  const ordered = [...caps, ...words].filter((w) => {
+    const k = w.toLowerCase();
+    if (seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
+  return ordered.slice(0, max).join(" ");
 }
 
 function cleanText(raw: string): string {
@@ -469,22 +476,22 @@ async function handle(request: Request) {
     const partyKey = url.searchParams.get("party") || "elas";
     if (!topic && !extra) return NextResponse.json({ error: "missing topic" }, { status: 400 });
 
-    // ΣΥΓΚΕΚΡΙΜΕΝΗ αναζήτηση: ο τίτλος του άρθρου είναι το κύριο query (όχι generic θεματική)
+    // Λέξεις-κλειδιά (κύρια ονόματα), ΟΧΙ όλος ο τίτλος — αλλιώς 0 αποτελέσματα.
     const headline = (extra || topic).trim();
-    const mainQuery = headline.slice(0, 120);
-    const tightQuery = (keyphrase(headline) || headline).slice(0, 120);
+    const narrowQuery = (coreTerms(headline, 4) || headline).slice(0, 80);
+    const broadQuery = (coreTerms(headline, 2) || coreTerms(headline, 4) || topic || headline).slice(0, 60);
     const debug = url.searchParams.get("debug") === "1";
     const apifyDiag: Record<string, unknown> = {};
 
     const [yt, tw] = await Promise.all([
-      collectYouTube(mainQuery, tightQuery),
-      collectApify(mainQuery, debug ? apifyDiag : undefined),
+      collectYouTube(narrowQuery, broadQuery),
+      collectApify(broadQuery, debug ? apifyDiag : undefined),
     ]);
 
     if (debug) {
       return NextResponse.json({
         debug: true,
-        queries: { mainQuery, tightQuery },
+        queries: { narrowQuery, broadQuery },
         youtube_key_present: !!process.env.YOUTUBE_API_KEY,
         youtube_found: yt.length,
         twitter_found: tw.length,
