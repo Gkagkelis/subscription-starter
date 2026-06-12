@@ -3410,35 +3410,35 @@ function AdvisorDock({
 }) {
   const advisorPrompts = [
     {
-      eyebrow: "RISK READ",
+      eyebrow: "Ρίσκο",
       title: "Πού είναι η παγίδα;",
       body: "Βρες το σημείο που μπορεί να μας εκθέσει σήμερα.",
       question:
         "Πού είναι η παγίδα σε αυτό το γεγονός; Θέλω καθαρό risk read, τι να αποφύγουμε και τι να πούμε με ασφάλεια.",
     },
     {
-      eyebrow: "AUDIENCE",
+      eyebrow: "Κοινό",
       title: "Τι κινεί το κοινό;",
       body: "Συναισθήματα, φόβοι, προσδοκίες και κοινά-κλειδιά.",
       question:
         "Τι κινεί το κοινό σε αυτό το γεγονός; Ποια κοινά επηρεάζονται και με ποιο συναίσθημα πρέπει να μιλήσουμε;",
     },
     {
-      eyebrow: "SPOKESPERSON",
+      eyebrow: "Εκπροσώπηση",
       title: "Ποιος πρέπει να μιλήσει;",
       body: "Πρόσωπο, τόνος, timing και λόγος παρέμβασης.",
       question:
         "Ποιος πρέπει να μιλήσει για αυτό το γεγονός, με τι τόνο, πότε και γιατί; Δώσε μου ασφαλή επιλογή εκπροσώπησης.",
     },
     {
-      eyebrow: "NO-GO LINE",
+      eyebrow: "Κόκκινες γραμμές",
       title: "Τι δεν λέμε σήμερα;",
       body: "Κόκκινες λέξεις, υπερβολές και framing traps.",
       question:
         "Τι δεν λέμε σήμερα για αυτό το γεγονός; Θέλω κόκκινες λέξεις, framing traps και διατυπώσεις που αυξάνουν ρίσκο.",
     },
     {
-      eyebrow: "PUBLIC LINE",
+      eyebrow: "Δημόσια γραμμή",
       title: "Δώσε 3 ασφαλείς γραμμές",
       body: "Θεσμική, ανθρώπινη και πιο αιχμηρή εκδοχή.",
       question:
@@ -3448,31 +3448,31 @@ function AdvisorDock({
 
   const strategicMoves = [
     {
-      label: "Agenda scan",
-      title: "Εντόπισε κίνηση στην ατζέντα",
+      label: "Τι ανεβαίνει στην ατζέντα;",
+      title: "Εντόπισε τι αλλάζει στην ατζέντα",
       question:
         "Με βάση όλο το dashboard και το active situation, ποια κίνηση στην ατζέντα πρέπει να δω τώρα; Τι ανεβαίνει, τι πέφτει και τι μπορεί να γίνει πολιτικό παράθυρο;",
     },
     {
-      label: "Messages",
+      label: "Τι μηνύματα λέμε;",
       title: "Μηνύματα & συμβολισμοί",
       question:
         "Δημιούργησε πακέτο μηνυμάτων και συμβολισμών για αυτό το θέμα: βασική γραμμή, λέξεις που χρησιμοποιούμε, λέξεις που αποφεύγουμε και εικόνα/σύμβολο που μπορεί να κουβαλήσει το αφήγημα.",
     },
     {
-      label: "Narrative",
+      label: "Ποιο αφήγημα χτίζουμε;",
       title: "Πρότεινε νέο αφήγημα",
       question:
         "Πρότεινε νέο αφήγημα για το active situation που να μας βγάζει από άμυνα και να μας δίνει πολιτική πρωτοβουλία. Θέλω framing, κοινό-στόχο και βασική αντίθεση.",
     },
     {
-      label: "Initiative",
+      label: "Τι πρωτοβουλία παίρνουμε;",
       title: "Ιδέα για πρωτοβουλία",
       question:
         "Πρότεινε συγκεκριμένη πρωτοβουλία, πρόταση ή μικρή καμπάνια για αυτό το θέμα. Θέλω τι κάνουμε, ποιος το ανακοινώνει, timing και πιθανό κέρδος/ρίσκο.",
     },
     {
-      label: "Red-team",
+      label: "Πώς θα μας χτυπήσουν;",
       title: "Κάνε επίθεση στον εαυτό μας",
       question:
         "Κάνε red-team στο θέμα. Πώς θα μας χτυπήσουν αντίπαλοι, ΜΜΕ και κοινό; Ποια είναι η καλύτερη άμυνα και ποια διατύπωση δεν πρέπει να ειπωθεί;",
@@ -3489,7 +3489,7 @@ function AdvisorDock({
                 NORAYA ADVISOR
               </div>
               <div className="mt-2 text-lg font-semibold tracking-[-0.01em] text-zinc-50">
-                Executive counsel
+                Στρατηγικός σύμβουλος
               </div>
               <div className="mt-2 line-clamp-2 text-xs leading-5 text-zinc-500">
                 {partyName}
@@ -3507,17 +3507,17 @@ function AdvisorDock({
           <div className="mt-5 rounded-[1.5rem] border border-cyan-300/15 bg-cyan-300/[0.055] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
             <div className="flex items-center justify-between gap-3">
               <div className="text-[9px] uppercase tracking-[0.26em] text-cyan-200/70">
-                ACTIVE SITUATION
+                Ενεργό γεγονός
               </div>
               <span className="rounded-full border border-emerald-300/20 bg-emerald-300/10 px-2 py-1 text-[9px] font-semibold text-emerald-100">
-                LIVE
+                Ζωντανό
               </span>
             </div>
             <div className="mt-3 line-clamp-4 text-sm font-semibold leading-6 text-zinc-100">
               {activeTitle}
             </div>
             <div className="mt-3 text-[11px] leading-5 text-zinc-500">
-              Ο σύμβουλος απαντά πάνω στο γεγονός, το advisor brief, τις πηγές
+              Ο σύμβουλος απαντά πάνω στο γεγονός, το στρατηγικό brief, τις πηγές
               και το πολιτικό περιβάλλον.
             </div>
           </div>
@@ -3570,7 +3570,7 @@ function AdvisorDock({
           </div>
 
           <div className="mt-5 border-t border-cyan-300/10 pt-5">
-            <div className="mb-2 text-[9px] uppercase tracking-[0.26em] text-zinc-500">
+            <div className="mb-3 text-xs font-semibold tracking-[-0.01em] text-zinc-300">
               Σύμβουλος σήμερα
             </div>
             <div className="grid gap-2.5">
@@ -3582,7 +3582,7 @@ function AdvisorDock({
                   disabled={chatLoading}
                   className="rounded-[1.25rem] border border-white/[0.07] bg-white/[0.035] px-3.5 py-3 text-left transition hover:border-cyan-300/30 hover:bg-cyan-300/[0.07] disabled:opacity-50"
                 >
-                  <div className="text-[8px] uppercase tracking-[0.24em] text-cyan-200/55">
+                  <div className="text-[9px] font-medium tracking-[0.08em] text-cyan-200/60">
                     {item.eyebrow}
                   </div>
                   <div className="mt-1 text-[12px] font-semibold leading-5 text-zinc-100">
@@ -3602,28 +3602,13 @@ function AdvisorDock({
             <div className="flex flex-col gap-4 2xl:flex-row 2xl:items-start 2xl:justify-between">
               <div className="min-w-0">
                 <div className="text-[10px] uppercase tracking-[0.34em] text-cyan-200/70">
-                  ADVISOR WORKSPACE
+                  Χώρος συμβούλου
                 </div>
                 <div className="mt-2 line-clamp-2 text-lg font-semibold tracking-[-0.01em] text-zinc-50">
                   {activeTitle}
                 </div>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {[
-                    "Live situation",
-                    "Advisor brief",
-                    "Evidence",
-                    "Political environment",
-                  ].map((chip) => (
-                    <span
-                      key={chip}
-                      className="rounded-full border border-white/[0.08] bg-white/[0.035] px-2.5 py-1 text-[9px] font-medium uppercase tracking-[0.12em] text-zinc-500"
-                    >
-                      {chip}
-                    </span>
-                  ))}
-                </div>
               </div>
-              <div className="grid min-w-[340px] gap-2 sm:grid-cols-5 2xl:w-[520px]">
+              <div className="grid min-w-[420px] gap-2 sm:grid-cols-5 2xl:w-[650px]">
                 {strategicMoves.map((move, index) => (
                   <button
                     key={move.label}
@@ -3631,12 +3616,12 @@ function AdvisorDock({
                     onClick={() => onAsk(move.question)}
                     disabled={chatLoading}
                     title={move.title}
-                    className="group rounded-[1.1rem] border border-cyan-300/15 bg-cyan-300/[0.045] px-2.5 py-3 text-left transition hover:border-cyan-200/40 hover:bg-cyan-300/[0.09] disabled:opacity-50"
+                    className="group rounded-[1.1rem] border border-cyan-300/15 bg-cyan-300/[0.045] px-3 py-3 text-left transition hover:border-cyan-200/40 hover:bg-cyan-300/[0.09] disabled:opacity-50"
                   >
                     <div className="flex h-6 w-6 items-center justify-center rounded-full border border-cyan-300/25 bg-black/20 text-[10px] font-semibold text-cyan-100">
                       {index + 1}
                     </div>
-                    <div className="mt-2 line-clamp-2 text-[10px] font-semibold leading-4 text-zinc-100 group-hover:text-cyan-50">
+                    <div className="mt-2 line-clamp-3 text-[10px] font-semibold leading-4 text-zinc-100 group-hover:text-cyan-50">
                       {move.label}
                     </div>
                   </button>
@@ -3649,36 +3634,19 @@ function AdvisorDock({
             {chatMessages.length === 0 && !chatLoading ? (
               <div className="flex h-full flex-col items-center justify-center px-8 text-center">
                 <div className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-4 py-2 text-[10px] uppercase tracking-[0.24em] text-cyan-100">
-                  Context-ready
+                  Έτοιμο με context
                 </div>
                 <div className="mt-5 text-2xl font-semibold tracking-[-0.02em] text-zinc-100">
                   Ρώτησε τον σύμβουλο Noraya
                 </div>
                 <div className="mt-3 max-w-2xl text-sm leading-7 text-zinc-500">
-                  Η απάντηση θα πατήσει στο live γεγονός, στο πολιτικό
-                  περιβάλλον, στις πηγές και στα signals του dashboard — όχι σε
+                  Η απάντηση θα πατήσει στο ενεργό γεγονός, στο πολιτικό
+                  περιβάλλον, στις πηγές και στα σήματα του dashboard — όχι σε
                   γενικές απαντήσεις.
                 </div>
-                <div className="mt-7 grid w-full max-w-3xl gap-3 sm:grid-cols-2">
-                  {advisorPrompts.slice(0, 4).map((item) => (
-                    <button
-                      key={`empty-${item.title}`}
-                      type="button"
-                      onClick={() => onAsk(item.question)}
-                      disabled={chatLoading}
-                      className="rounded-[1.35rem] border border-white/[0.07] bg-white/[0.035] px-4 py-4 text-left transition hover:border-cyan-300/30 hover:bg-cyan-300/[0.07] disabled:opacity-50"
-                    >
-                      <div className="text-[9px] uppercase tracking-[0.22em] text-cyan-200/55">
-                        {item.eyebrow}
-                      </div>
-                      <div className="mt-1 text-sm font-semibold text-zinc-100">
-                        {item.title}
-                      </div>
-                      <div className="mt-1 text-[11px] leading-5 text-zinc-500">
-                        {item.body}
-                      </div>
-                    </button>
-                  ))}
+                <div className="mt-7 max-w-2xl rounded-[1.5rem] border border-cyan-300/12 bg-cyan-300/[0.04] px-5 py-4 text-sm leading-7 text-zinc-400">
+                  Διάλεξε μία κίνηση από τη στήλη «Σύμβουλος σήμερα» ή γράψε ελεύθερα.
+                  Ο Noraya θα απαντήσει πάνω στο συγκεκριμένο γεγονός, όχι γενικά.
                 </div>
               </div>
             ) : (
