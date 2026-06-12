@@ -149,12 +149,12 @@ export default function PeoplePage() {
 
   const selected = useMemo(() => list.find((s) => s.id === selectedId) || null, [list, selectedId]);
 
-  async function listen(topic: string, title: string) {
+  async function listen(topic: string, title: string, eventId: string) {
     setData(null);
     setErrMsg(null);
     setListening(true);
     try {
-      const r = await fetch(`/api/voices?token=dev&party=${encodeURIComponent(party)}&topic=${encodeURIComponent(topic)}&q=${encodeURIComponent(title)}`, { cache: "no-store" });
+      const r = await fetch(`/api/voices?token=dev&party=${encodeURIComponent(party)}&topic=${encodeURIComponent(topic)}&q=${encodeURIComponent(title)}&event_id=${encodeURIComponent(eventId)}`, { cache: "no-store" });
       const j = await r.json();
       if (r.ok && j?.success) {
         setData(j as VoicesResponse);
@@ -185,7 +185,7 @@ export default function PeoplePage() {
     if (exhausted && selected) {
       setRefilling(true);
       try {
-        const r = await fetch(`/api/voices?token=dev&party=${encodeURIComponent(party)}&topic=${encodeURIComponent(selected.topic)}&q=${encodeURIComponent(selected.title)}&feed_only=1`, { cache: "no-store" });
+        const r = await fetch(`/api/voices?token=dev&party=${encodeURIComponent(party)}&topic=${encodeURIComponent(selected.topic)}&q=${encodeURIComponent(selected.title)}&event_id=${encodeURIComponent(selected.id)}&feed_only=1`, { cache: "no-store" });
         const j = await r.json();
         if (j?.feed) {
           setFeedYt((prev) => {
@@ -281,7 +281,7 @@ export default function PeoplePage() {
                 <div className="text-[11px] text-zinc-500">{selected.topic}</div>
                 <h2 className="mt-1 text-2xl font-semibold text-zinc-50">{selected.title}</h2>
                 <p className="mt-3 max-w-xl text-sm text-zinc-400">Ο Noraya θα μαζέψει πραγματικά σχόλια πολιτών, θα μετρήσει τη δυναμική κάθε φωνής (likes + followers) και θα τα συνθέσει σε θεματικές.</p>
-                <button type="button" onClick={() => listen(selected.topic, selected.title)} className="mt-5 rounded-2xl border border-cyan-300/30 bg-cyan-300/10 px-5 py-2.5 text-sm font-medium text-cyan-100 transition hover:bg-cyan-300/20">▶ Άκου τον κόσμο</button>
+                <button type="button" onClick={() => listen(selected.topic, selected.title, selected.id)} className="mt-5 rounded-2xl border border-cyan-300/30 bg-cyan-300/10 px-5 py-2.5 text-sm font-medium text-cyan-100 transition hover:bg-cyan-300/20">▶ Άκου τον κόσμο</button>
               </div>
             ) : listening ? (
               <div className="flex min-h-[400px] flex-col items-center justify-center rounded-3xl border border-cyan-300/20 bg-[#0a0f1c] p-8 text-center">
@@ -294,7 +294,7 @@ export default function PeoplePage() {
             ) : errMsg ? (
               <div className="rounded-3xl border border-[#1a2640] bg-[#0c1220] p-8 text-center">
                 <div className="text-sm text-zinc-300">{errMsg}</div>
-                <button type="button" onClick={() => selected && listen(selected.topic, selected.title)} className="mt-4 rounded-2xl border border-cyan-300/30 bg-cyan-300/10 px-4 py-2 text-xs text-cyan-100 transition hover:bg-cyan-300/20">Δοκίμασε ξανά</button>
+                <button type="button" onClick={() => selected && listen(selected.topic, selected.title, selected.id)} className="mt-4 rounded-2xl border border-cyan-300/30 bg-cyan-300/10 px-4 py-2 text-xs text-cyan-100 transition hover:bg-cyan-300/20">Δοκίμασε ξανά</button>
               </div>
             ) : data?.empty ? (
               <div className="rounded-3xl border border-[#1a2640] bg-[#0c1220] p-8 text-center text-sm text-zinc-400">{data.message || "Δεν βρέθηκαν σχόλια πολιτών γι' αυτό το θέμα αυτή τη στιγμή."}</div>
@@ -395,7 +395,7 @@ export default function PeoplePage() {
                     <ForCard tone="red" title="Τι να αποφύγεις" text={v.for_party?.avoid} />
                     <ForCard tone="cyan" title="Πού είναι η ευκαιρία" text={v.for_party?.opportunity} />
                   </div>
-                  <button type="button" onClick={() => selected && listen(selected.topic, selected.title)} className="mt-4 rounded-xl border border-[#243049] bg-white/[0.03] px-3 py-1.5 text-[11px] text-zinc-400 transition hover:text-zinc-200">↻ Νέα ακρόαση</button>
+                  <button type="button" onClick={() => selected && listen(selected.topic, selected.title, selected.id)} className="mt-4 rounded-xl border border-[#243049] bg-white/[0.03] px-3 py-1.5 text-[11px] text-zinc-400 transition hover:text-zinc-200">↻ Νέα ακρόαση</button>
                 </div>
               </div>
             ) : null}
