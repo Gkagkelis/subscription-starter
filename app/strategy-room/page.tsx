@@ -330,8 +330,8 @@ const situationTabs: Array<{ id: SituationTab; label: string }> = [
   { id: "strategic", label: "Στρατηγική εικόνα" },
   { id: "overview", label: "Συνολική εικόνα" },
   { id: "why", label: "Γιατί υπάρχει" },
-  { id: "drivers", label: "Drivers & πηγές" },
-  { id: "pulse", label: "Public Pulse" },
+  { id: "drivers", label: "Πηγές & παράγοντες" },
+  { id: "pulse", label: "Δημόσιος παλμός" },
   { id: "win", label: "Πώς κερδίζεται" },
   { id: "options", label: "Επιλογές δράσης" },
   { id: "comms", label: "Υλικό" },
@@ -503,6 +503,18 @@ function statusToneClass(value?: string | null) {
     return "border-white/10 bg-white/[0.04] text-zinc-400";
   return "border-white/10 bg-white/[0.04] text-zinc-300";
 }
+
+
+function statusLabel(value?: string | null) {
+  const normalized = String(value || "").toLowerCase();
+  if (normalized.includes("active")) return "Ενεργό";
+  if (normalized.includes("new") || normalized.includes("candidate")) return "Νέο";
+  if (normalized.includes("monitor")) return "Υπό παρακολούθηση";
+  if (normalized.includes("resolved")) return "Ολοκληρωμένο";
+  if (normalized.includes("archived")) return "Αρχείο";
+  return text(value, "Κατάσταση");
+}
+
 
 function recommendationLabel(value?: string) {
   if (value === "prefer") return "Προτεινόμενη";
@@ -857,7 +869,7 @@ function EventEvidenceList({
         const score = numberValue(article.score, 0);
         const body = (
           <>
-            <div className="text-[10px] uppercase tracking-[0.16em] text-cyan-300">
+            <div className="text-[10px] font-semibold tracking-[0.01em] text-cyan-300/85">
               {article.source || "Πηγή"}
             </div>
             <div className="mt-1 text-xs font-medium leading-5 text-zinc-100">
@@ -1746,7 +1758,7 @@ function TopNavigation({
             <div className="text-sm font-bold tracking-[0.22em] text-cyan-100">
               NORAYA
             </div>
-            <div className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">
+            <div className="text-[10px] font-semibold tracking-[0.01em] text-cyan-100/65">
               Political Intelligence
             </div>
           </div>
@@ -1931,13 +1943,13 @@ function LeftSidebar({
     <aside className="flex w-[256px] shrink-0 flex-col overflow-hidden bg-[#060a14]">
       <div className="flex-1 overflow-y-auto p-3">
         <SidebarPanel
-          title="AGENDA MAP"
+          title="Χάρτης ατζέντας"
           info
           action="Δες όλη την ατζέντα"
           footer={
             agendaItems.length
               ? `${situationCount || situations.length} γεγονότα · ${situationSource}`
-              : "awaiting agenda"
+              : "αναμονή ατζέντας"
           }
         >
           {situationWarning ? (
@@ -2048,23 +2060,23 @@ function LeftSidebar({
           )}
         </SidebarPanel>
 
-        <SidebarPanel title="ΕΣΩΤΕΡΙΚΑ ΔΕΔΟΜΕΝΑ">
+        <SidebarPanel title="Εσωτερικά δεδομένα">
           <div className="grid gap-2 text-[11px] text-zinc-400">
             <DataRow
               label="Δημοσκοπήσεις"
               value={String(polls.length)}
               badge={polls.length ? "Νέο" : undefined}
             />
-            <DataRow label="Focus Groups" value="—" />
+            <DataRow label="Focus groups" value="—" />
             <DataRow
-              label="Briefings"
+              label="Briefs"
               value={politicalEnvironment?.snapshot_date ? "1" : "—"}
             />
-            <DataRow label="Κόκκινες γραμμές" value="profile" />
+            <DataRow label="Κόκκινες γραμμές" value="προφίλ" />
           </div>
         </SidebarPanel>
 
-        <SidebarPanel title="QUICK CAPTURE">
+        <SidebarPanel title="Γρήγορη καταγραφή">
           <div className="grid grid-cols-2 gap-2">
             {[
               { label: "Σημείωση / Ιδέα", Glyph: IconNote },
@@ -2084,10 +2096,10 @@ function LeftSidebar({
           </div>
         </SidebarPanel>
 
-        <SidebarPanel title="ΕΣΩΤΕΡΙΚΗ ΜΝΗΜΗ" action="Όλες οι σημειώσεις">
+        <SidebarPanel title="Εσωτερική μνήμη" action="Όλες οι σημειώσεις">
           <div className="grid gap-2">
-            <MemoryLine date="Σήμερα" title="Cockpit shell checkpoint" />
-            <MemoryLine date="Live" title="Situation engine συνδεδεμένο" />
+            <MemoryLine date="Σήμερα" title="Έλεγχος Strategy Room" />
+            <MemoryLine date="Live" title="Situation engine ενεργό" />
           </div>
         </SidebarPanel>
       </div>
@@ -2120,7 +2132,7 @@ function PriorityStrip({
 }) {
   const cards = [
     {
-      label: "ΠΡΟΤΕΡΑΙΟΤΗΤΑ 1",
+      label: "Προτεραιότητα 1",
       title: activeTitle,
       badge: "Υψηλή προτεραιότητα",
       tone: "red" as const,
@@ -2132,7 +2144,7 @@ function PriorityStrip({
       ),
     },
     {
-      label: "ΣΗΜΑ ΑΤΖΕΝΤΑΣ",
+      label: "Σήμα ατζέντας",
       title: agenda[1]?.topic || "Δεύτερο σήμα υπό ταξινόμηση",
       badge: "Μεσαία",
       tone: "amber" as const,
@@ -2143,7 +2155,7 @@ function PriorityStrip({
       ),
     },
     {
-      label: "ΝΑ ΑΠΟΦΥΓΟΥΜΕ",
+      label: "Να αποφύγουμε",
       title: "Πρόωρη κλιμάκωση",
       badge: "Χαμηλή προς Μεσαία",
       tone: "emerald" as const,
@@ -2167,8 +2179,8 @@ function PriorityStrip({
       <div className="mb-3 flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <div className="text-[10px] uppercase tracking-[0.26em] text-cyan-200/70">
-              ΠΡΟΤΕΡΑΙΟΤΗΤΕΣ ΣΗΜΕΡΑ
+            <div className="text-[12px] font-semibold tracking-[0.01em] text-cyan-200/85">
+              Προτεραιότητες σήμερα
             </div>
             <IconInfo className="h-3.5 w-3.5 text-zinc-600" />
           </div>
@@ -2194,7 +2206,7 @@ function PriorityStrip({
             <div className="flex items-start gap-3">
               <NumberBadge value={index + 1} tone={card.tone} size="lg" />
               <div className="min-w-0 flex-1">
-                <div className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">
+                <div className="text-[10px] font-semibold tracking-[0.01em] text-cyan-100/65">
                   {card.label}
                 </div>
                 <h2 className="mt-1 line-clamp-2 text-sm font-semibold leading-6 text-zinc-100">
@@ -2282,7 +2294,7 @@ function ActiveSituationWorkspace({
           <div className="min-w-0">
             <div className="mb-3 flex flex-wrap items-center gap-2">
               <StatusChip className={statusToneClass(status)}>
-                {status.toUpperCase()}
+                {statusLabel(status)}
               </StatusChip>
               <StatusChip className={signalToneClass(urgency)}>
                 {riskLabel(urgency)}
@@ -2301,7 +2313,7 @@ function ActiveSituationWorkspace({
 
           <div className="grid shrink-0 grid-cols-2 gap-3">
             <MiniMetric
-              label="Agenda score"
+              label="Σκορ ατζέντας"
               value={score ? Math.round(score).toString() : "—"}
             />
             <MiniMetric
@@ -2344,8 +2356,8 @@ function ActiveSituationWorkspace({
         {activeTab === "strategic" ? (
           <div className="grid gap-4">
             <CockpitSection
-              title="1. STRATEGIC READ — Τι σημαίνει"
-              subtitle="Agenda Formation → Framing Diagnosis → Priming Risk"
+              title="1. Στρατηγική ανάγνωση"
+              subtitle="Ατζέντα → Πλαίσιο → Ρίσκο"
             >
               <div className="grid gap-5 xl:grid-cols-[1fr_150px]">
                 <p className="text-[13px] leading-7 text-zinc-300/95">
@@ -2356,8 +2368,8 @@ function ActiveSituationWorkspace({
             </CockpitSection>
 
             <CockpitSection
-              title="2. ΠΩΣ ΚΕΡΔΙΖΕΤΑΙ ΤΟ ΘΕΜΑ"
-              subtitle="HERESTHETIC / RIKER LAYER"
+              title="2. Πώς κερδίζεται το θέμα"
+              subtitle="Στρατηγική δυναμική"
             >
               <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-5">
                 <WinCard
@@ -2414,7 +2426,7 @@ function ActiveSituationWorkspace({
 
             <div className="grid gap-4 2xl:grid-cols-2">
               <CockpitSection
-                title="3. ΤΙ ΚΑΝΟΥΜΕ ΤΩΡΑ — ΕΠΙΛΟΓΕΣ"
+                title="3. Τι κάνουμε τώρα — επιλογές"
                 subtitle="Επιλογές δράσης Α/Β/Γ από scenarios"
               >
                 <div className="grid gap-3 md:grid-cols-3 2xl:grid-cols-1">
@@ -2434,7 +2446,7 @@ function ActiveSituationWorkspace({
               </CockpitSection>
 
               <CockpitSection
-                title="4. WHAT WOULD CHANGE MY MIND"
+                title="4. Τι θα άλλαζε την εκτίμηση"
                 subtitle="Triggers παρακολούθησης"
               >
                 <BulletList
@@ -2454,7 +2466,7 @@ function ActiveSituationWorkspace({
             </div>
 
             <CockpitSection
-              title="5. ΕΝΤΑΣΗ & ΔΥΝΑΜΙΚΗ"
+              title="5. Ένταση & δυναμική"
               subtitle="6 gauges — αρχικά από διαθέσιμα live signals"
             >
               <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
@@ -2521,7 +2533,7 @@ function ActiveSituationWorkspace({
             </CockpitSection>
 
             <CockpitSection
-              title="6. ESCALATION LADDER"
+              title="6. Κλίμακα κλιμάκωσης"
               subtitle="Αποφυγή πρόωρης κλιμάκωσης"
             >
               <EscalationLadder
@@ -2570,7 +2582,7 @@ function ActiveSituationWorkspace({
         {activeTab === "drivers" ? (
           <div className="grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
             <CockpitSection
-              title="Drivers"
+              title="Παράγοντες"
               subtitle="Agenda signals behind the selected situation"
             >
               <div className="grid gap-3">
@@ -2584,14 +2596,14 @@ function ActiveSituationWorkspace({
                 ))}
                 {!agenda.length ? (
                   <EmptyState>
-                    Δεν υπάρχουν διαθέσιμα agenda drivers.
+                    Δεν υπάρχουν διαθέσιμοι παράγοντες ατζέντας.
                   </EmptyState>
                 ) : null}
               </div>
             </CockpitSection>
             <CockpitSection
               title="Πηγές γεγονότος"
-              subtitle="Άρθρα που στηρίζουν το επιλεγμένο Live Situation"
+              subtitle="Άρθρα που στηρίζουν το επιλεγμένο γεγονός"
             >
               <EventEvidenceList articles={activeEvidenceArticles} />
             </CockpitSection>
@@ -2604,8 +2616,8 @@ function ActiveSituationWorkspace({
 
         {activeTab === "win" ? (
           <CockpitSection
-            title="ΠΩΣ ΚΕΡΔΙΖΕΤΑΙ ΤΟ ΘΕΜΑ (HERESTHETIC)"
-            subtitle="HERESTHETIC / RIKER LAYER — UI label κρατά πολιτική γλώσσα"
+            title="Πώς κερδίζεται το θέμα"
+            subtitle="Στρατηγική δυναμική και καθαρό framing"
           >
             <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-5">
               <WinCard
@@ -2964,12 +2976,12 @@ function AgendaOverviewPanel({
 
                   <div className="grid grid-cols-2 gap-2 xl:grid-cols-4">
                     <MiniMetric
-                      label="Raw Signal"
+                      label="Βασικό σήμα"
                       value={String(selectedScore)}
                       small
                     />
                     <MiniMetric
-                      label="Search Interest"
+                      label="Ενδιαφέρον αναζήτησης"
                       value={searchInterestLabel(
                         selectedSearchInterest,
                         selected.search_interest_status,
@@ -2977,7 +2989,7 @@ function AgendaOverviewPanel({
                       small
                     />
                     <MiniMetric
-                      label="Strategic Boost"
+                      label="Στρατηγική ώθηση"
                       value={String(selectedStrategicBoost)}
                       small
                     />
@@ -3137,9 +3149,9 @@ function RightInspector({
   return (
     <aside className="flex w-[240px] shrink-0 flex-col overflow-hidden bg-[#060a14]">
       <div className="flex-1 overflow-y-auto p-3">
-        <InspectorPanel title="ΓΙΑΤΙ ΤΟ ΒΛΕΠΕΙ Ο NORAYA">
+        <InspectorPanel title="Γιατί το βλέπει ο Noraya">
           <div className="rounded-2xl border border-cyan-300/20 bg-cyan-300/[0.06] p-3">
-            <div className="text-[10px] uppercase tracking-[0.18em] text-cyan-300">
+            <div className="text-[10px] font-semibold tracking-[0.01em] text-cyan-300/85">
               {inspectorTopic}
             </div>
             <div className="mt-2 text-xs font-semibold leading-5 text-zinc-100">
@@ -3162,11 +3174,11 @@ function RightInspector({
           </div>
         </InspectorPanel>
 
-        <InspectorPanel title="ΠΗΓΕΣ ΓΕΓΟΝΟΤΟΣ">
+        <InspectorPanel title="Πηγές γεγονότος">
           <EventEvidenceList articles={inspectorEvidenceArticles} compact />
         </InspectorPanel>
 
-        <InspectorPanel title="KEY DRIVERS">
+        <InspectorPanel title="Κύριοι παράγοντες">
           <div className="grid gap-3">
             {Array.isArray(brief.key_drivers) && brief.key_drivers.length
               ? brief.key_drivers
@@ -3192,7 +3204,7 @@ function RightInspector({
                 ).map((item, index) => (
                   <DriverBar
                     key={`${item.topic}-${index}`}
-                    label={item.topic || "Driver"}
+                    label={item.topic || "Παράγοντας"}
                     score={numberValue(
                       (item as RankedAgenda).score ?? score,
                       score,
@@ -3749,7 +3761,7 @@ function SidebarPanel({
   return (
     <section className="mb-3 rounded-[1.5rem] border border-[#1a2640] bg-[#080f1c] p-3">
       <div className="mb-3 flex items-center justify-between gap-2">
-        <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-500">
+        <div className="text-[11px] font-semibold tracking-[0.02em] text-cyan-200/80">
           {title}
         </div>
         {info ? <IconInfo className="h-3.5 w-3.5 text-zinc-600" /> : null}
@@ -3782,7 +3794,7 @@ function InspectorPanel({
 }) {
   return (
     <section className="mb-3 rounded-[1.5rem] border border-[#1a2640] bg-[#080f1c] p-3">
-      <div className="mb-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-500">
+      <div className="mb-3 text-[11px] font-semibold tracking-[0.02em] text-cyan-200/80">
         {title}
       </div>
       {children}
@@ -3802,11 +3814,11 @@ function CockpitSection({
   return (
     <section className="rounded-[1.75rem] border border-white/[0.07] bg-[#070c16]/95 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]">
       <div className="mb-4 flex flex-col gap-1.5 sm:flex-row sm:items-end sm:justify-between">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-cyan-100/90">
+        <div className="text-[12px] font-semibold tracking-[0.01em] text-cyan-100/90">
           {title}
         </div>
         {subtitle ? (
-          <div className="text-[9px] uppercase tracking-[0.16em] text-zinc-600">
+          <div className="text-[10px] font-medium tracking-[0.01em] text-zinc-600">
             {subtitle}
           </div>
         ) : null}
@@ -3825,7 +3837,7 @@ function StatusChip({
 }) {
   return (
     <span
-      className={`rounded-full border px-3 py-1 text-[9px] font-medium uppercase tracking-[0.08em] ${className}`}
+      className={`rounded-full border px-3 py-1 text-[10px] font-medium tracking-[0.01em] ${className}`}
     >
       {children}
     </span>
@@ -3845,7 +3857,7 @@ function MiniMetric({
     <div
       className={`rounded-2xl border border-white/[0.07] bg-black/20 ${small ? "px-3 py-2" : "px-4 py-3"}`}
     >
-      <div className="text-[9px] uppercase tracking-[0.18em] text-zinc-600">
+      <div className="text-[10px] font-medium tracking-[0.01em] text-zinc-600">
         {label}
       </div>
       <div
@@ -3870,7 +3882,7 @@ function MiniBox({
     <div
       className={`min-w-0 rounded-2xl border border-white/[0.07] bg-black/20 ${compact ? "p-3" : "p-4"}`}
     >
-      <div className="text-[9px] uppercase tracking-[0.18em] text-zinc-600">
+      <div className="text-[10px] font-medium tracking-[0.01em] text-zinc-600">
         {title}
       </div>
       <p
@@ -4025,7 +4037,7 @@ function WinCard({
     <div
       className={`min-w-0 rounded-[1.35rem] border p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)] ${className}`}
     >
-      <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
+      <div className="text-[10px] font-semibold tracking-[0.01em] text-cyan-100/70">
         {title}
       </div>
       <p className="mt-3 break-words text-[12px] leading-6 text-zinc-200/90">
@@ -4247,7 +4259,7 @@ function MemoryLine({ date, title }: { date: string; title: string }) {
 function SummaryLine({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-2xl border border-[#1a2640] bg-black/20 px-3 py-2">
-      <div className="text-[9px] uppercase tracking-[0.16em] text-zinc-600">
+      <div className="text-[10px] font-medium tracking-[0.01em] text-zinc-600">
         {label}
       </div>
       <div className="mt-1 line-clamp-3 text-[11px] leading-5 text-zinc-300">
