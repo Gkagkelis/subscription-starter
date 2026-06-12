@@ -309,43 +309,14 @@ type SituationTab = "strategic" | "overview" | "why" | "drivers" | "pulse" | "wi
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
 
-type ChatConversation = {
+type AdvisorConversation = {
   id: string;
   title: string;
-  partyName: string;
-  situationId: string;
   situationTitle: string;
   messages: ChatMessage[];
-  conversationId: string | null;
   createdAt: string;
   updatedAt: string;
 };
-
-const NORAYA_CHAT_STORAGE_KEY = "noraya-advisor-conversations-v1";
-
-function advisorConversationTitle(messages: ChatMessage[], fallback: string) {
-  const firstUserMessage = messages.find((message) => message.role === "user")?.content?.trim();
-  if (!firstUserMessage) return fallback;
-  return firstUserMessage.length > 72 ? `${firstUserMessage.slice(0, 72)}…` : firstUserMessage;
-}
-
-function advisorPreview(messages: ChatMessage[]) {
-  const lastMessage = [...messages].reverse().find((message) => message.content.trim());
-  if (!lastMessage) return "Νέα συνομιλία";
-  const content = lastMessage.content.replace(/\s+/g, " ").trim();
-  return content.length > 92 ? `${content.slice(0, 92)}…` : content;
-}
-
-function advisorTime(value: string) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleString("el-GR", {
-    day: "2-digit",
-    month: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
 
 const situationTabs: Array<{ id: SituationTab; label: string }> = [
   { id: "strategic", label: "Στρατηγική εικόνα" },
@@ -859,9 +830,8 @@ export default function StrategyRoomPage() {
   const [chatLoading, setChatLoading] = useState(false);
   const [chatError, setChatError] = useState("");
   const [conversationId, setConversationId] = useState<string | null>(null);
-  const [chatConversations, setChatConversations] = useState<ChatConversation[]>([]);
-  const [activeChatId, setActiveChatId] = useState<string | null>(null);
-  const [chatHistoryReady, setChatHistoryReady] = useState(false);
+  const [advisorConversations, setAdvisorConversations] = useState<AdvisorConversation[]>([]);
+  const [advisorStorageReady, setAdvisorStorageReady] = useState(false);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
 
   async function loadCockpit() {
@@ -912,37 +882,6 @@ export default function StrategyRoomPage() {
   useEffect(() => {
     loadCockpit();
   }, []);
-
-  useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem(NORAYA_CHAT_STORAGE_KEY);
-      const parsed = raw ? (JSON.parse(raw) as ChatConversation[]) : [];
-      const safeConversations = Array.isArray(parsed)
-        ? parsed
-            .filter((conversation) => conversation?.id && Array.isArray(conversation.messages))
-            .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-            .slice(0, 40)
-        : [];
-      setChatConversations(safeConversations);
-    } catch {
-      setChatConversations([]);
-    } finally {
-      setChatHistoryReady(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!chatHistoryReady) return;
-
-    try {
-      window.localStorage.setItem(
-        NORAYA_CHAT_STORAGE_KEY,
-        JSON.stringify(chatConversations.slice(0, 40))
-      );
-    } catch {
-      // Αν ο browser δεν επιτρέπει localStorage, το chat συνεχίζει να δουλεύει χωρίς persistence.
-    }
-  }, [chatConversations, chatHistoryReady]);
 
   const politicalEnvironment = data?.political_environment || null;
   const selectedPartyKey = data?.profile?.party_key || "";
@@ -1098,79 +1037,92 @@ export default function StrategyRoomPage() {
       ? brief.evidence.data_points.slice(0, 8).map((point: string) => ({ title: point, source: "" }))
       : [];
 
-  const advisorSituationId = activeSituationId || String((activeSituation as any)?.id || "general");
-
-  const activeSituationChats = useMemo(() => {
-    return chatConversations
-      .filter((conversation) => conversation.situationId === advisorSituationId)
-      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
-  }, [chatConversations, advisorSituationId]);
+  const advisorSituationKey = useMemo(() => {
+    const partyKey = data?.profile?.party_key || partyShortName(profile) || "unknown-party";
+    const situationKey = String((activeSituation as any)?.id || activeTitle || "no-active-situation");
+    return `noraya-advisor:${partyKey}:${situationKey}`;
+  }, [activeSituation, activeTitle, data?.profile?.party_key, profile]);
 
   useEffect(() => {
-    if (!chatHistoryReady) return;
+    setAdvisorStorageReady(false);
 
-    const latestForSituation = chatConversations
-      .filter((conversation) => conversation.situationId === advisorSituationId)
-      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())[0];
+    try {
+      const raw = window.localStorage.getItem(advisorSituationKey);
+      const parsed = raw ? JSON.parse(raw) : [];
+      const conversations: AdvisorConversation[] = Array.isArray(parsed) ? parsed : [];
+      setAdvisorConversations(conversations);
 
-    if (latestForSituation) {
-      setActiveChatId(latestForSituation.id);
-      setChatMessages(latestForSituation.messages);
-      setConversationId(latestForSituation.conversationId || null);
-    } else {
-      setActiveChatId(null);
-      setChatMessages([]);
+      const latest = conversations[0];
+      if (latest) {
+        setConversationId(latest.id);
+        setChatMessages(Array.isArray(latest.messages) ? latest.messages : []);
+      } else {
+        setConversationId(null);
+        setChatMessages([]);
+      }
+      setChatQuestion("");
+      setChatError("");
+    } catch {
+      setAdvisorConversations([]);
       setConversationId(null);
+      setChatMessages([]);
+    } finally {
+      setAdvisorStorageReady(true);
     }
+  }, [advisorSituationKey]);
 
-    setChatQuestion("");
-    setChatError("");
-  }, [advisorSituationId, chatHistoryReady]);
+  useEffect(() => {
+    if (!advisorStorageReady) return;
 
-  function saveAdvisorConversation(localChatId: string, messagesToSave: ChatMessage[], nextConversationId: string | null) {
+    try {
+      window.localStorage.setItem(advisorSituationKey, JSON.stringify(advisorConversations.slice(0, 20)));
+    } catch {
+      // localStorage can be unavailable in private browsing; chat still works in memory.
+    }
+  }, [advisorConversations, advisorSituationKey, advisorStorageReady]);
+
+  function upsertAdvisorConversation(id: string, conversationMessages: ChatMessage[], replaceId?: string | null) {
+    if (!conversationMessages.length) return;
+
     const now = new Date().toISOString();
-    const fallbackTitle = activeTitle || "Noraya Advisor";
-    const situationTitleValue = activeTitle || "Ενεργή πολιτική κατάσταση";
+    const firstUserMessage = conversationMessages.find((message) => message.role === "user")?.content || "Νέα συνομιλία";
+    const title = firstUserMessage.length > 88 ? `${firstUserMessage.slice(0, 88)}…` : firstUserMessage;
 
-    setChatConversations((previous) => {
-      const existing = previous.find((conversation) => conversation.id === localChatId);
-      const nextConversation: ChatConversation = {
-        id: localChatId,
-        title: existing?.title || advisorConversationTitle(messagesToSave, fallbackTitle),
-        partyName,
-        situationId: advisorSituationId,
-        situationTitle: situationTitleValue,
-        messages: messagesToSave,
-        conversationId: nextConversationId,
-        createdAt: existing?.createdAt || now,
-        updatedAt: now,
-      };
+    setAdvisorConversations((prev) => {
+      const existing = prev.find((conversation) => conversation.id === id || conversation.id === replaceId);
+      const rest = prev.filter((conversation) => conversation.id !== id && conversation.id !== replaceId);
 
       return [
-        nextConversation,
-        ...previous.filter((conversation) => conversation.id !== localChatId),
-      ]
-        .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-        .slice(0, 40);
+        {
+          id,
+          title: existing?.title || title,
+          situationTitle: activeTitle,
+          messages: conversationMessages,
+          createdAt: existing?.createdAt || now,
+          updatedAt: now,
+        },
+        ...rest,
+      ].slice(0, 20);
     });
   }
 
-  function openAdvisorConversation(conversation: ChatConversation) {
-    setActiveChatId(conversation.id);
+  function openAdvisorConversation(id: string) {
+    const conversation = advisorConversations.find((item) => item.id === id);
+    if (!conversation) return;
+
+    setConversationId(conversation.id);
     setChatMessages(conversation.messages);
-    setConversationId(conversation.conversationId || null);
     setChatQuestion("");
     setChatError("");
 
     setTimeout(() => {
       chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, 100);
+    }, 80);
   }
 
   function startNewAdvisorConversation() {
-    setActiveChatId(null);
-    setChatMessages([]);
     setConversationId(null);
+    setChatMessages([]);
     setChatQuestion("");
     setChatError("");
   }
@@ -1183,20 +1135,16 @@ export default function StrategyRoomPage() {
       return;
     }
 
-    const localChatId = activeChatId || `noraya-${Date.now()}`;
+    const localConversationId = conversationId || `local-${Date.now()}`;
     const userMessage: ChatMessage = { role: "user", content: question };
-    const messagesWithQuestion = [...chatMessages, userMessage];
+    const nextUserMessages = [...chatMessages, userMessage];
 
-    setActiveChatId(localChatId);
-    setChatMessages(messagesWithQuestion);
-    saveAdvisorConversation(localChatId, messagesWithQuestion, conversationId);
+    setConversationId(localConversationId);
+    setChatMessages(nextUserMessages);
+    upsertAdvisorConversation(localConversationId, nextUserMessages);
     setChatQuestion("");
     setChatLoading(true);
     setChatError("");
-
-    setTimeout(() => {
-      chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, 50);
 
     try {
       const response = await fetch("/api/advisor/strategy-chat", {
@@ -1204,7 +1152,7 @@ export default function StrategyRoomPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           question,
-          conversation_id: conversationId,
+          conversation_id: localConversationId,
           profile: data?.profile || null,
           strategic_brief: data?.strategic_brief || null,
           political_environment: data?.political_environment || null,
@@ -1234,15 +1182,12 @@ export default function StrategyRoomPage() {
 
       const json = (await response.json()) as StrategyChatResponse;
       const answer = json.answer || "Ο σύμβουλος Noraya δεν επέστρεψε απάντηση.";
-      const nextConversationId = json.conversation_id || conversationId;
-      const messagesWithAnswer: ChatMessage[] = [
-        ...messagesWithQuestion,
-        { role: "assistant", content: answer },
-      ];
+      const finalConversationId = json.conversation_id || localConversationId;
+      const nextMessages: ChatMessage[] = [...nextUserMessages, { role: "assistant", content: answer }];
 
-      if (json.conversation_id) setConversationId(json.conversation_id);
-      setChatMessages(messagesWithAnswer);
-      saveAdvisorConversation(localChatId, messagesWithAnswer, nextConversationId);
+      setConversationId(finalConversationId);
+      setChatMessages(nextMessages);
+      upsertAdvisorConversation(finalConversationId, nextMessages, localConversationId);
 
       setTimeout(() => {
         chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -1250,7 +1195,6 @@ export default function StrategyRoomPage() {
     } catch (err) {
       const known = err instanceof Error && /Noraya|διαθέσιμ|Δοκιμάστε/.test(err.message);
       setChatError(known ? (err as Error).message : "Δεν μπόρεσε να απαντήσει ο σύμβουλος Noraya. Δοκιμάστε ξανά.");
-      saveAdvisorConversation(localChatId, messagesWithQuestion, conversationId);
     } finally {
       setChatLoading(false);
     }
@@ -1321,59 +1265,58 @@ export default function StrategyRoomPage() {
         />
 
         <section className="min-w-0 flex-1 overflow-hidden border-x border-[#1a2640] bg-[#070d18]">
-  <div className="h-full overflow-y-auto px-5 py-4">
-    <PriorityStrip
-      agenda={rankedAgenda}
-      activeTitle={activeTitle}
-      immediateRecommendation={daily.immediate_recommendation}
-      avoidToday={daily.avoid_today}
-    />
+          <div className="h-full overflow-y-auto px-5 py-4">
+            <PriorityStrip
+              agenda={rankedAgenda}
+              activeTitle={activeTitle}
+              immediateRecommendation={daily.immediate_recommendation}
+              avoidToday={daily.avoid_today}
+            />
 
-    {analyzingId && activeSituation && String((activeSituation as any).id) === analyzingId ? (
-      <div className="mb-3 flex items-center gap-2 rounded-2xl border border-cyan-300/30 bg-cyan-300/[0.06] px-4 py-3 text-xs text-cyan-100">
-        <span className="h-2 w-2 animate-pulse rounded-full bg-cyan-300" />
-        Ο Noraya αναλύει αυτό το γεγονός για το κόμμα σου… (λίγα δευτερόλεπτα)
-      </div>
-    ) : null}
+            {analyzingId && activeSituation && String((activeSituation as any).id) === analyzingId ? (
+              <div className="mb-3 flex items-center gap-2 rounded-2xl border border-cyan-300/30 bg-cyan-300/[0.06] px-4 py-3 text-xs text-cyan-100">
+                <span className="h-2 w-2 animate-pulse rounded-full bg-cyan-300" />
+                Ο Noraya αναλύει αυτό το γεγονός για το κόμμα σου… (λίγα δευτερόλεπτα)
+              </div>
+            ) : null}
 
-    <ActiveSituationWorkspace
-      activeTab={activeTab}
-      onTabChange={setActiveTab}
-      situation={activeSituation}
-      title={activeTitle}
-      category={activeCategory}
-      status={activeStatus}
-      urgency={activeUrgency}
-      score={activeScore}
-      documentationScore={activeDocScore}
-      documentationLevel={activeDocLevel}
-      brief={brief}
-      agenda={rankedAgenda}
-      agendaOverview={agendaOverview}
-      selectedAgendaOverview={selectedAgendaOverview}
-      activeOverviewTopic={activeOverviewTopic}
-      onSelectOverviewTopic={setActiveOverviewTopic}
-      selectedPartyImplication={selectedPartyImplication}
-    />
+            <ActiveSituationWorkspace
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              situation={activeSituation}
+              title={activeTitle}
+              category={activeCategory}
+              status={activeStatus}
+              urgency={activeUrgency}
+              score={activeScore}
+              documentationScore={activeDocScore}
+              documentationLevel={activeDocLevel}
+              brief={brief}
+              agenda={rankedAgenda}
+              agendaOverview={agendaOverview}
+              selectedAgendaOverview={selectedAgendaOverview}
+              activeOverviewTopic={activeOverviewTopic}
+              onSelectOverviewTopic={setActiveOverviewTopic}
+              selectedPartyImplication={selectedPartyImplication}
+            />
 
-    <AdvisorDock
-      partyName={partyName}
-      chatQuestion={chatQuestion}
-      setChatQuestion={setChatQuestion}
-      chatMessages={chatMessages}
-      chatLoading={chatLoading}
-      chatError={chatError}
-      conversationId={conversationId}
-      onAsk={askNorayaAdvisor}
-      onReset={() => {
-        setChatMessages([]);
-        setConversationId(null);
-        setChatError("");
-      }}
-      chatEndRef={chatEndRef}
-    />
-  </div>
-</section>
+            <AdvisorDock
+              partyName={partyName}
+              activeTitle={activeTitle}
+              chatQuestion={chatQuestion}
+              setChatQuestion={setChatQuestion}
+              chatMessages={chatMessages}
+              chatLoading={chatLoading}
+              chatError={chatError}
+              conversationId={conversationId}
+              conversations={advisorConversations}
+              onSelectConversation={openAdvisorConversation}
+              onAsk={askNorayaAdvisor}
+              onReset={startNewAdvisorConversation}
+              chatEndRef={chatEndRef}
+            />
+          </div>
+        </section>
 
         <RightInspector
           situation={activeSituation}
@@ -2425,9 +2368,8 @@ function AdvisorDock({
   chatError,
   conversationId,
   conversations,
-  activeChatId,
-  onAsk,
   onSelectConversation,
+  onAsk,
   onReset,
   chatEndRef,
 }: {
@@ -2439,10 +2381,9 @@ function AdvisorDock({
   chatLoading: boolean;
   chatError: string;
   conversationId: string | null;
-  conversations: ChatConversation[];
-  activeChatId: string | null;
+  conversations: AdvisorConversation[];
+  onSelectConversation: (id: string) => void;
   onAsk: (questionOverride?: string) => void;
-  onSelectConversation: (conversation: ChatConversation) => void;
   onReset: () => void;
   chatEndRef: MutableRefObject<HTMLDivElement | null>;
 }) {
@@ -2454,117 +2395,93 @@ function AdvisorDock({
   ];
 
   return (
-    <section className="h-[44vh] min-h-[380px] max-h-[620px] shrink-0 border-t border-[#1a2640] bg-[#060a14] p-3">
-      <div className="flex h-full min-h-0 overflow-hidden rounded-[1.75rem] border border-cyan-300/20 bg-cyan-300/[0.045] shadow-2xl shadow-cyan-950/20">
-        <aside className="hidden w-[330px] shrink-0 flex-col border-r border-cyan-300/10 bg-black/10 p-4 xl:flex">
+    <section className="mt-4 h-[calc(100vh-120px)] min-h-[720px] rounded-[1.75rem] border border-cyan-300/20 bg-[#060a14] p-3 shadow-2xl shadow-cyan-950/20">
+      <div className="flex h-full min-h-0 overflow-hidden rounded-[1.5rem] border border-cyan-300/20 bg-cyan-300/[0.045]">
+        <aside className="hidden w-[330px] shrink-0 flex-col border-r border-cyan-300/10 bg-[#07111c]/80 p-4 xl:flex">
           <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
+            <div>
               <div className="text-[10px] uppercase tracking-[0.28em] text-cyan-200/80">NORAYA ADVISOR</div>
               <div className="mt-2 text-base font-semibold text-zinc-100">Context-aware chat</div>
               <div className="mt-2 line-clamp-2 text-xs leading-5 text-zinc-500">{partyName}</div>
             </div>
-
             <button
               type="button"
               onClick={onReset}
-              disabled={chatLoading}
-              className="shrink-0 rounded-2xl border border-cyan-300/20 bg-cyan-300/10 px-3 py-2 text-[11px] font-semibold text-cyan-100 transition hover:bg-cyan-300/15 disabled:opacity-50"
+              className="rounded-2xl border border-cyan-300/20 bg-cyan-300/10 px-3 py-2 text-xs font-semibold text-cyan-100 transition hover:bg-cyan-300/15"
             >
               Νέα
             </button>
           </div>
 
-          <div className="mt-3 rounded-2xl border border-cyan-300/10 bg-[#060a14]/70 p-3">
-            <div className="text-[9px] uppercase tracking-[0.2em] text-zinc-600">Active situation</div>
-            <div className="mt-1 line-clamp-2 text-xs font-medium leading-5 text-zinc-200">{activeTitle}</div>
-            <div className="mt-2 text-[10px] text-zinc-600">
-              {conversationId ? "Συνδεδεμένη συνομιλία" : "Νέο context-ready chat"}
-            </div>
+          <div className="mt-5 rounded-2xl border border-[#1a2640] bg-[#0c1220] p-3">
+            <div className="text-[9px] uppercase tracking-[0.22em] text-zinc-500">ACTIVE SITUATION</div>
+            <div className="mt-2 line-clamp-3 text-xs font-medium leading-5 text-zinc-100">{activeTitle}</div>
+            <div className="mt-2 text-[10px] text-zinc-600">Context-ready advisor</div>
           </div>
 
-          <div className="mt-3 grid gap-2">
+          <div className="mt-4 min-h-0 flex-1 overflow-y-auto pr-1">
+            <div className="mb-2 text-[9px] uppercase tracking-[0.22em] text-zinc-500">Συζητήσεις</div>
+            {conversations.length ? (
+              <div className="grid gap-2">
+                {conversations.map((conversation) => {
+                  const active = conversation.id === conversationId;
+                  return (
+                    <button
+                      key={conversation.id}
+                      type="button"
+                      onClick={() => onSelectConversation(conversation.id)}
+                      className={`rounded-2xl border px-3 py-2 text-left transition ${
+                        active
+                          ? "border-cyan-300/35 bg-cyan-300/10 text-cyan-50"
+                          : "border-white/10 bg-black/20 text-zinc-400 hover:border-cyan-300/25 hover:text-cyan-100"
+                      }`}
+                    >
+                      <div className="line-clamp-2 text-[11px] font-medium leading-5">{conversation.title}</div>
+                      <div className="mt-1 text-[9px] text-zinc-600">
+                        {new Date(conversation.updatedAt).toLocaleDateString("el-GR", { day: "2-digit", month: "2-digit" })} · {conversation.messages.length} μηνύματα
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-white/10 bg-black/20 px-3 py-4 text-[11px] leading-5 text-zinc-500">
+                Δεν υπάρχει ακόμη αποθηκευμένη συνομιλία για αυτό το γεγονός.
+              </div>
+            )}
+          </div>
+
+          <div className="mt-4 grid gap-2 border-t border-cyan-300/10 pt-4">
             {quickQuestions.map((question) => (
               <button
                 key={question}
                 type="button"
                 onClick={() => onAsk(question)}
                 disabled={chatLoading}
-                className="rounded-2xl border border-white/10 bg-black/20 px-3 py-2.5 text-left text-[11px] leading-5 text-zinc-400 transition hover:border-cyan-300/25 hover:text-cyan-100 disabled:opacity-50"
+                className="rounded-2xl border border-white/10 bg-black/20 px-3 py-3 text-left text-xs leading-5 text-zinc-400 transition hover:border-cyan-300/30 hover:text-cyan-100 disabled:opacity-50"
               >
                 {question}
               </button>
             ))}
           </div>
-
-          <div className="mt-4 flex min-h-0 flex-1 flex-col">
-            <div className="mb-2 flex items-center justify-between text-[10px] uppercase tracking-[0.2em] text-zinc-600">
-              <span>Chats</span>
-              <span>{conversations.length}</span>
-            </div>
-
-            <div className="min-h-0 flex-1 overflow-y-auto pr-1">
-              {conversations.length ? (
-                <div className="grid gap-2">
-                  {conversations.map((conversation) => {
-                    const selected = conversation.id === activeChatId;
-                    return (
-                      <button
-                        key={conversation.id}
-                        type="button"
-                        onClick={() => onSelectConversation(conversation)}
-                        className={`rounded-2xl border px-3 py-2 text-left transition ${
-                          selected
-                            ? "border-cyan-300/35 bg-cyan-300/10 text-cyan-100"
-                            : "border-white/10 bg-black/15 text-zinc-400 hover:border-cyan-300/20 hover:text-zinc-200"
-                        }`}
-                      >
-                        <div className="line-clamp-1 text-[11px] font-semibold">{conversation.title}</div>
-                        <div className="mt-1 line-clamp-2 text-[10px] leading-4 text-zinc-500">
-                          {advisorPreview(conversation.messages)}
-                        </div>
-                        <div className="mt-2 text-[9px] text-zinc-600">{advisorTime(conversation.updatedAt)}</div>
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="rounded-2xl border border-white/10 bg-black/15 p-3 text-[11px] leading-5 text-zinc-600">
-                  Δεν υπάρχει ακόμη αποθηκευμένο chat για αυτή την active situation.
-                </div>
-              )}
-            </div>
-          </div>
         </aside>
 
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-          <div className="flex items-center justify-between gap-3 border-b border-cyan-300/10 px-4 py-3">
-            <div className="min-w-0">
-              <div className="text-[10px] uppercase tracking-[0.22em] text-cyan-200/70">Advisor workspace</div>
-              <div className="mt-1 truncate text-sm font-medium text-zinc-100">{activeTitle}</div>
-            </div>
-
-            <button
-              type="button"
-              onClick={onReset}
-              disabled={chatLoading}
-              className="rounded-2xl border border-white/10 bg-black/20 px-3 py-2 text-xs text-zinc-400 transition hover:text-cyan-100 disabled:opacity-50 xl:hidden"
-            >
-              Νέα συνομιλία
-            </button>
+          <div className="border-b border-cyan-300/10 px-5 py-4">
+            <div className="text-[10px] uppercase tracking-[0.28em] text-cyan-200/70">ADVISOR WORKSPACE</div>
+            <div className="mt-1 line-clamp-2 text-sm font-semibold leading-6 text-zinc-100">{activeTitle}</div>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4">
+          <div className="min-h-0 flex-1 overflow-y-auto p-5">
             {chatMessages.length === 0 && !chatLoading ? (
-              <div className="flex h-full items-center justify-center px-6 text-center">
-                <div>
-                  <div className="text-sm font-semibold text-zinc-300">Ρώτησε τον σύμβουλο Noraya</div>
-                  <div className="mt-2 max-w-xl text-xs leading-6 text-zinc-600">
-                    Η απάντηση θα βασιστεί στο active situation, στο advisor brief, στις πηγές και στο πολιτικό περιβάλλον.
-                  </div>
+              <div className="flex h-full flex-col items-center justify-center px-8 text-center">
+                <div className="text-base font-semibold text-zinc-200">Ρώτησε τον σύμβουλο Noraya</div>
+                <div className="mt-3 max-w-xl text-sm leading-7 text-zinc-500">
+                  Η απάντηση θα βασιστεί στο active situation, στο advisor brief, στις πηγές και στο πολιτικό περιβάλλον.
                 </div>
               </div>
             ) : (
-              <div className="grid gap-3">
+              <div className="grid gap-4">
                 {chatMessages.map((message, index) => (
                   <div
                     key={`${message.role}-${index}`}
@@ -2580,13 +2497,11 @@ function AdvisorDock({
                     <div className="whitespace-pre-wrap">{message.content}</div>
                   </div>
                 ))}
-
                 {chatLoading ? (
                   <div className="max-w-[82%] justify-self-start rounded-2xl border border-cyan-300/20 bg-cyan-300/10 px-4 py-3 text-sm text-cyan-100">
                     <div className="animate-pulse">Σκέφτομαι...</div>
                   </div>
                 ) : null}
-
                 <div ref={(el) => { chatEndRef.current = el; }} />
               </div>
             )}
@@ -2600,10 +2515,9 @@ function AdvisorDock({
             className="border-t border-cyan-300/10 p-4"
           >
             {chatError ? <p className="mb-2 text-xs text-red-200">{chatError}</p> : null}
-
-            <div className="flex items-end gap-3">
+            <div className="flex items-stretch gap-3">
               <textarea
-                rows={3}
+                rows={4}
                 value={chatQuestion}
                 onChange={(event) => setChatQuestion(event.target.value)}
                 onKeyDown={(event) => {
@@ -2614,20 +2528,15 @@ function AdvisorDock({
                 }}
                 placeholder="Γράψε εδώ... Shift+Enter για νέα γραμμή"
                 disabled={chatLoading}
-                className="min-h-[96px] max-h-[190px] min-w-0 flex-1 resize-y rounded-2xl border border-white/10 bg-[#060a14] px-4 py-3 text-sm leading-6 text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-cyan-300/40 disabled:opacity-50"
+                className="min-h-[124px] max-h-[220px] min-w-0 flex-1 resize-y rounded-2xl border border-white/10 bg-[#060a14] px-4 py-3 text-sm leading-6 text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-cyan-300/40 disabled:opacity-50"
               />
-
               <button
                 type="submit"
                 disabled={chatLoading || !chatQuestion.trim()}
-                className="h-[96px] rounded-2xl bg-cyan-300 px-6 text-xs font-semibold text-slate-950 transition hover:bg-cyan-200 disabled:opacity-50"
+                className="min-h-[124px] rounded-2xl bg-cyan-300 px-6 text-xs font-semibold text-slate-950 transition hover:bg-cyan-200 disabled:opacity-50"
               >
                 Αποστολή
               </button>
-            </div>
-
-            <div className="mt-2 text-[10px] text-zinc-600">
-              Enter για αποστολή · Shift+Enter για νέα γραμμή · Τα chats μένουν σε αυτόν τον browser.
             </div>
           </form>
         </div>
