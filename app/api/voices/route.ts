@@ -32,8 +32,22 @@ type Comment = {
   likes: number;
   followers: number | null;
   influence: number;
+  retweets?: number;
+  quotes?: number;
+  replies?: number;
   channelId?: string | null;
 };
+
+function parseCount(v: unknown): number {
+  if (typeof v === "number") return Math.max(0, Math.round(v));
+  const str = String(v ?? "").trim().replace(/,/g, "");
+  if (!str) return 0;
+  const m = str.match(/^([\d.]+)\s*([KkMm])?/);
+  if (!m) return 0;
+  let n = parseFloat(m[1]) || 0;
+  if (m[2]) n *= m[2].toLowerCase() === "k" ? 1000 : 1000000;
+  return Math.round(n);
+}
 
 function isGreek(text: string): boolean {
   const greek = (text.match(/[\u0370-\u03FF\u1F00-\u1FFF]/g) || []).length;
@@ -186,6 +200,9 @@ async function collectApify(query: string, diag?: Record<string, unknown>): Prom
           source: "twitter" as const,
           likes: Number(it?.likeCount ?? it?.favoriteCount ?? it?.favorite_count ?? it?.likes ?? it?.likes_count) || 0,
           followers: followers != null ? Number(followers) || 0 : null,
+          retweets: parseCount(it?.retweets ?? it?.retweetCount),
+          quotes: parseCount(it?.quotes ?? it?.quoteCount),
+          replies: parseCount(it?.comments ?? it?.replies ?? it?.replyCount),
           channelId: null,
         };
       })
@@ -200,26 +217,31 @@ async function collectApify(query: string, diag?: Record<string, unknown>): Prom
 
 function finalizeComments(parts: Partial<Comment>[]): Comment[] {
   const list = parts.slice(0, MAX_COMMENTS + 25);
-  const maxLikes = Math.max(1, ...list.map((c) => c.likes || 0));
+  // Δυναμική ανά πηγή: YouTube=likes, Twitter=retweets(βαρύτητα)+quotes+απαντήσεις
+  const engagement = (c: Partial<Comment>) =>
+    c.source === "youtube" ? (c.likes || 0) : (c.retweets || 0) * 2 + (c.quotes || 0) * 1.5 + (c.replies || 0);
+  const maxEng = Math.max(1, ...list.map(engagement));
   const withF = list.filter((c) => typeof c.followers === "number" && (c.followers as number) > 0);
   const maxF = Math.max(1, ...withF.map((c) => c.followers as number));
   const lf = (x: number, m: number) => Math.log10((x || 0) + 1) / Math.log10(m + 1);
   return list.map((c, i) => {
-    const likes = c.likes || 0;
-    const ln = lf(likes, maxLikes);
+    const en = lf(engagement(c), maxEng);
     let influence: number;
     if (typeof c.followers === "number" && c.followers > 0) {
-      influence = Math.round(clamp(0.75 * ln + 0.25 * lf(c.followers, maxF), 0, 1) * 100);
+      influence = Math.round(clamp(0.75 * en + 0.25 * lf(c.followers, maxF), 0, 1) * 100);
     } else {
-      influence = Math.round(clamp(ln, 0, 1) * 100);
+      influence = Math.round(clamp(en, 0, 1) * 100);
     }
     return {
       ref: i + 1,
       text: c.text || "",
       name: c.name || "Πολίτης",
       source: (c.source as "youtube" | "twitter") || "youtube",
-      likes,
+      likes: c.likes || 0,
       followers: typeof c.followers === "number" ? c.followers : null,
+      retweets: c.retweets || 0,
+      quotes: c.quotes || 0,
+      replies: c.replies || 0,
       influence,
     };
   });
@@ -234,10 +256,10 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-type FeedQuote = { name: string; text: string; source: string; likes: number; followers: number | null; influence: number };
+type FeedQuote = { name: string; text: string; source: string; likes: number; followers: number | null; influence: number; retweets: number; quotes: number; replies: number };
 
 function buildFeed(comments: Comment[]): { youtube: FeedQuote[]; twitter: FeedQuote[] } {
-  const map = (c: Comment): FeedQuote => ({ name: c.name, text: c.text, source: c.source, likes: c.likes, followers: c.followers, influence: c.influence });
+  const map = (c: Comment): FeedQuote => ({ name: c.name, text: c.text, source: c.source, likes: c.likes, followers: c.followers, influence: c.influence, retweets: c.retweets || 0, quotes: c.quotes || 0, replies: c.replies || 0 });
   const yt = shuffle(comments.filter((c) => c.source === "youtube").map(map)).slice(0, 25);
   const tw = shuffle(comments.filter((c) => c.source === "twitter").map(map)).slice(0, 25);
   return { youtube: yt, twitter: tw };
@@ -313,7 +335,10 @@ function buildSystem(partyProfile: any, partyKey: string): string {
 
 function buildUser(topic: string, comments: Comment[]): string {
   const lines = comments
-    .map((c) => `[${c.ref}] ${c.source === "youtube" ? "YouTube" : "Twitter"} · ${c.likes} likes · ${c.followers != null ? c.followers + " followers" : "followers —"} · δυναμική ${c.influence} · ${c.name}: «${c.text}»`)
+    .map((c) => {
+      const eng = c.source === "youtube" ? `${c.likes} likes` : `${c.retweets || 0} retweets, ${c.quotes || 0} quotes`;
+      return `[${c.ref}] ${c.source === "youtube" ? "YouTube" : "Twitter"} · ${eng} · δυναμική ${c.influence} · ${c.name}: «${c.text}»`;
+    })
     .join("\n");
   return `ΘΕΜΑ: ${topic}
 
@@ -363,7 +388,7 @@ function enrichQuotes(parsed: any, byRef: Map<number, Comment>) {
       .map((q: any) => {
         const ref = Number(q?.ref);
         const c = Number.isFinite(ref) ? byRef.get(ref) : null;
-        if (c) return { text: c.text, name: c.name, source: c.source, likes: c.likes, followers: c.followers, influence: c.influence };
+        if (c) return { text: c.text, name: c.name, source: c.source, likes: c.likes, followers: c.followers, influence: c.influence, retweets: c.retweets || 0, quotes: c.quotes || 0, replies: c.replies || 0 };
         if (q?.text) return { text: String(q.text), name: String(q.name || "Πολίτης"), source: String(q.source || "youtube"), likes: Number(q.likes) || 0, followers: null, influence: Number(q.influence) || 0 };
         return null;
       })
