@@ -1779,8 +1779,8 @@ function ActiveSituationWorkspace({
   const activeEvidenceArticles = evidenceArticlesFromSituation(situation);
 
   return (
-    <section className="rounded-[2rem] border border-[#1a2640] bg-[#0c1220] shadow-2xl shadow-black/20">
-      <div className="border-b border-[#1a2640] p-5">
+    <section className="rounded-[2rem] border border-white/[0.07] bg-gradient-to-b from-[#0d1424] via-[#0a1020] to-[#070c18] shadow-[0_28px_90px_rgba(0,0,0,0.28)]">
+      <div className="border-b border-white/[0.06] px-5 py-4">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
           <div className="min-w-0">
             <div className="mb-3 flex flex-wrap items-center gap-2">
@@ -1788,8 +1788,8 @@ function ActiveSituationWorkspace({
               <StatusChip className={signalToneClass(urgency)}>{riskLabel(urgency)}</StatusChip>
               <StatusChip className={docToneClass(documentationLevel)}>{documentationLabel(documentationLevel)}</StatusChip>
             </div>
-            <h1 className="text-2xl font-semibold leading-tight text-zinc-50 xl:text-3xl">{title}</h1>
-            <p className="mt-2 text-sm text-zinc-500">{category}</p>
+            <h1 className="max-w-[760px] text-[1.35rem] font-semibold leading-[1.22] tracking-[-0.03em] text-zinc-50 xl:text-[1.65rem]">{title}</h1>
+            <p className="mt-2 text-xs font-medium tracking-wide text-zinc-500">{category}</p>
           </div>
 
           <div className="grid shrink-0 grid-cols-2 gap-3">
@@ -1798,13 +1798,13 @@ function ActiveSituationWorkspace({
           </div>
         </div>
 
-        <div className="mt-5 flex flex-wrap gap-2">
+        <div className="mt-4 flex flex-wrap gap-2">
           {situationTabs.map((tab) => (
             <button
               key={tab.id}
               type="button"
               onClick={() => onTabChange(tab.id)}
-              className={`rounded-2xl border px-3 py-2 text-[11px] transition ${
+              className={`rounded-2xl border px-3 py-2 text-[11px] font-medium transition ${
                 activeTab === tab.id
                   ? "border-cyan-300/30 bg-cyan-300/10 text-cyan-100"
                   : "border-[#1a2640] bg-black/15 text-zinc-500 hover:text-zinc-300"
@@ -1816,7 +1816,7 @@ function ActiveSituationWorkspace({
         </div>
       </div>
 
-      <div className="p-5">
+      <div className="p-5 xl:p-6">
         {activeTab === "overview" ? (
           <AgendaOverviewPanel
             overview={agendaOverview}
@@ -1830,13 +1830,13 @@ function ActiveSituationWorkspace({
           <div className="grid gap-4">
             <CockpitSection title="1. STRATEGIC READ — Τι σημαίνει" subtitle="Agenda Formation → Framing Diagnosis → Priming Risk">
               <div className="grid gap-5 xl:grid-cols-[1fr_150px]">
-                <p className="text-sm leading-7 text-zinc-300">{readStrategicText(situation, brief)}</p>
+                <p className="text-[13px] leading-7 text-zinc-300/95">{readStrategicText(situation, brief)}</p>
                 <Gauge score={documentationScore} label="Βαθμός τεκμηρίωσης" />
               </div>
             </CockpitSection>
 
             <CockpitSection title="2. ΠΩΣ ΚΕΡΔΙΖΕΤΑΙ ΤΟ ΘΕΜΑ" subtitle="HERESTHETIC / RIKER LAYER">
-              <div className="grid gap-3 xl:grid-cols-5">
+              <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-5">
                 <WinCard title="Το παιχνίδι σήμερα" tone="red" textValue={text(diagnosis.agenda_reading, text(issue.dominant_frame, "Το παιχνίδι δεν έχει ακόμη πλήρως οριστεί."))} />
                 <WinCard title="Η παγίδα" tone="amber" textValue={text(diagnosis.strategic_risk, text(issue.priming_risk, "Το ρίσκο είναι πρόωρη ή άστοχη αντίδραση."))} />
                 <WinCard title="Ευνοϊκή διάσταση" tone="emerald" textValue={text(diagnosis.strategic_opportunity, text(issue.opportunity, "Να εισαχθεί διάσταση θεσμικής σοβαρότητας και λύσης."))} />
@@ -1845,9 +1845,9 @@ function ActiveSituationWorkspace({
               </div>
             </CockpitSection>
 
-            <div className="grid gap-4 xl:grid-cols-2">
+            <div className="grid gap-4 2xl:grid-cols-2">
               <CockpitSection title="3. ΤΙ ΚΑΝΟΥΜΕ ΤΩΡΑ — ΕΠΙΛΟΓΕΣ" subtitle="Επιλογές δράσης Α/Β/Γ από scenarios">
-                <div className="grid gap-3 md:grid-cols-3">
+                <div className="grid gap-3 md:grid-cols-3 2xl:grid-cols-1">
                   {decisionOptions(brief).map((opt) => (
                     <DecisionCard
                       key={opt.label}
@@ -1900,9 +1900,9 @@ function ActiveSituationWorkspace({
         ) : null}
 
         {activeTab === "why" ? (
-          <div className="grid gap-4 xl:grid-cols-2">
+          <div className="grid gap-4 2xl:grid-cols-2">
             <CockpitSection title="Γιατί υπάρχει αυτή η κατάσταση" subtitle="Basis / documentation">
-              <p className="text-sm leading-7 text-zinc-300">{readWhyText(situation, brief)}</p>
+              <p className="text-[13px] leading-7 text-zinc-300/95">{readWhyText(situation, brief)}</p>
             </CockpitSection>
             <CockpitSection title="Τι δεν ξέρουμε ακόμη" subtitle="Uncertainty">
               <p className="text-sm leading-7 text-zinc-300">
@@ -1932,7 +1932,7 @@ function ActiveSituationWorkspace({
 
         {activeTab === "win" ? (
           <CockpitSection title="ΠΩΣ ΚΕΡΔΙΖΕΤΑΙ ΤΟ ΘΕΜΑ (HERESTHETIC)" subtitle="HERESTHETIC / RIKER LAYER — UI label κρατά πολιτική γλώσσα">
-            <div className="grid gap-3 xl:grid-cols-5">
+            <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-5">
               <WinCard title="Το παιχνίδι σήμερα" tone="red" textValue={text(diagnosis.agenda_reading, text(issue.dominant_frame, "Το παιχνίδι δεν έχει ακόμη πλήρως οριστεί."))} />
               <WinCard title="Η παγίδα" tone="amber" textValue={text(diagnosis.strategic_risk, text(issue.priming_risk, "Το ρίσκο είναι πρόωρη ή άστοχη αντίδραση."))} />
               <WinCard title="Ευνοϊκή διάσταση" tone="emerald" textValue={text(diagnosis.strategic_opportunity, text(issue.opportunity, "Να εισαχθεί διάσταση θεσμικής σοβαρότητας και λύσης."))} />
@@ -2395,9 +2395,9 @@ function AdvisorDock({
   ];
 
   return (
-    <section className="mt-4 h-[calc(100vh-120px)] min-h-[720px] rounded-[1.75rem] border border-cyan-300/20 bg-[#060a14] p-3 shadow-2xl shadow-cyan-950/20">
-      <div className="flex h-full min-h-0 overflow-hidden rounded-[1.5rem] border border-cyan-300/20 bg-cyan-300/[0.045]">
-        <aside className="hidden w-[330px] shrink-0 flex-col border-r border-cyan-300/10 bg-[#07111c]/80 p-4 xl:flex">
+    <section className="mt-5 h-[calc(100vh-120px)] min-h-[720px] rounded-[2rem] border border-cyan-300/20 bg-gradient-to-b from-[#07111c] to-[#050914] p-3 shadow-[0_32px_120px_rgba(8,145,178,0.12)]">
+      <div className="flex h-full min-h-0 overflow-hidden rounded-[1.65rem] border border-cyan-300/20 bg-cyan-300/[0.04]">
+        <aside className="hidden w-[330px] shrink-0 flex-col border-r border-cyan-300/10 bg-[#07111c]/75 p-4 xl:flex">
           <div className="flex items-start justify-between gap-3">
             <div>
               <div className="text-[10px] uppercase tracking-[0.28em] text-cyan-200/80">NORAYA ADVISOR</div>
@@ -2528,7 +2528,7 @@ function AdvisorDock({
                 }}
                 placeholder="Γράψε εδώ... Shift+Enter για νέα γραμμή"
                 disabled={chatLoading}
-                className="min-h-[124px] max-h-[220px] min-w-0 flex-1 resize-y rounded-2xl border border-white/10 bg-[#060a14] px-4 py-3 text-sm leading-6 text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-cyan-300/40 disabled:opacity-50"
+                className="min-h-[124px] max-h-[220px] min-w-0 flex-1 resize-y rounded-2xl border border-white/10 bg-[#050914] px-4 py-3 text-sm leading-6 text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-cyan-300/40 disabled:opacity-50"
               />
               <button
                 type="submit"
@@ -2586,10 +2586,10 @@ function InspectorPanel({ title, children }: { title: string; children: ReactNod
 
 function CockpitSection({ title, subtitle, children }: { title: string; subtitle?: string; children: ReactNode }) {
   return (
-    <section className="rounded-[1.5rem] border border-[#1a2640] bg-[#060a14] p-4">
-      <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-        <div className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-100">{title}</div>
-        {subtitle ? <div className="text-[10px] text-zinc-600">{subtitle}</div> : null}
+    <section className="rounded-[1.75rem] border border-white/[0.07] bg-[#070c16]/95 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]">
+      <div className="mb-4 flex flex-col gap-1.5 sm:flex-row sm:items-end sm:justify-between">
+        <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-cyan-100/90">{title}</div>
+        {subtitle ? <div className="text-[9px] uppercase tracking-[0.16em] text-zinc-600">{subtitle}</div> : null}
       </div>
       {children}
     </section>
@@ -2597,12 +2597,12 @@ function CockpitSection({ title, subtitle, children }: { title: string; subtitle
 }
 
 function StatusChip({ className, children }: { className: string; children: ReactNode }) {
-  return <span className={`rounded-full border px-3 py-1 text-[10px] ${className}`}>{children}</span>;
+  return <span className={`rounded-full border px-3 py-1 text-[9px] font-medium uppercase tracking-[0.08em] ${className}`}>{children}</span>;
 }
 
 function MiniMetric({ label, value, small }: { label: string; value: string; small?: boolean }) {
   return (
-    <div className={`rounded-2xl border border-[#1a2640] bg-[#060a14] ${small ? "px-3 py-2" : "px-4 py-3"}`}>
+    <div className={`rounded-2xl border border-white/[0.07] bg-black/20 ${small ? "px-3 py-2" : "px-4 py-3"}`}>
       <div className="text-[9px] uppercase tracking-[0.18em] text-zinc-600">{label}</div>
       <div className={`${small ? "mt-1 text-sm" : "mt-2 text-xl"} font-semibold text-cyan-100`}>{value}</div>
     </div>
@@ -2611,9 +2611,9 @@ function MiniMetric({ label, value, small }: { label: string; value: string; sma
 
 function MiniBox({ title, textValue, compact }: { title: string; textValue: string; compact?: boolean }) {
   return (
-    <div className={`rounded-2xl border border-[#1a2640] bg-black/20 ${compact ? "p-3" : "p-4"}`}>
-      <div className="text-[10px] uppercase tracking-[0.18em] text-zinc-600">{title}</div>
-      <p className={`${compact ? "mt-1 text-[11px] leading-5" : "mt-2 text-sm leading-6"} text-zinc-300`}>{textValue}</p>
+    <div className={`min-w-0 rounded-2xl border border-white/[0.07] bg-black/20 ${compact ? "p-3" : "p-4"}`}>
+      <div className="text-[9px] uppercase tracking-[0.18em] text-zinc-600">{title}</div>
+      <p className={`${compact ? "mt-1 text-[11px] leading-5" : "mt-2 text-sm leading-6"} break-words text-zinc-300`}>{textValue}</p>
     </div>
   );
 }
@@ -2690,17 +2690,17 @@ function DriverBar({ label, score, trend, compact }: { label: string; score: num
 
 function WinCard({ title, textValue, tone }: { title: string; textValue: string; tone: "red" | "amber" | "emerald" | "purple" | "zinc" }) {
   const className = {
-    red: "border-red-300/25 bg-red-300/[0.07]",
-    amber: "border-amber-300/25 bg-amber-300/[0.07]",
-    emerald: "border-emerald-300/25 bg-emerald-300/[0.07]",
-    purple: "border-purple-300/25 bg-purple-300/[0.07]",
-    zinc: "border-white/10 bg-white/[0.04]",
+    red: "border-red-300/20 bg-red-300/[0.055]",
+    amber: "border-amber-300/20 bg-amber-300/[0.055]",
+    emerald: "border-emerald-300/20 bg-emerald-300/[0.055]",
+    purple: "border-purple-300/20 bg-purple-300/[0.055]",
+    zinc: "border-white/[0.08] bg-white/[0.035]",
   }[tone];
 
   return (
-    <div className={`rounded-2xl border p-4 ${className}`}>
-      <div className="text-[10px] uppercase tracking-[0.16em] text-zinc-500">{title}</div>
-      <p className="mt-3 text-xs leading-6 text-zinc-200">{textValue}</p>
+    <div className={`min-w-0 rounded-[1.35rem] border p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)] ${className}`}>
+      <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-zinc-500">{title}</div>
+      <p className="mt-3 break-words text-[12px] leading-6 text-zinc-200/90">{textValue}</p>
     </div>
   );
 }
@@ -2723,13 +2723,13 @@ function DecisionCard({
   success?: number;
 }) {
   return (
-    <article className={`rounded-[1.5rem] border p-4 ${recommendationClass(recommendation)}`}>
+    <article className={`min-w-0 rounded-[1.5rem] border p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)] ${recommendationClass(recommendation)}`}>
       <div className="flex items-center justify-between gap-2">
-        <div className="text-lg font-semibold">{label}</div>
-        <span className="rounded-full border border-current/20 px-2 py-1 text-[10px]">{recommendationLabel(recommendation)}</span>
+        <div className="text-base font-semibold">{label}</div>
+        <span className="shrink-0 rounded-full border border-current/20 px-2 py-1 text-[9px] font-medium">{recommendationLabel(recommendation)}</span>
       </div>
-      <h3 className="mt-3 text-sm font-semibold leading-6 text-zinc-100">{title}</h3>
-      {move ? <p className="mt-1 text-[11px] leading-5 text-zinc-400">{move}</p> : null}
+      <h3 className="mt-3 break-words text-sm font-semibold leading-6 text-zinc-100">{title}</h3>
+      {move ? <p className="mt-1 break-words text-[11px] leading-5 text-zinc-400">{move}</p> : null}
       <div className="mt-4 grid gap-2">
         <MiniBox compact title="Κέρδος" textValue={gain} />
         <MiniBox compact title="Ρίσκο" textValue={risk} />
