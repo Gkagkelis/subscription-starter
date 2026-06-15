@@ -249,3 +249,59 @@ export async function buildEvidencePack(origin: string, topic: string): Promise<
         : "Στοιχεία από τη μόνιμη μνήμη public opinion, στοχευμένα στο θέμα.",
   };
 }
+
+
+// ----------------------------------------------------------------------------
+// Ελληνικές ετικέτες metrics (για να μη μπερδεύεται το AI με τα αγγλικά ids)
+// ----------------------------------------------------------------------------
+const METRIC_LABELS: Record<string, string> = {
+  issue_country_housing: "Στέγαση ως κορυφαίο εθνικό πρόβλημα (% κοινού)",
+  issue_country_immigration: "Μετανάστευση ως κορυφαίο πρόβλημα (%)",
+  issue_country_health: "Υγεία ως κορυφαίο πρόβλημα (%)",
+  issue_country_environment_climate: "Περιβάλλον/κλίμα ως κορυφαίο πρόβλημα (%)",
+  issue_country_crime_security: "Εγκληματικότητα/ασφάλεια ως κορυφαίο πρόβλημα (%)",
+  national_economy_situation: "Θετική αξιολόγηση εθνικής οικονομίας (%)",
+  expectation_national_economy: "Προσδοκία βελτίωσης εθνικής οικονομίας (%)",
+  employment_country_situation: "Θετική αξιολόγηση αγοράς εργασίας (%)",
+  expectation_personal_job: "Προσδοκία βελτίωσης προσωπικής εργασίας (%)",
+  trust_national_government: "Εμπιστοσύνη στην κυβέρνηση (%)",
+  trust_national_parliament: "Εμπιστοσύνη στη Βουλή (%)",
+  trust_european_union: "Εμπιστοσύνη στην ΕΕ (%)",
+  democracy_satisfaction_country: "Ικανοποίηση από τη δημοκρατία στην Ελλάδα (%)",
+  democracy_satisfaction_eu: "Ικανοποίηση από τη δημοκρατία στην ΕΕ (%)",
+  left_right_placement: "Τοποθέτηση αριστερά-δεξιά (κλίμακα)",
+};
+export function metricLabel(m: string): string {
+  return METRIC_LABELS[m] || m;
+}
+
+// Μετατρέπει το evidence pack σε συμπαγές κείμενο, έτοιμο για system prompt.
+export function formatEvidenceForPrompt(pack: EvidencePack): string {
+  const lines: string[] = [];
+  lines.push(`ΘΕΜΑ ΜΝΗΜΗΣ: ${pack.matched_label} · συνολική βεβαιότητα: ${pack.confidence}`);
+  if (pack.overall_signals.length) {
+    lines.push("Συνολικοί δείκτες κοινής γνώμης (πιο πρόσφατη μέτρηση):");
+    for (const sgn of pack.overall_signals) {
+      lines.push(`  • ${metricLabel(sgn.metric)} = ${sgn.value} [${sgn.year} ${sgn.quarter}, τεκμηρίωση: ${sgn.confidence}]`);
+    }
+  }
+  if (pack.affected_audiences.length) {
+    lines.push("Ακροατήρια με τις εντονότερες τιμές στο κύριο δείκτη:");
+    for (const a of pack.affected_audiences) {
+      lines.push(`  • ${a.group_type} → ${a.group}: ${a.value} [${a.year}]`);
+    }
+  }
+  lines.push("CAVEATS: " + pack.caveats.join(" "));
+  lines.push("ΑΠΟΣΑΦΗΝΙΣΗ ΚΟΜΜΑΤΩΝ (ΥΠΟΧΡΕΩΤΙΚΟ — μην το παραβιάσεις): " + pack.disambiguation);
+  return lines.join("\n");
+}
+
+// One-shot: φτιάχνει pack + το γυρνά ως κείμενο. Ασφαλές (ποτέ δεν πετάει).
+export async function getMemoryBlock(origin: string, topic: string): Promise<string> {
+  try {
+    const pack = await buildEvidencePack(origin, topic);
+    return formatEvidenceForPrompt(pack);
+  } catch {
+    return "";
+  }
+}
