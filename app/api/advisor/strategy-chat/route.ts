@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getMemoryBlock } from "@/lib/noraya/political-memory";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -151,6 +152,16 @@ export async function POST(req: Request) {
 
   const liveResearchRequired = shouldUseLiveResearch(question) && !hasActiveSituation;
 
+  // --- ΜΟΝΙΜΗ ΠΟΛΙΤΙΚΗ ΜΝΗΜΗ (Βήμα 1) ---
+  const memOrigin = (() => {
+    const h = req.headers;
+    const proto = h.get("x-forwarded-proto") || "https";
+    const host = h.get("x-forwarded-host") || h.get("host") || "";
+    return `${proto}://${host}`;
+  })();
+  const memTopic = cleanText(activeSituation?.topic || activeSituation?.title || body.topic || question || "", 200);
+  const memoryBlock = memTopic ? await getMemoryBlock(memOrigin, memTopic) : "";
+
   const systemPrompt = `Είσαι ο Noraya, AI Political Strategy Advisor.
 
 Μιλάς σαν εξαιρετικός πολιτικός σύμβουλος μέσα σε επιτελείο. Δεν είσαι news dashboard και δεν είσαι generic chatbot.
@@ -213,7 +224,12 @@ AGENDA SIGNALS:
 ${agendaUsed.length ? safeJson(agendaUsed, 5000) : "Δεν δόθηκαν."}
 
 FRONTEND ARTICLES:
-${frontendArticles.length ? safeJson(frontendArticles, 3500) : "Δεν δόθηκαν."}`;
+${frontendArticles.length ? safeJson(frontendArticles, 3500) : "Δεν δόθηκαν."}
+
+ΜΟΝΙΜΗ ΠΟΛΙΤΙΚΗ ΜΝΗΜΗ (Ευρωβαρόμετρο / εκλογική συμπεριφορά — διαχρονικά δεδομένα κοινού):
+${memoryBlock || "Δεν υπάρχουν διαθέσιμα δεδομένα μνήμης για το θέμα."}
+
+ΟΔΗΓΙΑ ΓΙΑ ΤΗ ΜΝΗΜΗ: Χρησιμοποίησε αυτά τα δεδομένα κοινού για να στηρίξεις ΠΟΙΟ κοινό επηρεάζεται και πώς. Σεβάσου τη βεβαιότητα/caveats. Μην παρουσιάζεις διαχρονικά δεδομένα ως σημερινή δημοσκόπηση. Τήρησε ΑΠΟΛΥΤΑ τον κανόνα αποσαφήνισης ΣΥΡΙΖΑ/ΕΛΑΣ.`;
 
   const userInstruction = liveResearchRequired
     ? `LIVE_RESEARCH_REQUIRED: true\n\nΠριν απαντήσεις, χρησιμοποίησε web_search για να ελέγξεις την τρέχουσα πραγματικότητα. Μετά δώσε πολιτική σύνθεση και σύσταση.\n\nΕρώτηση χρήστη:\n${question}`
