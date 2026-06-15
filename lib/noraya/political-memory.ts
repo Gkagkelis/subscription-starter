@@ -1,0 +1,234 @@
+// NORAYA — Μόνιμη πολιτική μνήμη (retrieval layer)
+// Φορτώνει τα 3 locked CSV (public/noraya-data) μία φορά, με cache, και επιστρέφει
+// ΜΟΝΟ τις σχετικές γραμμές ανά θέμα/ακροατήριο. Δεν «ρίχνει» όγκο στο AI — στοχεύει.
+// ΚΑΝΕΝΑ υπάρχον αρχείο δεν αλλάζει από εδώ.
+
+export type MemRow = Record<string, string>;
+
+// ----------------------------------------------------------------------------
+// ΚΡΙΣΙΜΟΣ ΚΑΝΟΝΑΣ ΑΠΟΣΑΦΗΝΙΣΗΣ — να μην μπερδευτεί ΣΥΡΙΖΑ/ΕΛΑΣ/Τσίπρας
+// ----------------------------------------------------------------------------
+export const PARTY_DISAMBIGUATION = [
+  "Ο Αλέξης Τσίπρας ήταν αρχηγός του ΣΥΡΙΖΑ έως το 2023 και πρωθυπουργός 2015-2019.",
+  "Από τον Μάιο 2026 ηγείται ΝΕΟΥ κόμματος: ΕΛΑΣ (Ελληνική Αριστερή Συμπαράταξη).",
+  "Τα ιστορικά δεδομένα leader-traits για «Αλέξης Τσίπρας» αφορούν την εικόνα του ΩΣ ΣΥΡΙΖΑ· μεταφέρονται στην ΕΛΑΣ ΜΟΝΟ ως ένδειξη προσωπικής εικόνας, με ρητή επιφύλαξη.",
+  "Τα ιστορικά vote-intention για «ΣΥΡΙΖΑ» (2018-2022) αφορούν το κόμμα που ηγείτο ΤΟΤΕ ο Τσίπρας. Ο ΣΥΡΙΖΑ συνεχίζει ΧΩΡΙΣ αυτόν. ΣΥΡΙΖΑ ≠ ΕΛΑΣ.",
+  "Η ΕΛΑΣ είναι νέο κόμμα — ΔΕΝ υπάρχουν ιστορικά εκλογικά ποσοστά της στα δεδομένα. ΠΟΤΕ μην αποδώσεις στην ΕΛΑΣ ποσοστό από το παρελθόν (π.χ. «η ΕΛΑΣ πήρε Χ% το 2019»).",
+].join(" ");
+
+// ----------------------------------------------------------------------------
+// Μικρός, ανθεκτικός CSV parser (χειρίζεται εισαγωγικά/κόμματα/νέες γραμμές)
+// ----------------------------------------------------------------------------
+function parseCsv(text: string): MemRow[] {
+  const clean = text.replace(/^\uFEFF/, "");
+  const rows: string[][] = [];
+  let cur: string[] = [];
+  let field = "";
+  let inQ = false;
+  for (let i = 0; i < clean.length; i++) {
+    const c = clean[i];
+    if (inQ) {
+      if (c === '"') {
+        if (clean[i + 1] === '"') {
+          field += '"';
+          i++;
+        } else {
+          inQ = false;
+        }
+      } else {
+        field += c;
+      }
+    } else if (c === '"') {
+      inQ = true;
+    } else if (c === ",") {
+      cur.push(field);
+      field = "";
+    } else if (c === "\n") {
+      cur.push(field);
+      rows.push(cur);
+      cur = [];
+      field = "";
+    } else if (c !== "\r") {
+      field += c;
+    }
+  }
+  if (field.length > 0 || cur.length > 0) {
+    cur.push(field);
+    rows.push(cur);
+  }
+  const header = (rows.shift() || []).map((h) => h.trim());
+  return rows
+    .filter((r) => r.length > 1)
+    .map((r) => {
+      const o: MemRow = {};
+      header.forEach((h, idx) => {
+        o[h] = (r[idx] ?? "").trim();
+      });
+      return o;
+    });
+}
+
+// ----------------------------------------------------------------------------
+// Φόρτωση + cache (ανά warm instance). Διαβάζει το static asset από public/.
+// ----------------------------------------------------------------------------
+const cache = new Map<string, MemRow[]>();
+
+async function loadCsv(origin: string, file: string): Promise<MemRow[]> {
+  if (cache.has(file)) return cache.get(file) as MemRow[];
+  try {
+    const res = await fetch(`${origin}/noraya-data/${file}`, { cache: "force-cache" });
+    if (!res.ok) {
+      cache.set(file, []);
+      return [];
+    }
+    const rows = parseCsv(await res.text());
+    cache.set(file, rows);
+    return rows;
+  } catch {
+    cache.set(file, []);
+    return [];
+  }
+}
+
+export const loadPublicOpinion = (origin: string) => loadCsv(origin, "public_opinion.csv");
+export const loadVoteIntention = (origin: string) => loadCsv(origin, "vote_intention.csv");
+export const loadLeaderTraits = (origin: string) => loadCsv(origin, "leader_traits.csv");
+
+// ----------------------------------------------------------------------------
+// Βοηθητικά
+// ----------------------------------------------------------------------------
+function num(v: string | undefined): number {
+  const n = parseFloat(String(v ?? "").replace(",", "."));
+  return Number.isFinite(n) ? n : NaN;
+}
+function yearNum(r: MemRow): number {
+  const n = parseInt(String(r.survey_year || "0"), 10);
+  return Number.isFinite(n) ? n : 0;
+}
+// Πιο πρόσφατο πρώτα
+function byLatest(a: MemRow, b: MemRow): number {
+  const dy = yearNum(b) - yearNum(a);
+  if (dy !== 0) return dy;
+  return String(b.survey_quarter || "").localeCompare(String(a.survey_quarter || ""));
+}
+
+// ----------------------------------------------------------------------------
+// Χαρτογράφηση ΘΕΜΑ → σχετικά metrics public opinion (audience-engine seed)
+// ----------------------------------------------------------------------------
+const TOPIC_METRICS: { keys: string[]; metrics: string[]; label: string }[] = [
+  { keys: ["στεγ", "ενοικ", "ακιν", "housing", "rent"], metrics: ["issue_country_housing"], label: "Στέγαση" },
+  { keys: ["μεταν", "προσφυγ", "immigration", "migr"], metrics: ["issue_country_immigration"], label: "Μετανάστευση" },
+  { keys: ["υγει", "νοσοκομ", "health"], metrics: ["issue_country_health"], label: "Υγεία" },
+  { keys: ["κλιμα", "περιβαλλ", "environment", "climate"], metrics: ["issue_country_environment_climate"], label: "Περιβάλλον/Κλίμα" },
+  { keys: ["εγκλημ", "ασφαλ", "crime", "security", "αστυν"], metrics: ["issue_country_crime_security"], label: "Εγκληματικότητα/Ασφάλεια" },
+  { keys: ["ακριβ", "πληθωρ", "κοστος", "οικονομ", "economy", "inflation"], metrics: ["national_economy_situation", "expectation_national_economy"], label: "Οικονομία/Ακρίβεια" },
+  { keys: ["εργασ", "ανεργ", "μισθ", "job", "employment"], metrics: ["employment_country_situation", "expectation_personal_job"], label: "Εργασία" },
+  { keys: ["φορολογ", "φορο", "tax"], metrics: ["national_economy_situation", "expectation_national_economy"], label: "Φορολογία" },
+  { keys: ["θεσμ", "διαφαν", "διαφθορ", "δικαιοσ", "democracy", "trust"], metrics: ["democracy_satisfaction_country", "trust_national_government", "trust_national_parliament"], label: "Θεσμοί/Δημοκρατία" },
+];
+
+function matchMetrics(topic: string): { metrics: string[]; label: string } {
+  const t = (topic || "").toLowerCase();
+  for (const m of TOPIC_METRICS) {
+    if (m.keys.some((k) => t.includes(k))) return { metrics: m.metrics, label: m.label };
+  }
+  // default: γενικό κλίμα οικονομίας + εμπιστοσύνη
+  return { metrics: ["national_economy_situation", "trust_national_government"], label: "Γενικό κλίμα" };
+}
+
+// ----------------------------------------------------------------------------
+// EVIDENCE PACK — συμπυκνωμένο, έτοιμο να μπει σε prompt
+// ----------------------------------------------------------------------------
+export type EvidenceSignal = {
+  metric: string;
+  group_type: string;
+  group: string;
+  value: number;
+  year: number;
+  quarter: string;
+  confidence: string;
+};
+
+export type EvidencePack = {
+  topic: string;
+  matched_label: string;
+  matched_metrics: string[];
+  overall_signals: EvidenceSignal[];
+  affected_audiences: EvidenceSignal[];
+  disambiguation: string;
+  confidence: "high" | "medium" | "low";
+  caveats: string[];
+  note: string;
+};
+
+export async function buildEvidencePack(origin: string, topic: string): Promise<EvidencePack> {
+  const po = await loadPublicOpinion(origin);
+  const { metrics, label } = matchMetrics(topic);
+
+  const overall: EvidenceSignal[] = [];
+  for (const metric of metrics) {
+    const rows = po
+      .filter((r) => r.metric === metric && r.group_type === "all")
+      .sort(byLatest);
+    const latest = rows[0];
+    if (latest) {
+      overall.push({
+        metric,
+        group_type: "all",
+        group: "overall",
+        value: Math.round(num(latest.value_weighted_0_100) * 10) / 10,
+        year: yearNum(latest),
+        quarter: latest.survey_quarter || "",
+        confidence: latest.sample_confidence || "",
+      });
+    }
+  }
+
+  // Ποια ακροατήρια «πονάνε» πιο πολύ στο κύριο metric (πιο πρόσφατη μέτρηση ανά ομάδα)
+  const primary = metrics[0];
+  const affected: EvidenceSignal[] = [];
+  for (const gt of ["age_group", "financial_difficulty_group", "occupation_group"]) {
+    const rows = po.filter((r) => r.metric === primary && r.group_type === gt);
+    const latestYear = Math.max(0, ...rows.map(yearNum));
+    const latestRows = rows.filter((r) => yearNum(r) === latestYear);
+    const seen = new Set<string>();
+    for (const r of latestRows) {
+      if (seen.has(r.group)) continue;
+      seen.add(r.group);
+      affected.push({
+        metric: primary,
+        group_type: gt,
+        group: r.group,
+        value: Math.round(num(r.value_weighted_0_100) * 10) / 10,
+        year: yearNum(r),
+        quarter: r.survey_quarter || "",
+        confidence: r.sample_confidence || "",
+      });
+    }
+  }
+  affected.sort((a, b) => b.value - a.value);
+  const topAffected = affected.slice(0, 6);
+
+  const confidences = [...overall, ...topAffected].map((s) => s.confidence);
+  const hasHigh = confidences.includes("high");
+  const hasLow = confidences.every((c) => c === "low");
+  const confidence: EvidencePack["confidence"] = overall.length >= 2 && hasHigh ? "high" : hasLow ? "low" : "medium";
+
+  return {
+    topic,
+    matched_label: label,
+    matched_metrics: metrics,
+    overall_signals: overall,
+    affected_audiences: topAffected,
+    disambiguation: PARTY_DISAMBIGUATION,
+    confidence,
+    caveats: [
+      "Public opinion = Ευρωβαρόμετρο, διαχρονικά μοτίβα — όχι σημερινή δημοσκόπηση.",
+      "Vote intention 2018-2022 & leader traits = ιστορικά/διαρθρωτικά, όχι τρέχουσα πρόθεση ψήφου.",
+    ],
+    note:
+      overall.length === 0
+        ? "Δεν βρέθηκαν άμεσα στοιχεία public opinion για το θέμα — χαμηλή τεκμηρίωση."
+        : "Στοιχεία από τη μόνιμη μνήμη public opinion, στοχευμένα στο θέμα.",
+  };
+}
