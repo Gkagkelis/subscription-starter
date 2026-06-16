@@ -95,19 +95,51 @@ function evidenceLines(activeSituation: any) {
     .join("\n\n");
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+  const url = new URL(req.url);
+
+  // DEBUG: τεστ web_search — δείχνει αν δουλεύει η αναζήτηση & την πραγματική αιτία αποτυχίας
+  if (url.searchParams.get("debug_search") === "1") {
+    const key = process.env.ANTHROPIC_API_KEY;
+    if (!key) return NextResponse.json({ ok: false, reason: "NO_API_KEY" });
+    const useWhitelist = url.searchParams.get("nowhitelist") !== "1";
+    const tool: any = { type: "web_search_20250305", name: "web_search", max_uses: 1 };
+    if (useWhitelist) tool.allowed_domains = ["dimoskopiseis.gr", "amna.gr", "reuters.com"];
+    try {
+      const r = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" },
+        body: JSON.stringify({
+          model: process.env.ANTHROPIC_MODEL || "claude-sonnet-4-6",
+          max_tokens: 500,
+          messages: [{ role: "user", content: "Ψάξε στο web: δημοσκοπήσεις Ελλάδα 2026 και πες μου μία πηγή." }],
+          tools: [tool],
+        }),
+      });
+      const status = r.status;
+      const bodyText = await r.text();
+      let contentTypes: string[] = [];
+      try {
+        const j = JSON.parse(bodyText);
+        contentTypes = (j?.content || []).map((b: any) => b?.type);
+      } catch {}
+      return NextResponse.json({
+        ok: r.ok,
+        whitelist_used: useWhitelist,
+        status,
+        content_types: contentTypes,
+        body_sample: bodyText.slice(0, 1200),
+      });
+    } catch (e: any) {
+      return NextResponse.json({ ok: false, reason: "FETCH_THREW", message: e?.message || String(e) });
+    }
+  }
+
   return NextResponse.json({
     ok: true,
     endpoint: "/api/advisor/strategy-chat",
     method: "POST",
-    expects: {
-      question: "string",
-      conversation_id: "string | null",
-      active_situation: "object | null",
-      strategic_brief: "object | null",
-      profile: "object | null",
-      political_environment: "object | null",
-    },
+    debug: "GET ?debug_search=1 (πρόσθεσε &nowhitelist=1 για τεστ χωρίς whitelist)",
   });
 }
 
@@ -284,16 +316,29 @@ ${competitiveContext ? "ΑΝΤΑΓΩΝΙΣΤΙΚΟ ΠΛΑΙΣΙΟ (υποχρε�
       ];
     }
 
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      signal: controller.signal,
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": anthropicKey,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify(payload),
-    });
+    const callAnthropic = async (withTools: boolean) => {
+      const p = { ...payload };
+      if (!withTools) delete p.tools;
+      return fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        signal: controller.signal,
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": anthropicKey,
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify(p),
+      });
+    };
+
+    let response = await callAnthropic(Boolean(payload.tools));
+    let webSearchFailed = false;
+
+    // Αν απέτυχε ΚΑΙ είχαμε tools (web_search), ξαναπροσπάθησε ΧΩΡΙΣ αναζήτηση — να μη σκάει ποτέ
+    if (!response.ok && payload.tools) {
+      webSearchFailed = true;
+      response = await callAnthropic(false);
+    }
 
     clearTimeout(timeout);
 
@@ -319,6 +364,7 @@ ${competitiveContext ? "ΑΝΤΑΓΩΝΙΣΤΙΚΟ ΠΛΑΙΣΙΟ (υποχρε�
       source: "ai",
       active_situation_used: hasActiveSituation,
       live_research_required: liveResearchRequired,
+      web_search_failed: webSearchFailed,
       sources,
       usage: ai.usage || null,
     });
