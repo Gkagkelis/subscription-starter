@@ -171,6 +171,27 @@ export async function POST(req: Request) {
   const frontendArticles = Array.isArray(body.articles) ? body.articles.slice(0, 8) : [];
   const hasActiveSituation = Boolean(activeSituation?.id || activeSituation?.title || activeSituation?.topic);
 
+  // ΦΩΝΗ ΤΟΥ ΚΟΣΜΟΥ (Πρόσωπα) — πραγματικές φωνές πολιτών για ΑΥΤΟ το γεγονός
+  const voicesPulse: any =
+    (activeSituation && activeSituation.advisor_brief && activeSituation.advisor_brief.voices_pulse) ||
+    (strategicBrief && (strategicBrief as any).voices_pulse) ||
+    null;
+  let voicesBlock = "";
+  if (voicesPulse && typeof voicesPulse === "object") {
+    const parts: string[] = [];
+    const emo = voicesPulse.dominant_emotion_label || voicesPulse.dominant_emotion;
+    if (emo) parts.push(`κυρίαρχο συναίσθημα: ${emo}`);
+    if (typeof voicesPulse.social_mood_score === "number") parts.push(`δείκτης κοινωνικής διάθεσης: ${voicesPulse.social_mood_score}/100`);
+    if (voicesPulse.dominant_public_frame) parts.push(`κυρίαρχο αφήγημα κοινού: ${voicesPulse.dominant_public_frame}`);
+    if (voicesPulse.social_spread) parts.push(`διάχυση/ένταση: ${voicesPulse.social_spread}`);
+    if (parts.length) {
+      voicesBlock =
+        "ΦΩΝΗ ΤΟΥ ΚΟΣΜΟΥ (από «Πρόσωπα» — πραγματικές φωνές πολιτών για ΑΥΤΟ το γεγονός):\n  • " +
+        parts.join("\n  • ") +
+        "\nΧΡΗΣΗ: Είναι το ΣΥΝΑΙΣΘΗΜΑΤΙΚΟ σήμα του κοινού ΤΩΡΑ για το γεγονός — καθόρισε τον τόνο και το framing με βάση αυτό (όχι ως ξερή στατιστική).";
+    }
+  }
+
   if (!question) {
     return NextResponse.json({ error: "Missing question." }, { status: 400 });
   }
@@ -311,6 +332,8 @@ ${competitiveContext ? "ΑΝΤΑΓΩΝΙΣΤΙΚΟ ΠΛΑΙΣΙΟ (υποχρε�
 ${audienceBlock}
 
 ${livePollsBlock}
+
+${voicesBlock}
 
 ΑΝΑΦΟΡΑ ΠΗΓΩΝ (υποχρεωτικό): Όταν χρησιμοποιείς αριθμούς ή ισχυρισμούς από ΕΝΑ άρθρο ή από το active situation (π.χ. «6 στους 10», «+110%»), ΑΠΕΔΩΣΕ τους φιλικά στην πηγή (π.χ. «σύμφωνα με το δημοσίευμα στα Νέα…»). ΜΗΝ τα παρουσιάζεις ως ανεξάρτητα επιβεβαιωμένο γεγονός όταν στηρίζονται σε μία μόνο πηγή.`;
 
