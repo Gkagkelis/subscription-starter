@@ -1547,6 +1547,7 @@ export default function StrategyRoomPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           question,
+          history: chatMessages,
           conversation_id: localConversationId,
           profile: data?.profile || null,
           strategic_brief: data?.strategic_brief || null,
