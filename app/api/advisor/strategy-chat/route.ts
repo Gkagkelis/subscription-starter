@@ -168,6 +168,21 @@ export async function POST(req: Request) {
 
   const politicalEnvironment = body.political_environment || null;
   const agendaUsed = Array.isArray(body.agenda_used) ? body.agenda_used.slice(0, 8) : [];
+  const agendaBlock = agendaUsed.length
+    ? "ΑΤΖΕΝΤΑ (τρέχουσες προτεραιότητες θεμάτων — από το σύστημα ατζέντας):\n" +
+      agendaUsed
+        .map((a: any) => {
+          const bits = [`  • ${a.topic || "—"}`];
+          if (a.agenda_score != null) bits.push(`προτεραιότητα ${a.agenda_score}`);
+          if (a.political_risk_level) bits.push(`ρίσκο ${a.political_risk_level}`);
+          let line = bits.join(" · ");
+          if (a.framing_summary) line += `\n    πλαισίωση: ${String(a.framing_summary).slice(0, 300)}`;
+          if (a.recommended_action) line += `\n    σύσταση: ${String(a.recommended_action).slice(0, 200)}`;
+          if (a.avoid_action) line += `\n    απόφυγε: ${String(a.avoid_action).slice(0, 160)}`;
+          return line;
+        })
+        .join("\n")
+    : "";
   const frontendArticles = Array.isArray(body.articles) ? body.articles.slice(0, 8) : [];
   const hasActiveSituation = Boolean(activeSituation?.id || activeSituation?.title || activeSituation?.topic);
 
@@ -341,8 +356,7 @@ ${safeJson(strategicBrief, 9000)}
 ΠΟΛΙΤΙΚΟ ΠΕΡΙΒΑΛΛΟΝ / POLLING / ACTORS, ΑΝ ΥΠΑΡΧΟΥΝ:
 ${safeJson(politicalEnvironment, 7000)}
 
-AGENDA SIGNALS:
-${agendaUsed.length ? safeJson(agendaUsed, 5000) : "Δεν δόθηκαν."}
+${agendaBlock || "ΑΤΖΕΝΤΑ: δεν δόθηκαν θέματα."}
 
 FRONTEND ARTICLES:
 ${frontendArticles.length ? safeJson(frontendArticles, 3500) : "Δεν δόθηκαν."}
