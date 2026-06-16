@@ -326,6 +326,10 @@ const AUDIENCE_MAP: Record<string, { voteProxy?: string; leader?: string; proxyN
   mera25: { voteProxy: "ΜέΡΑ25" },
 };
 
+function normGr(s: string): string {
+  return (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
 function audienceKeyFromInput(input: string): string {
   const n = normGr(input);
   if (/ελασ|ελ\.α\.σ|τσιπρα|elas/.test(n)) return "elas";
