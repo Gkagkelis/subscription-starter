@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { createClient as createAuthClient } from "@/utils/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
+import { getMemoryBlock } from "@/lib/noraya/political-memory";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -214,6 +215,7 @@ function fallbackBrief(signal: AgendaRow, processingStatus: string) {
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
+  const reqOrigin = new URL(req.url).origin;
 
   const rawLimit = Number.parseInt(searchParams.get("limit") || "8", 10);
   const limit = Number.isFinite(rawLimit)
@@ -362,8 +364,14 @@ export async function GET(req: Request) {
 Υπόθεσε προσωρινά γενικό προφίλ πολιτικού κόμματος, αλλά κράτησε χαμηλότερη βεβαιότητα και μην προσποιηθείς ότι ξέρεις θέσεις που δεν δόθηκαν.
 `;
 
-  const agendaContext = signals
-    .map((row, index) => {
+  const agendaContextArr = await Promise.all(
+    signals.map(async (row, index) => {
+      let opinion = "";
+      try {
+        opinion = await getMemoryBlock(reqOrigin, row.topic || "");
+      } catch {
+        opinion = "";
+      }
       return `
 ΣΗΜΑ ${index + 1}
 Θέμα: ${row.topic}
@@ -378,10 +386,11 @@ export async function GET(req: Request) {
 Υπάρχουσα αποφυγή βάσης: ${cleanText(row.avoid_action, 700)}
 Evidence summary: ${cleanText(row.evidence_summary, 700)}
 Top sources: ${safeJson(row.top_sources, 1400)}
-Evidence articles: ${safeJson(row.top_evidence_articles, 2400)}
+Evidence articles: ${safeJson(row.top_evidence_articles, 2400)}${opinion ? "\nΚΟΙΝΗ ΓΝΩΜΗ ΓΙΑ ΤΟ ΘΕΜΑ (Ευρωβαρόμετρο — διαρθρωτικό μοτίβο, ΟΧΙ σημερινός αριθμός· χρήση ΜΟΝΟ για να κρίνεις αν το θέμα αγγίζει πραγματικά τον κόσμο):\n" + opinion : ""}
 `;
     })
-    .join("\n---\n");
+  );
+  const agendaContext = agendaContextArr.join("\n---\n");
 
   const systemPrompt = `
 Είσαι ο Noraya, AI Political Intelligence Advisor.
