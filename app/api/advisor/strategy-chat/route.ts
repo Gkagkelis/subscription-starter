@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getMemoryBlock } from "@/lib/noraya/political-memory";
+import { getMemoryBlock, getAudienceMemoryBlock } from "@/lib/noraya/political-memory";
 import { buildCompetitiveContext } from "@/lib/noraya/competitive-memory";
 import { fetchPollsSnapshot, formatPollsForPrompt } from "@/lib/noraya/live-polls";
 
@@ -218,6 +218,14 @@ export async function POST(req: Request) {
   // ΔΟΜΙΚΟ ΠΛΑΙΣΙΟ ΑΝΤΑΓΩΝΙΣΜΟΥ (διαρθρωτικό, για το επιλεγμένο κόμμα + αντιπάλους)
   const competitiveContext = buildCompetitiveContext(party);
 
+  // ΙΣΤΟΡΙΚΟ ΜΟΤΙΒΟ ΚΟΙΝΩΝ/ΑΡΧΗΓΟΥ (CSV #2 vote intention + #3 leader traits)
+  let audienceBlock = "";
+  try {
+    audienceBlock = await getAudienceMemoryBlock(memOrigin, party);
+  } catch {
+    audienceBlock = "";
+  }
+
   // ΖΩΝΤΑΝΕΣ ΔΗΜΟΣΚΟΠΗΣΕΙΣ — ακριβή δεδομένα από dimoskopiseis.gr (μόνο σε ερωτήσεις επικαιρότητας)
   let livePollsBlock = "";
   if (liveResearchRequired) {
@@ -299,6 +307,8 @@ ${memoryBlock || "Δεν υπάρχουν διαθέσιμα δεδομένα μ
 - Τήρησε ΑΠΟΛΥΤΑ τον κανόνα αποσαφήνισης ΣΥΡΙΖΑ/ΕΛΑΣ.
 
 ${competitiveContext ? "ΑΝΤΑΓΩΝΙΣΤΙΚΟ ΠΛΑΙΣΙΟ (υποχρεωτικό όταν αναλύεις ανταγωνισμό / ποιος κερδίζει ή χάνει):\n" + competitiveContext : ""}
+
+${audienceBlock}
 
 ${livePollsBlock}
 
