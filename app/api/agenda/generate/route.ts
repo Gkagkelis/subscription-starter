@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { getMemoryBlock } from "@/lib/noraya/political-memory";
 
 /* ---------------------------------------------------------------------------
  * app/api/agenda/generate/route.ts   (ΒΗΜΑ 6 — ROBUST + DEBUG έκδοση)
@@ -96,9 +97,29 @@ export async function POST(req: Request) {
     'Σχήμα ΑΚΡΙΒΩΣ: {"gaps":["..."],"narratives":[{"title":"...","angle":"..."}],"slogans":["..."],"initiatives":[{"title":"...","description":"..."}],"proposed_situation":{"title":"...","topic":"...","why":"..."}}',
   ].join("\n");
 
+  // Κοινή γνώμη (CSV #1) για τα top θέματα — βοηθά να βρει gaps που ΝΟΙΑΖΟΥΝ τον κόσμο
+  const reqOrigin = new URL(req.url).origin;
+  let opinionContext = "";
+  try {
+    const topTopics = Array.from(new Set(briefs.map((b: any) => b.topic).filter(Boolean))).slice(0, 6);
+    const blocks = await Promise.all(
+      topTopics.map(async (t: string) => {
+        try {
+          const m = await getMemoryBlock(reqOrigin, t);
+          return m ? `• ${t}:\n${m}` : "";
+        } catch {
+          return "";
+        }
+      })
+    );
+    opinionContext = blocks.filter(Boolean).join("\n\n");
+  } catch {
+    opinionContext = "";
+  }
+
   const userContent = `Focus: ${focus || "γενική ενίσχυση ατζέντας"}\n\nΘέματα που ΗΔΗ καλύπτονται (JSON):\n${JSON.stringify(
     briefs.map((b) => ({ topic: b.topic, score: b.agenda_score, articles: b.article_count, sources: b.source_count }))
-  )}`;
+  )}${opinionContext ? "\n\n=== ΚΟΙΝΗ ΓΝΩΜΗ (Ευρωβαρόμετρο — διαρθρωτικό μοτίβο, ΟΧΙ σημερινοί αριθμοί· χρήση για να εντοπίσεις gaps που αγγίζουν πραγματικά τον κόσμο) ===\n" + opinionContext : ""}`;
 
   let rawText = "";
   let providerStatus = 0;
