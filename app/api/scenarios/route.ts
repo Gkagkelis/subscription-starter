@@ -244,6 +244,37 @@ async function handle(request: Request) {
       );
     }
 
+    // Αποθήκευση σεναρίων στο brief (ώστε να τα ΞΕΡΕΙ ο σύμβουλος-chat) — preserve υπόλοιπο brief
+    try {
+      const compact = {
+        headline: parsed?.situation?.headline || null,
+        foresight: Array.isArray(parsed?.foresight)
+          ? parsed.foresight.map((f: any) => ({ label: f?.label, path: f?.path, probability: f?.probability, window: f?.window }))
+          : [],
+        recommendation: parsed?.recommendation || null,
+        generated_at: new Date().toISOString(),
+      };
+      const { data: existingBrief } = await supabase
+        .from("event_party_briefs")
+        .select("advisor_brief")
+        .eq("event_id", eventId)
+        .eq("party_key", partyKey)
+        .maybeSingle();
+      const prevBrief =
+        existingBrief?.advisor_brief && typeof existingBrief.advisor_brief === "object" ? existingBrief.advisor_brief : {};
+      await supabase.from("event_party_briefs").upsert(
+        {
+          event_id: eventId,
+          party_key: partyKey,
+          advisor_brief: { ...prevBrief, scenarios: compact },
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "event_id,party_key" }
+      );
+    } catch {
+      // μη μπλοκάρεις την απάντηση αν αποτύχει η αποθήκευση
+    }
+
     return NextResponse.json({
       success: true,
       event: { id: ev.id, title: ev.title, topic: ev.topic },
