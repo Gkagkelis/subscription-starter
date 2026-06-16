@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { buildNorayaStrategicSystemPrompt } from "@/lib/noraya/strategic-reasoning";
+import { getMemoryBlock, getAudienceMemoryBlock } from "@/lib/noraya/political-memory";
+import { fetchPollsSnapshot, formatPollsForPrompt } from "@/lib/noraya/live-polls";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -234,7 +236,29 @@ async function handle(request: Request) {
     const system = buildSystem(partyProfile, partyKey);
     const userMsg = buildScenarioContext(ev, brief, partyKey);
 
-    const ai = await callAnthropic(system, userMsg);
+    // ΔΕΔΟΜΕΝΑ ΜΝΗΜΗΣ: τροφοδότηση σεναρίων από τα 3 CSV + ζωντανές δημοσκοπήσεις
+    const origin = url.origin;
+    let dataContext = "";
+    try {
+      const [mem, aud] = await Promise.all([
+        getMemoryBlock(origin, ev?.topic || ev?.title || ""),
+        getAudienceMemoryBlock(origin, partyKey),
+      ]);
+      let pollsTxt = "";
+      try {
+        pollsTxt = formatPollsForPrompt(await fetchPollsSnapshot());
+      } catch {
+        pollsTxt = "";
+      }
+      dataContext = [mem, aud, pollsTxt].filter(Boolean).join("\n\n");
+    } catch {
+      dataContext = "";
+    }
+    const userMsgFull = dataContext
+      ? `${userMsg}\n\n=== ΔΕΔΟΜΕΝΑ ΜΝΗΜΗΣ (στήριξε τα σενάρια σε αυτά) ===\nΣΗΜΕΙΩΣΗ: τα διαρθρωτικά/ιστορικά μοτίβα ΔΕΝ είναι σημερινά· οι ΖΩΝΤΑΝΕΣ ΔΗΜΟΣΚΟΠΗΣΕΙΣ είναι τρέχουσες (με ημερομηνία). Μην εφευρίσκεις ποσοστά.\n\n${dataContext}`
+      : userMsg;
+
+    const ai = await callAnthropic(system, userMsgFull);
     const parsed = ai.text ? parseAiJson(ai.text) : null;
 
     if (!parsed || !parsed.foresight || !parsed.moves) {
