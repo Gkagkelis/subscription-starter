@@ -305,3 +305,141 @@ export async function getMemoryBlock(origin: string, topic: string): Promise<str
     return "";
   }
 }
+
+// ============================================================================
+// CSV #2 (vote intention) + #3 (leader traits) — ΙΣΤΟΡΙΚΟ ΜΟΤΙΒΟ ΚΟΙΝΩΝ/ΑΡΧΗΓΩΝ
+// ΠΡΟΣΟΧΗ: δεδομένα 2018-2022 (εποχή ΣΥΡΙΖΑ). ΟΧΙ σημερινά. Η ΕΛΑΣ δεν υπάρχει → proxy ΣΥΡΙΖΑ.
+// ============================================================================
+
+const AUDIENCE_MAP: Record<string, { voteProxy?: string; leader?: string; proxyNote?: string }> = {
+  elas: {
+    voteProxy: "ΣΥΡΙΖΑ",
+    leader: "Αλέξης Τσίπρας",
+    proxyNote: "Η ΕΛΑΣ δεν υπάρχει στα ιστορικά δεδομένα· ως proxy χρησιμοποιείται η εποχή ΣΥΡΙΖΑ/Τσίπρα (διαρθρωτικό μοτίβο, όχι σημερινό).",
+  },
+  nd: { voteProxy: "ΝΔ", leader: "Κυριάκος Μητσοτάκης" },
+  pasok: { voteProxy: "ΠΑΣΟΚ/ΚΙΝΑΛ" },
+  syriza: { voteProxy: "ΣΥΡΙΖΑ", leader: "Αλέξης Τσίπρας" },
+  kke: { voteProxy: "ΚΚΕ" },
+  elliniki_lysi: { voteProxy: "Ελληνική Λύση" },
+  plefsi: { voteProxy: "Πλεύση Ελευθερίας" },
+  mera25: { voteProxy: "ΜέΡΑ25" },
+};
+
+function audienceKeyFromInput(input: string): string {
+  const n = normGr(input);
+  if (/ελασ|ελ\.α\.σ|τσιπρα|elas/.test(n)) return "elas";
+  if (/νεα δημοκρατ|μητσοτακ/.test(n) || /(^|[^α-ω])νδ([^α-ω]|$)/.test(n)) return "nd";
+  if (/πασοκ|κιναλ|ανδρουλακ/.test(n)) return "pasok";
+  if (/συριζα/.test(n)) return "syriza";
+  if (/κκε/.test(n)) return "kke";
+  if (/ελληνικη λυση|βελοπουλ/.test(n)) return "elliniki_lysi";
+  if (/πλευση|κωνσταντοπουλ/.test(n)) return "plefsi";
+  if (/μερα ?25|βαρουφακ/.test(n)) return "mera25";
+  return "";
+}
+
+function isJunkGroup(g: string): boolean {
+  return /δεν\s*(γνωριζω|απαντ)|δγ\/δα|^δα$|^αλλο|^$/.test(normGr(g));
+}
+
+async function voteBehaviorLines(origin: string, proxy: string): Promise<string[]> {
+  const v = await loadVoteIntention(origin);
+  const gtLabels: Record<string, string> = {
+    age_group: "ηλικία",
+    education_group: "μόρφωση",
+    left_right_group: "ιδεολογία",
+    occupation_group: "επάγγελμα",
+  };
+  const out: string[] = [];
+  for (const gt of Object.keys(gtLabels)) {
+    let rows = v.filter(
+      (r) => r.party === proxy && r.group_type === gt && num(r.vote_share_weighted_valid) > 0 && !isJunkGroup(r.group)
+    );
+    if (!rows.length) continue;
+    const ly = Math.max(...rows.map(yearNum));
+    rows = rows
+      .filter((r) => yearNum(r) === ly)
+      .sort((a, b) => num(b.vote_share_weighted_valid) - num(a.vote_share_weighted_valid));
+    if (!rows.length) continue;
+    const hi = rows[0];
+    const lo = rows[rows.length - 1];
+    out.push(
+      `  • ${gtLabels[gt]} (${ly}): ισχυρό «${hi.group}» ${Math.round(num(hi.vote_share_weighted_valid))}% / ασθενές «${lo.group}» ${Math.round(num(lo.vote_share_weighted_valid))}%`
+    );
+  }
+  return out;
+}
+
+async function leaderImageLines(origin: string, leader: string): Promise<string[]> {
+  const rowsAll = await loadLeaderTraits(origin);
+  const avg = (rows: MemRow[]) => {
+    const vals = rows.map((r) => num(r.share_weighted_valid)).filter((x) => Number.isFinite(x));
+    return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : NaN;
+  };
+  const latestOf = (rows: MemRow[]) => {
+    if (!rows.length) return [] as MemRow[];
+    const ly = Math.max(...rows.map(yearNum));
+    return rows.filter((r) => yearNum(r) === ly);
+  };
+  const out: string[] = [];
+
+  const ap = latestOf(
+    rowsAll.filter(
+      (r) => r.question_leader_primary === leader && r.metric_family === "leader_approval" && r.response_option === "positive_approval"
+    )
+  );
+  if (ap.length) out.push(`  • Έγκριση (θετική, ${yearNum(ap[0])}): ~${Math.round(avg(ap))}%`);
+
+  const pm = latestOf(rowsAll.filter((r) => r.metric_family === "suitable_pm" && r.response_option === leader));
+  if (pm.length) out.push(`  • Κατάλληλος πρωθυπουργός (${yearNum(pm[0])}): ~${Math.round(avg(pm))}%`);
+
+  const tr = latestOf(rowsAll.filter((r) => r.metric_family === "leader_trait" && r.response_option === leader));
+  if (tr.length) {
+    const byTrait: Record<string, number[]> = {};
+    for (const r of tr) {
+      const val = num(r.share_weighted_valid);
+      if (!Number.isFinite(val)) continue;
+      (byTrait[r.metric_name] = byTrait[r.metric_name] || []).push(val);
+    }
+    const ranked = Object.entries(byTrait)
+      .map(([k, arr]) => ({ k, s: arr.reduce((a, b) => a + b, 0) / arr.length }))
+      .sort((a, b) => b.s - a.s)
+      .slice(0, 3);
+    if (ranked.length) {
+      out.push(`  • Δυνατά χαρακτηριστικά (${yearNum(tr[0])}): ` + ranked.map((x) => `${x.k} (~${Math.round(x.s)}%)`).join(", "));
+    }
+  }
+  return out;
+}
+
+// Συνδυασμένο μπλοκ #2 + #3 για το ΕΠΙΛΕΓΜΕΝΟ κόμμα (ιστορικό μοτίβο, με caveats).
+export async function getAudienceMemoryBlock(origin: string, partyInput: string): Promise<string> {
+  try {
+    const key = audienceKeyFromInput(partyInput);
+    const map = AUDIENCE_MAP[key];
+    if (!map) return "";
+    const sections: string[] = [];
+
+    if (map.voteProxy) {
+      const lines = await voteBehaviorLines(origin, map.voteProxy);
+      if (lines.length) {
+        sections.push(`ΙΣΤΟΡΙΚΟ ΜΟΤΙΒΟ ΕΚΛΟΓΙΚΗΣ ΣΥΜΠΕΡΙΦΟΡΑΣ (proxy: ${map.voteProxy}, 2018-2022 — ΟΧΙ σημερινό):`);
+        sections.push(...lines);
+      }
+    }
+    if (map.leader) {
+      const lines = await leaderImageLines(origin, map.leader);
+      if (lines.length) {
+        sections.push(`ΙΣΤΟΡΙΚΗ ΕΙΚΟΝΑ ΑΡΧΗΓΟΥ (${map.leader}, 2018-2022, εποχή ΣΥΡΙΖΑ — ΟΧΙ σημερινή):`);
+        sections.push(...lines);
+      }
+    }
+    if (!sections.length) return "";
+    if (map.proxyNote) sections.push(`Σημείωση: ${map.proxyNote}`);
+    sections.push("ΧΡΗΣΗ: διαρθρωτικό μοτίβο (ποιο κοινό/τι εικόνα) — ΟΧΙ σημερινά ποσοστά. Για τρέχοντα → ζωντανές δημοσκοπήσεις.");
+    return sections.join("\n");
+  } catch {
+    return "";
+  }
+}
