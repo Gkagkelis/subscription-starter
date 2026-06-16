@@ -104,7 +104,7 @@ export async function GET(req: Request) {
     if (!key) return NextResponse.json({ ok: false, reason: "NO_API_KEY" });
     const useWhitelist = url.searchParams.get("nowhitelist") !== "1";
     const tool: any = { type: "web_search_20250305", name: "web_search", max_uses: 1 };
-    if (useWhitelist) tool.allowed_domains = ["dimoskopiseis.gr", "amna.gr", "reuters.com"];
+    if (useWhitelist) tool.allowed_domains = ["dimoskopiseis.gr", "amna.gr"];
     try {
       const r = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
@@ -291,7 +291,7 @@ ${competitiveContext ? "ΑΝΤΑΓΩΝΙΣΤΙΚΟ ΠΛΑΙΣΙΟ (υποχρε�
 ΑΝΑΦΟΡΑ ΠΗΓΩΝ (υποχρεωτικό): Όταν χρησιμοποιείς αριθμούς ή ισχυρισμούς από ΕΝΑ άρθρο ή από το active situation (π.χ. «6 στους 10», «+110%»), ΑΠΕΔΩΣΕ τους φιλικά στην πηγή (π.χ. «σύμφωνα με το δημοσίευμα στα Νέα…»). ΜΗΝ τα παρουσιάζεις ως ανεξάρτητα επιβεβαιωμένο γεγονός όταν στηρίζονται σε μία μόνο πηγή.`;
 
   const userInstruction = liveResearchRequired
-    ? `LIVE_RESEARCH_REQUIRED: true\n\nΠριν απαντήσεις, χρησιμοποίησε web_search για την ΤΡΕΧΟΥΣΑ εικόνα (δημοσκοπήσεις, δυναμική, ανταγωνισμός, νέα σχήματα).\nΠΗΓΕΣ — εμπιστεύσου ΜΟΝΟ: dimoskopiseis.gr (δημοσκοπήσεις/ποσοστά/δυναμική) και πρακτορεία (ΑΠΕ-ΜΠΕ/amna.gr, Reuters).\nΠΑΝΤΑ ανάφερε πηγή + ημερομηνία. Αν δεν βρεις αξιόπιστο τρέχον στοιχείο, πες «δεν έχω επιβεβαιωμένο τρέχον στοιχείο» — ΜΗΝ μαντεύεις και ΜΗΝ δίνεις ποσοστά/δυναμική από μνήμη. Μετά δώσε πολιτική σύνθεση και σύσταση.\n\nΕρώτηση χρήστη:\n${question}`
+    ? `LIVE_RESEARCH_REQUIRED: true\n\nΠριν απαντήσεις, χρησιμοποίησε web_search για την ΤΡΕΧΟΥΣΑ εικόνα (δημοσκοπήσεις, δυναμική, ανταγωνισμός, νέα σχήματα).\nΠΗΓΕΣ — εμπιστεύσου ΜΟΝΟ: dimoskopiseis.gr (δημοσκοπήσεις/ποσοστά/δυναμική) και πρακτορείο ΑΠΕ-ΜΠΕ (amna.gr).\nΠΑΝΤΑ ανάφερε πηγή + ημερομηνία. Αν δεν βρεις αξιόπιστο τρέχον στοιχείο, πες «δεν έχω επιβεβαιωμένο τρέχον στοιχείο» — ΜΗΝ μαντεύεις και ΜΗΝ δίνεις ποσοστά/δυναμική από μνήμη. Μετά δώσε πολιτική σύνθεση και σύσταση.\n\nΕρώτηση χρήστη:\n${question}`
     : `LIVE_RESEARCH_REQUIRED: false\n\nΑπάντησε ως πολιτικός σύμβουλος με βάση το διαθέσιμο context. Αν υπάρχει active situation, αυτό είναι το κέντρο της απάντησης.\n\nΕρώτηση χρήστη:\n${question}`;
 
   try {
@@ -311,7 +311,7 @@ ${competitiveContext ? "ΑΝΤΑΓΩΝΙΣΤΙΚΟ ΠΛΑΙΣΙΟ (υποχρε�
           type: "web_search_20250305",
           name: "web_search",
           max_uses: 2,
-          allowed_domains: ["dimoskopiseis.gr", "amna.gr", "reuters.com"],
+          allowed_domains: ["dimoskopiseis.gr", "amna.gr"],
         },
       ];
     }
