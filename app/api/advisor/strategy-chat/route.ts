@@ -192,6 +192,36 @@ export async function POST(req: Request) {
     }
   }
 
+  // ΣΕΝΑΡΙΑ / ΠΡΟΒΛΕΨΗ (από το «Σενάρια») για ΑΥΤΟ το γεγονός
+  const scenariosData: any =
+    (activeSituation && activeSituation.advisor_brief && activeSituation.advisor_brief.scenarios) ||
+    (strategicBrief && (strategicBrief as any).scenarios) ||
+    null;
+  let scenariosBlock = "";
+  if (scenariosData && typeof scenariosData === "object") {
+    const sParts: string[] = [];
+    if (scenariosData.headline) sParts.push(`Κατάσταση: ${scenariosData.headline}`);
+    if (Array.isArray(scenariosData.foresight) && scenariosData.foresight.length) {
+      sParts.push(
+        "Πιθανές εξελίξεις: " +
+          scenariosData.foresight
+            .map((f: any) => `${f.label} (${f.probability != null ? f.probability + "%" : "—"}${f.window ? ", " + f.window : ""})`)
+            .join(" · ")
+      );
+    }
+    if (scenariosData.recommendation && scenariosData.recommendation.move_label) {
+      sParts.push(
+        `Προτεινόμενη κίνηση: ${scenariosData.recommendation.move_label}${scenariosData.recommendation.because ? " — " + scenariosData.recommendation.because : ""}`
+      );
+    }
+    if (sParts.length) {
+      scenariosBlock =
+        "ΣΕΝΑΡΙΑ / ΠΡΟΒΛΕΨΗ (από το «Σενάρια» για αυτό το γεγονός):\n  • " +
+        sParts.join("\n  • ") +
+        "\nΧΡΗΣΗ: αν ο χρήστης θέλει να εμβαθύνει σε εξελίξεις/κινήσεις, στηρίξου σε αυτά (είναι δική μας ανάλυση foresight, όχι σημερινό γεγονός).";
+    }
+  }
+
   if (!question) {
     return NextResponse.json({ error: "Missing question." }, { status: 400 });
   }
@@ -334,6 +364,8 @@ ${audienceBlock}
 ${livePollsBlock}
 
 ${voicesBlock}
+
+${scenariosBlock}
 
 ΑΝΑΦΟΡΑ ΠΗΓΩΝ (υποχρεωτικό): Όταν χρησιμοποιείς αριθμούς ή ισχυρισμούς από ΕΝΑ άρθρο ή από το active situation (π.χ. «6 στους 10», «+110%»), ΑΠΕΔΩΣΕ τους φιλικά στην πηγή (π.χ. «σύμφωνα με το δημοσίευμα στα Νέα…»). ΜΗΝ τα παρουσιάζεις ως ανεξάρτητα επιβεβαιωμένο γεγονός όταν στηρίζονται σε μία μόνο πηγή.`;
 
