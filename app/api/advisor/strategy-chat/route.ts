@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getMemoryBlock } from "@/lib/noraya/political-memory";
+import { buildCompetitiveContext } from "@/lib/noraya/competitive-memory";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -38,6 +39,11 @@ function shouldUseLiveResearch(question: string) {
     "ποσοστά",
     "νέα",
     "ειδήσεις",
+    "ανεβαίνει",
+    "πέφτει",
+    "ανταγωνιστ",
+    "αντίπαλ",
+    "δυναμικ",
   ].some((signal) => q.includes(signal));
 }
 
@@ -150,7 +156,7 @@ export async function POST(req: Request) {
     timeStyle: "short",
   });
 
-  const liveResearchRequired = shouldUseLiveResearch(question) && !hasActiveSituation;
+  const liveResearchRequired = shouldUseLiveResearch(question);
 
   // --- ΜΟΝΙΜΗ ΠΟΛΙΤΙΚΗ ΜΝΗΜΗ (Βήμα 1) ---
   const memOrigin = (() => {
@@ -161,6 +167,23 @@ export async function POST(req: Request) {
   })();
   const memTopic = cleanText(activeSituation?.topic || activeSituation?.title || body.topic || question || "", 200);
   const memoryBlock = memTopic ? await getMemoryBlock(memOrigin, memTopic) : "";
+
+  // ΙΣΤΟΡΙΚΟ ΣΥΝΟΜΙΛΙΑΣ (ο σύμβουλος να ΘΥΜΑΤΑΙ τα προηγούμενα)
+  const rawHistory = Array.isArray(body.messages)
+    ? body.messages
+    : Array.isArray(body.history)
+    ? body.history
+    : [];
+  const chatHistory = rawHistory
+    .filter((m: any) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string" && m.content.trim())
+    .slice(-12)
+    .map((m: any) => ({ role: m.role as "user" | "assistant", content: cleanText(m.content, 4000) }));
+  while (chatHistory.length && chatHistory[chatHistory.length - 1].role === "user" && chatHistory[chatHistory.length - 1].content === question) {
+    chatHistory.pop();
+  }
+
+  // ΔΟΜΙΚΟ ΠΛΑΙΣΙΟ ΑΝΤΑΓΩΝΙΣΜΟΥ (διαρθρωτικό, για το επιλεγμένο κόμμα + αντιπάλους)
+  const competitiveContext = buildCompetitiveContext(party);
 
   const systemPrompt = `Είσαι ο Noraya, AI Political Strategy Advisor.
 
@@ -229,10 +252,14 @@ ${memoryBlock || "Δεν υπάρχουν διαθέσιμα δεδομένα μ
 - ΑΠΑΓΟΡΕΥΕΤΑΙ ΑΥΣΤΗΡΑ να παρουσιάσεις οποιοδήποτε νούμερο ως «σήμερα», ως «τρέχουσα» κατάσταση ή ως σημερινή δημοσκόπηση. ΠΟΤΕ μην πεις π.χ. «3 στους 4 δεν εμπιστεύονται ΤΗ ΣΗΜΕΡΙΝΗ κυβέρνηση» αντλώντας από αυτά.
 - Προτίμησε να μιλάς για το ΜΟΤΙΒΟ (ποιοι, πώς), όχι για ακριβή ποσοστά. Αν ΟΝΤΩΣ χρειαστεί να αναφέρεις αριθμό, πες ΡΗΤΑ ότι είναι ιστορικό/διαρθρωτικό με τη χρονιά (π.χ. «διαχρονικά στο Ευρωβαρόμετρο 2024…»).
 - Αν δεν υπάρχει ουσιαστική σύνδεση μνήμης-θέματος, ΜΗΝ εφεύρεις — βασίσου στο επίκαιρο γεγονός.
-- Τήρησε ΑΠΟΛΥΤΑ τον κανόνα αποσαφήνισης ΣΥΡΙΖΑ/ΕΛΑΣ.`;
+- Τήρησε ΑΠΟΛΥΤΑ τον κανόνα αποσαφήνισης ΣΥΡΙΖΑ/ΕΛΑΣ.
+
+${competitiveContext ? "ΑΝΤΑΓΩΝΙΣΤΙΚΟ ΠΛΑΙΣΙΟ (υποχρεωτικό όταν αναλύεις ανταγωνισμό / ποιος κερδίζει ή χάνει):\n" + competitiveContext : ""}
+
+ΑΝΑΦΟΡΑ ΠΗΓΩΝ (υποχρεωτικό): Όταν χρησιμοποιείς αριθμούς ή ισχυρισμούς από ΕΝΑ άρθρο ή από το active situation (π.χ. «6 στους 10», «+110%»), ΑΠΕΔΩΣΕ τους φιλικά στην πηγή (π.χ. «σύμφωνα με το δημοσίευμα στα Νέα…»). ΜΗΝ τα παρουσιάζεις ως ανεξάρτητα επιβεβαιωμένο γεγονός όταν στηρίζονται σε μία μόνο πηγή.`;
 
   const userInstruction = liveResearchRequired
-    ? `LIVE_RESEARCH_REQUIRED: true\n\nΠριν απαντήσεις, χρησιμοποίησε web_search για να ελέγξεις την τρέχουσα πραγματικότητα. Μετά δώσε πολιτική σύνθεση και σύσταση.\n\nΕρώτηση χρήστη:\n${question}`
+    ? `LIVE_RESEARCH_REQUIRED: true\n\nΠριν απαντήσεις, χρησιμοποίησε web_search για την ΤΡΕΧΟΥΣΑ εικόνα (δημοσκοπήσεις, δυναμική, ανταγωνισμός, νέα σχήματα).\nΠΗΓΕΣ — εμπιστεύσου ΜΟΝΟ: dimoskopiseis.gr (δημοσκοπήσεις/ποσοστά/δυναμική) και πρακτορεία (ΑΠΕ-ΜΠΕ/amna.gr, Reuters).\nΠΑΝΤΑ ανάφερε πηγή + ημερομηνία. Αν δεν βρεις αξιόπιστο τρέχον στοιχείο, πες «δεν έχω επιβεβαιωμένο τρέχον στοιχείο» — ΜΗΝ μαντεύεις και ΜΗΝ δίνεις ποσοστά/δυναμική από μνήμη. Μετά δώσε πολιτική σύνθεση και σύσταση.\n\nΕρώτηση χρήστη:\n${question}`
     : `LIVE_RESEARCH_REQUIRED: false\n\nΑπάντησε ως πολιτικός σύμβουλος με βάση το διαθέσιμο context. Αν υπάρχει active situation, αυτό είναι το κέντρο της απάντησης.\n\nΕρώτηση χρήστη:\n${question}`;
 
   try {
@@ -243,7 +270,7 @@ ${memoryBlock || "Δεν υπάρχουν διαθέσιμα δεδομένα μ
       model: process.env.ANTHROPIC_MODEL || "claude-sonnet-4-6",
       max_tokens: 3200,
       system: systemPrompt,
-      messages: [{ role: "user", content: userInstruction }],
+      messages: [...chatHistory, { role: "user", content: userInstruction }],
     };
 
     if (liveResearchRequired) {
@@ -252,6 +279,7 @@ ${memoryBlock || "Δεν υπάρχουν διαθέσιμα δεδομένα μ
           type: "web_search_20250305",
           name: "web_search",
           max_uses: 2,
+          allowed_domains: ["dimoskopiseis.gr", "amna.gr", "reuters.com"],
         },
       ];
     }
