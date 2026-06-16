@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getMemoryBlock } from "@/lib/noraya/political-memory";
 import { buildCompetitiveContext } from "@/lib/noraya/competitive-memory";
+import { fetchPollsSnapshot, formatPollsForPrompt } from "@/lib/noraya/live-polls";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -217,6 +218,17 @@ export async function POST(req: Request) {
   // ΔΟΜΙΚΟ ΠΛΑΙΣΙΟ ΑΝΤΑΓΩΝΙΣΜΟΥ (διαρθρωτικό, για το επιλεγμένο κόμμα + αντιπάλους)
   const competitiveContext = buildCompetitiveContext(party);
 
+  // ΖΩΝΤΑΝΕΣ ΔΗΜΟΣΚΟΠΗΣΕΙΣ — ακριβή δεδομένα από dimoskopiseis.gr (μόνο σε ερωτήσεις επικαιρότητας)
+  let livePollsBlock = "";
+  if (liveResearchRequired) {
+    try {
+      const snap = await fetchPollsSnapshot();
+      livePollsBlock = formatPollsForPrompt(snap);
+    } catch {
+      livePollsBlock = "";
+    }
+  }
+
   const systemPrompt = `Είσαι ο Noraya, AI Political Strategy Advisor.
 
 Μιλάς σαν εξαιρετικός πολιτικός σύμβουλος μέσα σε επιτελείο. Δεν είσαι news dashboard και δεν είσαι generic chatbot.
@@ -288,10 +300,12 @@ ${memoryBlock || "Δεν υπάρχουν διαθέσιμα δεδομένα μ
 
 ${competitiveContext ? "ΑΝΤΑΓΩΝΙΣΤΙΚΟ ΠΛΑΙΣΙΟ (υποχρεωτικό όταν αναλύεις ανταγωνισμό / ποιος κερδίζει ή χάνει):\n" + competitiveContext : ""}
 
+${livePollsBlock}
+
 ΑΝΑΦΟΡΑ ΠΗΓΩΝ (υποχρεωτικό): Όταν χρησιμοποιείς αριθμούς ή ισχυρισμούς από ΕΝΑ άρθρο ή από το active situation (π.χ. «6 στους 10», «+110%»), ΑΠΕΔΩΣΕ τους φιλικά στην πηγή (π.χ. «σύμφωνα με το δημοσίευμα στα Νέα…»). ΜΗΝ τα παρουσιάζεις ως ανεξάρτητα επιβεβαιωμένο γεγονός όταν στηρίζονται σε μία μόνο πηγή.`;
 
   const userInstruction = liveResearchRequired
-    ? `LIVE_RESEARCH_REQUIRED: true\n\nΠριν απαντήσεις, χρησιμοποίησε web_search για την ΤΡΕΧΟΥΣΑ εικόνα (δημοσκοπήσεις, δυναμική, ανταγωνισμός, νέα σχήματα).\nΠΗΓΕΣ — εμπιστεύσου ΜΟΝΟ: dimoskopiseis.gr (δημοσκοπήσεις/ποσοστά/δυναμική) και πρακτορείο ΑΠΕ-ΜΠΕ (amna.gr).\nΠΑΝΤΑ ανάφερε πηγή + ημερομηνία. Αν δεν βρεις αξιόπιστο τρέχον στοιχείο, πες «δεν έχω επιβεβαιωμένο τρέχον στοιχείο» — ΜΗΝ μαντεύεις και ΜΗΝ δίνεις ποσοστά/δυναμική από μνήμη. Μετά δώσε πολιτική σύνθεση και σύσταση.\n\nΕρώτηση χρήστη:\n${question}`
+    ? `LIVE_RESEARCH_REQUIRED: true\n\nΔΗΜΟΣΚΟΠΗΣΕΙΣ: Έχεις ΗΔΗ ακριβή ζωντανά δεδομένα παρακάτω (ενότητα «ΖΩΝΤΑΝΕΣ ΔΗΜΟΣΚΟΠΗΣΕΙΣ», πηγή dimoskopiseis.gr) — ΧΡΗΣΙΜΟΠΟΙΗΣΕ ΑΥΤΑ για ποσοστά/δυναμική, με εταιρεία+ημερομηνία. ΜΗΝ ψάχνεις ποσοστά στο web_search.\nΤο web_search ΜΟΝΟ για δηλώσεις/ανακοινώσεις/νέα σχήματα/γεγονότα που ΔΕΝ καλύπτονται από τις δημοσκοπήσεις. ΠΑΝΤΑ ανάφερε πηγή + ημερομηνία. Αν δεν βρεις αξιόπιστο στοιχείο, πες «δεν έχω επιβεβαιωμένο τρέχον στοιχείο» — ΜΗΝ μαντεύεις. Μετά δώσε πολιτική σύνθεση και σύσταση.\n\nΕρώτηση χρήστη:\n${question}`
     : `LIVE_RESEARCH_REQUIRED: false\n\nΑπάντησε ως πολιτικός σύμβουλος με βάση το διαθέσιμο context. Αν υπάρχει active situation, αυτό είναι το κέντρο της απάντησης.\n\nΕρώτηση χρήστη:\n${question}`;
 
   try {
@@ -311,7 +325,7 @@ ${competitiveContext ? "ΑΝΤΑΓΩΝΙΣΤΙΚΟ ΠΛΑΙΣΙΟ (υποχρε�
           type: "web_search_20250305",
           name: "web_search",
           max_uses: 2,
-          allowed_domains: ["dimoskopiseis.gr", "amna.gr"],
+          allowed_domains: ["dimoskopiseis.gr", "ertnews.gr", "in.gr", "newsit.gr", "news247.gr", "iefimerida.gr", "protothema.gr", "kathimerini.gr", "tovima.gr", "naftemporiki.gr", "eleftherostypos.gr", "amna.gr"],
         },
       ];
     }
