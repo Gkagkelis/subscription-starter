@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
+import { getMemoryBlock, getAudienceMemoryBlock } from "@/lib/noraya/political-memory";
+import { fetchPollsSnapshot, formatPollsForPrompt } from "@/lib/noraya/live-polls";
 import {
   buildNorayaStrategicSystemPrompt,
   buildNorayaStrategicJsonInstruction,
@@ -247,7 +249,8 @@ async function processOneEvent(
   supabase: ReturnType<typeof svc>,
   system: string,
   eventId: string,
-  partyKey: string
+  partyKey: string,
+  origin: string
 ): Promise<{ status: "ai" | "ai_down"; title?: string; ai_error?: string | null }> {
   const { data: ev, error } = await supabase
     .from("v_political_events_live")
@@ -257,7 +260,28 @@ async function processOneEvent(
 
   if (error || !ev) return { status: "ai_down", ai_error: error?.message || "event_not_found" };
 
-  const ai = await callAnthropic(system, buildEventContext(ev));
+  // ΔΕΔΟΜΕΝΑ ΜΝΗΜΗΣ: τροφοδότηση του brief από CSV #1/#2/#3 + ζωντανές δημοσκοπήσεις
+  let dataContext = "";
+  try {
+    const [mem, aud] = await Promise.all([
+      getMemoryBlock(origin, ev?.topic || ev?.title || ""),
+      getAudienceMemoryBlock(origin, partyKey),
+    ]);
+    let pollsTxt = "";
+    try {
+      pollsTxt = formatPollsForPrompt(await fetchPollsSnapshot());
+    } catch {
+      pollsTxt = "";
+    }
+    dataContext = [mem, aud, pollsTxt].filter(Boolean).join("\n\n");
+  } catch {
+    dataContext = "";
+  }
+  const eventContextFull = dataContext
+    ? `${buildEventContext(ev)}\n\n=== ΔΕΔΟΜΕΝΑ ΜΝΗΜΗΣ (στήριξε το brief· διαρθρωτικά/ιστορικά = ΟΧΙ σημερινά, δημοσκοπήσεις = τρέχουσες με ημερομηνία· μην εφευρίσκεις ποσοστά) ===\n${dataContext}`
+    : buildEventContext(ev);
+
+  const ai = await callAnthropic(system, eventContextFull);
   const parsed = ai.text ? parseAiJson(ai.text) : null;
 
   if (!(parsed && parsed.issue)) {
@@ -347,7 +371,7 @@ async function handle(request: Request) {
 
       for (const id of ids) {
         if (Date.now() - startedAt > BUDGET_MS) break;
-        const r = await processOneEvent(supabase, system, id, partyKey);
+        const r = await processOneEvent(supabase, system, id, partyKey, url.origin);
         if (r.status === "ai_down") {
           aiError = r.ai_error || "ai_down";
           break;
@@ -365,7 +389,7 @@ async function handle(request: Request) {
     }
 
     if (requestedId) {
-      const r = await processOneEvent(supabase, system, requestedId, partyKey);
+      const r = await processOneEvent(supabase, system, requestedId, partyKey, url.origin);
       return NextResponse.json({ ok: true, mode: "single", analyzed: r.status === "ai" ? 1 : 0, ai_error: r.ai_error || null, processed: r });
     }
 
@@ -379,7 +403,7 @@ async function handle(request: Request) {
       const eventId = (nextId as string) || null;
       if (!eventId) break;
 
-      const r = await processOneEvent(supabase, system, eventId, partyKey);
+      const r = await processOneEvent(supabase, system, eventId, partyKey, url.origin);
       if (r.status === "ai_down") {
         aiError = r.ai_error || "ai_down";
         break;
