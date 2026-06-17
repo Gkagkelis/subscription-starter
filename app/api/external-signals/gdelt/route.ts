@@ -46,6 +46,8 @@ type CandidateRow = {
   raw_payload: Record<string, unknown>;
 };
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 function cleanText(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
 }
@@ -82,7 +84,6 @@ function parseGdeltDate(value: unknown): string | null {
   const raw = cleanText(value);
   if (!raw) return null;
 
-  // GDELT often returns YYYYMMDDHHMMSS, but keep ISO-compatible values too.
   const gdelt = raw.match(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/);
   if (gdelt) {
     const [, y, mo, d, h, mi, s] = gdelt;
@@ -104,23 +105,73 @@ function topicVariants(topic: string) {
     "Υποδομές / μεταφορές": ["υποδομές", "μεταφορές", "σιδηρόδρομος"],
     "Ασφαλιστικό / συντάξεις": ["συντάξεις", "ασφαλιστικό"],
     "Ψηφιακή πολιτική / τεχνολογία": ["τεχνητή νοημοσύνη", "τεχνολογία", "ψηφιακή πολιτική"],
+    "Οικονομία": ["οικονομία", "δημόσιο χρέος", "ανάπτυξη"],
+    "Στέγαση": ["στέγαση", "κατοικία", "ενοίκια"],
+    "Πολιτική προστασία": ["πολιτική προστασία", "πυρκαγιές", "καύσωνας"],
   };
 
   for (const extra of expansions[normalized] || []) variants.push(extra);
-  return unique(variants.filter(Boolean)).slice(0, 4);
+
+  return unique(
+    variants
+      .map((value) => value.replace(/[()]/g, " ").replace(/\s+/g, " ").trim())
+      .filter(Boolean)
+  ).slice(0, 4);
 }
 
-function buildGdeltQuery(topic: string) {
-  const variants = topicVariants(topic)
-    .map((term) => `"${term.replace(/"/g, "")}"`)
-    .join(" OR ");
-
-  // Greece-focused shadow discovery. We keep it strict enough to avoid global noise.
-  return `(${variants}) sourcelang:Greek sourcecountry:GR`;
+function buildGdeltQuery(term: string) {
+  // Keep the query deliberately simple. GDELT can reject parenthesized OR groups
+  // with plain-text parser errors, which then break JSON parsing.
+  const cleanTerm = term.replace(/"/g, "").trim();
+  return `"${cleanTerm}" sourcelang:Greek sourcecountry:GR`;
 }
 
-async function fetchGdeltArticles(topic: string, timespan: string, maxRecords: number) {
-  const query = buildGdeltQuery(topic);
+async function fetchJsonOrText(url: string) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15_000);
+
+  try {
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        "User-Agent": "Noraya/1.0 external-signal-shadow",
+      },
+      cache: "no-store",
+    });
+
+    const body = await response.text();
+
+    if (!response.ok) {
+      return {
+        ok: false,
+        status: response.status,
+        body,
+        json: null as { articles?: GdeltArticle[] } | null,
+      };
+    }
+
+    try {
+      return {
+        ok: true,
+        status: response.status,
+        body,
+        json: JSON.parse(body) as { articles?: GdeltArticle[] },
+      };
+    } catch {
+      return {
+        ok: false,
+        status: response.status,
+        body,
+        json: null as { articles?: GdeltArticle[] } | null,
+      };
+    }
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function fetchGdeltArticlesForTerm(topic: string, term: string, timespan: string, maxRecords: number) {
+  const query = buildGdeltQuery(term);
   const url = new URL("https://api.gdeltproject.org/api/v2/doc/doc");
   url.searchParams.set("query", query);
   url.searchParams.set("mode", "ArtList");
@@ -129,44 +180,72 @@ async function fetchGdeltArticles(topic: string, timespan: string, maxRecords: n
   url.searchParams.set("timespan", timespan);
   url.searchParams.set("maxrecords", String(maxRecords));
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 12_000);
+  let result = await fetchJsonOrText(url.toString());
 
-  try {
-    const response = await fetch(url.toString(), {
-      signal: controller.signal,
-      headers: {
-        "User-Agent": "Noraya/1.0 external-signal-shadow",
-      },
-      cache: "no-store",
-    });
+  // GDELT rate-limits easily. Retry once, gently.
+  if (result.status === 429) {
+    await sleep(2500);
+    result = await fetchJsonOrText(url.toString());
+  }
 
-    if (!response.ok) {
-      return {
-        topic,
-        query,
-        error: `GDELT ${response.status}`,
-        articles: [] as GdeltArticle[],
-      };
-    }
-
-    const json = (await response.json()) as { articles?: GdeltArticle[] };
+  if (!result.ok || !result.json) {
     return {
       topic,
+      term,
       query,
-      error: null as string | null,
-      articles: Array.isArray(json.articles) ? json.articles : [],
-    };
-  } catch (error) {
-    return {
-      topic,
-      query,
-      error: error instanceof Error ? error.message : "GDELT fetch failed",
+      error:
+        result.status === 429
+          ? "GDELT 429 rate limit"
+          : result.body
+              ? `GDELT ${result.status}: ${result.body.slice(0, 160)}`
+              : `GDELT ${result.status}`,
       articles: [] as GdeltArticle[],
     };
-  } finally {
-    clearTimeout(timeout);
   }
+
+  return {
+    topic,
+    term,
+    query,
+    error: null as string | null,
+    articles: Array.isArray(result.json.articles) ? result.json.articles : [],
+  };
+}
+
+async function fetchGdeltArticles(topic: string, timespan: string, maxRecords: number) {
+  const variants = topicVariants(topic);
+  const responses: Array<{
+    topic: string;
+    term: string;
+    query: string;
+    error: string | null;
+    articles: GdeltArticle[];
+  }> = [];
+
+  for (const term of variants) {
+    const result = await fetchGdeltArticlesForTerm(topic, term, timespan, maxRecords);
+    responses.push(result);
+
+    // Stop early when we already have useful hits for this topic.
+    if (result.articles.length >= Math.min(maxRecords, 5)) break;
+
+    // Gentle spacing prevents 429s.
+    await sleep(900);
+  }
+
+  const articleMap = new Map<string, GdeltArticle>();
+  for (const response of responses) {
+    for (const article of response.articles) {
+      const rawUrl = cleanText(article.url || article.url_mobile);
+      if (rawUrl && !articleMap.has(rawUrl)) articleMap.set(rawUrl, article);
+    }
+  }
+
+  return {
+    topic,
+    responses,
+    articles: Array.from(articleMap.values()),
+  };
 }
 
 function candidateFromArticle(topic: string, query: string, article: GdeltArticle): CandidateRow | null {
@@ -198,13 +277,13 @@ function candidateFromArticle(topic: string, query: string, article: GdeltArticl
 }
 
 async function loadTopics(limit: number, explicitTopics: string[]) {
-  if (explicitTopics.length) return explicitTopics.slice(0, limit);
+  if (explicitTopics.length) return unique(explicitTopics).slice(0, limit);
 
   const { data: eventRows } = await supabase
     .from("v_political_events_live")
     .select("topic,event_score")
     .order("event_score", { ascending: false })
-    .limit(limit * 2);
+    .limit(limit * 3);
 
   const eventTopics = Array.isArray(eventRows)
     ? eventRows
@@ -245,9 +324,9 @@ export async function GET(req: Request) {
     .map((item) => item.trim())
     .filter(Boolean);
 
-  const topicLimit = Math.min(Math.max(numberValue(searchParams.get("limit"), 8), 1), 12);
-  const maxRecords = Math.min(Math.max(numberValue(searchParams.get("maxrecords"), 12), 1), 50);
-  const timespan = cleanText(searchParams.get("timespan")) || "48h";
+  const topicLimit = Math.min(Math.max(numberValue(searchParams.get("limit"), 8), 1), 20);
+  const maxRecords = Math.min(Math.max(numberValue(searchParams.get("maxrecords"), 6), 1), 20);
+  const timespan = cleanText(searchParams.get("timespan")) || "72h";
 
   const topics = await loadTopics(topicLimit, explicitTopics);
 
@@ -260,25 +339,38 @@ export async function GET(req: Request) {
     });
   }
 
-  const responses = [];
+  const responses: Array<{
+    topic: string;
+    term?: string;
+    query: string;
+    error: string | null;
+    article_count: number;
+  }> = [];
   const candidateMap = new Map<string, CandidateRow>();
 
   for (const topic of topics) {
     const result = await fetchGdeltArticles(topic, timespan, maxRecords);
-    responses.push({
-      topic,
-      query: result.query,
-      error: result.error,
-      article_count: result.articles.length,
-    });
 
-    for (const article of result.articles) {
-      const candidate = candidateFromArticle(topic, result.query, article);
-      if (!candidate) continue;
-      if (!candidateMap.has(candidate.url)) {
-        candidateMap.set(candidate.url, candidate);
+    for (const response of result.responses) {
+      responses.push({
+        topic,
+        term: response.term,
+        query: response.query,
+        error: response.error,
+        article_count: response.articles.length,
+      });
+
+      for (const article of response.articles) {
+        const candidate = candidateFromArticle(topic, response.query, article);
+        if (!candidate) continue;
+        if (!candidateMap.has(candidate.url)) {
+          candidateMap.set(candidate.url, candidate);
+        }
       }
     }
+
+    // Another small delay between topics.
+    await sleep(1200);
   }
 
   const candidates = Array.from(candidateMap.values());
