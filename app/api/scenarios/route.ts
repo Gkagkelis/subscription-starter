@@ -158,7 +158,7 @@ function buildSystem(partyProfile: any, partyKey: string) {
 ${JSON.stringify(partyProfile)}`;
 }
 
-async function callAnthropic(system: string, user: string): Promise<{ text: string | null; status: number | null; error: string | null }> {
+async function callAnthropic(system: string, user: string | any[]): Promise<{ text: string | null; status: number | null; error: string | null }> {
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) return { text: null, status: null, error: "MISSING ANTHROPIC_API_KEY" };
   let res: Response;
@@ -169,6 +169,7 @@ async function callAnthropic(system: string, user: string): Promise<{ text: stri
         "content-type": "application/json",
         "x-api-key": key,
         "anthropic-version": "2023-06-01",
+        "anthropic-beta": "pdfs-2024-09-25",
       },
       body: JSON.stringify({
         model: ANALYSIS_MODEL,
@@ -211,10 +212,12 @@ async function handle(request: Request) {
     // ΔΙΚΑ ΣΟΥ ΣΤΟΙΧΕΙΑ (Φάση 1): κείμενο (paste/CSV/TXT) + link
     let customText = "";
     let customLink = "";
+    let customFilesRaw: any[] = [];
     if (request.method === "POST") {
       const body: any = await request.json().catch(() => ({}));
       customText = String(body?.custom_text || "").slice(0, 8000);
       customLink = String(body?.custom_link || "").trim();
+      if (Array.isArray(body?.custom_files)) customFilesRaw = body.custom_files;
     }
     let linkText = "";
     if (customLink && /^https?:\/\//i.test(customLink)) {
@@ -291,7 +294,35 @@ async function handle(request: Request) {
       : "";
     const userMsgFull = [userMsg, customBlock, memBlock].filter(Boolean).join("\n\n");
 
-    const ai = await callAnthropic(system, userMsgFull);
+    // ΣΥΝΗΜΜΕΝΑ (Φάση 2 — vision): εικόνες + PDF δημοσκοπήσεων
+    const fileBlocks: any[] = [];
+    for (const f of (customFilesRaw || []).slice(0, 3)) {
+      const mt = String(f?.media_type || "");
+      const data = String(f?.data || "");
+      if (!data) continue;
+      if (mt.startsWith("image/")) {
+        fileBlocks.push({ type: "image", source: { type: "base64", media_type: mt, data } });
+      } else if (mt === "application/pdf") {
+        fileBlocks.push({ type: "document", source: { type: "base64", media_type: "application/pdf", data } });
+      }
+    }
+
+    let aiUser: string | any[] = userMsgFull;
+    if (fileBlocks.length) {
+      aiUser = [
+        {
+          type: "text",
+          text:
+            userMsgFull +
+            "\n\n=== ΣΥΝΗΜΜΕΝΗ ΔΗΜΟΣΚΟΠΗΣΗ (διάβασέ τη με προσοχή) ===\n" +
+            "Τα συνημμένα είναι δημοσκόπηση/ανάλυση και περιέχουν ΠΟΛΛΑ δεδομένα (πρόθεση ψήφου, εκτίμηση, δείκτες όπως «κατάλληλος πρωθυπουργός»/εικόνα αρχηγών, ευρήματα ανά θέμα, ίσως demographics ανά ηλικία/φύλο/περιοχή).\n" +
+            "ΚΑΝΕ ΔΙΑΣΤΡΩΜΑΤΙΚΗ ΑΝΑΛΥΣΗ: (1) σύνοψε ΤΙ ΔΕΙΧΝΕΙ ΣΥΝΟΛΙΚΑ η δημοσκόπηση στο «where_it_stands» (με τους πραγματικούς αριθμούς που διαβάζεις)· (2) στο «connection» εξήγησε ΤΙ ΣΗΜΑΙΝΕΙ ΕΙΔΙΚΑ ΓΙΑ ΤΟ ΚΟΜΜΑ (πού κερδίζει/χάνει, ποια κίνηση υπάρχει, ποιο κοινό-στόχος)· (3) θεμελίωσε foresight & moves σε ΑΥΤΑ τα στοιχεία, με ρητή αναφορά στα νούμερα. Μην εφευρίσκεις αριθμούς που δεν βλέπεις στο συνημμένο.",
+        },
+        ...fileBlocks,
+      ];
+    }
+
+    const ai = await callAnthropic(system, aiUser);
     const parsed = ai.text ? parseAiJson(ai.text) : null;
 
     if (!parsed || !parsed.foresight || !parsed.moves) {
