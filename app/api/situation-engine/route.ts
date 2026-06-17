@@ -123,16 +123,19 @@ function trendPayload(trend: TrendSignal) {
 }
 
 function realSearchInterestScore(trendInfo: {
-  search_interest_score?: unknown;
+  search_interest_score?: number | string | null;
   search_interest_status?: string | null;
   search_interest_fetched_at?: string | null;
-}) {
+}): number | string | null {
   const status = String(trendInfo.search_interest_status || "").toLowerCase();
 
   if (!trendInfo.search_interest_fetched_at) return null;
   if (status.includes("fallback") || status.includes("pending")) return null;
 
-  return trendInfo.search_interest_score ?? null;
+  const score = trendInfo.search_interest_score;
+  if (score === null || score === undefined || score === "") return null;
+
+  return score;
 }
 
 function opportunityLabel(score: number, coverageLevel?: string | null) {
