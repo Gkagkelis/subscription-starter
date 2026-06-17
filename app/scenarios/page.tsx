@@ -223,6 +223,8 @@ export default function ScenariosPage() {
   const [scenarios, setScenarios] = useState<Scenarios | null>(null);
   const [generating, setGenerating] = useState(false);
   const [errMsg, setErrMsg] = useState<string | null>(null);
+  const [customText, setCustomText] = useState("");
+  const [customLink, setCustomLink] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -272,7 +274,12 @@ export default function ScenariosPage() {
     setErrMsg(null);
     setGenerating(true);
     try {
-      const r = await fetch(`/api/scenarios?token=dev&party=${encodeURIComponent(party)}&event_id=${encodeURIComponent(id)}`, { cache: "no-store" });
+      const r = await fetch(`/api/scenarios?token=dev&party=${encodeURIComponent(party)}&event_id=${encodeURIComponent(id)}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ custom_text: customText, custom_link: customLink }),
+        cache: "no-store",
+      });
       const j = await r.json();
       if (r.ok && j?.scenarios) {
         setScenarios(j.scenarios as Scenarios);
@@ -377,8 +384,53 @@ export default function ScenariosPage() {
                 <div className="text-[11px] text-zinc-500">{selected.topic}</div>
                 <h2 className="mt-1 text-2xl font-semibold text-zinc-50">{selected.title}</h2>
                 <p className="mt-3 max-w-xl text-sm text-zinc-400">Ο Noraya θα προβλέψει 2-3 πιθανές εξελίξεις και θα προσομοιώσει τις κινήσεις σου, με βάση τα πραγματικά στοιχεία του γεγονότος και το προφίλ σου.</p>
+
+                {/* Δικά μου στοιχεία (Φάση 1: link + κείμενο/CSV) */}
+                <div className="mt-5 rounded-2xl border border-[#1a2640] bg-[#0a0f1c]/60 p-4">
+                  <div className="text-[11px] uppercase tracking-wide text-cyan-300/60">Δικά μου στοιχεία (προαιρετικά)</div>
+                  <p className="mt-1 text-[12px] text-zinc-500">Δώσε δική σου δημοσκόπηση/ανάλυση και το σενάριο θα θεμελιωθεί σε αυτά.</p>
+                  <input
+                    type="url"
+                    value={customLink}
+                    onChange={(e) => setCustomLink(e.target.value)}
+                    placeholder="Link ανάλυσης/δημοσκόπησης (π.χ. εφημερίδα)"
+                    className="mt-3 w-full rounded-xl border border-[#243049] bg-[#0c1220] px-3 py-2 text-[13px] text-zinc-200 outline-none placeholder:text-zinc-600 focus:border-cyan-300/40"
+                  />
+                  <textarea
+                    value={customText}
+                    onChange={(e) => setCustomText(e.target.value)}
+                    placeholder="Ή επικόλλησε εδώ τα στοιχεία/ευρήματα (ποσοστά, συμπεράσματα, κείμενο δημοσκόπησης)…"
+                    rows={4}
+                    className="mt-2 w-full rounded-xl border border-[#243049] bg-[#0c1220] px-3 py-2 text-[13px] text-zinc-200 outline-none placeholder:text-zinc-600 focus:border-cyan-300/40"
+                  />
+                  <div className="mt-2 flex items-center gap-3">
+                    <label className="cursor-pointer rounded-lg border border-[#243049] bg-white/[0.03] px-3 py-1.5 text-[11px] text-zinc-300 transition hover:text-zinc-100">
+                      📎 Ανέβασε CSV/TXT
+                      <input
+                        type="file"
+                        accept=".csv,.txt,text/csv,text/plain"
+                        className="hidden"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (!f) return;
+                          const reader = new FileReader();
+                          reader.onload = () => {
+                            const txt = String(reader.result || "").slice(0, 8000);
+                            setCustomText((prev) => (prev ? prev + "\n\n" : "") + `[${f.name}]\n` + txt);
+                          };
+                          reader.readAsText(f);
+                        }}
+                      />
+                    </label>
+                    {(customText || customLink) ? (
+                      <button type="button" onClick={() => { setCustomText(""); setCustomLink(""); }} className="text-[11px] text-zinc-500 transition hover:text-zinc-300">Καθαρισμός</button>
+                    ) : null}
+                  </div>
+                  <p className="mt-2 text-[10px] text-zinc-600">PDF/Excel αρχεία & εικόνες δημοσκοπήσεων: έρχονται στη Φάση 2. Προς το παρόν, αντιγραφή-επικόλληση ή CSV/TXT.</p>
+                </div>
+
                 <button type="button" onClick={() => generate(selected.id)} className="mt-5 rounded-2xl border border-cyan-300/30 bg-cyan-300/10 px-5 py-2.5 text-sm font-medium text-cyan-100 transition hover:bg-cyan-300/20">
-                  ▶ Ανάλυσε σενάρια
+                  ▶ Ανάλυσε σενάρια{(customText || customLink) ? " (με τα στοιχεία μου)" : ""}
                 </button>
               </div>
             ) : generating ? (
