@@ -28,6 +28,10 @@
     {
       "path": "/api/situation-engine/advise-event",
       "schedule": "20 5,13 * * *"
+    },
+    {
+      "path": "/api/external-signals/gdelt-feed?token=dev&timespan=6h&maxrecords=50&window_hours=72",
+      "schedule": "17 */6 * * *"
     }
   ]
 }
