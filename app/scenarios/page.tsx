@@ -226,6 +226,7 @@ export default function ScenariosPage() {
   const [customText, setCustomText] = useState("");
   const [customLink, setCustomLink] = useState("");
   const [customFiles, setCustomFiles] = useState<{ name: string; media_type: string; data: string }[]>([]);
+  const [mode, setMode] = useState<"event" | "custom">("event");
 
   useEffect(() => {
     (async () => {
@@ -267,6 +268,34 @@ export default function ScenariosPage() {
         .sort((a, b) => b.score - a.score),
     [situations]
   );
+
+  async function generateCustom() {
+    if (!customText && !customLink && customFiles.length === 0) {
+      setErrMsg("Δώσε πρώτα δεδομένα (link, κείμενο ή αρχείο).");
+      return;
+    }
+    setScenarios(null);
+    setErrMsg(null);
+    setGenerating(true);
+    try {
+      const r = await fetch(`/api/scenarios?token=dev&party=${encodeURIComponent(party)}&standalone=1`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ custom_text: customText, custom_link: customLink, custom_files: customFiles }),
+        cache: "no-store",
+      });
+      const j = await r.json();
+      if (r.ok && j?.scenarios) {
+        setScenarios(j.scenarios as Scenarios);
+      } else {
+        setErrMsg("Η ανάλυση δεν ολοκληρώθηκε. Δοκίμασε ξανά σε λίγο.");
+      }
+    } catch {
+      setErrMsg("Κάτι πήγε στραβά στην ανάλυση. Δοκίμασε ξανά.");
+    } finally {
+      setGenerating(false);
+    }
+  }
 
   const selected = useMemo(() => list.find((s) => s.id === selectedId) || null, [list, selectedId]);
 
@@ -346,8 +375,15 @@ export default function ScenariosPage() {
           <p className="mt-2 max-w-2xl text-sm text-zinc-400">Διάλεξε μια κατάσταση. Ο Noraya προβλέπει πού μπορεί να πάει και προσομοιώνει κάθε κίνηση, ενωμένα σε έναν συλλογισμό για {partyLabel}.</p>
         </section>
 
-        <div className="grid gap-5 lg:grid-cols-[320px_1fr]">
+        {/* Διακόπτης πηγής */}
+        <div className="mb-5 inline-flex rounded-2xl border border-[#1a2640] bg-[#0c1220] p-1 text-xs">
+          <button type="button" onClick={() => { setMode("event"); setScenarios(null); setErrMsg(null); }} className={`rounded-xl px-4 py-2 transition ${mode === "event" ? "bg-cyan-300/15 text-cyan-100" : "text-zinc-400 hover:text-zinc-200"}`}>Από κατάσταση</button>
+          <button type="button" onClick={() => { setMode("custom"); setScenarios(null); setErrMsg(null); setSelectedId(null); }} className={`rounded-xl px-4 py-2 transition ${mode === "custom" ? "bg-cyan-300/15 text-cyan-100" : "text-zinc-400 hover:text-zinc-200"}`}>Τα δικά μου δεδομένα</button>
+        </div>
+
+        <div className={`grid gap-5 ${mode === "event" ? "lg:grid-cols-[320px_1fr]" : "grid-cols-1"}`}>
           {/* Picker */}
+          {mode === "event" ? (
           <aside className="rounded-3xl border border-[#1a2640] bg-[#0c1220] p-3">
             <div className="mb-2 px-1 text-xs font-medium text-zinc-400">Καταστάσεις</div>
             {loadingList ? (
@@ -373,105 +409,52 @@ export default function ScenariosPage() {
               </div>
             )}
           </aside>
+          ) : null}
 
           {/* Reasoning panel */}
           <section>
-            {!selected ? (
+            {(mode === "event" && !selected) ? (
               <div className="flex h-full min-h-[400px] items-center justify-center rounded-3xl border border-dashed border-[#1a2640] bg-[#0a0f1c]/50 p-8 text-center text-sm text-zinc-500">
                 Διάλεξε μια κατάσταση από αριστερά για να δεις πιθανές εξελίξεις και κινήσεις.
               </div>
             ) : !scenarios && !generating && !errMsg ? (
+              mode === "custom" ? (
+              <div className="rounded-3xl border border-[#1a2640] bg-gradient-to-b from-[#0d1525] to-[#0a0f1c] p-8">
+                <div className="text-[11px] uppercase tracking-wide text-cyan-300/70">Τα δικά μου δεδομένα</div>
+                <h2 className="mt-1 text-2xl font-semibold text-zinc-50">Ανάλυση από δικά σου στοιχεία</h2>
+                <p className="mt-3 max-w-xl text-sm text-zinc-400">Ανέβασε ή επικόλλησε δημοσκόπηση, non-paper, link ή οποιαδήποτε πληροφορία. Ο Noraya θα κάνει σύνθετη στρατηγική ανάλυση για {partyLabel} — χωρίς να διαλέξεις θέμα.</p>
+                <CustomInputs
+                  customLink={customLink}
+                  setCustomLink={setCustomLink}
+                  customText={customText}
+                  setCustomText={setCustomText}
+                  customFiles={customFiles}
+                  setCustomFiles={setCustomFiles}
+                />
+                <button type="button" onClick={generateCustom} className="mt-5 rounded-2xl border border-cyan-300/30 bg-cyan-300/10 px-5 py-2.5 text-sm font-medium text-cyan-100 transition hover:bg-cyan-300/20">
+                  ▶ Ανάλυσε από τα δεδομένα μου
+                </button>
+              </div>
+              ) : (
               <div className="rounded-3xl border border-[#1a2640] bg-gradient-to-b from-[#0d1525] to-[#0a0f1c] p-8">
                 <div className="text-[11px] text-zinc-500">{selected.topic}</div>
                 <h2 className="mt-1 text-2xl font-semibold text-zinc-50">{selected.title}</h2>
                 <p className="mt-3 max-w-xl text-sm text-zinc-400">Ο Noraya θα προβλέψει 2-3 πιθανές εξελίξεις και θα προσομοιώσει τις κινήσεις σου, με βάση τα πραγματικά στοιχεία του γεγονότος και το προφίλ σου.</p>
 
-                {/* Δικά μου στοιχεία (Φάση 1: link + κείμενο/CSV) */}
-                <div className="mt-5 rounded-2xl border border-[#1a2640] bg-[#0a0f1c]/60 p-4">
-                  <div className="text-[11px] uppercase tracking-wide text-cyan-300/60">Δικά μου στοιχεία (προαιρετικά)</div>
-                  <p className="mt-1 text-[12px] text-zinc-500">Δώσε δική σου δημοσκόπηση/ανάλυση και το σενάριο θα θεμελιωθεί σε αυτά.</p>
-                  <input
-                    type="url"
-                    value={customLink}
-                    onChange={(e) => setCustomLink(e.target.value)}
-                    placeholder="Link ανάλυσης/δημοσκόπησης (π.χ. εφημερίδα)"
-                    className="mt-3 w-full rounded-xl border border-[#243049] bg-[#0c1220] px-3 py-2 text-[13px] text-zinc-200 outline-none placeholder:text-zinc-600 focus:border-cyan-300/40"
-                  />
-                  <textarea
-                    value={customText}
-                    onChange={(e) => setCustomText(e.target.value)}
-                    placeholder="Ή επικόλλησε εδώ τα στοιχεία/ευρήματα (ποσοστά, συμπεράσματα, κείμενο δημοσκόπησης)…"
-                    rows={4}
-                    className="mt-2 w-full rounded-xl border border-[#243049] bg-[#0c1220] px-3 py-2 text-[13px] text-zinc-200 outline-none placeholder:text-zinc-600 focus:border-cyan-300/40"
-                  />
-                  <div className="mt-2 flex items-center gap-3">
-                    <label className="cursor-pointer rounded-lg border border-[#243049] bg-white/[0.03] px-3 py-1.5 text-[11px] text-zinc-300 transition hover:text-zinc-100">
-                      📎 CSV/TXT
-                      <input
-                        type="file"
-                        accept=".csv,.txt,text/csv,text/plain"
-                        className="hidden"
-                        onChange={(e) => {
-                          const f = e.target.files?.[0];
-                          if (!f) return;
-                          const reader = new FileReader();
-                          reader.onload = () => {
-                            const txt = String(reader.result || "").slice(0, 8000);
-                            setCustomText((prev) => (prev ? prev + "\n\n" : "") + `[${f.name}]\n` + txt);
-                          };
-                          reader.readAsText(f);
-                        }}
-                      />
-                    </label>
-                    <label className="cursor-pointer rounded-lg border border-[#243049] bg-white/[0.03] px-3 py-1.5 text-[11px] text-zinc-300 transition hover:text-zinc-100">
-                      🖼️ PDF / Εικόνα δημοσκόπησης
-                      <input
-                        type="file"
-                        accept=".pdf,application/pdf,image/png,image/jpeg,image/webp"
-                        multiple
-                        className="hidden"
-                        onChange={(e) => {
-                          const files = Array.from(e.target.files || []);
-                          files.forEach((f: File) => {
-                            if (f.size > 4_000_000) {
-                              alert(`Το «${f.name}» είναι >4MB. Δοκίμασε μικρότερο αρχείο/εικόνα.`);
-                              return;
-                            }
-                            const reader = new FileReader();
-                            reader.onload = () => {
-                              const result = String(reader.result || "");
-                              const base64 = result.includes(",") ? result.split(",")[1] : "";
-                              if (!base64) return;
-                              const mt = f.type || (f.name.toLowerCase().endsWith(".pdf") ? "application/pdf" : "application/octet-stream");
-                              setCustomFiles((prev) => [...prev, { name: f.name, media_type: mt, data: base64 }].slice(0, 3));
-                            };
-                            reader.readAsDataURL(f);
-                          });
-                          e.target.value = "";
-                        }}
-                      />
-                    </label>
-                    {(customText || customLink || customFiles.length) ? (
-                      <button type="button" onClick={() => { setCustomText(""); setCustomLink(""); setCustomFiles([]); }} className="text-[11px] text-zinc-500 transition hover:text-zinc-300">Καθαρισμός</button>
-                    ) : null}
-                  </div>
-                  {customFiles.length ? (
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {customFiles.map((cf, i) => (
-                        <span key={i} className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-300/20 bg-cyan-300/10 px-2 py-1 text-[11px] text-cyan-100">
-                          {cf.media_type === "application/pdf" ? "📄" : "🖼️"} {cf.name}
-                          <button type="button" onClick={() => setCustomFiles((prev) => prev.filter((_, j) => j !== i))} className="text-cyan-300/60 hover:text-cyan-100">✕</button>
-                        </span>
-                      ))}
-                    </div>
-                  ) : null}
-                  <p className="mt-2 text-[10px] text-zinc-600">Υποστηρίζονται: link, κείμενο, CSV/TXT, και PDF/εικόνα δημοσκόπησης (το AI τα διαβάζει). Για Excel: αποθήκευσε ως CSV ή κάνε copy-paste.</p>
-                </div>
+                <CustomInputs
+                  customLink={customLink}
+                  setCustomLink={setCustomLink}
+                  customText={customText}
+                  setCustomText={setCustomText}
+                  customFiles={customFiles}
+                  setCustomFiles={setCustomFiles}
+                />
 
                 <button type="button" onClick={() => generate(selected.id)} className="mt-5 rounded-2xl border border-cyan-300/30 bg-cyan-300/10 px-5 py-2.5 text-sm font-medium text-cyan-100 transition hover:bg-cyan-300/20">
                   ▶ Ανάλυσε σενάρια{(customText || customLink || customFiles.length) ? " (με τα στοιχεία μου)" : ""}
                 </button>
               </div>
+              )
             ) : generating ? (
               <div className="flex min-h-[400px] flex-col items-center justify-center rounded-3xl border border-cyan-300/20 bg-[#0a0f1c] p-8 text-center">
                 <div className="mb-4 flex gap-1.5">
@@ -604,6 +587,99 @@ export default function ScenariosPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+function CustomInputs(props: {
+  customLink: string;
+  setCustomLink: any;
+  customText: string;
+  setCustomText: any;
+  customFiles: { name: string; media_type: string; data: string }[];
+  setCustomFiles: any;
+}): ReactNode {
+  const { customLink, setCustomLink, customText, setCustomText, customFiles, setCustomFiles } = props;
+  return (
+                <div className="mt-5 rounded-2xl border border-[#1a2640] bg-[#0a0f1c]/60 p-4">
+                  <div className="text-[11px] uppercase tracking-wide text-cyan-300/60">Δικά μου στοιχεία (προαιρετικά)</div>
+                  <p className="mt-1 text-[12px] text-zinc-500">Δώσε δική σου δημοσκόπηση/ανάλυση και το σενάριο θα θεμελιωθεί σε αυτά.</p>
+                  <input
+                    type="url"
+                    value={customLink}
+                    onChange={(e) => setCustomLink(e.target.value)}
+                    placeholder="Link ανάλυσης/δημοσκόπησης (π.χ. εφημερίδα)"
+                    className="mt-3 w-full rounded-xl border border-[#243049] bg-[#0c1220] px-3 py-2 text-[13px] text-zinc-200 outline-none placeholder:text-zinc-600 focus:border-cyan-300/40"
+                  />
+                  <textarea
+                    value={customText}
+                    onChange={(e) => setCustomText(e.target.value)}
+                    placeholder="Ή επικόλλησε εδώ τα στοιχεία/ευρήματα (ποσοστά, συμπεράσματα, κείμενο δημοσκόπησης)…"
+                    rows={4}
+                    className="mt-2 w-full rounded-xl border border-[#243049] bg-[#0c1220] px-3 py-2 text-[13px] text-zinc-200 outline-none placeholder:text-zinc-600 focus:border-cyan-300/40"
+                  />
+                  <div className="mt-2 flex items-center gap-3">
+                    <label className="cursor-pointer rounded-lg border border-[#243049] bg-white/[0.03] px-3 py-1.5 text-[11px] text-zinc-300 transition hover:text-zinc-100">
+                      📎 CSV/TXT
+                      <input
+                        type="file"
+                        accept=".csv,.txt,text/csv,text/plain"
+                        className="hidden"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (!f) return;
+                          const reader = new FileReader();
+                          reader.onload = () => {
+                            const txt = String(reader.result || "").slice(0, 8000);
+                            setCustomText((prev) => (prev ? prev + "\n\n" : "") + `[${f.name}]\n` + txt);
+                          };
+                          reader.readAsText(f);
+                        }}
+                      />
+                    </label>
+                    <label className="cursor-pointer rounded-lg border border-[#243049] bg-white/[0.03] px-3 py-1.5 text-[11px] text-zinc-300 transition hover:text-zinc-100">
+                      🖼️ PDF / Εικόνα δημοσκόπησης
+                      <input
+                        type="file"
+                        accept=".pdf,application/pdf,image/png,image/jpeg,image/webp"
+                        multiple
+                        className="hidden"
+                        onChange={(e) => {
+                          const files = Array.from(e.target.files || []);
+                          files.forEach((f: File) => {
+                            if (f.size > 4_000_000) {
+                              alert(`Το «${f.name}» είναι >4MB. Δοκίμασε μικρότερο αρχείο/εικόνα.`);
+                              return;
+                            }
+                            const reader = new FileReader();
+                            reader.onload = () => {
+                              const result = String(reader.result || "");
+                              const base64 = result.includes(",") ? result.split(",")[1] : "";
+                              if (!base64) return;
+                              const mt = f.type || (f.name.toLowerCase().endsWith(".pdf") ? "application/pdf" : "application/octet-stream");
+                              setCustomFiles((prev) => [...prev, { name: f.name, media_type: mt, data: base64 }].slice(0, 3));
+                            };
+                            reader.readAsDataURL(f);
+                          });
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
+                    {(customText || customLink || customFiles.length) ? (
+                      <button type="button" onClick={() => { setCustomText(""); setCustomLink(""); setCustomFiles([]); }} className="text-[11px] text-zinc-500 transition hover:text-zinc-300">Καθαρισμός</button>
+                    ) : null}
+                  </div>
+                  {customFiles.length ? (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {customFiles.map((cf, i) => (
+                        <span key={i} className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-300/20 bg-cyan-300/10 px-2 py-1 text-[11px] text-cyan-100">
+                          {cf.media_type === "application/pdf" ? "📄" : "🖼️"} {cf.name}
+                          <button type="button" onClick={() => setCustomFiles((prev) => prev.filter((_, j) => j !== i))} className="text-cyan-300/60 hover:text-cyan-100">✕</button>
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                  <p className="mt-2 text-[10px] text-zinc-600">Υποστηρίζονται: link, κείμενο, CSV/TXT, και PDF/εικόνα δημοσκόπησης (το AI τα διαβάζει). Για Excel: αποθήκευσε ως CSV ή κάνε copy-paste.</p>
+                </div>
   );
 }
 
