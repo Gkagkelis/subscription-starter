@@ -207,7 +207,8 @@ async function handle(request: Request) {
     }
     const eventId = url.searchParams.get("event_id");
     const partyKey = url.searchParams.get("party") || "elas";
-    if (!eventId) return NextResponse.json({ error: "missing event_id" }, { status: 400 });
+    const standalone = url.searchParams.get("standalone") === "1";
+    if (!eventId && !standalone) return NextResponse.json({ error: "missing event_id" }, { status: 400 });
 
     // ΔΙΚΑ ΣΟΥ ΣΤΟΙΧΕΙΑ (Φάση 1): κείμενο (paste/CSV/TXT) + link
     let customText = "";
@@ -245,26 +246,44 @@ async function handle(request: Request) {
 
     const supabase = svc();
 
-    const { data: ev, error } = await supabase
-      .from("v_political_events_live")
-      .select("*")
-      .eq("id", eventId)
-      .single();
-    if (error || !ev) {
-      return NextResponse.json({ error: "event_not_found", detail: error?.message || null }, { status: 404 });
+    let ev: any = null;
+    if (eventId && !standalone) {
+      const { data: evRow, error } = await supabase
+        .from("v_political_events_live")
+        .select("*")
+        .eq("id", eventId)
+        .single();
+      if (error || !evRow) {
+        return NextResponse.json({ error: "event_not_found", detail: error?.message || null }, { status: 404 });
+      }
+      ev = evRow;
+    } else {
+      ev = {
+        id: null,
+        topic: "Δικά μου δεδομένα",
+        title: "Ανάλυση από δικά μου στοιχεία",
+        summary: "",
+        status: "custom",
+        event_score: null,
+        documentation_level: "custom",
+        article_count: 0,
+        source_count: 0,
+      };
     }
 
     let brief: any = null;
-    try {
-      const { data: pb } = await supabase
-        .from("event_party_briefs")
-        .select("framing_summary,recommended_action,avoid_action,red_team_warning")
-        .eq("event_id", eventId)
-        .eq("party_key", partyKey)
-        .maybeSingle();
-      brief = pb || null;
-    } catch {
-      brief = null;
+    if (eventId && !standalone) {
+      try {
+        const { data: pb } = await supabase
+          .from("event_party_briefs")
+          .select("framing_summary,recommended_action,avoid_action,red_team_warning")
+          .eq("event_id", eventId)
+          .eq("party_key", partyKey)
+          .maybeSingle();
+        brief = pb || null;
+      } catch {
+        brief = null;
+      }
     }
 
     const partyProfile = await loadPartyProfile(supabase, partyKey);
@@ -332,8 +351,8 @@ async function handle(request: Request) {
       );
     }
 
-    // Αποθήκευση σεναρίων στο brief (ώστε να τα ΞΕΡΕΙ ο σύμβουλος-chat) — preserve υπόλοιπο brief
-    try {
+    // Αποθήκευση σεναρίων στο brief (μόνο όταν υπάρχει event) — preserve υπόλοιπο brief
+    if (eventId && !standalone) try {
       const compact = {
         headline: parsed?.situation?.headline || null,
         foresight: Array.isArray(parsed?.foresight)
