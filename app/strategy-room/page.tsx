@@ -2344,16 +2344,14 @@ function ActiveSituationWorkspace({
             </p>
           </div>
 
-          <div className="grid shrink-0 grid-cols-2 gap-3">
+                  <div className="grid shrink-0 grid-cols-2 gap-3">
             <MiniMetric
-              label="Σκορ ατζέντας"
+              label="Noraya Priority"
               value={score ? Math.round(score).toString() : "—"}
             />
             <MiniMetric
-              label="Βαθμός τεκμηρίωσης"
-              value={
-                documentationScore ? `${Math.round(documentationScore)}%` : "—"
-              }
+              label="Τεκμηρίωση"
+              value={documentationLabel(documentationLevel)}
             />
           </div>
         </div>
@@ -2396,7 +2394,17 @@ function ActiveSituationWorkspace({
                 <p className="text-[13px] leading-7 text-zinc-300/95">
                   {readStrategicText(situation, brief)}
                 </p>
-                <Gauge score={documentationScore} label="Βαθμός τεκμηρίωσης" />
+                                <div className="rounded-2xl border border-white/[0.07] bg-black/15 p-4">
+                  <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
+                    Τεκμηρίωση
+                  </div>
+                  <div className="mt-3 text-lg font-semibold text-zinc-100">
+                    {documentationLabel(documentationLevel)}
+                  </div>
+                  <p className="mt-2 text-[11px] leading-5 text-zinc-500">
+                    Στάδιο επιβεβαίωσης πηγών — όχι ψευδοποσοστό.
+                  </p>
+                </div>
               </div>
             </CockpitSection>
 
