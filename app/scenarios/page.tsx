@@ -225,6 +225,7 @@ export default function ScenariosPage() {
   const [errMsg, setErrMsg] = useState<string | null>(null);
   const [customText, setCustomText] = useState("");
   const [customLink, setCustomLink] = useState("");
+  const [customFiles, setCustomFiles] = useState<{ name: string; media_type: string; data: string }[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -277,7 +278,7 @@ export default function ScenariosPage() {
       const r = await fetch(`/api/scenarios?token=dev&party=${encodeURIComponent(party)}&event_id=${encodeURIComponent(id)}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ custom_text: customText, custom_link: customLink }),
+        body: JSON.stringify({ custom_text: customText, custom_link: customLink, custom_files: customFiles }),
         cache: "no-store",
       });
       const j = await r.json();
@@ -405,7 +406,7 @@ export default function ScenariosPage() {
                   />
                   <div className="mt-2 flex items-center gap-3">
                     <label className="cursor-pointer rounded-lg border border-[#243049] bg-white/[0.03] px-3 py-1.5 text-[11px] text-zinc-300 transition hover:text-zinc-100">
-                      📎 Ανέβασε CSV/TXT
+                      📎 CSV/TXT
                       <input
                         type="file"
                         accept=".csv,.txt,text/csv,text/plain"
@@ -422,15 +423,53 @@ export default function ScenariosPage() {
                         }}
                       />
                     </label>
-                    {(customText || customLink) ? (
-                      <button type="button" onClick={() => { setCustomText(""); setCustomLink(""); }} className="text-[11px] text-zinc-500 transition hover:text-zinc-300">Καθαρισμός</button>
+                    <label className="cursor-pointer rounded-lg border border-[#243049] bg-white/[0.03] px-3 py-1.5 text-[11px] text-zinc-300 transition hover:text-zinc-100">
+                      🖼️ PDF / Εικόνα δημοσκόπησης
+                      <input
+                        type="file"
+                        accept=".pdf,application/pdf,image/png,image/jpeg,image/webp"
+                        multiple
+                        className="hidden"
+                        onChange={(e) => {
+                          const files = Array.from(e.target.files || []);
+                          files.forEach((f: File) => {
+                            if (f.size > 4_000_000) {
+                              alert(`Το «${f.name}» είναι >4MB. Δοκίμασε μικρότερο αρχείο/εικόνα.`);
+                              return;
+                            }
+                            const reader = new FileReader();
+                            reader.onload = () => {
+                              const result = String(reader.result || "");
+                              const base64 = result.includes(",") ? result.split(",")[1] : "";
+                              if (!base64) return;
+                              const mt = f.type || (f.name.toLowerCase().endsWith(".pdf") ? "application/pdf" : "application/octet-stream");
+                              setCustomFiles((prev) => [...prev, { name: f.name, media_type: mt, data: base64 }].slice(0, 3));
+                            };
+                            reader.readAsDataURL(f);
+                          });
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
+                    {(customText || customLink || customFiles.length) ? (
+                      <button type="button" onClick={() => { setCustomText(""); setCustomLink(""); setCustomFiles([]); }} className="text-[11px] text-zinc-500 transition hover:text-zinc-300">Καθαρισμός</button>
                     ) : null}
                   </div>
-                  <p className="mt-2 text-[10px] text-zinc-600">PDF/Excel αρχεία & εικόνες δημοσκοπήσεων: έρχονται στη Φάση 2. Προς το παρόν, αντιγραφή-επικόλληση ή CSV/TXT.</p>
+                  {customFiles.length ? (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {customFiles.map((cf, i) => (
+                        <span key={i} className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-300/20 bg-cyan-300/10 px-2 py-1 text-[11px] text-cyan-100">
+                          {cf.media_type === "application/pdf" ? "📄" : "🖼️"} {cf.name}
+                          <button type="button" onClick={() => setCustomFiles((prev) => prev.filter((_, j) => j !== i))} className="text-cyan-300/60 hover:text-cyan-100">✕</button>
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                  <p className="mt-2 text-[10px] text-zinc-600">Υποστηρίζονται: link, κείμενο, CSV/TXT, και PDF/εικόνα δημοσκόπησης (το AI τα διαβάζει). Για Excel: αποθήκευσε ως CSV ή κάνε copy-paste.</p>
                 </div>
 
                 <button type="button" onClick={() => generate(selected.id)} className="mt-5 rounded-2xl border border-cyan-300/30 bg-cyan-300/10 px-5 py-2.5 text-sm font-medium text-cyan-100 transition hover:bg-cyan-300/20">
-                  ▶ Ανάλυσε σενάρια{(customText || customLink) ? " (με τα στοιχεία μου)" : ""}
+                  ▶ Ανάλυσε σενάρια{(customText || customLink || customFiles.length) ? " (με τα στοιχεία μου)" : ""}
                 </button>
               </div>
             ) : generating ? (
