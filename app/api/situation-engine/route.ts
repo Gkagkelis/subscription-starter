@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { computeNorayaPriorityScore } from "@/lib/noraya-priority-score";
 
 export const dynamic = "force-dynamic";
 
@@ -121,6 +122,19 @@ function trendPayload(trend: TrendSignal) {
   };
 }
 
+function realSearchInterestScore(trendInfo: {
+  search_interest_score?: unknown;
+  search_interest_status?: string | null;
+  search_interest_fetched_at?: string | null;
+}) {
+  const status = String(trendInfo.search_interest_status || "").toLowerCase();
+
+  if (!trendInfo.search_interest_fetched_at) return null;
+  if (status.includes("fallback") || status.includes("pending")) return null;
+
+  return trendInfo.search_interest_score ?? null;
+}
+
 function opportunityLabel(score: number, coverageLevel?: string | null) {
   const coverage = String(coverageLevel || "").toLowerCase();
 
@@ -140,6 +154,12 @@ function eventToSituationRow(ev: any, trendMap = new Map<string, TrendSignal>())
   const rawSignal = numberValue(ev.event_score, 0);
   const boost = strategicBoostScore(ev);
   const strategicIndex = strategicIndexScore(rawSignal, trendInfo.search_interest_score, boost);
+  const norayaPriority = computeNorayaPriorityScore({
+    norayaScore: rawSignal,
+    googleTrendsScore: realSearchInterestScore(trendInfo),
+    gdeltScore: null,
+    clientRelevanceScore: null,
+  });
 
   return {
     id: ev.id,
@@ -160,6 +180,16 @@ function eventToSituationRow(ev: any, trendMap = new Map<string, TrendSignal>())
     strategic_boost_score: boost,
     strategic_index_score: strategicIndex,
     strategic_index_label: signalLabel(strategicIndex),
+
+    noraya_priority_score: norayaPriority.score,
+    noraya_priority_raw_score: norayaPriority.rawScore,
+    noraya_priority_route: norayaPriority.route,
+    noraya_priority_status: norayaPriority.status,
+    noraya_priority_cap: norayaPriority.reliabilityCap,
+    noraya_priority_signals: norayaPriority.signals,
+    noraya_priority_routes: norayaPriority.routes,
+    noraya_priority_formula_version: norayaPriority.formulaVersion,
+
     documentation_level: ev.documentation_level,
 
     framing_summary: ev.framing_summary ?? ev.summary ?? null,
@@ -241,6 +271,12 @@ function buildAgendaOverview(agendaRows: any[] = [], eventRows: any[] = [], tren
     });
     const opportunityBonus = trendInfo.search_interest_score >= 65 && String(row?.coverage_level || "").toLowerCase() === "low" ? 5 : 0;
     const strategicIndex = strategicIndexScore(score, trendInfo.search_interest_score, boost, opportunityBonus);
+    const norayaPriority = computeNorayaPriorityScore({
+      norayaScore: score,
+      googleTrendsScore: realSearchInterestScore(trendInfo),
+      gdeltScore: null,
+      clientRelevanceScore: null,
+    });
 
     return {
       id: row?.id ?? topic,
@@ -256,6 +292,16 @@ function buildAgendaOverview(agendaRows: any[] = [], eventRows: any[] = [], tren
       strategic_boost_score: boost,
       strategic_index_score: strategicIndex,
       strategic_index_label: signalLabel(strategicIndex),
+
+      noraya_priority_score: norayaPriority.score,
+      noraya_priority_raw_score: norayaPriority.rawScore,
+      noraya_priority_route: norayaPriority.route,
+      noraya_priority_status: norayaPriority.status,
+      noraya_priority_cap: norayaPriority.reliabilityCap,
+      noraya_priority_signals: norayaPriority.signals,
+      noraya_priority_routes: norayaPriority.routes,
+      noraya_priority_formula_version: norayaPriority.formulaVersion,
+
       strategic_index_components: {
         raw_signal: score,
         search_interest: trendInfo.search_interest_score,
