@@ -48,6 +48,172 @@ function riskMeta(risk: string): { label: string; cls: string } {
   return { label: "Χαμηλό ρίσκο", cls: "text-emerald-200 border-emerald-300/25 bg-emerald-300/10" };
 }
 
+// ---------- EXPORT PDF (designed, branded) ----------
+function escHtml(v: unknown): string {
+  return String(v ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+function pdfPathColor(path: string): string {
+  const p = String(path || "").toLowerCase();
+  if (p === "escalate") return "#dc2626";
+  if (p === "deescalate") return "#059669";
+  if (p === "pivot") return "#d97706";
+  return "#475569";
+}
+function pdfRisk(risk: string): { label: string; bg: string; fg: string } {
+  const r = String(risk || "").toLowerCase();
+  if (r === "high") return { label: "Υψηλό ρίσκο", bg: "#fee2e2", fg: "#b91c1c" };
+  if (r === "medium") return { label: "Μεσαίο ρίσκο", bg: "#fef3c7", fg: "#b45309" };
+  return { label: "Χαμηλό ρίσκο", bg: "#d1fae5", fg: "#047857" };
+}
+
+function exportScenarioPdf(sc: Scenarios, partyLabel: string, title: string) {
+  if (!sc) return;
+  const today = new Date().toLocaleDateString("el-GR", { day: "2-digit", month: "long", year: "numeric" });
+
+  const foresightHtml = (sc.foresight || [])
+    .map((f) => {
+      const c = pdfPathColor(f.path);
+      const prob = Math.max(0, Math.min(100, Math.round(num(f.probability))));
+      const pm = pathMeta(f.path);
+      const signals =
+        Array.isArray(f.signals) && f.signals.length
+          ? `<ul class="sig">${f.signals.map((x) => `<li>${escHtml(x)}</li>`).join("")}</ul>`
+          : "";
+      return `
+      <div class="fc" style="border-left-color:${c}">
+        <div class="fc-top">
+          <span class="fc-label" style="color:${c}">${escHtml(pm.label)}</span>
+          <span class="fc-prob" style="color:${c}">${prob}%</span>
+        </div>
+        <div class="bar"><span style="width:${prob}%;background:${c}"></span></div>
+        ${f.window ? `<div class="win">Παράθυρο: ${escHtml(f.window)}</div>` : ""}
+        <p class="rat">${escHtml(f.rationale)}</p>
+        ${signals}
+      </div>`;
+    })
+    .join("");
+
+  const movesHtml = (sc.moves || [])
+    .map((mv) => {
+      const rk = pdfRisk(mv.risk);
+      const pm = pathMeta(mv.best_for_path);
+      return `
+      <div class="mv">
+        <div class="mv-top">
+          <span class="mv-label">${escHtml(mv.label)}</span>
+          <span class="risk" style="background:${rk.bg};color:${rk.fg}">${rk.label}</span>
+        </div>
+        ${mv.best_for_path ? `<div class="mv-fit">Ταιριάζει αν: <b style="color:${pdfPathColor(mv.best_for_path)}">${escHtml(pm.label)}</b></div>` : ""}
+        ${mv.upside ? `<div class="kv"><span class="k up">Κέρδος</span><span class="v">${escHtml(mv.upside)}</span></div>` : ""}
+        ${mv.downside ? `<div class="kv"><span class="k dn">Κόστος</span><span class="v">${escHtml(mv.downside)}</span></div>` : ""}
+        ${mv.who_gains ? `<div class="kv"><span class="k">Κερδίζει</span><span class="v">${escHtml(mv.who_gains)}</span></div>` : ""}
+        ${mv.who_loses ? `<div class="kv"><span class="k">Χάνει</span><span class="v">${escHtml(mv.who_loses)}</span></div>` : ""}
+        ${mv.opponent_counter ? `<div class="kv"><span class="k">Αντίδραση αντιπάλου</span><span class="v">${escHtml(mv.opponent_counter)}</span></div>` : ""}
+      </div>`;
+    })
+    .join("");
+
+  const watchHtml =
+    Array.isArray(sc.recommendation?.watch) && sc.recommendation.watch.length
+      ? `<div class="watch"><div class="watch-t">Τι να παρακολουθείς</div><ul>${sc.recommendation.watch
+          .map((w) => `<li>${escHtml(w)}</li>`)
+          .join("")}</ul></div>`
+      : "";
+
+  const html = `<!doctype html><html lang="el"><head><meta charset="utf-8">
+<title>${escHtml(title)} — Noraya</title>
+<style>
+@page { size: A4; margin: 15mm 14mm 18mm; }
+* { box-sizing: border-box; }
+html,body { margin:0; padding:0; }
+body { font-family: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif; color:#0c1220; background:#fff;
+  -webkit-print-color-adjust:exact; print-color-adjust:exact; font-size:11px; line-height:1.55; }
+.wrap { max-width: 720px; margin: 0 auto; }
+header { display:flex; align-items:flex-end; justify-content:space-between; border-bottom:2px solid #06b6d4; padding-bottom:10px; }
+.brand { font-size:20px; font-weight:700; letter-spacing:.14em; color:#0c1220; }
+.brand small { display:block; font-size:8px; letter-spacing:.28em; color:#0891b2; font-weight:600; margin-top:2px; }
+.meta { text-align:right; font-size:9px; color:#475569; }
+.meta b { color:#0c1220; font-size:11px; }
+.kicker { text-transform:uppercase; letter-spacing:.18em; font-size:8.5px; color:#0891b2; font-weight:700; margin:18px 0 4px; }
+h1 { font-size:18px; margin:0 0 4px; color:#0c1220; }
+.stand { font-size:11.5px; color:#334155; margin:0 0 4px; }
+.section-t { font-size:12px; font-weight:700; color:#0c1220; margin:20px 0 8px; padding-bottom:4px; border-bottom:1px solid #e2e8f0; }
+.fgrid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+.fc { border:1px solid #e2e8f0; border-left:3px solid #475569; border-radius:8px; padding:9px 10px; background:#f8fafc; page-break-inside:avoid; }
+.fc-top { display:flex; justify-content:space-between; align-items:center; }
+.fc-label { font-weight:700; font-size:11px; }
+.fc-prob { font-weight:700; font-size:13px; }
+.bar { height:5px; border-radius:3px; background:#e2e8f0; margin:6px 0; overflow:hidden; }
+.bar span { display:block; height:100%; }
+.win { font-size:8.5px; color:#64748b; margin-bottom:4px; }
+.rat { font-size:9.5px; color:#334155; margin:4px 0 0; }
+.sig { margin:5px 0 0; padding-left:14px; }
+.sig li { font-size:8.5px; color:#475569; margin-bottom:1px; }
+.connection { background:#f1f5f9; border-radius:8px; padding:11px 13px; font-size:11px; color:#1e293b; }
+.mv { border:1px solid #e2e8f0; border-radius:9px; padding:11px 13px; margin-bottom:9px; page-break-inside:avoid; }
+.mv-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; }
+.mv-label { font-weight:700; font-size:12px; color:#0c1220; }
+.risk { font-size:8px; font-weight:700; padding:2px 8px; border-radius:999px; }
+.mv-fit { font-size:9px; color:#64748b; margin-bottom:6px; }
+.kv { display:flex; gap:8px; margin:3px 0; font-size:9.5px; }
+.kv .k { flex:0 0 92px; font-weight:600; color:#64748b; }
+.kv .k.up { color:#047857; } .kv .k.dn { color:#b91c1c; }
+.kv .v { color:#334155; }
+.rec { background:linear-gradient(180deg,#ecfeff,#fff); border:1.5px solid #06b6d4; border-radius:11px; padding:15px 17px; margin-top:8px; page-break-inside:avoid; }
+.rec-k { text-transform:uppercase; letter-spacing:.16em; font-size:8.5px; color:#0891b2; font-weight:700; }
+.rec-m { font-size:17px; font-weight:700; color:#0c1220; margin:3px 0 5px; }
+.rec-b { font-size:11px; color:#334155; margin:0; }
+.watch { margin-top:10px; }
+.watch-t { font-size:8.5px; color:#0891b2; font-weight:700; }
+.watch ul { margin:4px 0 0; padding-left:15px; }
+.watch li { font-size:9.5px; color:#334155; margin-bottom:2px; }
+footer { margin-top:16px; border-top:1px solid #e2e8f0; padding-top:7px; font-size:8px; color:#94a3b8; display:flex; justify-content:space-between; }
+</style></head>
+<body><div class="wrap">
+  <header>
+    <div class="brand">NORAYA<small>POLITICAL INTELLIGENCE</small></div>
+    <div class="meta"><b>${escHtml(partyLabel)}</b><br>Ανάλυση Σεναρίων<br>${escHtml(today)}</div>
+  </header>
+
+  <div class="kicker">Πού στέκεται</div>
+  <h1>${escHtml(sc.situation?.headline)}</h1>
+  <p class="stand">${escHtml(sc.situation?.where_it_stands)}</p>
+
+  <div class="section-t">Πιθανές εξελίξεις</div>
+  <div class="fgrid">${foresightHtml}</div>
+
+  ${sc.connection ? `<div class="section-t">Ο συλλογισμός</div><div class="connection">${escHtml(sc.connection)}</div>` : ""}
+
+  <div class="section-t">Πιθανές κινήσεις</div>
+  ${movesHtml}
+
+  <div class="section-t">Η σύσταση</div>
+  <div class="rec">
+    <div class="rec-k">Προτεινόμενη κίνηση</div>
+    <div class="rec-m">${escHtml(sc.recommendation?.move_label)}</div>
+    <p class="rec-b">${escHtml(sc.recommendation?.because)}</p>
+    ${watchHtml}
+  </div>
+
+  <footer><span>Noraya — Εμπιστευτικό · Στρατηγική ανάλυση</span><span>${escHtml(today)}</span></footer>
+</div>
+<script>window.onload=function(){setTimeout(function(){window.print();},350);};</script>
+</body></html>`;
+
+  const w = window.open("", "_blank");
+  if (!w) {
+    alert("Επέτρεψε τα pop-ups για να γίνει export σε PDF.");
+    return;
+  }
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
+  w.focus();
+}
+
 export default function ScenariosPage() {
   const [situations, setSituations] = useState<Situation[]>([]);
   const [party, setParty] = useState("elas");
@@ -230,6 +396,16 @@ export default function ScenariosPage() {
               </div>
             ) : scenarios ? (
               <div className="grid gap-5">
+                {/* Export PDF */}
+                <div className="flex items-center justify-end">
+                  <button
+                    type="button"
+                    onClick={() => exportScenarioPdf(scenarios, partyLabel, scenarios.situation?.headline || "Ανάλυση Σεναρίων")}
+                    className="rounded-xl border border-cyan-300/30 bg-cyan-300/10 px-4 py-2 text-xs font-medium text-cyan-100 transition hover:bg-cyan-300/20"
+                  >
+                    ⬇ Export PDF
+                  </button>
+                </div>
                 {/* Where it stands */}
                 <div className="rounded-3xl border border-[#1a2640] bg-gradient-to-b from-[#0d1525] to-[#0a0f1c] p-5" style={{ animation: "scIn .4s ease both" }}>
                   <div className="text-[11px] uppercase tracking-wide text-cyan-300/60">Πού στέκεται</div>
