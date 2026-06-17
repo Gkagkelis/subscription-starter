@@ -1,109 +1,140 @@
-# Noraya Phase 1 — OneScore shadow engine
+export type NullableScore = number | string | null | undefined;
 
-## Αρχή
-Δεν αλλάζουμε live ranking.
-Δεν βάζουμε Apify.
-Δεν βάζουμε GDELT ακόμα.
-Δεν αφαιρούμε UI ακόμα.
-Προσθέτουμε μόνο shadow score στα API payloads.
+export type NorayaPriorityRoute = "media" | "public" | "external";
 
----
+export type NorayaPriorityStatus =
+  | "ranked"
+  | "trigger_only"
+  | "no_signal";
 
-## Αρχείο 1 — νέο αρχείο
-Create new file:
+export type NorayaPriorityInput = {
+  /** Existing Noraya article/event/agenda signal. */
+  norayaScore?: NullableScore;
+  /** Real Google Trends score only. Do not pass fallback/pending 50. */
+  googleTrendsScore?: NullableScore;
+  /** GDELT Greece media-spread score. */
+  gdeltScore?: NullableScore;
+  /** Client/party relevance. Optional until we wire party-specific relevance. */
+  clientRelevanceScore?: NullableScore;
+};
 
-`lib/noraya-priority-score.ts`
+export type NorayaPriorityRouteScore = {
+  route: NorayaPriorityRoute;
+  score: number;
+  inputs: Record<string, number>;
+};
 
-Paste the provided `noraya-priority-score.ts` file.
+export type NorayaPriorityResult = {
+  score: number | null;
+  rawScore: number | null;
+  route: NorayaPriorityRoute | null;
+  status: NorayaPriorityStatus;
+  reliabilityCap: number | null;
+  routes: NorayaPriorityRouteScore[];
+  signals: {
+    noraya: boolean;
+    googleTrends: boolean;
+    gdelt: boolean;
+  };
+  formulaVersion: "noraya-priority-v1-shadow";
+};
 
----
-
-## Αρχείο 2 — modify
-Open:
-
-`app/api/situation-engine/route.ts`
-
-### 1. Add import after the existing imports
-
-```ts
-import { computeNorayaPriorityScore } from "@/lib/noraya-priority-score";
-```
-
-### 2. Add this helper after `function trendPayload(...)`
-
-```ts
-function usableTrendScore(trendInfo: ReturnType<typeof trendPayload>) {
-  const status = String(trendInfo.search_interest_status || "").toLowerCase();
-  if (!trendInfo.search_interest_fetched_at) return null;
-  if (status.includes("fallback") || status.includes("pending")) return null;
-  return trendInfo.search_interest_score;
+function toScore(value: NullableScore): number | null {
+  if (value === null || value === undefined || value === "") return null;
+  const parsed = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(parsed)) return null;
+  return Math.min(100, Math.max(0, Math.round(parsed)));
 }
-```
 
-### 3. In `eventToSituationRow`, after `const strategicIndex = ...`, add:
+function weightedAverage(parts: Array<{ key: string; value: number | null; weight: number }>) {
+  const available = parts.filter((part): part is { key: string; value: number; weight: number } => part.value !== null);
+  const weightSum = available.reduce((sum, part) => sum + part.weight, 0);
+  if (!available.length || weightSum <= 0) return null;
 
-```ts
-  const norayaPriority = computeNorayaPriorityScore({
-    norayaScore: rawSignal,
-    googleTrendsScore: usableTrendScore(trendInfo),
-    gdeltScore: null,
-    clientRelevanceScore: null,
-  });
-```
+  const score = available.reduce((sum, part) => sum + part.value * part.weight, 0) / weightSum;
+  return {
+    score: Math.min(100, Math.max(0, Math.round(score))),
+    inputs: Object.fromEntries(available.map((part) => [part.key, part.value])),
+  };
+}
 
-### 4. In the object returned by `eventToSituationRow`, after `strategic_index_label`, add:
+function reliabilityCap(hasNoraya: boolean, hasGoogleTrends: boolean, hasGdelt: boolean) {
+  if (hasNoraya && hasGoogleTrends && hasGdelt) return 100;
+  if (hasNoraya && hasGoogleTrends) return 90;
+  if (hasNoraya && hasGdelt) return 88;
+  if (hasGoogleTrends && hasGdelt) return 82;
+  if (hasNoraya) return 78;
+  if (hasGdelt) return 70;
+  // Trends-only is deliberately not a ranked item. It should trigger enrichment only.
+  return null;
+}
 
-```ts
-    noraya_priority_score: norayaPriority.score,
-    noraya_priority_route: norayaPriority.route,
-    noraya_priority_status: norayaPriority.status,
-    noraya_priority_components: norayaPriority,
-```
+export function computeNorayaPriorityScore(input: NorayaPriorityInput): NorayaPriorityResult {
+  const noraya = toScore(input.norayaScore);
+  const googleTrends = toScore(input.googleTrendsScore);
+  const gdelt = toScore(input.gdeltScore);
+  const clientRelevance = toScore(input.clientRelevanceScore);
 
-### 5. In `buildAgendaOverview`, after `const strategicIndex = ...`, add:
+  const hasNoraya = noraya !== null;
+  const hasGoogleTrends = googleTrends !== null;
+  const hasGdelt = gdelt !== null;
+  const cap = reliabilityCap(hasNoraya, hasGoogleTrends, hasGdelt);
 
-```ts
-    const norayaPriority = computeNorayaPriorityScore({
-      norayaScore: score,
-      googleTrendsScore: usableTrendScore(trendInfo),
-      gdeltScore: null,
-      clientRelevanceScore: null,
-    });
-```
+  const routes: NorayaPriorityRouteScore[] = [];
 
-### 6. In the agenda overview returned object, after `strategic_index_label`, add:
+  if (hasNoraya) {
+    const media = weightedAverage([
+      { key: "noraya", value: noraya, weight: 0.55 },
+      { key: "googleTrends", value: googleTrends, weight: 0.25 },
+      { key: "gdelt", value: gdelt, weight: 0.20 },
+    ]);
+    if (media) routes.push({ route: "media", score: media.score, inputs: media.inputs });
+  }
 
-```ts
-      noraya_priority_score: norayaPriority.score,
-      noraya_priority_route: norayaPriority.route,
-      noraya_priority_status: norayaPriority.status,
-      noraya_priority_components: norayaPriority,
-```
+  // Public route is allowed only when public interest is attached to at least one real evidence channel.
+  // Google Trends alone remains a trigger, not a ranked political item.
+  if (hasGoogleTrends && (hasNoraya || hasGdelt)) {
+    const publicRoute = weightedAverage([
+      { key: "googleTrends", value: googleTrends, weight: 0.60 },
+      { key: "clientRelevance", value: clientRelevance, weight: 0.25 },
+      { key: "gdelt", value: gdelt, weight: 0.15 },
+    ]);
+    if (publicRoute) routes.push({ route: "public", score: publicRoute.score, inputs: publicRoute.inputs });
+  }
 
----
+  if (hasGdelt) {
+    const external = weightedAverage([
+      { key: "gdelt", value: gdelt, weight: 0.55 },
+      { key: "googleTrends", value: googleTrends, weight: 0.25 },
+      { key: "clientRelevance", value: clientRelevance, weight: 0.20 },
+    ]);
+    if (external) routes.push({ route: "external", score: external.score, inputs: external.inputs });
+  }
 
-## Έλεγχος
+  if (!routes.length || cap === null) {
+    return {
+      score: null,
+      rawScore: null,
+      route: null,
+      status: hasGoogleTrends && !hasNoraya && !hasGdelt ? "trigger_only" : "no_signal",
+      reliabilityCap: cap,
+      routes,
+      signals: { noraya: hasNoraya, googleTrends: hasGoogleTrends, gdelt: hasGdelt },
+      formulaVersion: "noraya-priority-v1-shadow",
+    };
+  }
 
-1. Commit.
-2. Περιμένουμε Vercel Ready.
-3. Ανοίγουμε:
+  const best = routes.reduce((winner, route) => (route.score > winner.score ? route : winner), routes[0]);
+  const finalScore = Math.min(best.score, cap);
 
-`/api/situation-engine?token=dev&party=elas`
-
-4. Σε κάθε situation πρέπει να υπάρχει:
-
-```json
-"noraya_priority_score": 74,
-"noraya_priority_route": "media",
-"noraya_priority_status": "ranked"
-```
-
-5. Το UI δεν πρέπει να έχει αλλάξει ακόμα.
-6. Το live ranking δεν πρέπει να έχει αλλάξει ακόμα.
-
----
-
-## Τι σημαίνει αν δεν υπάρχει Trends/GDELT
-
-Το νέο score πρέπει να ισούται περίπου με το υπάρχον Noraya score, επειδή κάνουμε reweight μόνο στο διαθέσιμο κανάλι.
-Δεν περνάει fake 50.
+  return {
+    score: finalScore,
+    rawScore: best.score,
+    route: best.route,
+    status: "ranked",
+    reliabilityCap: cap,
+    routes,
+    signals: { noraya: hasNoraya, googleTrends: hasGoogleTrends, gdelt: hasGdelt },
+    formulaVersion: "noraya-priority-v1-shadow",
+  };
+}
