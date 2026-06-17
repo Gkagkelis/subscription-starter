@@ -208,6 +208,38 @@ async function handle(request: Request) {
     const partyKey = url.searchParams.get("party") || "elas";
     if (!eventId) return NextResponse.json({ error: "missing event_id" }, { status: 400 });
 
+    // ΔΙΚΑ ΣΟΥ ΣΤΟΙΧΕΙΑ (Φάση 1): κείμενο (paste/CSV/TXT) + link
+    let customText = "";
+    let customLink = "";
+    if (request.method === "POST") {
+      const body: any = await request.json().catch(() => ({}));
+      customText = String(body?.custom_text || "").slice(0, 8000);
+      customLink = String(body?.custom_link || "").trim();
+    }
+    let linkText = "";
+    if (customLink && /^https?:\/\//i.test(customLink)) {
+      try {
+        const lr = await fetch(customLink, { headers: { "User-Agent": "Mozilla/5.0 (compatible; NorayaBot/1.0)" } });
+        const lhtml = await lr.text();
+        linkText = lhtml
+          .replace(/<script[\s\S]*?<\/script>/gi, " ")
+          .replace(/<style[\s\S]*?<\/style>/gi, " ")
+          .replace(/<[^>]+>/g, " ")
+          .replace(/\s+/g, " ")
+          .trim()
+          .slice(0, 6000);
+      } catch {
+        linkText = "";
+      }
+    }
+    const customParts: string[] = [];
+    if (customText) customParts.push("ΚΕΙΜΕΝΟ/ΔΕΔΟΜΕΝΑ ΠΟΥ ΕΔΩΣΕ Ο ΧΡΗΣΤΗΣ:\n" + customText);
+    if (linkText) customParts.push(`ΠΕΡΙΕΧΟΜΕΝΟ ΑΠΟ LINK (${customLink}):\n${linkText}`);
+    const customBlock = customParts.length
+      ? "=== ΔΙΚΑ ΣΟΥ ΣΤΟΙΧΕΙΑ (δημοσκόπηση/ανάλυση που ανέβασε ο χρήστης — ΘΕΜΕΛΙΩΣΕ ΤΟ ΣΕΝΑΡΙΟ ΣΕ ΑΥΤΑ ΚΑΤΑ ΠΡΟΤΕΡΑΙΟΤΗΤΑ· ανάφερε ρητά ότι βασίζεται σε στοιχεία του χρήστη) ===\n" +
+        customParts.join("\n\n")
+      : "";
+
     const supabase = svc();
 
     const { data: ev, error } = await supabase
@@ -254,9 +286,10 @@ async function handle(request: Request) {
     } catch {
       dataContext = "";
     }
-    const userMsgFull = dataContext
-      ? `${userMsg}\n\n=== ΔΕΔΟΜΕΝΑ ΜΝΗΜΗΣ (στήριξε τα σενάρια σε αυτά) ===\nΣΗΜΕΙΩΣΗ: τα διαρθρωτικά/ιστορικά μοτίβα ΔΕΝ είναι σημερινά· οι ΖΩΝΤΑΝΕΣ ΔΗΜΟΣΚΟΠΗΣΕΙΣ είναι τρέχουσες (με ημερομηνία). Μην εφευρίσκεις ποσοστά.\n\n${dataContext}`
-      : userMsg;
+    const memBlock = dataContext
+      ? `=== ΔΕΔΟΜΕΝΑ ΜΝΗΜΗΣ (στήριξε τα σενάρια σε αυτά) ===\nΣΗΜΕΙΩΣΗ: τα διαρθρωτικά/ιστορικά μοτίβα ΔΕΝ είναι σημερινά· οι ΖΩΝΤΑΝΕΣ ΔΗΜΟΣΚΟΠΗΣΕΙΣ είναι τρέχουσες (με ημερομηνία). Μην εφευρίσκεις ποσοστά.\n\n${dataContext}`
+      : "";
+    const userMsgFull = [userMsg, customBlock, memBlock].filter(Boolean).join("\n\n");
 
     const ai = await callAnthropic(system, userMsgFull);
     const parsed = ai.text ? parseAiJson(ai.text) : null;
