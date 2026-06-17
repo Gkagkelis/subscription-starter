@@ -437,8 +437,8 @@ export default function ScenariosPage() {
               </div>
               ) : (
               <div className="rounded-3xl border border-[#1a2640] bg-gradient-to-b from-[#0d1525] to-[#0a0f1c] p-8">
-                <div className="text-[11px] text-zinc-500">{selected.topic}</div>
-                <h2 className="mt-1 text-2xl font-semibold text-zinc-50">{selected.title}</h2>
+                <div className="text-[11px] text-zinc-500">{selected?.topic}</div>
+                <h2 className="mt-1 text-2xl font-semibold text-zinc-50">{selected?.title}</h2>
                 <p className="mt-3 max-w-xl text-sm text-zinc-400">Ο Noraya θα προβλέψει 2-3 πιθανές εξελίξεις και θα προσομοιώσει τις κινήσεις σου, με βάση τα πραγματικά στοιχεία του γεγονότος και το προφίλ σου.</p>
 
                 <CustomInputs
@@ -450,7 +450,7 @@ export default function ScenariosPage() {
                   setCustomFiles={setCustomFiles}
                 />
 
-                <button type="button" onClick={() => generate(selected.id)} className="mt-5 rounded-2xl border border-cyan-300/30 bg-cyan-300/10 px-5 py-2.5 text-sm font-medium text-cyan-100 transition hover:bg-cyan-300/20">
+                <button type="button" onClick={() => selected && generate(selected.id)} className="mt-5 rounded-2xl border border-cyan-300/30 bg-cyan-300/10 px-5 py-2.5 text-sm font-medium text-cyan-100 transition hover:bg-cyan-300/20">
                   ▶ Ανάλυσε σενάρια{(customText || customLink || customFiles.length) ? " (με τα στοιχεία μου)" : ""}
                 </button>
               </div>
