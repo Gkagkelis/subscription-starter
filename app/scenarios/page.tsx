@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode, type Dispatch, type SetStateAction } from "react";
 import Link from "next/link";
 import { IBM_Plex_Sans } from "next/font/google";
 
@@ -592,11 +592,11 @@ export default function ScenariosPage() {
 
 function CustomInputs(props: {
   customLink: string;
-  setCustomLink: any;
+  setCustomLink: Dispatch<SetStateAction<string>>;
   customText: string;
-  setCustomText: any;
+  setCustomText: Dispatch<SetStateAction<string>>;
   customFiles: { name: string; media_type: string; data: string }[];
-  setCustomFiles: any;
+  setCustomFiles: Dispatch<SetStateAction<{ name: string; media_type: string; data: string }[]>>;
 }): ReactNode {
   const { customLink, setCustomLink, customText, setCustomText, customFiles, setCustomFiles } = props;
   return (
