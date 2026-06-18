@@ -170,34 +170,52 @@ export async function GET(request: Request) {
 
   results.sort((a, b) => b.coverage_level - a.coverage_level);
 
-  // 3) Αποθήκευση στο external_topic_signals (source=google_news), εκτός dry_run
+  // 3) Αποθήκευση snapshot στο ΥΠΑΡΧΟΝ analysis_cache (χωρίς νέο πίνακα), εκτός dry_run
   let stored = 0;
   let storeError: string | null = null;
   if (!dryRun) {
     const now = new Date().toISOString();
-    const signalRows = results.map((rr) => ({
-      source: "google_news",
-      topic: rr.topic,
-      window_hours: 48,
-      mention_count: rr.articles_48h,
-      candidate_count: rr.articles_7d,
-      unique_domain_count: rr.sources_48h,
-      coverage_score: rr.coverage_level,
-      sample_status: rr.status,
-      last_checked_at: now,
-      raw_metrics: {
-        articles_48h: rr.articles_48h,
-        articles_7d: rr.articles_7d,
-        sources_48h: rr.sources_48h,
-        momentum: rr.momentum,
+    const topicsMap: Record<string, unknown> = {};
+    for (const rr of results) {
+      topicsMap[rr.topic] = {
         coverage_level: rr.coverage_level,
+        articles_48h: rr.articles_48h,
+        sources_48h: rr.sources_48h,
+        articles_7d: rr.articles_7d,
+        momentum: rr.momentum,
+        status: rr.status,
+      };
+    }
+    const cacheRow = {
+      situation_id: null,
+      organization_id: null,
+      analysis_kind: "news_coverage_v1",
+      input_hash: "global",
+      model_used: "google_news_rss",
+      result: {
+        generated_at: now,
+        source: "google_news",
+        window_hours: 48,
+        topics: topicsMap,
       },
-    }));
-    const { error: upErr } = await supabase
-      .from("external_topic_signals")
-      .upsert(signalRows, { onConflict: "source,topic,window_hours" });
-    if (upErr) storeError = upErr.message;
-    else stored = signalRows.length;
+    };
+    try {
+      // Safety-first: update υπάρχουσας εγγραφής, αλλιώς insert (null situation_id σπάει το onConflict).
+      const { data: updatedRows, error: updErr } = await supabase
+        .from("analysis_cache")
+        .update(cacheRow)
+        .is("situation_id", null)
+        .eq("analysis_kind", "news_coverage_v1")
+        .select("analysis_kind");
+      if (updErr) throw updErr;
+      if (!updatedRows || updatedRows.length === 0) {
+        const { error: insErr } = await supabase.from("analysis_cache").insert(cacheRow);
+        if (insErr) throw insErr;
+      }
+      stored = results.length;
+    } catch (e) {
+      storeError = (e as { message?: string })?.message || String(e);
+    }
   }
 
   const rateLimited = results.filter((r) => r.status === "rate_limited").length;
