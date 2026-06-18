@@ -136,13 +136,23 @@ export async function GET(request: Request) {
       const rr = await fetch(`https://api.apify.com/v2/actor-runs/${st.run_id}`, { headers: auth, cache: "no-store" });
       const jj: any = await rr.json();
       const status = jj?.data?.status ?? "UNKNOWN";
-      if (status !== "SUCCEEDED" && status !== "FAILED") {
-        return NextResponse.json({ ok: true, mode: "collect", status, hint: "Ακόμα τρέχει — περίμενε και ξαναχτύπα." });
-      }
       const datasetId = st.dataset_id || jj?.data?.defaultDatasetId;
+
+      // Διάβασε το dataset ΑΚΟΜΑ ΚΑΙ αν τρέχει (γράφεται ένα-ένα) -> δείξε πρόοδο
       const dr = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?clean=true&format=json`, { headers: auth, cache: "no-store" });
       const items: any = await dr.json();
       const arr = Array.isArray(items) ? items : [];
+
+      if (status !== "SUCCEEDED" && status !== "FAILED") {
+        return NextResponse.json({
+          ok: true,
+          mode: "collect",
+          status,
+          done_so_far: arr.length,
+          of_topics: st.topic_count ?? null,
+          hint: `Ακόμα τρέχει — ${arr.length}/${st.topic_count ?? "?"} θέματα έτοιμα. Περίμενε και ξαναχτύπα collect.`,
+        });
+      }
 
       const topics = await activeTopics(maxTopics);
       const queryToTopic = new Map<string, string>();
