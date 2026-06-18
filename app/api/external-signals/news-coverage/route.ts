@@ -100,9 +100,9 @@ async function fetchTopicCoverage(topic: string): Promise<TopicCoverage> {
       }
     }
 
-    // Επίπεδο "τώρα" (48h): όγκος + ποικιλία πηγών
-    const volComp = Math.min(100, (a48 / 30) * 100); // ~30 άρθρα/48h = κορεσμός
-    const divComp = Math.min(100, (src48.size / 15) * 100); // ~15 πηγές = κορεσμός
+    // Επίπεδο "τώρα" (48h): όγκος + ποικιλία πηγών — καλιμπραρισμένο σε πραγματικά δεδομένα
+    const volComp = Math.min(100, (a48 / 70) * 100); // ~70 άρθρα/48h = κορεσμός (μόνο τα κυρίαρχα θέματα)
+    const divComp = Math.min(100, (src48.size / 40) * 100); // ~40 πηγές = κορεσμός
     const coverageLevel = Math.round(0.6 * volComp + 0.4 * divComp);
 
     // Ορμή: ρυθμός 48h vs προηγούμενες 5 ημέρες
