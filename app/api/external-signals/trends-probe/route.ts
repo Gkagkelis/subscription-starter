@@ -10,7 +10,8 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
 );
 
-const ACTOR = "steadyfetch~google-trends-scraper";
+// API-based actor (no browser) — πιο αξιόπιστος στα 429.
+const ACTOR = "signalbench~google-trends-scraper";
 const STATE_KEY = "trends_probe_state";
 
 async function saveState(obj: Record<string, unknown>) {
@@ -19,7 +20,7 @@ async function saveState(obj: Record<string, unknown>) {
     organization_id: null,
     analysis_kind: STATE_KEY,
     input_hash: "global",
-    model_used: "apify_trends",
+    model_used: "apify_trends_signalbench",
     result: obj,
   };
   const { data: upd } = await supabase
@@ -59,15 +60,15 @@ export async function GET(request: Request) {
   const auth = { Authorization: `Bearer ${apifyToken}` };
   const mode = url.searchParams.get("mode") || "start";
 
-  // ---------- START: ξεκινάει το run, επιστρέφει αμέσως ----------
+  // ---------- START ----------
   if (mode === "start") {
     const q = (url.searchParams.get("q") || "Στέγαση").replace(/\s*\/\s*/g, " ").trim();
     const input = {
       searchTerms: [q],
       geo: "GR",
       timeRange: url.searchParams.get("range") || "today 1-m",
-      compare: false,
-      includeTrendingNow: false,
+      includeInterestOverTime: true,
+      includeRelatedQueries: true,
     };
     try {
       const r = await fetch(`https://api.apify.com/v2/acts/${ACTOR}/runs`, {
@@ -88,10 +89,11 @@ export async function GET(request: Request) {
       return NextResponse.json({
         ok: true,
         mode: "start",
+        actor: ACTOR,
         run_id: runId,
         dataset_id: datasetId,
         query: q,
-        next: "Περίμενε ~2 λεπτά και χτύπα το ίδιο link με ?mode=collect",
+        next: "Περίμενε ~1-2 λεπτά και χτύπα το ίδιο link με ?mode=collect",
       });
     } catch (err) {
       const e = err as { message?: string };
@@ -99,7 +101,7 @@ export async function GET(request: Request) {
     }
   }
 
-  // ---------- COLLECT: διαβάζει το αποτέλεσμα όταν είναι έτοιμο ----------
+  // ---------- COLLECT ----------
   if (mode === "collect") {
     const st = await loadState();
     if (!st?.run_id) {
@@ -109,18 +111,13 @@ export async function GET(request: Request) {
       const rr = await fetch(`https://api.apify.com/v2/actor-runs/${st.run_id}`, { headers: auth, cache: "no-store" });
       const jj: any = await rr.json();
       const status = jj?.data?.status ?? "UNKNOWN";
-      if (status !== "SUCCEEDED") {
+      if (status !== "SUCCEEDED" && status !== "FAILED") {
         return NextResponse.json({
-          ok: true,
-          mode: "collect",
-          status,
-          query: st.query,
-          hint:
-            status === "RUNNING" || status === "READY"
-              ? "Ακόμα τρέχει — περίμενε λίγο ακόμα και ξαναχτύπα collect."
-              : "Το run δεν πέτυχε. Ξανατρέξε start.",
+          ok: true, mode: "collect", status, query: st.query,
+          hint: "Ακόμα τρέχει — περίμενε λίγο ακόμα και ξαναχτύπα collect.",
         });
       }
+
       const datasetId = st.dataset_id || jj?.data?.defaultDatasetId;
       const dr = await fetch(
         `https://api.apify.com/v2/datasets/${datasetId}/items?clean=true&format=json`,
@@ -129,57 +126,28 @@ export async function GET(request: Request) {
       const items: any = await dr.json();
       const arr = Array.isArray(items) ? items : [];
 
-      // Διαγνωστικό αν είναι άδειο (δωρεάν — διαβάζει log + ERRORS του ίδιου run)
       if (arr.length === 0) {
+        // Διαγνωστικό (δωρεάν) αν άδειο/απέτυχε
         const runData = jj?.data || {};
         let logTail: string | null = null;
-        let errorsRecord: unknown = null;
         try {
           const lr = await fetch(`https://api.apify.com/v2/actor-runs/${st.run_id}/log`, { headers: auth, cache: "no-store" });
-          if (lr.ok) {
-            const lt = await lr.text();
-            logTail = lt.slice(-1500);
-          }
+          if (lr.ok) logTail = (await lr.text()).slice(-1500);
         } catch { logTail = "log_fetch_failed"; }
-        const kvId = runData?.defaultKeyValueStoreId;
-        if (kvId) {
-          try {
-            const er = await fetch(`https://api.apify.com/v2/key-value-stores/${kvId}/records/ERRORS`, { headers: auth, cache: "no-store" });
-            if (er.ok) {
-              const et = await er.text();
-              try { errorsRecord = JSON.parse(et); } catch { errorsRecord = et.slice(0, 800); }
-            } else {
-              errorsRecord = `no_ERRORS_record (http ${er.status})`;
-            }
-          } catch { errorsRecord = "errors_fetch_failed"; }
-        }
         return NextResponse.json({
-          ok: true,
-          mode: "collect",
-          status,
-          query: st.query,
-          item_count: 0,
-          diagnostic: {
-            run_stats: runData?.stats ?? null,
-            exit_code: runData?.exitCode ?? null,
-            dataset_id: datasetId,
-            errors_record: errorsRecord,
-            log_tail: logTail,
-          },
-          note: "Άδειο dataset — δες diagnostic.errors_record και diagnostic.log_tail για τον λόγο.",
+          ok: true, mode: "collect", status, query: st.query, item_count: 0,
+          diagnostic: { run_stats: runData?.stats ?? null, exit_code: runData?.exitCode ?? null, log_tail: logTail },
+          note: "Άδειο — δες diagnostic.log_tail (πιθανόν 429 σε ώρα αιχμής).",
         });
       }
 
-      const iot = arr.find((x: any) => x?.surface === "interestOverTime");
-      const rel = arr.find((x: any) => x?.surface === "relatedQueries");
-      const points: any[] = Array.isArray(iot?.data?.points) ? iot.data.points : [];
-      const latest = points.length ? points[points.length - 1]?.value ?? null : null;
-      const avg = points.length
-        ? Math.round(points.reduce((s, p) => s + (Number(p?.value) || 0), 0) / points.length)
-        : null;
-      const rising = (Array.isArray(rel?.data?.rising) ? rel.data.rising : [])
+      const it = arr[0] || {};
+      const iot: any[] = Array.isArray(it?.interestOverTime) ? it.interestOverTime : [];
+      const latest = iot.length ? iot[iot.length - 1]?.value ?? null : null;
+      const avg = it?.averageInterest ?? null;
+      const rising = (Array.isArray(it?.relatedQueries?.rising) ? it.relatedQueries.rising : [])
         .slice(0, 6)
-        .map((x: any) => ({ query: x?.query, growth: x?.formattedValue ?? x?.value }));
+        .map((x: any) => ({ query: x?.label ?? x?.query, growth: x?.formattedValue ?? x?.value }));
 
       return NextResponse.json({
         ok: true,
@@ -187,12 +155,12 @@ export async function GET(request: Request) {
         status,
         query: st.query,
         item_count: arr.length,
-        surfaces: arr.map((x: any) => x?.surface),
-        interest_points: points.length,
         latest_interest: latest,
         avg_interest: avg,
+        peak_date: it?.peakDate ?? null,
+        interest_points: iot.length,
         rising_queries: rising,
-        raw_sample: arr.slice(0, 2),
+        raw_sample: arr.slice(0, 1),
       });
     } catch (err) {
       const e = err as { message?: string };
