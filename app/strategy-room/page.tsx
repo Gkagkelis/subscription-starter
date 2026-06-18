@@ -1050,23 +1050,23 @@ function redTeamItems(value: unknown) {
     );
 }
 
-function confidenceFromDocLevel(level?: string | null, fallbackScore = 0) {
-  const normalized = String(level || "").toLowerCase();
-  if (
-    normalized.includes("strong") ||
-    normalized.includes("high") ||
-    normalized.includes("ισχυ")
-  )
-    return Math.max(fallbackScore, 76);
-  if (normalized.includes("medium") || normalized.includes("μεσα"))
-    return Math.max(fallbackScore, 56);
-  if (
-    normalized.includes("initial") ||
-    normalized.includes("low") ||
-    normalized.includes("αρχ")
-  )
-    return Math.max(fallbackScore, 34);
-  return fallbackScore;
+// ΠΡΑΓΜΑΤΙΚΗ τεκμηρίωση από πλήθος άρθρων/πηγών (όχι καρφωτό 34).
+// Ευθυγραμμισμένο με τα κατώφλια: ~5 ανεξάρτητες πηγές & ~8 άρθρα = ισχυρή.
+function evidenceConfidenceScore(articleCount: number, sourceCount: number) {
+  const a = Math.max(0, numberValue(articleCount, 0));
+  const s = Math.max(0, numberValue(sourceCount, 0));
+  const sourceComp = Math.min(100, (s / 5) * 100); // οι ανεξάρτητες πηγές μετράνε περισσότερο
+  const articleComp = Math.min(100, (a / 8) * 100); // ο όγκος άρθρων
+  const score = 0.6 * sourceComp + 0.4 * articleComp;
+  return Math.round(Math.min(100, Math.max(0, score)));
+}
+
+function docLabelFromScore(score?: number | null) {
+  const sc = numberValue(score, 0);
+  if (sc >= 65) return "Ισχυρή τεκμηρίωση";
+  if (sc >= 35) return "Μεσαία τεκμηρίωση";
+  if (sc > 0) return "Αρχική τεκμηρίωση";
+  return "Χωρίς τεκμηρίωση";
 }
 
 export default function StrategyRoomPage() {
@@ -1356,9 +1356,9 @@ export default function StrategyRoomPage() {
     issue.documentation_level ||
     evidence.documentation_level ||
     null;
-  const activeDocScore = confidenceFromDocLevel(
-    activeDocLevel,
-    numberValue(activeSituation?.confidence_score, 0),
+  const activeDocScore = evidenceConfidenceScore(
+    numberValue(activeSituation?.article_count, 0),
+    numberValue(activeSituation?.source_count, 0),
   );
 
   const evidenceArticles = activeEvidenceArticles.length
@@ -2333,7 +2333,7 @@ function ActiveSituationWorkspace({
                 {riskLabel(urgency)}
               </StatusChip>
               <StatusChip className={docToneClass(documentationLevel)}>
-                {documentationLabel(documentationLevel)}
+                {docLabelFromScore(documentationScore)}
               </StatusChip>
             </div>
             <h1 className="max-w-[760px] text-[1.35rem] font-semibold leading-[1.22] tracking-[-0.03em] text-zinc-50 xl:text-[1.65rem]">
@@ -2351,7 +2351,7 @@ function ActiveSituationWorkspace({
             />
             <MiniMetric
               label="Τεκμηρίωση"
-              value={documentationLabel(documentationLevel)}
+              value={docLabelFromScore(documentationScore)}
             />
           </div>
         </div>
@@ -2399,7 +2399,7 @@ function ActiveSituationWorkspace({
                     Τεκμηρίωση
                   </div>
                   <div className="mt-3 text-lg font-semibold text-zinc-100">
-                    {documentationLabel(documentationLevel)}
+                    {docLabelFromScore(documentationScore)}
                   </div>
                   <p className="mt-2 text-[11px] leading-5 text-zinc-500">
                     Στάδιο επιβεβαίωσης πηγών — όχι ψευδοποσοστό.
@@ -3211,7 +3211,7 @@ function RightInspector({
             {readWhyText(situation, brief)}
           </p>
           <div className="mt-3 text-[10px] leading-5 text-zinc-500">
-            Τεκμηρίωση: {documentationLabel(documentationLevel)}
+            Τεκμηρίωση: {docLabelFromScore(evidenceConfidenceScore(inspectorArticleCount, inspectorSourceCount))}
           </div>
         </InspectorPanel>
 
@@ -3377,7 +3377,7 @@ function RightInspector({
             />
             <SummaryLine
               label="Βαθμός τεκμηρίωσης"
-              value={documentationLabel(documentationLevel)}
+              value={docLabelFromScore(evidenceConfidenceScore(inspectorArticleCount, inspectorSourceCount))}
             />
           </div>
         </InspectorPanel>
