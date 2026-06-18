@@ -151,7 +151,7 @@ function articleKey(article: EvidenceArticle, fallback: string) {
   return String(article.article_id || article.url || `${article.source || "source"}-${article.title || fallback}`);
 }
 
-function eventToSituationRow(ev: any, trendMap = new Map<string, TrendSignal>(), coverageMap = new Map<string, number>()) {
+function eventToSituationRow(ev: any, trendMap = new Map<string, TrendSignal>(), coverageMap = new Map<string, number>(), trendsMap = new Map<string, number>()) {
   const trend = trendForTopic(trendMap, ev.topic);
   const trendInfo = trendPayload(trend);
   const rawSignal = numberValue(ev.event_score, 0);
@@ -159,7 +159,7 @@ function eventToSituationRow(ev: any, trendMap = new Map<string, TrendSignal>(),
   const strategicIndex = strategicIndexScore(rawSignal, trendInfo.search_interest_score, boost);
   const norayaPriority = computeNorayaPriorityScore({
     norayaScore: rawSignal,
-    googleTrendsScore: realSearchInterestScore(trendInfo),
+    googleTrendsScore: trendsMap.get(String(ev.topic || "").trim()) ?? realSearchInterestScore(trendInfo),
     gdeltScore: coverageMap.get(String(ev.topic || "").trim()) ?? null,
     clientRelevanceScore: null,
   });
@@ -216,7 +216,7 @@ function eventToSituationRow(ev: any, trendMap = new Map<string, TrendSignal>(),
   };
 }
 
-function buildAgendaOverview(agendaRows: any[] = [], eventRows: any[] = [], trendMap = new Map<string, TrendSignal>(), coverageMap = new Map<string, number>()) {
+function buildAgendaOverview(agendaRows: any[] = [], eventRows: any[] = [], trendMap = new Map<string, TrendSignal>(), coverageMap = new Map<string, number>(), trendsMap = new Map<string, number>()) {
   const eventsByTopic = new Map<string, any[]>();
 
   for (const ev of eventRows || []) {
@@ -276,7 +276,7 @@ function buildAgendaOverview(agendaRows: any[] = [], eventRows: any[] = [], tren
     const strategicIndex = strategicIndexScore(score, trendInfo.search_interest_score, boost, opportunityBonus);
     const norayaPriority = computeNorayaPriorityScore({
       norayaScore: score,
-      googleTrendsScore: realSearchInterestScore(trendInfo),
+      googleTrendsScore: trendsMap.get(topic) ?? realSearchInterestScore(trendInfo),
       gdeltScore: coverageMap.get(topic) ?? null,
       clientRelevanceScore: null,
     });
@@ -410,6 +410,26 @@ export async function GET(req: Request) {
     }
   }
 
+  // Google Trends (Στρώση Γ, best-effort): analysis_cache -> topic -> trends_score (0-100)
+  const trendsMap = new Map<string, number>();
+  const { data: trendsRows } = await supabase
+    .from("analysis_cache")
+    .select("result")
+    .is("situation_id", null)
+    .eq("analysis_kind", "trends_v1")
+    .limit(1);
+  const trendsTopics =
+    Array.isArray(trendsRows) && trendsRows[0] && (trendsRows[0] as any).result
+      ? (trendsRows[0] as any).result.topics
+      : null;
+  if (trendsTopics && typeof trendsTopics === "object") {
+    for (const [t, v] of Object.entries(trendsTopics as Record<string, any>)) {
+      const key = String(t || "").trim();
+      const sc = numberValue((v as any)?.trends_score, -1);
+      if (key && sc >= 0) trendsMap.set(key, sc);
+    }
+  }
+
   const allEventRows = !eventError && Array.isArray(eventRows) ? eventRows : [];
   // ΒΗΜΑ 1 — ΦΙΛΤΡΟ (gate): μόνο ΦΡΕΣΚΑ θέματα (≤48 ώρες, βάσει ημερομηνίας πιο πρόσφατου άρθρου).
   //          Η φρεσκάδα ΔΕΝ είναι κριτήριο σημαντικότητας — μόνο "ποιος μπαίνει στο γήπεδο".
@@ -426,7 +446,7 @@ export async function GET(req: Request) {
     .sort((a, b) => numberValue((b as any).event_score, 0) - numberValue((a as any).event_score, 0))
     .slice(0, 25);
   const agendaOverview = !agendaError && Array.isArray(agendaRows)
-    ? buildAgendaOverview(agendaRows, safeEventRows, trendMap, coverageMap)
+    ? buildAgendaOverview(agendaRows, safeEventRows, trendMap, coverageMap, trendsMap)
     : [];
 
   // Δρόμος Β: ανάλυση ΑΝΑ ΚΟΜΜΑ — φέρε το brief του ενεργού κόμματος και μπόλιασέ το στα γεγονότα.
@@ -459,7 +479,7 @@ export async function GET(req: Request) {
   }
 
   if (!eventError && safeEventRows.length > 0) {
-    const situations = safeEventRows.map((ev) => eventToSituationRow(ev, trendMap, coverageMap));
+    const situations = safeEventRows.map((ev) => eventToSituationRow(ev, trendMap, coverageMap, trendsMap));
     return NextResponse.json({
       success: true,
       timestamp: new Date().toISOString(),
