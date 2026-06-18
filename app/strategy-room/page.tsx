@@ -201,6 +201,7 @@ type LiveSituationRow = {
   documentation_basis?: string | null;
   agenda_score?: number | string | null;
   priority_score?: number | string | null;
+  noraya_priority_score?: number | string | null;
   raw_signal_score?: number | string | null;
   search_interest_score?: number | string | null;
   search_interest_status?: string | null;
@@ -656,7 +657,8 @@ function situationScore(situation?: LiveSituationRow | null, fallback = 0) {
   if (!situation) return fallback;
   return clamp(
     numberValue(
-      situation.priority_score ??
+      situation.noraya_priority_score ??
+        situation.priority_score ??
         situation.agenda_score ??
         situation.confidence_score,
       fallback,
