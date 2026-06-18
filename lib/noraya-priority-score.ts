@@ -12,7 +12,7 @@ export type NorayaPriorityInput = {
   norayaScore?: NullableScore;
   /** Real Google Trends score only. Do not pass fallback/pending 50. */
   googleTrendsScore?: NullableScore;
-  /** GDELT Greece media-spread score. */
+  /** Media coverage score (Google News coverage_level 0-100). */
   gdeltScore?: NullableScore;
   /** Client/party relevance. Optional until we wire party-specific relevance. */
   clientRelevanceScore?: NullableScore;
@@ -84,9 +84,9 @@ export function computeNorayaPriorityScore(input: NorayaPriorityInput): NorayaPr
 
   if (hasNoraya) {
     const media = weightedAverage([
-      { key: "noraya", value: noraya, weight: 0.55 },
-      { key: "googleTrends", value: googleTrends, weight: 0.25 },
-      { key: "gdelt", value: gdelt, weight: 0.20 },
+      { key: "noraya", value: noraya, weight: 0.40 },
+      { key: "googleTrends", value: googleTrends, weight: 0.30 },
+      { key: "gdelt", value: gdelt, weight: 0.30 },
     ]);
     if (media) routes.push({ route: "media", score: media.score, inputs: media.inputs });
   }
