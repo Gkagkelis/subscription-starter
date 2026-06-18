@@ -128,6 +128,48 @@ export async function GET(request: Request) {
       );
       const items: any = await dr.json();
       const arr = Array.isArray(items) ? items : [];
+
+      // Διαγνωστικό αν είναι άδειο (δωρεάν — διαβάζει log + ERRORS του ίδιου run)
+      if (arr.length === 0) {
+        const runData = jj?.data || {};
+        let logTail: string | null = null;
+        let errorsRecord: unknown = null;
+        try {
+          const lr = await fetch(`https://api.apify.com/v2/actor-runs/${st.run_id}/log`, { headers: auth, cache: "no-store" });
+          if (lr.ok) {
+            const lt = await lr.text();
+            logTail = lt.slice(-1500);
+          }
+        } catch { logTail = "log_fetch_failed"; }
+        const kvId = runData?.defaultKeyValueStoreId;
+        if (kvId) {
+          try {
+            const er = await fetch(`https://api.apify.com/v2/key-value-stores/${kvId}/records/ERRORS`, { headers: auth, cache: "no-store" });
+            if (er.ok) {
+              const et = await er.text();
+              try { errorsRecord = JSON.parse(et); } catch { errorsRecord = et.slice(0, 800); }
+            } else {
+              errorsRecord = `no_ERRORS_record (http ${er.status})`;
+            }
+          } catch { errorsRecord = "errors_fetch_failed"; }
+        }
+        return NextResponse.json({
+          ok: true,
+          mode: "collect",
+          status,
+          query: st.query,
+          item_count: 0,
+          diagnostic: {
+            run_stats: runData?.stats ?? null,
+            exit_code: runData?.exitCode ?? null,
+            dataset_id: datasetId,
+            errors_record: errorsRecord,
+            log_tail: logTail,
+          },
+          note: "Άδειο dataset — δες diagnostic.errors_record και diagnostic.log_tail για τον λόγο.",
+        });
+      }
+
       const iot = arr.find((x: any) => x?.surface === "interestOverTime");
       const rel = arr.find((x: any) => x?.surface === "relatedQueries");
       const points: any[] = Array.isArray(iot?.data?.points) ? iot.data.points : [];
