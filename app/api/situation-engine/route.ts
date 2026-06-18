@@ -151,7 +151,7 @@ function articleKey(article: EvidenceArticle, fallback: string) {
   return String(article.article_id || article.url || `${article.source || "source"}-${article.title || fallback}`);
 }
 
-function eventToSituationRow(ev: any, trendMap = new Map<string, TrendSignal>()) {
+function eventToSituationRow(ev: any, trendMap = new Map<string, TrendSignal>(), coverageMap = new Map<string, number>()) {
   const trend = trendForTopic(trendMap, ev.topic);
   const trendInfo = trendPayload(trend);
   const rawSignal = numberValue(ev.event_score, 0);
@@ -160,7 +160,7 @@ function eventToSituationRow(ev: any, trendMap = new Map<string, TrendSignal>())
   const norayaPriority = computeNorayaPriorityScore({
     norayaScore: rawSignal,
     googleTrendsScore: realSearchInterestScore(trendInfo),
-    gdeltScore: null,
+    gdeltScore: coverageMap.get(String(ev.topic || "").trim()) ?? null,
     clientRelevanceScore: null,
   });
 
@@ -216,7 +216,7 @@ function eventToSituationRow(ev: any, trendMap = new Map<string, TrendSignal>())
   };
 }
 
-function buildAgendaOverview(agendaRows: any[] = [], eventRows: any[] = [], trendMap = new Map<string, TrendSignal>()) {
+function buildAgendaOverview(agendaRows: any[] = [], eventRows: any[] = [], trendMap = new Map<string, TrendSignal>(), coverageMap = new Map<string, number>()) {
   const eventsByTopic = new Map<string, any[]>();
 
   for (const ev of eventRows || []) {
@@ -277,7 +277,7 @@ function buildAgendaOverview(agendaRows: any[] = [], eventRows: any[] = [], tren
     const norayaPriority = computeNorayaPriorityScore({
       norayaScore: score,
       googleTrendsScore: realSearchInterestScore(trendInfo),
-      gdeltScore: null,
+      gdeltScore: coverageMap.get(topic) ?? null,
       clientRelevanceScore: null,
     });
 
@@ -390,6 +390,26 @@ export async function GET(req: Request) {
     }
   }
 
+  // Google News coverage (Στρώση Β): analysis_cache -> topic -> coverage_level (0-100)
+  const coverageMap = new Map<string, number>();
+  const { data: coverageRows } = await supabase
+    .from("analysis_cache")
+    .select("result")
+    .is("situation_id", null)
+    .eq("analysis_kind", "news_coverage_v1")
+    .limit(1);
+  const coverageTopics =
+    Array.isArray(coverageRows) && coverageRows[0] && (coverageRows[0] as any).result
+      ? (coverageRows[0] as any).result.topics
+      : null;
+  if (coverageTopics && typeof coverageTopics === "object") {
+    for (const [t, v] of Object.entries(coverageTopics as Record<string, any>)) {
+      const key = String(t || "").trim();
+      const lvl = numberValue((v as any)?.coverage_level, -1);
+      if (key && lvl >= 0) coverageMap.set(key, lvl);
+    }
+  }
+
   const allEventRows = !eventError && Array.isArray(eventRows) ? eventRows : [];
   // ΒΗΜΑ 1 — ΦΙΛΤΡΟ (gate): μόνο ΦΡΕΣΚΑ θέματα (≤48 ώρες, βάσει ημερομηνίας πιο πρόσφατου άρθρου).
   //          Η φρεσκάδα ΔΕΝ είναι κριτήριο σημαντικότητας — μόνο "ποιος μπαίνει στο γήπεδο".
@@ -406,7 +426,7 @@ export async function GET(req: Request) {
     .sort((a, b) => numberValue((b as any).event_score, 0) - numberValue((a as any).event_score, 0))
     .slice(0, 25);
   const agendaOverview = !agendaError && Array.isArray(agendaRows)
-    ? buildAgendaOverview(agendaRows, safeEventRows, trendMap)
+    ? buildAgendaOverview(agendaRows, safeEventRows, trendMap, coverageMap)
     : [];
 
   // Δρόμος Β: ανάλυση ΑΝΑ ΚΟΜΜΑ — φέρε το brief του ενεργού κόμματος και μπόλιασέ το στα γεγονότα.
@@ -439,7 +459,7 @@ export async function GET(req: Request) {
   }
 
   if (!eventError && safeEventRows.length > 0) {
-    const situations = safeEventRows.map((ev) => eventToSituationRow(ev, trendMap));
+    const situations = safeEventRows.map((ev) => eventToSituationRow(ev, trendMap, coverageMap));
     return NextResponse.json({
       success: true,
       timestamp: new Date().toISOString(),
