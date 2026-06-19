@@ -1084,7 +1084,7 @@ export default function StrategyRoomPage() {
     null,
   );
   const [analyzingId, setAnalyzingId] = useState<string | null>(null);
-  const requestedBriefRef = useRef<Set<string>>(new Set());
+  const requestedBriefRef = useRef<Map<string, number>>(new Map());
   const [activeTab, setActiveTab] = useState<SituationTab>("strategic");
   const [activeOverviewTopic, setActiveOverviewTopic] = useState<string | null>(
     null,
@@ -1269,10 +1269,16 @@ export default function StrategyRoomPage() {
   // Α: On-demand ανάλυση — αν το επιλεγμένο γεγονός δεν έχει ακόμη άποψη, ζήτα την τώρα (cached μετά).
   useEffect(() => {
     if (!activeSituation) return;
-    if ((activeSituation as any).advisor_brief) return;
+    if (analyzingId) return;
+    const ab = (activeSituation as any).advisor_brief;
+    const hasScenarios =
+      ab && Array.isArray(ab.scenarios) && ab.scenarios.length > 0;
+    if (hasScenarios) return;
     const id = String((activeSituation as any).id || "");
-    if (!id || requestedBriefRef.current.has(id)) return;
-    requestedBriefRef.current.add(id);
+    if (!id) return;
+    const tries = requestedBriefRef.current.get(id) || 0;
+    if (tries >= 2) return;
+    requestedBriefRef.current.set(id, tries + 1);
     const party = (data as any)?.profile?.party_key || "elas";
     setAnalyzingId(id);
     (async () => {
@@ -1288,12 +1294,12 @@ export default function StrategyRoomPage() {
         if (r.ok)
           setSituationEngine((await r.json()) as SituationEngineResponse);
       } catch {
-        // αφήνουμε το id σημειωμένο ώστε να μη μπει σε loop· retry με reload
+        requestedBriefRef.current.set(id, tries);
       } finally {
         setAnalyzingId((cur) => (cur === id ? null : cur));
       }
     })();
-  }, [activeSituation, data]);
+  }, [activeSituation, data, analyzingId]);
 
   // Το brief έρχεται ΜΟΝΟ από την ανάλυση ΤΟΥ ΕΠΙΛΕΓΜΕΝΟΥ ΓΕΓΟΝΟΤΟΣ.
   // ΠΟΤΕ δεν πέφτουμε στο global strategy-brief: θα έδειχνε περιεχόμενο ΑΛΛΟΥ θέματος
