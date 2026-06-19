@@ -202,6 +202,8 @@ type LiveSituationRow = {
   agenda_score?: number | string | null;
   priority_score?: number | string | null;
   noraya_priority_score?: number | string | null;
+  news_coverage_level?: number | string | null;
+  google_trends_score?: number | string | null;
   raw_signal_score?: number | string | null;
   search_interest_score?: number | string | null;
   search_interest_status?: string | null;
@@ -2516,9 +2518,12 @@ function ActiveSituationWorkspace({
                 <Gauge
                   score={clamp(
                     numberValue(
-                      situation?.article_count,
-                      agenda[0]?.article_count || 0,
-                    ) * 8,
+                      situation?.news_coverage_level,
+                      numberValue(
+                        situation?.article_count,
+                        agenda[0]?.article_count || 0,
+                      ) * 8,
+                    ),
                   )}
                   label="Media ένταση"
                   small
@@ -2526,11 +2531,14 @@ function ActiveSituationWorkspace({
                 <Gauge
                   score={clamp(
                     numberValue(
-                      situation?.source_count,
-                      agenda[0]?.source_count || 0,
-                    ) * 15,
+                      situation?.google_trends_score,
+                      numberValue(
+                        situation?.source_count,
+                        agenda[0]?.source_count || 0,
+                      ) * 15,
+                    ),
                   )}
-                  label="Social ένταση"
+                  label="Δημόσια αναζήτηση"
                   small
                 />
                 <Gauge
