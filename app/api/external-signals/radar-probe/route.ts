@@ -32,14 +32,14 @@ function keywords(s: string): Set<string> {
   return new Set(
     String(s || "")
       .toLowerCase()
-      .replace(/[^\p{L}\s]/gu, " ")
+      .replace(/[^a-zA-Z\u0370-\u03ff\u1f00-\u1fff\s]/g, " ")
       .split(/\s+/)
       .filter((w) => w.length >= 4 && !STOP.has(w)),
   );
 }
 function overlap(a: Set<string>, b: Set<string>): number {
   let n = 0;
-  for (const w of a) if (b.has(w)) n++;
+  a.forEach((w) => { if (b.has(w)) n++; });
   return n;
 }
 
@@ -105,7 +105,7 @@ export async function GET(request: Request) {
       if (overlap(kw, c.kw) >= 2) {
         c.titles.push(h.title);
         if (h.source) c.sources.add(h.source);
-        for (const w of kw) c.kw.add(w);
+        kw.forEach((w) => c.kw.add(w));
         placed = true;
         break;
       }
