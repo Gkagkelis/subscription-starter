@@ -150,7 +150,7 @@ function buildLiveAgenda(events: any[], trends: any[]) {
   const monitoringEvents: any[] = [];
   const grouped = groupEventsByTopic(events);
 
-  for (const [topic, topicEvents] of grouped.entries()) {
+  for (const [topic, topicEvents] of Array.from(grouped.entries())) {
     const sortedEvents = [...topicEvents].sort(
       (a, b) => toNumber(b?.event_score) - toNumber(a?.event_score)
     );
