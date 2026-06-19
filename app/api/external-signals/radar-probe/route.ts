@@ -37,6 +37,11 @@ function keywords(s: string): Set<string> {
       .filter((w) => w.length >= 4 && !STOP.has(w)),
   );
 }
+function distinctive(s: string, topicWords: Set<string>): Set<string> {
+  const kw = keywords(s);
+  topicWords.forEach((w) => kw.delete(w));
+  return kw;
+}
 function overlap(a: Set<string>, b: Set<string>): number {
   let n = 0;
   a.forEach((w) => { if (b.has(w)) n++; });
@@ -50,6 +55,7 @@ export async function GET(request: Request) {
   }
   const topic = (url.searchParams.get("topic") || "Οικονομία").trim();
   const q = topic.replace(/\s*\/\s*/g, " ").trim();
+  const topicWords = keywords(topic);
 
   // 1) Τίτλοι γεγονότων ΑΤΖΕΝΤΑΣ για αυτό το θέμα
   const { data: events } = await supabase
@@ -60,7 +66,7 @@ export async function GET(request: Request) {
     .filter((e: any) => String(e?.topic || "").trim() === topic)
     .map((e: any) => String(e?.title || "").trim())
     .filter(Boolean);
-  const agendaKW = agendaTitles.map((t) => keywords(t));
+  const agendaKW = agendaTitles.map((t) => distinctive(t, topicWords));
 
   // 2) Τίτλοι Google News για το θέμα (τελευταίες ~72h)
   const feedUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(q)}&hl=el&gl=GR&ceid=GR:el`;
@@ -90,7 +96,7 @@ export async function GET(request: Request) {
 
   // 3) Ποιοι τίτλοι News ΔΕΝ ταιριάζουν με κανένα γεγονός ατζέντας
   const unmatched = headlines.filter((h) => {
-    const kw = keywords(h.title);
+    const kw = distinctive(h.title, topicWords);
     if (kw.size === 0) return false;
     return !agendaKW.some((ek) => overlap(kw, ek) >= 2);
   });
@@ -99,7 +105,7 @@ export async function GET(request: Request) {
   type Cluster = { rep: string; sources: Set<string>; titles: string[]; kw: Set<string> };
   const clusters: Cluster[] = [];
   for (const h of unmatched) {
-    const kw = keywords(h.title);
+    const kw = distinctive(h.title, topicWords);
     let placed = false;
     for (const c of clusters) {
       if (overlap(kw, c.kw) >= 2) {
