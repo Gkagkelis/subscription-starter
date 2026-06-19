@@ -192,6 +192,8 @@ function eventToSituationRow(ev: any, trendMap = new Map<string, TrendSignal>(),
     noraya_priority_signals: norayaPriority.signals,
     noraya_priority_routes: norayaPriority.routes,
     noraya_priority_formula_version: norayaPriority.formulaVersion,
+    news_coverage_level: coverageMap.get(String(ev.topic || "").trim()) ?? null,
+    google_trends_score: trendsMap.get(String(ev.topic || "").trim()) ?? null,
 
     documentation_level: ev.documentation_level,
 
@@ -304,6 +306,8 @@ function buildAgendaOverview(agendaRows: any[] = [], eventRows: any[] = [], tren
       noraya_priority_signals: norayaPriority.signals,
       noraya_priority_routes: norayaPriority.routes,
       noraya_priority_formula_version: norayaPriority.formulaVersion,
+      news_coverage_level: coverageMap.get(topic) ?? null,
+      google_trends_score: trendsMap.get(topic) ?? null,
 
       strategic_index_components: {
         raw_signal: score,
