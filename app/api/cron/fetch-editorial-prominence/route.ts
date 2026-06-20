@@ -5,27 +5,32 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
 
-type EditorialSource = {
+type FrontpageSource = {
   key: string;
   name: string;
-  homepageUrl: string;
-  host: string;
-  defaultSurface: string;
+  aliases: string[];
+  category: "political" | "economic";
+  baseScore: number;
+  priority: number;
 };
 
-type ExtractedArticle = {
+type FrontpageItem = {
   sourceKey: string;
   sourceName: string;
+  category: "political" | "economic";
   sourceUrl: string;
-  surface: string;
-  section: string | null;
-  articleUrl: string;
+  surface: "frontpage";
+  section: "political" | "economic";
+  frontpageUrl: string;
+  imageUrl: string | null;
+  rawLabel: string;
   articleTitle: string;
   position: number;
   positionLabel: string;
+  sourceBaseScore: number;
 };
 
-type ClassifiedArticle = ExtractedArticle & {
+type ClassifiedFrontpageItem = FrontpageItem & {
   parentTopic: string | null;
   microAgenda: string | null;
   microAgendaId: string | null;
@@ -43,57 +48,199 @@ type MicroAgendaRule = {
   priority?: number;
 };
 
-const MODE = "fetch_editorial_prominence_homepage_v1";
+const MODE = "fetch_editorial_prominence_frontpages_v2";
 const TARGET_TABLE = "editorial_prominence_signals";
-const DEFAULT_SOURCE_LIMIT = 4;
-const DEFAULT_ARTICLE_LIMIT = 40;
-const MAX_SOURCE_LIMIT = 8;
-const MAX_ARTICLE_LIMIT = 120;
-const FETCH_TIMEOUT_MS = 12000;
+const SOURCE_URL = "https://www.frontpages.gr/";
+const DEFAULT_LIMIT = 30;
+const MAX_LIMIT = 80;
+const FETCH_TIMEOUT_MS = 15000;
 
-const SOURCES: EditorialSource[] = [
+const ALLOWED_FRONTPAGE_SOURCES: FrontpageSource[] = [
+  {
+    key: "kathimerini",
+    name: "Η Καθημερινή",
+    aliases: ["η καθημερινη", "καθημερινη"],
+    category: "political",
+    baseScore: 96,
+    priority: 100,
+  },
   {
     key: "tanea",
     name: "Τα Νέα",
-    homepageUrl: "https://www.tanea.gr/",
-    host: "tanea.gr",
-    defaultSurface: "homepage",
+    aliases: ["τα νεα"],
+    category: "political",
+    baseScore: 94,
+    priority: 98,
   },
   {
-    key: "tovima",
-    name: "Το Βήμα",
-    homepageUrl: "https://www.tovima.gr/",
-    host: "tovima.gr",
-    defaultSurface: "homepage",
-  },
-  {
-    key: "kathimerini",
-    name: "Καθημερινή",
-    homepageUrl: "https://www.kathimerini.gr/",
-    host: "kathimerini.gr",
-    defaultSurface: "homepage",
+    key: "apogevmatini",
+    name: "Απογευματινή",
+    aliases: ["απογευματινη"],
+    category: "political",
+    baseScore: 91,
+    priority: 92,
   },
   {
     key: "efsyn",
-    name: "Εφ.Συν.",
-    homepageUrl: "https://www.efsyn.gr/",
-    host: "efsyn.gr",
-    defaultSurface: "homepage",
+    name: "Η Εφημερίδα των Συντακτών",
+    aliases: ["η εφημεριδα των συντακτων", "εφημεριδα των συντακτων", "εφ συν", "εφ.συν"],
+    category: "political",
+    baseScore: 90,
+    priority: 90,
   },
   {
-    key: "newsbeast",
-    name: "Newsbeast",
-    homepageUrl: "https://www.newsbeast.gr/",
-    host: "newsbeast.gr",
-    defaultSurface: "homepage",
+    key: "rizospastis",
+    name: "Ριζοσπάστης",
+    aliases: ["ριζοσπαστης"],
+    category: "political",
+    baseScore: 88,
+    priority: 86,
   },
   {
-    key: "avgi",
-    name: "Αυγή",
-    homepageUrl: "https://www.avgi.gr/",
-    host: "avgi.gr",
-    defaultSurface: "homepage",
+    key: "eleftheros_typos",
+    name: "Ελεύθερος Τύπος",
+    aliases: ["ελευθερος τυπος"],
+    category: "political",
+    baseScore: 88,
+    priority: 86,
   },
+  {
+    key: "kontra_news",
+    name: "Kontra News",
+    aliases: ["kontra news"],
+    category: "political",
+    baseScore: 84,
+    priority: 76,
+  },
+  {
+    key: "estia",
+    name: "Εστία",
+    aliases: ["εστια"],
+    category: "political",
+    baseScore: 84,
+    priority: 76,
+  },
+  {
+    key: "parapolitika",
+    name: "Παραπολιτικά",
+    aliases: ["παραπολιτικα"],
+    category: "political",
+    baseScore: 83,
+    priority: 74,
+  },
+  {
+    key: "political",
+    name: "Political",
+    aliases: ["political"],
+    category: "political",
+    baseScore: 82,
+    priority: 72,
+  },
+  {
+    key: "dimokratia",
+    name: "Δημοκρατία",
+    aliases: ["δημοκρατια"],
+    category: "political",
+    baseScore: 82,
+    priority: 72,
+  },
+  {
+    key: "dromos_aristeras",
+    name: "Δρόμος της Αριστεράς",
+    aliases: ["δρομος της αριστερας"],
+    category: "political",
+    baseScore: 80,
+    priority: 68,
+  },
+  {
+    key: "prin",
+    name: "Πριν",
+    aliases: ["πριν"],
+    category: "political",
+    baseScore: 78,
+    priority: 64,
+  },
+  {
+    key: "epoxi",
+    name: "Η Εποχή",
+    aliases: ["η εποχη", "εποχη"],
+    category: "political",
+    baseScore: 78,
+    priority: 64,
+  },
+  {
+    key: "karfi",
+    name: "Στο Καρφί",
+    aliases: ["στο καρφι"],
+    category: "political",
+    baseScore: 76,
+    priority: 60,
+  },
+  {
+    key: "logos",
+    name: "Ο Λόγος",
+    aliases: ["ο λογος"],
+    category: "political",
+    baseScore: 74,
+    priority: 58,
+  },
+  {
+    key: "apopsi",
+    name: "Άποψη",
+    aliases: ["αποψη"],
+    category: "political",
+    baseScore: 74,
+    priority: 56,
+  },
+  {
+    key: "naftemporiki",
+    name: "Η Ναυτεμπορική",
+    aliases: ["η ναυτεμπορικη", "ναυτεμπορικη"],
+    category: "economic",
+    baseScore: 92,
+    priority: 95,
+  },
+  {
+    key: "kefalaio",
+    name: "Κεφάλαιο",
+    aliases: ["κεφαλαιο"],
+    category: "economic",
+    baseScore: 84,
+    priority: 72,
+  },
+  {
+    key: "axia",
+    name: "Η Αξία",
+    aliases: ["η αξια", "αξια"],
+    category: "economic",
+    baseScore: 82,
+    priority: 70,
+  },
+  {
+    key: "agrenda",
+    name: "Agrenda",
+    aliases: ["agrenda"],
+    category: "economic",
+    baseScore: 80,
+    priority: 68,
+  },
+];
+
+const BLOCKED_SOURCE_ALIASES = [
+  "espresso",
+  "star press",
+  "on time",
+  "sport day",
+  "πρωταθλητης",
+  "φως",
+  "η ωρα των σπορ",
+  "live sport",
+  "forza",
+  "metrosport",
+  "δικεφαλος",
+  "εφημερις δημοπρασιων",
+  "ηχω των δημοπρασιων",
+  "γενικη δημοπρασιων",
 ];
 
 const MICRO_AGENDA_RULES: MicroAgendaRule[] = [
@@ -101,35 +248,35 @@ const MICRO_AGENDA_RULES: MicroAgendaRule[] = [
     id: "housing_rents",
     label: "Στέγαση / ενοίκια",
     parent: "Στέγαση",
-    keywords: ["στεγασ", "ενοικ", "ενοικια", "κατοικια", "ακινητα", "πρωτη κατοικια"],
-    priority: 20,
+    keywords: ["στεγασ", "στεγαστικ", "ενοικ", "ενοικια", "πλαφον", "κατοικια", "ακινητα", "τραπεζες", "δανεια", "φθηνα στεγαστικα"],
+    priority: 30,
   },
   {
     id: "housing_renovation_programs",
     label: "Προγράμματα κατοικίας / ανακαινίσεις",
     parent: "Στέγαση",
     keywords: ["ανακαινιζω", "ανακαινισ", "προγραμμα κατοικιας", "επιδότηση ανακαίνισης", "επιδοτηση ανακαινισης"],
-    priority: 45,
+    priority: 35,
   },
   {
     id: "taxation_public_revenue",
     label: "Φορολογία / δημόσια έσοδα",
     parent: "Φορολογία",
-    keywords: ["φορο", "φορολογ", "ααδε", "ενφια", "φπα", "τεκμηρι", "δηλωσεις"],
-    priority: 20,
+    keywords: ["φορο", "φορολογ", "ααδε", "ενφια", "φπα", "τεκμηρι", "δηλωσεις", "εσοδα", "τελων", "παρατασ"],
+    priority: 25,
   },
   {
     id: "debt_settlement_installments",
     label: "Ρύθμιση οφειλών / δόσεις",
     parent: "Φορολογία",
-    keywords: ["ρυθμιση οφειλων", "οφειλετ", "72 δοσεις", "72 δοσεισ", "χρεη", "εφορια", "δοσεις", "δοσεισ"],
-    priority: 45,
+    keywords: ["ρυθμιση οφειλων", "οφειλετ", "72 δοσεις", "χρεη", "εφορια", "δοσεις", "κοκκινα δανεια", "πλειστηριασ"],
+    priority: 35,
   },
   {
     id: "energy_prices_grid",
     label: "Ενέργεια / τιμές ρεύματος",
     parent: "Ενέργεια",
-    keywords: ["ενεργεια", "ρευμα", "τιμες ρευματος", "λογαριασμοι", "ηλεκτρικο", "πετρελαιο", "φυσικο αεριο"],
+    keywords: ["ενεργεια", "ρευμα", "τιμες ρευματος", "λογαριασμοι", "ηλεκτρικο", "πετρελαιο", "φυσικο αεριο", "καυσιμ"],
     priority: 25,
   },
   {
@@ -143,86 +290,79 @@ const MICRO_AGENDA_RULES: MicroAgendaRule[] = [
     id: "farmers_rural_production",
     label: "Αγροτικά / παραγωγή / επιδοτήσεις",
     parent: "Αγροτικά",
-    keywords: ["αγροτ", "αγροτες", "καλλιεργ", "ελγα", "οπεκεπε", "επιδοτησεις", "πρωτογενης τομεας"],
+    keywords: ["αγροτ", "αγροτες", "καλλιεργ", "ελγα", "οπεκεπε", "επιδοτησεις", "πρωτογενης τομεας", "παραγωγ"],
     priority: 25,
   },
   {
     id: "wildfire_prevention",
     label: "Πυροπροστασία / καθαρισμοί οικοπέδων",
     parent: "Πολιτική προστασία",
-    keywords: ["πυροπροστασ", "καθαρισμ", "οικοπεδ", "πυρκαγ", "φωτια", "πολιτικη προστασια", "προστίμα οικοπέδων", "προστιμα οικοπεδων"],
-    priority: 40,
+    keywords: ["πυροπροστασ", "καθαρισμ", "οικοπεδ", "πυρκαγ", "φωτια", "πυρινο", "112", "εκκενωση", "πολιτικη προστασια"],
+    priority: 35,
   },
   {
     id: "consumer_price_tools",
     label: "Ακρίβεια / σύγκριση τιμών / εργαλεία καταναλωτή",
     parent: "Ακρίβεια / κόστος ζωής",
-    keywords: ["ακριβεια", "posokanei", "ποσο κανει", "συγκριση τιμων", "καλαθι", "τιμες"],
-    priority: 35,
+    keywords: ["ακριβεια", "posokanei", "ποσο κανει", "συγκριση τιμων", "καλαθι", "τιμες", "σουπερ μαρκετ", "τροφίμων", "τροφίμα"],
+    priority: 25,
   },
   {
     id: "social_benefits_support",
     label: "Επιδόματα / κοινωνική στήριξη",
     parent: "Ακρίβεια / κόστος ζωής",
-    keywords: ["επιδομα", "επιδοματα", "κοινωνικα", "δικαιουχ", "θερμανσης", "στήριξη", "στηριξη"],
-    priority: 30,
+    keywords: ["επιδομα", "επιδοματα", "κοινωνικα", "δικαιουχ", "θερμανσης", "στήριξη", "στηριξη", "συνταξ", "συνταξεις"],
+    priority: 25,
   },
   {
     id: "defense_technology_drones",
     label: "Άμυνα / drones / τεχνολογία",
     parent: "Άμυνα",
-    keywords: ["αμυνα", "αμυντικ", "drones", "drone", "οπλικ", "ενοπλες δυναμεις", "εξοπλισ"],
-    priority: 35,
+    keywords: ["αμυνα", "αμυντικ", "drones", "drone", "οπλικ", "ενοπλες δυναμεις", "εξοπλισ", "στρατο"],
+    priority: 25,
   },
   {
     id: "hormuz_geopolitical_risk",
     label: "Ορμούζ / γεωπολιτικό ρίσκο",
     parent: "Διεθνή / γεωπολιτική",
-    keywords: ["ορμουζ", "ιραν", "ισραηλ", "περσικος", "γεωπολιτικ", "πετρελαιο", "κυρωσεις"],
-    priority: 45,
+    keywords: ["ορμουζ", "ιραν", "ισραηλ", "περσικος", "γεωπολιτικ", "πετρελαιο", "κυρωσεις", "ηπα", "λιβανο", "χεζμπολαχ", "πολεμο"],
+    priority: 35,
+  },
+  {
+    id: "elections_political_timing",
+    label: "Εκλογές / πολιτικός χρόνος",
+    parent: "Πολιτικό σύστημα",
+    keywords: ["εκλογ", "καλπη", "υποψηφ", "κομμα", "κυβερνηση", "αντιπολιτευση", "δημοσκοπ", "μεταρρυθμ"],
+    priority: 25,
   },
   {
     id: "demographic_crisis",
     label: "Δημογραφικό / γήρανση πληθυσμού",
     parent: "Νεολαία",
     keywords: ["δημογραφ", "γεννησεις", "γεννησ", "γηρανση", "πληθυσμ", "συρρικνωση"],
-    priority: 30,
+    priority: 25,
   },
   {
     id: "schools_education",
     label: "Σχολεία / εκπαίδευση",
     parent: "Παιδεία",
-    keywords: ["σχολ", "εκπαιδευ", "μαθητ", "πανελλην", "παιδεια", "πανεπιστημ", "φοιτητ"],
-    priority: 20,
+    keywords: ["σχολ", "εκπαιδευ", "μαθητ", "πανελλην", "παιδεια", "πανεπιστημ", "φοιτητ", "αει"],
+    priority: 25,
   },
   {
     id: "nhs_hospitals",
     label: "Νοσοκομεία / ΕΣΥ",
     parent: "Υγεία",
     keywords: ["νοσοκομ", "εσυ", "υγεια", "γιατρο", "ασθεν", "φαρμακ", "κλινικ"],
-    priority: 20,
+    priority: 25,
   },
   {
     id: "wages_labor_rights",
     label: "Μισθοί / εργασιακά δικαιώματα",
     parent: "Εργασία",
-    keywords: ["μισθ", "εργασια", "εργασιακ", "κατωτατος", "συλλογικες συμβασεις", "απεργ"],
-    priority: 20,
+    keywords: ["μισθ", "εργασια", "εργασιακ", "κατωτατος", "συλλογικες συμβασεις", "απεργ", "λεφτα"],
+    priority: 25,
   },
-];
-
-const SECTION_HINTS = [
-  "politics",
-  "economy",
-  "finance",
-  "greece",
-  "world",
-  "diplomatia",
-  "society",
-  "politiki",
-  "oikonomia",
-  "kosmos",
-  "ellada",
 ];
 
 const supabase = createClient(
@@ -251,7 +391,7 @@ function normalizeText(value: unknown): string {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/ς/g, "σ")
-    .replace(/[^a-z0-9α-ω\s/-]/gi, " ")
+    .replace(/[^a-z0-9α-ω\s./:_-]/gi, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -285,49 +425,30 @@ function stripTags(value: string): string {
     .trim();
 }
 
+function getAttr(attrs: string, attrName: string): string | null {
+  const regex = new RegExp(`${attrName}\\s*=\\s*["']([^"']+)["']`, "i");
+  const match = attrs.match(regex);
+  return match?.[1] ? decodeHtml(match[1]).trim() : null;
+}
+
 function isAuthorized(request: Request): boolean {
   const url = new URL(request.url);
   const token = url.searchParams.get("token") || "";
   const auth = request.headers.get("authorization") || "";
   const cronHeader = request.headers.get("x-vercel-cron") || "";
+
   const devAllowed = process.env.ALLOW_DEV_PROBE_TOKEN === "true" && token === "dev";
   const cronSecret = process.env.CRON_SECRET || process.env.EDITORIAL_PROMINENCE_CRON_SECRET || "";
   const bearerAllowed = !!cronSecret && auth === `Bearer ${cronSecret}`;
   const vercelCronAllowed = process.env.ALLOW_VERCEL_CRON_HEADER === "true" && cronHeader === "1";
+
   return devAllowed || bearerAllowed || vercelCronAllowed;
 }
 
-function sourceSelection(searchParams: URLSearchParams): EditorialSource[] {
-  const requested = String(searchParams.get("sources") || "")
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-
-  if (requested.length) {
-    const byKey = new Map(SOURCES.map((source) => [source.key, source]));
-    return requested.map((key) => byKey.get(key)).filter(Boolean).slice(0, MAX_SOURCE_LIMIT) as EditorialSource[];
-  }
-
-  const sourceLimit = parseIntParam(searchParams.get("source_limit"), DEFAULT_SOURCE_LIMIT, 1, MAX_SOURCE_LIMIT);
-  return SOURCES.slice(0, sourceLimit);
-}
-
-function isLikelyArticleUrl(url: URL): boolean {
-  const path = url.pathname.toLocaleLowerCase("el-GR");
-  if (!path || path === "/") return false;
-  if (path.includes("/tag/") || path.includes("/author/") || path.includes("/category/")) return false;
-  if (path.includes("/wp-content/") || path.includes("/cdn-cgi/")) return false;
-  if (path.endsWith(".jpg") || path.endsWith(".png") || path.endsWith(".webp") || path.endsWith(".svg")) return false;
-
-  const hasDatePath = /\/20\d{2}\//.test(path);
-  const hasArticleWords = ["arthro", "article", "eidiseis", "politics", "economy", "finance", "greece", "world", "politiki", "oikonomia", "kosmos", "ellada"].some((part) => path.includes(part));
-  const longSlug = path.split("/").filter(Boolean).some((part) => part.length >= 18 && part.includes("-"));
-  return hasDatePath || hasArticleWords || longSlug;
-}
-
-function canonicalizeUrl(rawHref: string, baseUrl: string): string | null {
+function canonicalizeUrl(rawHref: string | null, baseUrl: string): string | null {
   try {
-    if (!rawHref || rawHref.startsWith("#") || rawHref.startsWith("mailto:") || rawHref.startsWith("tel:") || rawHref.startsWith("javascript:")) return null;
+    if (!rawHref) return null;
+    if (rawHref.startsWith("#") || rawHref.startsWith("mailto:") || rawHref.startsWith("tel:") || rawHref.startsWith("javascript:")) return null;
     const url = new URL(rawHref, baseUrl);
     url.hash = "";
     for (const key of Array.from(url.searchParams.keys())) {
@@ -340,80 +461,86 @@ function canonicalizeUrl(rawHref: string, baseUrl: string): string | null {
   }
 }
 
-function sectionFromUrl(articleUrl: string): string | null {
-  try {
-    const parts = new URL(articleUrl).pathname.split("/").filter(Boolean);
-    for (const part of parts) {
-      const normalized = normalizeText(part);
-      if (SECTION_HINTS.includes(normalized)) return part;
-    }
-    return parts[0] || null;
-  } catch {
-    return null;
-  }
+function isBlockedLabel(label: string): boolean {
+  const normalized = normalizeText(label);
+  return BLOCKED_SOURCE_ALIASES.some((blocked) => normalized.includes(normalizeText(blocked)));
 }
 
-function extractArticlesFromHtml(source: EditorialSource, html: string, perSourceLimit: number): ExtractedArticle[] {
-  const anchorRegex = /<a\s+[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
-  const seen = new Set<string>();
-  const articles: ExtractedArticle[] = [];
-  let match: RegExpExecArray | null;
+function stripFrontpagePrefix(label: string): string {
+  return decodeHtml(label)
+    .replace(/^image:\s*/i, "")
+    .replace(/^πρωτοσέλιδο\s+εφημερίδας\s+/i, "")
+    .replace(/^πρωτοσελιδο\s+εφημεριδας\s+/i, "")
+    .replace(/^πρωτοσέλιδο\s+/i, "")
+    .replace(/^πρωτοσελιδο\s+/i, "")
+    .replace(/\s+-\s+protoselida\s*$/i, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
 
-  while ((match = anchorRegex.exec(html)) && articles.length < perSourceLimit * 4) {
-    const href = match[1];
-    const inner = match[2] || "";
-    const articleUrl = canonicalizeUrl(href, source.homepageUrl);
-    if (!articleUrl) continue;
+function sourceForLabel(label: string): FrontpageSource | null {
+  if (isBlockedLabel(label)) return null;
 
-    let parsed: URL;
-    try {
-      parsed = new URL(articleUrl);
-    } catch {
-      continue;
+  const cleaned = normalizeText(stripFrontpagePrefix(label));
+  const sortedSources = [...ALLOWED_FRONTPAGE_SOURCES].sort((a, b) => b.priority - a.priority);
+
+  for (const source of sortedSources) {
+    for (const alias of source.aliases) {
+      const normalizedAlias = normalizeText(alias);
+      if (!normalizedAlias) continue;
+
+      if (
+        cleaned === normalizedAlias ||
+        cleaned.startsWith(`${normalizedAlias}:`) ||
+        cleaned.startsWith(`${normalizedAlias} `) ||
+        cleaned.includes(` ${normalizedAlias}:`)
+      ) {
+        return source;
+      }
     }
-
-    if (!parsed.hostname.includes(source.host)) continue;
-    if (!isLikelyArticleUrl(parsed)) continue;
-
-    const title = stripTags(inner);
-    const normalizedTitle = normalizeText(title);
-    if (title.length < 20 || normalizedTitle.length < 15) continue;
-    if (/^(menu|search|login|συνδεση|διαφημιση|newsletter)$/i.test(normalizedTitle)) continue;
-
-    const key = articleUrl;
-    if (seen.has(key)) continue;
-    seen.add(key);
-
-    const position = articles.length + 1;
-    articles.push({
-      sourceKey: source.key,
-      sourceName: source.name,
-      sourceUrl: source.homepageUrl,
-      surface: source.defaultSurface,
-      section: sectionFromUrl(articleUrl),
-      articleUrl,
-      articleTitle: title,
-      position,
-      positionLabel: `${source.defaultSurface}_${position}`,
-    });
   }
 
-  return articles.slice(0, perSourceLimit);
+  return null;
+}
+
+function headlineForLabel(label: string, source: FrontpageSource): string {
+  const cleaned = stripFrontpagePrefix(label);
+  const colonIndex = cleaned.indexOf(":");
+
+  if (colonIndex > -1) {
+    const left = normalizeText(cleaned.slice(0, colonIndex));
+    const sourceMatchesLeft = source.aliases.some((alias) => left.includes(normalizeText(alias)));
+    if (sourceMatchesLeft) {
+      const headline = cleaned.slice(colonIndex + 1).trim();
+      if (headline.length >= 4) return headline;
+    }
+  }
+
+  const withoutSource = source.aliases.reduce((acc, alias) => {
+    const pattern = new RegExp(`^${alias.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*:?\\s*`, "i");
+    return acc.replace(pattern, "");
+  }, cleaned);
+
+  const fallback = withoutSource.replace(/\s+-\s+protoselida\s*$/i, "").trim();
+  if (fallback && normalizeText(fallback) !== normalizeText(source.name)) return fallback;
+
+  return `Πρωτοσέλιδο: ${source.name}`;
 }
 
 function keywordMatchScore(text: string, keyword: string): number {
   const normalizedKeyword = normalizeText(keyword);
   if (!normalizedKeyword) return 0;
-  if (text === normalizedKeyword) return 10;
+  if (text === normalizedKeyword) return 12;
   if (text.includes(normalizedKeyword)) {
-    const words = normalizedKeyword.split(" ").length;
-    return words > 1 ? 8 + words : 5;
+    const words = normalizedKeyword.split(" ").filter(Boolean).length;
+    return words > 1 ? 9 + words : 6;
   }
   return 0;
 }
 
-function classifyArticle(article: ExtractedArticle): ClassifiedArticle {
-  const text = normalizeText(`${article.articleTitle} ${article.articleUrl}`);
+function classifyFrontpageItem(item: FrontpageItem): ClassifiedFrontpageItem {
+  const text = normalizeText(`${item.sourceName} ${item.articleTitle} ${item.rawLabel} ${item.frontpageUrl}`);
+
   let best: { rule: MicroAgendaRule; score: number; matches: string[] } | null = null;
 
   for (const rule of MICRO_AGENDA_RULES) {
@@ -432,26 +559,27 @@ function classifyArticle(article: ExtractedArticle): ClassifiedArticle {
     if (!best || score > best.score) best = { rule, score, matches };
   }
 
-  const baseProminence = clamp(88 - (article.position - 1) * 5, 20, 88);
-
   if (!best) {
     return {
-      ...article,
+      ...item,
       parentTopic: null,
       microAgenda: null,
       microAgendaId: null,
       classifierConfidence: 0,
       matchedKeywords: [],
       classifierScore: 0,
-      prominenceScore: baseProminence,
+      prominenceScore: clamp(item.sourceBaseScore - Math.max(0, item.position - 1) * 2, 35, 100),
     };
   }
 
   const classifierConfidence = clamp(best.score * 4, 35, 100);
-  const prominenceScore = clamp(baseProminence + Math.min(12, Math.floor(classifierConfidence / 12)), 0, 100);
+  const sourcePositionScore = item.sourceBaseScore - Math.max(0, item.position - 1) * 2;
+  const categoryBonus = item.category === "economic" ? 3 : 0;
+  const classifiedBonus = Math.min(8, Math.floor(classifierConfidence / 14));
+  const prominenceScore = clamp(sourcePositionScore + categoryBonus + classifiedBonus, 0, 100);
 
   return {
-    ...article,
+    ...item,
     parentTopic: best.rule.parent,
     microAgenda: best.rule.label,
     microAgendaId: best.rule.id,
@@ -462,18 +590,96 @@ function classifyArticle(article: ExtractedArticle): ClassifiedArticle {
   };
 }
 
-async function fetchWithTimeout(url: string): Promise<string> {
+function extractImageLabel(anchorInner: string): { label: string | null; imageUrl: string | null } {
+  const imgMatch = anchorInner.match(/<img\b([^>]*)>/i);
+  if (!imgMatch?.[1]) return { label: null, imageUrl: null };
+
+  const attrs = imgMatch[1];
+  const label = getAttr(attrs, "alt") || getAttr(attrs, "title");
+  const imageUrl = canonicalizeUrl(getAttr(attrs, "src") || getAttr(attrs, "data-src") || getAttr(attrs, "data-lazy-src"), SOURCE_URL);
+
+  return {
+    label: label ? stripTags(label) : null,
+    imageUrl,
+  };
+}
+
+function extractTextLabel(anchorInner: string): string | null {
+  const text = stripTags(anchorInner);
+  if (text.length < 3) return null;
+  return text;
+}
+
+function extractFrontpageItems(html: string, limit: number): FrontpageItem[] {
+  const anchorRegex = /<a\b([^>]*)>([\s\S]*?)<\/a>/gi;
+  const seen = new Set<string>();
+  const items: FrontpageItem[] = [];
+
+  let match: RegExpExecArray | null;
+  while ((match = anchorRegex.exec(html))) {
+    const attrs = match[1] || "";
+    const inner = match[2] || "";
+
+    const href = canonicalizeUrl(getAttr(attrs, "href"), SOURCE_URL);
+    const image = extractImageLabel(inner);
+    const textLabel = extractTextLabel(inner);
+    const rawLabel = image.label || textLabel;
+
+    if (!rawLabel) continue;
+
+    const source = sourceForLabel(rawLabel);
+    if (!source) continue;
+
+    const headline = headlineForLabel(rawLabel, source);
+    const stableUrl = href || image.imageUrl || `${SOURCE_URL}#${source.key}-${normalizeText(headline).replace(/\s+/g, "-").slice(0, 80)}`;
+
+    const uniqueKey = `${source.key}::${stableUrl}::${normalizeText(headline)}`;
+    if (seen.has(uniqueKey)) continue;
+    seen.add(uniqueKey);
+
+    const positionInCategory = items.filter((item) => item.category === source.category).length + 1;
+
+    items.push({
+      sourceKey: source.key,
+      sourceName: source.name,
+      category: source.category,
+      sourceUrl: SOURCE_URL,
+      surface: "frontpage",
+      section: source.category,
+      frontpageUrl: stableUrl,
+      imageUrl: image.imageUrl,
+      rawLabel,
+      articleTitle: headline,
+      position: positionInCategory,
+      positionLabel: `frontpage_${source.category}_${positionInCategory}`,
+      sourceBaseScore: source.baseScore,
+    });
+
+    if (items.length >= limit * 2) break;
+  }
+
+  return items
+    .sort((a, b) => {
+      if (a.category !== b.category) return a.category === "political" ? -1 : 1;
+      return a.position - b.position;
+    })
+    .slice(0, limit);
+}
+
+async function fetchFrontpagesHtml(): Promise<string> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
   try {
-    const response = await fetch(url, {
+    const response = await fetch(SOURCE_URL, {
       signal: controller.signal,
       headers: {
-        "user-agent": "NorayaEditorialProminenceBot/1.0 (+https://noraya.vercel.app)",
+        "user-agent": "NorayaFrontpageSignalBot/2.0 (+https://noraya.vercel.app)",
         accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
       },
       cache: "no-store",
     });
+
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     return await response.text();
   } finally {
@@ -481,43 +687,36 @@ async function fetchWithTimeout(url: string): Promise<string> {
   }
 }
 
-async function fetchSourceArticles(source: EditorialSource, perSourceLimit: number): Promise<{ source: EditorialSource; articles: ExtractedArticle[]; error: string | null }> {
-  try {
-    const html = await fetchWithTimeout(source.homepageUrl);
-    return { source, articles: extractArticlesFromHtml(source, html, perSourceLimit), error: null };
-  } catch (error: any) {
-    return { source, articles: [], error: `${source.key}: ${error?.message || String(error)}` };
-  }
-}
-
-function toInsertRow(article: ClassifiedArticle, observedAt: string) {
+function toInsertRow(item: ClassifiedFrontpageItem, observedAt: string) {
   return {
     observed_at: observedAt,
-    source_name: article.sourceName,
-    source_url: article.sourceUrl,
-    surface: article.surface,
-    section: article.section,
-    article_url: article.articleUrl,
-    article_title: article.articleTitle,
+    source_name: item.sourceName,
+    source_url: item.sourceUrl,
+    surface: item.surface,
+    section: item.section,
+    article_url: item.frontpageUrl,
+    article_title: item.articleTitle,
     article_excerpt: null,
     article_published_at: null,
-    article_source: article.sourceName,
-    position: article.position,
-    position_label: article.positionLabel,
-    prominence_score: article.prominenceScore,
-    parent_topic: article.parentTopic,
-    micro_agenda: article.microAgenda,
-    micro_agenda_id: article.microAgendaId,
-    classifier_confidence: article.classifierConfidence,
-    matched_keywords: article.matchedKeywords,
+    article_source: item.sourceName,
+    position: item.position,
+    position_label: item.positionLabel,
+    prominence_score: item.prominenceScore,
+    parent_topic: item.parentTopic,
+    micro_agenda: item.microAgenda,
+    micro_agenda_id: item.microAgendaId,
+    classifier_confidence: item.classifierConfidence,
+    matched_keywords: item.matchedKeywords,
     raw_payload: {
       mode: MODE,
-      source_key: article.sourceKey,
-      homepage_url: article.sourceUrl,
-      extracted_position: article.position,
-      classifier_score: article.classifierScore,
-      classifier_confidence: article.classifierConfidence,
-      is_homepage_scrape_v1: true,
+      source_key: item.sourceKey,
+      source_category: item.category,
+      frontpage_url: item.frontpageUrl,
+      image_url: item.imageUrl,
+      raw_label: item.rawLabel,
+      classifier_score: item.classifierScore,
+      classifier_confidence: item.classifierConfidence,
+      is_frontpages_gr_v2: true,
       observed_at: observedAt,
     },
   };
@@ -526,26 +725,40 @@ function toInsertRow(article: ClassifiedArticle, observedAt: string) {
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const dryRun = ["1", "true", "yes"].includes(String(url.searchParams.get("dry") || "").toLowerCase());
-  const articleLimit = parseIntParam(url.searchParams.get("limit"), DEFAULT_ARTICLE_LIMIT, 1, MAX_ARTICLE_LIMIT);
-  const perSourceLimit = parseIntParam(url.searchParams.get("per_source_limit"), 12, 1, 30);
-  const sources = sourceSelection(url.searchParams);
+  const limit = parseIntParam(url.searchParams.get("limit"), DEFAULT_LIMIT, 1, MAX_LIMIT);
 
   if (!isAuthorized(request)) {
     return json({ success: false, mode: MODE, error: "unauthorized" }, 401);
   }
 
   const observedAt = new Date().toISOString();
-  const sourceResults = await Promise.all(sources.map((source) => fetchSourceArticles(source, perSourceLimit)));
-  const fetchErrors = sourceResults.map((result) => result.error).filter(Boolean) as string[];
 
-  const extracted = sourceResults.flatMap((result) => result.articles);
+  let html = "";
+  try {
+    html = await fetchFrontpagesHtml();
+  } catch (error: any) {
+    return json({
+      success: false,
+      mode: MODE,
+      generated_at: observedAt,
+      error: `frontpages_fetch_failed: ${error?.message || String(error)}`,
+      diagnostics: {
+        source_mode: "frontpages_gr_political_economic",
+        source_url: SOURCE_URL,
+        read_only: dryRun,
+        target_table: TARGET_TABLE,
+      },
+    }, 502);
+  }
+
+  const extracted = extractFrontpageItems(html, limit);
   const classified = extracted
-    .map(classifyArticle)
+    .map(classifyFrontpageItem)
     .sort((a, b) => b.prominenceScore - a.prominenceScore || a.position - b.position)
-    .slice(0, articleLimit);
+    .slice(0, limit);
 
-  const rows = classified.map((article) => toInsertRow(article, observedAt));
-  const classifiedCount = classified.filter((article) => article.microAgendaId).length;
+  const rows = classified.map((item) => toInsertRow(item, observedAt));
+  const classifiedCount = classified.filter((item) => item.microAgendaId).length;
 
   let writeError: string | null = null;
   let written = 0;
@@ -564,9 +777,6 @@ export async function GET(request: Request) {
     }
   }
 
-  const errors = [...fetchErrors];
-  if (writeError) errors.push(writeError);
-
   return json({
     success: !writeError,
     mode: MODE,
@@ -575,22 +785,28 @@ export async function GET(request: Request) {
       read_only: dryRun,
       writes_to_database: !dryRun && !writeError,
       target_table: TARGET_TABLE,
-      source_mode: "homepage_scrape_v1",
-      sources_requested: sources.length,
-      sources: sources.map((source) => ({ key: source.key, name: source.name, homepage_url: source.homepageUrl })),
-      article_limit: articleLimit,
-      per_source_limit: perSourceLimit,
-      classifier: "local_micro_agenda_keyword_rules_v1",
+      source_mode: "frontpages_gr_political_economic",
+      source_url: SOURCE_URL,
+      surface: "frontpage",
+      categories_allowed: ["political", "economic"],
+      blocked_categories: ["sports", "lifestyle", "magazines", "local"],
+      allowed_sources: ALLOWED_FRONTPAGE_SOURCES.map((source) => ({
+        key: source.key,
+        name: source.name,
+        category: source.category,
+      })),
+      classifier: "local_frontpage_micro_agenda_keyword_rules_v2",
+      limit,
     },
-    sources_with_errors: fetchErrors.length,
-    articles_extracted: extracted.length,
-    articles_considered: classified.length,
-    classified_articles: classifiedCount,
+    frontpages_extracted: extracted.length,
+    frontpages_considered: classified.length,
+    classified_frontpages: classifiedCount,
     dry_run: dryRun,
     writes: written,
-    writes_preview: rows.slice(0, 12).map((row) => ({
+    writes_preview: rows.slice(0, 20).map((row) => ({
       source_name: row.source_name,
       surface: row.surface,
+      section: row.section,
       position: row.position,
       prominence_score: row.prominence_score,
       article_title: row.article_title,
@@ -600,6 +816,6 @@ export async function GET(request: Request) {
       classifier_confidence: row.classifier_confidence,
       article_url: row.article_url,
     })),
-    errors,
+    errors: writeError ? [writeError] : [],
   });
 }
