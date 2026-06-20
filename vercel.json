@@ -11,6 +11,7 @@
     { "path": "/api/external-signals/trends-coverage?token=dev&mode=collect", "schedule": "40 4 * * *" },
     { "path": "/api/situation-engine/detect-events", "schedule": "0 5,13 * * *" },
     { "path": "/api/situation-engine/advise-event", "schedule": "20 5,13 * * *" },
-    { "path": "/api/external-signals/gdelt-feed?token=dev&timespan=6h&maxrecords=50&window_hours=72", "schedule": "17 */6 * * *" }
+    { "path": "/api/external-signals/gdelt-feed?token=dev&timespan=6h&maxrecords=50&window_hours=72", "schedule": "17 */6 * * *" },
+    { "path": "/api/cron/fetch-topic-trends?token=dev&limit=3", "schedule": "45 5,13 * * *" }
   ]
 }
