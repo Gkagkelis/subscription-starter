@@ -2,6 +2,15 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode } from "react";
+import {
+  buildAgendaMap,
+  buildEventIntelligenceView,
+  buildPriorityCards,
+  type AgendaMapItem as ProbeAgendaMapItem,
+  type EventIntelligenceView,
+  type ProbeV4Response,
+  type PriorityCard as ProbePriorityCard,
+} from "../../lib/noraya/strategy-room-intelligence";
 
 type Scenario = {
   name?: string;
@@ -327,6 +336,11 @@ type AdvisorConversation = {
   messages: ChatMessage[];
   createdAt: string;
   updatedAt: string;
+};
+
+type AgendaProbeSelection = {
+  clusterId: string;
+  eventId?: string | null;
 };
 
 const situationTabs: Array<{ id: SituationTab; label: string }> = [
@@ -1077,6 +1091,9 @@ export default function StrategyRoomPage() {
   const [data, setData] = useState<ApiResponse | null>(null);
   const [situationEngine, setSituationEngine] =
     useState<SituationEngineResponse | null>(null);
+  const [agendaProbe, setAgendaProbe] = useState<ProbeV4Response | null>(null);
+  const [activeProbeSelection, setActiveProbeSelection] =
+    useState<AgendaProbeSelection | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [situationWarning, setSituationWarning] = useState("");
@@ -1145,6 +1162,21 @@ export default function StrategyRoomPage() {
           `Situation engine API error: ${situationResponse.status}`,
         );
       }
+
+      try {
+        const agendaProbeResponse = await fetch(
+          "/api/situation-engine/agenda-probe?token=dev&hours=168",
+          { cache: "no-store" },
+        );
+
+        if (agendaProbeResponse.ok) {
+          setAgendaProbe((await agendaProbeResponse.json()) as ProbeV4Response);
+        } else {
+          setAgendaProbe(null);
+        }
+      } catch {
+        setAgendaProbe(null);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
@@ -1210,6 +1242,50 @@ export default function StrategyRoomPage() {
       : [];
     return rows.filter((row) => row?.topic && row.topic !== "Μη ταξινομημένο");
   }, [situationEngine?.agenda_overview]);
+
+  const probeAgendaMap = useMemo<ProbeAgendaMapItem[]>(() => {
+    return agendaProbe?.success ? buildAgendaMap(agendaProbe) : [];
+  }, [agendaProbe]);
+
+  const probePriorityCards = useMemo<ProbePriorityCard[]>(() => {
+    return agendaProbe?.success ? buildPriorityCards(agendaProbe) : [];
+  }, [agendaProbe]);
+
+  useEffect(() => {
+    if (!activeProbeSelection && probeAgendaMap.length > 0) {
+      const firstItem = probeAgendaMap[0];
+      setActiveProbeSelection({
+        clusterId: firstItem.id,
+        eventId: firstItem.events[0]?.id ?? null,
+      });
+    }
+  }, [activeProbeSelection, probeAgendaMap]);
+
+  const activeProbeItem = useMemo(() => {
+    if (!probeAgendaMap.length) return null;
+    return (
+      probeAgendaMap.find((item) => item.id === activeProbeSelection?.clusterId) ||
+      probeAgendaMap[0]
+    );
+  }, [activeProbeSelection?.clusterId, probeAgendaMap]);
+
+  const activeProbeEvent = useMemo(() => {
+    const events = activeProbeItem?.events ?? [];
+    if (!events.length) return undefined;
+    return (
+      events.find((event) => event.id === activeProbeSelection?.eventId) ||
+      events[0]
+    );
+  }, [activeProbeItem, activeProbeSelection?.eventId]);
+
+  const activeProbeView = useMemo<EventIntelligenceView | null>(() => {
+    if (!activeProbeItem) return null;
+    return buildEventIntelligenceView(activeProbeItem.raw, activeProbeEvent);
+  }, [activeProbeEvent, activeProbeItem]);
+
+  const probeSituationCount = useMemo(() => {
+    return probeAgendaMap.reduce((sum, item) => sum + item.events.length, 0);
+  }, [probeAgendaMap]);
 
   useEffect(() => {
     if (!activeOverviewTopic && agendaOverview.length > 0) {
@@ -1321,7 +1397,7 @@ export default function StrategyRoomPage() {
   const partyLogo = profile?.party_profile_snapshot?.logo_url || "";
   const partyInitial = partyInitials(profile);
 
-  const activeTitle = situationTitle(
+  const baseActiveTitle = situationTitle(
     activeSituation,
     text(
       daily.headline,
@@ -1331,10 +1407,13 @@ export default function StrategyRoomPage() {
       ),
     ),
   );
-  const activeCategory = text(
-    activeSituation?.category || activeSituation?.topic || issue.topic,
-    "Πολιτική ατζέντα",
-  );
+  const activeTitle = activeProbeView?.eventTitle || baseActiveTitle;
+  const activeCategory =
+    activeProbeView?.microAgenda ||
+    text(
+      activeSituation?.category || activeSituation?.topic || issue.topic,
+      "Πολιτική ατζέντα",
+    );
   const activeStatus = text(
     activeSituation?.status,
     liveSituations.length ? "active" : "derived",
@@ -1343,10 +1422,12 @@ export default function StrategyRoomPage() {
     activeSituation?.urgency || issue.urgency,
     "watch",
   );
-  const activeScore = situationScore(
-    activeSituation,
-    numberValue(rankedAgenda[0]?.score, 0),
-  );
+  const activeScore =
+    activeProbeView?.score ??
+    situationScore(
+      activeSituation,
+      numberValue(rankedAgenda[0]?.score, 0),
+    );
   const activeIntensityScore = strategicIndexFromSituation(
     activeSituation,
     activeScore,
@@ -1691,13 +1772,19 @@ export default function StrategyRoomPage() {
         <LeftSidebar
           agenda={rankedAgenda}
           situations={liveSituations}
+          agendaMap={probeAgendaMap}
           activeSituationId={activeSituationId}
+          activeProbeSelection={activeProbeSelection}
           onSelectSituation={(id) => {
             setActiveSituationId(id);
             setActiveTab("strategic");
           }}
-          situationSource={situationEngine?.source || "—"}
-          situationCount={situationEngine?.count || liveSituations.length}
+          onSelectProbeEvent={(selection) => {
+            setActiveProbeSelection(selection);
+            setActiveTab("strategic");
+          }}
+          situationSource={probeAgendaMap.length ? "agenda-probe v4" : situationEngine?.source || "—"}
+          situationCount={probeAgendaMap.length ? probeSituationCount : situationEngine?.count || liveSituations.length}
           situationWarning={situationWarning}
           politicalEnvironment={politicalEnvironment}
         />
@@ -1706,6 +1793,7 @@ export default function StrategyRoomPage() {
           <div className="h-full overflow-y-auto px-5 py-4">
             <PriorityStrip
               agenda={rankedAgenda}
+              probeCards={probePriorityCards}
               activeTitle={activeTitle}
               immediateRecommendation={daily.immediate_recommendation}
               avoidToday={daily.avoid_today}
@@ -1739,6 +1827,7 @@ export default function StrategyRoomPage() {
               activeOverviewTopic={activeOverviewTopic}
               onSelectOverviewTopic={setActiveOverviewTopic}
               selectedPartyImplication={selectedPartyImplication}
+              probeView={activeProbeView}
             />
 
             <AdvisorDock
@@ -1907,8 +1996,11 @@ function TopNavigation({
 function LeftSidebar({
   agenda,
   situations,
+  agendaMap,
   activeSituationId,
+  activeProbeSelection,
   onSelectSituation,
+  onSelectProbeEvent,
   situationSource,
   situationCount,
   situationWarning,
@@ -1916,8 +2008,11 @@ function LeftSidebar({
 }: {
   agenda: RankedAgenda[];
   situations: LiveSituationRow[];
+  agendaMap?: ProbeAgendaMapItem[];
   activeSituationId: string | null;
+  activeProbeSelection?: AgendaProbeSelection | null;
   onSelectSituation: (id: string) => void;
+  onSelectProbeEvent?: (selection: AgendaProbeSelection) => void;
   situationSource: string;
   situationCount: number;
   situationWarning: string;
@@ -1932,8 +2027,29 @@ function LeftSidebar({
     title: string;
     score: number;
     status: string;
+    probeClusterId?: string;
+    probeEventId?: string | null;
   };
   const agendaItems = useMemo(() => {
+    if (agendaMap && agendaMap.length) {
+      return agendaMap.slice(0, 8).map((item, index) => ({
+        topic: item.title,
+        score: item.score,
+        count: item.events.length,
+        rank: index + 1,
+        probeClusterId: item.id,
+        statusLabel: item.statusLabel,
+        events: item.events.map((event, eventIndex) => ({
+          id: String(event.id || `${item.id}-${eventIndex}`),
+          title: event.title || item.title,
+          score: numberValue(event.event_score, item.score),
+          status: String(event.status || item.statusLabel || "live"),
+          probeClusterId: item.id,
+          probeEventId: event.id ? String(event.id) : null,
+        })),
+      }));
+    }
+
     if (situations && situations.length) {
       const groups = new Map<
         string,
@@ -1980,7 +2096,7 @@ function LeftSidebar({
       rank: i + 1,
       events: [] as AgendaEvent[],
     }));
-  }, [situations, agenda]);
+  }, [agendaMap, situations, agenda]);
 
   return (
     <aside className="flex w-[256px] shrink-0 flex-col overflow-hidden bg-[#060a14]">
@@ -2014,9 +2130,9 @@ function LeftSidebar({
                       ? "Μεσαία"
                       : "Χαμηλή";
                 const isExpanded = expandedTopic === item.topic;
-                const hasActiveChild = item.events.some(
-                  (e) => e.id === activeSituationId,
-                );
+                const hasActiveChild = item.probeClusterId
+                  ? activeProbeSelection?.clusterId === item.probeClusterId
+                  : item.events.some((e) => e.id === activeSituationId);
                 return (
                   <div
                     key={`${item.topic}-${item.rank}`}
@@ -2033,8 +2149,14 @@ function LeftSidebar({
                         setExpandedTopic((prev) =>
                           prev === topicKey ? null : topicKey,
                         );
-                        if (item.events[0]?.id)
+                        if (item.probeClusterId && onSelectProbeEvent) {
+                          onSelectProbeEvent({
+                            clusterId: item.probeClusterId,
+                            eventId: item.events[0]?.probeEventId ?? null,
+                          });
+                        } else if (item.events[0]?.id) {
                           onSelectSituation(item.events[0].id);
+                        }
                       }}
                       className="group flex w-full items-center gap-2 p-3 text-left transition hover:bg-cyan-300/[0.04]"
                     >
@@ -2074,12 +2196,24 @@ function LeftSidebar({
                     {isExpanded && item.events.length ? (
                       <div className="grid gap-1 border-t border-[#1a2640] px-2 pb-2 pt-2">
                         {item.events.map((ev) => {
-                          const selected = ev.id === activeSituationId;
+                          const selected = ev.probeClusterId
+                            ? activeProbeSelection?.clusterId === ev.probeClusterId &&
+                              activeProbeSelection?.eventId === ev.probeEventId
+                            : ev.id === activeSituationId;
                           return (
                             <button
                               key={ev.id}
                               type="button"
-                              onClick={() => onSelectSituation(ev.id)}
+                              onClick={() => {
+                                if (ev.probeClusterId && onSelectProbeEvent) {
+                                  onSelectProbeEvent({
+                                    clusterId: ev.probeClusterId,
+                                    eventId: ev.probeEventId ?? null,
+                                  });
+                                } else {
+                                  onSelectSituation(ev.id);
+                                }
+                              }}
                               className={`rounded-xl px-2 py-1.5 text-left text-[11px] leading-4 transition ${
                                 selected
                                   ? "bg-cyan-300/15 text-cyan-100"
@@ -2164,16 +2298,34 @@ function LeftSidebar({
 
 function PriorityStrip({
   agenda,
+  probeCards,
   activeTitle,
   immediateRecommendation,
   avoidToday,
 }: {
   agenda: RankedAgenda[];
+  probeCards?: ProbePriorityCard[];
   activeTitle: string;
   immediateRecommendation?: string;
   avoidToday?: string;
 }) {
-  const cards = [
+  const mappedCards = probeCards?.length
+    ? probeCards.slice(0, 3).map((card, index) => ({
+        label: card.label,
+        title: card.title,
+        badge: card.priorityLabel,
+        tone:
+          card.tone === "red"
+            ? ("red" as const)
+            : card.tone === "yellow"
+              ? ("amber" as const)
+              : ("emerald" as const),
+        score: card.score,
+        textValue: card.actionHint,
+      }))
+    : null;
+
+  const cards = mappedCards || [
     {
       label: "Προτεραιότητα 1",
       title: activeTitle,
@@ -2302,6 +2454,7 @@ function ActiveSituationWorkspace({
   activeOverviewTopic,
   onSelectOverviewTopic,
   selectedPartyImplication,
+  probeView,
 }: {
   activeTab: SituationTab;
   onTabChange: (tab: SituationTab) => void;
@@ -2320,6 +2473,7 @@ function ActiveSituationWorkspace({
   activeOverviewTopic: string | null;
   onSelectOverviewTopic: (topic: string) => void;
   selectedPartyImplication: string;
+  probeView?: EventIntelligenceView | null;
 }) {
   const issue = brief.issue || {};
   const daily = brief.daily_brief || {};
@@ -2329,6 +2483,51 @@ function ActiveSituationWorkspace({
   const messages = brief.message_package || {};
   const evidence = brief.evidence || {};
   const activeEvidenceArticles = evidenceArticlesFromSituation(situation);
+  const probeSection = (tab: EventIntelligenceView["sections"][number]["tab"]) =>
+    probeView?.sections.find((section) => section.tab === tab);
+  const strategicSection = probeSection("strategic_image");
+  const overallSection = probeSection("overall_image");
+  const whySection = probeSection("why_exists");
+  const sourcesSection = probeSection("sources_factors");
+  const pulseSection = probeSection("public_pulse");
+  const winSection = probeSection("how_to_win");
+  const actionSection = probeSection("action_options");
+  const materialSection = probeSection("material");
+  const effectiveTitle = probeView?.eventTitle || title;
+  const effectiveCategory = probeView?.microAgenda || category;
+  const effectiveScore = probeView?.score ?? score;
+  const effectiveDocumentationLabel =
+    probeView?.evidenceLabel || docLabelFromScore(documentationScore);
+  const effectiveStatusLabel = probeView?.statusLabel || statusLabel(status);
+  const effectiveUrgencyLabel = probeView?.scoreLabel || riskLabel(urgency);
+  const effectiveStatusClass = probeView
+    ? probeView.sensitiveMode
+      ? "border-red-300/25 bg-red-300/10 text-red-100"
+      : effectiveScore >= 68
+        ? "border-amber-300/25 bg-amber-300/10 text-amber-100"
+        : "border-cyan-300/25 bg-cyan-300/10 text-cyan-100"
+    : statusToneClass(status);
+  const effectiveUrgencyClass = probeView
+    ? effectiveScore >= 68
+      ? "border-amber-300/25 bg-amber-300/10 text-amber-100"
+      : "border-cyan-300/25 bg-cyan-300/10 text-cyan-100"
+    : signalToneClass(urgency);
+  const effectiveDecisionOptions =
+    actionSection?.actions?.length
+      ? actionSection.actions.map((option) => ({
+          label: option.key,
+          title: option.title,
+          move: option.body,
+          gain: option.gain,
+          risk: option.risk,
+          recommendation: option.avoid
+            ? "avoid"
+            : option.recommended
+              ? "prefer"
+              : "acceptable",
+          success: option.successProbability,
+        }))
+      : decisionOptions(brief);
 
   return (
     <section className="rounded-[2rem] border border-white/[0.07] bg-gradient-to-b from-[#0d1424] via-[#0a1020] to-[#070c18] shadow-[0_28px_90px_rgba(0,0,0,0.28)]">
@@ -2336,32 +2535,32 @@ function ActiveSituationWorkspace({
         <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
           <div className="min-w-0">
             <div className="mb-3 flex flex-wrap items-center gap-2">
-              <StatusChip className={statusToneClass(status)}>
-                {statusLabel(status)}
+              <StatusChip className={effectiveStatusClass}>
+                {effectiveStatusLabel}
               </StatusChip>
-              <StatusChip className={signalToneClass(urgency)}>
-                {riskLabel(urgency)}
+              <StatusChip className={effectiveUrgencyClass}>
+                {effectiveUrgencyLabel}
               </StatusChip>
-              <StatusChip className={docToneClass(documentationLevel)}>
-                {docLabelFromScore(documentationScore)}
+              <StatusChip className={docToneClass(effectiveDocumentationLabel)}>
+                {effectiveDocumentationLabel}
               </StatusChip>
             </div>
             <h1 className="max-w-[760px] text-[1.35rem] font-semibold leading-[1.22] tracking-[-0.03em] text-zinc-50 xl:text-[1.65rem]">
-              {title}
+              {effectiveTitle}
             </h1>
             <p className="mt-2 text-xs font-medium tracking-wide text-zinc-500">
-              {category}
+              {effectiveCategory}
             </p>
           </div>
 
                   <div className="grid shrink-0 grid-cols-2 gap-3">
             <MiniMetric
               label="Noraya Priority"
-              value={score ? Math.round(score).toString() : "—"}
+              value={effectiveScore ? Math.round(effectiveScore).toString() : "—"}
             />
             <MiniMetric
               label="Τεκμηρίωση"
-              value={docLabelFromScore(documentationScore)}
+              value={effectiveDocumentationLabel}
             />
           </div>
         </div>
@@ -2378,7 +2577,7 @@ function ActiveSituationWorkspace({
                   : "border-[#1a2640] bg-black/15 text-zinc-500 hover:text-zinc-300"
               }`}
             >
-              {tab.label}
+              {tab.id === "win" && probeView ? probeView.primaryTabLabel : tab.label}
             </button>
           ))}
         </div>
@@ -2402,14 +2601,14 @@ function ActiveSituationWorkspace({
             >
               <div className="grid gap-5 xl:grid-cols-[1fr_150px]">
                 <p className="text-[13px] leading-7 text-zinc-300/95">
-                  {readStrategicText(situation, brief)}
+                  {strategicSection?.body || readStrategicText(situation, brief)}
                 </p>
                                 <div className="rounded-2xl border border-white/[0.07] bg-black/15 p-4">
                   <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
                     Τεκμηρίωση
                   </div>
                   <div className="mt-3 text-lg font-semibold text-zinc-100">
-                    {docLabelFromScore(documentationScore)}
+                    {effectiveDocumentationLabel}
                   </div>
                   <p className="mt-2 text-[11px] leading-5 text-zinc-500">
                     Στάδιο επιβεβαίωσης πηγών — όχι ψευδοποσοστό.
@@ -2419,50 +2618,62 @@ function ActiveSituationWorkspace({
             </CockpitSection>
 
             <CockpitSection
-              title="2. Πώς κερδίζεται το θέμα"
-              subtitle="Στρατηγική δυναμική"
+              title={`2. ${probeView?.primaryTabLabel || "Πώς κερδίζεται το θέμα"}`}
+              subtitle={winSection?.kicker || "Στρατηγική δυναμική"}
             >
               <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-5">
                 <WinCard
                   title="Το παιχνίδι σήμερα"
                   tone="red"
-                  textValue={text(
-                    diagnosis.agenda_reading,
+                  textValue={
+                    winSection?.body ||
                     text(
-                      issue.dominant_frame,
-                      "Το παιχνίδι δεν έχει ακόμη πλήρως οριστεί.",
-                    ),
-                  )}
+                      diagnosis.agenda_reading,
+                      text(
+                        issue.dominant_frame,
+                        "Το παιχνίδι δεν έχει ακόμη πλήρως οριστεί.",
+                      ),
+                    )
+                  }
                 />
                 <WinCard
                   title="Η παγίδα"
                   tone="amber"
-                  textValue={text(
-                    diagnosis.strategic_risk,
+                  textValue={
+                    winSection?.bullets?.[0] ||
                     text(
-                      issue.priming_risk,
-                      "Το ρίσκο είναι πρόωρη ή άστοχη αντίδραση.",
-                    ),
-                  )}
+                      diagnosis.strategic_risk,
+                      text(
+                        issue.priming_risk,
+                        "Το ρίσκο είναι πρόωρη ή άστοχη αντίδραση.",
+                      ),
+                    )
+                  }
                 />
                 <WinCard
                   title="Ευνοϊκή διάσταση"
                   tone="emerald"
-                  textValue={text(
-                    diagnosis.strategic_opportunity,
+                  textValue={
+                    winSection?.bullets?.[1] ||
                     text(
-                      issue.opportunity,
-                      "Να εισαχθεί διάσταση θεσμικής σοβαρότητας και λύσης.",
-                    ),
-                  )}
+                      diagnosis.strategic_opportunity,
+                      text(
+                        issue.opportunity,
+                        "Να εισαχθεί διάσταση θεσμικής σοβαρότητας και λύσης.",
+                      ),
+                    )
+                  }
                 />
                 <WinCard
                   title="Κίνηση αναδιάταξης"
                   tone="purple"
-                  textValue={text(
-                    diagnosis.recommended_posture,
-                    "Μετατόπιση από άμυνα σε τεκμηριωμένη πρόταση.",
-                  )}
+                  textValue={
+                    winSection?.bullets?.[2] ||
+                    text(
+                      diagnosis.recommended_posture,
+                      "Μετατόπιση από άμυνα σε τεκμηριωμένη πρόταση.",
+                    )
+                  }
                 />
                 <WinCard
                   title="Ακολουθία"
@@ -2481,7 +2692,7 @@ function ActiveSituationWorkspace({
                 subtitle="Επιλογές δράσης Α/Β/Γ από scenarios"
               >
                 <div className="grid gap-3 md:grid-cols-3 2xl:grid-cols-1">
-                  {decisionOptions(brief).map((opt) => (
+                  {effectiveDecisionOptions.map((opt) => (
                     <DecisionCard
                       key={opt.label}
                       label={opt.label}
@@ -2502,7 +2713,7 @@ function ActiveSituationWorkspace({
               >
                 <BulletList
                   compact
-                  items={list(monitoring.escalation_triggers)}
+                  items={probeView?.escalation?.triggerLines || list(monitoring.escalation_triggers)}
                   fallback={[
                     "Νέο δημοσκοπικό εύρημα ή verified internal poll.",
                     "Θεσμική αντίδραση που αλλάζει το επίπεδο κλιμάκωσης.",
@@ -2521,71 +2732,84 @@ function ActiveSituationWorkspace({
               subtitle="6 gauges — αρχικά από διαθέσιμα live signals"
             >
               <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-                <Gauge
-                  score={clamp(
-                    numberValue(
-                      situation?.news_coverage_level,
-                      numberValue(
-                        situation?.article_count,
-                        agenda[0]?.article_count || 0,
-                      ) * 8,
-                    ),
-                  )}
-                  label="Media ένταση"
-                  small
-                />
-                <Gauge
-                  score={clamp(
-                    numberValue(
-                      situation?.google_trends_score,
-                      numberValue(
-                        situation?.source_count,
-                        agenda[0]?.source_count || 0,
-                      ) * 15,
-                    ),
-                  )}
-                  label="Δημόσια αναζήτηση"
-                  small
-                />
-                <Gauge
-                  score={clamp(
-                    numberValue(
-                      situation?.confidence_score,
-                      documentationScore,
-                    ),
-                  )}
-                  label="Πολιτική ένταση"
-                  small
-                />
-                <Gauge
-                  score={clamp(
-                    numberValue(
-                      issue.emotion_intensity,
-                      publicPulseScore(situation),
-                    ),
-                  )}
-                  label="Συναισθηματική ένταση"
-                  small
-                />
-                <Gauge
-                  score={clamp(
-                    Math.round(
-                      numberValue(
-                        issue.emotion_intensity,
-                        publicPulseScore(situation),
-                      ) *
-                        0.6 +
-                        (score >= 70 ? 20 : score >= 50 ? 10 : 0),
-                    ),
-                  )}
-                  label="Κίνδυνος υπερβολής"
-                  small
-                />
-                <Gauge
-                  score={clamp(Math.max(score, documentationScore))}
-                  label="Agenda potential"
-                  small
-                />
+                {probeView?.gauges?.length ? (
+                  probeView.gauges.map((gauge) => (
+                    <Gauge
+                      key={gauge.key}
+                      score={gauge.value}
+                      label={gauge.label}
+                      small
+                    />
+                  ))
+                ) : (
+                  <>
+                    <Gauge
+                      score={clamp(
+                        numberValue(
+                          situation?.news_coverage_level,
+                          numberValue(
+                            situation?.article_count,
+                            agenda[0]?.article_count || 0,
+                          ) * 8,
+                        ),
+                      )}
+                      label="Media ένταση"
+                      small
+                    />
+                    <Gauge
+                      score={clamp(
+                        numberValue(
+                          situation?.google_trends_score,
+                          numberValue(
+                            situation?.source_count,
+                            agenda[0]?.source_count || 0,
+                          ) * 15,
+                        ),
+                      )}
+                      label="Δημόσια αναζήτηση"
+                      small
+                    />
+                    <Gauge
+                      score={clamp(
+                        numberValue(
+                          situation?.confidence_score,
+                          documentationScore,
+                        ),
+                      )}
+                      label="Πολιτική ένταση"
+                      small
+                    />
+                    <Gauge
+                      score={clamp(
+                        numberValue(
+                          issue.emotion_intensity,
+                          publicPulseScore(situation),
+                        ),
+                      )}
+                      label="Συναισθηματική ένταση"
+                      small
+                    />
+                    <Gauge
+                      score={clamp(
+                        Math.round(
+                          numberValue(
+                            issue.emotion_intensity,
+                            publicPulseScore(situation),
+                          ) *
+                            0.6 +
+                            (effectiveScore >= 70 ? 20 : effectiveScore >= 50 ? 10 : 0),
+                        ),
+                      )}
+                      label="Κίνδυνος υπερβολής"
+                      small
+                    />
+                    <Gauge
+                      score={clamp(Math.max(effectiveScore, documentationScore))}
+                      label="Agenda potential"
+                      small
+                    />
+                  </>
+                )}
               </div>
             </CockpitSection>
 
@@ -2594,22 +2818,28 @@ function ActiveSituationWorkspace({
               subtitle="Αποφυγή πρόωρης κλιμάκωσης"
             >
               <EscalationLadder
-                current={clamp(
-                  numberValue(
-                    situation?.escalation_level,
-                    score >= 70 ? 3 : score >= 50 ? 2 : 1,
-                  ),
-                  1,
-                  6,
-                )}
-                recommended={clamp(
-                  numberValue(
-                    situation?.escalation_recommended,
-                    score >= 75 ? 3 : 2,
-                  ),
-                  1,
-                  6,
-                )}
+                current={
+                  probeView?.escalation?.currentLevel ??
+                  clamp(
+                    numberValue(
+                      situation?.escalation_level,
+                      effectiveScore >= 70 ? 3 : effectiveScore >= 50 ? 2 : 1,
+                    ),
+                    1,
+                    6,
+                  )
+                }
+                recommended={
+                  probeView?.escalation?.currentLevel ??
+                  clamp(
+                    numberValue(
+                      situation?.escalation_recommended,
+                      effectiveScore >= 75 ? 3 : 2,
+                    ),
+                    1,
+                    6,
+                  )
+                }
               />
             </CockpitSection>
           </div>
@@ -2622,15 +2852,16 @@ function ActiveSituationWorkspace({
               subtitle="Basis / documentation"
             >
               <p className="text-[13px] leading-7 text-zinc-300/95">
-                {readWhyText(situation, brief)}
+                {whySection?.body || readWhyText(situation, brief)}
               </p>
             </CockpitSection>
             <CockpitSection title="Τι δεν ξέρουμε ακόμη" subtitle="Uncertainty">
               <p className="text-sm leading-7 text-zinc-300">
-                {text(
-                  evidence.uncertainty,
-                  "Δεν υπάρχει ακόμη πλήρης αβεβαιότητα καταγεγραμμένη. Μέχρι να υπάρξει verified internal data, δεν παρουσιάζουμε ισχυρή σύσταση ως βεβαιότητα.",
-                )}
+                {probeView?.escalation?.triggerLines?.[0] ||
+                  text(
+                    evidence.uncertainty,
+                    "Η εκτίμηση αναθεωρείται όταν εμφανιστεί νέο σήμα, δεύτερη πηγή ή πολιτική αντίδραση.",
+                  )}
               </p>
             </CockpitSection>
           </div>
@@ -2643,15 +2874,24 @@ function ActiveSituationWorkspace({
               subtitle="Agenda signals behind the selected situation"
             >
               <div className="grid gap-3">
-                {(agenda.length ? agenda.slice(0, 5) : []).map((item) => (
-                  <DriverBar
-                    key={`${item.topic}-${item.rank}`}
-                    label={item.topic || "Θέμα"}
-                    score={item.score}
-                    trend={item.signalLabel}
-                  />
-                ))}
-                {!agenda.length ? (
+                {sourcesSection?.bullets?.length
+                  ? sourcesSection.bullets.slice(0, 5).map((item, index) => (
+                      <DriverBar
+                        key={`${item}-${index}`}
+                        label={item}
+                        score={probeView?.gauges?.[index]?.value ?? effectiveScore}
+                        trend={probeView?.statusLabel}
+                      />
+                    ))
+                  : (agenda.length ? agenda.slice(0, 5) : []).map((item) => (
+                      <DriverBar
+                        key={`${item.topic}-${item.rank}`}
+                        label={item.topic || "Θέμα"}
+                        score={item.score}
+                        trend={item.signalLabel}
+                      />
+                    ))}
+                {!sourcesSection?.bullets?.length && !agenda.length ? (
                   <EmptyState>
                     Δεν υπάρχουν διαθέσιμοι παράγοντες ατζέντας.
                   </EmptyState>
@@ -2668,60 +2908,93 @@ function ActiveSituationWorkspace({
         ) : null}
 
         {activeTab === "pulse" ? (
-          <PublicPulsePanel situation={situation} brief={brief} />
+          pulseSection ? (
+            <CockpitSection title={pulseSection.title} subtitle={pulseSection.kicker}>
+              <p className="text-[13px] leading-7 text-zinc-300/95">
+                {pulseSection.body}
+              </p>
+              {pulseSection.gauges?.length ? (
+                <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+                  {pulseSection.gauges.map((gauge) => (
+                    <Gauge
+                      key={gauge.key}
+                      score={gauge.value}
+                      label={gauge.label}
+                      small
+                    />
+                  ))}
+                </div>
+              ) : null}
+            </CockpitSection>
+          ) : (
+            <PublicPulsePanel situation={situation} brief={brief} />
+          )
         ) : null}
 
         {activeTab === "win" ? (
           <CockpitSection
-            title="Πώς κερδίζεται το θέμα"
-            subtitle="Στρατηγική δυναμική και καθαρό framing"
+            title={probeView?.primaryTabLabel || "Πώς κερδίζεται το θέμα"}
+            subtitle={winSection?.kicker || "Στρατηγική δυναμική και καθαρό framing"}
           >
             <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-5">
               <WinCard
                 title="Το παιχνίδι σήμερα"
                 tone="red"
-                textValue={text(
-                  diagnosis.agenda_reading,
+                textValue={
+                  winSection?.body ||
                   text(
-                    issue.dominant_frame,
-                    "Το παιχνίδι δεν έχει ακόμη πλήρως οριστεί.",
-                  ),
-                )}
+                    diagnosis.agenda_reading,
+                    text(
+                      issue.dominant_frame,
+                      "Το παιχνίδι δεν έχει ακόμη πλήρως οριστεί.",
+                    ),
+                  )
+                }
               />
               <WinCard
                 title="Η παγίδα"
                 tone="amber"
-                textValue={text(
-                  diagnosis.strategic_risk,
+                textValue={
+                  winSection?.bullets?.[0] ||
                   text(
-                    issue.priming_risk,
-                    "Το ρίσκο είναι πρόωρη ή άστοχη αντίδραση.",
-                  ),
-                )}
+                    diagnosis.strategic_risk,
+                    text(
+                      issue.priming_risk,
+                      "Το ρίσκο είναι πρόωρη ή άστοχη αντίδραση.",
+                    ),
+                  )
+                }
               />
               <WinCard
                 title="Ευνοϊκή διάσταση"
                 tone="emerald"
-                textValue={text(
-                  diagnosis.strategic_opportunity,
+                textValue={
+                  winSection?.bullets?.[1] ||
                   text(
-                    issue.opportunity,
-                    "Να εισαχθεί διάσταση θεσμικής σοβαρότητας και λύσης.",
-                  ),
-                )}
+                    diagnosis.strategic_opportunity,
+                    text(
+                      issue.opportunity,
+                      "Να εισαχθεί διάσταση θεσμικής σοβαρότητας και λύσης.",
+                    ),
+                  )
+                }
               />
               <WinCard
                 title="Κίνηση αναδιάταξης"
                 tone="purple"
-                textValue={text(
-                  diagnosis.recommended_posture,
-                  "Μετατόπιση από άμυνα σε τεκμηριωμένη πρόταση.",
-                )}
+                textValue={
+                  winSection?.bullets?.[2] ||
+                  text(
+                    diagnosis.recommended_posture,
+                    "Μετατόπιση από άμυνα σε τεκμηριωμένη πρόταση.",
+                  )
+                }
               />
               <WinCard
                 title="Ακολουθία"
                 tone="zinc"
                 textValue={
+                  winSection?.bullets?.[3] ||
                   list(actionPlan.next_24h)[0] ||
                   "Πρώτα παρακολούθηση, μετά ασφαλής δημόσια γραμμή, μετά κλιμάκωση μόνο με νέα στοιχεία."
                 }
@@ -2736,7 +3009,7 @@ function ActiveSituationWorkspace({
             subtitle="Πάντα A / B / Γ — όταν δεν υπάρχουν AI options, εμφανίζονται ως pending"
           >
             <div className="grid gap-3 xl:grid-cols-3">
-              {decisionOptions(brief).map((option) => (
+              {effectiveDecisionOptions.map((option) => (
                 <DecisionCard key={option.label} {...option} />
               ))}
             </div>
@@ -2750,10 +3023,11 @@ function ActiveSituationWorkspace({
               subtitle="Communication material"
             >
               <p className="text-lg font-semibold leading-8 text-zinc-100">
-                {text(
-                  messages.central_line,
-                  "Δεν υπάρχει ακόμη κεντρική γραμμή από το strategy brief.",
-                )}
+                {materialSection?.material?.briefing ||
+                  text(
+                    messages.central_line,
+                    "Δεν υπάρχει ακόμη κεντρική γραμμή από το strategy brief.",
+                  )}
               </p>
             </CockpitSection>
             <CockpitSection
@@ -2761,18 +3035,20 @@ function ActiveSituationWorkspace({
               subtitle="Safe public version"
             >
               <p className="text-sm leading-7 text-zinc-300">
-                {text(
-                  messages.institutional_version,
-                  "Εκκρεμεί θεσμική εκδοχή.",
-                )}
+                {materialSection?.material?.suggestedStatement ||
+                  text(
+                    messages.institutional_version,
+                    "Εκκρεμεί θεσμική εκδοχή.",
+                  )}
               </p>
             </CockpitSection>
             <CockpitSection title="Αν μας επιτεθούν" subtitle="Response seed">
               <p className="text-sm leading-7 text-zinc-300">
-                {text(
-                  messages.answer_if_attacked,
-                  "Εκκρεμεί απάντηση σε πιθανή επίθεση.",
-                )}
+                {materialSection?.material?.internalNote ||
+                  text(
+                    messages.answer_if_attacked,
+                    "Εκκρεμεί απάντηση σε πιθανή επίθεση.",
+                  )}
               </p>
             </CockpitSection>
             <CockpitSection
