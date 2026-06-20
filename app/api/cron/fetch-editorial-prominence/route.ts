@@ -57,7 +57,7 @@ type FrontpagesFetchResult = {
   attempts: Array<{ method: string; ok: boolean; status?: number; error?: string }>;
 };
 
-const MODE = "fetch_editorial_prominence_frontpages_v2_1";
+const MODE = "fetch_editorial_prominence_frontpages_v2_2";
 const TARGET_TABLE = "editorial_prominence_signals";
 const SOURCE_URL = "https://www.frontpages.gr/";
 const READER_FALLBACK_URL = "https://r.jina.ai/http://r.jina.ai/http://https://www.frontpages.gr/";
@@ -110,6 +110,41 @@ const BLOCKED_SOURCE_ALIASES = [
   "ηχω των δημοπρασιων",
   "γενικη δημοπρασιων",
 ];
+
+const LOCAL_OR_REGIONAL_NOISE_TERMS = [
+  "αμαρυσια",
+  "μαρουσι",
+  "πελλας",
+  "πελλα",
+  "του νοτου",
+  "νοτου",
+  "τοπικη",
+  "τοπικα",
+  "θεσσαλια",
+  "κρητη",
+  "πατρα",
+  "λαρισα",
+  "ηπειρος",
+  "μακεδονια",
+  "θρακη",
+  "κυκλαδες",
+  "δωδεκανησα",
+];
+
+const IMPORTANT_UNCLASSIFIED_SOURCE_KEYS = new Set([
+  "kathimerini",
+  "tanea",
+  "apogevmatini",
+  "efsyn",
+  "rizospastis",
+  "eleftheros_typos",
+  "kontra_news",
+  "estia",
+  "parapolitika",
+  "political",
+  "dimokratia",
+  "naftemporiki",
+]);
 
 const MICRO_AGENDA_RULES: MicroAgendaRule[] = [
   {
@@ -193,7 +228,7 @@ const MICRO_AGENDA_RULES: MicroAgendaRule[] = [
     id: "hormuz_geopolitical_risk",
     label: "Ορμούζ / γεωπολιτικό ρίσκο",
     parent: "Διεθνή / γεωπολιτική",
-    keywords: ["ορμουζ", "ιραν", "ισραηλ", "περσικος", "γεωπολιτικ", "πετρελαιο", "κυρωσεις", "ηπα", "λιβανο", "χεζμπολαχ", "πολεμο"],
+    keywords: ["ορμουζ", "ιραν", "ισραηλ", "περσικος", "γεωπολιτικ", "πετρελαιο", "κυρωσεις", "ηπα", "λιβανο", "χεζμπολαχ", ],
     priority: 35,
   },
   {
@@ -228,8 +263,8 @@ const MICRO_AGENDA_RULES: MicroAgendaRule[] = [
     id: "wages_labor_rights",
     label: "Μισθοί / εργασιακά δικαιώματα",
     parent: "Εργασία",
-    keywords: ["μισθ", "εργασια", "εργασιακ", "κατωτατος", "συλλογικες συμβασεις", "απεργ", "λεφτα"],
-    priority: 25,
+    keywords: ["μισθ", "εργασια", "εργασιακ", "κατωτατος", "συλλογικες συμβασεις", "απεργ", "λεφτα", "κερδη", "υγεια", "παιδεια", "θυσια"],
+    priority: 45,
   },
 ];
 
@@ -334,6 +369,36 @@ function isBlockedLabel(label: string): boolean {
   return BLOCKED_SOURCE_ALIASES.some((blocked) => normalized.includes(normalizeText(blocked)));
 }
 
+function isLocalOrRegionalNoiseLabel(label: string): boolean {
+  const normalized = normalizeText(label);
+  return LOCAL_OR_REGIONAL_NOISE_TERMS.some((term) => normalized.includes(normalizeText(term)));
+}
+
+function isGenericFrontpageOnly(headline: string, source: FrontpageSource): boolean {
+  const normalized = normalizeText(headline);
+  const sourceName = normalizeText(source.name);
+  if (!normalized) return true;
+  if (normalized === sourceName) return true;
+  if (normalized === normalizeText(`Πρωτοσέλιδο: ${source.name}`)) return true;
+  if (normalized.startsWith("πρωτοσελιδο") && source.aliases.some((alias) => normalized.includes(normalizeText(alias)))) return true;
+  return false;
+}
+
+function isMeaningfulFrontpageHeadline(headline: string, source: FrontpageSource): boolean {
+  const normalized = normalizeText(headline);
+  if (isGenericFrontpageOnly(headline, source)) return false;
+  if (normalized.length < 10) return false;
+  if (isLocalOrRegionalNoiseLabel(headline)) return false;
+  return true;
+}
+
+function shouldKeepClassifiedItem(item: ClassifiedFrontpageItem): boolean {
+  if (item.microAgendaId) return true;
+  if (!IMPORTANT_UNCLASSIFIED_SOURCE_KEYS.has(item.sourceKey)) return false;
+  if (normalizeText(item.articleTitle).length < 14) return false;
+  return true;
+}
+
 function stripFrontpagePrefix(label: string): string {
   return decodeHtml(label)
     .replace(/^image:\s*/i, "")
@@ -348,6 +413,7 @@ function stripFrontpagePrefix(label: string): string {
 
 function sourceForLabel(label: string): FrontpageSource | null {
   if (isBlockedLabel(label)) return null;
+  if (isLocalOrRegionalNoiseLabel(label)) return null;
 
   const cleaned = normalizeText(stripFrontpagePrefix(label));
   const sortedSources = [...ALLOWED_FRONTPAGE_SOURCES].sort((a, b) => b.priority - a.priority);
@@ -488,6 +554,8 @@ function makeFrontpageItemFromLabel(label: string, href: string | null, imageUrl
   if (!source) return null;
 
   const headline = headlineForLabel(label, source);
+  if (!isMeaningfulFrontpageHeadline(headline, source)) return null;
+
   const frontpageUrl = href || imageUrl || `${SOURCE_URL}#${source.key}-${normalizeText(headline).replace(/\s+/g, "-").slice(0, 80)}`;
   const position = positionForCategory(items, source.category);
 
@@ -688,7 +756,7 @@ function toInsertRow(item: ClassifiedFrontpageItem, observedAt: string) {
       raw_label: item.rawLabel,
       classifier_score: item.classifierScore,
       classifier_confidence: item.classifierConfidence,
-      is_frontpages_gr_v2_1: true,
+      is_frontpages_gr_v2_2: true,
       observed_at: observedAt,
     },
   };
@@ -728,13 +796,15 @@ export async function GET(request: Request) {
     ? extractFrontpageItemsFromHtml(fetched.body, limit)
     : extractFrontpageItemsFromText(fetched.body, limit);
 
-  const classified = extracted
-    .map(classifyFrontpageItem)
+  const classifiedRaw = extracted.map(classifyFrontpageItem);
+  const classified = classifiedRaw
+    .filter(shouldKeepClassifiedItem)
     .sort((a, b) => b.prominenceScore - a.prominenceScore || a.position - b.position)
     .slice(0, limit);
 
   const rows = classified.map((item) => toInsertRow(item, observedAt));
   const classifiedCount = classified.filter((item) => item.microAgendaId).length;
+  const droppedAfterClassification = classifiedRaw.length - classified.length;
 
   let writeError: string | null = null;
   let written = 0;
@@ -771,7 +841,7 @@ export async function GET(request: Request) {
         name: source.name,
         category: source.category,
       })),
-      classifier: "local_frontpage_micro_agenda_keyword_rules_v2_1",
+      classifier: "local_frontpage_micro_agenda_keyword_rules_v2_2",
       fetch_method: fetched.method,
       fetch_attempts: fetched.attempts,
       parsed_format: fetched.format,
@@ -779,6 +849,8 @@ export async function GET(request: Request) {
       limit,
     },
     frontpages_extracted: extracted.length,
+    frontpages_after_cleanup: classified.length,
+    frontpages_dropped_after_classification: droppedAfterClassification,
     frontpages_considered: classified.length,
     classified_frontpages: classifiedCount,
     dry_run: dryRun,
