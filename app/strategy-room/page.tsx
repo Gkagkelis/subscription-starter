@@ -2030,7 +2030,16 @@ function LeftSidebar({
     probeClusterId?: string;
     probeEventId?: string | null;
   };
-  const agendaItems = useMemo(() => {
+  type AgendaSidebarItem = {
+    topic: string;
+    score: number;
+    count: number;
+    rank: number;
+    events: AgendaEvent[];
+    probeClusterId?: string;
+    statusLabel?: string;
+  };
+  const agendaItems = useMemo<AgendaSidebarItem[]>(() => {
     if (agendaMap && agendaMap.length) {
       return agendaMap.slice(0, 8).map((item, index) => ({
         topic: item.title,
