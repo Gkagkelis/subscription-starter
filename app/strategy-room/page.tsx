@@ -739,6 +739,26 @@ function evidenceArticlesFromSituation(
     : [];
 }
 
+function evidenceArticlesFromProbeItem(
+  item?: ProbeAgendaMapItem | null,
+): EvidenceArticleItem[] {
+  const articles = item?.raw?.evidence_articles;
+  if (!Array.isArray(articles)) return [];
+
+  return articles.slice(0, 8).map((article, index) => ({
+    article_id:
+      typeof article.article_id === "string"
+        ? article.article_id
+        : `${item?.id || "probe"}-${index}`,
+    title: article.title || "Άρθρο τεκμηρίωσης",
+    source: article.source || "Πηγή",
+    url: article.url || null,
+    published_at: article.published_at || null,
+    score: article.score ?? null,
+    role: article.role || "primary",
+  }));
+}
+
 function articleDate(article?: EvidenceArticleItem | null) {
   return shortDate(article?.published_at || null);
 }
@@ -1283,6 +1303,10 @@ export default function StrategyRoomPage() {
     return buildEventIntelligenceView(activeProbeItem.raw, activeProbeEvent);
   }, [activeProbeEvent, activeProbeItem]);
 
+  const activeProbeEvidenceArticles = useMemo(() => {
+    return evidenceArticlesFromProbeItem(activeProbeItem);
+  }, [activeProbeItem]);
+
   const probeSituationCount = useMemo(() => {
     return probeAgendaMap.reduce((sum, item) => sum + item.events.length, 0);
   }, [probeAgendaMap]);
@@ -1441,7 +1465,10 @@ export default function StrategyRoomPage() {
     activeSituation?.strategic_boost_score,
     cockpitIntensityScore(activeSituation, activeScore),
   );
-  const activeEvidenceArticles = evidenceArticlesFromSituation(activeSituation);
+  const activeSituationEvidenceArticles = evidenceArticlesFromSituation(activeSituation);
+  const activeEvidenceArticles = activeProbeEvidenceArticles.length
+    ? activeProbeEvidenceArticles
+    : activeSituationEvidenceArticles;
   const activeDocLevel =
     activeSituation?.documentation_level ||
     issue.documentation_level ||
@@ -1828,6 +1855,7 @@ export default function StrategyRoomPage() {
               onSelectOverviewTopic={setActiveOverviewTopic}
               selectedPartyImplication={selectedPartyImplication}
               probeView={activeProbeView}
+              probeEvidenceArticles={activeProbeEvidenceArticles}
             />
 
             <AdvisorDock
@@ -1860,6 +1888,9 @@ export default function StrategyRoomPage() {
           brief={brief}
           agenda={rankedAgenda}
           politicalEnvironment={politicalEnvironment}
+          probeView={activeProbeView}
+          probeItem={activeProbeItem}
+          probeEvidenceArticles={activeProbeEvidenceArticles}
         />
       </div>
     </main>
@@ -2464,6 +2495,7 @@ function ActiveSituationWorkspace({
   onSelectOverviewTopic,
   selectedPartyImplication,
   probeView,
+  probeEvidenceArticles,
 }: {
   activeTab: SituationTab;
   onTabChange: (tab: SituationTab) => void;
@@ -2483,6 +2515,7 @@ function ActiveSituationWorkspace({
   onSelectOverviewTopic: (topic: string) => void;
   selectedPartyImplication: string;
   probeView?: EventIntelligenceView | null;
+  probeEvidenceArticles?: EvidenceArticleItem[];
 }) {
   const issue = brief.issue || {};
   const daily = brief.daily_brief || {};
@@ -2491,7 +2524,10 @@ function ActiveSituationWorkspace({
   const monitoring = brief.monitoring_plan || {};
   const messages = brief.message_package || {};
   const evidence = brief.evidence || {};
-  const activeEvidenceArticles = evidenceArticlesFromSituation(situation);
+  const situationEvidenceArticles = evidenceArticlesFromSituation(situation);
+  const activeEvidenceArticles = probeEvidenceArticles?.length
+    ? probeEvidenceArticles
+    : situationEvidenceArticles;
   const probeSection = (tab: EventIntelligenceView["sections"][number]["tab"]) =>
     probeView?.sections.find((section) => section.tab === tab);
   const strategicSection = probeSection("strategic_image");
@@ -3462,6 +3498,9 @@ function RightInspector({
   brief,
   agenda,
   politicalEnvironment,
+  probeView,
+  probeItem,
+  probeEvidenceArticles,
 }: {
   situation: LiveSituationRow | null;
   title: string;
@@ -3471,6 +3510,9 @@ function RightInspector({
   brief: StrategicBrief;
   agenda: RankedAgenda[];
   politicalEnvironment: PoliticalEnvironment | null;
+  probeView?: EventIntelligenceView | null;
+  probeItem?: ProbeAgendaMapItem | null;
+  probeEvidenceArticles?: EvidenceArticleItem[];
 }) {
   const diagnosis = brief.strategic_diagnosis || {};
   const issue = brief.issue || {};
@@ -3480,13 +3522,34 @@ function RightInspector({
   const redTeam = redTeamItems(situation?.red_team);
   const polls = recentPolls(politicalEnvironment);
   const actors = topActorTrends(politicalEnvironment);
-  const inspectorTopic = text(
+  const probeWhySection = probeView?.sections.find(
+    (section) => section.tab === "why_exists",
+  );
+  const probeSourcesSection = probeView?.sections.find(
+    (section) => section.tab === "sources_factors",
+  );
+  const probePulseSection = probeView?.sections.find(
+    (section) => section.tab === "public_pulse",
+  );
+  const inspectorTopic = probeView?.microAgenda || text(
     situation?.topic || situation?.category || issue.topic,
     "Πολιτική ατζέντα",
   );
-  const inspectorArticleCount = numberValue(situation?.article_count, 0);
-  const inspectorSourceCount = numberValue(situation?.source_count, 0);
-  const inspectorEvidenceArticles = evidenceArticlesFromSituation(situation);
+  const inspectorEvidenceArticles = probeEvidenceArticles?.length
+    ? probeEvidenceArticles
+    : evidenceArticlesFromSituation(situation);
+  const inspectorArticleCount = probeItem
+    ? numberValue(probeItem.raw.article_count, inspectorEvidenceArticles.length)
+    : numberValue(situation?.article_count, 0);
+  const inspectorSourceCount = probeItem
+    ? numberValue(
+        probeItem.raw.source_count,
+        new Set(inspectorEvidenceArticles.map((article) => article.source).filter(Boolean)).size,
+      )
+    : numberValue(situation?.source_count, 0);
+  const inspectorDocumentationLabel =
+    probeView?.evidenceLabel ||
+    docLabelFromScore(evidenceConfidenceScore(inspectorArticleCount, inspectorSourceCount));
 
   return (
     <aside className="flex w-[240px] shrink-0 flex-col overflow-hidden bg-[#060a14]">
@@ -3509,10 +3572,10 @@ function RightInspector({
             </div>
           </div>
           <p className="mt-3 text-[11px] leading-6 text-zinc-400">
-            {readWhyText(situation, brief)}
+            {probeWhySection?.body || readWhyText(situation, brief)}
           </p>
           <div className="mt-3 text-[10px] leading-5 text-zinc-500">
-            Τεκμηρίωση: {docLabelFromScore(evidenceConfidenceScore(inspectorArticleCount, inspectorSourceCount))}
+            Τεκμηρίωση: {inspectorDocumentationLabel}
           </div>
         </InspectorPanel>
 
@@ -3522,42 +3585,52 @@ function RightInspector({
 
         <InspectorPanel title="Κύριοι παράγοντες">
           <div className="grid gap-3">
-            {Array.isArray(brief.key_drivers) && brief.key_drivers.length
-              ? brief.key_drivers
-                  .slice(0, 5)
-                  .map((d, index) => (
-                    <DriverBar
-                      key={`${d?.label || "driver"}-${index}`}
-                      label={text(d?.label, "Παράγοντας")}
-                      score={numberValue(d?.value, score)}
-                      trend=""
-                      compact
-                    />
-                  ))
-              : (agenda.length
-                  ? agenda.slice(0, 4)
-                  : [
-                      {
-                        topic: title,
-                        score,
-                        signalLabel: riskLabel(situation?.political_risk_level),
-                      },
-                    ]
-                ).map((item, index) => (
+            {probeSourcesSection?.bullets?.length
+              ? probeSourcesSection.bullets.slice(0, 5).map((item, index) => (
                   <DriverBar
-                    key={`${item.topic}-${index}`}
-                    label={item.topic || "Παράγοντας"}
-                    score={numberValue(
-                      (item as RankedAgenda).score ?? score,
-                      score,
-                    )}
-                    trend={
-                      (item as RankedAgenda).signalLabel ||
-                      riskLabel(situation?.political_risk_level)
-                    }
+                    key={`${item}-${index}`}
+                    label={item}
+                    score={probeView?.gauges?.[index]?.value ?? score}
+                    trend={probeView?.statusLabel || ""}
                     compact
                   />
-                ))}
+                ))
+              : Array.isArray(brief.key_drivers) && brief.key_drivers.length
+                ? brief.key_drivers
+                    .slice(0, 5)
+                    .map((d, index) => (
+                      <DriverBar
+                        key={`${d?.label || "driver"}-${index}`}
+                        label={text(d?.label, "Παράγοντας")}
+                        score={numberValue(d?.value, score)}
+                        trend=""
+                        compact
+                      />
+                    ))
+                : (agenda.length
+                    ? agenda.slice(0, 4)
+                    : [
+                        {
+                          topic: title,
+                          score,
+                          signalLabel: riskLabel(situation?.political_risk_level),
+                        },
+                      ]
+                  ).map((item, index) => (
+                    <DriverBar
+                      key={`${item.topic}-${index}`}
+                      label={item.topic || "Παράγοντας"}
+                      score={numberValue(
+                        (item as RankedAgenda).score ?? score,
+                        score,
+                      )}
+                      trend={
+                        (item as RankedAgenda).signalLabel ||
+                        riskLabel(situation?.political_risk_level)
+                      }
+                      compact
+                    />
+                  ))}
           </div>
         </InspectorPanel>
 
@@ -3565,29 +3638,41 @@ function RightInspector({
           <div className="space-y-3">
             <MiniBox
               compact
-              title="Κοινωνικό framing"
-              textValue={pickString(
-                pulse,
-                ["dominant_public_frame", "frame"],
-                text(issue.dominant_frame, "Δεν έχει υπολογιστεί."),
-              )}
+              title="Δημόσιος παλμός"
+              textValue={
+                probePulseSection?.body ||
+                pickString(
+                  pulse,
+                  ["dominant_public_frame", "frame"],
+                  text(issue.dominant_frame, "Δεν έχει υπολογιστεί."),
+                )
+              }
             />
             <MiniBox
               compact
               title="Διάθεση"
-              textValue={pickString(
-                pulse,
-                ["dominant_emotion", "emotion"],
-                "Signal υπό επεξεργασία",
-              )}
+              textValue={
+                probeView?.sensitiveMode
+                  ? "Προσεκτικός χειρισμός"
+                  : pickString(
+                      pulse,
+                      ["dominant_emotion", "emotion"],
+                      "Signal υπό επεξεργασία",
+                    )
+              }
             />
-            <BarMeter score={publicPulseScore(situation)} label="mood" />
+            <BarMeter
+              score={probeView?.gauges?.find((gauge) => gauge.key === "public_pulse")?.value ?? publicPulseScore(situation)}
+              label="mood"
+            />
             <TinyWarning>
-              {pickString(
-                pulse,
-                ["bias_warning"],
-                "Public pulse = ένδειξη, όχι κοινή γνώμη χωρίς δημοσκόπηση.",
-              )}
+              {probeView
+                ? "Δημόσιος παλμός = ένδειξη, όχι κοινή γνώμη χωρίς δημοσκόπηση."
+                : pickString(
+                    pulse,
+                    ["bias_warning"],
+                    "Public pulse = ένδειξη, όχι κοινή γνώμη χωρίς δημοσκόπηση.",
+                  )}
             </TinyWarning>
           </div>
         </InspectorPanel>
