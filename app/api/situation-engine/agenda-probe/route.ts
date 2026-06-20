@@ -65,7 +65,7 @@ const CONFIG = {
   minimumRuleScore: 10,
   monitoringCap: 59,
   highSeverityScore: 88,
-  formulaVersion: "micro_agenda_hardened_sensitive_v2",
+  formulaVersion: "micro_agenda_hardened_sensitive_v3",
 };
 
 const MICRO_AGENDA_RULES: MicroAgendaRule[] = [
@@ -73,17 +73,32 @@ const MICRO_AGENDA_RULES: MicroAgendaRule[] = [
   { id: "cost_of_living", label: "Ακρίβεια / κόστος ζωής", parentHints: ["οικονομια", "κοινωνια", "ακριβεια"], priority: 20, keywords: [
     { term: "ακριβεια", weight: 12, mode: "exact" }, { term: "πληθωρισ", weight: 10, mode: "prefix" }, { term: "τιμες", weight: 6, mode: "exact" }, { term: "καλαθι", weight: 6, mode: "exact" }, { term: "κοστος ζωης", weight: 11, mode: "phrase" }, { term: "τροφ", weight: 5, mode: "prefix" },
   ]},
-  { id: "consumer_price_tools", label: "Ακρίβεια / σύγκριση τιμών / εργαλεία καταναλωτή", parentHints: ["οικονομια", "ακριβεια", "κοινωνια"], priority: 35, keywords: [
-    { term: "posokanei", weight: 16, mode: "exact" }, { term: "ποσο κανει", weight: 16, mode: "phrase" }, { term: "συγκριση τιμων", weight: 14, mode: "phrase" }, { term: "βασικα αγαθα", weight: 11, mode: "phrase" }, { term: "εργαλειο καταναλωτη", weight: 12, mode: "phrase" }, { term: "καταναλωτ", weight: 6, mode: "prefix" }, { term: "πλατφορμα", weight: 5, mode: "prefix" },
+  { id: "consumer_price_tools", label: "Ακρίβεια / σύγκριση τιμών / εργαλεία καταναλωτή", parentHints: ["οικονομια", "ακριβεια", "κοινωνια"], priority: 45, keywords: [
+    { term: "posokanei", weight: 18, mode: "exact" }, { term: "ποσο κανει", weight: 18, mode: "phrase" }, { term: "συγκριση τιμων", weight: 16, mode: "phrase" }, { term: "βασικα αγαθα", weight: 12, mode: "phrase" }, { term: "εργαλειο καταναλωτη", weight: 14, mode: "phrase" }, { term: "παρατηρητηριο τιμων", weight: 14, mode: "phrase" }, { term: "τιμες στα βασικα αγαθα", weight: 14, mode: "phrase" },
+  ]},
+  { id: "energy_heating_support", label: "Ενεργειακό κόστος / επίδομα θέρμανσης", parentHints: ["ακριβεια", "οικονομια", "κοινωνια", "ενεργεια"], priority: 50, keywords: [
+    { term: "επιδομα θερμανσης", weight: 18, mode: "phrase" }, { term: "θερμανση", weight: 11, mode: "prefix" }, { term: "ενεργειακο κοστος", weight: 15, mode: "phrase" }, { term: "λογαριασμοι ρευματος", weight: 14, mode: "phrase" }, { term: "ρευμα", weight: 8, mode: "exact" },
+  ]},
+  { id: "social_benefits_support", label: "Επιδόματα / κοινωνική στήριξη", parentHints: ["ακριβεια", "κοινωνια", "οικονομια", "εργασια", "ασφαλιστικο"], priority: 42, keywords: [
+    { term: "επιδομα", weight: 13, mode: "prefix" }, { term: "κοινωνικα προγραμματα", weight: 15, mode: "phrase" }, { term: "κοινωνικη στηριξη", weight: 15, mode: "phrase" }, { term: "ενισχυση νοικοκυριων", weight: 14, mode: "phrase" }, { term: "χρηματοδοτηση νοικοκυριων", weight: 13, mode: "phrase" },
   ]},
   { id: "banks_loans_private_debt", label: "Τράπεζες / δάνεια / ιδιωτικό χρέος", parentHints: ["οικονομια"], priority: 15, keywords: [
     { term: "τραπεζ", weight: 10, mode: "prefix" }, { term: "δανει", weight: 9, mode: "prefix" }, { term: "κοκκινα δανεια", weight: 14, mode: "phrase" }, { term: "ιδιωτικο χρεος", weight: 13, mode: "phrase" }, { term: "πλειστηριασ", weight: 12, mode: "prefix" }, { term: "fund", weight: 5, mode: "exact" }, { term: "servicer", weight: 6, mode: "prefix" },
   ]},
+  { id: "banking_consumer_protection", label: "Τράπεζες / καταναλωτική προστασία", parentHints: ["οικονομια", "τραπεζ"], priority: 60, keywords: [
+    { term: "τραπεζικος τομεας", weight: 16, mode: "phrase" }, { term: "τραπεζικο τομεα", weight: 16, mode: "phrase" }, { term: "προστασια καταναλωτων", weight: 18, mode: "phrase" }, { term: "νομοσχεδιο προστασιας καταναλωτων", weight: 20, mode: "phrase" }, { term: "τραπεζ", weight: 10, mode: "prefix" }, { term: "καταναλωτων", weight: 8, mode: "exact" },
+  ]},
   { id: "taxation_public_revenue", label: "Φορολογία / δημόσια έσοδα", parentHints: ["οικονομια", "φορολογια"], keywords: [
     { term: "φορο", weight: 8, mode: "prefix" }, { term: "φορολογ", weight: 10, mode: "prefix" }, { term: "τεκμηρι", weight: 8, mode: "prefix" }, { term: "φπα", weight: 9, mode: "exact" }, { term: "ενφια", weight: 9, mode: "exact" }, { term: "ααδε", weight: 8, mode: "exact" },
   ]},
-  { id: "debt_settlement_installments", label: "Ρύθμιση οφειλών / δόσεις", parentHints: ["φορολογια", "οικονομια", "ασφαλιστικο"], priority: 35, keywords: [
-    { term: "ρυθμιση οφειλων", weight: 15, mode: "phrase" }, { term: "οφειλετ", weight: 10, mode: "prefix" }, { term: "οφειλων", weight: 10, mode: "exact" }, { term: "δοσεις", weight: 11, mode: "exact" }, { term: "72 δοσεις", weight: 16, mode: "phrase" }, { term: "πλατφορμα", weight: 5, mode: "prefix" },
+  { id: "debt_settlement_installments", label: "Ρύθμιση οφειλών / δόσεις", parentHints: ["φορολογια", "οικονομια", "ασφαλιστικο"], priority: 45, keywords: [
+    { term: "ρυθμιση οφειλων", weight: 18, mode: "phrase" }, { term: "ρυθμιση φορολογικων χρεων", weight: 18, mode: "phrase" }, { term: "οφειλετ", weight: 10, mode: "prefix" }, { term: "οφειλων", weight: 10, mode: "exact" }, { term: "δοσεισ", weight: 11, mode: "exact" }, { term: "δοσεις", weight: 11, mode: "exact" }, { term: "72 δοσεις", weight: 18, mode: "phrase" }, { term: "72 δοσεισ", weight: 18, mode: "phrase" }, { term: "χρεη σε εφορια", weight: 14, mode: "phrase" },
+  ]},
+  { id: "income_protection_unseizable", label: "Ακατάσχετο / προστασία εισοδήματος", parentHints: ["ασφαλιστικο", "συνταξεις", "φορολογια", "οικονομια"], priority: 55, keywords: [
+    { term: "ακατασχετο", weight: 18, mode: "exact" }, { term: "ακατασχετου", weight: 18, mode: "exact" }, { term: "ακατασχετο οριο", weight: 20, mode: "phrase" }, { term: "μισθους και συνταξεις", weight: 15, mode: "phrase" }, { term: "προστασια εισοδηματος", weight: 14, mode: "phrase" },
+  ]},
+  { id: "professional_insurance_pensions", label: "Επαγγελματική ασφάλιση / επικουρικό", parentHints: ["ασφαλιστικο", "συνταξεις", "εργασια", "οικονομια"], priority: 50, keywords: [
+    { term: "επαγγελματικη ασφαλιση", weight: 20, mode: "phrase" }, { term: "επαγγελματικης ασφαλισης", weight: 20, mode: "phrase" }, { term: "επικουρικ", weight: 11, mode: "prefix" }, { term: "ασφαλιστικο νομοσχεδιο", weight: 14, mode: "phrase" }, { term: "κεραμεως", weight: 8, mode: "exact" },
   ]},
   { id: "public_debt_fiscal", label: "Δημόσιο χρέος / δημοσιονομικά", parentHints: ["οικονομια"], priority: 20, keywords: [
     { term: "δημοσιο χρεος", weight: 13, mode: "phrase" }, { term: "δημοσιου χρεους", weight: 13, mode: "phrase" }, { term: "χρεο", weight: 9, mode: "prefix" }, { term: "χρεου", weight: 9, mode: "prefix" }, { term: "πλεονασμα", weight: 8, mode: "prefix" }, { term: "ελλειμμα", weight: 8, mode: "prefix" }, { term: "δημοσιονομ", weight: 10, mode: "prefix" }, { term: "προυπολογισ", weight: 8, mode: "prefix" },
@@ -91,13 +106,16 @@ const MICRO_AGENDA_RULES: MicroAgendaRule[] = [
   { id: "business_market_competition", label: "Επιχειρήσεις / αγορά / ανταγωνισμός", parentHints: ["οικονομια"], keywords: [
     { term: "επιχειρη", weight: 7, mode: "prefix" }, { term: "αγορα", weight: 5, mode: "exact" }, { term: "ανταγωνισμ", weight: 9, mode: "prefix" }, { term: "καρτελ", weight: 9, mode: "prefix" }, { term: "επενδυ", weight: 7, mode: "prefix" }, { term: "αναπτυξ", weight: 6, mode: "prefix" },
   ]},
+  { id: "party_economic_programs", label: "Οικονομικά προγράμματα κομμάτων", parentHints: ["οικονομια", "πολιτικο", "κομμα"], priority: 50, keywords: [
+    { term: "οικονομικο οραμα", weight: 18, mode: "phrase" }, { term: "οραμα του πασοκ", weight: 18, mode: "phrase" }, { term: "πασοκ", weight: 9, mode: "exact" }, { term: "ανδρουλακη", weight: 9, mode: "prefix" }, { term: "σεβ", weight: 7, mode: "exact" }, { term: "προγραμμα οικονομιας", weight: 14, mode: "phrase" },
+  ]},
 
   // Στέγαση
   { id: "short_term_rentals_airbnb", label: "Βραχυχρόνιες μισθώσεις / Airbnb", parentHints: ["στεγαση", "οικονομια", "τουρισμ"], priority: 45, keywords: [
     { term: "airbnb", weight: 16, mode: "exact" }, { term: "βραχυχρονια", weight: 15, mode: "prefix" }, { term: "βραχυχρονιες μισθωσεις", weight: 18, mode: "phrase" }, { term: "μισθωσεις", weight: 7, mode: "prefix" },
   ]},
-  { id: "housing_renovation_programs", label: "Προγράμματα κατοικίας / ανακαινίσεις", parentHints: ["στεγαση", "οικονομια", "κοινωνια"], priority: 40, keywords: [
-    { term: "ανακαινιση κατοικιας", weight: 16, mode: "phrase" }, { term: "ανακαινισ", weight: 12, mode: "prefix" }, { term: "προγραμμα κατοικιας", weight: 14, mode: "phrase" }, { term: "δικαιουχ", weight: 6, mode: "prefix" },
+  { id: "housing_renovation_programs", label: "Προγράμματα κατοικίας / ανακαινίσεις", parentHints: ["στεγαση", "οικονομια", "κοινωνια", "ακριβεια"], priority: 58, keywords: [
+    { term: "ανακαινιζω", weight: 18, mode: "exact" }, { term: "ανακαινιση κατοικιας", weight: 18, mode: "phrase" }, { term: "ανακαινισ", weight: 14, mode: "prefix" }, { term: "προγραμμα κατοικιας", weight: 16, mode: "phrase" }, { term: "επιδοτησεις εως", weight: 10, mode: "phrase" }, { term: "δικαιουχ", weight: 6, mode: "prefix" },
   ]},
   { id: "housing_rents", label: "Στέγαση / ενοίκια", parentHints: ["στεγαση", "κοινωνια", "οικονομια"], priority: 25, keywords: [
     { term: "στεγασ", weight: 10, mode: "prefix" }, { term: "ενοικ", weight: 12, mode: "prefix" }, { term: "ενοικιαστη", weight: 11, mode: "prefix" }, { term: "οικονομικη ασφυξια", weight: 11, mode: "phrase" }, { term: "πρωτη κατοικια", weight: 12, mode: "phrase" }, { term: "κατοικι", weight: 5, mode: "prefix" },
@@ -169,11 +187,11 @@ const MICRO_AGENDA_RULES: MicroAgendaRule[] = [
   { id: "youth_violence", label: "Ανήλικοι / σχολική βία", parentHints: ["ασφαλεια", "νεολαια", "παιδεια", "κοινωνια"], sensitivity: "high", keywords: [
     { term: "ανηλικ", weight: 12, mode: "prefix" }, { term: "σχολικη βια", weight: 14, mode: "phrase" }, { term: "bullying", weight: 10, mode: "exact" }, { term: "ξυλοδαρμ", weight: 11, mode: "prefix" }, { term: "συμμορια ανηλικων", weight: 14, mode: "phrase" },
   ]},
-  { id: "gender_domestic_violence", label: "Έμφυλη / ενδοοικογενειακή βία", parentHints: ["ασφαλεια", "κοινωνια", "δικαιοσυνη"], sensitivity: "high", keywords: [
-    { term: "γυναικοκτον", weight: 16, mode: "prefix" }, { term: "ενδοοικογενειακ", weight: 14, mode: "prefix" }, { term: "εμφυλη βια", weight: 14, mode: "phrase" }, { term: "κακοποιησ", weight: 10, mode: "prefix" }, { term: "βιασμ", weight: 14, mode: "prefix" },
+  { id: "gender_domestic_violence", label: "Έμφυλη / ενδοοικογενειακή βία", parentHints: ["ασφαλεια", "κοινωνια", "δικαιοσυνη"], sensitivity: "high", priority: 95, keywords: [
+    { term: "γυναικοκτον", weight: 22, mode: "prefix" }, { term: "ενδοοικογενειακ", weight: 18, mode: "prefix" }, { term: "εμφυλη βια", weight: 18, mode: "phrase" }, { term: "κακοποιησ", weight: 12, mode: "prefix" }, { term: "βιασμ", weight: 18, mode: "prefix" }, { term: "συζυγ", weight: 8, mode: "prefix" }, { term: "συντροφο", weight: 8, mode: "prefix" },
   ]},
-  { id: "organized_crime_drugs", label: "Οργανωμένο έγκλημα / ναρκωτικά", parentHints: ["ασφαλεια", "δικαιοσυνη"], sensitivity: "medium", priority: 35, keywords: [
-    { term: "οργανωμενο εγκλημα", weight: 14, mode: "phrase" }, { term: "μαφια", weight: 10, mode: "exact" }, { term: "ναρκωτικ", weight: 13, mode: "prefix" }, { term: "κυκλωμα", weight: 11, mode: "prefix" }, { term: "διακινηση ναρκωτικων", weight: 16, mode: "phrase" }, { term: "βαρονοι ναρκωτικων", weight: 16, mode: "phrase" }, { term: "δολοφον", weight: 8, mode: "prefix" },
+  { id: "organized_crime_drugs", label: "Οργανωμένο έγκλημα / ναρκωτικά", parentHints: ["ασφαλεια", "δικαιοσυνη"], sensitivity: "medium", priority: 45, keywords: [
+    { term: "οργανωμενο εγκλημα", weight: 18, mode: "phrase" }, { term: "εγκληματικο δικτυο", weight: 17, mode: "phrase" }, { term: "διεθνες εγκληματικο δικτυο", weight: 18, mode: "phrase" }, { term: "μαφια", weight: 12, mode: "exact" }, { term: "ναρκωτικ", weight: 15, mode: "prefix" }, { term: "κοσμο των ναρκωτικων", weight: 18, mode: "phrase" }, { term: "κυκλωμα", weight: 13, mode: "prefix" }, { term: "διακινηση ναρκωτικων", weight: 20, mode: "phrase" }, { term: "βαρονοι ναρκωτικων", weight: 20, mode: "phrase" }, { term: "εν ψυχρω εκτελεση", weight: 11, mode: "phrase" },
   ]},
   { id: "justice_rule_of_law", label: "Δικαιοσύνη / κράτος δικαίου", parentHints: ["δικαιοσυνη", "θεσμ", "πολιτικο συστημα"], keywords: [
     { term: "δικαιοσυν", weight: 10, mode: "prefix" }, { term: "κρατος δικαιου", weight: 13, mode: "phrase" }, { term: "εισαγγελ", weight: 8, mode: "prefix" }, { term: "δικαστ", weight: 8, mode: "prefix" }, { term: "ανεξαρτητη αρχη", weight: 10, mode: "phrase" },
@@ -188,6 +206,9 @@ const MICRO_AGENDA_RULES: MicroAgendaRule[] = [
   ]},
   { id: "defense_armaments", label: "Άμυνα / εξοπλισμοί", parentHints: ["αμυνα", "εξωτερικη"], priority: 20, keywords: [
     { term: "εξοπλισ", weight: 13, mode: "prefix" }, { term: "οπλικ", weight: 9, mode: "prefix" }, { term: "φρεγατ", weight: 10, mode: "prefix" }, { term: "rafale", weight: 10, mode: "exact" }, { term: "f35", weight: 10, mode: "exact" }, { term: "belharra", weight: 9, mode: "exact" },
+  ]},
+  { id: "defense_drones_ukraine", label: "Drones / αμυντική τεχνολογία / Ουκρανία", parentHints: ["αμυνα", "εξωτερικη"], priority: 55, keywords: [
+    { term: "drone", weight: 18, mode: "exact" }, { term: "drones", weight: 18, mode: "exact" }, { term: "ουκρανικο drone", weight: 20, mode: "phrase" }, { term: "ουκρανια", weight: 8, mode: "exact" }, { term: "ζελενσκι", weight: 8, mode: "exact" }, { term: "αμυντικη τεχνολογια", weight: 14, mode: "phrase" },
   ]},
   { id: "foreign_policy_turkey", label: "Ελληνοτουρκικά / εξωτερική πολιτική", parentHints: ["εξωτερικη", "αμυνα"], keywords: [
     { term: "ελληνοτουρκ", weight: 14, mode: "prefix" }, { term: "τουρκ", weight: 8, mode: "prefix" }, { term: "αιγαιο", weight: 9, mode: "exact" }, { term: "κυπρ", weight: 8, mode: "prefix" }, { term: "υφαλοκρηπ", weight: 10, mode: "prefix" }, { term: "αοζ", weight: 9, mode: "exact" },
@@ -296,6 +317,28 @@ function prepareRule(rule: MicroAgendaRule): PreparedRule {
 const PREPARED_RULES = MICRO_AGENDA_RULES.map(prepareRule);
 const PREPARED_SENSITIVE_KEYWORDS = SENSITIVE_KEYWORDS.map(prepareKeyword);
 
+function preparedRuleById(ruleId: string): PreparedRule | null {
+  return PREPARED_RULES.find((rule) => rule.id === ruleId) || null;
+}
+
+function forcedClassificationResult(ruleId: string, matches: string[], ruleScore: number): ClassificationResult | null {
+  const rule = preparedRuleById(ruleId);
+  if (!rule) return null;
+  return {
+    micro_agenda_id: rule.id,
+    micro_agenda: rule.label,
+    confidence: clampScore(ruleScore * 3 + Math.min(25, matches.length * 5)),
+    matches,
+    mode: "rule_based_micro_agenda",
+    rule_score: ruleScore,
+  };
+}
+
+function scoreInlineTerms(index: ReturnType<typeof makeTextIndex>, keywords: KeywordSpec[]) {
+  return scoreKeywords(keywords.map(prepareKeyword), index);
+}
+
+
 function keywordMatches(keyword: PreparedKeyword, index: ReturnType<typeof makeTextIndex>): boolean {
   const term = keyword.normalized;
   if (!term) return false;
@@ -364,6 +407,89 @@ function eventText(event: any): string {
     .join(" ");
 }
 
+function forcedClassification(event: any, parentIndex: ReturnType<typeof makeTextIndex>, index: ReturnType<typeof makeTextIndex>): ClassificationResult | null {
+  // Hard guards for high-risk conflicts. These prevent generic terms like
+  // "δολοφονία" from overpowering more specific, sensitive categories.
+  const gender = scoreInlineTerms(index, [
+    { term: "γυναικοκτον", weight: 22, mode: "prefix" },
+    { term: "ενδοοικογενειακ", weight: 18, mode: "prefix" },
+    { term: "εμφυλη βια", weight: 18, mode: "phrase" },
+    { term: "συζυγ", weight: 9, mode: "prefix" },
+    { term: "συντροφο", weight: 9, mode: "prefix" },
+    { term: "βιασμ", weight: 18, mode: "prefix" },
+  ]);
+  if (gender.score >= 18) return forcedClassificationResult("gender_domestic_violence", gender.matches, 60 + gender.score);
+
+  const bankingConsumer = scoreInlineTerms(index, [
+    { term: "τραπεζ", weight: 10, mode: "prefix" },
+    { term: "προστασια καταναλωτων", weight: 18, mode: "phrase" },
+    { term: "νομοσχεδιο προστασιας καταναλωτων", weight: 20, mode: "phrase" },
+    { term: "τραπεζικος τομεας", weight: 15, mode: "phrase" },
+    { term: "τραπεζικο τομεα", weight: 15, mode: "phrase" },
+  ]);
+  if (bankingConsumer.score >= 25) return forcedClassificationResult("banking_consumer_protection", bankingConsumer.matches, 55 + bankingConsumer.score);
+
+  const drugs = scoreInlineTerms(index, [
+    { term: "ναρκωτικ", weight: 15, mode: "prefix" },
+    { term: "κυκλωμα", weight: 12, mode: "prefix" },
+    { term: "διακινηση ναρκωτικων", weight: 20, mode: "phrase" },
+    { term: "βαρονοι ναρκωτικων", weight: 20, mode: "phrase" },
+    { term: "εγκληματικο δικτυο", weight: 15, mode: "phrase" },
+  ]);
+  if (drugs.score >= 15) return forcedClassificationResult("organized_crime_drugs", drugs.matches, 45 + drugs.score);
+
+  const accident = scoreInlineTerms(index, [
+    { term: "λουνα παρκ", weight: 18, mode: "phrase" },
+    { term: "δυστυχημ", weight: 14, mode: "prefix" },
+    { term: "δημαρχ", weight: 8, mode: "prefix" },
+    { term: "αργια", weight: 8, mode: "exact" },
+  ]);
+  if (accident.score >= 22 && parentIndex.tokens.some((token) => token.startsWith("πολιτικ") || token.startsWith("προστασια"))) {
+    return forcedClassificationResult("public_safety_accidents", accident.matches, 45 + accident.score);
+  }
+
+  const housingRenovation = scoreInlineTerms(index, [
+    { term: "ανακαινιζω", weight: 18, mode: "exact" },
+    { term: "ανακαινισ", weight: 14, mode: "prefix" },
+    { term: "ανακαινιση κατοικιας", weight: 18, mode: "phrase" },
+  ]);
+  if (housingRenovation.score >= 14) return forcedClassificationResult("housing_renovation_programs", housingRenovation.matches, 50 + housingRenovation.score);
+
+  const consumerTools = scoreInlineTerms(index, [
+    { term: "posokanei", weight: 18, mode: "exact" },
+    { term: "ποσο κανει", weight: 18, mode: "phrase" },
+    { term: "συγκριση τιμων", weight: 16, mode: "phrase" },
+  ]);
+  if (consumerTools.score >= 16) return forcedClassificationResult("consumer_price_tools", consumerTools.matches, 50 + consumerTools.score);
+
+  const heating = scoreInlineTerms(index, [
+    { term: "επιδομα θερμανσης", weight: 18, mode: "phrase" },
+    { term: "θερμανση", weight: 11, mode: "prefix" },
+  ]);
+  if (heating.score >= 18) return forcedClassificationResult("energy_heating_support", heating.matches, 45 + heating.score);
+
+  const unseizable = scoreInlineTerms(index, [
+    { term: "ακατασχετο", weight: 18, mode: "exact" },
+    { term: "ακατασχετου", weight: 18, mode: "exact" },
+    { term: "ακατασχετο οριο", weight: 20, mode: "phrase" },
+  ]);
+  if (unseizable.score >= 18) return forcedClassificationResult("income_protection_unseizable", unseizable.matches, 45 + unseizable.score);
+
+  const professionalInsurance = scoreInlineTerms(index, [
+    { term: "επαγγελματικη ασφαλιση", weight: 20, mode: "phrase" },
+    { term: "επαγγελματικης ασφαλισης", weight: 20, mode: "phrase" },
+  ]);
+  if (professionalInsurance.score >= 20) return forcedClassificationResult("professional_insurance_pensions", professionalInsurance.matches, 45 + professionalInsurance.score);
+
+  const drone = scoreInlineTerms(index, [
+    { term: "drone", weight: 18, mode: "exact" },
+    { term: "ουκρανικο drone", weight: 20, mode: "phrase" },
+  ]);
+  if (drone.score >= 18) return forcedClassificationResult("defense_drones_ukraine", drone.matches, 45 + drone.score);
+
+  return null;
+}
+
 function stableFallbackSignature(event: any): string {
   const index = makeTextIndex(eventText(event));
   const meaningful = index.tokens
@@ -380,6 +506,9 @@ function classifyMicroAgenda(event: any): ClassificationResult {
   const parentTopic = String(event?.topic || "Μη ταξινομημένο");
   const parentIndex = makeTextIndex(parentTopic);
   const index = makeTextIndex(eventText(event));
+
+  const forced = forcedClassification(event, parentIndex, index);
+  if (forced) return forced;
 
   let best: { rule: PreparedRule; score: number; matches: string[] } | null = null;
 
@@ -618,6 +747,14 @@ function buildAgendaItem(group: { parentTopic: string; classification: Classific
   const trend = trendForTopic(group.parentTopic, trends);
   const sensitivity = classifySensitivity(group.events, group.classification.micro_agenda);
   const uiPolicy = sensitivityUiPolicy(sensitivity);
+  const eventClassifications = new Map<any, ClassificationResult>();
+  for (const event of sortedEvents) {
+    eventClassifications.set(event, classifyMicroAgenda(event));
+  }
+  const groupMatches = Array.from(new Set(Array.from(eventClassifications.values())
+    .filter((classification) => classification.micro_agenda_id === group.classification.micro_agenda_id)
+    .flatMap((classification) => classification.matches))).slice(0, 12);
+  const groupConfidence = Math.max(group.classification.confidence, ...Array.from(eventClassifications.values()).map((classification) => classification.confidence));
 
   const eventCount = group.events.length;
   const articleCount = group.events.reduce((sum, event) => sum + toNumber(event?.article_count), 0);
@@ -677,8 +814,8 @@ function buildAgendaItem(group: { parentTopic: string; classification: Classific
     search_interest_status: trend?.search_interest_status || "pending_fallback_50",
     newest_article_at: newest,
     classification_mode: group.classification.mode,
-    micro_agenda_confidence: group.classification.confidence,
-    micro_agenda_matches: group.classification.matches,
+    micro_agenda_confidence: groupConfidence,
+    micro_agenda_matches: groupMatches.length ? groupMatches : group.classification.matches,
     sensitivity_level: sensitivity.level,
     requires_human_review: sensitivity.requires_human_review,
     ranking_policy: sensitivity.ranking_policy,
@@ -700,22 +837,26 @@ function buildAgendaItem(group: { parentTopic: string; classification: Classific
           : type === "monitoring_event"
             ? "Μεμονωμένο φρέσκο γεγονός. Δεν πρέπει να γίνει κεντρική ατζέντα χωρίς περισσότερες πηγές, επανάληψη ή πολιτική κλιμάκωση."
             : "Συστάδα συγγενών σημάτων σε συγκεκριμένη micro-agenda, όχι απλή θεματική κατηγορία.",
-    top_events: sortedEvents.slice(0, eventLimit).map((event) => ({
-      id: event?.id,
-      title: event?.title,
-      parent_topic: group.parentTopic,
-      micro_agenda: group.classification.micro_agenda,
-      micro_agenda_confidence: group.classification.confidence,
-      micro_agenda_matches: group.classification.matches,
-      event_score: toNumber(event?.event_score),
-      status: event?.status,
-      article_count: toNumber(event?.article_count),
-      source_count: toNumber(event?.source_count),
-      documentation_level: event?.documentation_level,
-      detection_method: event?.detection_method,
-      last_article_at: event?.last_article_at,
-      event_classification: classifyEvent(event, sensitivity),
-    })),
+    top_events: sortedEvents.slice(0, eventLimit).map((event) => {
+      const eventClassification = eventClassifications.get(event) || group.classification;
+      return {
+        id: event?.id,
+        title: event?.title,
+        parent_topic: group.parentTopic,
+        micro_agenda: group.classification.micro_agenda,
+        event_micro_agenda_id: eventClassification.micro_agenda_id,
+        event_micro_agenda_confidence: eventClassification.confidence,
+        event_micro_agenda_matches: eventClassification.matches,
+        event_score: toNumber(event?.event_score),
+        status: event?.status,
+        article_count: toNumber(event?.article_count),
+        source_count: toNumber(event?.source_count),
+        documentation_level: event?.documentation_level,
+        detection_method: event?.detection_method,
+        last_article_at: event?.last_article_at,
+        event_classification: classifyEvent(event, sensitivity),
+      };
+    }),
     evidence_articles: topEvidence(group.events, evidenceLimit),
   };
 }
@@ -850,7 +991,7 @@ export async function GET(req: Request) {
 
   const basePayload = {
     success: true,
-    mode: "read_only_hardened_sensitive_micro_agenda_probe",
+    mode: "read_only_hardened_sensitive_micro_agenda_probe_v3",
     grouping: "parent_topic_to_micro_agenda_to_events",
     view,
     generated_at: new Date().toISOString(),
