@@ -665,3 +665,6 @@ function publicMetricLabel(metric?: string): string {
 function audienceLabel(row: CsvRow | null, profile: ResearchProfile): string | undefined {
   if (!row) return undefined;
   return profile.audienceGroups.find((group) => group.group_type === row.group_type && group.group === row.group)?.label || row.group;
+}
+
+// End of research-context v5.7.1
