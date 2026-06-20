@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { buildAgendaResearchContext, RESEARCH_CONTEXT_VERSION } from "../../../../lib/noraya/research-context";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 type MatchMode = "exact" | "prefix" | "phrase";
 
@@ -65,7 +67,7 @@ const CONFIG = {
   minimumRuleScore: 10,
   monitoringCap: 59,
   highSeverityScore: 88,
-  formulaVersion: "micro_agenda_frontpage_fusion_v5_4",
+  formulaVersion: "micro_agenda_frontpage_fusion_v5_5_research_context",
 };
 
 const MICRO_AGENDA_RULES: MicroAgendaRule[] = [
@@ -1106,7 +1108,8 @@ function buildAgendaItem(
   agendaTopics: any[],
   advisorBriefs: any[],
   editorialProminenceRows: any[],
-  debug: boolean
+  debug: boolean,
+  partyKey: string | null = null
 ) {
   const sortedEvents = [...group.events].sort((a, b) => toNumber(b?.event_score) - toNumber(a?.event_score));
   const bestEvent = sortedEvents[0];
@@ -1197,6 +1200,15 @@ function buildAgendaItem(
   }
   const eventLimit = debug ? CONFIG.topDebugEventsPerAgenda : CONFIG.topBriefEventsPerAgenda;
   const evidenceLimit = debug ? CONFIG.topDebugEvidencePerAgenda : CONFIG.topBriefEvidencePerAgenda;
+  const researchContext = buildAgendaResearchContext({
+    microAgendaId: group.classification.micro_agenda_id,
+    microAgenda: group.classification.micro_agenda,
+    parentTopic: group.parentTopic,
+    eventTitle: bestEvent?.title || group.classification.micro_agenda,
+    eventText: sortedEvents.map((event) => `${event?.title || ""} ${event?.summary || ""}`).join(" ").slice(0, 4000),
+    partyKey,
+  });
+
 
   return {
     type,
@@ -1261,7 +1273,7 @@ function buildAgendaItem(
       parent_only_signal: parentOnlySignal,
       formula: sensitivity.ranking_policy === "do_not_optimize_for_engagement"
         ? "sensitive capped: event + coverage + freshness + documentation"
-        : "v5.4: 36% event + 14% agenda + 16% calibrated coverage + 12% micro-agenda-preferred trends + 12% frontpage editorial prominence with parent-fallback cap + 7% freshness + 3% documentation + breadth bonus",
+        : "v5.5: 36% event + 14% agenda + 16% calibrated coverage + 12% micro-agenda-preferred trends + 12% frontpage editorial prominence with parent-fallback cap + 7% freshness + 3% documentation + breadth bonus, enriched with research context for narrative",
     },
     search_interest_score: sensitivity.ranking_policy === "do_not_optimize_for_engagement" ? null : trendScore,
     search_interest_status: trend?.search_interest_status || matchedAgendaTopic?.public_attention_signal ? "real_signal_bridge" : "no_trend_signal",
@@ -1276,6 +1288,7 @@ function buildAgendaItem(
     public_recommendation_allowed: uiPolicy.public_recommendation_allowed,
     language_policy: uiPolicy.language_policy,
     sensitivity_reasons: sensitivity.reasons,
+    research_context: researchContext,
     diagnosis: [
       hasClusterEvidence ? "multiple_events_or_sources" : "single_event_or_single_source_cap",
       type,
@@ -1314,10 +1327,10 @@ function buildAgendaItem(
   };
 }
 
-function buildLiveAgenda(events: any[], trends: any[], agendaTopics: any[], advisorBriefs: any[], editorialProminenceRows: any[], debug: boolean) {
+function buildLiveAgenda(events: any[], trends: any[], agendaTopics: any[], advisorBriefs: any[], editorialProminenceRows: any[], debug: boolean, partyKey: string | null = null) {
   const filteredEvents = events.filter((event) => !isSportsNoiseEvent(event));
   const sportsNoiseEventsFiltered = events.length - filteredEvents.length;
-  const items = groupEvents(filteredEvents).map((group) => buildAgendaItem(group, trends, agendaTopics, advisorBriefs, editorialProminenceRows, debug));
+  const items = groupEvents(filteredEvents).map((group) => buildAgendaItem(group, trends, agendaTopics, advisorBriefs, editorialProminenceRows, debug, partyKey));
   const agendaClusters = items
     .filter((item) => item.type !== "monitoring_event")
     .sort((a, b) => b.score - a.score || b.top_event_score - a.top_event_score || b.event_count - a.event_count);
@@ -1440,7 +1453,8 @@ export async function GET(req: Request) {
         .sort((a, b) => toTime(b) - toTime(a))[0]
     : null;
   const legacyHoursOld = newestLegacySeenAt ? hoursOld(newestLegacySeenAt) : null;
-  const result = buildLiveAgenda(events, trends, agendaTopics, advisorBriefs, editorialProminenceRows, debug);
+  const partyKey = searchParams.get("party") || null;
+  const result = buildLiveAgenda(events, trends, agendaTopics, advisorBriefs, editorialProminenceRows, debug, partyKey);
 
   const diagnostics = {
     read_only: true,
@@ -1452,8 +1466,10 @@ export async function GET(req: Request) {
     source_agenda_topics: "agenda_topics",
     source_advisor_agenda_briefs: "v_advisor_agenda_briefs_recent",
     source_editorial_prominence: "v_editorial_prominence_recent",
+    source_research_context: "public/noraya-data/public_opinion.csv + leader_traits.csv + vote_intention.csv",
+    research_context_version: RESEARCH_CONTEXT_VERSION,
     frontpage_layer_present: editorialProminenceRows.length > 0,
-    frontpage_layer_note: "v5.4 fuses political/economic frontpage editorial prominence, with full credit for exact micro-agenda matches and capped credit for parent-only fallback.",
+    frontpage_layer_note: "v5.5 fuses political/economic frontpage editorial prominence and enriches each micro-agenda with public-opinion, leader-trait and vote-intention research context.",
     legacy_situations_source: "v_situation_engine_live",
     event_rows_considered: events.length,
     event_rows_total_matching_window: eventsResult.count,
@@ -1463,7 +1479,7 @@ export async function GET(req: Request) {
     editorial_prominence_rows_considered: editorialProminenceRows.length,
     formula_version: CONFIG.formulaVersion,
     sports_noise_events_filtered: result.sports_noise_events_filtered,
-    calibration_note: "v5.4 keeps micro-agenda trend preference and caps parent-only frontpage fallback so adjacent micro-agendas do not inherit full Door B power.",
+    calibration_note: "v5.5 keeps micro-agenda trend preference, caps parent-only frontpage fallback, and enriches each agenda item with public-opinion, leader-trait and vote-intention research context.",
     classifier_features: [
       "safe_token_matching",
       "weighted_keywords",
@@ -1483,6 +1499,7 @@ export async function GET(req: Request) {
       "frontpage_editorial_prominence_fusion",
       "political_economic_frontpages_only",
       "frontpage_parent_fallback_cap",
+      "research_context_from_public_opinion_leader_traits_vote_intention",
     ],
     newest_legacy_situation_seen_at: newestLegacySeenAt,
     newest_legacy_situation_hours_old:
@@ -1496,7 +1513,7 @@ export async function GET(req: Request) {
 
   const basePayload = {
     success: true,
-    mode: "read_only_real_signal_bridge_frontpage_fusion_v5_4",
+    mode: "read_only_real_signal_bridge_frontpage_fusion_v5_5_research_context",
     grouping: "canonical_micro_agenda_to_parent_topics_to_events",
     view,
     generated_at: new Date().toISOString(),
