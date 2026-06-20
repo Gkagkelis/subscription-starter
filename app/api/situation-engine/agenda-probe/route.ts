@@ -65,7 +65,7 @@ const CONFIG = {
   minimumRuleScore: 10,
   monitoringCap: 59,
   highSeverityScore: 88,
-  formulaVersion: "micro_agenda_real_signal_bridge_v5",
+  formulaVersion: "micro_agenda_real_signal_bridge_v5_1",
 };
 
 const MICRO_AGENDA_RULES: MicroAgendaRule[] = [
@@ -419,6 +419,33 @@ function eventCoreText(event: any): string {
 
 function eventText(event: any): string {
   return [eventCoreText(event), eventEvidenceText(event)].filter(Boolean).join(" ");
+}
+
+function eventUrlText(event: any): string {
+  return Array.isArray(event?.evidence_articles)
+    ? event.evidence_articles.map((a: any) => `${a?.url || ""} ${a?.source || ""}`).join(" ")
+    : "";
+}
+
+function isSportsNoiseEvent(event: any): boolean {
+  const text = normalizeText([eventText(event), eventUrlText(event), event?.topic].filter(Boolean).join(" "));
+  if (!text) return false;
+
+  const sportsSignals = [
+    "sports", "football", "super league", "rebuilding", "ποδοσφαιρ", "μπασκετ", "αθλητικ",
+    "αρησ", "αρης", "παοκ", "αεκ", "ολυμπιακ", "παναθηναικ", "ομαδα", "παικτη", "προπονητ",
+  ];
+  const hardDefenseSignals = [
+    "νατο", "nato", "ενόπλων δυναμεων", "ενοπλων δυναμεων", "ενοπλεσ δυναμεισ", "στρατιωτικ",
+    "υπουργειο αμυνασ", "υπουργειο αμυνας", "πενταγων", "φρεγατ", "κορβετ", "drones", "drone",
+    "ορμουζ", "θαλασσια ασφαλεια", "γεεθα", "γεν", "πολεμικο ναυτικο", "αμυντικη τεχνολογια",
+  ];
+
+  const hasSportsSignal = sportsSignals.some((signal) => text.includes(normalizeText(signal)));
+  if (!hasSportsSignal) return false;
+
+  const hasHardDefenseSignal = hardDefenseSignals.some((signal) => text.includes(normalizeText(signal)));
+  return !hasHardDefenseSignal;
 }
 
 function forcedClassification(
@@ -826,6 +853,37 @@ function advisorBriefForAgenda(topicCandidates: string[], advisorBriefs: any[]) 
   return bestRowMatch(topicCandidates, advisorBriefs, (brief) => brief?.topic);
 }
 
+function isParentOnlyRealSignal(rowTopic: unknown, microAgenda: string, parentTopic: string): boolean {
+  const topic = String(rowTopic || "").trim();
+  if (!topic) return false;
+  const microOverlap = tokenOverlapScore(topic, microAgenda);
+  const parentOverlap = tokenOverlapScore(topic, parentTopic);
+  const topicNorm = normalizeText(topic);
+  const parentNorm = normalizeText(parentTopic);
+  const microNorm = normalizeText(microAgenda);
+
+  if (topicNorm === microNorm) return false;
+  if (topicNorm.includes(microNorm) || microNorm.includes(topicNorm)) return false;
+  return parentOverlap >= 0.5 || topicNorm === parentNorm || parentNorm.includes(topicNorm) || topicNorm.includes(parentNorm);
+}
+
+function calibratedCoverageScore(rawCoverage: number, fallbackCoverageScore: number, parentOnlySignal: boolean): number {
+  if (!parentOnlySignal) return clampScore(rawCoverage);
+  // Broad parent signals such as "Άμυνα" or "Στέγαση" should support a micro-agenda,
+  // but they must not make every child micro-agenda look equally front-page-important.
+  return Math.min(clampScore(rawCoverage), clampScore(fallbackCoverageScore + 22));
+}
+
+function calibratedAgendaSignalScore(rawAgendaScore: number, topEventScore: number, parentOnlySignal: boolean): number {
+  if (!parentOnlySignal) return clampScore(rawAgendaScore);
+  // Keep broad agenda-topic support visible, but let micro-level event evidence decide the ranking spread.
+  return Math.min(clampScore(rawAgendaScore), Math.max(52, Math.min(72, topEventScore + 4)));
+}
+
+function clusterBreadthBonus(eventCount: number, sourceCount: number, articleCount: number): number {
+  return Math.min(8, Math.max(0, Math.min(4, eventCount - 1) + Math.min(3, sourceCount - 1) + Math.min(3, Math.floor(articleCount / 4))));
+}
+
 function coverageLevelScore(value: unknown): number {
   const normalized = normalizeText(value);
   if (normalized.includes("high") || normalized.includes("υψη")) return 82;
@@ -943,11 +1001,18 @@ function buildAgendaItem(group: { parentTopic: string; parentTopics: Set<string>
   const freshness = freshnessScore(newest);
   const doc = Math.max(...group.events.map((event) => documentationScore(event?.documentation_level)), 0);
   const fallbackCoverageScore = clampScore(eventCount * 12 + articleCount * 6 + sourceCount * 12);
-  const coverageScore = realNewsCoverageScore(matchedAgendaTopic, matchedAdvisorBrief, fallbackCoverageScore);
+  const parentOnlyAgendaTopic = isParentOnlyRealSignal(matchedAgendaTopic?.name, group.classification.micro_agenda, group.parentTopic);
+  const parentOnlyAdvisorBrief = isParentOnlyRealSignal(matchedAdvisorBrief?.topic, group.classification.micro_agenda, group.parentTopic);
+  const parentOnlyTrend = isParentOnlyRealSignal(trend?.topic, group.classification.micro_agenda, group.parentTopic);
+  const parentOnlySignal = Boolean((matchedAgendaTopic && parentOnlyAgendaTopic) || (matchedAdvisorBrief && parentOnlyAdvisorBrief) || (trend && parentOnlyTrend));
+  const rawCoverageScore = realNewsCoverageScore(matchedAgendaTopic, matchedAdvisorBrief, fallbackCoverageScore);
+  const coverageScore = calibratedCoverageScore(rawCoverageScore, fallbackCoverageScore, parentOnlySignal);
   const trendScore = realTrendScore(trend, matchedAgendaTopic);
-  const agendaSignalScore = realAgendaScore(matchedAgendaTopic, matchedAdvisorBrief);
+  const rawAgendaSignalScore = realAgendaScore(matchedAgendaTopic, matchedAdvisorBrief);
+  const agendaSignalScore = calibratedAgendaSignalScore(rawAgendaSignalScore, topEventScore, parentOnlySignal);
   const editorialScore = editorialRelevanceScore(matchedAgendaTopic, matchedAdvisorBrief, group);
   const hasRealSignalBridge = Boolean(matchedAgendaTopic || matchedAdvisorBrief || trend);
+  const breadthBonus = clusterBreadthBonus(eventCount, sourceCount, articleCount);
 
   const hasClusterEvidence = eventCount >= 2 || articleCount >= 3 || sourceCount >= 2;
   const highSeverity = isHighSeveritySingleEvent(bestEvent);
@@ -957,11 +1022,13 @@ function buildAgendaItem(group: { parentTopic: string; parentTopics: Set<string>
   else if (highSeverity) type = "high_severity_single_event";
 
   const standardRawScore = clampScore(
-    0.35 * Math.max(topEventScore, agendaSignalScore) +
-      0.25 * coverageScore +
-      0.2 * trendScore +
-      0.12 * editorialScore +
-      0.08 * Math.max(freshness, doc)
+    0.42 * topEventScore +
+      0.18 * agendaSignalScore +
+      0.18 * coverageScore +
+      0.12 * trendScore +
+      0.07 * freshness +
+      0.03 * doc +
+      breadthBonus
   );
 
   const sensitiveRawScore = clampScore(
@@ -1011,18 +1078,26 @@ function buildAgendaItem(group: { parentTopic: string; parentTopics: Set<string>
       uses_advisor_agenda_briefs: Boolean(matchedAdvisorBrief),
       uses_topic_trend_signals: Boolean(trend),
       has_real_signal_bridge: hasRealSignalBridge,
+      parent_only_signal: parentOnlySignal,
+      parent_only_agenda_topic: parentOnlyAgendaTopic,
+      parent_only_advisor_brief: parentOnlyAdvisorBrief,
+      parent_only_trend: parentOnlyTrend,
       frontpage_layer_present: false,
     },
     score_components: {
       event_or_agenda_signal: Math.max(topEventScore, agendaSignalScore),
+      raw_agenda_signal: rawAgendaSignalScore,
       news_coverage: coverageScore,
+      raw_news_coverage: rawCoverageScore,
       trends_public_pulse: trendScore,
       editorial_relevance: editorialScore,
       freshness,
       documentation: doc,
+      cluster_breadth_bonus: breadthBonus,
+      parent_only_signal: parentOnlySignal,
       formula: sensitivity.ranking_policy === "do_not_optimize_for_engagement"
         ? "sensitive capped: event + coverage + freshness + documentation"
-        : "35% event/agenda + 25% real coverage + 20% real trend + 12% editorial + 8% freshness/doc",
+        : "v5.1: 42% event + 18% agenda + 18% calibrated coverage + 12% trends + 7% freshness + 3% documentation + breadth bonus",
     },
     search_interest_score: sensitivity.ranking_policy === "do_not_optimize_for_engagement" ? null : trendScore,
     search_interest_status: trend?.search_interest_status || matchedAgendaTopic?.public_attention_signal ? "real_signal_bridge" : "no_trend_signal",
@@ -1076,16 +1151,18 @@ function buildAgendaItem(group: { parentTopic: string; parentTopics: Set<string>
 }
 
 function buildLiveAgenda(events: any[], trends: any[], agendaTopics: any[], advisorBriefs: any[], debug: boolean) {
-  const items = groupEvents(events).map((group) => buildAgendaItem(group, trends, agendaTopics, advisorBriefs, debug));
+  const filteredEvents = events.filter((event) => !isSportsNoiseEvent(event));
+  const sportsNoiseEventsFiltered = events.length - filteredEvents.length;
+  const items = groupEvents(filteredEvents).map((group) => buildAgendaItem(group, trends, agendaTopics, advisorBriefs, debug));
   const agendaClusters = items
     .filter((item) => item.type !== "monitoring_event")
-    .sort((a, b) => b.score - a.score || b.top_event_score - a.top_event_score);
+    .sort((a, b) => b.score - a.score || b.top_event_score - a.top_event_score || b.event_count - a.event_count);
   const monitoringEvents = items
     .filter((item) => item.type === "monitoring_event")
     .sort((a, b) => b.top_event_score - a.top_event_score)
     .slice(0, debug ? 40 : 12);
 
-  return { agenda_clusters: agendaClusters, monitoring_events: monitoringEvents, all_items: items };
+  return { agenda_clusters: agendaClusters, monitoring_events: monitoringEvents, all_items: items, sports_noise_events_filtered: sportsNoiseEventsFiltered };
 }
 
 function readHours(searchParams: URLSearchParams): number {
@@ -1197,7 +1274,7 @@ export async function GET(req: Request) {
     source_agenda_topics: "agenda_topics",
     source_advisor_agenda_briefs: "v_advisor_agenda_briefs_recent",
     frontpage_layer_present: false,
-    frontpage_layer_note: "No public frontpage/editorial-prominence table/view exists yet. v5 bridges existing real agenda/trend signals only.",
+    frontpage_layer_note: "No public frontpage/editorial-prominence table/view exists yet. v5.1 bridges existing real agenda/trend signals and calibrates parent-only broad signals.",
     legacy_situations_source: "v_situation_engine_live",
     event_rows_considered: events.length,
     event_rows_total_matching_window: eventsResult.count,
@@ -1205,6 +1282,8 @@ export async function GET(req: Request) {
     agenda_topic_rows_considered: agendaTopics.length,
     advisor_agenda_brief_rows_considered: advisorBriefs.length,
     formula_version: CONFIG.formulaVersion,
+    sports_noise_events_filtered: result.sports_noise_events_filtered,
+    calibration_note: "v5.1 reduces broad parent-only signal inflation, widens score spread, and excludes clear sports/football noise from defense agenda clusters.",
     classifier_features: [
       "safe_token_matching",
       "weighted_keywords",
@@ -1216,6 +1295,9 @@ export async function GET(req: Request) {
       "core_text_weighted_above_evidence",
       "brief_debug_modes",
       "no_raw_substring_matching",
+      "real_signal_parent_only_calibration",
+      "sports_noise_exclusion",
+      "score_spread_calibration",
     ],
     newest_legacy_situation_seen_at: newestLegacySeenAt,
     newest_legacy_situation_hours_old:
@@ -1228,7 +1310,7 @@ export async function GET(req: Request) {
 
   const basePayload = {
     success: true,
-    mode: "read_only_real_signal_bridge_micro_agenda_probe_v5",
+    mode: "read_only_real_signal_bridge_micro_agenda_probe_v5_1",
     grouping: "canonical_micro_agenda_to_parent_topics_to_events",
     view,
     generated_at: new Date().toISOString(),
@@ -1245,6 +1327,7 @@ export async function GET(req: Request) {
         agenda_clusters_total: result.agenda_clusters.length,
         monitoring_events_returned: result.monitoring_events.length,
         all_micro_agendas_total: result.all_items.length,
+        sports_noise_events_filtered: result.sports_noise_events_filtered,
       },
     });
   }
