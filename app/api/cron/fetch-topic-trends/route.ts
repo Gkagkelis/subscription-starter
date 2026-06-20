@@ -25,6 +25,24 @@ type TrendWrite = {
   fetched_at: string;
 };
 
+type TrendCandidate = {
+  topic: string;
+  queries: string[];
+  source: "manual" | "agenda_probe_micro_agenda" | "parent_topic_fallback";
+  micro_agenda_id?: string | null;
+  parent_topic?: string | null;
+  score?: number | null;
+};
+
+type ProbeCluster = {
+  title?: string | null;
+  topic?: string | null;
+  micro_agenda?: string | null;
+  micro_agenda_id?: string | null;
+  parent_topic?: string | null;
+  score?: number | null;
+};
+
 const REGION = "GR";
 const TIMEFRAME = "now 7-d";
 const DEFAULT_LIMIT = 12;
@@ -81,13 +99,36 @@ function dedupe<T>(items: T[], keyFn: (item: T) => string): T[] {
   return out;
 }
 
+const MICRO_AGENDA_QUERY_MAP: Record<string, string[]> = {
+  housing_rents: ["ενοίκια", "στεγαστικό", "τιμές κατοικιών"],
+  housing_renovation_programs: ["Ανακαινίζω", "ανακαίνιση κατοικίας", "επιδότηση ανακαίνισης"],
+  airbnb_short_term_rentals: ["Airbnb", "βραχυχρόνια μίσθωση", "τουριστική μίσθωση"],
+  migration_asylum: ["μεταναστευτικό", "άσυλο", "μετανάστες"],
+  taxation_public_revenue: ["φορολογικές δηλώσεις", "ΑΑΔΕ", "φορολογία"],
+  debt_settlement_installments: ["ρύθμιση οφειλών", "72 δόσεις", "χρέη εφορία"],
+  farmers_rural_production: ["αγρότες", "αγροτικές επιδοτήσεις", "ΕΛΓΑ"],
+  wildfire_prevention: ["καθαρισμός οικοπέδων", "πυροπροστασία", "πρόστιμα οικόπεδα"],
+  public_infrastructure_projects: ["δημόσια έργα", "υποδομές", "Αττική Οδός"],
+  social_benefits_support: ["επίδομα", "κοινωνικά επιδόματα", "επίδομα θέρμανσης"],
+  consumer_price_tools: ["posokanei", "ακρίβεια", "σύγκριση τιμών"],
+  banks_consumer_protection: ["τράπεζες", "τραπεζικές χρεώσεις", "καταναλωτική προστασία"],
+  defense_technology_drones: ["drones", "αμυντική τεχνολογία", "μη επανδρωμένα"],
+  hormuz_geopolitical_risk: ["Ορμούζ", "Ιράν", "πετρέλαιο"],
+};
+
+function makeQueriesForCandidate(topic: string, microAgendaId?: string | null): string[] {
+  const mapped = microAgendaId ? MICRO_AGENDA_QUERY_MAP[microAgendaId] : undefined;
+  if (mapped?.length) return mapped.slice(0, 4);
+  return makeQueries(topic);
+}
+
 function makeQueries(topic: string): string[] {
   const clean = topic.replace(/\s*\/\s*/g, " ").replace(/\s+/g, " ").trim();
   const parts = topic.split("/").map((p) => p.trim()).filter(Boolean);
   return dedupe([clean, ...parts].filter((q) => q.length >= 3), (q) => q.toLocaleLowerCase("el-GR")).slice(0, 4);
 }
 
-async function loadTopics(limit: number): Promise<string[]> {
+async function loadParentTopicCandidates(limit: number): Promise<TrendCandidate[]> {
   const [agendaTopics, advisorBriefs] = await Promise.all([
     supabase
       .from("agenda_topics")
@@ -107,10 +148,58 @@ async function loadTopics(limit: number): Promise<string[]> {
 
   return dedupe(
     rows
-      .map((row) => textValue(row.name || row.topic))
-      .filter((topic) => topic.length >= 3),
-    (topic) => topic.toLocaleLowerCase("el-GR")
+      .map((row) => {
+        const topic = textValue(row.name || row.topic);
+        return topic.length >= 3
+          ? { topic, queries: makeQueries(topic), source: "parent_topic_fallback" as const, score: row.agenda_score ?? row.public_attention_signal ?? null }
+          : null;
+      })
+      .filter((item): item is TrendCandidate => Boolean(item)),
+    (item) => item.topic.toLocaleLowerCase("el-GR")
   ).slice(0, limit);
+}
+
+async function loadMicroAgendaCandidates(request: Request, limit: number): Promise<TrendCandidate[]> {
+  const currentUrl = new URL(request.url);
+  const token = currentUrl.searchParams.get("token") || "dev";
+  const probeUrl = new URL("/api/situation-engine/agenda-probe", currentUrl.origin);
+  probeUrl.searchParams.set("token", token);
+  probeUrl.searchParams.set("view", "brief");
+
+  const res = await fetch(probeUrl.toString(), { cache: "no-store" });
+  if (!res.ok) throw new Error(`agenda-probe ${res.status}`);
+  const payload = await res.json();
+  const clusters = Array.isArray(payload?.agenda_clusters) ? (payload.agenda_clusters as ProbeCluster[]) : [];
+
+  return dedupe(
+    clusters
+      .map((cluster) => {
+        const topic = textValue(cluster.title || cluster.micro_agenda || cluster.topic);
+        if (topic.length < 3) return null;
+        const microAgendaId = textValue(cluster.micro_agenda_id) || null;
+        return {
+          topic,
+          queries: makeQueriesForCandidate(topic, microAgendaId),
+          source: "agenda_probe_micro_agenda" as const,
+          micro_agenda_id: microAgendaId,
+          parent_topic: textValue(cluster.parent_topic) || null,
+          score: typeof cluster.score === "number" ? cluster.score : null,
+        };
+      })
+      .filter((item): item is TrendCandidate => Boolean(item)),
+    (item) => `${item.micro_agenda_id || ""}|${item.topic.toLocaleLowerCase("el-GR")}`
+  ).slice(0, limit);
+}
+
+async function loadTrendCandidates(request: Request, limit: number, sourceMode: string): Promise<TrendCandidate[]> {
+  if (sourceMode === "parents") return loadParentTopicCandidates(limit);
+  try {
+    const micro = await loadMicroAgendaCandidates(request, limit);
+    if (micro.length) return micro;
+  } catch {
+    // Fallback keeps the endpoint usable if agenda-probe is unavailable during deploys.
+  }
+  return loadParentTopicCandidates(limit);
 }
 
 function collectNumericValues(value: unknown, out: number[] = []): number[] {
@@ -377,6 +466,7 @@ export async function GET(request: Request) {
   const requestedLimit = numberValue(url.searchParams.get("limit"), DEFAULT_LIMIT);
   const limit = clamp(requestedLimit, 1, 25);
   const topicParam = textValue(url.searchParams.get("topic"));
+  const sourceMode = textValue(url.searchParams.get("source") || "micro_agendas");
 
   if (!isAuthorized(request)) {
     return json({ success: false, error: "unauthorized" }, 401);
@@ -389,7 +479,11 @@ export async function GET(request: Request) {
     token_present: !!process.env.APIFY_API_TOKEN,
     actor_present: !!actor,
     actor,
-    source_topics: ["agenda_topics", "v_advisor_agenda_briefs_recent"],
+    source_topics:
+      sourceMode === "parents"
+        ? ["agenda_topics", "v_advisor_agenda_briefs_recent"]
+        : ["agenda-probe agenda_clusters", "agenda_topics fallback", "v_advisor_agenda_briefs_recent fallback"],
+    source_mode: sourceMode,
     target_table: "topic_trend_signals",
     status_written: "apify_google_trends",
     region: REGION,
@@ -400,14 +494,16 @@ export async function GET(request: Request) {
     return json({ success: false, error: "missing_apify_google_trends_config", diagnostics }, 400);
   }
 
-  const topics = topicParam ? [topicParam] : await loadTopics(limit);
+  const candidates: TrendCandidate[] = topicParam
+    ? [{ topic: topicParam, queries: makeQueries(topicParam), source: "manual" }]
+    : await loadTrendCandidates(request, limit, sourceMode);
   const results: unknown[] = [];
   const writes: TrendWrite[] = [];
   const errors: unknown[] = [];
   const fetchedAt = new Date().toISOString();
 
-  for (const topic of topics) {
-    const queries = makeQueries(topic);
+  for (const candidate of candidates) {
+    const { topic, queries } = candidate;
     try {
       const result = await runApifyTrendActor(topic, queries);
       results.push(result);
@@ -431,6 +527,10 @@ export async function GET(request: Request) {
             scoring_method: result.score_result.scoring_method,
             series_stats: result.score_result.series_stats ?? null,
             items_sample: result.items_sample,
+            candidate_source: candidate.source,
+            micro_agenda_id: candidate.micro_agenda_id ?? null,
+            parent_topic: candidate.parent_topic ?? null,
+            source_score: candidate.score ?? null,
           },
           fetched_at: fetchedAt,
         });
@@ -451,10 +551,11 @@ export async function GET(request: Request) {
 
   return json({
     success: true,
-    mode: "fetch_topic_trends_apify_google_trends_v2",
+    mode: "fetch_topic_trends_apify_google_trends_v3_micro_agendas",
     generated_at: fetchedAt,
     diagnostics,
-    topics_requested: topics.length,
+    topics_requested: candidates.length,
+    candidates: dryRun ? candidates : candidates.map((c) => ({ topic: c.topic, source: c.source, micro_agenda_id: c.micro_agenda_id ?? null })),
     parseable_writes: writes.length,
     dry_run: dryRun,
     writes_preview: dryRun ? writes : writes.map((w) => ({ topic: w.topic, score: w.search_interest_score, status: w.search_interest_status })),
