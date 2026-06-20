@@ -5,11 +5,13 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
 
+type FrontpageCategory = "political" | "economic";
+
 type FrontpageSource = {
   key: string;
   name: string;
   aliases: string[];
-  category: "political" | "economic";
+  category: FrontpageCategory;
   baseScore: number;
   priority: number;
 };
@@ -17,10 +19,10 @@ type FrontpageSource = {
 type FrontpageItem = {
   sourceKey: string;
   sourceName: string;
-  category: "political" | "economic";
+  category: FrontpageCategory;
   sourceUrl: string;
   surface: "frontpage";
-  section: "political" | "economic";
+  section: FrontpageCategory;
   frontpageUrl: string;
   imageUrl: string | null;
   rawLabel: string;
@@ -48,182 +50,44 @@ type MicroAgendaRule = {
   priority?: number;
 };
 
-const MODE = "fetch_editorial_prominence_frontpages_v2";
+type FrontpagesFetchResult = {
+  body: string;
+  format: "html" | "text";
+  method: "direct_browser_headers" | "reader_fallback";
+  attempts: Array<{ method: string; ok: boolean; status?: number; error?: string }>;
+};
+
+const MODE = "fetch_editorial_prominence_frontpages_v2_1";
 const TARGET_TABLE = "editorial_prominence_signals";
 const SOURCE_URL = "https://www.frontpages.gr/";
+const READER_FALLBACK_URL = "https://r.jina.ai/http://r.jina.ai/http://https://www.frontpages.gr/";
+
 const DEFAULT_LIMIT = 30;
 const MAX_LIMIT = 80;
 const FETCH_TIMEOUT_MS = 15000;
 
 const ALLOWED_FRONTPAGE_SOURCES: FrontpageSource[] = [
-  {
-    key: "kathimerini",
-    name: "Η Καθημερινή",
-    aliases: ["η καθημερινη", "καθημερινη"],
-    category: "political",
-    baseScore: 96,
-    priority: 100,
-  },
-  {
-    key: "tanea",
-    name: "Τα Νέα",
-    aliases: ["τα νεα"],
-    category: "political",
-    baseScore: 94,
-    priority: 98,
-  },
-  {
-    key: "apogevmatini",
-    name: "Απογευματινή",
-    aliases: ["απογευματινη"],
-    category: "political",
-    baseScore: 91,
-    priority: 92,
-  },
-  {
-    key: "efsyn",
-    name: "Η Εφημερίδα των Συντακτών",
-    aliases: ["η εφημεριδα των συντακτων", "εφημεριδα των συντακτων", "εφ συν", "εφ.συν"],
-    category: "political",
-    baseScore: 90,
-    priority: 90,
-  },
-  {
-    key: "rizospastis",
-    name: "Ριζοσπάστης",
-    aliases: ["ριζοσπαστης"],
-    category: "political",
-    baseScore: 88,
-    priority: 86,
-  },
-  {
-    key: "eleftheros_typos",
-    name: "Ελεύθερος Τύπος",
-    aliases: ["ελευθερος τυπος"],
-    category: "political",
-    baseScore: 88,
-    priority: 86,
-  },
-  {
-    key: "kontra_news",
-    name: "Kontra News",
-    aliases: ["kontra news"],
-    category: "political",
-    baseScore: 84,
-    priority: 76,
-  },
-  {
-    key: "estia",
-    name: "Εστία",
-    aliases: ["εστια"],
-    category: "political",
-    baseScore: 84,
-    priority: 76,
-  },
-  {
-    key: "parapolitika",
-    name: "Παραπολιτικά",
-    aliases: ["παραπολιτικα"],
-    category: "political",
-    baseScore: 83,
-    priority: 74,
-  },
-  {
-    key: "political",
-    name: "Political",
-    aliases: ["political"],
-    category: "political",
-    baseScore: 82,
-    priority: 72,
-  },
-  {
-    key: "dimokratia",
-    name: "Δημοκρατία",
-    aliases: ["δημοκρατια"],
-    category: "political",
-    baseScore: 82,
-    priority: 72,
-  },
-  {
-    key: "dromos_aristeras",
-    name: "Δρόμος της Αριστεράς",
-    aliases: ["δρομος της αριστερας"],
-    category: "political",
-    baseScore: 80,
-    priority: 68,
-  },
-  {
-    key: "prin",
-    name: "Πριν",
-    aliases: ["πριν"],
-    category: "political",
-    baseScore: 78,
-    priority: 64,
-  },
-  {
-    key: "epoxi",
-    name: "Η Εποχή",
-    aliases: ["η εποχη", "εποχη"],
-    category: "political",
-    baseScore: 78,
-    priority: 64,
-  },
-  {
-    key: "karfi",
-    name: "Στο Καρφί",
-    aliases: ["στο καρφι"],
-    category: "political",
-    baseScore: 76,
-    priority: 60,
-  },
-  {
-    key: "logos",
-    name: "Ο Λόγος",
-    aliases: ["ο λογος"],
-    category: "political",
-    baseScore: 74,
-    priority: 58,
-  },
-  {
-    key: "apopsi",
-    name: "Άποψη",
-    aliases: ["αποψη"],
-    category: "political",
-    baseScore: 74,
-    priority: 56,
-  },
-  {
-    key: "naftemporiki",
-    name: "Η Ναυτεμπορική",
-    aliases: ["η ναυτεμπορικη", "ναυτεμπορικη"],
-    category: "economic",
-    baseScore: 92,
-    priority: 95,
-  },
-  {
-    key: "kefalaio",
-    name: "Κεφάλαιο",
-    aliases: ["κεφαλαιο"],
-    category: "economic",
-    baseScore: 84,
-    priority: 72,
-  },
-  {
-    key: "axia",
-    name: "Η Αξία",
-    aliases: ["η αξια", "αξια"],
-    category: "economic",
-    baseScore: 82,
-    priority: 70,
-  },
-  {
-    key: "agrenda",
-    name: "Agrenda",
-    aliases: ["agrenda"],
-    category: "economic",
-    baseScore: 80,
-    priority: 68,
-  },
+  { key: "kathimerini", name: "Η Καθημερινή", aliases: ["η καθημερινη", "καθημερινη"], category: "political", baseScore: 96, priority: 100 },
+  { key: "tanea", name: "Τα Νέα", aliases: ["τα νεα"], category: "political", baseScore: 94, priority: 98 },
+  { key: "apogevmatini", name: "Απογευματινή", aliases: ["απογευματινη"], category: "political", baseScore: 91, priority: 92 },
+  { key: "efsyn", name: "Η Εφημερίδα των Συντακτών", aliases: ["η εφημεριδα των συντακτων", "εφημεριδα των συντακτων", "εφ συν", "εφ.συν"], category: "political", baseScore: 90, priority: 90 },
+  { key: "rizospastis", name: "Ριζοσπάστης", aliases: ["ριζοσπαστης"], category: "political", baseScore: 88, priority: 86 },
+  { key: "eleftheros_typos", name: "Ελεύθερος Τύπος", aliases: ["ελευθερος τυπος"], category: "political", baseScore: 88, priority: 86 },
+  { key: "kontra_news", name: "Kontra News", aliases: ["kontra news"], category: "political", baseScore: 84, priority: 76 },
+  { key: "estia", name: "Εστία", aliases: ["εστια"], category: "political", baseScore: 84, priority: 76 },
+  { key: "parapolitika", name: "Παραπολιτικά", aliases: ["παραπολιτικα"], category: "political", baseScore: 83, priority: 74 },
+  { key: "political", name: "Political", aliases: ["political"], category: "political", baseScore: 82, priority: 72 },
+  { key: "dimokratia", name: "Δημοκρατία", aliases: ["δημοκρατια"], category: "political", baseScore: 82, priority: 72 },
+  { key: "dromos_aristeras", name: "Δρόμος της Αριστεράς", aliases: ["δρομος της αριστερας"], category: "political", baseScore: 80, priority: 68 },
+  { key: "prin", name: "Πριν", aliases: ["πριν"], category: "political", baseScore: 78, priority: 64 },
+  { key: "epoxi", name: "Η Εποχή", aliases: ["η εποχη", "εποχη"], category: "political", baseScore: 78, priority: 64 },
+  { key: "karfi", name: "Στο Καρφί", aliases: ["στο καρφι"], category: "political", baseScore: 76, priority: 60 },
+  { key: "logos", name: "Ο Λόγος", aliases: ["ο λογος"], category: "political", baseScore: 74, priority: 58 },
+  { key: "apopsi", name: "Άποψη", aliases: ["αποψη"], category: "political", baseScore: 74, priority: 56 },
+  { key: "naftemporiki", name: "Η Ναυτεμπορική", aliases: ["η ναυτεμπορικη", "ναυτεμπορικη"], category: "economic", baseScore: 92, priority: 95 },
+  { key: "kefalaio", name: "Κεφάλαιο", aliases: ["κεφαλαιο"], category: "economic", baseScore: 84, priority: 72 },
+  { key: "axia", name: "Η Αξία", aliases: ["η αξια", "αξια"], category: "economic", baseScore: 82, priority: 70 },
+  { key: "agrenda", name: "Agrenda", aliases: ["agrenda"], category: "economic", baseScore: 80, priority: 68 },
 ];
 
 const BLOCKED_SOURCE_ALIASES = [
@@ -238,6 +102,10 @@ const BLOCKED_SOURCE_ALIASES = [
   "forza",
   "metrosport",
   "δικεφαλος",
+  "karfitsa",
+  "θεσσαλονικη",
+  "τυπος θεσσαλονικης",
+  "ελευθερη ωρα",
   "εφημερις δημοπρασιων",
   "ηχω των δημοπρασιων",
   "γενικη δημοπρασιων",
@@ -559,6 +427,8 @@ function classifyFrontpageItem(item: FrontpageItem): ClassifiedFrontpageItem {
     if (!best || score > best.score) best = { rule, score, matches };
   }
 
+  const sourcePositionScore = item.sourceBaseScore - Math.max(0, item.position - 1) * 2;
+
   if (!best) {
     return {
       ...item,
@@ -568,12 +438,11 @@ function classifyFrontpageItem(item: FrontpageItem): ClassifiedFrontpageItem {
       classifierConfidence: 0,
       matchedKeywords: [],
       classifierScore: 0,
-      prominenceScore: clamp(item.sourceBaseScore - Math.max(0, item.position - 1) * 2, 35, 100),
+      prominenceScore: clamp(sourcePositionScore, 35, 100),
     };
   }
 
   const classifierConfidence = clamp(best.score * 4, 35, 100);
-  const sourcePositionScore = item.sourceBaseScore - Math.max(0, item.position - 1) * 2;
   const categoryBonus = item.category === "economic" ? 3 : 0;
   const classifiedBonus = Math.min(8, Math.floor(classifierConfidence / 14));
   const prominenceScore = clamp(sourcePositionScore + categoryBonus + classifiedBonus, 0, 100);
@@ -610,7 +479,36 @@ function extractTextLabel(anchorInner: string): string | null {
   return text;
 }
 
-function extractFrontpageItems(html: string, limit: number): FrontpageItem[] {
+function positionForCategory(items: FrontpageItem[], category: FrontpageCategory): number {
+  return items.filter((item) => item.category === category).length + 1;
+}
+
+function makeFrontpageItemFromLabel(label: string, href: string | null, imageUrl: string | null, items: FrontpageItem[]): FrontpageItem | null {
+  const source = sourceForLabel(label);
+  if (!source) return null;
+
+  const headline = headlineForLabel(label, source);
+  const frontpageUrl = href || imageUrl || `${SOURCE_URL}#${source.key}-${normalizeText(headline).replace(/\s+/g, "-").slice(0, 80)}`;
+  const position = positionForCategory(items, source.category);
+
+  return {
+    sourceKey: source.key,
+    sourceName: source.name,
+    category: source.category,
+    sourceUrl: SOURCE_URL,
+    surface: "frontpage",
+    section: source.category,
+    frontpageUrl,
+    imageUrl,
+    rawLabel: label,
+    articleTitle: headline,
+    position,
+    positionLabel: `frontpage_${source.category}_${position}`,
+    sourceBaseScore: source.baseScore,
+  };
+}
+
+function extractFrontpageItemsFromHtml(html: string, limit: number): FrontpageItem[] {
   const anchorRegex = /<a\b([^>]*)>([\s\S]*?)<\/a>/gi;
   const seen = new Set<string>();
   const items: FrontpageItem[] = [];
@@ -627,37 +525,65 @@ function extractFrontpageItems(html: string, limit: number): FrontpageItem[] {
 
     if (!rawLabel) continue;
 
-    const source = sourceForLabel(rawLabel);
-    if (!source) continue;
+    const item = makeFrontpageItemFromLabel(rawLabel, href, image.imageUrl, items);
+    if (!item) continue;
 
-    const headline = headlineForLabel(rawLabel, source);
-    const stableUrl = href || image.imageUrl || `${SOURCE_URL}#${source.key}-${normalizeText(headline).replace(/\s+/g, "-").slice(0, 80)}`;
-
-    const uniqueKey = `${source.key}::${stableUrl}::${normalizeText(headline)}`;
+    const uniqueKey = `${item.sourceKey}::${item.frontpageUrl}::${normalizeText(item.articleTitle)}`;
     if (seen.has(uniqueKey)) continue;
     seen.add(uniqueKey);
 
-    const positionInCategory = items.filter((item) => item.category === source.category).length + 1;
-
-    items.push({
-      sourceKey: source.key,
-      sourceName: source.name,
-      category: source.category,
-      sourceUrl: SOURCE_URL,
-      surface: "frontpage",
-      section: source.category,
-      frontpageUrl: stableUrl,
-      imageUrl: image.imageUrl,
-      rawLabel,
-      articleTitle: headline,
-      position: positionInCategory,
-      positionLabel: `frontpage_${source.category}_${positionInCategory}`,
-      sourceBaseScore: source.baseScore,
-    });
-
+    items.push(item);
     if (items.length >= limit * 2) break;
   }
 
+  return sortAndLimitItems(items, limit);
+}
+
+function extractUrlFromMarkdownLine(line: string): string | null {
+  const markdownUrl = line.match(/\((https?:\/\/[^)]+)\)/i)?.[1];
+  const rawUrl = line.match(/https?:\/\/\S+/i)?.[0]?.replace(/[)\].,]+$/, "");
+  return canonicalizeUrl(markdownUrl || rawUrl || null, SOURCE_URL);
+}
+
+function stripMarkdown(line: string): string {
+  return decodeHtml(line)
+    .replace(/!\[[^\]]*\]\([^)]+\)/g, " ")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/^#+\s*/g, "")
+    .replace(/^[*-]\s*/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function extractFrontpageItemsFromText(text: string, limit: number): FrontpageItem[] {
+  const seen = new Set<string>();
+  const items: FrontpageItem[] = [];
+  const lines = text
+    .split(/\r?\n/)
+    .map((line) => stripMarkdown(line))
+    .map((line) => line.replace(/^L\d+:\s*/i, "").trim())
+    .filter((line) => line.length >= 3);
+
+  for (const line of lines) {
+    const source = sourceForLabel(line);
+    if (!source) continue;
+
+    const url = extractUrlFromMarkdownLine(line);
+    const item = makeFrontpageItemFromLabel(line, url, null, items);
+    if (!item) continue;
+
+    const uniqueKey = `${item.sourceKey}::${normalizeText(item.articleTitle)}`;
+    if (seen.has(uniqueKey)) continue;
+    seen.add(uniqueKey);
+
+    items.push(item);
+    if (items.length >= limit * 2) break;
+  }
+
+  return sortAndLimitItems(items, limit);
+}
+
+function sortAndLimitItems(items: FrontpageItem[], limit: number): FrontpageItem[] {
   return items
     .sort((a, b) => {
       if (a.category !== b.category) return a.category === "political" ? -1 : 1;
@@ -666,25 +592,71 @@ function extractFrontpageItems(html: string, limit: number): FrontpageItem[] {
     .slice(0, limit);
 }
 
-async function fetchFrontpagesHtml(): Promise<string> {
+async function fetchTextWithTimeout(
+  url: string,
+  method: FrontpagesFetchResult["method"],
+  headers: Record<string, string>
+): Promise<{ body: string; attempt: { method: string; ok: boolean; status?: number; error?: string } }> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
   try {
-    const response = await fetch(SOURCE_URL, {
+    const response = await fetch(url, {
       signal: controller.signal,
-      headers: {
-        "user-agent": "NorayaFrontpageSignalBot/2.0 (+https://noraya.vercel.app)",
-        accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-      },
+      headers,
       cache: "no-store",
     });
 
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return await response.text();
+    if (!response.ok) {
+      return {
+        body: "",
+        attempt: { method, ok: false, status: response.status, error: `HTTP ${response.status}` },
+      };
+    }
+
+    return {
+      body: await response.text(),
+      attempt: { method, ok: true, status: response.status },
+    };
+  } catch (error: any) {
+    return {
+      body: "",
+      attempt: { method, ok: false, error: error?.message || String(error) },
+    };
   } finally {
     clearTimeout(timeout);
   }
+}
+
+async function fetchFrontpages(): Promise<FrontpagesFetchResult> {
+  const attempts: FrontpagesFetchResult["attempts"] = [];
+
+  const direct = await fetchTextWithTimeout(SOURCE_URL, "direct_browser_headers", {
+    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0 Safari/537.36",
+    accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+    "accept-language": "el-GR,el;q=0.9,en-US;q=0.8,en;q=0.7",
+    referer: "https://www.google.com/",
+    "upgrade-insecure-requests": "1",
+  });
+  attempts.push(direct.attempt);
+
+  if (direct.attempt.ok && direct.body) {
+    return { body: direct.body, format: "html", method: "direct_browser_headers", attempts };
+  }
+
+  const reader = await fetchTextWithTimeout(READER_FALLBACK_URL, "reader_fallback", {
+    "user-agent": "Mozilla/5.0 (compatible; NorayaFrontpageSignalBot/2.1; +https://noraya.vercel.app)",
+    accept: "text/plain,text/markdown,*/*;q=0.8",
+    "accept-language": "el-GR,el;q=0.9,en-US;q=0.8,en;q=0.7",
+  });
+  attempts.push(reader.attempt);
+
+  if (reader.attempt.ok && reader.body) {
+    return { body: reader.body, format: "text", method: "reader_fallback", attempts };
+  }
+
+  const last = attempts[attempts.length - 1];
+  throw new Error(last?.error || "frontpages_fetch_failed");
 }
 
 function toInsertRow(item: ClassifiedFrontpageItem, observedAt: string) {
@@ -716,7 +688,7 @@ function toInsertRow(item: ClassifiedFrontpageItem, observedAt: string) {
       raw_label: item.rawLabel,
       classifier_score: item.classifierScore,
       classifier_confidence: item.classifierConfidence,
-      is_frontpages_gr_v2: true,
+      is_frontpages_gr_v2_1: true,
       observed_at: observedAt,
     },
   };
@@ -733,9 +705,9 @@ export async function GET(request: Request) {
 
   const observedAt = new Date().toISOString();
 
-  let html = "";
+  let fetched: FrontpagesFetchResult;
   try {
-    html = await fetchFrontpagesHtml();
+    fetched = await fetchFrontpages();
   } catch (error: any) {
     return json({
       success: false,
@@ -747,11 +719,15 @@ export async function GET(request: Request) {
         source_url: SOURCE_URL,
         read_only: dryRun,
         target_table: TARGET_TABLE,
+        fallback_enabled: true,
       },
     }, 502);
   }
 
-  const extracted = extractFrontpageItems(html, limit);
+  const extracted = fetched.format === "html"
+    ? extractFrontpageItemsFromHtml(fetched.body, limit)
+    : extractFrontpageItemsFromText(fetched.body, limit);
+
   const classified = extracted
     .map(classifyFrontpageItem)
     .sort((a, b) => b.prominenceScore - a.prominenceScore || a.position - b.position)
@@ -795,7 +771,11 @@ export async function GET(request: Request) {
         name: source.name,
         category: source.category,
       })),
-      classifier: "local_frontpage_micro_agenda_keyword_rules_v2",
+      classifier: "local_frontpage_micro_agenda_keyword_rules_v2_1",
+      fetch_method: fetched.method,
+      fetch_attempts: fetched.attempts,
+      parsed_format: fetched.format,
+      fallback_enabled: true,
       limit,
     },
     frontpages_extracted: extracted.length,
