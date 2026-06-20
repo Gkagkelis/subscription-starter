@@ -65,7 +65,7 @@ const CONFIG = {
   minimumRuleScore: 10,
   monitoringCap: 59,
   highSeverityScore: 88,
-  formulaVersion: "micro_agenda_real_signal_bridge_v5_1",
+  formulaVersion: "micro_agenda_real_signal_bridge_v5_2",
 };
 
 const MICRO_AGENDA_RULES: MicroAgendaRule[] = [
@@ -841,7 +841,46 @@ function bestRowMatch<T extends Record<string, any>>(topicCandidates: string[], 
   return best && best.score >= 0.28 ? best.row : null;
 }
 
-function trendForAgenda(topicCandidates: string[], trends: any[]) {
+function isApifyGoogleTrend(row: any): boolean {
+  return String(row?.search_interest_status || "").startsWith("apify_google_trends");
+}
+
+function fetchedAtMs(row: any): number {
+  const t = Date.parse(String(row?.fetched_at || ""));
+  return Number.isFinite(t) ? t : 0;
+}
+
+function compareTrendRows(a: any, b: any): number {
+  const apifyDelta = Number(isApifyGoogleTrend(b)) - Number(isApifyGoogleTrend(a));
+  if (apifyDelta) return apifyDelta;
+  const scoreDelta = toNumber(b?.search_interest_score, 0) - toNumber(a?.search_interest_score, 0);
+  if (scoreDelta) return scoreDelta;
+  return fetchedAtMs(b) - fetchedAtMs(a);
+}
+
+function trendForAgenda(topicCandidates: string[], trends: any[], microAgenda?: string, parentTopic?: string) {
+  const micro = String(microAgenda || topicCandidates[0] || "").trim();
+  const parent = String(parentTopic || topicCandidates[1] || "").trim();
+  const microNorm = normalizeText(micro);
+
+  if (microNorm) {
+    const exactMicro = trends
+      .filter((trend) => normalizeText(trend?.topic) === microNorm)
+      .sort(compareTrendRows);
+    if (exactMicro.length) return exactMicro[0];
+
+    const strongMicro = trends
+      .filter((trend) => {
+        const topic = String(trend?.topic || "").trim();
+        if (!topic) return false;
+        if (isParentOnlyRealSignal(topic, micro, parent)) return false;
+        const topicNorm = normalizeText(topic);
+        return topicNorm.includes(microNorm) || microNorm.includes(topicNorm) || tokenOverlapScore(topic, micro) >= 0.5;
+      })
+      .sort(compareTrendRows);
+    if (strongMicro.length) return strongMicro[0];
+  }
+
   return bestRowMatch(topicCandidates, trends, (trend) => trend?.topic);
 }
 
@@ -902,6 +941,7 @@ function realNewsCoverageScore(agendaTopic: any, advisorBrief: any, fallbackCove
 }
 
 function realTrendScore(trend: any, agendaTopic: any): number {
+  if (isApifyGoogleTrend(trend)) return clampScore(toNumber(trend?.search_interest_score, 0));
   return Math.max(
     toNumber(trend?.search_interest_score, 0),
     toNumber(agendaTopic?.public_attention_signal, 0)
@@ -978,7 +1018,7 @@ function buildAgendaItem(group: { parentTopic: string; parentTopics: Set<string>
   const sortedEvents = [...group.events].sort((a, b) => toNumber(b?.event_score) - toNumber(a?.event_score));
   const bestEvent = sortedEvents[0];
   const topicCandidates = [group.classification.micro_agenda, group.parentTopic, ...Array.from(group.parentTopics)];
-  const trend = trendForAgenda(topicCandidates, trends);
+  const trend = trendForAgenda(topicCandidates, trends, group.classification.micro_agenda, group.parentTopic);
   const matchedAgendaTopic = agendaTopicForAgenda(topicCandidates, agendaTopics);
   const matchedAdvisorBrief = advisorBriefForAgenda(topicCandidates, advisorBriefs);
   const sensitivity = classifySensitivity(group.events, group.classification.micro_agenda);
@@ -1097,7 +1137,7 @@ function buildAgendaItem(group: { parentTopic: string; parentTopics: Set<string>
       parent_only_signal: parentOnlySignal,
       formula: sensitivity.ranking_policy === "do_not_optimize_for_engagement"
         ? "sensitive capped: event + coverage + freshness + documentation"
-        : "v5.1: 42% event + 18% agenda + 18% calibrated coverage + 12% trends + 7% freshness + 3% documentation + breadth bonus",
+        : "v5.2: 42% event + 18% agenda + 18% calibrated coverage + 12% micro-agenda-preferred trends + 7% freshness + 3% documentation + breadth bonus",
     },
     search_interest_score: sensitivity.ranking_policy === "do_not_optimize_for_engagement" ? null : trendScore,
     search_interest_status: trend?.search_interest_status || matchedAgendaTopic?.public_attention_signal ? "real_signal_bridge" : "no_trend_signal",
@@ -1274,7 +1314,7 @@ export async function GET(req: Request) {
     source_agenda_topics: "agenda_topics",
     source_advisor_agenda_briefs: "v_advisor_agenda_briefs_recent",
     frontpage_layer_present: false,
-    frontpage_layer_note: "No public frontpage/editorial-prominence table/view exists yet. v5.1 bridges existing real agenda/trend signals and calibrates parent-only broad signals.",
+    frontpage_layer_note: "No public frontpage/editorial-prominence table/view exists yet. v5.2 prefers exact micro-agenda Google Trends rows before parent-topic fallback.",
     legacy_situations_source: "v_situation_engine_live",
     event_rows_considered: events.length,
     event_rows_total_matching_window: eventsResult.count,
@@ -1283,7 +1323,7 @@ export async function GET(req: Request) {
     advisor_agenda_brief_rows_considered: advisorBriefs.length,
     formula_version: CONFIG.formulaVersion,
     sports_noise_events_filtered: result.sports_noise_events_filtered,
-    calibration_note: "v5.1 reduces broad parent-only signal inflation, widens score spread, and excludes clear sports/football noise from defense agenda clusters.",
+    calibration_note: "v5.2 keeps v5.1 calibration and prefers exact micro-agenda Apify Google Trends rows before parent-topic trend fallback.",
     classifier_features: [
       "safe_token_matching",
       "weighted_keywords",
@@ -1298,6 +1338,8 @@ export async function GET(req: Request) {
       "real_signal_parent_only_calibration",
       "sports_noise_exclusion",
       "score_spread_calibration",
+      "micro_agenda_trend_preference",
+      "apify_google_trends_preferred_over_parent_fallback",
     ],
     newest_legacy_situation_seen_at: newestLegacySeenAt,
     newest_legacy_situation_hours_old:
@@ -1310,7 +1352,7 @@ export async function GET(req: Request) {
 
   const basePayload = {
     success: true,
-    mode: "read_only_real_signal_bridge_micro_agenda_probe_v5_1",
+    mode: "read_only_real_signal_bridge_micro_agenda_probe_v5_2",
     grouping: "canonical_micro_agenda_to_parent_topics_to_events",
     view,
     generated_at: new Date().toISOString(),
