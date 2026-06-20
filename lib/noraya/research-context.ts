@@ -2,9 +2,10 @@ import "server-only";
 import fs from "node:fs";
 import path from "node:path";
 
-export const RESEARCH_CONTEXT_VERSION = "research_context_v1_public_opinion_leaders_vote";
+export const RESEARCH_CONTEXT_VERSION = "research_context_v3_party_profile_source_of_truth";
 
 type CsvRow = Record<string, string>;
+export type PoliticalPartyProfile = Record<string, any>;
 
 export type AgendaResearchContextInput = {
   microAgendaId?: string | null;
@@ -13,11 +14,13 @@ export type AgendaResearchContextInput = {
   eventTitle?: string | null;
   eventText?: string | null;
   partyKey?: string | null;
+  partyProfile?: PoliticalPartyProfile | null;
 };
 
 export type AgendaResearchContext = {
   version: string;
   source_files: string[];
+  source_models?: string[];
   micro_agenda_id: string;
   micro_agenda: string;
   parent_topic: string;
@@ -27,6 +30,14 @@ export type AgendaResearchContext = {
   strategic_meaning: string;
   party_relevance: string;
   leader_trait_hint: string;
+  party_key?: string;
+  party_lens?: PartyResearchLens;
+  party_profile?: PoliticalPartyProfile | null;
+  narrative_instruction?: string;
+  user_learning_slot?: {
+    enabled: boolean;
+    note: string;
+  };
   recommended_language: string[];
   evidence_lines: string[];
   evidence_points: Array<{
@@ -37,6 +48,26 @@ export type AgendaResearchContext = {
     period?: string;
     confidence?: string;
   }>;
+};
+
+export type PartyResearchLens = {
+  party_key: string;
+  party_label: string;
+  political_family: string;
+  value_frame: string;
+  preferred_tone: string;
+  persuasion_path: string;
+  risk_to_avoid: string;
+  preferred_language: string[];
+  core_themes?: string[];
+  core_audiences?: string[];
+  known_positions?: string[];
+  red_lines?: string[];
+  opportunity_frame?: string;
+  risk_frame?: string;
+  competitor_frame?: string;
+  advisor_instructions?: string;
+  source?: "political_party_profiles" | "fallback";
 };
 
 type ResearchProfile = {
@@ -263,6 +294,129 @@ const WORK_GROUPS: ResearchProfile["audienceGroups"] = [
   { group_type: "all", group: "all", label: "σύνολο κοινού" },
 ];
 
+function asStringArray(value: unknown): string[] {
+  if (Array.isArray(value)) return value.map((item) => String(item || "").trim()).filter(Boolean);
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed) return [];
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (Array.isArray(parsed)) return parsed.map((item) => String(item || "").trim()).filter(Boolean);
+    } catch {
+      // plain comma / newline separated string
+    }
+    return trimmed
+      .split(/[\n,;]+/)
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+  return [];
+}
+
+function compactText(value: unknown): string {
+  return String(value || "").replace(/\s+/g, " ").trim();
+}
+
+function normalizePartyKey(value?: string | null): string {
+  return normalize(value || "").replace(/[^a-zα-ω0-9_]+/g, "_").replace(/^_+|_+$/g, "");
+}
+
+function visibleProfile(profile?: PoliticalPartyProfile | null): PoliticalPartyProfile | null {
+  if (!profile || typeof profile !== "object") return null;
+  return {
+    party_key: profile.party_key ?? null,
+    party_name: profile.party_name ?? null,
+    short_name: profile.short_name ?? null,
+    profile_type: profile.profile_type ?? null,
+    ideological_family: profile.ideological_family ?? null,
+    strategic_positioning: profile.strategic_positioning ?? null,
+    default_tone: profile.default_tone ?? null,
+    core_themes: asStringArray(profile.core_themes),
+    core_audiences: asStringArray(profile.core_audiences),
+    known_positions: asStringArray(profile.known_positions),
+    red_lines: asStringArray(profile.red_lines),
+    opportunity_frame: profile.opportunity_frame ?? null,
+    risk_frame: profile.risk_frame ?? null,
+    competitor_frame: profile.competitor_frame ?? null,
+    advisor_instructions: profile.advisor_instructions ?? null,
+  };
+}
+
+function buildPartyLensFromProfile(profile: PoliticalPartyProfile, fallbackPartyKey?: string | null): PartyResearchLens {
+  const coreThemes = asStringArray(profile.core_themes);
+  const coreAudiences = asStringArray(profile.core_audiences);
+  const knownPositions = asStringArray(profile.known_positions);
+  const redLines = asStringArray(profile.red_lines);
+  const key = normalizePartyKey(profile.party_key || fallbackPartyKey || profile.short_name || profile.party_name || "party_profile");
+  const label = compactText(profile.party_name) || compactText(profile.short_name) || key || "επιλεγμένο πολιτικό προφίλ";
+  const strategicPositioning = compactText(profile.strategic_positioning);
+  const opportunity = compactText(profile.opportunity_frame);
+  const risk = compactText(profile.risk_frame);
+  const advisor = compactText(profile.advisor_instructions);
+  const competitor = compactText(profile.competitor_frame);
+  const preferredLanguage = Array.from(new Set([...coreThemes, ...knownPositions]))
+    .filter(Boolean)
+    .slice(0, 10);
+
+  return {
+    party_key: key || "party_profile",
+    party_label: label,
+    political_family: compactText(profile.ideological_family) || "πολιτικό προφίλ από political_party_profiles",
+    value_frame: strategicPositioning || opportunity || [...coreThemes, ...knownPositions].slice(0, 5).join(", ") || "καθαρή πολιτική ευθύνη και εφαρμόσιμη στάση",
+    preferred_tone: compactText(profile.default_tone) || "σοβαρό, καθαρό και πολιτικά χρήσιμο",
+    persuasion_path: advisor || opportunity || "να συνδέει το γεγονός με την ατζέντα, την κοινωνική βάση και το πολιτικό σχέδιο του κόμματος",
+    risk_to_avoid: redLines.length ? redLines.join(" · ") : risk || "γενικότητα χωρίς καθαρή πολιτική επιλογή",
+    preferred_language: preferredLanguage.length ? preferredLanguage : ["σοβαρότητα", "πρακτική λύση", "ευθύνη", "εφαρμογή"],
+    core_themes: coreThemes,
+    core_audiences: coreAudiences,
+    known_positions: knownPositions,
+    red_lines: redLines,
+    opportunity_frame: opportunity || undefined,
+    risk_frame: risk || undefined,
+    competitor_frame: competitor || undefined,
+    advisor_instructions: advisor || undefined,
+    source: "political_party_profiles",
+  };
+}
+
+function fallbackPartyLensFor(partyKey?: string | null): PartyResearchLens {
+  const key = normalizePartyKey(partyKey || "");
+
+  if (["elas", "el_as", "elliniki_aristeri_symparataxi", "ελασ"].includes(key)) {
+    return {
+      party_key: key || "elas",
+      party_label: "Ελληνική Αριστερή Συμπαράταξη",
+      political_family: "δημοκρατική αριστερά / κοινωνική προστασία",
+      value_frame: "κοινωνική δικαιοσύνη, δημόσια ευθύνη, αξιοπρέπεια και προστασία των νεότερων και πιεσμένων κοινωνικών ομάδων",
+      preferred_tone: "ανθρώπινο, θεσμικό, κοινωνικά καθαρό και λύση-κεντρικό",
+      persuasion_path: "να δείχνει ότι η καθημερινή πίεση γίνεται πολιτική ευθύνη και εφαρμόσιμη δημόσια πολιτική",
+      risk_to_avoid: "γενική καταγγελία χωρίς πρακτικό σχέδιο",
+      preferred_language: ["κοινωνική δικαιοσύνη", "αξιοπρέπεια", "δημόσια ευθύνη", "νέα γενιά", "πρακτική λύση"],
+      red_lines: ["Γενική καταγγελία χωρίς πρακτικό σχέδιο"],
+      source: "fallback",
+    };
+  }
+
+  return {
+    party_key: key || "generic",
+    party_label: "επιλεγμένο πολιτικό προφίλ",
+    political_family: "γενική στρατηγική ανάγνωση",
+    value_frame: "θεσμική σοβαρότητα, πρακτική λύση και καθαρή πολιτική ευθύνη",
+    preferred_tone: "σοβαρό, πρακτικό και συμβουλευτικό",
+    persuasion_path: "να συνδέει το γεγονός με την ατζέντα, την κοινωνική βάση και την εφαρμόσιμη στάση",
+    risk_to_avoid: "γενικότητα χωρίς καθαρή πολιτική επιλογή",
+    preferred_language: ["σοβαρότητα", "πρακτική λύση", "ευθύνη", "εφαρμογή"],
+    source: "fallback",
+  };
+}
+
+function partyLensFor(partyKey?: string | null, partyProfile?: PoliticalPartyProfile | null): PartyResearchLens {
+  if (partyProfile && typeof partyProfile === "object") {
+    return buildPartyLensFromProfile(partyProfile, partyKey);
+  }
+  return fallbackPartyLensFor(partyKey);
+}
+
 function profileFor(input: AgendaResearchContextInput): ResearchProfile {
   const id = normalize(input.microAgendaId);
   const text = normalize(`${input.microAgenda} ${input.parentTopic} ${input.eventTitle} ${input.eventText}`);
@@ -279,6 +433,52 @@ function profileFor(input: AgendaResearchContextInput): ResearchProfile {
       publicOpinionMetrics: ["expectation_personal_job", "expectation_national_economy", "trust_national_parliament"],
       audienceGroups: YOUNG_GROUPS,
       leaderTraitNames: ["Κοντά στους πολίτες", "Σταθερότητα χώρας"],
+    };
+  }
+
+
+  if (id.includes("taxation") || id.includes("tax") || id.includes("debt") || text.includes("φορο") || text.includes("ααδε") || text.includes("ενφια") || text.includes("οφειλ")) {
+    return {
+      frame: "φορολογική δικαιοσύνη, εμπιστοσύνη στο κράτος και ανταπόδοση",
+      socialBasis: "Το γεγονός πατά στη σχέση πολίτη και κράτους: σταθεροί κανόνες, ίση μεταχείριση και αίσθηση ανταπόδοσης.",
+      audienceReading: "Η ανάγνωση χρειάζεται να μιλήσει σε επαγγελματίες, μισθωτούς και νοικοκυριά που μετρούν βάρη, υποχρεώσεις και προβλεψιμότητα.",
+      strategicMeaning: "Η πολιτική αξία βρίσκεται στο να συνδεθούν τα δημόσια έσοδα με απλότητα, δικαιοσύνη και εμπιστοσύνη.",
+      partyRelevance: "Κερδίζει όποιος εξηγήσει ποιος πληρώνει, με ποιους κανόνες και τι παίρνει πίσω.",
+      leaderTraitHint: "Ο τόνος αρχηγού πρέπει να δείχνει σοβαρότητα, σταθερότητα και δίκαιη διαχείριση.",
+      recommendedLanguage: ["δίκαιοι κανόνες", "απλότητα", "ανταπόδοση", "σταθερότητα", "ίση μεταχείριση"],
+      publicOpinionMetrics: ["trust_national_parliament", "expectation_national_economy", "democracy_satisfaction_country"],
+      audienceGroups: DEFAULT_GROUPS,
+      leaderTraitNames: ["Σταθερότητα χώρας", "Κοντά στους πολίτες"],
+    };
+  }
+
+  if (id.includes("social_benefits") || id.includes("support") || text.includes("επιδομα") || text.includes("κοινωνικη στηριξη") || text.includes("κοινωνικα προγραμματα")) {
+    return {
+      frame: "κοινωνική στήριξη, αγοραστική δύναμη και προστασία νοικοκυριών",
+      socialBasis: "Το γεγονός πατά στην ανάγκη των νοικοκυριών να αισθάνονται ότι η πολιτεία στηρίζει στοχευμένα εκεί όπου η καθημερινή πίεση γίνεται άμεση.",
+      audienceReading: "Η ανάγνωση χρειάζεται να μιλήσει σε νοικοκυριά με πιεσμένο εισόδημα, οικογένειες και ευάλωτες ομάδες που κρίνουν την πολιτική από το αν φτάνει πρακτικά στην καθημερινότητα.",
+      strategicMeaning: "Η πολιτική αξία βρίσκεται στη μετάβαση από την παροχή ως βοήθημα στην προστασία αγοραστικής δύναμης με σαφή κριτήρια και πραγματικό αποτέλεσμα.",
+      partyRelevance: "Κερδίζει όποιος δείξει στόχευση, δικαιοσύνη και εφαρμογή χωρίς να εγκλωβιστεί σε λογική αποσπασματικού επιδόματος.",
+      leaderTraitHint: "Ο τόνος αρχηγού πρέπει να δείχνει κοινωνική εγγύτητα, γνώση της πίεσης και καθαρή εφαρμογή.",
+      recommendedLanguage: ["στήριξη", "νοικοκυριά", "αγοραστική δύναμη", "δίκαια κριτήρια", "πρακτικό αποτέλεσμα"],
+      publicOpinionMetrics: ["expectation_national_economy", "trust_national_parliament", "democracy_satisfaction_country"],
+      audienceGroups: DEFAULT_GROUPS,
+      leaderTraitNames: ["Κοντά στους πολίτες"],
+    };
+  }
+
+  if (id.includes("energy") || text.includes("ενεργεια") || text.includes("ρευμα") || text.includes("λογαριασμ")) {
+    return {
+      frame: "ενεργειακό κόστος, λογαριασμοί και αίσθηση ελέγχου",
+      socialBasis: "Το γεγονός πατά στην πίεση που δημιουργούν οι λογαριασμοί, οι τιμές ενέργειας και η ανάγκη των πολιτών να βλέπουν έλεγχο σε βασικό κόστος ζωής.",
+      audienceReading: "Η ανάγνωση χρειάζεται να μιλήσει σε νοικοκυριά, μικρές επιχειρήσεις και παραγωγικές ομάδες που συνδέουν την ενέργεια με μηνιαίο κόστος και προβλεψιμότητα.",
+      strategicMeaning: "Η πολιτική αξία βρίσκεται στη σύνδεση της ενεργειακής ασφάλειας με λογαριασμούς, διαφάνεια αγοράς και προστασία παραγωγής.",
+      partyRelevance: "Κερδίζει όποιος δείξει ότι κρατά υπό έλεγχο κόστος, υποδομές και αγορά χωρίς γενικές υποσχέσεις.",
+      leaderTraitHint: "Ο τόνος αρχηγού πρέπει να δείχνει πρακτικό έλεγχο, σοβαρότητα και προστασία καθημερινότητας.",
+      recommendedLanguage: ["λογαριασμοί", "κόστος ενέργειας", "έλεγχος", "διαφάνεια", "υποδομές", "προστασία παραγωγής"],
+      publicOpinionMetrics: ["expectation_national_economy", "trust_national_parliament", "democracy_satisfaction_country"],
+      audienceGroups: DEFAULT_GROUPS,
+      leaderTraitNames: ["Σταθερότητα χώρας", "Κοντά στους πολίτες"],
     };
   }
 
@@ -403,6 +603,7 @@ function profileFor(input: AgendaResearchContextInput): ResearchProfile {
 
 export function buildAgendaResearchContext(input: AgendaResearchContextInput): AgendaResearchContext {
   const profile = profileFor(input);
+  const partyLens = partyLensFor(input.partyKey, input.partyProfile);
   const microAgendaId = String(input.microAgendaId || "unknown_micro_agenda");
   const microAgenda = String(input.microAgenda || "Μικρο-ατζέντα");
   const parentTopic = String(input.parentTopic || "Πολιτική ατζέντα");
@@ -424,6 +625,10 @@ export function buildAgendaResearchContext(input: AgendaResearchContextInput): A
   return {
     version: RESEARCH_CONTEXT_VERSION,
     source_files: [PUBLIC_OPINION, LEADER_TRAITS, VOTE_INTENTION],
+    source_models: ["public_opinion", "leader_traits", "vote_intention", partyLens.source === "political_party_profiles" ? "political_party_profiles" : "party_profile_fallback"],
+    party_key: partyLens.party_key,
+    party_lens: partyLens,
+    party_profile: visibleProfile(input.partyProfile),
     micro_agenda_id: microAgendaId,
     micro_agenda: microAgenda,
     parent_topic: parentTopic,
@@ -431,9 +636,14 @@ export function buildAgendaResearchContext(input: AgendaResearchContextInput): A
     social_basis: profile.socialBasis,
     audience_reading: `${profile.audienceReading} Το ερευνητικό υπόβαθρο δείχνει ${signalBand} πεδίο κοινωνικής ανάγνωσης για αυτή την ατζέντα.`,
     strategic_meaning: profile.strategicMeaning,
-    party_relevance: profile.partyRelevance,
-    leader_trait_hint: profile.leaderTraitHint,
-    recommended_language: profile.recommendedLanguage,
+    party_relevance: `${profile.partyRelevance} Για ${partyLens.party_label}, η γραμμή πρέπει να πατήσει στο πραγματικό προφίλ του κόμματος: ${partyLens.value_frame}.`,
+    leader_trait_hint: `${profile.leaderTraitHint} ${partyLens.persuasion_path}.`,
+    narrative_instruction: `Σύνδεσε το γεγονός με ${profile.frame}, μετά με το πολιτικό προφίλ από political_party_profiles: ${partyLens.value_frame}. Κράτα τόνο ${partyLens.preferred_tone}. Σεβάσου τις κόκκινες γραμμές: ${partyLens.risk_to_avoid}.`,
+    user_learning_slot: {
+      enabled: true,
+      note: "Εδώ θα κουμπώσει το μελλοντικό προφίλ προτιμήσεων χρήστη: ύφος, λέξεις που προτιμά, λέξεις που αποφεύγει και διορθώσεις που έχει κάνει.",
+    },
+    recommended_language: Array.from(new Set([...profile.recommendedLanguage, ...partyLens.preferred_language])).slice(0, 10),
     evidence_lines: evidenceLines,
     evidence_points: evidencePoints,
   };
@@ -455,4 +665,3 @@ function publicMetricLabel(metric?: string): string {
 function audienceLabel(row: CsvRow | null, profile: ResearchProfile): string | undefined {
   if (!row) return undefined;
   return profile.audienceGroups.find((group) => group.group_type === row.group_type && group.group === row.group)?.label || row.group;
-}
