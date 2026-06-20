@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { buildAgendaResearchContext, RESEARCH_CONTEXT_VERSION } from "../../../../lib/noraya/research-context";
+import { buildAgendaResearchContext, RESEARCH_CONTEXT_VERSION, type PoliticalPartyProfile } from "../../../../lib/noraya/research-context";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -67,8 +67,56 @@ const CONFIG = {
   minimumRuleScore: 10,
   monitoringCap: 59,
   highSeverityScore: 88,
-  formulaVersion: "micro_agenda_frontpage_fusion_v5_5_research_context",
+  formulaVersion: "micro_agenda_frontpage_fusion_v5_7_party_profile_narrative_intelligence",
 };
+
+
+function sanitizePartyProfile(profile: PoliticalPartyProfile | null): PoliticalPartyProfile | null {
+  if (!profile || typeof profile !== "object") return null;
+  if (
+    profile.party_key === "el_as" ||
+    profile.party_key === "elas" ||
+    String(profile.party_name || "").includes("Σώματα Ασφαλείας")
+  ) {
+    return {
+      ...profile,
+      party_key: "elas",
+      party_name: "ΕΛΑΣ",
+      short_name: "ΕΛΑΣ",
+      profile_type: "political_party",
+      ideological_family: "κεντροαριστερά / προοδευτικός χώρος",
+      strategic_positioning:
+        "Πολιτικό κόμμα / project του Αλέξη Τσίπρα με στόχο την προοδευτική ανασύνθεση, την κυβερνητική εναλλακτική και την κοινωνική πλειοψηφία.",
+      default_tone: "προοδευτικός, θεσμικός, κυβερνητικός, ενωτικός",
+      core_themes: ["Προοδευτική διακυβέρνηση", "Θεσμοί", "Κοινωνικό κράτος", "Οικονομία", "Ακρίβεια", "Δικαιοσύνη", "Δημοκρατική ανασύνθεση"],
+      core_audiences: ["προοδευτικοί ψηφοφόροι", "κεντροαριστερά", "απογοητευμένοι ψηφοφόροι", "μεσαία τάξη", "νέοι", "εργαζόμενοι"],
+      known_positions: ["Προοδευτική ανασύνθεση", "Κοινωνική δικαιοσύνη", "Θεσμική αξιοπιστία", "Πολιτική αλλαγή", "Κυβερνητική εναλλακτική"],
+      red_lines: ["Εικόνα επιστροφής στο παρελθόν", "Προσωποκεντρικότητα χωρίς νέο σχέδιο", "Ασάφεια κυβερνησιμότητας", "Καταγγελτική γλώσσα χωρίς πρόταση"],
+      opportunity_frame: "Να εμφανίζεται ως σοβαρή προοδευτική κυβερνητική εναλλακτική.",
+      risk_frame: "Κίνδυνος να παρουσιαστεί ως ανακύκλωση παλιού πολιτικού κύκλου.",
+      competitor_frame: "Οι αντίπαλοι θα το πλαισιώνουν ως επιστροφή Τσίπρα ή διάσπαση του προοδευτικού χώρου.",
+      advisor_instructions:
+        "Να δίνεις συμβουλές με θεσμικό, κυβερνητικό και ενωτικό τόνο. Κάθε μήνυμα πρέπει να δείχνει αλλαγή, αξιοπιστία και συγκεκριμένο σχέδιο.",
+    };
+  }
+  return profile;
+}
+
+function profileMatchesParty(profile: PoliticalPartyProfile, partyKey: string): boolean {
+  const target = normalizeText(partyKey).replace(/\s+/g, "_");
+  if (!target) return false;
+  const candidates = [profile.party_key, profile.short_name, profile.party_name]
+    .map((value) => normalizeText(value).replace(/\s+/g, "_"))
+    .filter(Boolean);
+  if (target === "el_as" || target === "ελασ") return candidates.includes("elas") || candidates.includes("ελασ");
+  return candidates.some((candidate) => candidate === target || candidate.includes(target) || target.includes(candidate));
+}
+
+function selectPartyProfile(partyKey: string | null, profiles: PoliticalPartyProfile[]): PoliticalPartyProfile | null {
+  if (!partyKey) return null;
+  const sanitized = profiles.map((profile) => sanitizePartyProfile(profile)).filter(Boolean) as PoliticalPartyProfile[];
+  return sanitized.find((profile) => profileMatchesParty(profile, partyKey)) || null;
+}
 
 const MICRO_AGENDA_RULES: MicroAgendaRule[] = [
   // Οικονομία
@@ -528,13 +576,14 @@ function forcedClassification(
   ]);
   if (electricityTheft.score >= 18) return forcedClassificationResult("electricity_theft_energy_grid", electricityTheft.matches, 50 + electricityTheft.score);
 
-  const socialBenefits = scoreInlineTerms(coreIndex, [
-    { term: "επιδομα", weight: 13, mode: "prefix" },
-    { term: "κοινωνικα επιδοματα", weight: 16, mode: "phrase" },
-    { term: "κοινωνικη στηριξη", weight: 15, mode: "phrase" },
-    { term: "κοινωνικα προγραμματα", weight: 15, mode: "phrase" },
+  const paidLeave = scoreInlineTerms(coreIndex, [
+    { term: "καλοκαιρινη αδεια", weight: 20, mode: "phrase" },
+    { term: "αδεια", weight: 13, mode: "exact" },
+    { term: "αδειας", weight: 13, mode: "exact" },
+    { term: "ιδιωτικο τομεα", weight: 14, mode: "phrase" },
+    { term: "εργαζομεν", weight: 8, mode: "prefix" },
   ]);
-  if (socialBenefits.score >= 16) return forcedClassificationResult("social_benefits_support", socialBenefits.matches, 45 + socialBenefits.score);
+  if (paidLeave.score >= 22) return forcedClassificationResult("wages_labor_rights", paidLeave.matches, 45 + paidLeave.score);
 
   const housingRenovation = scoreInlineTerms(coreIndex, [
     { term: "ανακαινιζω", weight: 18, mode: "exact" },
@@ -542,6 +591,15 @@ function forcedClassification(
     { term: "ανακαινιση κατοικιας", weight: 18, mode: "phrase" },
   ]);
   if (housingRenovation.score >= 14) return forcedClassificationResult("housing_renovation_programs", housingRenovation.matches, 50 + housingRenovation.score);
+
+  const socialBenefits = scoreInlineTerms(coreIndex, [
+    { term: "επιδομα", weight: 13, mode: "prefix" },
+    { term: "κοινωνικα επιδοματα", weight: 16, mode: "phrase" },
+    { term: "κοινωνικη στηριξη", weight: 15, mode: "phrase" },
+    { term: "κοινωνικα προγραμματα", weight: 15, mode: "phrase" },
+  ]);
+  const socialBenefitsBlocked = coreIndex.normalized.includes("ανακαιν") || coreIndex.normalized.includes("αδεια") || coreIndex.normalized.includes("αδειασ");
+  if (socialBenefits.score >= 16 && !socialBenefitsBlocked) return forcedClassificationResult("social_benefits_support", socialBenefits.matches, 45 + socialBenefits.score);
 
   const consumerTools = scoreInlineTerms(fullIndex, [
     { term: "posokanei", weight: 18, mode: "exact" },
@@ -1109,7 +1167,8 @@ function buildAgendaItem(
   advisorBriefs: any[],
   editorialProminenceRows: any[],
   debug: boolean,
-  partyKey: string | null = null
+  partyKey: string | null = null,
+  partyProfile: PoliticalPartyProfile | null = null
 ) {
   const sortedEvents = [...group.events].sort((a, b) => toNumber(b?.event_score) - toNumber(a?.event_score));
   const bestEvent = sortedEvents[0];
@@ -1207,6 +1266,7 @@ function buildAgendaItem(
     eventTitle: bestEvent?.title || group.classification.micro_agenda,
     eventText: sortedEvents.map((event) => `${event?.title || ""} ${event?.summary || ""}`).join(" ").slice(0, 4000),
     partyKey,
+    partyProfile,
   });
 
 
@@ -1273,7 +1333,7 @@ function buildAgendaItem(
       parent_only_signal: parentOnlySignal,
       formula: sensitivity.ranking_policy === "do_not_optimize_for_engagement"
         ? "sensitive capped: event + coverage + freshness + documentation"
-        : "v5.5: 36% event + 14% agenda + 16% calibrated coverage + 12% micro-agenda-preferred trends + 12% frontpage editorial prominence with parent-fallback cap + 7% freshness + 3% documentation + breadth bonus, enriched with research context for narrative",
+        : "v5.6: 36% event + 14% agenda + 16% calibrated coverage + 12% micro-agenda-preferred trends + 12% frontpage editorial prominence with parent-fallback cap + 7% freshness + 3% documentation + breadth bonus, enriched with corrected party-aware research context for narrative",
     },
     search_interest_score: sensitivity.ranking_policy === "do_not_optimize_for_engagement" ? null : trendScore,
     search_interest_status: trend?.search_interest_status || matchedAgendaTopic?.public_attention_signal ? "real_signal_bridge" : "no_trend_signal",
@@ -1327,10 +1387,10 @@ function buildAgendaItem(
   };
 }
 
-function buildLiveAgenda(events: any[], trends: any[], agendaTopics: any[], advisorBriefs: any[], editorialProminenceRows: any[], debug: boolean, partyKey: string | null = null) {
+function buildLiveAgenda(events: any[], trends: any[], agendaTopics: any[], advisorBriefs: any[], editorialProminenceRows: any[], debug: boolean, partyKey: string | null = null, partyProfile: PoliticalPartyProfile | null = null) {
   const filteredEvents = events.filter((event) => !isSportsNoiseEvent(event));
   const sportsNoiseEventsFiltered = events.length - filteredEvents.length;
-  const items = groupEvents(filteredEvents).map((group) => buildAgendaItem(group, trends, agendaTopics, advisorBriefs, editorialProminenceRows, debug, partyKey));
+  const items = groupEvents(filteredEvents).map((group) => buildAgendaItem(group, trends, agendaTopics, advisorBriefs, editorialProminenceRows, debug, partyKey, partyProfile));
   const agendaClusters = items
     .filter((item) => item.type !== "monitoring_event")
     .sort((a, b) => b.score - a.score || b.top_event_score - a.top_event_score || b.event_count - a.event_count);
@@ -1419,13 +1479,19 @@ export async function GET(req: Request) {
     .order("last_seen_at", { ascending: false, nullsFirst: false })
     .limit(31);
 
-  const [eventsResult, trendsResult, agendaTopicsResult, advisorBriefsResult, editorialProminenceResult, legacyResult] = await Promise.all([
+  const partyProfilesQuery = supabase
+    .from("political_party_profiles")
+    .select("*")
+    .limit(250);
+
+  const [eventsResult, trendsResult, agendaTopicsResult, advisorBriefsResult, editorialProminenceResult, legacyResult, partyProfilesResult] = await Promise.all([
     eventsQuery,
     trendsQuery,
     agendaTopicsQuery,
     advisorBriefsQuery,
     editorialProminenceQuery,
     legacyQuery,
+    partyProfilesQuery,
   ]);
 
   if (eventsResult.error) {
@@ -1445,6 +1511,7 @@ export async function GET(req: Request) {
   const advisorBriefs = Array.isArray(advisorBriefsResult.data) ? advisorBriefsResult.data : [];
   const editorialProminenceRows = Array.isArray(editorialProminenceResult.data) ? editorialProminenceResult.data : [];
   const legacySituations = Array.isArray(legacyResult.data) ? legacyResult.data : [];
+  const partyProfiles = Array.isArray(partyProfilesResult.data) ? (partyProfilesResult.data as PoliticalPartyProfile[]) : [];
 
   const newestLegacySeenAt = legacySituations.length
     ? legacySituations
@@ -1454,7 +1521,8 @@ export async function GET(req: Request) {
     : null;
   const legacyHoursOld = newestLegacySeenAt ? hoursOld(newestLegacySeenAt) : null;
   const partyKey = searchParams.get("party") || null;
-  const result = buildLiveAgenda(events, trends, agendaTopics, advisorBriefs, editorialProminenceRows, debug, partyKey);
+  const partyProfile = selectPartyProfile(partyKey, partyProfiles);
+  const result = buildLiveAgenda(events, trends, agendaTopics, advisorBriefs, editorialProminenceRows, debug, partyKey, partyProfile);
 
   const diagnostics = {
     read_only: true,
@@ -1466,10 +1534,15 @@ export async function GET(req: Request) {
     source_agenda_topics: "agenda_topics",
     source_advisor_agenda_briefs: "v_advisor_agenda_briefs_recent",
     source_editorial_prominence: "v_editorial_prominence_recent",
-    source_research_context: "public/noraya-data/public_opinion.csv + leader_traits.csv + vote_intention.csv",
+    source_research_context: "public/noraya-data/public_opinion.csv + leader_traits.csv + vote_intention.csv + political_party_profiles",
+    source_party_profiles: "political_party_profiles",
+    party_key: partyKey,
+    party_profile_found: Boolean(partyProfile),
+    party_profile_name: partyProfile?.party_name || partyProfile?.short_name || null,
+    party_profiles_error: partyProfilesResult.error?.message ?? null,
     research_context_version: RESEARCH_CONTEXT_VERSION,
     frontpage_layer_present: editorialProminenceRows.length > 0,
-    frontpage_layer_note: "v5.5 fuses political/economic frontpage editorial prominence and enriches each micro-agenda with public-opinion, leader-trait and vote-intention research context.",
+    frontpage_layer_note: "v5.7 fuses frontpage editorial prominence with research context and the real political_party_profiles source of truth, including red lines and advisor instructions.",
     legacy_situations_source: "v_situation_engine_live",
     event_rows_considered: events.length,
     event_rows_total_matching_window: eventsResult.count,
@@ -1479,7 +1552,7 @@ export async function GET(req: Request) {
     editorial_prominence_rows_considered: editorialProminenceRows.length,
     formula_version: CONFIG.formulaVersion,
     sports_noise_events_filtered: result.sports_noise_events_filtered,
-    calibration_note: "v5.5 keeps micro-agenda trend preference, caps parent-only frontpage fallback, and enriches each agenda item with public-opinion, leader-trait and vote-intention research context.",
+    calibration_note: "v5.7 keeps micro-agenda trend preference, caps parent-only frontpage fallback, fixes mappings, and feeds narrative intelligence from public opinion, leader traits, vote intention, and political_party_profiles red lines.",
     classifier_features: [
       "safe_token_matching",
       "weighted_keywords",
@@ -1500,6 +1573,11 @@ export async function GET(req: Request) {
       "political_economic_frontpages_only",
       "frontpage_parent_fallback_cap",
       "research_context_from_public_opinion_leader_traits_vote_intention",
+      "party_profile_source_of_truth",
+      "party_red_lines_in_narrative",
+      "advisor_instructions_in_narrative",
+      "tax_social_support_mapping_corrections",
+      "paid_leave_disambiguation",
     ],
     newest_legacy_situation_seen_at: newestLegacySeenAt,
     newest_legacy_situation_hours_old:
@@ -1513,7 +1591,7 @@ export async function GET(req: Request) {
 
   const basePayload = {
     success: true,
-    mode: "read_only_real_signal_bridge_frontpage_fusion_v5_5_research_context",
+    mode: "read_only_real_signal_bridge_frontpage_fusion_v5_7_party_profile_narrative_intelligence",
     grouping: "canonical_micro_agenda_to_parent_topics_to_events",
     view,
     generated_at: new Date().toISOString(),
