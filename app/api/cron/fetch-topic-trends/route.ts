@@ -114,7 +114,7 @@ async function loadTopics(limit: number): Promise<string[]> {
 }
 
 function collectNumericValues(value: unknown, out: number[] = []): number[] {
-  if (out.length > 300) return out;
+  if (out.length > 500) return out;
   if (typeof value === "number" && Number.isFinite(value)) {
     if (value >= 0 && value <= 100) out.push(value);
     return out;
@@ -132,11 +132,97 @@ function collectNumericValues(value: unknown, out: number[] = []): number[] {
     const obj = value as Record<string, unknown>;
     for (const [key, val] of Object.entries(obj)) {
       const k = key.toLowerCase();
-      if (k.includes("time") || k.includes("date") || k.includes("timestamp")) continue;
+      // Skip actual timestamps/dates and config fields, but DO NOT skip "interestOverTime".
+      if (
+        k === "date" ||
+        k === "timestamp" ||
+        k === "scrapedat" ||
+        k === "timerange" ||
+        k === "timeframe" ||
+        k === "geo" ||
+        k === "property"
+      ) continue;
       collectNumericValues(val, out);
     }
   }
   return out;
+}
+
+type SeriesStats = {
+  values: number[];
+  average: number;
+  peak: number;
+  recent_average: number;
+  last_value: number;
+  non_zero_rate: number;
+};
+
+function extractSeriesValuesFromEntry(entry: unknown): number[] {
+  if (!entry || typeof entry !== "object") return [];
+  const obj = entry as Record<string, unknown>;
+  const raw = obj.value ?? obj.values ?? obj.formattedValue;
+  if (Array.isArray(raw)) {
+    return raw
+      .map((v) => numberValue(v, NaN))
+      .filter((v) => Number.isFinite(v) && v >= 0 && v <= 100);
+  }
+  const n = numberValue(raw, NaN);
+  return Number.isFinite(n) && n >= 0 && n <= 100 ? [n] : [];
+}
+
+function findInterestSeries(value: unknown, out: number[] = []): number[] {
+  if (out.length > 1000 || !value) return out;
+
+  if (Array.isArray(value)) {
+    const looksLikeSeries = value.some((item) => {
+      if (!item || typeof item !== "object") return false;
+      const obj = item as Record<string, unknown>;
+      return obj.value != null && (obj.date != null || obj.timestamp != null || obj.isPartial != null);
+    });
+
+    if (looksLikeSeries) {
+      for (const item of value) {
+        out.push(...extractSeriesValuesFromEntry(item));
+        if (out.length > 1000) break;
+      }
+      return out;
+    }
+
+    for (const item of value) findInterestSeries(item, out);
+    return out;
+  }
+
+  if (typeof value === "object") {
+    const obj = value as Record<string, unknown>;
+    for (const [key, val] of Object.entries(obj)) {
+      const k = key.toLowerCase();
+      if (
+        k === "interestovertime" ||
+        k === "interest_over_time" ||
+        k === "timelinedata" ||
+        k === "timeline_data" ||
+        k === "timeline"
+      ) {
+        findInterestSeries(val, out);
+        continue;
+      }
+      if (typeof val === "object") findInterestSeries(val, out);
+    }
+  }
+
+  return out;
+}
+
+function summarizeSeries(values: number[]): SeriesStats | null {
+  const clean = values.filter((v) => Number.isFinite(v) && v >= 0 && v <= 100);
+  if (!clean.length) return null;
+  const average = clean.reduce((a, b) => a + b, 0) / clean.length;
+  const peak = Math.max(...clean);
+  const recent = clean.slice(-24);
+  const recent_average = recent.length ? recent.reduce((a, b) => a + b, 0) / recent.length : average;
+  const last_value = clean[clean.length - 1] ?? 0;
+  const non_zero_rate = clean.filter((v) => v > 0).length / clean.length;
+  return { values: clean, average, peak, recent_average, last_value, non_zero_rate };
 }
 
 function extractRisingQueries(payload: unknown): unknown[] {
@@ -166,22 +252,62 @@ function extractRisingQueries(payload: unknown): unknown[] {
   return out.slice(0, 25);
 }
 
-function extractTrendScore(items: unknown[]): { score: number | null; confidence: "parsed" | "weak" | "none"; numeric_sample: number[] } {
+function extractTrendScore(items: unknown[]): {
+  score: number | null;
+  confidence: "parsed" | "weak" | "none";
+  numeric_sample: number[];
+  series_stats?: Omit<SeriesStats, "values"> & { points: number };
+  scoring_method: "interest_over_time" | "generic_numeric_fallback" | "none";
+} {
+  const seriesValues: number[] = [];
+  for (const item of items) findInterestSeries(item, seriesValues);
+  const stats = summarizeSeries(seriesValues);
+
+  if (stats) {
+    // Google Trends values are relative within the query. We use average/recent momentum
+    // more than isolated peak, so one random spike doesn't become a false "public pulse".
+    const score = clamp(Math.round(
+      stats.average * 0.50 +
+      stats.recent_average * 0.25 +
+      stats.peak * 0.15 +
+      stats.non_zero_rate * 10
+    ));
+
+    return {
+      score,
+      confidence: stats.values.length >= 24 ? "parsed" : "weak",
+      numeric_sample: stats.values.slice(0, 12),
+      series_stats: {
+        average: Math.round(stats.average * 10) / 10,
+        peak: stats.peak,
+        recent_average: Math.round(stats.recent_average * 10) / 10,
+        last_value: stats.last_value,
+        non_zero_rate: Math.round(stats.non_zero_rate * 1000) / 1000,
+        points: stats.values.length,
+      },
+      scoring_method: "interest_over_time",
+    };
+  }
+
   const values: number[] = [];
   for (const item of items) collectNumericValues(item, values);
   const filtered = values.filter((v) => Number.isFinite(v) && v >= 0 && v <= 100);
-  if (!filtered.length) return { score: null, confidence: "none", numeric_sample: [] };
+  if (!filtered.length) {
+    return { score: null, confidence: "none", numeric_sample: [], scoring_method: "none" };
+  }
 
   const topValues = filtered.slice(-40);
   const max = Math.max(...topValues);
   const avg = topValues.reduce((a, b) => a + b, 0) / topValues.length;
-  const score = clamp(Math.round(max * 0.65 + avg * 0.35));
+  const score = clamp(Math.round(max * 0.45 + avg * 0.55));
   return {
     score,
     confidence: filtered.length >= 8 ? "parsed" : "weak",
     numeric_sample: filtered.slice(0, 12),
+    scoring_method: "generic_numeric_fallback",
   };
 }
+
 
 async function runApifyTrendActor(topic: string, queries: string[]) {
   const token = process.env.APIFY_API_TOKEN;
@@ -302,6 +428,8 @@ export async function GET(request: Request) {
             parser_confidence: result.score_result.confidence,
             raw_count: result.raw_count,
             numeric_sample: result.score_result.numeric_sample,
+            scoring_method: result.score_result.scoring_method,
+            series_stats: result.score_result.series_stats ?? null,
             items_sample: result.items_sample,
           },
           fetched_at: fetchedAt,
@@ -323,7 +451,7 @@ export async function GET(request: Request) {
 
   return json({
     success: true,
-    mode: "fetch_topic_trends_apify_google_trends_v1",
+    mode: "fetch_topic_trends_apify_google_trends_v2",
     generated_at: fetchedAt,
     diagnostics,
     topics_requested: topics.length,
