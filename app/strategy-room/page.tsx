@@ -2098,9 +2098,9 @@ function LeftSidebar({
       );
     }
     // Fallback: classified θέματα όταν δεν υπάρχουν ακόμη live γεγονότα.
-    return (agenda || []).slice(0, 8).map((a, i) => ({
-      topic: a.topic,
-      score: a.score,
+    return (agenda || []).slice(0, 8).map((a, i): AgendaSidebarItem => ({
+      topic: String(a.topic || "Γενικά"),
+      score: numberValue(a.score, 0),
       count: 0,
       rank: i + 1,
       events: [] as AgendaEvent[],
