@@ -67,6 +67,13 @@ export type AgendaCluster = {
   sensitivity_reasons?: string[];
   diagnosis?: string[];
   strategic_read?: string | null;
+  real_news_coverage_score?: number | null;
+  real_trend_score?: number | null;
+  real_frontpage_prominence_score?: number | null;
+  raw_frontpage_prominence_score?: number | null;
+  editorial_relevance_score?: number | null;
+  signal_bridge?: Record<string, unknown> | null;
+  score_components?: Record<string, unknown> | null;
   top_events?: AgendaEvent[];
   evidence_articles?: EvidenceArticle[];
 };
@@ -216,6 +223,113 @@ const safeText = (value: unknown, fallback = ''): string => {
 const unique = <T,>(items: T[]): T[] => Array.from(new Set(items.filter(Boolean)));
 const sourceWord = (count: number): string => (count === 1 ? 'πηγή' : 'πηγές');
 const articleWord = (count: number): string => (count === 1 ? 'άρθρο' : 'άρθρα');
+
+const recordOf = (value: unknown): Record<string, unknown> =>
+  value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : {};
+
+const signalBridgeOf = (cluster: AgendaCluster): Record<string, unknown> => recordOf(cluster.signal_bridge);
+const scoreComponentsOf = (cluster: AgendaCluster): Record<string, unknown> => recordOf(cluster.score_components);
+
+const editorialItemsOf = (cluster: AgendaCluster): Record<string, unknown>[] => {
+  const items = signalBridgeOf(cluster).editorial_top_items;
+  return Array.isArray(items) ? items.map(recordOf) : [];
+};
+
+const sourceNamesOf = (items: Record<string, unknown>[]): string[] =>
+  unique(items.map((item) => safeText(item.source_name)).filter(Boolean)).slice(0, 4);
+
+const compactSourceList = (sources: string[]): string => {
+  if (!sources.length) return 'πολιτικές και οικονομικές πηγές';
+  if (sources.length === 1) return sources[0];
+  if (sources.length === 2) return `${sources[0]} και ${sources[1]}`;
+  return `${sources.slice(0, -1).join(', ')} και ${sources[sources.length - 1]}`;
+};
+
+const hasExactFrontpageSignal = (cluster: AgendaCluster): boolean => {
+  const bridge = signalBridgeOf(cluster);
+  return Boolean(bridge.uses_editorial_prominence_signals) && !Boolean(bridge.parent_only_editorial_prominence) && n(bridge.editorial_signal_count) > 0;
+};
+
+const hasParentFrontpageSignal = (cluster: AgendaCluster): boolean => {
+  const bridge = signalBridgeOf(cluster);
+  return Boolean(bridge.uses_editorial_prominence_signals) && Boolean(bridge.parent_only_editorial_prominence) && n(bridge.editorial_signal_count) > 0;
+};
+
+const signalStrengthWord = (value: number): string => {
+  if (value >= 80) return 'ισχυρή';
+  if (value >= 55) return 'σταθερή';
+  if (value >= 30) return 'ήπια';
+  return 'πρώιμη';
+};
+
+const publicInterestPhrase = (cluster: AgendaCluster): string => {
+  const trend = n(cluster.real_trend_score ?? cluster.search_interest_score);
+  if (trend >= 55) return 'Οι αναζητήσεις δείχνουν αυξημένο δημόσιο ενδιαφέρον και προσθέτουν κοινωνική ώθηση στο θέμα.';
+  if (trend >= 25) return 'Οι αναζητήσεις δείχνουν υπαρκτό ενδιαφέρον και κρατούν το θέμα μέσα στην καθημερινή προσοχή του κοινού.';
+  if (trend > 0) return 'Οι αναζητήσεις προσθέτουν πρώιμο δημόσιο ενδιαφέρον και λειτουργούν ως συμπληρωματικό σήμα.';
+  return 'Το δημόσιο ενδιαφέρον παραμένει σε φάση σχηματισμού και παρακολουθείται μαζί με την ειδησεογραφική κάλυψη.';
+};
+
+const newsCoveragePhrase = (cluster: AgendaCluster): string => {
+  const coverage = n(cluster.real_news_coverage_score, Math.min(100, n(cluster.article_count) * 8));
+  if (coverage >= 80) return 'Η ειδησεογραφική κάλυψη είναι ισχυρή και δίνει διάρκεια στην ατζέντα.';
+  if (coverage >= 50) return 'Η ειδησεογραφική κάλυψη είναι σταθερή και συντηρεί το θέμα στο προσκήνιο.';
+  return 'Η ειδησεογραφική κάλυψη σχηματίζει αρχικό υπόβαθρο για παρακολούθηση.';
+};
+
+const frontpagePhrase = (cluster: AgendaCluster): string => {
+  const sources = compactSourceList(sourceNamesOf(editorialItemsOf(cluster)));
+  const raw = n(cluster.raw_frontpage_prominence_score ?? cluster.real_frontpage_prominence_score);
+  const capped = n(cluster.real_frontpage_prominence_score);
+
+  if (hasExactFrontpageSignal(cluster)) {
+    return `Η παρουσία σε πρωτοσέλιδα από ${sources} δίνει στο θέμα θεσμικό βάρος και το μετακινεί προς το κέντρο της πολιτικής ατζέντας.`;
+  }
+
+  if (hasParentFrontpageSignal(cluster)) {
+    return `Η ευρύτερη ατζέντα γύρω από ${safeText(signalBridgeOf(cluster).matched_editorial_topic, cluster.parent_topic || cluster.micro_agenda)} ανεβαίνει στα πρωτοσέλιδα και προσθέτει πλαίσιο στο θέμα, με ελεγχόμενη βαρύτητα ${capped || raw}.`;
+  }
+
+  return 'Η θέση του θέματος σχηματίζεται από την ειδησεογραφική κάλυψη, τη δημόσια προσοχή και τα συγγενή γεγονότα.';
+};
+
+const strategicAdvisorBody = (cluster: AgendaCluster, view: EventIntelligenceView): string => {
+  const topic = cluster.micro_agenda;
+  const frontpage = frontpagePhrase(cluster);
+  const pulse = publicInterestPhrase(cluster);
+  const coverage = newsCoveragePhrase(cluster);
+
+  if (hasExactFrontpageSignal(cluster)) {
+    return `${topic} συγκεντρώνει σήμερα ${signalStrengthWord(n(cluster.real_news_coverage_score, n(cluster.article_count) * 8))} ειδησεογραφική κάλυψη, υπαρκτό ενδιαφέρον στις αναζητήσεις και καθαρή παρουσία στα πολιτικά και οικονομικά πρωτοσέλιδα. ${frontpage} ${pulse} Για τη στρατηγική ανάγνωση, το θέμα μπορεί να λειτουργήσει ως γέφυρα ανάμεσα στην καθημερινή πίεση, την αξιοπιστία λύσεων και την πολιτική τοποθέτηση.`;
+  }
+
+  if (hasParentFrontpageSignal(cluster)) {
+    return `${topic} κινείται μέσα σε ευρύτερο κύμα που έχει αποκτήσει πρωτοσέλιδη παρουσία. ${frontpage} ${coverage} ${pulse} Για τη στρατηγική ανάγνωση, το θέμα αποκτά αξία ως πεδίο εφαρμογής, εξειδίκευσης και αξιοπιστίας.`;
+  }
+
+  return `${topic} συγκεντρώνει σήματα από ειδήσεις, συγγενή γεγονότα και δημόσια προσοχή. ${coverage} ${pulse} Για τη στρατηγική ανάγνωση, το θέμα αξίζει παρακολούθηση ως πεδίο πιθανής πολιτικής μετατόπισης.`;
+};
+
+const whyAdvisorBody = (cluster: AgendaCluster): string => {
+  const topic = cluster.micro_agenda;
+  if (hasExactFrontpageSignal(cluster)) {
+    return `${topic} εμφανίζεται επειδή ενώνονται τρία επίπεδα: δημόσιο ενδιαφέρον, ειδησεογραφική διάρκεια και πρωτοσέλιδη ανάδειξη. Η σύμπτωση αυτών των σημάτων δημιουργεί πολιτικό βάρος και φέρνει το θέμα σε θέση άμεσης αξιολόγησης.`;
+  }
+  if (hasParentFrontpageSignal(cluster)) {
+    return `${topic} εμφανίζεται επειδή συνδέεται με ευρύτερη ατζέντα που αποκτά πρωτοσέλιδη δύναμη. Η σύνδεση λειτουργεί συμπληρωματικά και δείχνει πού μπορεί να μετακινηθεί η συζήτηση τις επόμενες ώρες.`;
+  }
+  return `${topic} εμφανίζεται επειδή συγκεντρώνει επαναλαμβανόμενα σήματα από ειδήσεις, πηγές και σχετικές εξελίξεις. Η εικόνα δείχνει θέμα που σχηματίζει πολιτική σημασία μέσα από τη συσσώρευση ενδείξεων.`;
+};
+
+const winningAdvisorBody = (cluster: AgendaCluster): string => {
+  if (hasExactFrontpageSignal(cluster)) {
+    return `Το θέμα κερδίζεται με γραμμή που αναγνωρίζει την κοινωνική πίεση και δείχνει συγκεκριμένη λύση. Η πρωτοσέλιδη παρουσία δημιουργεί χώρο για σοβαρή τοποθέτηση με θεσμικό τόνο και πρακτική απάντηση.`;
+  }
+  if (hasParentFrontpageSignal(cluster)) {
+    return `Το θέμα κερδίζεται όταν συνδεθεί καθαρά με την κεντρική ατζέντα που ήδη ανεβαίνει. Η σωστή κίνηση είναι εξειδίκευση: από το γενικό πρόβλημα σε εφαρμόσιμη λύση.`;
+  }
+  return `Το θέμα κερδίζεται με καθαρή σύνδεση ανάμεσα στο γεγονός, την καθημερινή επίπτωση και την πολιτική επιλογή. Η τοποθέτηση χρειάζεται ακρίβεια, ανθρώπινο τόνο και τεκμηρίωση.`;
+};
 
 export function getProfessionalStatusLabel(item: AgendaCluster | AgendaEvent): string {
   const articleCount = n((item as AgendaCluster).article_count ?? (item as AgendaEvent).article_count);
@@ -385,8 +499,8 @@ function buildPrioritySubtitle(cluster: AgendaCluster): string {
 }
 
 function buildActionHint(cluster: AgendaCluster): string {
-  if (cluster.requires_human_review) return 'Ανθρώπινος τόνος, όχι κομματική εργαλειοποίηση.';
-  if (n(cluster.score) >= 75) return 'Σύντομη τοποθέτηση με καθαρό framing και τεκμηρίωση.';
+  if (cluster.requires_human_review) return 'Ανθρώπινος τόνος, θεσμική ακρίβεια και αποφυγή εργαλειοποίησης.';
+  if (n(cluster.score) >= 75) return 'Σύντομη τοποθέτηση με καθαρή πλαισίωση και τεκμηρίωση.';
   if (n(cluster.event_count) <= 1) return 'Παρακολούθηση μέχρι να φανεί αν επαναλαμβάνεται.';
   return 'Κράτα το θέμα ενεργό και σύνδεσέ το με ευρύτερο πλαίσιο.';
 }
@@ -409,12 +523,12 @@ function buildDynamicGauges(cluster: AgendaCluster, event: AgendaEvent): Gauge[]
   const agenda = clamp(score * 0.55 + media * 0.2 + political * 0.15 + publicPulse * 0.1);
 
   return [
-    { key: 'media_intensity', label: 'Media ένταση', value: media, valueLabel: gaugeLabel(media), explanation: 'Άρθρα, πηγές και επανάληψη σημάτων.' },
+    { key: 'media_intensity', label: 'Ένταση κάλυψης', value: media, valueLabel: gaugeLabel(media), explanation: 'Άρθρα, πηγές και επανάληψη σημάτων.' },
     { key: 'public_pulse', label: 'Δημόσιος παλμός', value: publicPulse, valueLabel: gaugeLabel(publicPulse), explanation: 'Αναζήτηση, τάσεις και εξωτερικός δημόσιος παλμός.' },
-    { key: 'political_intensity', label: 'Πολιτική ένταση', value: political, valueLabel: gaugeLabel(political), explanation: 'Πολιτικά άρθρα, actors και πιθανότητα κομματικής χρήσης.' },
+    { key: 'political_intensity', label: 'Πολιτική βαρύτητα', value: political, valueLabel: gaugeLabel(political), explanation: 'Πολιτικά άρθρα, θεσμικοί παράγοντες και δυνατότητα δημόσιας χρήσης.' },
     { key: 'emotional_intensity', label: 'Συναισθηματική ένταση', value: emotional, valueLabel: gaugeLabel(emotional), explanation: 'Κοινωνική φόρτιση, ευαισθησία και γλώσσα τίτλων.' },
-    { key: 'overreach_risk', label: 'Κίνδυνος υπερβολής', value: overreach, valueLabel: gaugeLabel(overreach), explanation: 'Ρίσκο υπερ-ερμηνείας πριν παγιωθεί το θέμα.' },
-    { key: 'agenda_potential', label: 'Agenda potential', value: agenda, valueLabel: gaugeLabel(agenda), explanation: 'Πιθανότητα να περάσει από γεγονός σε πολιτικό θέμα.' },
+    { key: 'overreach_risk', label: 'Προσοχή χειρισμού', value: overreach, valueLabel: gaugeLabel(overreach), explanation: 'Βαθμός προσοχής πριν από δημόσια κλιμάκωση.' },
+    { key: 'agenda_potential', label: 'Δυναμική ατζέντας', value: agenda, valueLabel: gaugeLabel(agenda), explanation: 'Πιθανότητα να περάσει από γεγονός σε κεντρικό πολιτικό θέμα.' },
   ];
 }
 
@@ -464,7 +578,7 @@ function buildEscalationTriggers(cluster: AgendaCluster, event: AgendaEvent): st
 
   if (sourceCount >= 3) triggers.push('Περνά σε περισσότερες ανεξάρτητες πηγές.');
   if (eventCount >= 3) triggers.push('Συνδέεται με περισσότερα συγγενή γεγονότα.');
-  if (hasPoliticalActor(title)) triggers.push('Μπαίνουν ενεργά πολιτικοί ή θεσμικοί actors.');
+  if (hasPoliticalActor(title)) triggers.push('Μπαίνουν ενεργά πολιτικοί ή θεσμικοί παράγοντες.');
   if (cluster.search_interest_score && cluster.search_interest_score >= 50) triggers.push('Ο δημόσιος παλμός αρχίζει να ανεβαίνει.');
   if (cluster.requires_human_review) triggers.push('Ο χειρισμός παραμένει θεσμικός και προσεκτικός λόγω ευαισθησίας.');
   if (!triggers.length) triggers.push('Η σύσταση αναθεωρείται αν εμφανιστεί δεύτερη πηγή ή νέο πολιτικό σήμα.');
@@ -474,14 +588,14 @@ function buildEscalationTriggers(cluster: AgendaCluster, event: AgendaEvent): st
 
 function buildStrategicImageSection(cluster: AgendaCluster, event: AgendaEvent, view: EventIntelligenceView): IntelligenceSection {
   const body = view.sensitiveMode
-    ? `Το γεγονός ανήκει στο "${cluster.micro_agenda}" και χρειάζεται προσεκτική, ανθρώπινη ανάγνωση. Η αξία του για το Strategy Room είναι η έγκαιρη κατανόηση του θεσμικού και κοινωνικού πλαισίου.`
-    : `Το γεγονός ανήκει στο "${cluster.micro_agenda}". Η στρατηγική σημασία δεν βρίσκεται μόνο στον τίτλο, αλλά στο πώς κουμπώνει με την τρέχουσα πολιτική ατζέντα.`;
+    ? `Το θέμα ανήκει στο "${cluster.micro_agenda}" και ζητά προσεκτική, ανθρώπινη ανάγνωση. Η αξία του για το Strategy Room είναι η έγκαιρη κατανόηση του θεσμικού και κοινωνικού πλαισίου.`
+    : strategicAdvisorBody(cluster, view);
 
   return {
     tab: 'strategic_image',
     label: 'Στρατηγική εικόνα',
     kicker: 'Ατζέντα → Πλαίσιο → Ρίσκο',
-    title: 'Τι σημαίνει σήμερα',
+    title: 'Τι βλέπουμε',
     body,
     bullets: [`Θέμα: ${cluster.micro_agenda}`, `Κατάσταση: ${view.statusLabel}`, `Τεκμηρίωση: ${view.evidenceLabel}`],
   };
@@ -495,29 +609,31 @@ function buildOverallImageSection(cluster: AgendaCluster, event: AgendaEvent, vi
   return {
     tab: 'overall_image',
     label: 'Συνολική εικόνα',
-    kicker: 'Micro-agenda context',
+    kicker: 'Πλαίσιο μικροατζέντας',
     title: 'Πού ανήκει και τι το στηρίζει',
-    body: `Το γεγονός εντάσσεται στο micro-agenda "${cluster.micro_agenda}". Η εικόνα σχηματίζεται από ${eventCount} ${eventCount === 1 ? 'γεγονός' : 'γεγονότα'}, ${articleCount} ${articleWord(articleCount)} και ${sourceCount} ${sourceWord(sourceCount)}.`,
-    bullets: [`Parent topics: ${view.parentTopics.join(', ') || '—'}`, `Πιο πρόσφατο σήμα: ${formatDate(cluster.newest_article_at ?? event.last_article_at)}`, `Κατεύθυνση: ${getProfessionalStatusLabel(cluster)}`],
+    body: `Το γεγονός εντάσσεται στη μικροατζέντα "${cluster.micro_agenda}". Η εικόνα σχηματίζεται από ${eventCount} ${eventCount === 1 ? 'γεγονός' : 'γεγονότα'}, ${articleCount} ${articleWord(articleCount)} και ${sourceCount} ${sourceWord(sourceCount)}.`,
+    bullets: [`Ευρύτερο πλαίσιο: ${view.parentTopics.join(', ') || '—'}`, `Πιο πρόσφατο σήμα: ${formatDate(cluster.newest_article_at ?? event.last_article_at)}`, `Κατεύθυνση: ${getProfessionalStatusLabel(cluster)}`],
   };
 }
 
 function buildWhyExistsSection(cluster: AgendaCluster, event: AgendaEvent, view: EventIntelligenceView): IntelligenceSection {
   const reasons = [
-    `Συνδέεται με το micro-agenda "${cluster.micro_agenda}".`,
+    `Συνδέεται με τη μικροατζέντα "${cluster.micro_agenda}".`,
     `${n(cluster.article_count)} ${articleWord(n(cluster.article_count))} / ${n(cluster.source_count)} ${sourceWord(n(cluster.source_count))}.`,
     `Τεκμηρίωση: ${view.evidenceLabel}.`,
   ];
 
-  if (n(cluster.event_count) > 1) reasons.push('Δεν εμφανίζεται ως μεμονωμένος τίτλος, αλλά μέσα σε συστάδα σημάτων.');
+  if (n(cluster.event_count) > 1) reasons.push('Εμφανίζεται μέσα σε συστάδα συγγενών σημάτων.');
+  if (hasExactFrontpageSignal(cluster)) reasons.push('Έχει άμεση παρουσία σε πολιτικά και οικονομικά πρωτοσέλιδα.');
+  if (hasParentFrontpageSignal(cluster)) reasons.push('Συνδέεται με ευρύτερο πρωτοσέλιδο κύμα της ίδιας ατζέντας.');
   if (cluster.requires_human_review) reasons.push('Εμφανίζεται με προσεκτικό χειρισμό λόγω κοινωνικής ευαισθησίας.');
 
   return {
     tab: 'why_exists',
-    label: 'Γιατί υπάρχει',
-    kicker: 'Noraya rationale',
-    title: 'Γιατί το βλέπει η Noraya',
-    body: 'Το σύστημα δεν το εμφανίζει ως απλή αναπαραγωγή είδησης. Το εμφανίζει επειδή συγκεντρώνει σήματα με πολιτική ή θεσμική σημασία.',
+    label: 'Γιατί έχει σημασία',
+    kicker: 'Στρατηγική αιτιολόγηση',
+    title: 'Γιατί μπαίνει στην εικόνα',
+    body: whyAdvisorBody(cluster),
     bullets: reasons,
   };
 }
@@ -531,7 +647,7 @@ function buildSourcesFactorsSection(cluster: AgendaCluster, event: AgendaEvent, 
     label: 'Πηγές & παράγοντες',
     kicker: 'Τεκμηρίωση',
     title: 'Από πού προκύπτει',
-    body: 'Οι πηγές δείχνουν το γεγονός· οι παράγοντες εξηγούν γιατί αποκτά πολιτική αξία.',
+    body: 'Οι πηγές δείχνουν το γεγονός· οι παράγοντες φωτίζουν το πολιτικό του βάρος.',
     bullets: [`Πηγές: ${sources.length ? sources.join(', ') : 'σε εξέλιξη'}`, ...factors],
   };
 }
@@ -542,12 +658,10 @@ function buildPublicPulseSection(cluster: AgendaCluster, view: EventIntelligence
 
   return {
     tab: 'public_pulse',
-    label: 'Δημόσιος παλμός',
-    kicker: 'Search / media pulse',
+    label: 'Δημόσιο ενδιαφέρον',
+    kicker: 'Αναζητήσεις και δημόσια προσοχή',
     title: pulse,
-    body: score >= 45
-      ? 'Το θέμα έχει αρχίσει να κινείται πέρα από την απλή ειδησεογραφική εμφάνιση και αξίζει παρακολούθηση ως δημόσιος παλμός.'
-      : 'Το θέμα κινείται κυρίως ως θεσμικό ή μιντιακό σήμα. Δεν χρειάζεται να εμφανιστεί ως μαζικός παλμός για να έχει στρατηγική σημασία.',
+    body: publicInterestPhrase(cluster),
     gauges: view.gauges,
   };
 }
@@ -559,8 +673,8 @@ function buildHowToWinSection(cluster: AgendaCluster, view: EventIntelligenceVie
       label: 'Πώς χειρίζεται',
       kicker: 'Προσεκτική λειτουργία',
       title: 'Θεσμικός και ανθρώπινος χειρισμός',
-      body: 'Το θέμα δεν πρέπει να αντιμετωπιστεί ως ευκαιρία αντιπαράθεσης. Η σωστή στάση είναι προσεκτική, θεσμική και μη εργαλειοποιητική.',
-      bullets: ['Ανθρώπινος τόνος και σεβασμός στα πρόσωπα.', 'Όχι attack line πάνω σε θύματα ή τραγωδίες.', 'Έμφαση σε θεσμική ευθύνη, πρόληψη και προστασία.'],
+      body: 'Η σωστή στάση χτίζεται με σεβασμό, θεσμική σοβαρότητα και καθαρή προστατευτική γλώσσα.',
+      bullets: ['Ανθρώπινος τόνος και σεβασμός στα πρόσωπα.', 'Θεσμική ευθύνη, πρόληψη και προστασία.', 'Δημόσια στάση με ακρίβεια και μέτρο.'],
     };
   }
 
@@ -568,9 +682,9 @@ function buildHowToWinSection(cluster: AgendaCluster, view: EventIntelligenceVie
     tab: 'how_to_win',
     label: 'Πώς κερδίζεται',
     kicker: 'Στρατηγική δυναμική',
-    title: 'Το framing που δουλεύει',
-    body: `Το θέμα κερδίζεται όταν μεταφερθεί από απλή είδηση σε καθαρό πολιτικό ερώτημα μέσα στο "${cluster.micro_agenda}".`,
-    bullets: ['Κράτα το μήνυμα συγκεκριμένο, όχι γενικό.', 'Σύνδεσε το γεγονός με κόστος, ευθύνη ή επιλογή πολιτικής.', 'Απόφυγε υπερβολή πριν αυξηθεί η τεκμηρίωση.'],
+    title: 'Η γραμμή που δουλεύει',
+    body: winningAdvisorBody(cluster),
+    bullets: ['Κράτα το μήνυμα συγκεκριμένο και ανθρώπινο.', 'Σύνδεσε το γεγονός με κόστος, ευθύνη ή επιλογή πολιτικής.', 'Δώσε πρακτική κατεύθυνση πριν από την κλιμάκωση.'],
   };
 }
 
@@ -578,9 +692,9 @@ function buildActionOptionsSection(cluster: AgendaCluster, event: AgendaEvent, v
   return {
     tab: 'action_options',
     label: 'Επιλογές δράσης',
-    kicker: 'Α/Β/Γ από scenarios',
+    kicker: 'Τρεις διαδρομές απόφασης',
     title: 'Τι κάνουμε τώρα',
-    body: 'Οι επιλογές είναι σχεδιασμένες για γρήγορη απόφαση χωρίς να χαθεί η πολιτική ακρίβεια.',
+    body: 'Οι επιλογές είναι σχεδιασμένες για γρήγορη απόφαση με πολιτική ακρίβεια και καθαρή ευθύνη.',
     actions: buildActionOptions(view),
   };
 }
@@ -588,43 +702,43 @@ function buildActionOptionsSection(cluster: AgendaCluster, event: AgendaEvent, v
 function buildActionOptions(view: EventIntelligenceView): ActionOption[] {
   if (view.sensitiveMode) {
     return [
-      { key: 'A', title: 'Θεσμική στάση', badge: 'Προτεινόμενη', body: 'Τοποθέτηση μόνο σε επίπεδο θεσμικής ευθύνης, πρόληψης και προστασίας.', gain: 'Δείχνει σοβαρότητα χωρίς εργαλειοποίηση.', risk: 'Να ακουστεί γενικό αν δεν είναι ανθρώπινο.', successProbability: 65, recommended: true, avoid: false },
-      { key: 'B', title: 'Σιωπηλή παρακολούθηση', badge: 'Εναλλακτική', body: 'Καμία δημόσια κίνηση μέχρι να υπάρξει θεσμική εξέλιξη.', gain: 'Αποφεύγει άστοχη εμπλοκή.', risk: 'Μπορεί να χαθεί θεσμικό timing.', successProbability: 45, recommended: false, avoid: false },
-      { key: 'Γ', title: 'Κομματική επίθεση', badge: 'Να αποφευχθεί', body: 'Χρήση του θέματος ως επιθετική κομματική γραμμή.', gain: 'Βραχυπρόθεσμη ένταση.', risk: 'Υψηλό ρίσκο κοινωνικής απόρριψης.', successProbability: 15, recommended: false, avoid: true },
+      { key: 'A', title: 'Θεσμική στάση', badge: 'Προτεινόμενη', body: 'Τοποθέτηση μόνο σε επίπεδο θεσμικής ευθύνης, πρόληψης και προστασίας.', gain: 'Δείχνει σοβαρότητα χωρίς εργαλειοποίηση.', risk: 'Χρειάζεται ανθρώπινη διατύπωση για να αποκτήσει βάρος.', successProbability: 65, recommended: true, avoid: false },
+      { key: 'B', title: 'Σιωπηλή παρακολούθηση', badge: 'Εναλλακτική', body: 'Εσωτερική παρακολούθηση μέχρι να υπάρξει θεσμική εξέλιξη.', gain: 'Αποφεύγει άστοχη εμπλοκή.', risk: 'Μπορεί να χαθεί θεσμικό timing.', successProbability: 45, recommended: false, avoid: false },
+      { key: 'Γ', title: 'Υψηλού ρίσκου αντιπαράθεση', badge: 'Υψηλό ρίσκο', body: 'Επιθετική κομματική γραμμή πάνω στο θέμα.', gain: 'Βραχυπρόθεσμη ένταση.', risk: 'Υψηλό ρίσκο κοινωνικής απόρριψης.', successProbability: 15, recommended: false, avoid: true },
     ];
   }
 
   return [
-    { key: 'A', title: 'Ενεργή τοποθέτηση με αξιακή γραμμή', badge: 'Προτεινόμενη', body: 'Σύντομη δήλωση που αναγνωρίζει το θέμα και θέτει καθαρό πολιτικό ερώτημα.', gain: 'Κατοχυρώνει θέση πριν το θέμα γίνει θόρυβος.', risk: 'Θέλει ακριβή διατύπωση για να μη φανεί βιαστικό.', successProbability: 65, recommended: true, avoid: false },
-    { key: 'B', title: 'Παρακολούθηση', badge: 'Ουδέτερη', body: 'Κρατάμε το θέμα ενεργό και περιμένουμε δεύτερο κύμα σημάτων.', gain: 'Μειώνει το ρίσκο υπερβολής.', risk: 'Μπορεί να χαθεί πρώτο framing.', successProbability: 45, recommended: false, avoid: false },
-    { key: 'Γ', title: 'Σκληρή γραμμή', badge: 'Να αποφευχθεί', body: 'Άμεση επιθετική τοποθέτηση χωρίς επαρκές πλαίσιο.', gain: 'Δίνει ένταση.', risk: 'Μπορεί να παιχτεί ως υπερβολή ή μικροπολιτική.', successProbability: 25, recommended: false, avoid: true },
+    { key: 'A', title: 'Ενεργή τοποθέτηση με αξιακή γραμμή', badge: 'Προτεινόμενη', body: 'Σύντομη δήλωση που αναγνωρίζει το θέμα και θέτει καθαρό πολιτικό ερώτημα.', gain: 'Κατοχυρώνει θέση πριν το θέμα γίνει θόρυβος.', risk: 'Θέλει ακριβή διατύπωση για να ακουστεί ώριμο.', successProbability: 65, recommended: true, avoid: false },
+    { key: 'B', title: 'Παρακολούθηση', badge: 'Ουδέτερη', body: 'Κρατάμε το θέμα ενεργό και περιμένουμε δεύτερο κύμα σημάτων.', gain: 'Μειώνει το ρίσκο υπερβολής.', risk: 'Μπορεί να χαθεί η πρώτη πλαισίωση.', successProbability: 45, recommended: false, avoid: false },
+    { key: 'Γ', title: 'Υψηλής έντασης γραμμή', badge: 'Υψηλό ρίσκο', body: 'Άμεση επιθετική τοποθέτηση με περιορισμένο πλαίσιο.', gain: 'Δίνει ένταση.', risk: 'Μπορεί να παιχτεί ως υπερβολή ή μικροπολιτική.', successProbability: 25, recommended: false, avoid: true },
   ];
 }
 
 function buildMaterialSection(cluster: AgendaCluster, event: AgendaEvent, view: EventIntelligenceView): IntelligenceSection {
   const material = view.sensitiveMode
     ? {
-        briefing: `Το θέμα "${event.title}" χρειάζεται θεσμική και ανθρώπινη διαχείριση. Δεν προτείνεται επιθετική πολιτική αξιοποίηση.`,
+        briefing: `Το θέμα "${event.title}" χρειάζεται θεσμική και ανθρώπινη διαχείριση με προστατευτική γλώσσα.`,
         talkingPoints: ['Πρώτα σεβασμός στα πρόσωπα και στα πραγματικά δεδομένα.', 'Η δημόσια στάση να μείνει σε πρόληψη, ευθύνη και θεσμική επάρκεια.', 'Αποφυγή δραματοποίησης και κομματικής εκμετάλλευσης.'],
         suggestedStatement: 'Η δημόσια συζήτηση χρειάζεται σοβαρότητα, σεβασμό και θεσμική ευθύνη. Η προτεραιότητα είναι η προστασία και η πρόληψη.',
         questionForIntervention: 'Ποια θεσμικά βήματα διασφαλίζουν ότι αντίστοιχα περιστατικά αντιμετωπίζονται έγκαιρα και με προστασία των ευάλωτων;',
-        internalNote: 'Να μη χρησιμοποιηθεί ως attack line. Review required πριν από οποιαδήποτε δημόσια χρήση.',
+        internalNote: 'Χρήση μόνο μετά από ανθρώπινη αξιολόγηση και με θεσμικό τόνο.',
       }
     : {
-        briefing: `Το γεγονός "${event.title}" εντάσσεται στο "${cluster.micro_agenda}" και μπορεί να χρησιμοποιηθεί για καθαρό πολιτικό framing.`,
-        talkingPoints: [`Το θέμα δεν είναι μεμονωμένο· συνδέεται με "${cluster.micro_agenda}".`, 'Η τοποθέτηση πρέπει να είναι συγκεκριμένη και τεκμηριωμένη.', 'Το framing να δείχνει επιλογή πολιτικής, όχι απλή αντίδραση σε τίτλο.'],
-        suggestedStatement: 'Το ζήτημα δείχνει ότι χρειάζεται καθαρή πολιτική επιλογή και όχι επικοινωνιακή διαχείριση. Η κοινωνία πρέπει να ξέρει ποιο είναι το κόστος, ποιος το αναλαμβάνει και ποια προτεραιότητα προστατεύεται.',
+        briefing: `Το γεγονός "${event.title}" εντάσσεται στο "${cluster.micro_agenda}" και μπορεί να στηρίξει καθαρή πολιτική πλαισίωση.`,
+        talkingPoints: [`Το θέμα συνδέεται με τη μικροατζέντα "${cluster.micro_agenda}".`, 'Η τοποθέτηση χρειάζεται συγκεκριμένη και τεκμηριωμένη κατεύθυνση.', 'Η πλαισίωση να δείχνει επιλογή πολιτικής και καθαρή ευθύνη.'],
+        suggestedStatement: 'Το ζήτημα δείχνει ότι χρειάζεται καθαρή πολιτική επιλογή με ουσία, κόστος και ευθύνη. Η κοινωνία πρέπει να ξέρει ποιο είναι το κόστος, ποιος το αναλαμβάνει και ποια προτεραιότητα προστατεύεται.',
         questionForIntervention: 'Ποια είναι η συγκεκριμένη επιλογή πολιτικής πίσω από αυτή την εξέλιξη και ποιος πληρώνει το κόστος της;',
-        socialDraft: `Δεν αρκεί να παρακολουθούμε τις εξελίξεις. Χρειάζεται καθαρή στάση, τεκμηρίωση και πολιτική ευθύνη στο θέμα "${cluster.micro_agenda}".`,
-        internalNote: 'Χρήσιμο για σύντομο briefing, όχι για υπερβολική κλιμάκωση χωρίς νέα τεκμηρίωση.',
+        socialDraft: `Οι εξελίξεις στο θέμα "${cluster.micro_agenda}" ζητούν καθαρή στάση, τεκμηρίωση και πολιτική ευθύνη.`,
+        internalNote: 'Χρήσιμο για σύντομη ενημέρωση με συγκρατημένη κλιμάκωση και νέα τεκμηρίωση.',
       };
 
   return {
     tab: 'material',
     label: 'Υλικό',
-    kicker: 'Briefing assets',
+    kicker: 'Υλικό συμβούλου',
     title: 'Έτοιμο υλικό χρήσης',
-    body: 'Σύντομο, στοχευμένο υλικό για εσωτερική χρήση ή προσεκτική δημόσια παρέμβαση.',
+    body: 'Σύντομο, στοχευμένο υλικό για εσωτερική χρήση και προσεκτική δημόσια παρέμβαση.',
     material,
   };
 }
@@ -637,8 +751,8 @@ function buildFactors(cluster: AgendaCluster, event: AgendaEvent): string[] {
   if (text.includes('ακρίβ') || text.includes('τιμ') || text.includes('καταναλω')) factors.push('Κόστος ζωής και καταναλωτική πίεση.');
   if (text.includes('τράπεζ')) factors.push('Τραπεζικό πλαίσιο και προστασία καταναλωτή.');
   if (text.includes('δήμαρχ') || text.includes('θεσμ')) factors.push('Θεσμική ευθύνη και δημόσια λογοδοσία.');
-  if (cluster.requires_human_review) factors.push('Κοινωνική ευαισθησία και ανάγκη ανθρώπινου review.');
-  if (!factors.length) factors.push('Σύνδεση γεγονότος με ενεργό πολιτικό micro-agenda.');
+  if (cluster.requires_human_review) factors.push('Κοινωνική ευαισθησία και ανάγκη ανθρώπινης αξιολόγησης.');
+  if (!factors.length) factors.push('Σύνδεση γεγονότος με ενεργή πολιτική μικροατζέντα.');
 
   return factors;
 }
