@@ -65,7 +65,7 @@ const CONFIG = {
   minimumRuleScore: 10,
   monitoringCap: 59,
   highSeverityScore: 88,
-  formulaVersion: "micro_agenda_frontpage_fusion_v5_3",
+  formulaVersion: "micro_agenda_frontpage_fusion_v5_4",
 };
 
 const MICRO_AGENDA_RULES: MicroAgendaRule[] = [
@@ -1014,7 +1014,16 @@ function editorialProminenceForAgenda(
   return bestEditorialProminenceRow(parentFallbackRows);
 }
 
-function realFrontpageProminenceScore(editorialProminence: any): number {
+function realFrontpageProminenceScore(editorialProminence: any, parentOnlyEditorialProminence = false): number {
+  const rawScore = clampScore(toNumber(editorialProminence?.editorial_prominence_score, 0));
+  // v5.4: exact micro-agenda frontpage signal can fully boost an agenda.
+  // Parent-only editorial fallback is useful context, but must not let adjacent micro-agendas
+  // inherit the full frontpage power of another micro-agenda under the same parent.
+  if (parentOnlyEditorialProminence) return Math.min(rawScore, 42);
+  return rawScore;
+}
+
+function rawFrontpageProminenceScore(editorialProminence: any): number {
   return clampScore(toNumber(editorialProminence?.editorial_prominence_score, 0));
 }
 
@@ -1147,7 +1156,8 @@ function buildAgendaItem(
   const trendScore = realTrendScore(trend, matchedAgendaTopic);
   const rawAgendaSignalScore = realAgendaScore(matchedAgendaTopic, matchedAdvisorBrief);
   const agendaSignalScore = calibratedAgendaSignalScore(rawAgendaSignalScore, topEventScore, parentOnlySignal);
-  const frontpageProminenceScore = realFrontpageProminenceScore(matchedEditorialProminence);
+  const rawFrontpageProminenceScoreValue = rawFrontpageProminenceScore(matchedEditorialProminence);
+  const frontpageProminenceScore = realFrontpageProminenceScore(matchedEditorialProminence, parentOnlyEditorialProminence);
   const editorialScore = editorialRelevanceScore(matchedAgendaTopic, matchedAdvisorBrief, group);
   const hasRealSignalBridge = Boolean(matchedAgendaTopic || matchedAdvisorBrief || trend || matchedEditorialProminence);
   const breadthBonus = clusterBreadthBonus(eventCount, sourceCount, articleCount);
@@ -1209,6 +1219,7 @@ function buildAgendaItem(
     real_news_coverage_score: coverageScore,
     real_trend_score: trendScore,
     real_frontpage_prominence_score: frontpageProminenceScore,
+    raw_frontpage_prominence_score: rawFrontpageProminenceScoreValue,
     editorial_relevance_score: editorialScore,
     signal_bridge: {
       matched_agenda_topic: matchedAgendaTopic?.name || null,
@@ -1228,6 +1239,8 @@ function buildAgendaItem(
       frontpage_layer_present: Array.isArray(editorialProminenceRows) && editorialProminenceRows.length > 0,
       frontpage_signal_present: Boolean(matchedEditorialProminence),
       editorial_prominence_score: frontpageProminenceScore,
+      raw_editorial_prominence_score: rawFrontpageProminenceScoreValue,
+      editorial_parent_fallback_cap_applied: Boolean(parentOnlyEditorialProminence && rawFrontpageProminenceScoreValue > frontpageProminenceScore),
       editorial_signal_count: toNumber(matchedEditorialProminence?.signal_count, 0),
       editorial_source_count: toNumber(matchedEditorialProminence?.source_count, 0),
       editorial_top_items: editorialTopItems(matchedEditorialProminence),
@@ -1239,6 +1252,8 @@ function buildAgendaItem(
       raw_news_coverage: rawCoverageScore,
       trends_public_pulse: trendScore,
       frontpage_editorial_prominence: frontpageProminenceScore,
+      raw_frontpage_editorial_prominence: rawFrontpageProminenceScoreValue,
+      frontpage_parent_fallback_cap_applied: Boolean(parentOnlyEditorialProminence && rawFrontpageProminenceScoreValue > frontpageProminenceScore),
       editorial_relevance: editorialScore,
       freshness,
       documentation: doc,
@@ -1246,7 +1261,7 @@ function buildAgendaItem(
       parent_only_signal: parentOnlySignal,
       formula: sensitivity.ranking_policy === "do_not_optimize_for_engagement"
         ? "sensitive capped: event + coverage + freshness + documentation"
-        : "v5.3: 36% event + 14% agenda + 16% calibrated coverage + 12% micro-agenda-preferred trends + 12% frontpage editorial prominence + 7% freshness + 3% documentation + breadth bonus",
+        : "v5.4: 36% event + 14% agenda + 16% calibrated coverage + 12% micro-agenda-preferred trends + 12% frontpage editorial prominence with parent-fallback cap + 7% freshness + 3% documentation + breadth bonus",
     },
     search_interest_score: sensitivity.ranking_policy === "do_not_optimize_for_engagement" ? null : trendScore,
     search_interest_status: trend?.search_interest_status || matchedAgendaTopic?.public_attention_signal ? "real_signal_bridge" : "no_trend_signal",
@@ -1438,7 +1453,7 @@ export async function GET(req: Request) {
     source_advisor_agenda_briefs: "v_advisor_agenda_briefs_recent",
     source_editorial_prominence: "v_editorial_prominence_recent",
     frontpage_layer_present: editorialProminenceRows.length > 0,
-    frontpage_layer_note: "v5.3 fuses frontpage/editorial prominence from political/economic frontpages with live events and micro-agenda Google Trends.",
+    frontpage_layer_note: "v5.4 fuses political/economic frontpage editorial prominence, with full credit for exact micro-agenda matches and capped credit for parent-only fallback.",
     legacy_situations_source: "v_situation_engine_live",
     event_rows_considered: events.length,
     event_rows_total_matching_window: eventsResult.count,
@@ -1448,7 +1463,7 @@ export async function GET(req: Request) {
     editorial_prominence_rows_considered: editorialProminenceRows.length,
     formula_version: CONFIG.formulaVersion,
     sports_noise_events_filtered: result.sports_noise_events_filtered,
-    calibration_note: "v5.3 keeps micro-agenda trend preference and adds political/economic frontpage editorial prominence as Door B signal.",
+    calibration_note: "v5.4 keeps micro-agenda trend preference and caps parent-only frontpage fallback so adjacent micro-agendas do not inherit full Door B power.",
     classifier_features: [
       "safe_token_matching",
       "weighted_keywords",
@@ -1467,6 +1482,7 @@ export async function GET(req: Request) {
       "apify_google_trends_preferred_over_parent_fallback",
       "frontpage_editorial_prominence_fusion",
       "political_economic_frontpages_only",
+      "frontpage_parent_fallback_cap",
     ],
     newest_legacy_situation_seen_at: newestLegacySeenAt,
     newest_legacy_situation_hours_old:
@@ -1480,7 +1496,7 @@ export async function GET(req: Request) {
 
   const basePayload = {
     success: true,
-    mode: "read_only_real_signal_bridge_frontpage_fusion_v5_3",
+    mode: "read_only_real_signal_bridge_frontpage_fusion_v5_4",
     grouping: "canonical_micro_agenda_to_parent_topics_to_events",
     view,
     generated_at: new Date().toISOString(),
