@@ -146,17 +146,19 @@ async function loadParentTopicCandidates(limit: number): Promise<TrendCandidate[
   if (!agendaTopics.error && Array.isArray(agendaTopics.data)) rows.push(...agendaTopics.data);
   if (!advisorBriefs.error && Array.isArray(advisorBriefs.data)) rows.push(...(advisorBriefs.data as TopicRow[]));
 
-  return dedupe(
-    rows
-      .map((row) => {
-        const topic = textValue(row.name || row.topic);
-        return topic.length >= 3
-          ? { topic, queries: makeQueries(topic), source: "parent_topic_fallback" as const, score: row.agenda_score ?? row.public_attention_signal ?? null }
-          : null;
-      })
-      .filter((item): item is TrendCandidate => Boolean(item)),
-    (item) => item.topic.toLocaleLowerCase("el-GR")
-  ).slice(0, limit);
+  const candidates: TrendCandidate[] = [];
+  for (const row of rows) {
+    const topic = textValue(row.name || row.topic);
+    if (topic.length < 3) continue;
+    candidates.push({
+      topic,
+      queries: makeQueries(topic),
+      source: "parent_topic_fallback",
+      score: row.agenda_score ?? row.public_attention_signal ?? null,
+    });
+  }
+
+  return dedupe(candidates, (item) => item.topic.toLocaleLowerCase("el-GR")).slice(0, limit);
 }
 
 async function loadMicroAgendaCandidates(request: Request, limit: number): Promise<TrendCandidate[]> {
@@ -171,24 +173,22 @@ async function loadMicroAgendaCandidates(request: Request, limit: number): Promi
   const payload = await res.json();
   const clusters = Array.isArray(payload?.agenda_clusters) ? (payload.agenda_clusters as ProbeCluster[]) : [];
 
-  return dedupe(
-    clusters
-      .map((cluster) => {
-        const topic = textValue(cluster.title || cluster.micro_agenda || cluster.topic);
-        if (topic.length < 3) return null;
-        const microAgendaId = textValue(cluster.micro_agenda_id) || null;
-        return {
-          topic,
-          queries: makeQueriesForCandidate(topic, microAgendaId),
-          source: "agenda_probe_micro_agenda" as const,
-          micro_agenda_id: microAgendaId,
-          parent_topic: textValue(cluster.parent_topic) || null,
-          score: typeof cluster.score === "number" ? cluster.score : null,
-        };
-      })
-      .filter((item): item is TrendCandidate => Boolean(item)),
-    (item) => `${item.micro_agenda_id || ""}|${item.topic.toLocaleLowerCase("el-GR")}`
-  ).slice(0, limit);
+  const candidates: TrendCandidate[] = [];
+  for (const cluster of clusters) {
+    const topic = textValue(cluster.title || cluster.micro_agenda || cluster.topic);
+    if (topic.length < 3) continue;
+    const microAgendaId = textValue(cluster.micro_agenda_id) || null;
+    candidates.push({
+      topic,
+      queries: makeQueriesForCandidate(topic, microAgendaId),
+      source: "agenda_probe_micro_agenda",
+      micro_agenda_id: microAgendaId,
+      parent_topic: textValue(cluster.parent_topic) || null,
+      score: typeof cluster.score === "number" ? cluster.score : null,
+    });
+  }
+
+  return dedupe(candidates, (item) => `${item.micro_agenda_id || ""}|${item.topic.toLocaleLowerCase("el-GR")}`).slice(0, limit);
 }
 
 async function loadTrendCandidates(request: Request, limit: number, sourceMode: string): Promise<TrendCandidate[]> {
@@ -551,7 +551,7 @@ export async function GET(request: Request) {
 
   return json({
     success: true,
-    mode: "fetch_topic_trends_apify_google_trends_v3_micro_agendas",
+    mode: "fetch_topic_trends_apify_google_trends_v3_2_micro_agendas",
     generated_at: fetchedAt,
     diagnostics,
     topics_requested: candidates.length,
