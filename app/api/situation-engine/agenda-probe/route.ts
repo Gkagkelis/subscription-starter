@@ -65,7 +65,7 @@ const CONFIG = {
   minimumRuleScore: 10,
   monitoringCap: 59,
   highSeverityScore: 88,
-  formulaVersion: "micro_agenda_hardened_sensitive_v3",
+  formulaVersion: "micro_agenda_hardened_sensitive_v4",
 };
 
 const MICRO_AGENDA_RULES: MicroAgendaRule[] = [
@@ -78,6 +78,9 @@ const MICRO_AGENDA_RULES: MicroAgendaRule[] = [
   ]},
   { id: "energy_heating_support", label: "Ενεργειακό κόστος / επίδομα θέρμανσης", parentHints: ["ακριβεια", "οικονομια", "κοινωνια", "ενεργεια"], priority: 50, keywords: [
     { term: "επιδομα θερμανσης", weight: 18, mode: "phrase" }, { term: "θερμανση", weight: 11, mode: "prefix" }, { term: "ενεργειακο κοστος", weight: 15, mode: "phrase" }, { term: "λογαριασμοι ρευματος", weight: 14, mode: "phrase" }, { term: "ρευμα", weight: 8, mode: "exact" },
+  ]},
+  { id: "electricity_theft_energy_grid", label: "Ρευματοκλοπές / ενεργειακό δίκτυο", parentHints: ["ενεργεια", "οικονομια", "ασφαλεια", "κοινωνια"], priority: 70, keywords: [
+    { term: "ρευματοκλοπ", weight: 22, mode: "prefix" }, { term: "κλοπη ρευματος", weight: 20, mode: "phrase" }, { term: "παρανομες συνδεσεις", weight: 16, mode: "phrase" }, { term: "δεδδηε", weight: 12, mode: "exact" }, { term: "ενεργειακο δικτυο", weight: 14, mode: "phrase" },
   ]},
   { id: "social_benefits_support", label: "Επιδόματα / κοινωνική στήριξη", parentHints: ["ακριβεια", "κοινωνια", "οικονομια", "εργασια", "ασφαλιστικο"], priority: 42, keywords: [
     { term: "επιδομα", weight: 13, mode: "prefix" }, { term: "κοινωνικα προγραμματα", weight: 15, mode: "phrase" }, { term: "κοινωνικη στηριξη", weight: 15, mode: "phrase" }, { term: "ενισχυση νοικοκυριων", weight: 14, mode: "phrase" }, { term: "χρηματοδοτηση νοικοκυριων", weight: 13, mode: "phrase" },
@@ -207,8 +210,14 @@ const MICRO_AGENDA_RULES: MicroAgendaRule[] = [
   { id: "defense_armaments", label: "Άμυνα / εξοπλισμοί", parentHints: ["αμυνα", "εξωτερικη"], priority: 20, keywords: [
     { term: "εξοπλισ", weight: 13, mode: "prefix" }, { term: "οπλικ", weight: 9, mode: "prefix" }, { term: "φρεγατ", weight: 10, mode: "prefix" }, { term: "rafale", weight: 10, mode: "exact" }, { term: "f35", weight: 10, mode: "exact" }, { term: "belharra", weight: 9, mode: "exact" },
   ]},
-  { id: "defense_drones_ukraine", label: "Drones / αμυντική τεχνολογία / Ουκρανία", parentHints: ["αμυνα", "εξωτερικη"], priority: 55, keywords: [
+  { id: "defense_drones_technology", label: "Drones / αμυντική τεχνολογία", parentHints: ["αμυνα", "εξωτερικη"], priority: 55, keywords: [
     { term: "drone", weight: 18, mode: "exact" }, { term: "drones", weight: 18, mode: "exact" }, { term: "ουκρανικο drone", weight: 20, mode: "phrase" }, { term: "ουκρανια", weight: 8, mode: "exact" }, { term: "ζελενσκι", weight: 8, mode: "exact" }, { term: "αμυντικη τεχνολογια", weight: 14, mode: "phrase" },
+  ]},
+  { id: "international_missions_maritime_security", label: "Διεθνείς αποστολές / θαλάσσια ασφάλεια", parentHints: ["αμυνα", "εξωτερικη"], priority: 72, keywords: [
+    { term: "στενα του ορμουζ", weight: 22, mode: "phrase" }, { term: "ορμουζ", weight: 18, mode: "exact" }, { term: "διεθνη αποστολη", weight: 18, mode: "phrase" }, { term: "διεθνης αποστολη", weight: 18, mode: "phrase" }, { term: "θαλασσια ασφαλεια", weight: 15, mode: "phrase" }, { term: "φρεγατα", weight: 10, mode: "prefix" },
+  ]},
+  { id: "defense_reorganization_forces", label: "Αμυντική πολιτική / ανασυγκρότηση Ενόπλων Δυνάμεων", parentHints: ["αμυνα", "εξωτερικη"], priority: 68, keywords: [
+    { term: "ανασυγκροτηση ελληνικης αμυνας", weight: 22, mode: "phrase" }, { term: "ελληνικη αμυνα", weight: 15, mode: "phrase" }, { term: "ενόπλων δυναμεων", weight: 18, mode: "phrase" }, { term: "ενοπλων δυναμεων", weight: 18, mode: "phrase" }, { term: "ενοπλες δυναμεις", weight: 16, mode: "phrase" }, { term: "αμυντικη πολιτικη", weight: 16, mode: "phrase" },
   ]},
   { id: "foreign_policy_turkey", label: "Ελληνοτουρκικά / εξωτερική πολιτική", parentHints: ["εξωτερικη", "αμυνα"], keywords: [
     { term: "ελληνοτουρκ", weight: 14, mode: "prefix" }, { term: "τουρκ", weight: 8, mode: "prefix" }, { term: "αιγαιο", weight: 9, mode: "exact" }, { term: "κυπρ", weight: 8, mode: "prefix" }, { term: "υφαλοκρηπ", weight: 10, mode: "prefix" }, { term: "αοζ", weight: 9, mode: "exact" },
@@ -384,11 +393,13 @@ function parentMatches(rule: PreparedRule, parentIndex: ReturnType<typeof makeTe
   return rule.parentHints.some((hint) => parentIndex.padded.includes(` ${hint} `) || parentIndex.tokens.some((t) => t.startsWith(hint)));
 }
 
-function eventText(event: any): string {
-  const evidenceTitles = Array.isArray(event?.evidence_articles)
+function eventEvidenceText(event: any): string {
+  return Array.isArray(event?.evidence_articles)
     ? event.evidence_articles.map((a: any) => a?.title || "").join(" ")
     : "";
+}
 
+function eventCoreText(event: any): string {
   const detectionTerms = Array.isArray(event?.detection_terms)
     ? event.detection_terms.join(" ")
     : typeof event?.detection_terms === "string"
@@ -401,16 +412,24 @@ function eventText(event: any): string {
     event?.framing_summary,
     event?.recommended_action,
     detectionTerms,
-    evidenceTitles,
   ]
     .filter(Boolean)
     .join(" ");
 }
 
-function forcedClassification(event: any, parentIndex: ReturnType<typeof makeTextIndex>, index: ReturnType<typeof makeTextIndex>): ClassificationResult | null {
+function eventText(event: any): string {
+  return [eventCoreText(event), eventEvidenceText(event)].filter(Boolean).join(" ");
+}
+
+function forcedClassification(
+  event: any,
+  parentIndex: ReturnType<typeof makeTextIndex>,
+  coreIndex: ReturnType<typeof makeTextIndex>,
+  fullIndex: ReturnType<typeof makeTextIndex>
+): ClassificationResult | null {
   // Hard guards for high-risk conflicts. These prevent generic terms like
   // "δολοφονία" from overpowering more specific, sensitive categories.
-  const gender = scoreInlineTerms(index, [
+  const gender = scoreInlineTerms(fullIndex, [
     { term: "γυναικοκτον", weight: 22, mode: "prefix" },
     { term: "ενδοοικογενειακ", weight: 18, mode: "prefix" },
     { term: "εμφυλη βια", weight: 18, mode: "phrase" },
@@ -420,7 +439,7 @@ function forcedClassification(event: any, parentIndex: ReturnType<typeof makeTex
   ]);
   if (gender.score >= 18) return forcedClassificationResult("gender_domestic_violence", gender.matches, 60 + gender.score);
 
-  const bankingConsumer = scoreInlineTerms(index, [
+  const bankingConsumer = scoreInlineTerms(fullIndex, [
     { term: "τραπεζ", weight: 10, mode: "prefix" },
     { term: "προστασια καταναλωτων", weight: 18, mode: "phrase" },
     { term: "νομοσχεδιο προστασιας καταναλωτων", weight: 20, mode: "phrase" },
@@ -429,7 +448,7 @@ function forcedClassification(event: any, parentIndex: ReturnType<typeof makeTex
   ]);
   if (bankingConsumer.score >= 25) return forcedClassificationResult("banking_consumer_protection", bankingConsumer.matches, 55 + bankingConsumer.score);
 
-  const drugs = scoreInlineTerms(index, [
+  const drugs = scoreInlineTerms(fullIndex, [
     { term: "ναρκωτικ", weight: 15, mode: "prefix" },
     { term: "κυκλωμα", weight: 12, mode: "prefix" },
     { term: "διακινηση ναρκωτικων", weight: 20, mode: "phrase" },
@@ -438,7 +457,7 @@ function forcedClassification(event: any, parentIndex: ReturnType<typeof makeTex
   ]);
   if (drugs.score >= 15) return forcedClassificationResult("organized_crime_drugs", drugs.matches, 45 + drugs.score);
 
-  const accident = scoreInlineTerms(index, [
+  const accident = scoreInlineTerms(fullIndex, [
     { term: "λουνα παρκ", weight: 18, mode: "phrase" },
     { term: "δυστυχημ", weight: 14, mode: "prefix" },
     { term: "δημαρχ", weight: 8, mode: "prefix" },
@@ -448,44 +467,79 @@ function forcedClassification(event: any, parentIndex: ReturnType<typeof makeTex
     return forcedClassificationResult("public_safety_accidents", accident.matches, 45 + accident.score);
   }
 
-  const housingRenovation = scoreInlineTerms(index, [
+  const maritimeMission = scoreInlineTerms(coreIndex, [
+    { term: "στενα του ορμουζ", weight: 22, mode: "phrase" },
+    { term: "ορμουζ", weight: 18, mode: "exact" },
+    { term: "διεθνη αποστολη", weight: 18, mode: "phrase" },
+    { term: "διεθνης αποστολη", weight: 18, mode: "phrase" },
+  ]);
+  if (maritimeMission.score >= 18) return forcedClassificationResult("international_missions_maritime_security", maritimeMission.matches, 55 + maritimeMission.score);
+
+  const defenseReorg = scoreInlineTerms(coreIndex, [
+    { term: "ανασυγκροτηση ελληνικης αμυνας", weight: 22, mode: "phrase" },
+    { term: "ελληνικη αμυνα", weight: 15, mode: "phrase" },
+    { term: "ενοπλων δυναμεων", weight: 18, mode: "phrase" },
+    { term: "ενοπλες δυναμεις", weight: 16, mode: "phrase" },
+    { term: "αμυντικη πολιτικη", weight: 16, mode: "phrase" },
+  ]);
+  if (defenseReorg.score >= 16) return forcedClassificationResult("defense_reorganization_forces", defenseReorg.matches, 55 + defenseReorg.score);
+
+  const heating = scoreInlineTerms(coreIndex, [
+    { term: "επιδομα θερμανσης", weight: 18, mode: "phrase" },
+    { term: "θερμανση", weight: 11, mode: "prefix" },
+    { term: "λογαριασμοι ρευματος", weight: 14, mode: "phrase" },
+  ]);
+  if (heating.score >= 18) return forcedClassificationResult("energy_heating_support", heating.matches, 45 + heating.score);
+
+  const electricityTheft = scoreInlineTerms(fullIndex, [
+    { term: "ρευματοκλοπ", weight: 22, mode: "prefix" },
+    { term: "κλοπη ρευματος", weight: 20, mode: "phrase" },
+    { term: "παρανομες συνδεσεις", weight: 16, mode: "phrase" },
+    { term: "δεδδηε", weight: 12, mode: "exact" },
+  ]);
+  if (electricityTheft.score >= 18) return forcedClassificationResult("electricity_theft_energy_grid", electricityTheft.matches, 50 + electricityTheft.score);
+
+  const socialBenefits = scoreInlineTerms(coreIndex, [
+    { term: "επιδομα", weight: 13, mode: "prefix" },
+    { term: "κοινωνικα επιδοματα", weight: 16, mode: "phrase" },
+    { term: "κοινωνικη στηριξη", weight: 15, mode: "phrase" },
+    { term: "κοινωνικα προγραμματα", weight: 15, mode: "phrase" },
+  ]);
+  if (socialBenefits.score >= 16) return forcedClassificationResult("social_benefits_support", socialBenefits.matches, 45 + socialBenefits.score);
+
+  const housingRenovation = scoreInlineTerms(coreIndex, [
     { term: "ανακαινιζω", weight: 18, mode: "exact" },
     { term: "ανακαινισ", weight: 14, mode: "prefix" },
     { term: "ανακαινιση κατοικιας", weight: 18, mode: "phrase" },
   ]);
   if (housingRenovation.score >= 14) return forcedClassificationResult("housing_renovation_programs", housingRenovation.matches, 50 + housingRenovation.score);
 
-  const consumerTools = scoreInlineTerms(index, [
+  const consumerTools = scoreInlineTerms(fullIndex, [
     { term: "posokanei", weight: 18, mode: "exact" },
     { term: "ποσο κανει", weight: 18, mode: "phrase" },
     { term: "συγκριση τιμων", weight: 16, mode: "phrase" },
   ]);
   if (consumerTools.score >= 16) return forcedClassificationResult("consumer_price_tools", consumerTools.matches, 50 + consumerTools.score);
 
-  const heating = scoreInlineTerms(index, [
-    { term: "επιδομα θερμανσης", weight: 18, mode: "phrase" },
-    { term: "θερμανση", weight: 11, mode: "prefix" },
-  ]);
-  if (heating.score >= 18) return forcedClassificationResult("energy_heating_support", heating.matches, 45 + heating.score);
 
-  const unseizable = scoreInlineTerms(index, [
+  const unseizable = scoreInlineTerms(fullIndex, [
     { term: "ακατασχετο", weight: 18, mode: "exact" },
     { term: "ακατασχετου", weight: 18, mode: "exact" },
     { term: "ακατασχετο οριο", weight: 20, mode: "phrase" },
   ]);
   if (unseizable.score >= 18) return forcedClassificationResult("income_protection_unseizable", unseizable.matches, 45 + unseizable.score);
 
-  const professionalInsurance = scoreInlineTerms(index, [
+  const professionalInsurance = scoreInlineTerms(fullIndex, [
     { term: "επαγγελματικη ασφαλιση", weight: 20, mode: "phrase" },
     { term: "επαγγελματικης ασφαλισης", weight: 20, mode: "phrase" },
   ]);
   if (professionalInsurance.score >= 20) return forcedClassificationResult("professional_insurance_pensions", professionalInsurance.matches, 45 + professionalInsurance.score);
 
-  const drone = scoreInlineTerms(index, [
+  const drone = scoreInlineTerms(fullIndex, [
     { term: "drone", weight: 18, mode: "exact" },
     { term: "ουκρανικο drone", weight: 20, mode: "phrase" },
   ]);
-  if (drone.score >= 18) return forcedClassificationResult("defense_drones_ukraine", drone.matches, 45 + drone.score);
+  if (drone.score >= 18) return forcedClassificationResult("defense_drones_technology", drone.matches, 45 + drone.score);
 
   return null;
 }
@@ -505,9 +559,11 @@ function stableFallbackSignature(event: any): string {
 function classifyMicroAgenda(event: any): ClassificationResult {
   const parentTopic = String(event?.topic || "Μη ταξινομημένο");
   const parentIndex = makeTextIndex(parentTopic);
-  const index = makeTextIndex(eventText(event));
+  const coreIndex = makeTextIndex(eventCoreText(event));
+  const evidenceIndex = makeTextIndex(eventEvidenceText(event));
+  const fullIndex = makeTextIndex(eventText(event));
 
-  const forced = forcedClassification(event, parentIndex, index);
+  const forced = forcedClassification(event, parentIndex, coreIndex, fullIndex);
   if (forced) return forced;
 
   let best: { rule: PreparedRule; score: number; matches: string[] } | null = null;
@@ -516,7 +572,13 @@ function classifyMicroAgenda(event: any): ClassificationResult {
     const parentOk = parentMatches(rule, parentIndex);
     if (!parentOk) continue;
 
-    const keywordResult = scoreKeywords(rule.keywords, index);
+    const coreResult = scoreKeywords(rule.keywords, coreIndex);
+    const evidenceResult = scoreKeywords(rule.keywords, evidenceIndex);
+    const evidenceScore = coreResult.score > 0 ? Math.round(evidenceResult.score * 0.35) : Math.round(evidenceResult.score * 0.2);
+    const keywordResult = {
+      score: coreResult.score + evidenceScore,
+      matches: Array.from(new Set([...coreResult.matches, ...evidenceResult.matches])).slice(0, 12),
+    };
     if (keywordResult.score <= 0) continue;
 
     const parentBonus = rule.parentHints.length ? 12 : 0;
@@ -723,25 +785,55 @@ function trendForTopic(topic: string, trends: any[]) {
   return trends.find((trend) => normalizeText(trend?.topic) === topicNorm) || null;
 }
 
+function canonicalParentTopicForMicroAgenda(microAgendaId: string, fallbackParent: string): string {
+  const canonical: Record<string, string> = {
+    gender_domestic_violence: "Ασφάλεια / εγκληματικότητα",
+    organized_crime_drugs: "Ασφάλεια / εγκληματικότητα",
+    public_safety_accidents: "Πολιτική προστασία",
+    disasters_loss_of_life: "Πολιτική προστασία",
+    housing_renovation_programs: "Στέγαση",
+    housing_rents: "Στέγαση",
+    short_term_rentals_airbnb: "Στέγαση",
+    energy_heating_support: "Ακρίβεια / κόστος ζωής",
+    social_benefits_support: "Ακρίβεια / κόστος ζωής",
+    consumer_price_tools: "Ακρίβεια / κόστος ζωής",
+    defense_drones_technology: "Άμυνα",
+    international_missions_maritime_security: "Άμυνα",
+    defense_reorganization_forces: "Άμυνα",
+  };
+
+  return canonical[microAgendaId] || fallbackParent;
+}
+
 function groupEvents(events: any[]) {
-  const grouped = new Map<string, { parentTopic: string; classification: ClassificationResult; events: any[] }>();
+  const grouped = new Map<string, { parentTopic: string; parentTopics: Set<string>; classification: ClassificationResult; events: any[] }>();
 
   for (const event of events) {
     const parentTopic = String(event?.topic || "Μη ταξινομημένο").trim();
     const classification = classifyMicroAgenda(event);
-    const key = `${normalizeText(parentTopic)}::${classification.micro_agenda_id}`;
+    const key = classification.micro_agenda_id;
 
     if (!grouped.has(key)) {
-      grouped.set(key, { parentTopic, classification, events: [] });
+      grouped.set(key, {
+        parentTopic: canonicalParentTopicForMicroAgenda(classification.micro_agenda_id, parentTopic),
+        parentTopics: new Set<string>(),
+        classification,
+        events: [],
+      });
     }
 
-    grouped.get(key)!.events.push(event);
+    const group = grouped.get(key)!;
+    group.parentTopics.add(parentTopic);
+    if (classification.confidence > group.classification.confidence) {
+      group.classification = classification;
+    }
+    group.events.push(event);
   }
 
   return Array.from(grouped.values());
 }
 
-function buildAgendaItem(group: { parentTopic: string; classification: ClassificationResult; events: any[] }, trends: any[], debug: boolean) {
+function buildAgendaItem(group: { parentTopic: string; parentTopics: Set<string>; classification: ClassificationResult; events: any[] }, trends: any[], debug: boolean) {
   const sortedEvents = [...group.events].sort((a, b) => toNumber(b?.event_score) - toNumber(a?.event_score));
   const bestEvent = sortedEvents[0];
   const trend = trendForTopic(group.parentTopic, trends);
@@ -797,6 +889,7 @@ function buildAgendaItem(group: { parentTopic: string; classification: Classific
   return {
     type,
     parent_topic: group.parentTopic,
+    parent_topics: Array.from(group.parentTopics),
     topic: group.classification.micro_agenda,
     micro_agenda: group.classification.micro_agenda,
     micro_agenda_id: group.classification.micro_agenda_id,
@@ -842,7 +935,7 @@ function buildAgendaItem(group: { parentTopic: string; classification: Classific
       return {
         id: event?.id,
         title: event?.title,
-        parent_topic: group.parentTopic,
+        parent_topic: String(event?.topic || group.parentTopic),
         micro_agenda: group.classification.micro_agenda,
         event_micro_agenda_id: eventClassification.micro_agenda_id,
         event_micro_agenda_confidence: eventClassification.confidence,
@@ -977,6 +1070,8 @@ export async function GET(req: Request) {
       "sensitivity_flags",
       "sensitivity_ui_policy",
       "conflict_priority_tiebreakers",
+      "canonical_micro_agenda_merge",
+      "core_text_weighted_above_evidence",
       "brief_debug_modes",
       "no_raw_substring_matching",
     ],
@@ -991,8 +1086,8 @@ export async function GET(req: Request) {
 
   const basePayload = {
     success: true,
-    mode: "read_only_hardened_sensitive_micro_agenda_probe_v3",
-    grouping: "parent_topic_to_micro_agenda_to_events",
+    mode: "read_only_hardened_sensitive_micro_agenda_probe_v4",
+    grouping: "canonical_micro_agenda_to_parent_topics_to_events",
     view,
     generated_at: new Date().toISOString(),
     params: { hours, since },
