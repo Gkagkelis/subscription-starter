@@ -65,7 +65,7 @@ const CONFIG = {
   minimumRuleScore: 10,
   monitoringCap: 59,
   highSeverityScore: 88,
-  formulaVersion: "micro_agenda_real_signal_bridge_v5_2",
+  formulaVersion: "micro_agenda_frontpage_fusion_v5_3",
 };
 
 const MICRO_AGENDA_RULES: MicroAgendaRule[] = [
@@ -956,6 +956,83 @@ function realAgendaScore(agendaTopic: any, advisorBrief: any): number {
   );
 }
 
+
+function compareEditorialProminenceRows(a: any, b: any): number {
+  const scoreDiff = toNumber(b?.editorial_prominence_score, 0) - toNumber(a?.editorial_prominence_score, 0);
+  if (scoreDiff !== 0) return scoreDiff;
+
+  const sourceDiff = toNumber(b?.source_count, 0) - toNumber(a?.source_count, 0);
+  if (sourceDiff !== 0) return sourceDiff;
+
+  const signalDiff = toNumber(b?.signal_count, 0) - toNumber(a?.signal_count, 0);
+  if (signalDiff !== 0) return signalDiff;
+
+  return toTime(b?.newest_observed_at) - toTime(a?.newest_observed_at);
+}
+
+function bestEditorialProminenceRow(rows: any[]): any | null {
+  if (!Array.isArray(rows) || !rows.length) return null;
+  return [...rows].sort(compareEditorialProminenceRows)[0] || null;
+}
+
+function editorialProminenceForAgenda(
+  topicCandidates: string[],
+  editorialProminenceRows: any[],
+  microAgendaId: string,
+  microAgenda: string,
+  parentTopic: string
+): any | null {
+  if (!Array.isArray(editorialProminenceRows) || !editorialProminenceRows.length) return null;
+
+  const microNorm = normalizeText(microAgenda);
+  const parentNorm = normalizeText(parentTopic);
+  const candidateNorms = topicCandidates.map((candidate) => normalizeText(candidate)).filter(Boolean);
+
+  const exactMicroIdRows = editorialProminenceRows.filter((row) => String(row?.micro_agenda_id || "") === microAgendaId);
+  const exactMicroId = bestEditorialProminenceRow(exactMicroIdRows);
+  if (exactMicroId) return exactMicroId;
+
+  const exactMicroTopicRows = editorialProminenceRows.filter((row) => normalizeText(row?.topic) === microNorm);
+  const exactMicroTopic = bestEditorialProminenceRow(exactMicroTopicRows);
+  if (exactMicroTopic) return exactMicroTopic;
+
+  const strongMicroRows = editorialProminenceRows.filter((row) => {
+    const rowTopic = normalizeText(row?.topic);
+    if (!rowTopic) return false;
+    if (isParentOnlyRealSignal(row?.topic, microAgenda, parentTopic)) return false;
+    return rowTopic === microNorm || rowTopic.includes(microNorm) || microNorm.includes(rowTopic);
+  });
+  const strongMicro = bestEditorialProminenceRow(strongMicroRows);
+  if (strongMicro) return strongMicro;
+
+  const parentFallbackRows = editorialProminenceRows.filter((row) => {
+    const rowTopic = normalizeText(row?.topic);
+    const rowParent = normalizeText(row?.parent_topic);
+    return rowTopic === parentNorm || rowParent === parentNorm || candidateNorms.includes(rowTopic);
+  });
+
+  return bestEditorialProminenceRow(parentFallbackRows);
+}
+
+function realFrontpageProminenceScore(editorialProminence: any): number {
+  return clampScore(toNumber(editorialProminence?.editorial_prominence_score, 0));
+}
+
+function editorialTopItems(editorialProminence: any): any[] {
+  const raw = editorialProminence?.top_items;
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw.slice(0, 5);
+  if (typeof raw === "string") {
+    try {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed.slice(0, 5) : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
 function editorialRelevanceScore(agendaTopic: any, advisorBrief: any, group: { parentTopic: string; classification: ClassificationResult; events: any[] }): number {
   const internal = toNumber(agendaTopic?.internal_relevance, 0);
   const politicalRisk = normalizeText(agendaTopic?.political_risk_level || advisorBrief?.political_risk_level);
@@ -1014,13 +1091,27 @@ function groupEvents(events: any[]) {
   return Array.from(grouped.values());
 }
 
-function buildAgendaItem(group: { parentTopic: string; parentTopics: Set<string>; classification: ClassificationResult; events: any[] }, trends: any[], agendaTopics: any[], advisorBriefs: any[], debug: boolean) {
+function buildAgendaItem(
+  group: { parentTopic: string; parentTopics: Set<string>; classification: ClassificationResult; events: any[] },
+  trends: any[],
+  agendaTopics: any[],
+  advisorBriefs: any[],
+  editorialProminenceRows: any[],
+  debug: boolean
+) {
   const sortedEvents = [...group.events].sort((a, b) => toNumber(b?.event_score) - toNumber(a?.event_score));
   const bestEvent = sortedEvents[0];
   const topicCandidates = [group.classification.micro_agenda, group.parentTopic, ...Array.from(group.parentTopics)];
   const trend = trendForAgenda(topicCandidates, trends, group.classification.micro_agenda, group.parentTopic);
   const matchedAgendaTopic = agendaTopicForAgenda(topicCandidates, agendaTopics);
   const matchedAdvisorBrief = advisorBriefForAgenda(topicCandidates, advisorBriefs);
+  const matchedEditorialProminence = editorialProminenceForAgenda(
+    topicCandidates,
+    editorialProminenceRows,
+    group.classification.micro_agenda_id,
+    group.classification.micro_agenda,
+    group.parentTopic
+  );
   const sensitivity = classifySensitivity(group.events, group.classification.micro_agenda);
   const uiPolicy = sensitivityUiPolicy(sensitivity);
   const eventClassifications = new Map<any, ClassificationResult>();
@@ -1044,14 +1135,21 @@ function buildAgendaItem(group: { parentTopic: string; parentTopics: Set<string>
   const parentOnlyAgendaTopic = isParentOnlyRealSignal(matchedAgendaTopic?.name, group.classification.micro_agenda, group.parentTopic);
   const parentOnlyAdvisorBrief = isParentOnlyRealSignal(matchedAdvisorBrief?.topic, group.classification.micro_agenda, group.parentTopic);
   const parentOnlyTrend = isParentOnlyRealSignal(trend?.topic, group.classification.micro_agenda, group.parentTopic);
-  const parentOnlySignal = Boolean((matchedAgendaTopic && parentOnlyAgendaTopic) || (matchedAdvisorBrief && parentOnlyAdvisorBrief) || (trend && parentOnlyTrend));
+  const parentOnlyEditorialProminence = isParentOnlyRealSignal(matchedEditorialProminence?.topic, group.classification.micro_agenda, group.parentTopic);
+  const parentOnlySignal = Boolean(
+    (matchedAgendaTopic && parentOnlyAgendaTopic) ||
+    (matchedAdvisorBrief && parentOnlyAdvisorBrief) ||
+    (trend && parentOnlyTrend) ||
+    (matchedEditorialProminence && parentOnlyEditorialProminence)
+  );
   const rawCoverageScore = realNewsCoverageScore(matchedAgendaTopic, matchedAdvisorBrief, fallbackCoverageScore);
   const coverageScore = calibratedCoverageScore(rawCoverageScore, fallbackCoverageScore, parentOnlySignal);
   const trendScore = realTrendScore(trend, matchedAgendaTopic);
   const rawAgendaSignalScore = realAgendaScore(matchedAgendaTopic, matchedAdvisorBrief);
   const agendaSignalScore = calibratedAgendaSignalScore(rawAgendaSignalScore, topEventScore, parentOnlySignal);
+  const frontpageProminenceScore = realFrontpageProminenceScore(matchedEditorialProminence);
   const editorialScore = editorialRelevanceScore(matchedAgendaTopic, matchedAdvisorBrief, group);
-  const hasRealSignalBridge = Boolean(matchedAgendaTopic || matchedAdvisorBrief || trend);
+  const hasRealSignalBridge = Boolean(matchedAgendaTopic || matchedAdvisorBrief || trend || matchedEditorialProminence);
   const breadthBonus = clusterBreadthBonus(eventCount, sourceCount, articleCount);
 
   const hasClusterEvidence = eventCount >= 2 || articleCount >= 3 || sourceCount >= 2;
@@ -1062,10 +1160,11 @@ function buildAgendaItem(group: { parentTopic: string; parentTopics: Set<string>
   else if (highSeverity) type = "high_severity_single_event";
 
   const standardRawScore = clampScore(
-    0.42 * topEventScore +
-      0.18 * agendaSignalScore +
-      0.18 * coverageScore +
+    0.36 * topEventScore +
+      0.14 * agendaSignalScore +
+      0.16 * coverageScore +
       0.12 * trendScore +
+      0.12 * frontpageProminenceScore +
       0.07 * freshness +
       0.03 * doc +
       breadthBonus
@@ -1109,20 +1208,29 @@ function buildAgendaItem(group: { parentTopic: string; parentTopics: Set<string>
     real_agenda_score: agendaSignalScore,
     real_news_coverage_score: coverageScore,
     real_trend_score: trendScore,
+    real_frontpage_prominence_score: frontpageProminenceScore,
     editorial_relevance_score: editorialScore,
     signal_bridge: {
       matched_agenda_topic: matchedAgendaTopic?.name || null,
       matched_advisor_topic: matchedAdvisorBrief?.topic || null,
       matched_trend_topic: trend?.topic || null,
+      matched_editorial_topic: matchedEditorialProminence?.topic || null,
       uses_agenda_topics: Boolean(matchedAgendaTopic),
       uses_advisor_agenda_briefs: Boolean(matchedAdvisorBrief),
       uses_topic_trend_signals: Boolean(trend),
+      uses_editorial_prominence_signals: Boolean(matchedEditorialProminence),
       has_real_signal_bridge: hasRealSignalBridge,
       parent_only_signal: parentOnlySignal,
       parent_only_agenda_topic: parentOnlyAgendaTopic,
       parent_only_advisor_brief: parentOnlyAdvisorBrief,
       parent_only_trend: parentOnlyTrend,
-      frontpage_layer_present: false,
+      parent_only_editorial_prominence: parentOnlyEditorialProminence,
+      frontpage_layer_present: Array.isArray(editorialProminenceRows) && editorialProminenceRows.length > 0,
+      frontpage_signal_present: Boolean(matchedEditorialProminence),
+      editorial_prominence_score: frontpageProminenceScore,
+      editorial_signal_count: toNumber(matchedEditorialProminence?.signal_count, 0),
+      editorial_source_count: toNumber(matchedEditorialProminence?.source_count, 0),
+      editorial_top_items: editorialTopItems(matchedEditorialProminence),
     },
     score_components: {
       event_or_agenda_signal: Math.max(topEventScore, agendaSignalScore),
@@ -1130,6 +1238,7 @@ function buildAgendaItem(group: { parentTopic: string; parentTopics: Set<string>
       news_coverage: coverageScore,
       raw_news_coverage: rawCoverageScore,
       trends_public_pulse: trendScore,
+      frontpage_editorial_prominence: frontpageProminenceScore,
       editorial_relevance: editorialScore,
       freshness,
       documentation: doc,
@@ -1137,7 +1246,7 @@ function buildAgendaItem(group: { parentTopic: string; parentTopics: Set<string>
       parent_only_signal: parentOnlySignal,
       formula: sensitivity.ranking_policy === "do_not_optimize_for_engagement"
         ? "sensitive capped: event + coverage + freshness + documentation"
-        : "v5.2: 42% event + 18% agenda + 18% calibrated coverage + 12% micro-agenda-preferred trends + 7% freshness + 3% documentation + breadth bonus",
+        : "v5.3: 36% event + 14% agenda + 16% calibrated coverage + 12% micro-agenda-preferred trends + 12% frontpage editorial prominence + 7% freshness + 3% documentation + breadth bonus",
     },
     search_interest_score: sensitivity.ranking_policy === "do_not_optimize_for_engagement" ? null : trendScore,
     search_interest_status: trend?.search_interest_status || matchedAgendaTopic?.public_attention_signal ? "real_signal_bridge" : "no_trend_signal",
@@ -1190,10 +1299,10 @@ function buildAgendaItem(group: { parentTopic: string; parentTopics: Set<string>
   };
 }
 
-function buildLiveAgenda(events: any[], trends: any[], agendaTopics: any[], advisorBriefs: any[], debug: boolean) {
+function buildLiveAgenda(events: any[], trends: any[], agendaTopics: any[], advisorBriefs: any[], editorialProminenceRows: any[], debug: boolean) {
   const filteredEvents = events.filter((event) => !isSportsNoiseEvent(event));
   const sportsNoiseEventsFiltered = events.length - filteredEvents.length;
-  const items = groupEvents(filteredEvents).map((group) => buildAgendaItem(group, trends, agendaTopics, advisorBriefs, debug));
+  const items = groupEvents(filteredEvents).map((group) => buildAgendaItem(group, trends, agendaTopics, advisorBriefs, editorialProminenceRows, debug));
   const agendaClusters = items
     .filter((item) => item.type !== "monitoring_event")
     .sort((a, b) => b.score - a.score || b.top_event_score - a.top_event_score || b.event_count - a.event_count);
@@ -1270,13 +1379,26 @@ export async function GET(req: Request) {
     .order("latest_seen_at", { ascending: false, nullsFirst: false })
     .limit(250);
 
+  const editorialProminenceQuery = supabase
+    .from("v_editorial_prominence_recent")
+    .select("micro_agenda_id,topic,parent_topic,editorial_prominence_score,signal_count,source_count,newest_observed_at,top_items")
+    .order("editorial_prominence_score", { ascending: false, nullsFirst: false })
+    .limit(250);
+
   const legacyQuery = supabase
     .from("v_situation_engine_live")
     .select("id,title,topic,priority_score,last_seen_at,last_computed_at,evidence_article_count")
     .order("last_seen_at", { ascending: false, nullsFirst: false })
     .limit(31);
 
-  const [eventsResult, trendsResult, agendaTopicsResult, advisorBriefsResult, legacyResult] = await Promise.all([eventsQuery, trendsQuery, agendaTopicsQuery, advisorBriefsQuery, legacyQuery]);
+  const [eventsResult, trendsResult, agendaTopicsResult, advisorBriefsResult, editorialProminenceResult, legacyResult] = await Promise.all([
+    eventsQuery,
+    trendsQuery,
+    agendaTopicsQuery,
+    advisorBriefsQuery,
+    editorialProminenceQuery,
+    legacyQuery,
+  ]);
 
   if (eventsResult.error) {
     return NextResponse.json(
@@ -1293,6 +1415,7 @@ export async function GET(req: Request) {
   const trends = Array.isArray(trendsResult.data) ? trendsResult.data : [];
   const agendaTopics = Array.isArray(agendaTopicsResult.data) ? agendaTopicsResult.data : [];
   const advisorBriefs = Array.isArray(advisorBriefsResult.data) ? advisorBriefsResult.data : [];
+  const editorialProminenceRows = Array.isArray(editorialProminenceResult.data) ? editorialProminenceResult.data : [];
   const legacySituations = Array.isArray(legacyResult.data) ? legacyResult.data : [];
 
   const newestLegacySeenAt = legacySituations.length
@@ -1302,7 +1425,7 @@ export async function GET(req: Request) {
         .sort((a, b) => toTime(b) - toTime(a))[0]
     : null;
   const legacyHoursOld = newestLegacySeenAt ? hoursOld(newestLegacySeenAt) : null;
-  const result = buildLiveAgenda(events, trends, agendaTopics, advisorBriefs, debug);
+  const result = buildLiveAgenda(events, trends, agendaTopics, advisorBriefs, editorialProminenceRows, debug);
 
   const diagnostics = {
     read_only: true,
@@ -1313,17 +1436,19 @@ export async function GET(req: Request) {
     source_trends: "topic_trend_signals",
     source_agenda_topics: "agenda_topics",
     source_advisor_agenda_briefs: "v_advisor_agenda_briefs_recent",
-    frontpage_layer_present: false,
-    frontpage_layer_note: "No public frontpage/editorial-prominence table/view exists yet. v5.2 prefers exact micro-agenda Google Trends rows before parent-topic fallback.",
+    source_editorial_prominence: "v_editorial_prominence_recent",
+    frontpage_layer_present: editorialProminenceRows.length > 0,
+    frontpage_layer_note: "v5.3 fuses frontpage/editorial prominence from political/economic frontpages with live events and micro-agenda Google Trends.",
     legacy_situations_source: "v_situation_engine_live",
     event_rows_considered: events.length,
     event_rows_total_matching_window: eventsResult.count,
     trend_rows_considered: trends.length,
     agenda_topic_rows_considered: agendaTopics.length,
     advisor_agenda_brief_rows_considered: advisorBriefs.length,
+    editorial_prominence_rows_considered: editorialProminenceRows.length,
     formula_version: CONFIG.formulaVersion,
     sports_noise_events_filtered: result.sports_noise_events_filtered,
-    calibration_note: "v5.2 keeps v5.1 calibration and prefers exact micro-agenda Apify Google Trends rows before parent-topic trend fallback.",
+    calibration_note: "v5.3 keeps micro-agenda trend preference and adds political/economic frontpage editorial prominence as Door B signal.",
     classifier_features: [
       "safe_token_matching",
       "weighted_keywords",
@@ -1340,6 +1465,8 @@ export async function GET(req: Request) {
       "score_spread_calibration",
       "micro_agenda_trend_preference",
       "apify_google_trends_preferred_over_parent_fallback",
+      "frontpage_editorial_prominence_fusion",
+      "political_economic_frontpages_only",
     ],
     newest_legacy_situation_seen_at: newestLegacySeenAt,
     newest_legacy_situation_hours_old:
@@ -1347,12 +1474,13 @@ export async function GET(req: Request) {
     legacy_situations_are_stale_for_today:
       legacyHoursOld !== null && Number.isFinite(legacyHoursOld) ? legacyHoursOld > 48 : null,
     trends_error: trendsResult.error?.message ?? null,
+    editorial_prominence_error: editorialProminenceResult.error?.message ?? null,
     legacy_error: legacyResult.error?.message ?? null,
   };
 
   const basePayload = {
     success: true,
-    mode: "read_only_real_signal_bridge_micro_agenda_probe_v5_2",
+    mode: "read_only_real_signal_bridge_frontpage_fusion_v5_3",
     grouping: "canonical_micro_agenda_to_parent_topics_to_events",
     view,
     generated_at: new Date().toISOString(),
