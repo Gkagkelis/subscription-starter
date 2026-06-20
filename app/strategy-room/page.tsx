@@ -196,7 +196,7 @@ type StrategyChatResponse = {
   conversation_id?: string;
 };
 
-type LiveSituationRow = {
+type ΕνεργόSituationRow = {
   id?: string | null;
   title?: string | null;
   topic?: string | null;
@@ -302,7 +302,7 @@ type SituationEngineResponse = {
   returned_count?: number;
   source?: string;
   fallback_used?: boolean;
-  situations?: LiveSituationRow[];
+  situations?: ΕνεργόSituationRow[];
   agenda_overview?: AgendaOverviewRow[];
   agenda_overview_error?: string | null;
   error?: string;
@@ -435,11 +435,11 @@ function documentationLabel(value?: string | null) {
     normalized.includes("strong") ||
     normalized.includes("ισχυ")
   ) {
-    return "Ισχυρή τεκμηρίωση";
+    return "Στερεή βάση εκτίμησης";
   }
 
   if (normalized.includes("medium") || normalized.includes("μεσα")) {
-    return "Μεσαία τεκμηρίωση";
+    return "Σχηματισμένη εικόνα";
   }
 
   if (
@@ -448,7 +448,7 @@ function documentationLabel(value?: string | null) {
     normalized.includes("starter") ||
     normalized.includes("αρχ")
   ) {
-    return "Αρχική τεκμηρίωση";
+    return "Πρώτη εικόνα";
   }
 
   if (
@@ -456,10 +456,10 @@ function documentationLabel(value?: string | null) {
     normalized.includes("weak") ||
     normalized.includes("ανεπαρκ")
   ) {
-    return "Ανεπαρκής τεκμηρίωση";
+    return "Εικόνα που συμπληρώνεται";
   }
 
-  return "Τεκμηρίωση υπό έλεγχο";
+  return "Εικόνα υπό διαμόρφωση";
 }
 
 function riskLabel(value?: string | null) {
@@ -488,7 +488,7 @@ function signalToneClass(value?: string | null) {
   const label = riskLabel(value);
   if (label.includes("Υψηλή"))
     return "border-red-400/30 bg-red-400/10 text-red-100";
-  if (label.includes("Μεσαία"))
+  if (label.includes("Σχηματισμένη"))
     return "border-amber-400/30 bg-amber-400/10 text-amber-100";
   if (label.includes("Χαμηλή"))
     return "border-cyan-300/25 bg-cyan-300/10 text-cyan-100";
@@ -497,13 +497,13 @@ function signalToneClass(value?: string | null) {
 
 function docToneClass(value?: string | null) {
   const label = documentationLabel(value);
-  if (label.includes("Ισχυρή"))
+  if (label.includes("Στερεή"))
     return "border-emerald-300/25 bg-emerald-300/10 text-emerald-100";
-  if (label.includes("Μεσαία"))
+  if (label.includes("Σχηματισμένη"))
     return "border-cyan-300/25 bg-cyan-300/10 text-cyan-100";
-  if (label.includes("Αρχική"))
+  if (label.includes("Πρώτη"))
     return "border-amber-300/25 bg-amber-300/10 text-amber-100";
-  if (label.includes("Ανεπαρκής"))
+  if (label.includes("συμπληρώνεται"))
     return "border-red-300/25 bg-red-300/10 text-red-100";
   return "border-white/10 bg-white/[0.04] text-zinc-300";
 }
@@ -648,7 +648,7 @@ function partyImplicationText(
   return typeof value === "string" ? value : "";
 }
 
-function situationId(situation: LiveSituationRow, index: number) {
+function situationId(situation: ΕνεργόSituationRow, index: number) {
   return String(
     situation.id ||
       `${situation.title || situation.topic || "situation"}-${index}`,
@@ -656,7 +656,7 @@ function situationId(situation: LiveSituationRow, index: number) {
 }
 
 function situationTitle(
-  situation?: LiveSituationRow | null,
+  situation?: ΕνεργόSituationRow | null,
   fallback = "Ενεργή πολιτική κατάσταση",
 ) {
   if (!situation) return fallback;
@@ -669,7 +669,7 @@ function situationTitle(
   );
 }
 
-function situationScore(situation?: LiveSituationRow | null, fallback = 0) {
+function situationScore(situation?: ΕνεργόSituationRow | null, fallback = 0) {
   if (!situation) return fallback;
   return clamp(
     numberValue(
@@ -732,7 +732,7 @@ function evidenceRoleLabel(role?: string | null) {
 }
 
 function evidenceArticlesFromSituation(
-  situation?: LiveSituationRow | null,
+  situation?: ΕνεργόSituationRow | null,
 ): EvidenceArticleItem[] {
   return Array.isArray(situation?.evidence_articles)
     ? situation.evidence_articles
@@ -787,7 +787,7 @@ function articleDate(article?: EvidenceArticleItem | null) {
 }
 
 function cockpitIntensityScore(
-  situation?: LiveSituationRow | null,
+  situation?: ΕνεργόSituationRow | null,
   fallback = 0,
 ) {
   const raw = situationScore(situation, fallback);
@@ -839,7 +839,7 @@ function cockpitIntensityScore(
 }
 
 function strategicIndexFromSituation(
-  situation?: LiveSituationRow | null,
+  situation?: ΕνεργόSituationRow | null,
   fallback = 0,
 ) {
   return clamp(
@@ -864,7 +864,7 @@ function strategicIndexFromAgenda(row?: AgendaOverviewRow | null) {
 }
 
 function rawSignalFromSituation(
-  situation?: LiveSituationRow | null,
+  situation?: ΕνεργόSituationRow | null,
   fallback = 0,
 ) {
   return clamp(
@@ -997,7 +997,7 @@ function topicWhyText(row: AgendaOverviewRow | null | undefined) {
 }
 
 function readStrategicText(
-  situation: LiveSituationRow | null | undefined,
+  situation: ΕνεργόSituationRow | null | undefined,
   brief: StrategicBrief,
 ) {
   const detail = asRecord(
@@ -1033,7 +1033,7 @@ function readStrategicText(
 }
 
 function readWhyText(
-  situation: LiveSituationRow | null | undefined,
+  situation: ΕνεργόSituationRow | null | undefined,
   brief: StrategicBrief,
 ) {
   const detail = asRecord(
@@ -1055,7 +1055,7 @@ function readWhyText(
   );
 }
 
-function publicPulseScore(situation: LiveSituationRow | null | undefined) {
+function publicPulseScore(situation: ΕνεργόSituationRow | null | undefined) {
   const pulse = asRecord(situation?.public_pulse);
   return clamp(
     numberValue(
@@ -1124,10 +1124,10 @@ function evidenceConfidenceScore(articleCount: number, sourceCount: number) {
 
 function docLabelFromScore(score?: number | null) {
   const sc = numberValue(score, 0);
-  if (sc >= 65) return "Ισχυρή τεκμηρίωση";
-  if (sc >= 35) return "Μεσαία τεκμηρίωση";
-  if (sc > 0) return "Αρχική τεκμηρίωση";
-  return "Χωρίς τεκμηρίωση";
+  if (sc >= 65) return "Στερεή βάση εκτίμησης";
+  if (sc >= 35) return "Σχηματισμένη εικόνα";
+  if (sc > 0) return "Πρώτη εικόνα";
+  return "Πρώτη εικόνα";
 }
 
 export default function StrategyRoomPage() {
@@ -1208,7 +1208,7 @@ export default function StrategyRoomPage() {
 
       try {
         const agendaProbeResponse = await fetch(
-          "/api/situation-engine/agenda-probe?token=dev&hours=168",
+          `/api/situation-engine/agenda-probe?token=dev&hours=168&party=${encodeURIComponent(activeParty)}`,
           { cache: "no-store" },
         );
 
@@ -2061,7 +2061,7 @@ function LeftSidebar({
   politicalEnvironment,
 }: {
   agenda: RankedAgenda[];
-  situations: LiveSituationRow[];
+  situations: ΕνεργόSituationRow[];
   agendaMap?: ProbeAgendaMapItem[];
   activeSituationId: string | null;
   activeProbeSelection?: AgendaProbeSelection | null;
@@ -2307,9 +2307,9 @@ function LeftSidebar({
               value={String(polls.length)}
               badge={polls.length ? "Νέο" : undefined}
             />
-            <DataRow label="Focus groups" value="—" />
+            <DataRow label="Ομάδες συζήτησης" value="—" />
             <DataRow
-              label="Briefs"
+              label="Ενημερώσεις"
               value={politicalEnvironment?.snapshot_date ? "1" : "—"}
             />
             <DataRow label="Κόκκινες γραμμές" value="προφίλ" />
@@ -2320,7 +2320,7 @@ function LeftSidebar({
           <div className="grid grid-cols-2 gap-2">
             {[
               { label: "Σημείωση / Ιδέα", Glyph: IconNote },
-              { label: "URL / Άρθρο", Glyph: IconLink },
+              { label: "Σύνδεσμος / Άρθρο", Glyph: IconLink },
               { label: "Στιγμιότυπο", Glyph: IconCamera },
               { label: "Ηχητική σημείωση", Glyph: IconMic },
             ].map(({ label, Glyph }) => (
@@ -2339,13 +2339,13 @@ function LeftSidebar({
         <SidebarPanel title="Εσωτερική μνήμη" action="Όλες οι σημειώσεις">
           <div className="grid gap-2">
             <MemoryLine date="Σήμερα" title="Έλεγχος Strategy Room" />
-            <MemoryLine date="Live" title="Situation engine ενεργό" />
+            <MemoryLine date="Ενεργό" title="Situation engine ενεργό" />
           </div>
         </SidebarPanel>
       </div>
 
       <div className="grid grid-cols-4 border-t border-[#1a2640] bg-[#060a14] text-[10px] text-zinc-600">
-        {["UX", "Αρχεία", "Σημειώσεις", "Θεωρήσεις"].map((item) => (
+        {["Εμπειρία", "Αρχεία", "Σημειώσεις", "Θεωρήσεις"].map((item) => (
           <button
             key={item}
             type="button"
@@ -2522,7 +2522,7 @@ function ActiveSituationWorkspace({
 }: {
   activeTab: SituationTab;
   onTabChange: (tab: SituationTab) => void;
-  situation: LiveSituationRow | null;
+  situation: ΕνεργόSituationRow | null;
   title: string;
   category: string;
   status: string;
@@ -2623,11 +2623,11 @@ function ActiveSituationWorkspace({
 
                   <div className="grid shrink-0 grid-cols-2 gap-3">
             <MiniMetric
-              label="Noraya Priority"
+              label="Προτεραιότητα ημέρας"
               value={effectiveScore ? Math.round(effectiveScore).toString() : "—"}
             />
             <MiniMetric
-              label="Τεκμηρίωση"
+              label="Βάση εκτίμησης"
               value={effectiveDocumentationLabel}
             />
           </div>
@@ -2673,13 +2673,13 @@ function ActiveSituationWorkspace({
                 </p>
                                 <div className="rounded-2xl border border-white/[0.07] bg-black/15 p-4">
                   <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
-                    Τεκμηρίωση
+                    Βάση εκτίμησης
                   </div>
                   <div className="mt-3 text-lg font-semibold text-zinc-100">
                     {effectiveDocumentationLabel}
                   </div>
                   <p className="mt-2 text-[11px] leading-5 text-zinc-500">
-                    Στάδιο επιβεβαίωσης πηγών — όχι ψευδοποσοστό.
+                    Η εικόνα βασίζεται στα διαθέσιμα σήματα της ημέρας.
                   </p>
                 </div>
               </div>
@@ -2757,7 +2757,7 @@ function ActiveSituationWorkspace({
             <div className="grid gap-4 2xl:grid-cols-2">
               <CockpitSection
                 title="3. Τι κάνουμε τώρα — επιλογές"
-                subtitle="Επιλογές δράσης Α/Β/Γ από scenarios"
+                subtitle="Τρεις διαδρομές απόφασης"
               >
                 <div className="grid gap-3 md:grid-cols-3 2xl:grid-cols-1">
                   {effectiveDecisionOptions.map((opt) => (
@@ -2777,7 +2777,7 @@ function ActiveSituationWorkspace({
 
               <CockpitSection
                 title="4. Τι θα άλλαζε την εκτίμηση"
-                subtitle="Triggers παρακολούθησης"
+                subtitle="Σήματα επανεκτίμησης"
               >
                 <BulletList
                   compact
@@ -2790,7 +2790,7 @@ function ActiveSituationWorkspace({
                 />
                 <div className="mt-3 rounded-2xl border border-amber-300/25 bg-amber-300/10 px-4 py-3 text-xs leading-6 text-amber-100">
                   Το κοινό αλλάζει γρήγορα. Η σύσταση πρέπει να αναθεωρείται
-                  όταν ενεργοποιηθούν triggers.
+                  όταν εμφανιστούν νέα σήματα.
                 </div>
               </CockpitSection>
             </div>
@@ -2821,7 +2821,7 @@ function ActiveSituationWorkspace({
                           ) * 8,
                         ),
                       )}
-                      label="Media ένταση"
+                      label="Ένταση κάλυψης"
                       small
                     />
                     <Gauge
@@ -2873,7 +2873,7 @@ function ActiveSituationWorkspace({
                     />
                     <Gauge
                       score={clamp(Math.max(effectiveScore, documentationScore))}
-                      label="Agenda potential"
+                      label="Δυναμική ατζέντας"
                       small
                     />
                   </>
@@ -3074,7 +3074,7 @@ function ActiveSituationWorkspace({
         {activeTab === "options" ? (
           <CockpitSection
             title="ΕΠΙΛΟΓΕΣ ΔΡΑΣΗΣ"
-            subtitle="Πάντα A / B / Γ — όταν δεν υπάρχουν AI options, εμφανίζονται ως pending"
+            subtitle="Τρεις διαδρομές απόφασης — όταν λείπει πλήρης ανάλυση, μένουν σε αναμονή"
           >
             <div className="grid gap-3 xl:grid-cols-3">
               {effectiveDecisionOptions.map((option) => (
@@ -3088,7 +3088,7 @@ function ActiveSituationWorkspace({
           <div className="grid gap-4 xl:grid-cols-[1fr_1fr]">
             <CockpitSection
               title="Κεντρική γραμμή"
-              subtitle="Communication material"
+              subtitle="Υλικό επικοινωνίας"
             >
               <p className="text-lg font-semibold leading-8 text-zinc-100">
                 {materialSection?.material?.briefing ||
@@ -3100,7 +3100,7 @@ function ActiveSituationWorkspace({
             </CockpitSection>
             <CockpitSection
               title="Θεσμική εκδοχή"
-              subtitle="Safe public version"
+              subtitle="Ασφαλής δημόσια εκδοχή"
             >
               <p className="text-sm leading-7 text-zinc-300">
                 {materialSection?.material?.suggestedStatement ||
@@ -3110,7 +3110,7 @@ function ActiveSituationWorkspace({
                   )}
               </p>
             </CockpitSection>
-            <CockpitSection title="Αν μας επιτεθούν" subtitle="Response seed">
+            <CockpitSection title="Αν μας επιτεθούν" subtitle="Πρώτη γραμμή απάντησης">
               <p className="text-sm leading-7 text-zinc-300">
                 {materialSection?.material?.internalNote ||
                   text(
@@ -3121,12 +3121,12 @@ function ActiveSituationWorkspace({
             </CockpitSection>
             <CockpitSection
               title="Για το συγκεκριμένο κόμμα"
-              subtitle="Party implication"
+              subtitle="Επίπτωση για το προφίλ"
             >
               <p className="text-sm leading-7 text-zinc-300">
                 {text(
                   selectedPartyImplication,
-                  "Δεν υπάρχει ειδική επίπτωση για το επιλεγμένο party profile στο political environment snapshot.",
+                  "Δεν υπάρχει ακόμη ειδική επίπτωση για το επιλεγμένο προφίλ στο σημερινό πολιτικό περιβάλλον.",
                 )}
               </p>
             </CockpitSection>
@@ -3141,7 +3141,7 @@ function PublicPulsePanel({
   situation,
   brief,
 }: {
-  situation: LiveSituationRow | null;
+  situation: ΕνεργόSituationRow | null;
   brief: StrategicBrief;
 }) {
   const pulse = asRecord(situation?.public_pulse);
@@ -3201,11 +3201,11 @@ function PublicPulsePanel({
 
   return (
     <CockpitSection
-      title="PUBLIC PULSE – ΕΝΔΕΙΞΕΙΣ ΚΟΙΝΟΥ"
+      title="ΔΗΜΟΣΙΟ ΕΝΔΙΑΦΕΡΟΝ — ΕΝΔΕΙΞΕΙΣ ΚΟΙΝΟΥ"
       subtitle={
         hasVoices
-          ? "Πραγματικές φωνές πολιτών (YouTube + Twitter)"
-          : "Signal από την κάλυψη, όχι δημοσκόπηση"
+          ? "Ενδείξεις από δημόσιες πλατφόρμες"
+          : "Σήμα από την κάλυψη, όχι δημοσκόπηση"
       }
     >
       <div className="grid gap-4 xl:grid-cols-[170px_1fr]">
@@ -3298,7 +3298,7 @@ function AgendaOverviewPanel({
       >
         {!overview.length ? (
           <EmptyState>
-            Δεν υπάρχουν διαθέσιμες θεματικές από το agenda overview.
+            Δεν υπάρχουν διαθέσιμες θεματικές από τη συνολική εικόνα ατζέντας.
           </EmptyState>
         ) : (
           <div className="grid gap-4 xl:grid-cols-[1.35fr_0.9fr]">
@@ -3308,7 +3308,7 @@ function AgendaOverviewPanel({
                 <div>Στρατηγικός Δείκτης</div>
                 <div>Κάλυψη</div>
                 <div>Πηγές</div>
-                <div>Τεκμηρίωση</div>
+                <div>Βάση εκτίμησης</div>
                 <div>Ρίσκο</div>
                 <div>Ευκαιρία</div>
               </div>
@@ -3525,7 +3525,7 @@ function RightInspector({
   probeItem,
   probeEvidenceArticles,
 }: {
-  situation: LiveSituationRow | null;
+  situation: ΕνεργόSituationRow | null;
   title: string;
   score: number;
   intensityScore: number;
@@ -3598,7 +3598,7 @@ function RightInspector({
             {probeWhySection?.body || readWhyText(situation, brief)}
           </p>
           <div className="mt-3 text-[10px] leading-5 text-zinc-500">
-            Τεκμηρίωση: {inspectorDocumentationLabel}
+            Βάση εκτίμησης: {inspectorDocumentationLabel}
           </div>
         </InspectorPanel>
 
