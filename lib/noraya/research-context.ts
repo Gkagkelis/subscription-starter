@@ -2,7 +2,7 @@ import "server-only";
 import fs from "node:fs";
 import path from "node:path";
 
-export const RESEARCH_CONTEXT_VERSION = "research_context_v3_party_profile_source_of_truth";
+export const RESEARCH_CONTEXT_VERSION = "research_context_v4_party_profile_premium_narrative";
 
 type CsvRow = Record<string, string>;
 export type PoliticalPartyProfile = Record<string, any>;
@@ -417,9 +417,62 @@ function partyLensFor(partyKey?: string | null, partyProfile?: PoliticalPartyPro
   return fallbackPartyLensFor(partyKey);
 }
 
+function cleanForSentence(value?: unknown): string {
+  return compactText(value).replace(/[.。]+$/g, "").trim();
+}
+
+function uniqueNonEmpty(values: string[]): string[] {
+  const out: string[] = [];
+  const seen = new Set<string>();
+  for (const value of values.map(cleanForSentence).filter(Boolean)) {
+    const key = normalize(value);
+    if (!seen.has(key)) {
+      seen.add(key);
+      out.push(value);
+    }
+  }
+  return out;
+}
+
+function partyStrategicAxis(lens: PartyResearchLens): string {
+  const priorities = uniqueNonEmpty([
+    ...(lens.known_positions || []),
+    ...(lens.core_themes || []),
+    ...(lens.preferred_language || []),
+  ]).slice(0, 5);
+  const opportunity = cleanForSentence(lens.opportunity_frame);
+
+  if (opportunity && priorities.length) return `${opportunity}, με άξονες ${priorities.join(", ")}`;
+  if (opportunity) return opportunity;
+  if (priorities.length) return priorities.join(", ");
+  return cleanForSentence(lens.value_frame) || "σοβαρή πολιτική ευθύνη και εφαρμόσιμη στάση";
+}
+
+function partyStrategicBoundary(lens: PartyResearchLens): string {
+  const redLines = uniqueNonEmpty(lens.red_lines || []).slice(0, 4);
+  if (redLines.length) return redLines.join(" · ");
+  return cleanForSentence(lens.risk_to_avoid) || "γενικότητα χωρίς καθαρή πολιτική επιλογή";
+}
+
+
 function profileFor(input: AgendaResearchContextInput): ResearchProfile {
   const id = normalize(input.microAgendaId);
   const text = normalize(`${input.microAgenda} ${input.parentTopic} ${input.eventTitle} ${input.eventText}`);
+
+  if (id.includes("wages") || id.includes("labor_rights") || id.includes("unemployment") || id.includes("precarity")) {
+    return {
+      frame: "εργασία, εισόδημα και αξιοπρέπεια",
+      socialBasis: "Το γεγονός πατά στην αγωνία για το αν η εργασία αρκεί για αξιοπρεπή ζωή και σταθερή προοπτική.",
+      audienceReading: "Η ανάγνωση χρειάζεται να μιλήσει σε εργαζόμενους, νέους και νοικοκυριά που συνδέουν μισθό, κόστος ζωής και καθημερινή αντοχή.",
+      strategicMeaning: "Η πολιτική αξία βρίσκεται στη σύνδεση της ανάπτυξης με το πραγματικό εισόδημα και τη δίκαιη ανταμοιβή της εργασίας.",
+      partyRelevance: "Κερδίζει όποιος μεταφέρει τη συζήτηση από τον κλάδο στο ερώτημα ποιος ωφελείται από την οικονομία.",
+      leaderTraitHint: "Ο τόνος αρχηγού πρέπει να δείχνει κοινωνική εγγύτητα και καθαρή αίσθηση δικαιοσύνης.",
+      recommendedLanguage: ["εργασία", "αξιοπρέπεια", "πραγματικό εισόδημα", "εργασιακά δικαιώματα", "κόστος ζωής", "δίκαιη ανάπτυξη"],
+      publicOpinionMetrics: ["expectation_personal_job", "expectation_national_economy", "trust_national_parliament"],
+      audienceGroups: WORK_GROUPS,
+      leaderTraitNames: ["Κοντά στους πολίτες"],
+    };
+  }
 
   if (id.includes("housing") || text.includes("στεγαση") || text.includes("ενοικ")) {
     return {
@@ -636,9 +689,9 @@ export function buildAgendaResearchContext(input: AgendaResearchContextInput): A
     social_basis: profile.socialBasis,
     audience_reading: `${profile.audienceReading} Το ερευνητικό υπόβαθρο δείχνει ${signalBand} πεδίο κοινωνικής ανάγνωσης για αυτή την ατζέντα.`,
     strategic_meaning: profile.strategicMeaning,
-    party_relevance: `${profile.partyRelevance} Για ${partyLens.party_label}, η γραμμή πρέπει να πατήσει στο πραγματικό προφίλ του κόμματος: ${partyLens.value_frame}.`,
-    leader_trait_hint: `${profile.leaderTraitHint} ${partyLens.persuasion_path}.`,
-    narrative_instruction: `Σύνδεσε το γεγονός με ${profile.frame}, μετά με το πολιτικό προφίλ από political_party_profiles: ${partyLens.value_frame}. Κράτα τόνο ${partyLens.preferred_tone}. Σεβάσου τις κόκκινες γραμμές: ${partyLens.risk_to_avoid}.`,
+    party_relevance: `${profile.partyRelevance} Για ${partyLens.party_label}, η πολιτική αξιοποίηση χρειάζεται να συνδεθεί με ${partyStrategicAxis(partyLens)}.`,
+    leader_trait_hint: `${profile.leaderTraitHint} Ο τόνος χρειάζεται να παραμείνει ${cleanForSentence(partyLens.preferred_tone)}, με καθαρή αίσθηση σχεδίου, αξιοπιστίας και εφαρμογής.`,
+    narrative_instruction: `Γράψε ως κορυφαίος πολιτικός σύμβουλος: σύνδεσε το γεγονός με ${profile.frame}, μετά με ${partyLens.party_label} μέσα από ${partyStrategicAxis(partyLens)}. Κράτα τόνο ${cleanForSentence(partyLens.preferred_tone)}. Στρατηγικό όριο: ${partyStrategicBoundary(partyLens)}.`,
     user_learning_slot: {
       enabled: true,
       note: "Εδώ θα κουμπώσει το μελλοντικό προφίλ προτιμήσεων χρήστη: ύφος, λέξεις που προτιμά, λέξεις που αποφεύγει και διορθώσεις που έχει κάνει.",
