@@ -476,6 +476,7 @@ export async function GET(request: Request) {
   const diagnostics = {
     read_only: dryRun,
     writes_to_database: !dryRun,
+    write_operation: "upsert",
     token_present: !!process.env.APIFY_API_TOKEN,
     actor_present: !!actor,
     actor,
@@ -543,15 +544,25 @@ export async function GET(request: Request) {
   }
 
   if (!dryRun && writes.length) {
-    const inserted = await supabase.from("topic_trend_signals").insert(writes);
-    if (inserted.error) {
-      return json({ success: false, error: "supabase_insert_failed", details: inserted.error.message, diagnostics, attempted_writes: writes, results, errors }, 500);
+    const upserted = await supabase
+      .from("topic_trend_signals")
+      .upsert(writes, { onConflict: "topic,region,timeframe" });
+    if (upserted.error) {
+      return json({
+        success: false,
+        error: "supabase_upsert_failed",
+        details: upserted.error.message,
+        diagnostics,
+        attempted_writes: writes,
+        results,
+        errors,
+      }, 500);
     }
   }
 
   return json({
     success: true,
-    mode: "fetch_topic_trends_apify_google_trends_v3_2_micro_agendas",
+    mode: "fetch_topic_trends_apify_google_trends_v3_3_micro_agendas_upsert",
     generated_at: fetchedAt,
     diagnostics,
     topics_requested: candidates.length,
