@@ -745,18 +745,41 @@ function evidenceArticlesFromProbeItem(
   const articles = item?.raw?.evidence_articles;
   if (!Array.isArray(articles)) return [];
 
-  return articles.slice(0, 8).map((article, index) => ({
-    article_id:
-      typeof article.article_id === "string"
-        ? article.article_id
-        : `${item?.id || "probe"}-${index}`,
-    title: article.title || "Άρθρο τεκμηρίωσης",
-    source: article.source || "Πηγή",
-    url: article.url || null,
-    published_at: article.published_at || null,
-    score: article.score ?? null,
-    role: article.role || "primary",
-  }));
+  return articles.slice(0, 8).map((article, index) => {
+    const record = article as Record<string, unknown>;
+    const articleId =
+      typeof record.article_id === "string" && record.article_id.trim()
+        ? record.article_id
+        : `${item?.id || "probe"}-${index}`;
+
+    return {
+      article_id: articleId,
+      title:
+        typeof record.title === "string" && record.title.trim()
+          ? record.title
+          : "Άρθρο τεκμηρίωσης",
+      source:
+        typeof record.source === "string" && record.source.trim()
+          ? record.source
+          : "Πηγή",
+      url:
+        typeof record.url === "string" && record.url.trim()
+          ? record.url
+          : null,
+      published_at:
+        typeof record.published_at === "string" && record.published_at.trim()
+          ? record.published_at
+          : null,
+      score:
+        typeof record.score === "number" || typeof record.score === "string"
+          ? record.score
+          : null,
+      role:
+        typeof record.role === "string" && record.role.trim()
+          ? record.role
+          : "primary",
+    };
+  });
 }
 
 function articleDate(article?: EvidenceArticleItem | null) {
