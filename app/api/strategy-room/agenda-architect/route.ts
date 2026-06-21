@@ -6,7 +6,7 @@ export const maxDuration = 60;
 
 function cleanText(value: unknown, maxLength = 12000) {
   return String(value || "")
-    .replace(/<[^>]*>/g, "")
+    .replace(/<script[\s\S]*?<\/script>/gi, "")
     .replace(/\s+/g, " ")
     .trim()
     .slice(0, maxLength);
@@ -28,43 +28,68 @@ function extractText(ai: any) {
     .trim();
 }
 
-function tryParseJsonObject(text: string) {
-  const cleaned = text
-    .replace(/^```json\s*/i, "")
-    .replace(/^```\s*/i, "")
-    .replace(/```$/i, "")
-    .trim();
+function extractBetween(text: string, start: string, end: string) {
+  const s = text.indexOf(start);
+  const e = text.indexOf(end);
+  if (s === -1 || e === -1 || e <= s) return "";
+  return text.slice(s + start.length, e).trim();
+}
 
+function cleanDisplayText(text: string) {
+  const display = extractBetween(text, "<displayText>", "</displayText>");
+  const raw = display || text;
+
+  // Safety: if the model still returned JSON, recover displayText instead of showing raw JSON.
   try {
-    return JSON.parse(cleaned);
-  } catch {
-    const first = cleaned.indexOf("{");
-    const last = cleaned.lastIndexOf("}");
-    if (first >= 0 && last > first) {
-      try {
-        return JSON.parse(cleaned.slice(first, last + 1));
-      } catch {
-        return null;
-      }
-    }
-  }
+    const parsed = JSON.parse(raw);
+    if (typeof parsed?.displayText === "string") return parsed.displayText.trim();
+    if (typeof parsed?.display_text === "string") return parsed.display_text.trim();
+  } catch {}
 
-  return null;
+  return raw
+    .replace(/<context>[\s\S]*?<\/context>/gi, "")
+    .replace(/<\/?displayText>/gi, "")
+    .replace(/^```[\w-]*\s*/i, "")
+    .replace(/```$/i, "")
+    .trim()
+    .slice(0, 6500);
+}
+
+function contextValue(context: string, key: string) {
+  const re = new RegExp(`${key}\\s*:\\s*([\\s\\S]*?)(?=\\n[A-Za-zΑ-Ωα-ω_]+\\s*:|$)`, "i");
+  const match = context.match(re);
+  return cleanText(match?.[1] || "", 1400);
+}
+
+function contextList(context: string, key: string) {
+  const value = contextValue(context, key);
+  if (!value) return [];
+  return value
+    .split(/[,\n•;-]+/)
+    .map((item) => cleanText(item, 220))
+    .filter(Boolean)
+    .slice(0, 6);
 }
 
 function compactAgendaOverview(rows: any[]) {
-  return rows.slice(0, 12).map((row: any) => {
-    const microAgendas = Array.isArray(row?.micro_agendas)
-      ? row.micro_agendas.slice(0, 6).map((micro: any) => ({
+  return rows.slice(0, 14).map((row: any) => ({
+    topic: row?.topic,
+    score: row?.strategic_index_score ?? row?.agenda_score,
+    signal_label: row?.strategic_index_label ?? row?.signal_label,
+    coverage_level: row?.coverage_level,
+    documentation_level: row?.documentation_level,
+    opportunity_label: row?.opportunity_label,
+    active_micro_agenda: row?.active_micro_agenda,
+    micro_agendas: Array.isArray(row?.micro_agendas)
+      ? row.micro_agendas.slice(0, 7).map((micro: any) => ({
           title: micro?.title,
           score: micro?.score,
           eventCount: micro?.eventCount,
           statusLabel: micro?.statusLabel,
           evidenceLabel: micro?.evidenceLabel,
         }))
-      : [];
-
-    const relatedEvents = Array.isArray(row?.related_events)
+      : [],
+    related_events: Array.isArray(row?.related_events)
       ? row.related_events.slice(0, 8).map((event: any) => ({
           title: event?.title,
           micro_agenda: event?.micro_agenda,
@@ -72,31 +97,17 @@ function compactAgendaOverview(rows: any[]) {
           article_count: event?.article_count,
           source_count: event?.source_count,
         }))
-      : [];
-
-    return {
-      topic: row?.topic,
-      score: row?.strategic_index_score ?? row?.agenda_score,
-      signal_label: row?.strategic_index_label ?? row?.signal_label,
-      coverage_level: row?.coverage_level,
-      documentation_level: row?.documentation_level,
-      opportunity_label: row?.opportunity_label,
-      active_micro_agenda: row?.active_micro_agenda,
-      micro_agendas: microAgendas,
-      related_events: relatedEvents,
-    };
-  });
+      : [],
+  }));
 }
 
 function compactProbeAgendaMap(rows: any[]) {
-  return rows.slice(0, 18).map((item: any) => ({
-    id: item?.id,
+  return rows.slice(0, 20).map((item: any) => ({
     title: item?.title,
     parentTopics: item?.parentTopics,
     score: item?.score,
     statusLabel: item?.statusLabel,
     evidenceLabel: item?.evidenceLabel,
-    eventCountLabel: item?.eventCountLabel,
     events: Array.isArray(item?.events)
       ? item.events.slice(0, 5).map((event: any) => ({
           title: event?.title,
@@ -105,41 +116,18 @@ function compactProbeAgendaMap(rows: any[]) {
           source_count: event?.source_count,
         }))
       : [],
-    rawSignals: item?.raw
+    signals: item?.raw
       ? {
-          score: item.raw.score,
           real_news_coverage_score: item.raw.real_news_coverage_score,
           real_trend_score: item.raw.real_trend_score,
           real_frontpage_prominence_score: item.raw.real_frontpage_prominence_score,
           freshness_score: item.raw.freshness_score,
           documentation_score: item.raw.documentation_score,
-          event_count: item.raw.event_count,
           article_count: item.raw.article_count,
           source_count: item.raw.source_count,
-          strategic_read: item.raw.strategic_read,
         }
       : null,
   }));
-}
-
-function fallbackResult(text: string) {
-  return {
-    title: "Στρατηγική Αναδιάταξη Ημέρας",
-    displayText: text || "Δεν μπόρεσα να παράγω αξιόπιστη Κίνηση Αναδιάταξης αυτή τη στιγμή.",
-    chatContext: {
-      coreDiagnosis: "",
-      herestheticMove: "",
-      agendaCreationRoute: "",
-      connectedMicroAgendas: [],
-      firstMove: "",
-      trap: "",
-      followups: [
-        "Μετάτρεψέ το σε γραμμή 24ώρου.",
-        "Ποια είναι η παγίδα των αντιπάλων;",
-        "Πώς το λέει ο αρχηγός χωρίς να φανεί παλιό;",
-      ],
-    },
-  };
 }
 
 export async function POST(req: Request) {
@@ -157,7 +145,6 @@ export async function POST(req: Request) {
       {
         ok: false,
         error: "NO_ANTHROPIC_API_KEY",
-        title: "Στρατηγική Αναδιάταξη Ημέρας",
         displayText: "Δεν υπάρχει διαθέσιμο ANTHROPIC_API_KEY για να παραχθεί η Κίνηση Αναδιάταξης.",
       },
       { status: 500 },
@@ -181,25 +168,19 @@ export async function POST(req: Request) {
 
   const prompt = `Είσαι ο κορυφαίος πολιτικός στρατηγικός σύμβουλος της Noraya.
 
-Αποστολή σου: να παραγάγεις την premium ανάλυση "Στρατηγική Αναδιάταξη Ημέρας" για το κόμμα/οργανισμό ${party}.
+Αποστολή: γράψε την premium ανάλυση "Στρατηγική Αναδιάταξη Ημέρας" για το ${party}.
 
-Δεν κάνεις περίληψη. Δεν κάνεις dashboard analysis. Κάνεις heresthetic analysis με την έννοια του William Riker: βρίσκεις πώς μπορεί ο χρήστης να αλλάξει τη διάσταση της σύγκρουσης ώστε να δημιουργήσει ατζέντα, όχι απλώς να ακολουθήσει την ατζέντα.
+Δεν κάνεις περίληψη. Δεν κάνεις dashboard analysis. Κάνεις heresthetic analysis με την έννοια του William Riker: βρίσκεις πώς αλλάζει η διάσταση της σύγκρουσης ώστε το κόμμα να δημιουργήσει ατζέντα, όχι απλώς να ακολουθήσει την επικαιρότητα.
 
-ΔΕΔΟΜΕΝΑ ΠΟΥ ΕΧΕΙΣ:
-1. Η συνολική εικόνα θεματικών, χτισμένη από agenda-probe micro-agendas.
-2. Τα micro-agendas και τα γεγονότα που δημιουργούν ή δεν δημιουργούν ατζέντα.
-3. Τα scores ως σήματα προτεραιότητας/έντασης — όχι ως raw δημόσιο copy.
-4. Το party profile και τις κόκκινες γραμμές.
-5. Το πολιτικό περιβάλλον και brief, όπου υπάρχουν.
-
+ΔΕΔΟΜΕΝΑ:
 ΚΟΜΜΑ / PROFILE:
 ${safeJson(profile, 7000)}
 
 ΣΥΝΟΛΙΚΗ ΕΙΚΟΝΑ ΘΕΜΑΤΙΚΩΝ:
-${safeJson(compactAgendaOverview(agendaOverview), 12000)}
+${safeJson(compactAgendaOverview(agendaOverview), 13000)}
 
 MICRO-AGENDA FIELD MAP:
-${safeJson(compactProbeAgendaMap(probeAgendaMap), 14000)}
+${safeJson(compactProbeAgendaMap(probeAgendaMap), 15000)}
 
 ΠΟΛΙΤΙΚΟ ΠΕΡΙΒΑΛΛΟΝ:
 ${safeJson(politicalEnvironment, 6000)}
@@ -207,34 +188,33 @@ ${safeJson(politicalEnvironment, 6000)}
 STRATEGIC BRIEF:
 ${safeJson(strategicBrief, 5000)}
 
-ΑΠΑΙΤΗΣΕΙΣ ΠΟΙΟΤΗΤΑΣ:
-- Γράψε στα ελληνικά.
-- Το displayText να είναι περίπου 350-470 λέξεις.
-- Να ακούγεται σαν πολύ έμπειρος πολιτικός σύμβουλος σε κλειστό επιτελικό δωμάτιο.
-- Να κάνει τον χρήστη να νιώσει: "αυτό δεν το είχα δει".
-- Να ενώνει micro-agendas σε ενιαίο πολιτικό ερώτημα.
-- Να δείχνει ποιο θέμα είναι ήδη κλειδωμένο από την επικαιρότητα και πού υπάρχει ανοιχτό πεδίο agenda-setting.
-- Να δίνει καθαρή heresthetic κίνηση: ποια διάσταση της σύγκρουσης αλλάζουμε.
-- Να δίνει πρώτη κίνηση 24ώρου χωρίς να λέει generic "βγάλε ανακοίνωση".
-- Να δείχνει την παγίδα ειδικά για το συγκεκριμένο κόμμα.
-- Να μη βγάζει raw fields, raw formulas, τεχνικά labels, πίνακες ή "Search/Boost".
-- Να μη γράψει markdown table.
-- Να μη χρησιμοποιήσει φλύαρες ενότητες. Επιτρέπονται λίγες συμπαγείς παράγραφοι.
+ΚΑΝΟΝΕΣ:
+- Γράψε ελληνικά.
+- Περίπου 350-470 λέξεις.
+- Όχι raw JSON. Όχι markdown table. Όχι bullet list ως βασική μορφή.
+- Όχι τεχνικά labels τύπου Search, Boost, Raw Signal.
+- Μην παρουσιάσεις scores ως δημόσια επιχειρήματα. Χρησιμοποίησέ τα ως εσωτερικά σήματα.
+- Να ενώνεις 2-5 micro-agendas σε ένα ενιαίο πολιτικό ερώτημα.
+- Να λες ποιο θέμα είναι ήδη κλειδωμένο από την επικαιρότητα και πού υπάρχει ανοιχτό πεδίο agenda-setting.
+- Να δώσεις καθαρή heresthetic κίνηση: ποια διάσταση αλλάζουμε.
+- Να δώσεις πρώτη κίνηση 24ώρου χωρίς generic "βγάλε ανακοίνωση".
+- Να δείξεις την παγίδα ειδικά για το κόμμα.
+- Ύφος: κλειστό επιτελικό δωμάτιο, υψηλή πολιτική οξυδέρκεια, όχι ακαδημαϊκή φλυαρία.
 
-ΑΠΑΝΤΗΣΕ ΜΟΝΟ σε έγκυρο JSON, χωρίς markdown fences, με ακριβώς αυτό το σχήμα:
-{
-  "title": "Στρατηγική Αναδιάταξη Ημέρας",
-  "displayText": "...",
-  "chatContext": {
-    "coreDiagnosis": "...",
-    "herestheticMove": "...",
-    "agendaCreationRoute": "...",
-    "connectedMicroAgendas": ["...", "..."],
-    "firstMove": "...",
-    "trap": "...",
-    "followups": ["...", "...", "..."]
-  }
-}`;
+ΑΠΑΝΤΗΣΕ ΑΚΡΙΒΩΣ ΜΕ ΑΥΤΗ ΤΗ ΜΟΡΦΗ:
+
+<displayText>
+[εδώ το καθαρό κείμενο που θα εμφανιστεί στο UI]
+</displayText>
+
+<context>
+coreDiagnosis: [μία πρόταση]
+herestheticMove: [μία πρόταση]
+agendaCreationRoute: [μία πρόταση]
+connectedMicroAgendas: [λίστα ονομάτων χωρισμένη με κόμμα]
+firstMove: [μία πρόταση]
+trap: [μία πρόταση]
+</context>`;
 
   try {
     const controller = new AbortController();
@@ -250,9 +230,9 @@ ${safeJson(strategicBrief, 5000)}
       },
       body: JSON.stringify({
         model: process.env.ANTHROPIC_MODEL || "claude-sonnet-4-6",
-        max_tokens: 2400,
+        max_tokens: 2200,
         system:
-          "You are Noraya Agenda Architect. Return only valid JSON. No markdown fences.",
+          "You are Noraya Agenda Architect. Follow the exact XML-like output tags. Never return raw JSON.",
         messages: [{ role: "user", content: prompt }],
       }),
     });
@@ -273,34 +253,26 @@ ${safeJson(strategicBrief, 5000)}
 
     const ai = await response.json();
     const text = extractText(ai);
-    const parsed = tryParseJsonObject(text) || fallbackResult(text);
+    const displayText = cleanDisplayText(text);
+    const context = extractBetween(text, "<context>", "</context>");
 
-    const result = {
-      title: cleanText(parsed.title || "Στρατηγική Αναδιάταξη Ημέρας", 200),
-      displayText: cleanText(parsed.displayText || parsed.display_text || text, 6000),
+    return NextResponse.json({
+      ok: true,
+      title: "Στρατηγική Αναδιάταξη Ημέρας",
+      displayText,
       chatContext: {
-        coreDiagnosis: cleanText(parsed.chatContext?.coreDiagnosis || parsed.chat_context?.coreDiagnosis, 1200),
-        herestheticMove: cleanText(parsed.chatContext?.herestheticMove || parsed.chat_context?.herestheticMove, 1200),
-        agendaCreationRoute: cleanText(parsed.chatContext?.agendaCreationRoute || parsed.chat_context?.agendaCreationRoute, 1200),
-        connectedMicroAgendas: Array.isArray(parsed.chatContext?.connectedMicroAgendas)
-          ? parsed.chatContext.connectedMicroAgendas.slice(0, 6).map((v: unknown) => cleanText(v, 200)).filter(Boolean)
-          : [],
-        firstMove: cleanText(parsed.chatContext?.firstMove || parsed.chat_context?.firstMove, 1200),
-        trap: cleanText(parsed.chatContext?.trap || parsed.chat_context?.trap, 1200),
-        followups: Array.isArray(parsed.chatContext?.followups)
-          ? parsed.chatContext.followups.slice(0, 4).map((v: unknown) => cleanText(v, 220)).filter(Boolean)
-          : [
-              "Μετάτρεψέ το σε γραμμή 24ώρου.",
-              "Ποια είναι η παγίδα των αντιπάλων;",
-              "Πώς το λέει ο αρχηγός χωρίς να φανεί παλιό;",
-            ],
+        coreDiagnosis: contextValue(context, "coreDiagnosis") || displayText.slice(0, 600),
+        herestheticMove: contextValue(context, "herestheticMove"),
+        agendaCreationRoute: contextValue(context, "agendaCreationRoute"),
+        connectedMicroAgendas: contextList(context, "connectedMicroAgendas"),
+        firstMove: contextValue(context, "firstMove"),
+        trap: contextValue(context, "trap"),
+        followups: [],
       },
       generatedAt: new Date().toISOString(),
       model: process.env.ANTHROPIC_MODEL || "claude-sonnet-4-6",
       usage: ai.usage || null,
-    };
-
-    return NextResponse.json({ ok: true, ...result });
+    });
   } catch (err: any) {
     return NextResponse.json(
       {
