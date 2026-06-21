@@ -261,6 +261,11 @@ type AgendaRelatedEvent = {
   article_count?: number | string | null;
   source_count?: number | string | null;
   last_article_at?: string | null;
+
+  // From agenda-probe / probeAgendaMap.
+  probe_cluster_id?: string | null;
+  probe_event_id?: string | null;
+  micro_agenda?: string | null;
 };
 
 type AgendaOverviewRow = {
@@ -720,6 +725,329 @@ function opportunityText(row: AgendaOverviewRow | null | undefined) {
     numberValue(row.agenda_score, 0),
     row.coverage_level,
     row.opportunity_label,
+  );
+}
+
+function normalizeAgendaKey(value: unknown) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/ς/g, "σ")
+    .trim();
+}
+
+function evidenceLevelFromProbeLabel(label?: string | null) {
+  const normalized = normalizeAgendaKey(label);
+  if (normalized.includes("στερε") || normalized.includes("ισχυ")) return "high";
+  if (normalized.includes("σχηματισ") || normalized.includes("μεσα")) return "medium";
+  if (normalized.includes("πρωτ") || normalized.includes("αρχ")) return "low";
+  return "medium";
+}
+
+function strongerCoverageLevel(a?: string | null, b?: string | null) {
+  const rank = (value?: string | null) => {
+    const normalized = normalizeAgendaKey(value);
+    if (normalized.includes("high") || normalized.includes("υψη")) return 3;
+    if (normalized.includes("medium") || normalized.includes("μεσα")) return 2;
+    if (normalized.includes("low") || normalized.includes("χαμη")) return 1;
+    return 0;
+  };
+  return rank(b) > rank(a) ? b || a || "medium" : a || b || "medium";
+}
+
+function coverageLevelFromProbeItem(item: ProbeAgendaMapItem) {
+  const articleCount = numberValue(item.raw?.article_count, 0);
+  const sourceCount = numberValue(item.raw?.source_count, 0);
+  if (sourceCount >= 4 || articleCount >= 8) return "high";
+  if (sourceCount >= 2 || articleCount >= 3) return "medium";
+  return "low";
+}
+
+function broadThemeForProbeItem(
+  item: ProbeAgendaMapItem,
+  legacyOverview: AgendaOverviewRow[],
+) {
+  const rawCandidates = [
+    ...(Array.isArray(item.parentTopics) ? item.parentTopics : []),
+    item.raw?.parent_topic,
+    ...(Array.isArray(item.raw?.parent_topics) ? item.raw.parent_topics : []),
+    item.title,
+    item.raw?.micro_agenda,
+    item.raw?.topic,
+  ]
+    .map((value) => String(value || "").trim())
+    .filter(Boolean);
+
+  const textIndex = normalizeAgendaKey(rawCandidates.join(" "));
+
+  const canonical = (() => {
+    if (
+      textIndex.includes("στεγασ") ||
+      textIndex.includes("κατοικ") ||
+      textIndex.includes("ενοικ") ||
+      textIndex.includes("airbnb") ||
+      textIndex.includes("βραχυχρον")
+    ) {
+      return "Στέγαση";
+    }
+
+    if (
+      textIndex.includes("ακριβ") ||
+      textIndex.includes("κοστοσ ζωησ") ||
+      textIndex.includes("τιμων") ||
+      textIndex.includes("καταναλωτ") ||
+      textIndex.includes("βασικα αγαθα")
+    ) {
+      return "Ακρίβεια / κόστος ζωής";
+    }
+
+    if (
+      textIndex.includes("ενεργ") ||
+      textIndex.includes("ρευμα") ||
+      textIndex.includes("θερμαν")
+    ) {
+      return "Ενέργεια";
+    }
+
+    if (
+      textIndex.includes("μισθ") ||
+      textIndex.includes("εργασ") ||
+      textIndex.includes("φορο") ||
+      textIndex.includes("τραπεζ") ||
+      textIndex.includes("δανει") ||
+      textIndex.includes("χρεοσ") ||
+      textIndex.includes("οικονομ")
+    ) {
+      return "Οικονομία";
+    }
+
+    if (
+      textIndex.includes("δικαιοσυν") ||
+      textIndex.includes("θεσμ") ||
+      textIndex.includes("δημοκρατ")
+    ) {
+      return "Δικαιοσύνη";
+    }
+
+    if (
+      textIndex.includes("αμυνα") ||
+      textIndex.includes("εξοπλισ") ||
+      textIndex.includes("στρατιωτικ") ||
+      textIndex.includes("drone")
+    ) {
+      return "Άμυνα";
+    }
+
+    if (
+      textIndex.includes("εξωτερικ") ||
+      textIndex.includes("γεωπολιτικ") ||
+      textIndex.includes("νατο") ||
+      textIndex.includes("ευρωπη") ||
+      textIndex.includes("τουρκ")
+    ) {
+      return "Εξωτερική πολιτική";
+    }
+
+    if (
+      textIndex.includes("υγεια") ||
+      textIndex.includes("νοσοκομ") ||
+      textIndex.includes("γιατρ")
+    ) {
+      return "Υγεία";
+    }
+
+    if (
+      textIndex.includes("παιδει") ||
+      textIndex.includes("πανεπιστημ") ||
+      textIndex.includes("σχολ")
+    ) {
+      return "Παιδεία";
+    }
+
+    if (
+      textIndex.includes("ασφαλ") ||
+      textIndex.includes("εγκλημα") ||
+      textIndex.includes("προστασια")
+    ) {
+      return "Ασφάλεια / πολιτική προστασία";
+    }
+
+    if (textIndex.includes("κοινων")) {
+      return "Κοινωνία";
+    }
+
+    return rawCandidates[0] || item.title || "Γενικά";
+  })();
+
+  const exactLegacy = legacyOverview.find(
+    (row) => normalizeAgendaKey(row.topic) === normalizeAgendaKey(canonical),
+  );
+  if (exactLegacy?.topic) return exactLegacy.topic;
+
+  return canonical;
+}
+
+function probeOpportunityLabel(score: number, coverageLevel?: string | null) {
+  const coverage = String(coverageLevel || "").toLowerCase();
+  if (score >= 70) return "Ήδη στο κέντρο";
+  if (score >= 58 && coverage === "low") return "Ευκαιρία ανάδειξης";
+  if (score >= 55) return "Χώρος για πλαισίωση";
+  return "Παρακολούθηση";
+}
+
+function mergeDocumentationLevel(a?: string | null, b?: string | null) {
+  const rank = (value?: string | null) => {
+    const normalized = normalizeAgendaKey(value);
+    if (
+      normalized.includes("high") ||
+      normalized.includes("strong") ||
+      normalized.includes("ισχυ")
+    ) {
+      return 3;
+    }
+    if (normalized.includes("medium") || normalized.includes("μεσα")) return 2;
+    if (
+      normalized.includes("low") ||
+      normalized.includes("initial") ||
+      normalized.includes("αρχ")
+    ) {
+      return 1;
+    }
+    return 0;
+  };
+  return rank(b) > rank(a) ? b || a || "medium" : a || b || "medium";
+}
+
+function buildProbeThematicOverview(
+  probeAgendaMap: ProbeAgendaMapItem[],
+  legacyOverview: AgendaOverviewRow[],
+): AgendaOverviewRow[] {
+  if (!probeAgendaMap.length) return [];
+
+  const grouped = new Map<string, AgendaOverviewRow>();
+
+  for (const item of probeAgendaMap) {
+    const theme = broadThemeForProbeItem(item, legacyOverview);
+    const itemScore = Math.round(numberValue(item.score, 0));
+    const sourceCount = numberValue(item.raw?.source_count, 0);
+    const articleCount = numberValue(item.raw?.article_count, 0);
+    const coverage = coverageLevelFromProbeItem(item);
+    const documentation = evidenceLevelFromProbeLabel(item.evidenceLabel);
+    const existing = grouped.get(theme);
+
+    const relatedEvents: AgendaRelatedEvent[] = (item.events || []).map(
+      (event, index) => ({
+        id: String(event.id || `${item.id}-${index}`),
+        title: event.title || item.title,
+        topic: theme,
+        micro_agenda: item.title,
+        event_score: numberValue(event.event_score, itemScore),
+        status: event.status || item.statusLabel || "live",
+        article_count: numberValue(event.article_count, articleCount),
+        source_count: numberValue(event.source_count, sourceCount),
+        last_article_at: event.last_article_at || item.raw?.newest_article_at || null,
+        probe_cluster_id: item.id,
+        probe_event_id: event.id ? String(event.id) : null,
+      }),
+    );
+
+    const evidenceArticles = Array.isArray(item.raw?.evidence_articles)
+      ? (item.raw.evidence_articles as EvidenceArticleItem[])
+      : [];
+
+    if (!existing) {
+      grouped.set(theme, {
+        id: `probe-theme-${normalizeAgendaKey(theme).replace(/[^a-zα-ω0-9]+/g, "_")}`,
+        topic: theme,
+        category: theme,
+        agenda_score: itemScore,
+        raw_signal_score: itemScore,
+        strategic_index_score: itemScore,
+        strategic_index_label: signalLabelFromScore(itemScore),
+        search_interest_score:
+          item.raw?.real_trend_score ?? item.raw?.search_interest_score ?? null,
+        search_interest_status: item.raw?.search_interest_status ?? null,
+        strategic_boost_score:
+          item.raw?.editorial_relevance_score ??
+          item.raw?.real_news_coverage_score ??
+          itemScore,
+        coverage_level: coverage,
+        source_diversity: sourceCount,
+        documentation_level: documentation,
+        political_risk_level:
+          itemScore >= 70 ? "high" : itemScore >= 55 ? "medium" : "low",
+        opportunity_label: probeOpportunityLabel(itemScore, coverage),
+        events_detected_at: item.raw?.newest_article_at ?? null,
+        updated_at: item.raw?.newest_article_at ?? null,
+        related_events: relatedEvents,
+        evidence_articles: evidenceArticles.slice(0, 5),
+      });
+      continue;
+    }
+
+    const currentScore = numberValue(existing.agenda_score, 0);
+    const nextScore = Math.max(currentScore, itemScore);
+    const nextCoverage = strongerCoverageLevel(existing.coverage_level, coverage);
+    const nextDocumentation = mergeDocumentationLevel(
+      existing.documentation_level,
+      documentation,
+    );
+    const currentSourceDiversity = numberValue(existing.source_diversity, 0);
+    const nextSourceDiversity = Math.max(currentSourceDiversity, sourceCount);
+
+    const mergedEvents = [...(existing.related_events || []), ...relatedEvents].sort(
+      (a, b) => numberValue(b.event_score, 0) - numberValue(a.event_score, 0),
+    );
+
+    const articleMap = new Map<string, EvidenceArticleItem>();
+    for (const article of [...(existing.evidence_articles || []), ...evidenceArticles]) {
+      if (!article) continue;
+      const key = String(
+        article.article_id ||
+          article.url ||
+          `${article.source || "source"}-${article.title || articleMap.size}`,
+      );
+      const old = articleMap.get(key);
+      if (!old || numberValue(article.score, 0) > numberValue(old.score, 0)) {
+        articleMap.set(key, article);
+      }
+    }
+
+    grouped.set(theme, {
+      ...existing,
+      agenda_score: nextScore,
+      raw_signal_score: nextScore,
+      strategic_index_score: nextScore,
+      strategic_index_label: signalLabelFromScore(nextScore),
+      search_interest_score: Math.max(
+        numberValue(existing.search_interest_score, 0),
+        numberValue(item.raw?.real_trend_score ?? item.raw?.search_interest_score, 0),
+      ),
+      strategic_boost_score: Math.max(
+        numberValue(existing.strategic_boost_score, 0),
+        numberValue(
+          item.raw?.editorial_relevance_score ?? item.raw?.real_news_coverage_score,
+          itemScore,
+        ),
+      ),
+      coverage_level: nextCoverage,
+      source_diversity: nextSourceDiversity,
+      documentation_level: nextDocumentation,
+      political_risk_level:
+        nextScore >= 70 ? "high" : nextScore >= 55 ? "medium" : "low",
+      opportunity_label: probeOpportunityLabel(nextScore, nextCoverage),
+      events_detected_at: existing.events_detected_at || item.raw?.newest_article_at || null,
+      updated_at: item.raw?.newest_article_at || existing.updated_at || null,
+      related_events: mergedEvents,
+      evidence_articles: Array.from(articleMap.values())
+        .sort((a, b) => numberValue(b.score, 0) - numberValue(a.score, 0))
+        .slice(0, 5),
+    });
+  }
+
+  return Array.from(grouped.values()).sort(
+    (a, b) => numberValue(b.agenda_score, 0) - numberValue(a.agenda_score, 0),
   );
 }
 
@@ -1292,6 +1620,14 @@ export default function StrategyRoomPage() {
     return agendaProbe?.success ? buildAgendaMap(agendaProbe) : [];
   }, [agendaProbe]);
 
+  const probeThematicOverview = useMemo<AgendaOverviewRow[]>(() => {
+    return buildProbeThematicOverview(probeAgendaMap, agendaOverview);
+  }, [probeAgendaMap, agendaOverview]);
+
+  const effectiveAgendaOverview = useMemo<AgendaOverviewRow[]>(() => {
+    return probeThematicOverview.length ? probeThematicOverview : agendaOverview;
+  }, [probeThematicOverview, agendaOverview]);
+
   const probePriorityCards = useMemo<ProbePriorityCard[]>(() => {
     return agendaProbe?.success ? buildPriorityCards(agendaProbe) : [];
   }, [agendaProbe]);
@@ -1397,18 +1733,22 @@ export default function StrategyRoomPage() {
   }, [activeProbeItem, activeProbeEvent, activeProbeSelection, data, strategicImageCache]);
 
   useEffect(() => {
-    if (!activeOverviewTopic && agendaOverview.length > 0) {
-      setActiveOverviewTopic(agendaOverview[0].topic);
+    if (
+      effectiveAgendaOverview.length > 0 &&
+      (!activeOverviewTopic ||
+        !effectiveAgendaOverview.some((row) => row.topic === activeOverviewTopic))
+    ) {
+      setActiveOverviewTopic(effectiveAgendaOverview[0].topic);
     }
-  }, [activeOverviewTopic, agendaOverview]);
+  }, [activeOverviewTopic, effectiveAgendaOverview]);
 
   const selectedAgendaOverview = useMemo(() => {
-    if (!agendaOverview.length) return null;
+    if (!effectiveAgendaOverview.length) return null;
     return (
-      agendaOverview.find((row) => row.topic === activeOverviewTopic) ||
-      agendaOverview[0]
+      effectiveAgendaOverview.find((row) => row.topic === activeOverviewTopic) ||
+      effectiveAgendaOverview[0]
     );
-  }, [activeOverviewTopic, agendaOverview]);
+  }, [activeOverviewTopic, effectiveAgendaOverview]);
 
   useEffect(() => {
     if (!activeSituationId && liveSituations.length > 0) {
@@ -1934,10 +2274,14 @@ export default function StrategyRoomPage() {
               documentationLevel={activeDocLevel}
               brief={brief}
               agenda={rankedAgenda}
-              agendaOverview={agendaOverview}
+              agendaOverview={effectiveAgendaOverview}
               selectedAgendaOverview={selectedAgendaOverview}
               activeOverviewTopic={activeOverviewTopic}
               onSelectOverviewTopic={setActiveOverviewTopic}
+              onSelectProbeEvent={(selection) => {
+                setActiveProbeSelection(selection);
+                setActiveTab("strategic");
+              }}
               selectedPartyImplication={selectedPartyImplication}
               probeView={activeProbeView}
               probeEvidenceArticles={activeProbeEvidenceArticles}
@@ -2579,6 +2923,7 @@ function ActiveSituationWorkspace({
   selectedAgendaOverview,
   activeOverviewTopic,
   onSelectOverviewTopic,
+  onSelectProbeEvent,
   selectedPartyImplication,
   probeView,
   probeEvidenceArticles,
@@ -2600,6 +2945,7 @@ function ActiveSituationWorkspace({
   selectedAgendaOverview: AgendaOverviewRow | null;
   activeOverviewTopic: string | null;
   onSelectOverviewTopic: (topic: string) => void;
+  onSelectProbeEvent?: (selection: AgendaProbeSelection) => void;
   selectedPartyImplication: string;
   probeView?: EventIntelligenceView | null;
   probeEvidenceArticles?: EvidenceArticleItem[];
@@ -2723,6 +3069,10 @@ function ActiveSituationWorkspace({
             selectedRow={selectedAgendaOverview}
             activeTopic={activeOverviewTopic}
             onSelectTopic={onSelectOverviewTopic}
+            onSelectProbeEvent={(selection) => {
+              onSelectProbeEvent?.(selection);
+              onTabChange("strategic");
+            }}
           />
         ) : null}
 
@@ -3327,11 +3677,13 @@ function AgendaOverviewPanel({
   selectedRow,
   activeTopic,
   onSelectTopic,
+  onSelectProbeEvent,
 }: {
   overview: AgendaOverviewRow[];
   selectedRow: AgendaOverviewRow | null;
   activeTopic: string | null;
   onSelectTopic: (topic: string) => void;
+  onSelectProbeEvent?: (selection: AgendaProbeSelection) => void;
 }) {
   const selected = selectedRow || overview[0] || null;
   const relatedEvents = Array.isArray(selected?.related_events)
@@ -3484,19 +3836,63 @@ function AgendaOverviewPanel({
                       <div className="grid gap-2">
                         {relatedEvents.slice(0, 5).map((event, index) => {
                           const eventScore = numberValue(event.event_score, 0);
-                          return (
-                            <div
-                              key={event.id || `${event.title}-${index}`}
-                              className="rounded-2xl border border-[#1a2640] bg-[#0c1220] p-3"
-                            >
-                              <div className="text-xs font-medium leading-5 text-zinc-100">
-                                {event.title || "Γεγονός"}
+                          const probeClusterId = event.probe_cluster_id
+                            ? String(event.probe_cluster_id)
+                            : "";
+                          const probeEventId = event.probe_event_id
+                            ? String(event.probe_event_id)
+                            : null;
+                          const clickable = Boolean(
+                            probeClusterId && onSelectProbeEvent,
+                          );
+
+                          const content = (
+                            <>
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                  <div className="text-xs font-medium leading-5 text-zinc-100">
+                                    {event.title || "Γεγονός"}
+                                  </div>
+                                  {event.micro_agenda ? (
+                                    <div className="mt-1 text-[10px] text-cyan-300/75">
+                                      {event.micro_agenda}
+                                    </div>
+                                  ) : null}
+                                </div>
+                                {clickable ? (
+                                  <span className="shrink-0 rounded-full border border-cyan-300/20 bg-cyan-300/10 px-2 py-1 text-[10px] text-cyan-100">
+                                    Άνοιγμα
+                                  </span>
+                                ) : null}
                               </div>
-                              <div className="mt-1 text-[10px] text-zinc-500">
+                              <div className="mt-2 text-[10px] text-zinc-500">
                                 {scoreSignalText(eventScore)} ·{" "}
                                 {numberValue(event.article_count, 0)} άρθρα ·{" "}
                                 {numberValue(event.source_count, 0)} πηγές
                               </div>
+                            </>
+                          );
+
+                          return clickable ? (
+                            <button
+                              key={event.id || `${event.title}-${index}`}
+                              type="button"
+                              onClick={() =>
+                                onSelectProbeEvent?.({
+                                  clusterId: probeClusterId,
+                                  eventId: probeEventId,
+                                })
+                              }
+                              className="block w-full rounded-2xl border border-[#1a2640] bg-[#0c1220] p-3 text-left transition hover:border-cyan-300/30 hover:bg-cyan-300/[0.05]"
+                            >
+                              {content}
+                            </button>
+                          ) : (
+                            <div
+                              key={event.id || `${event.title}-${index}`}
+                              className="rounded-2xl border border-[#1a2640] bg-[#0c1220] p-3"
+                            >
+                              {content}
                             </div>
                           );
                         })}
