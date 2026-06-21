@@ -56,8 +56,8 @@ export async function GET(req: Request) {
   // Product throughput comes from many calls, not one huge call.
   const requestedLimit = Number(searchParams.get("limit") || "10");
   const limit = Math.min(
-    Math.max(Number.isFinite(requestedLimit) ? Math.trunc(requestedLimit) : 10, 1),
-    10
+    Math.max(Number.isFinite(requestedLimit) ? Math.trunc(requestedLimit) : 50, 1),
+    50
   );
 
   // Default compact response prevents large browser/serverless responses.
