@@ -269,21 +269,7 @@ ${articlesList}`;
     // refresh_article_scores_baseline τρέχει χειροκίνητα από SQL Editor (πολύ βαρύ για serverless)
     const baselineRefreshed = null;
 
-    // refresh_article_scores_classified — best effort, δεν σταματάμε αν αποτύχει
-    const { data: classifiedRefreshed, error: classifiedScoreError } =
-      await supabase.rpc("refresh_article_scores_classified");
-
-    if (classifiedScoreError) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: classifiedScoreError.message,
-          stage: "refresh_article_scores_classified",
-        },
-        { status: 500 }
-      );
-    }
-
+    const classifiedRefreshed = null;
     return NextResponse.json({
       success: true,
       classifier_version: "noraya_public_reality_radar_v2_compact",
