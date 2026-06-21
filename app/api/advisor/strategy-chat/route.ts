@@ -167,6 +167,11 @@ export async function POST(req: Request) {
     null;
 
   const politicalEnvironment = body.political_environment || null;
+
+  const advisorMode = cleanText(body.advisor_mode || "", 80);
+  const agendaArchitectContext = body.agenda_architect_context || null;
+  const agendaArchitectDisplay = cleanText(body.agenda_architect_display || "", 6000);
+
   const agendaUsed = Array.isArray(body.agenda_used) ? body.agenda_used.slice(0, 8) : [];
   const agendaBlock = agendaUsed.length
     ? "ΑΤΖΕΝΤΑ (τρέχουσες προτεραιότητες θεμάτων — από το σύστημα ατζέντας):\n" +
@@ -182,6 +187,19 @@ export async function POST(req: Request) {
           return line;
         })
         .join("\n")
+    : "";
+  const agendaArchitectBlock = agendaArchitectContext || agendaArchitectDisplay
+    ? `ΣΤΡΑΤΗΓΙΚΗ ΑΝΑΔΙΑΤΑΞΗ / AGENDA ARCHITECT:
+${agendaArchitectDisplay ? `Ανάλυση που παράχθηκε στο premium κουμπί «Κίνηση Αναδιάταξης»:
+${agendaArchitectDisplay}
+
+` : ""}Structured context:
+${safeJson(agendaArchitectContext, 5000)}
+
+ΧΡΗΣΗ:
+- Αν ο χρήστης ρωτά για συνολική εικόνα, δημιουργία ατζέντας, κίνηση αναδιάταξης, heresthetic move, τι σηκώνουμε πρώτο, ή πώς συνεχίζουμε αυτό το στρατηγικό πλαίσιο, αυτό το block είναι το ΚΥΡΙΟ context.
+- Αν ο χρήστης ρωτά καθαρά για το επιλεγμένο γεγονός, τότε χρησιμοποίησε το active situation.
+- Μη χάσεις το επίπεδο: μίλα σαν σύμβουλος που αναδιατάσσει πεδίο, όχι σαν dashboard.`
     : "";
   const frontendArticles = Array.isArray(body.articles) ? body.articles.slice(0, 8) : [];
   const hasActiveSituation = Boolean(activeSituation?.id || activeSituation?.title || activeSituation?.topic);
@@ -358,6 +376,8 @@ ${safeJson(politicalEnvironment, 7000)}
 
 ${agendaBlock || "ΑΤΖΕΝΤΑ: δεν δόθηκαν θέματα."}
 
+${agendaArchitectBlock}
+
 FRONTEND ARTICLES:
 ${frontendArticles.length ? safeJson(frontendArticles, 3500) : "Δεν δόθηκαν."}
 
@@ -383,9 +403,20 @@ ${scenariosBlock}
 
 ΑΝΑΦΟΡΑ ΠΗΓΩΝ (υποχρεωτικό): Όταν χρησιμοποιείς αριθμούς ή ισχυρισμούς από ΕΝΑ άρθρο ή από το active situation (π.χ. «6 στους 10», «+110%»), ΑΠΕΔΩΣΕ τους φιλικά στην πηγή (π.χ. «σύμφωνα με το δημοσίευμα στα Νέα…»). ΜΗΝ τα παρουσιάζεις ως ανεξάρτητα επιβεβαιωμένο γεγονός όταν στηρίζονται σε μία μόνο πηγή.`;
 
+  const agendaArchitectMode =
+    advisorMode === "agenda_architect" ||
+    Boolean(agendaArchitectContext || agendaArchitectDisplay);
+
   const userInstruction = liveResearchRequired
     ? `LIVE_RESEARCH_REQUIRED: true\n\nΔΗΜΟΣΚΟΠΗΣΕΙΣ: Έχεις ΗΔΗ ακριβή ζωντανά δεδομένα παρακάτω (ενότητα «ΖΩΝΤΑΝΕΣ ΔΗΜΟΣΚΟΠΗΣΕΙΣ», πηγή dimoskopiseis.gr) — ΧΡΗΣΙΜΟΠΟΙΗΣΕ ΑΥΤΑ για ποσοστά/δυναμική, με εταιρεία+ημερομηνία. ΜΗΝ ψάχνεις ποσοστά στο web_search.\nΤο web_search ΜΟΝΟ για δηλώσεις/ανακοινώσεις/νέα σχήματα/γεγονότα που ΔΕΝ καλύπτονται από τις δημοσκοπήσεις. ΠΑΝΤΑ ανάφερε πηγή + ημερομηνία. Αν δεν βρεις αξιόπιστο στοιχείο, πες «δεν έχω επιβεβαιωμένο τρέχον στοιχείο» — ΜΗΝ μαντεύεις. Μετά δώσε πολιτική σύνθεση και σύσταση.\n\nΕρώτηση χρήστη:\n${question}`
-    : `LIVE_RESEARCH_REQUIRED: false\n\nΑπάντησε ως πολιτικός σύμβουλος με βάση το διαθέσιμο context. Αν υπάρχει active situation, αυτό είναι το κέντρο της απάντησης.\n\nΕρώτηση χρήστη:\n${question}`;
+    : agendaArchitectMode
+      ? `LIVE_RESEARCH_REQUIRED: false
+
+Ο χρήστης συνεχίζει από την premium «Κίνηση Αναδιάταξης». Απάντησε πρώτα με βάση το AGENDA ARCHITECT context. Αν η ερώτηση ζητά συγκεκριμένο γεγονός, τότε σύνδεσέ το με το active situation. Μην επιστρέψεις σε γενική dashboard γλώσσα.
+
+Ερώτηση χρήστη:
+${question}`
+      : `LIVE_RESEARCH_REQUIRED: false\n\nΑπάντησε ως πολιτικός σύμβουλος με βάση το διαθέσιμο context. Αν υπάρχει active situation, αυτό είναι το κέντρο της απάντησης.\n\nΕρώτηση χρήστη:\n${question}`;
 
   try {
     const controller = new AbortController();
