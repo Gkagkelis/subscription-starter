@@ -6,7 +6,7 @@
       "schedule": "*/30 * * * *"
     },
     {
-      "path": "/api/classify?token=dev&limit=50",
+      "path": "/api/classify?token=dev&limit=25",
       "schedule": "*/10 * * * *"
     },
     {
