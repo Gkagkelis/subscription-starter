@@ -1,17 +1,57 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "crons": [
-    { "path": "/api/ingest?token=dev", "schedule": "*/30 * * * *" },
-    { "path": "/api/radar-tick", "schedule": "0 */3 * * *" },
-    { "path": "/api/advisor/strategy-brief-precompute", "schedule": "20 */3 * * *" },
-    { "path": "/api/trends/refresh?token=dev", "schedule": "0 4 * * *" },
-    { "path": "/api/classify?token=dev", "schedule": "0 * * * *" },
-    { "path": "/api/external-signals/news-coverage?token=dev", "schedule": "5 * * * *" },
-    { "path": "/api/external-signals/trends-coverage?token=dev&mode=start", "schedule": "10 4 * * *" },
-    { "path": "/api/external-signals/trends-coverage?token=dev&mode=collect", "schedule": "40 4 * * *" },
-    { "path": "/api/situation-engine/detect-events", "schedule": "0 5,13 * * *" },
-    { "path": "/api/situation-engine/advise-event", "schedule": "20 5,13 * * *" },
-    { "path": "/api/external-signals/gdelt-feed?token=dev&timespan=6h&maxrecords=50&window_hours=72", "schedule": "17 */6 * * *" },
-    { "path": "/api/cron/fetch-topic-trends?token=dev&limit=3", "schedule": "45 5,13 * * *" }
+    {
+      "path": "/api/ingest?token=dev",
+      "schedule": "*/30 * * * *"
+    },
+    {
+      "path": "/api/classify?token=dev&limit=10",
+      "schedule": "10 * * * *"
+    },
+    {
+      "path": "/api/external-signals/news-coverage?token=dev",
+      "schedule": "5 * * * *"
+    },
+    {
+      "path": "/api/cron/fetch-editorial-prominence?token=dev&limit=30",
+      "schedule": "15 */2 * * *"
+    },
+    {
+      "path": "/api/situation-engine/detect-events",
+      "schedule": "25 */3 * * *"
+    },
+    {
+      "path": "/api/situation-engine/advise-event",
+      "schedule": "45 */3 * * *"
+    },
+    {
+      "path": "/api/advisor/strategy-brief-precompute",
+      "schedule": "55 */3 * * *"
+    },
+    {
+      "path": "/api/radar-tick",
+      "schedule": "5 */3 * * *"
+    },
+    {
+      "path": "/api/cron/fetch-topic-trends?token=dev&limit=20",
+      "schedule": "45 */6 * * *"
+    },
+    {
+      "path": "/api/external-signals/trends-coverage?token=dev&mode=start",
+      "schedule": "10 4 * * *"
+    },
+    {
+      "path": "/api/external-signals/trends-coverage?token=dev&mode=collect",
+      "schedule": "40 4 * * *"
+    },
+    {
+      "path": "/api/external-signals/gdelt-feed?token=dev&timespan=6h&maxrecords=50&window_hours=72",
+      "schedule": "17 */6 * * *"
+    },
+    {
+      "path": "/api/trends/refresh?token=dev",
+      "schedule": "0 4 * * *"
+    }
   ]
 }
