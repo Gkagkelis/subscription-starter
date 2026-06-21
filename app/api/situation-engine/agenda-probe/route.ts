@@ -54,9 +54,9 @@ const supabase = createClient(
 );
 
 const CONFIG = {
-  maxHours: 168,
+  maxHours: 48,
   minHours: 24,
-  defaultHours: 168,
+  defaultHours: 48,
   maxEvents: 300,
   topBriefMicroAgendas: 10,
   topBriefEventsPerAgenda: 3,
