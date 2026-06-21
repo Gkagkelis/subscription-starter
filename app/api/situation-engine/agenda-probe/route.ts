@@ -1333,7 +1333,7 @@ function buildAgendaItem(
       parent_only_signal: parentOnlySignal,
       formula: sensitivity.ranking_policy === "do_not_optimize_for_engagement"
         ? "sensitive capped: event + coverage + freshness + documentation"
-        : "v5.6: 36% event + 14% agenda + 16% calibrated coverage + 12% micro-agenda-preferred trends + 12% frontpage editorial prominence with parent-fallback cap + 7% freshness + 3% documentation + breadth bonus, enriched with corrected party-aware research context for narrative",
+        : "v5.7: 36% event + 14% agenda + 16% calibrated coverage + 12% micro-agenda-preferred trends + 12% frontpage editorial prominence with parent-fallback cap + 7% freshness + 3% documentation + breadth bonus, enriched with party-profile narrative intelligence and premium research context",
     },
     search_interest_score: sensitivity.ranking_policy === "do_not_optimize_for_engagement" ? null : trendScore,
     search_interest_status: trend?.search_interest_status || matchedAgendaTopic?.public_attention_signal ? "real_signal_bridge" : "no_trend_signal",
