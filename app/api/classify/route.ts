@@ -270,7 +270,7 @@ ${articlesList}`;
     const baselineRefreshed = null;
 
     // refresh_article_scores_classified — best effort, δεν σταματάμε αν αποτύχει
-    const { error: classifiedScoreError } =
+    const { data: classifiedRefreshed, error: classifiedScoreError } =
       await supabase.rpc("refresh_article_scores_classified");
 
     if (classifiedScoreError) {
