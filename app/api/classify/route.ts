@@ -266,21 +266,11 @@ ${articlesList}`;
       }
     }
 
-    const { data: baselineRefreshed, error: baselineScoreError } =
-      await supabase.rpc("refresh_article_scores_baseline");
+    // refresh_article_scores_baseline τρέχει χειροκίνητα από SQL Editor (πολύ βαρύ για serverless)
+    const baselineRefreshed = null;
 
-    if (baselineScoreError) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: baselineScoreError.message,
-          stage: "refresh_article_scores_baseline",
-        },
-        { status: 500 }
-      );
-    }
-
-    const { data: classifiedRefreshed, error: classifiedScoreError } =
+    // refresh_article_scores_classified — best effort, δεν σταματάμε αν αποτύχει
+    const { error: classifiedScoreError } =
       await supabase.rpc("refresh_article_scores_classified");
 
     if (classifiedScoreError) {
