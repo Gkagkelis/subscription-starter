@@ -1,4 +1,4 @@
-"use client";
+ "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode } from "react";
@@ -194,6 +194,21 @@ type ApiResponse = {
 type StrategyChatResponse = {
   answer?: string;
   conversation_id?: string;
+};
+
+type AgendaArchitectResult = {
+  title: string;
+  displayText: string;
+  generatedAt?: string;
+  chatContext?: {
+    coreDiagnosis?: string;
+    herestheticMove?: string;
+    agendaCreationRoute?: string;
+    connectedMicroAgendas?: string[];
+    firstMove?: string;
+    trap?: string;
+    followups?: string[];
+  };
 };
 
 type ΕνεργόSituationRow = {
@@ -1484,6 +1499,10 @@ export default function StrategyRoomPage() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatLoading, setChatLoading] = useState(false);
   const [chatError, setChatError] = useState("");
+  const [agendaArchitectLoading, setAgendaArchitectLoading] = useState(false);
+  const [agendaArchitectError, setAgendaArchitectError] = useState("");
+  const [agendaArchitectResult, setAgendaArchitectResult] =
+    useState<AgendaArchitectResult | null>(null);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [advisorConversations, setAdvisorConversations] = useState<
     AdvisorConversation[]
@@ -1749,6 +1768,55 @@ export default function StrategyRoomPage() {
       effectiveAgendaOverview[0]
     );
   }, [activeOverviewTopic, effectiveAgendaOverview]);
+
+  async function runAgendaArchitect() {
+    setAgendaArchitectLoading(true);
+    setAgendaArchitectError("");
+
+    try {
+      const response = await fetch("/api/strategy-room/agenda-architect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          party: partyName,
+          profile: data?.profile || null,
+          strategic_brief: data?.strategic_brief || null,
+          political_environment: data?.political_environment || null,
+          agenda_overview: effectiveAgendaOverview,
+          probe_agenda_map: probeAgendaMap,
+        }),
+      });
+
+      const json = await response.json();
+
+      if (!response.ok || !json.ok) {
+        throw new Error(json.error || `Agenda Architect API error: ${response.status}`);
+      }
+
+      setAgendaArchitectResult({
+        title: json.title || "Στρατηγική Αναδιάταξη Ημέρας",
+        displayText: json.displayText || "",
+        generatedAt: json.generatedAt,
+        chatContext: json.chatContext || null,
+      });
+    } catch (err) {
+      setAgendaArchitectError(
+        err instanceof Error
+          ? err.message
+          : "Δεν μπόρεσε να παραχθεί η Κίνηση Αναδιάταξης.",
+      );
+    } finally {
+      setAgendaArchitectLoading(false);
+    }
+  }
+
+  function continueAgendaArchitectInAdvisor() {
+    if (!agendaArchitectResult) return;
+    setActiveTab("overview");
+    askNorayaAdvisor(
+      "Συνέχισε από την Κίνηση Αναδιάταξης. Θέλω να μου πεις πώς το μετατρέπω σε πολιτική γραμμή για τις επόμενες 24 ώρες.",
+    );
+  }
 
   useEffect(() => {
     if (!activeSituationId && liveSituations.length > 0) {
@@ -2101,6 +2169,9 @@ export default function StrategyRoomPage() {
           party: partyName,
           articles: evidenceArticles,
           active_situation: activeSituation || null,
+          advisor_mode: activeTab === "overview" && agendaArchitectResult ? "agenda_architect" : "event",
+          agenda_architect_display: agendaArchitectResult?.displayText || "",
+          agenda_architect_context: agendaArchitectResult?.chatContext || null,
         }),
       });
 
@@ -2286,6 +2357,11 @@ export default function StrategyRoomPage() {
               probeView={activeProbeView}
               probeEvidenceArticles={activeProbeEvidenceArticles}
               aiStrategicBody={activeProbeItem ? (strategicImageCache[String((activeProbeItem.raw.micro_agenda_id || activeProbeItem.raw.micro_agenda || "") + (activeProbeSelection?.eventId ? "__" + activeProbeSelection.eventId : ""))] || null) : null}
+              agendaArchitectResult={agendaArchitectResult}
+              agendaArchitectLoading={agendaArchitectLoading}
+              agendaArchitectError={agendaArchitectError}
+              onRunAgendaArchitect={runAgendaArchitect}
+              onContinueAgendaArchitect={continueAgendaArchitectInAdvisor}
             />
 
             <AdvisorDock
@@ -2928,6 +3004,11 @@ function ActiveSituationWorkspace({
   probeView,
   probeEvidenceArticles,
   aiStrategicBody,
+  agendaArchitectResult,
+  agendaArchitectLoading,
+  agendaArchitectError,
+  onRunAgendaArchitect,
+  onContinueAgendaArchitect,
 }: {
   activeTab: SituationTab;
   onTabChange: (tab: SituationTab) => void;
@@ -2950,6 +3031,11 @@ function ActiveSituationWorkspace({
   probeView?: EventIntelligenceView | null;
   probeEvidenceArticles?: EvidenceArticleItem[];
   aiStrategicBody?: string | null;
+  agendaArchitectResult?: AgendaArchitectResult | null;
+  agendaArchitectLoading?: boolean;
+  agendaArchitectError?: string;
+  onRunAgendaArchitect?: () => void;
+  onContinueAgendaArchitect?: () => void;
 }) {
   const issue = brief.issue || {};
   const daily = brief.daily_brief || {};
@@ -3064,16 +3150,26 @@ function ActiveSituationWorkspace({
 
       <div className="p-5 xl:p-6">
         {activeTab === "overview" ? (
-          <AgendaOverviewPanel
-            overview={agendaOverview}
-            selectedRow={selectedAgendaOverview}
-            activeTopic={activeOverviewTopic}
-            onSelectTopic={onSelectOverviewTopic}
-            onSelectProbeEvent={(selection) => {
-              onSelectProbeEvent?.(selection);
-              onTabChange("strategic");
-            }}
-          />
+          <div className="grid gap-4">
+            <AgendaOverviewPanel
+              overview={agendaOverview}
+              selectedRow={selectedAgendaOverview}
+              activeTopic={activeOverviewTopic}
+              onSelectTopic={onSelectOverviewTopic}
+              onSelectProbeEvent={(selection) => {
+                onSelectProbeEvent?.(selection);
+                onTabChange("strategic");
+              }}
+            />
+
+            <AgendaArchitectPanel
+              result={agendaArchitectResult || null}
+              loading={Boolean(agendaArchitectLoading)}
+              error={agendaArchitectError || ""}
+              onRun={onRunAgendaArchitect}
+              onContinue={onContinueAgendaArchitect}
+            />
+          </div>
         ) : null}
 
         {activeTab === "strategic" ? (
@@ -3667,6 +3763,90 @@ function PublicPulsePanel({
             </div>
           </div>
         </div>
+      </div>
+    </CockpitSection>
+  );
+}
+
+function AgendaArchitectPanel({
+  result,
+  loading,
+  error,
+  onRun,
+  onContinue,
+}: {
+  result: AgendaArchitectResult | null;
+  loading: boolean;
+  error: string;
+  onRun?: () => void;
+  onContinue?: () => void;
+}) {
+  const followups = result?.chatContext?.followups || [];
+
+  return (
+    <CockpitSection
+      title="ΚΙΝΗΣΗ ΑΝΑΔΙΑΤΑΞΗΣ"
+      subtitle="Premium ανάλυση για το πώς μπορεί να δημιουργηθεί ατζέντα από τη σημερινή συνολική εικόνα."
+    >
+      <div className="rounded-[2rem] border border-red-400/20 bg-gradient-to-br from-red-500/[0.12] via-[#120914] to-black/20 p-5 shadow-[0_0_48px_rgba(248,113,113,0.08)]">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-red-200">
+              Agenda Architect
+            </div>
+            <h3 className="mt-2 text-lg font-semibold tracking-[-0.02em] text-zinc-50">
+              Στρατηγική Αναδιάταξη Ημέρας
+            </h3>
+            <p className="mt-2 max-w-2xl text-xs leading-6 text-zinc-400">
+              Ο Noraya διαβάζει όλες τις θεματικές και τα micro-agendas της ημέρας και προτείνει πώς μπορείς να αλλάξεις τη διάσταση της σύγκρουσης — όχι απλώς να ακολουθήσεις την επικαιρότητα.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={onRun}
+            disabled={loading}
+            className="rounded-2xl border border-red-300/30 bg-red-400 px-4 py-3 text-xs font-semibold text-red-950 shadow-lg shadow-red-950/30 transition hover:bg-red-300 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {loading ? "Αναλύει το πεδίο…" : result ? "Ανανέωση Αναδιάταξης" : "Κίνηση Αναδιάταξης"}
+          </button>
+        </div>
+
+        {error ? (
+          <div className="mt-4 rounded-2xl border border-red-300/25 bg-red-300/10 p-3 text-xs leading-6 text-red-100">
+            {error}
+          </div>
+        ) : null}
+
+        {result?.displayText ? (
+          <div className="mt-5 rounded-3xl border border-white/[0.08] bg-black/25 p-5">
+            <div className="text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+              {result.title || "Στρατηγική Αναδιάταξη Ημέρας"}
+            </div>
+            <p className="mt-3 whitespace-pre-line text-[13px] leading-7 text-zinc-200">
+              {result.displayText}
+            </p>
+
+            <div className="mt-5 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={onContinue}
+                className="rounded-2xl border border-cyan-300/25 bg-cyan-300/10 px-3 py-2 text-[11px] font-medium text-cyan-100 transition hover:bg-cyan-300/15"
+              >
+                Συνέχισε στο Advisor
+              </button>
+
+              {followups.slice(0, 3).map((item) => (
+                <span
+                  key={item}
+                  className="rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2 text-[11px] text-zinc-400"
+                >
+                  {item}
+                </span>
+              ))}
+            </div>
+          </div>
+        ) : null}
       </div>
     </CockpitSection>
   );
