@@ -267,6 +267,15 @@ type EvidenceArticleItem = {
   role?: string | null;
 };
 
+type ProbeMicroAgendaSummary = {
+  clusterId: string;
+  title: string;
+  score: number;
+  eventCount: number;
+  statusLabel?: string;
+  evidenceLabel?: string;
+};
+
 type AgendaRelatedEvent = {
   id?: string | null;
   title?: string | null;
@@ -313,6 +322,9 @@ type AgendaOverviewRow = {
   updated_at?: string | null;
   related_events?: AgendaRelatedEvent[];
   evidence_articles?: EvidenceArticleItem[];
+  active_micro_agenda?: string | null;
+  micro_agendas?: ProbeMicroAgendaSummary[];
+  overview_source?: "agenda_probe" | "situation_engine";
 };
 
 type SituationEngineResponse = {
@@ -951,6 +963,15 @@ function buildProbeThematicOverview(
     const documentation = evidenceLevelFromProbeLabel(item.evidenceLabel);
     const existing = grouped.get(theme);
 
+    const microSummary: ProbeMicroAgendaSummary = {
+      clusterId: item.id,
+      title: item.title,
+      score: itemScore,
+      eventCount: (item.events || []).length,
+      statusLabel: item.statusLabel,
+      evidenceLabel: item.evidenceLabel,
+    };
+
     const relatedEvents: AgendaRelatedEvent[] = (item.events || []).map(
       (event, index) => ({
         id: String(event.id || `${item.id}-${index}`),
@@ -997,6 +1018,9 @@ function buildProbeThematicOverview(
         updated_at: item.raw?.newest_article_at ?? null,
         related_events: relatedEvents,
         evidence_articles: evidenceArticles.slice(0, 5),
+        active_micro_agenda: item.title,
+        micro_agendas: [microSummary],
+        overview_source: "agenda_probe",
       });
       continue;
     }
@@ -1029,6 +1053,15 @@ function buildProbeThematicOverview(
       }
     }
 
+    const microMap = new Map<string, ProbeMicroAgendaSummary>();
+    for (const micro of [...(existing.micro_agendas || []), microSummary]) {
+      microMap.set(micro.clusterId, micro);
+    }
+
+    const mergedMicroAgendas = Array.from(microMap.values()).sort(
+      (a, b) => numberValue(b.score, 0) - numberValue(a.score, 0),
+    );
+
     grouped.set(theme, {
       ...existing,
       agenda_score: nextScore,
@@ -1058,6 +1091,10 @@ function buildProbeThematicOverview(
       evidence_articles: Array.from(articleMap.values())
         .sort((a, b) => numberValue(b.score, 0) - numberValue(a.score, 0))
         .slice(0, 5),
+      active_micro_agenda:
+        mergedMicroAgendas[0]?.title || existing.active_micro_agenda || item.title,
+      micro_agendas: mergedMicroAgendas,
+      overview_source: "agenda_probe",
     });
   }
 
@@ -1228,27 +1265,7 @@ function rawSignalFromAgenda(row?: AgendaOverviewRow | null) {
   );
 }
 
-function searchInterestLabel(score?: unknown, status?: string | null) {
-  const normalizedStatus = String(status || "").toLowerCase();
-  if (
-    normalizedStatus.includes("pending") ||
-    normalizedStatus.includes("fallback") ||
-    normalizedStatus.includes("unavailable") ||
-    normalizedStatus.includes("error")
-  ) {
-    return `Search · ${numberValue(score, 50)} (pending)`;
-  }
-  return `Search · ${numberValue(score, 50)}`;
-}
 
-function strategicIndexExplanation(
-  raw: number,
-  search: number,
-  boost: number,
-  bonus = 0,
-) {
-  return `55% Raw Signal (${raw}) + 25% Search Interest (${search}) + 20% Strategic Boost (${boost})${bonus ? ` + bonus ευκαιρίας (${bonus})` : ""}.`;
-}
 
 function EventEvidenceList({
   articles,
@@ -3768,6 +3785,66 @@ function PublicPulsePanel({
   );
 }
 
+function agendaThemeWhyText(row: AgendaOverviewRow | null | undefined) {
+  if (!row) return "Δεν έχει επιλεγεί θεματική.";
+
+  const microAgendas = row.micro_agendas || [];
+  const lead = row.active_micro_agenda || microAgendas[0]?.title;
+  const second = microAgendas[1]?.title;
+  const events = row.related_events?.length || 0;
+  const opportunity = opportunityText(row);
+
+  if (row.overview_source === "agenda_probe" && lead) {
+    const pair = second ? ` μαζί με το «${second}»` : "";
+    if (opportunity === "Ήδη στο κέντρο") {
+      return `Η θεματική βρίσκεται ήδη ψηλά επειδή το «${lead}»${pair} παράγει πραγματική πίεση στο πεδίο. Με ${events || "—"} σχετικά γεγονότα, το ζήτημα δεν είναι να το “ανακαλύψουμε”, αλλά να μη χαθεί ο έλεγχος του πλαισίου.`;
+    }
+    if (opportunity === "Χώρος για πλαισίωση") {
+      return `Η θεματική έχει αρκετό σήμα, αλλά δεν έχει ακόμη κλειδώσει το κυρίαρχο πλαίσιο. Το «${lead}»${pair} δείχνει πού υπάρχει χώρος να ενωθούν διάσπαρτες πιέσεις σε καθαρή πολιτική γραμμή.`;
+    }
+    if (opportunity === "Ευκαιρία ανάδειξης") {
+      return `Η θεματική δεν είναι ακόμη πλήρως στο κέντρο, αλλά το «${lead}» δίνει παράθυρο έγκαιρης πρωτοβουλίας. Αυτό είναι πεδίο όπου μπορείς να πας πρώτος πριν το ορίσουν άλλοι.`;
+    }
+    return `Η θεματική παρακολουθείται επειδή το «${lead}» παράγει αρχικό σήμα. Δεν είναι ακόμη ώριμη για μεγάλη κλιμάκωση, αλλά μπορεί να γίνει χρήσιμη αν συνδεθεί με ισχυρότερη πολιτική αφήγηση.`;
+  }
+
+  return topicWhyText(row);
+}
+
+function agendaThemeBasisText(row: AgendaOverviewRow | null | undefined) {
+  if (!row) return "Δεν υπάρχει ακόμη βάση εκτίμησης.";
+
+  if (row.overview_source === "agenda_probe") {
+    const microCount = row.micro_agendas?.length || 0;
+    const eventCount = row.related_events?.length || 0;
+    return `Η εκτίμηση βγαίνει από τα micro-agendas που ανιχνεύει ο Χάρτης ατζέντας με την ίδια μεθοδολογία scoring. Η θεματική δεν σημαίνει ότι όλα είναι “στην ατζέντα”· δείχνει ποια σήματα υπάρχουν στο πεδίο, ποια ανεβαίνουν και ποια μπορούν να μετατραπούν σε ατζέντα. Εδώ συνυπολογίζονται ${microCount || "—"} micro-agendas, ${eventCount || "—"} σχετικά γεγονότα, κάλυψη, φρεσκάδα και βάση τεκμηρίωσης.`;
+  }
+
+  return "Η εκτίμηση βασίζεται στα διαθέσιμα σήματα της θεματικής και στη συνολική εικόνα του situation engine.";
+}
+
+function agendaArchitectDisplay(result: AgendaArchitectResult | null) {
+  const raw = String(result?.displayText || "").trim();
+  if (!raw) return "";
+
+  if (raw.startsWith("{")) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (typeof parsed?.displayText === "string") return parsed.displayText.trim();
+      if (typeof parsed?.display_text === "string") return parsed.display_text.trim();
+    } catch {
+      return raw
+        .replace(/^\{[\s\S]*?"displayText"\s*:\s*"/, "")
+        .replace(/",\s*"chatContext"[\s\S]*$/,"")
+        .replace(/\\n/g, "\n")
+        .replace(/\\"/g, '"')
+        .trim();
+    }
+  }
+
+  return raw;
+}
+
 function AgendaArchitectPanel({
   result,
   loading,
@@ -3781,16 +3858,16 @@ function AgendaArchitectPanel({
   onRun?: () => void;
   onContinue?: () => void;
 }) {
-  const followups = result?.chatContext?.followups || [];
+  const displayText = agendaArchitectDisplay(result);
 
   return (
     <CockpitSection
       title="ΚΙΝΗΣΗ ΑΝΑΔΙΑΤΑΞΗΣ"
-      subtitle="Premium ανάλυση για το πώς μπορεί να δημιουργηθεί ατζέντα από τη σημερινή συνολική εικόνα."
+      subtitle="Πώς μπορεί να δημιουργηθεί ατζέντα από το σημερινό πεδίο."
     >
-      <div className="rounded-[2rem] border border-red-400/20 bg-gradient-to-br from-red-500/[0.12] via-[#120914] to-black/20 p-5 shadow-[0_0_48px_rgba(248,113,113,0.08)]">
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-          <div>
+      <div className="rounded-[2rem] border border-red-400/20 bg-gradient-to-br from-red-500/[0.10] via-[#120914] to-black/20 p-5 shadow-[0_0_48px_rgba(248,113,113,0.08)]">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+          <div className="min-w-0">
             <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-red-200">
               Agenda Architect
             </div>
@@ -3798,7 +3875,7 @@ function AgendaArchitectPanel({
               Στρατηγική Αναδιάταξη Ημέρας
             </h3>
             <p className="mt-2 max-w-2xl text-xs leading-6 text-zinc-400">
-              Ο Noraya διαβάζει όλες τις θεματικές και τα micro-agendas της ημέρας και προτείνει πώς μπορείς να αλλάξεις τη διάσταση της σύγκρουσης — όχι απλώς να ακολουθήσεις την επικαιρότητα.
+              Η Noraya ενώνει θεματικές, micro-agendas και γεγονότα για να δείξει πού μπορείς να αλλάξεις τη διάσταση της σύγκρουσης.
             </p>
           </div>
 
@@ -3808,7 +3885,7 @@ function AgendaArchitectPanel({
             disabled={loading}
             className="rounded-2xl border border-red-300/30 bg-red-400 px-4 py-3 text-xs font-semibold text-red-950 shadow-lg shadow-red-950/30 transition hover:bg-red-300 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {loading ? "Αναλύει το πεδίο…" : result ? "Ανανέωση Αναδιάταξης" : "Κίνηση Αναδιάταξης"}
+            {loading ? "Αναλύει το πεδίο…" : displayText ? "Ανανέωση" : "Κίνηση Αναδιάταξης"}
           </button>
         </div>
 
@@ -3818,32 +3895,23 @@ function AgendaArchitectPanel({
           </div>
         ) : null}
 
-        {result?.displayText ? (
+        {displayText ? (
           <div className="mt-5 rounded-3xl border border-white/[0.08] bg-black/25 p-5">
             <div className="text-[10px] uppercase tracking-[0.2em] text-zinc-500">
-              {result.title || "Στρατηγική Αναδιάταξη Ημέρας"}
+              {result?.title || "Στρατηγική Αναδιάταξη Ημέρας"}
             </div>
             <p className="mt-3 whitespace-pre-line text-[13px] leading-7 text-zinc-200">
-              {result.displayText}
+              {displayText}
             </p>
 
-            <div className="mt-5 flex flex-wrap gap-2">
+            <div className="mt-5">
               <button
                 type="button"
                 onClick={onContinue}
                 className="rounded-2xl border border-cyan-300/25 bg-cyan-300/10 px-3 py-2 text-[11px] font-medium text-cyan-100 transition hover:bg-cyan-300/15"
               >
-                Συνέχισε στο Advisor
+                Συνέχισε στο Advisor Chat
               </button>
-
-              {followups.slice(0, 3).map((item) => (
-                <span
-                  key={item}
-                  className="rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2 text-[11px] text-zinc-400"
-                >
-                  {item}
-                </span>
-              ))}
             </div>
           </div>
         ) : null}
@@ -3872,69 +3940,61 @@ function AgendaOverviewPanel({
   const evidenceArticles = Array.isArray(selected?.evidence_articles)
     ? selected.evidence_articles
     : [];
-  const selectedScore = numberValue(selected?.agenda_score, 0);
-  const selectedStrategicIndex = strategicIndexFromAgenda(selected);
-  const selectedSearchInterest = numberValue(
-    selected?.search_interest_score,
-    50,
-  );
-  const selectedStrategicBoost = numberValue(
-    selected?.strategic_boost_score,
-    50,
-  );
-  const selectedOpportunityBonus = numberValue(
-    selected?.strategic_index_components?.opportunity_bonus,
-    0,
-  );
+  const microAgendas = Array.isArray(selected?.micro_agendas)
+    ? selected.micro_agendas
+    : [];
+  const selectedSignal = strategicIndexFromAgenda(selected);
+  const selectedOpportunity = opportunityText(selected);
 
   return (
     <div className="grid gap-4">
       <CockpitSection
         title="ΣΥΝΟΛΙΚΗ ΕΙΚΟΝΑ ΑΤΖΕΝΤΑΣ"
-        subtitle="Όλες οι θεματικές που παρακολουθεί σήμερα ο Noraya — τι είναι ήδη ψηλά και πού υπάρχει χώρος να ορίσεις εσύ την ατζέντα."
+        subtitle="Θεματικές, micro-agendas και γεγονότα που δείχνουν τι κινείται σήμερα και πού μπορεί να δημιουργηθεί ατζέντα."
       >
         {!overview.length ? (
           <EmptyState>
             Δεν υπάρχουν διαθέσιμες θεματικές από τη συνολική εικόνα ατζέντας.
           </EmptyState>
         ) : (
-          <div className="grid gap-4 xl:grid-cols-[1.35fr_0.9fr]">
+          <div className="grid gap-4 xl:grid-cols-[1.15fr_0.95fr]">
             <div className="overflow-hidden rounded-3xl border border-[#1a2640] bg-black/10">
-              <div className="grid min-w-[860px] grid-cols-[minmax(170px,1.4fr)_150px_90px_80px_120px_90px_minmax(150px,1fr)] gap-2 border-b border-[#1a2640] px-4 py-3 text-[10px] uppercase tracking-[0.16em] text-zinc-500">
+              <div className="grid min-w-[680px] grid-cols-[minmax(170px,1.2fr)_130px_90px_minmax(180px,1fr)] gap-2 border-b border-[#1a2640] px-4 py-3 text-[10px] uppercase tracking-[0.16em] text-zinc-500">
                 <div>Θεματική</div>
-                <div>Στρατηγικός Δείκτης</div>
+                <div>Σήμα ημέρας</div>
                 <div>Κάλυψη</div>
-                <div>Πηγές</div>
-                <div>Βάση εκτίμησης</div>
-                <div>Ρίσκο</div>
-                <div>Ευκαιρία</div>
+                <div>Τι τη σηκώνει</div>
               </div>
-              <div className="max-h-[460px] min-w-[860px] overflow-y-auto">
+
+              <div className="max-h-[460px] min-w-[680px] overflow-y-auto">
                 {overview.map((row) => {
-                  const score = numberValue(row.agenda_score, 0);
-                  const strategicIndex = strategicIndexFromAgenda(row);
                   const isActive = row.topic === activeTopic;
+                  const score = strategicIndexFromAgenda(row);
+                  const leadMicro =
+                    row.active_micro_agenda ||
+                    row.micro_agendas?.[0]?.title ||
+                    "—";
+                  const microCount = row.micro_agendas?.length || 0;
+
                   return (
                     <button
                       key={row.id || row.topic}
                       type="button"
                       onClick={() => onSelectTopic(row.topic)}
-                      className={`grid w-full grid-cols-[minmax(170px,1.4fr)_150px_90px_80px_120px_90px_minmax(150px,1fr)] gap-2 border-b border-[#111a2b] px-4 py-3 text-left text-xs transition ${
+                      className={`grid w-full grid-cols-[minmax(170px,1.2fr)_130px_90px_minmax(180px,1fr)] gap-2 border-b border-[#111a2b] px-4 py-3 text-left text-xs transition ${
                         isActive
                           ? "bg-cyan-300/10 text-cyan-50"
                           : "text-zinc-300 hover:bg-white/[0.03]"
                       }`}
                     >
                       <div className="font-medium leading-5">{row.topic}</div>
-                      <div className="text-cyan-100">
-                        {scoreSignalText(strategicIndex)}
-                      </div>
+                      <div className="text-cyan-100">{scoreSignalText(score)}</div>
                       <div>{coverageLabel(row.coverage_level)}</div>
-                      <div>{numberValue(row.source_diversity, 0)}</div>
-                      <div>{documentationLabel(row.documentation_level)}</div>
-                      <div>{riskLabel(row.political_risk_level)}</div>
-                      <div className="text-amber-100">
-                        {opportunityText(row)}
+                      <div className="min-w-0">
+                        <div className="truncate text-zinc-300">{leadMicro}</div>
+                        <div className="mt-0.5 text-[10px] text-zinc-500">
+                          {microCount ? `${microCount} micro-agendas` : "χωρίς micro-agenda"}
+                        </div>
                       </div>
                     </button>
                   );
@@ -3954,58 +4014,63 @@ function AgendaOverviewPanel({
                     </h3>
                     <div className="mt-3 flex flex-wrap gap-2">
                       <StatusChip className="border-cyan-300/25 bg-cyan-300/10 text-cyan-100">
-                        Στρατηγικός Δείκτης · {selectedStrategicIndex}
+                        {scoreSignalText(selectedSignal)}
                       </StatusChip>
                       <StatusChip className="border-white/10 bg-white/[0.04] text-zinc-300">
                         Κάλυψη: {coverageLabel(selected.coverage_level)}
                       </StatusChip>
-                      <StatusChip
-                        className={docToneClass(selected.documentation_level)}
-                      >
+                      <StatusChip className={docToneClass(selected.documentation_level)}>
                         {documentationLabel(selected.documentation_level)}
+                      </StatusChip>
+                      <StatusChip className="border-amber-300/20 bg-amber-300/[0.08] text-amber-100">
+                        {selectedOpportunity}
                       </StatusChip>
                     </div>
                   </div>
 
+                  {microAgendas.length ? (
+                    <div className="rounded-2xl border border-[#1a2640] bg-black/10 p-3">
+                      <div className="mb-2 text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+                        Τι τη σηκώνει σήμερα
+                      </div>
+                      <div className="grid gap-2">
+                        {microAgendas.slice(0, 5).map((micro) => (
+                          <button
+                            key={micro.clusterId}
+                            type="button"
+                            onClick={() =>
+                              onSelectProbeEvent?.({
+                                clusterId: micro.clusterId,
+                                eventId: null,
+                              })
+                            }
+                            className="flex items-center justify-between gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.025] px-3 py-2 text-left transition hover:border-cyan-300/25 hover:bg-cyan-300/[0.05]"
+                          >
+                            <div className="min-w-0">
+                              <div className="truncate text-xs font-medium text-zinc-100">
+                                {micro.title}
+                              </div>
+                              <div className="mt-1 text-[10px] text-zinc-500">
+                                {micro.eventCount} {micro.eventCount === 1 ? "γεγονός" : "γεγονότα"}
+                              </div>
+                            </div>
+                            <div className="shrink-0 rounded-full border border-cyan-300/20 bg-cyan-300/10 px-2 py-1 text-[10px] font-semibold text-cyan-100">
+                              {Math.round(numberValue(micro.score, 0))}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+
                   <MiniBox
                     title="Γιατί έχει σημασία"
-                    textValue={topicWhyText(selected)}
+                    textValue={agendaThemeWhyText(selected)}
                   />
 
-                  <div className="grid grid-cols-2 gap-2 xl:grid-cols-4">
-                    <MiniMetric
-                      label="Βασικό σήμα"
-                      value={String(selectedScore)}
-                      small
-                    />
-                    <MiniMetric
-                      label="Ενδιαφέρον αναζήτησης"
-                      value={searchInterestLabel(
-                        selectedSearchInterest,
-                        selected.search_interest_status,
-                      )}
-                      small
-                    />
-                    <MiniMetric
-                      label="Στρατηγική ώθηση"
-                      value={String(selectedStrategicBoost)}
-                      small
-                    />
-                    <MiniMetric
-                      label="Ευκαιρία"
-                      value={opportunityText(selected)}
-                      small
-                    />
-                  </div>
-
                   <MiniBox
-                    title="Από τι βγαίνει ο Στρατηγικός Δείκτης"
-                    textValue={strategicIndexExplanation(
-                      selectedScore,
-                      selectedSearchInterest,
-                      selectedStrategicBoost,
-                      selectedOpportunityBonus,
-                    )}
+                    title="Βάση εκτίμησης"
+                    textValue={agendaThemeBasisText(selected)}
                   />
 
                   <div className="rounded-2xl border border-[#1a2640] bg-black/10 p-3">
@@ -4079,8 +4144,7 @@ function AgendaOverviewPanel({
                       </div>
                     ) : (
                       <EmptyState small>
-                        Δεν υπάρχουν ακόμη συνδεδεμένα γεγονότα για αυτή τη
-                        θεματική.
+                        Δεν υπάρχουν ακόμη συνδεδεμένα γεγονότα για αυτή τη θεματική.
                       </EmptyState>
                     )}
                   </div>
@@ -4100,8 +4164,8 @@ function AgendaOverviewPanel({
                               </div>
                               <div className="mt-1 text-[10px] text-zinc-500">
                                 {article.source || "Πηγή"} · Score{" "}
-                                {articleScore ? Math.round(articleScore) : "—"}{" "}
-                                · {evidenceRoleLabel(article.role)}
+                                {articleScore ? Math.round(articleScore) : "—"} ·{" "}
+                                {evidenceRoleLabel(article.role)}
                               </div>
                             </>
                           );
