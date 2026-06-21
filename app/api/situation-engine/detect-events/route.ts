@@ -164,7 +164,7 @@ async function processTopic(
   topic: string,
   themes: string[]
 ): Promise<{ topic: string; events: number }> {
-  const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const since = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
   const { data: articles } = await supabase
     .from("articles")
     .select("id,title,source_name,topic,published_at,ingested_at")
