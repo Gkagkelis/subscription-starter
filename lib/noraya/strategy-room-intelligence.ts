@@ -728,10 +728,13 @@ const eventTokenStem = (value: string): string[] =>
 
 const tokenSimilarity = (a: string[], b: string[]): number => {
   if (!a.length || !b.length) return 0;
-  const left = new Set(a);
+  const left = Array.from(new Set(a));
   const right = new Set(b);
-  const intersection = [...left].filter((token) => right.has(token)).length;
-  const union = new Set([...left, ...right]).size;
+  let intersection = 0;
+  for (const token of left) {
+    if (right.has(token)) intersection += 1;
+  }
+  const union = Array.from(new Set(a.concat(b))).length;
   return union ? intersection / union : 0;
 };
 
