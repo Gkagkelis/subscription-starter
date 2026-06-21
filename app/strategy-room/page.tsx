@@ -1340,7 +1340,8 @@ export default function StrategyRoomPage() {
   useEffect(() => {
     if (!activeProbeItem) return;
     const raw = activeProbeItem.raw;
-    const id = String(raw.micro_agenda_id || raw.micro_agenda || "");
+    const eventId = String(activeProbeEvent?.id || activeProbeSelection?.eventId || "");
+    const id = String((raw.micro_agenda_id || raw.micro_agenda || "") + (eventId ? "__" + eventId : ""));
     if (!id) return;
     if (strategicImageCache[id]) return; // ήδη έχουμε
     if (fetchingStrategicRef.current.has(id)) return; // ήδη φέρνουμε
@@ -1393,7 +1394,7 @@ export default function StrategyRoomPage() {
         fetchingStrategicRef.current.delete(id);
       }
     })();
-  }, [activeProbeItem, data, strategicImageCache]);
+  }, [activeProbeItem, activeProbeEvent, activeProbeSelection, data, strategicImageCache]);
 
   useEffect(() => {
     if (!activeOverviewTopic && agendaOverview.length > 0) {
@@ -1940,7 +1941,7 @@ export default function StrategyRoomPage() {
               selectedPartyImplication={selectedPartyImplication}
               probeView={activeProbeView}
               probeEvidenceArticles={activeProbeEvidenceArticles}
-              aiStrategicBody={activeProbeItem ? (strategicImageCache[String(activeProbeItem.raw.micro_agenda_id || activeProbeItem.raw.micro_agenda || "")] || null) : null}
+              aiStrategicBody={activeProbeItem ? (strategicImageCache[String((activeProbeItem.raw.micro_agenda_id || activeProbeItem.raw.micro_agenda || "") + (activeProbeSelection?.eventId ? "__" + activeProbeSelection.eventId : ""))] || null) : null}
             />
 
             <AdvisorDock
