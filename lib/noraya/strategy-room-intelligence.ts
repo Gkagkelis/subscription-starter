@@ -325,6 +325,35 @@ const partyRedLines = (cluster: AgendaCluster, limit = 3): string[] => {
   return redLines.map(cleanSentence).filter(Boolean).slice(0, limit);
 };
 
+const uniqueStrategicTerms = (values: unknown[]): string[] => {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const value of values.map(cleanSentence).filter(Boolean)) {
+    const key = value.toLowerCase();
+    if (!seen.has(key)) {
+      seen.add(key);
+      out.push(value);
+    }
+  }
+  return out;
+};
+
+const partyStrategicAxis = (cluster: AgendaCluster, limit = 5): string => {
+  const ctx = researchContextOf(cluster);
+  const lens = ctx?.party_lens;
+  if (!lens) return '';
+  const terms = uniqueStrategicTerms([
+    ...(Array.isArray(lens.known_positions) ? lens.known_positions : []),
+    ...(Array.isArray(lens.core_themes) ? lens.core_themes : []),
+    ...(Array.isArray(lens.preferred_language) ? lens.preferred_language : []),
+  ]).slice(0, limit);
+  const opportunity = cleanSentence(lens.opportunity_frame);
+  if (opportunity && terms.length) return `${opportunity}, με άξονες ${terms.join(', ')}`;
+  if (opportunity) return opportunity;
+  if (terms.length) return terms.join(', ');
+  return cleanSentence(lens.value_frame);
+};
+
 const partyNarrativeDepth = (cluster: AgendaCluster): string => {
   const ctx = researchContextOf(cluster);
   if (!ctx?.party_lens) return '';
@@ -335,11 +364,10 @@ const partyNarrativeDepth = (cluster: AgendaCluster): string => {
   const opportunity = cleanSentence(lens.opportunity_frame);
   const advisor = cleanSentence(lens.advisor_instructions);
   const parts = [];
-  if (themes.length) parts.push(`Θεματικός άξονας κόμματος: ${themes.join(', ')}.`);
-  if (audiences.length) parts.push(`Κρίσιμα κοινά: ${audiences.join(', ')}.`);
-  if (positions.length) parts.push(`Σταθερές θέσεις: ${positions.join(', ')}.`);
-  if (opportunity) parts.push(`Πεδίο ευκαιρίας: ${opportunity}`);
-  if (advisor) parts.push(`Οδηγία συμβούλου: ${advisor}`);
+  if (themes.length || positions.length) parts.push(`Η αφήγηση χρειάζεται να κουμπώσει σε ${uniqueStrategicTerms([...positions, ...themes]).slice(0, 5).join(', ')}.`);
+  if (audiences.length) parts.push(`Τα κρίσιμα κοινά είναι ${audiences.join(', ')}.`);
+  if (opportunity) parts.push(`Το πεδίο ευκαιρίας είναι να μετατραπεί το γεγονός σε ${opportunity}.`);
+  if (advisor) parts.push(`Η γραμμή πρέπει να κρατήσει ${advisor.toLowerCase()}`);
   return parts.join(' ');
 };
 
@@ -353,15 +381,14 @@ const researchBackedStrategicBody = (cluster: AgendaCluster, event: AgendaEvent)
   const party = cleanSentence(ctx.party_relevance);
   const leader = cleanSentence(ctx.leader_trait_hint);
   const partyLabel = cleanSentence(ctx.party_lens?.party_label);
-  const partyFrame = cleanSentence(ctx.party_lens?.value_frame);
-  const partySource = cleanSentence(ctx.party_lens?.source);
-  const partySentence = partyLabel && partyFrame
-    ? `Για ${partyLabel}, η ανάγνωση πατά στο πραγματικό κομματικό προφίλ${partySource === 'political_party_profiles' ? ' από political_party_profiles' : ''}: ${partyFrame}.`
+  const partyAxis = partyStrategicAxis(cluster);
+  const partySentence = partyLabel && partyAxis
+    ? `Για ${partyLabel}, το ίδιο γεγονός μεταφράζεται σε ${partyAxis}.`
     : '';
   const partyDepth = partyNarrativeDepth(cluster);
   const redLines = partyRedLines(cluster);
   const redLineSentence = redLines.length
-    ? `Οι κόκκινες γραμμές της αφήγησης είναι σαφείς: ${redLines.join(' · ')}.`
+    ? `Το στρατηγικό όριο της αφήγησης είναι σαφές: ${redLines.join(' · ')}.`
     : '';
 
   return [
@@ -396,9 +423,11 @@ const researchBackedWinningBody = (cluster: AgendaCluster, event: AgendaEvent): 
   const language = researchLanguage(cluster);
   const redLines = partyRedLines(cluster, 2);
   const redLineText = redLines.length ? `Η γραμμή κρατά καθαρό όριο απέναντι σε: ${redLines.join(' · ')}.` : '';
+  const partyAxis = partyStrategicAxis(cluster);
   const advisor = cleanSentence(ctx.party_lens?.advisor_instructions || ctx.narrative_instruction);
-  const advisorText = advisor ? `Η συμβουλευτική οδηγία είναι: ${advisor}` : '';
-  return `${title} κερδίζεται όταν η γραμμή πατήσει στη μικροατζέντα «${cluster.micro_agenda}», στη βαθύτερη κοινωνική βάση και στο κομματικό προφίλ του χρήστη. ${meaning} ${party} Η γλώσσα πρέπει να κινηθεί γύρω από: ${language}. ${redLineText} ${advisorText}`.trim();
+  const advisorText = advisor ? `Η γραμμή αποκτά αξία όταν κρατά αυτόν τον τόνο: ${advisor}` : '';
+  const partyText = partyAxis ? `Για το επιλεγμένο κόμμα, το θέμα πρέπει να μεταφραστεί σε ${partyAxis}.` : '';
+  return `${title} κερδίζεται όταν η γραμμή πατήσει στη μικροατζέντα «${cluster.micro_agenda}» και στη βαθύτερη κοινωνική βάση που δείχνουν τα δεδομένα. ${meaning} ${party} ${partyText} Η γλώσσα πρέπει να κινηθεί γύρω από: ${language}. ${redLineText} ${advisorText}`.trim();
 };
 
 const agendaFamily = (cluster: AgendaCluster):
@@ -1078,4 +1107,3 @@ function formatDate(value?: string | null): string {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return 'σήμερα';
   return date.toLocaleDateString('el-GR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-}
