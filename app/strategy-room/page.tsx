@@ -1,4 +1,4 @@
- "use client";
+  "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode } from "react";
@@ -374,6 +374,8 @@ type AgendaProbeSelection = {
   clusterId: string;
   eventId?: string | null;
 };
+
+type ProbeAgendaEventItem = ProbeAgendaMapItem["events"][number];
 
 const situationTabs: Array<{ id: SituationTab; label: string }> = [
   { id: "strategic", label: "Στρατηγική εικόνα" },
@@ -1415,6 +1417,194 @@ function readWhyText(
   );
 }
 
+function probeRawNumber(item: ProbeAgendaMapItem | null | undefined, keys: string[], fallback = 0) {
+  const raw = item?.raw as Record<string, unknown> | undefined;
+  for (const key of keys) {
+    const value = raw?.[key];
+    if (typeof value === "number" || typeof value === "string") {
+      const n = numberValue(value, NaN);
+      if (Number.isFinite(n)) return clamp(Math.round(n));
+    }
+  }
+  return clamp(Math.round(fallback));
+}
+
+function probeSearchSignalScore(
+  item: ProbeAgendaMapItem | null | undefined,
+  situation: ΕνεργόSituationRow | null | undefined,
+) {
+  const primary = probeRawNumber(item, ["real_trend_score", "search_interest_score"], NaN);
+  const secondary = numberValue(
+    situation?.search_interest_score ?? situation?.google_trends_score,
+    NaN,
+  );
+
+  const values = [primary, secondary].filter((value) => Number.isFinite(value));
+  if (!values.length) return 0;
+
+  if (values.length === 1) return clamp(Math.round(values[0]));
+
+  // Οι δύο είσοδοι δημόσιου ενδιαφέροντος: agenda-probe trend + situation/search fallback.
+  return clamp(Math.round(values[0] * 0.6 + values[1] * 0.4));
+}
+
+function signalStrengthLabel(score: number) {
+  if (score >= 70) return "Ισχυρό";
+  if (score >= 50) return "Ανιχνεύσιμο";
+  if (score >= 30) return "Πρώιμο";
+  if (score > 0) return "Χαμηλό";
+  return "Άγνωστο";
+}
+
+function probeWhyContext(item: ProbeAgendaMapItem | null | undefined, event: ProbeAgendaEventItem | null | undefined, situation: ΕνεργόSituationRow | null | undefined) {
+  const title = item?.title || situation?.topic || situation?.title || "η micro-agenda";
+  const eventTitle = event?.title || situation?.title || item?.events?.[0]?.title || title;
+  const articleCount = numberValue(
+    event?.article_count ?? item?.raw?.article_count ?? situation?.article_count,
+    0,
+  );
+  const sourceCount = numberValue(
+    event?.source_count ?? item?.raw?.source_count ?? situation?.source_count,
+    0,
+  );
+  const eventCount = item?.events?.length || 0;
+  const searchScore = probeSearchSignalScore(item, situation);
+  const coverageScore = probeRawNumber(
+    item,
+    ["real_news_coverage_score", "coverage_score", "news_coverage_score"],
+    numberValue(situation?.news_coverage_level, 0),
+  );
+  const frontpageScore = probeRawNumber(
+    item,
+    ["real_frontpage_prominence_score", "frontpage_prominence_score"],
+    0,
+  );
+  const freshnessScore = probeRawNumber(item, ["freshness_score"], 0);
+  const documentationScore = probeRawNumber(
+    item,
+    ["documentation_score"],
+    evidenceConfidenceScore(articleCount, sourceCount),
+  );
+
+  return {
+    title,
+    eventTitle,
+    articleCount,
+    sourceCount,
+    eventCount,
+    searchScore,
+    coverageScore,
+    frontpageScore,
+    freshnessScore,
+    documentationScore,
+  };
+}
+
+function whyProbeAgendaExistsText(
+  item: ProbeAgendaMapItem | null | undefined,
+  event: ProbeAgendaEventItem | null | undefined,
+  situation: ΕνεργόSituationRow | null | undefined,
+) {
+  const ctx = probeWhyContext(item, event, situation);
+
+  if (!item) {
+    return readWhyText(situation, {});
+  }
+
+  const searchHigh = ctx.searchScore >= 60;
+  const coverageHigh = ctx.coverageScore >= 60;
+  const coverageMedium = ctx.coverageScore >= 35;
+  const frontpageHigh = ctx.frontpageScore >= 55;
+  const docStrong = ctx.documentationScore >= 55;
+  const manyEvents = ctx.eventCount >= 3;
+
+  if (searchHigh && coverageHigh) {
+    return `Η «${ctx.title}» υπάρχει στον Χάρτη επειδή δεν είναι απλώς δημοσιογραφικό επεισόδιο: συμπίπτουν δημόσιο ενδιαφέρον και πραγματική κάλυψη. Το ενεργό γεγονός «${ctx.eventTitle}» δίνει πρόσωπο στη micro-agenda, ενώ τα ${ctx.articleCount || "—"} άρθρα και οι ${ctx.sourceCount || "—"} πηγές δείχνουν ότι το θέμα έχει περάσει από μεμονωμένη είδηση σε πεδίο πίεσης. Εδώ ο σύμβουλος δεν βλέπει μόνο ένταση· βλέπει θέμα που μπορεί να απαιτήσει καθαρή πολιτική θέση.`;
+  }
+
+  if (searchHigh && !coverageHigh) {
+    return `Η «${ctx.title}» μπήκε στον Χάρτη επειδή το δημόσιο ενδιαφέρον κινείται πιο γρήγορα από την οργανωμένη κάλυψη. Αυτό είναι σημαντικό: η micro-agenda δεν έχει ακόμη πλήρως κλειδώσει από τα μέσα, άρα υπάρχει παράθυρο να οριστεί το πλαίσιο πριν το κάνουν άλλοι. Το «${ctx.eventTitle}» λειτουργεί ως πρώτο ορατό σημείο, όχι ως τελική εικόνα.`;
+  }
+
+  if (!searchHigh && coverageHigh) {
+    return `Η «${ctx.title}» υπάρχει επειδή η κάλυψη και οι πηγές σηκώνουν θέμα πριν φανεί καθαρά αν το ακολουθεί το ευρύ κοινό. Αυτό δεν είναι αδυναμία· είναι προειδοποιητικό σήμα. Το «${ctx.eventTitle}» δείχνει ότι το πεδίο κινείται θεσμικά ή ειδησεογραφικά, αλλά η πολιτική αξία του θα κριθεί από το αν μετατραπεί σε καθημερινό ερώτημα για περισσότερους.`;
+  }
+
+  if (frontpageHigh || docStrong || manyEvents) {
+    return `Η «${ctx.title}» υπάρχει στον Χάρτη επειδή μαζεύει αρκετά επιμέρους σήματα ώστε να μην αγνοηθεί. Δεν είναι απαραίτητα κεντρικό θέμα ακόμη, αλλά το «${ctx.eventTitle}» συνδέεται με ${ctx.eventCount || "—"} σχετικά γεγονότα και σχηματίζει μικροατζέντα. Αυτό είναι το σημείο όπου ο σύμβουλος ξεχωρίζει το απλό monitoring από το πιθανό agenda opening.`;
+  }
+
+  if (coverageMedium || ctx.searchScore >= 30) {
+    return `Η «${ctx.title}» παρακολουθείται επειδή εμφανίζει πρώιμο αλλά υπαρκτό σήμα. Το «${ctx.eventTitle}» από μόνο του δεν αρκεί για μεγάλη κλιμάκωση, όμως δείχνει πιθανή κατεύθυνση: αν προστεθεί δεύτερο γεγονός, ισχυρότερη πηγή ή αντίδραση actor, η micro-agenda μπορεί να περάσει από παρακολούθηση σε πολιτική προτεραιότητα.`;
+  }
+
+  return `Η «${ctx.title}» βρίσκεται στον Χάρτη ως χαμηλό σήμα παρακολούθησης. Αυτό σημαίνει ότι ο Noraya την κρατά στο πεδίο όχι επειδή είναι ήδη ατζέντα, αλλά επειδή μπορεί να συνδεθεί με ισχυρότερο θέμα αν αλλάξει η κάλυψη, η αναζήτηση ή η πολιτική αντίδραση γύρω από το «${ctx.eventTitle}».`;
+}
+
+function whyProbeAgendaUnknownText(
+  item: ProbeAgendaMapItem | null | undefined,
+  event: ProbeAgendaEventItem | null | undefined,
+  situation: ΕνεργόSituationRow | null | undefined,
+) {
+  const ctx = probeWhyContext(item, event, situation);
+
+  if (!item) {
+    return text(
+      situation?.evidence_summary,
+      "Χρειάζεται νέο σήμα, δεύτερη πηγή ή πολιτική αντίδραση για να αναθεωρηθεί η εκτίμηση.",
+    );
+  }
+
+  if (ctx.searchScore >= 60 && ctx.coverageScore < 45) {
+    return `Το ανοιχτό ερώτημα είναι αν το δημόσιο ενδιαφέρον θα βρει πολιτικό φορέα και αφήγημα ή θα μείνει διάσπαρτη αναζήτηση. Θέλουμε δεύτερο γεγονός ή καθαρή αντίδραση actor για να ξέρουμε αν η micro-agenda μπορεί να σηκωθεί δημόσια.`;
+  }
+
+  if (ctx.coverageScore >= 60 && ctx.searchScore < 35) {
+    return `Δεν ξέρουμε ακόμη αν η έντονη κάλυψη περνάει έξω από το ειδησεογραφικό/θεσμικό κύκλωμα. Αν δεν ακολουθήσει ενδιαφέρον κοινού ή κοινωνική σύνδεση, το θέμα μπορεί να μείνει “θέμα πηγών” και όχι θέμα ατζέντας.`;
+  }
+
+  if (ctx.documentationScore < 35) {
+    return `Η βασική αβεβαιότητα είναι η τεκμηρίωση. Χρειάζεται καθαρότερη δεύτερη πηγή, νεότερο άρθρο ή πιο συγκεκριμένο στοιχείο πριν η micro-agenda γίνει ασφαλής βάση δημόσιας παρέμβασης.`;
+  }
+
+  if (ctx.eventCount <= 1) {
+    return `Αυτό που λείπει είναι η επανάληψη. Ένα γεγονός μπορεί να ανοίξει micro-agenda, αλλά χρειάζεται δεύτερο συγγενές επεισόδιο ή actor reaction για να φανεί ότι έχουμε μοτίβο και όχι απλή ημερήσια είδηση.`;
+  }
+
+  return `Δεν ξέρουμε ακόμη ποια διάσταση θα κλειδώσει: κοινωνική πίεση, θεσμική ευθύνη, κόστος ζωής ή κομματική αντιπαράθεση. Η επόμενη πηγή ή αντίδραση θα δείξει αν η micro-agenda σηκώνεται ή μένει σε επίπεδο παρακολούθησης.`;
+}
+
+function whyProbeSignalPills(
+  item: ProbeAgendaMapItem | null | undefined,
+  event: ProbeAgendaEventItem | null | undefined,
+  situation: ΕνεργόSituationRow | null | undefined,
+) {
+  const ctx = probeWhyContext(item, event, situation);
+
+  return [
+    {
+      label: "Δημόσιο ενδιαφέρον",
+      value: signalStrengthLabel(ctx.searchScore),
+      score: ctx.searchScore,
+    },
+    {
+      label: "Κάλυψη",
+      value: coverageLabel(ctx.coverageScore >= 60 ? "high" : ctx.coverageScore >= 35 ? "medium" : "low"),
+      score: ctx.coverageScore,
+    },
+    {
+      label: "Βάση",
+      value: docLabelFromScore(ctx.documentationScore),
+      score: ctx.documentationScore,
+    },
+    {
+      label: "Φρεσκάδα",
+      value: signalStrengthLabel(ctx.freshnessScore),
+      score: ctx.freshnessScore,
+    },
+  ];
+}
+
 function publicPulseScore(situation: ΕνεργόSituationRow | null | undefined) {
   const pulse = asRecord(situation?.public_pulse);
   return clamp(
@@ -2373,6 +2563,8 @@ export default function StrategyRoomPage() {
               selectedPartyImplication={selectedPartyImplication}
               probeView={activeProbeView}
               probeEvidenceArticles={activeProbeEvidenceArticles}
+              probeItem={activeProbeItem}
+              probeEvent={activeProbeEvent}
               aiStrategicBody={activeProbeItem ? (strategicImageCache[String((activeProbeItem.raw.micro_agenda_id || activeProbeItem.raw.micro_agenda || "") + (activeProbeSelection?.eventId ? "__" + activeProbeSelection.eventId : ""))] || null) : null}
               agendaArchitectResult={agendaArchitectResult}
               agendaArchitectLoading={agendaArchitectLoading}
@@ -3020,6 +3212,8 @@ function ActiveSituationWorkspace({
   selectedPartyImplication,
   probeView,
   probeEvidenceArticles,
+  probeItem,
+  probeEvent,
   aiStrategicBody,
   agendaArchitectResult,
   agendaArchitectLoading,
@@ -3047,6 +3241,8 @@ function ActiveSituationWorkspace({
   selectedPartyImplication: string;
   probeView?: EventIntelligenceView | null;
   probeEvidenceArticles?: EvidenceArticleItem[];
+  probeItem?: ProbeAgendaMapItem | null;
+  probeEvent?: ProbeAgendaEventItem | null;
   aiStrategicBody?: string | null;
   agendaArchitectResult?: AgendaArchitectResult | null;
   agendaArchitectLoading?: boolean;
@@ -3442,22 +3638,49 @@ function ActiveSituationWorkspace({
         ) : null}
 
         {activeTab === "why" ? (
-          <div className="grid gap-4 2xl:grid-cols-2">
+          <div className="grid gap-4">
             <CockpitSection
-              title="Γιατί υπάρχει αυτή η κατάσταση"
-              subtitle="Basis / documentation"
+              title="Γιατί μπήκε στον Χάρτη"
+              subtitle="Δημόσιο ενδιαφέρον · Κάλυψη · Πηγές · Φρεσκάδα"
             >
-              <p className="text-[13px] leading-7 text-zinc-300/95">
-                {whySection?.body || readWhyText(situation, brief)}
-              </p>
+              <div className="grid gap-4">
+                <div className="flex flex-wrap gap-2">
+                  {whyProbeSignalPills(probeItem, probeEvent, situation).map((pill) => (
+                    <StatusChip
+                      key={pill.label}
+                      className="border-cyan-300/18 bg-cyan-300/[0.06] text-cyan-100"
+                    >
+                      {pill.label}: {pill.value}
+                      {pill.score ? ` · ${Math.round(pill.score)}` : ""}
+                    </StatusChip>
+                  ))}
+                </div>
+
+                <div className="rounded-3xl border border-[#1a2640] bg-black/10 p-5">
+                  <div className="text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+                    Ανάγνωση micro-agenda
+                  </div>
+                  <p className="mt-3 text-[13px] leading-7 text-zinc-300/95">
+                    {probeItem
+                      ? whyProbeAgendaExistsText(probeItem, probeEvent, situation)
+                      : whySection?.body || readWhyText(situation, brief)}
+                  </p>
+                </div>
+              </div>
             </CockpitSection>
-            <CockpitSection title="Τι δεν ξέρουμε ακόμη" subtitle="Uncertainty">
+
+            <CockpitSection
+              title="Τι θα ξεκαθάριζε την εικόνα"
+              subtitle="Σήματα που αλλάζουν την εκτίμηση"
+            >
               <p className="text-sm leading-7 text-zinc-300">
-                {probeView?.escalation?.triggerLines?.[0] ||
-                  text(
-                    evidence.uncertainty,
-                    "Η εκτίμηση αναθεωρείται όταν εμφανιστεί νέο σήμα, δεύτερη πηγή ή πολιτική αντίδραση.",
-                  )}
+                {probeItem
+                  ? whyProbeAgendaUnknownText(probeItem, probeEvent, situation)
+                  : probeView?.escalation?.triggerLines?.[0] ||
+                    text(
+                      evidence.uncertainty,
+                      "Χρειάζεται νέο σήμα, δεύτερη πηγή ή πολιτική αντίδραση για να αναθεωρηθεί η εκτίμηση.",
+                    )}
               </p>
             </CockpitSection>
           </div>
