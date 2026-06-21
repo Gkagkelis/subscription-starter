@@ -56,8 +56,8 @@ export async function GET(req: Request) {
   // Product throughput comes from many calls, not one huge call.
   const requestedLimit = Number(searchParams.get("limit") || "10");
   const limit = Math.min(
-    Math.max(Number.isFinite(requestedLimit) ? Math.trunc(requestedLimit) : 50, 1),
-    50
+    Math.max(Number.isFinite(requestedLimit) ? Math.trunc(requestedLimit) : 25, 1),
+    25
   );
 
   // Default compact response prevents large browser/serverless responses.
@@ -177,7 +177,7 @@ ${articlesList}`;
       },
       body: JSON.stringify({
         model: classifierModel,
-        max_tokens: 3500,
+        max_tokens: 8000,
         messages: [{ role: "user", content: prompt }],
       }),
     });
