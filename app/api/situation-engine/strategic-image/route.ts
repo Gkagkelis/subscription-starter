@@ -17,9 +17,10 @@ function json(payload: unknown, status = 200) {
   return NextResponse.json(payload, { status });
 }
 
-// Cache key per micro_agenda_id + party_key (αλλάζει μόνο αν αλλάξει το cluster)
-function cacheKey(microAgendaId: string, partyKey: string) {
-  return "strategic_image_v1__" + microAgendaId + "__" + partyKey;
+// FIX: Cache key περιέχει και το event_id — κάθε γεγονός παίρνει τη δική του ανάλυση
+function cacheKey(microAgendaId: string, partyKey: string, eventId?: string | null) {
+  const base = "strategic_image_v1__" + microAgendaId + "__" + partyKey;
+  return eventId ? base + "__" + eventId : base;
 }
 
 async function readCache(supabase: ReturnType<typeof svc>, key: string): Promise<string | null> {
@@ -32,7 +33,6 @@ async function readCache(supabase: ReturnType<typeof svc>, key: string): Promise
       .limit(1);
     if (!Array.isArray(data) || !data[0]) return null;
     const result = (data[0] as any).result;
-    // Invalidate αν > 6 ώρες (το cluster μπορεί να αλλάξει)
     const updatedAt = new Date((data[0] as any).updated_at || 0).getTime();
     if (Date.now() - updatedAt > 6 * 60 * 60 * 1000) return null;
     return typeof result?.body === "string" ? result.body : null;
@@ -75,7 +75,7 @@ async function callClaude(prompt: string): Promise<string> {
     },
     body: JSON.stringify({
       model: "claude-sonnet-4-6",
-      max_tokens: 600,
+      max_tokens: 700,
       messages: [{ role: "user", content: prompt }],
     }),
   });
@@ -88,12 +88,43 @@ async function callClaude(prompt: string): Promise<string> {
   return text.trim();
 }
 
+// FIX: Μετατρέπει raw memory lines σε αναγνώσιμο αναλυτικό κείμενο
+// Αποφεύγει τεχνικές ετικέτες όπως "female:", "Q4", "2022 Q4" κλπ
+function formatMemoryLines(lines: string[]): string {
+  if (!lines || lines.length === 0) {
+    return "Δεν υπάρχουν διαθέσιμα ιστορικά δεδομένα.";
+  }
+
+  const cleaned = lines
+    .slice(0, 8)
+    .map((line: string) => {
+      // Αφαίρεση τεχνικών ετικετών που εμφανίζονται raw
+      return line
+        // Π.χ. "female: 61/100 (2022 Q4)" → αντικατάσταση με ανθρώπινο κείμενο
+        .replace(/\bfemale\b/gi, "γυναίκες")
+        .replace(/\bmale\b/gi, "άνδρες")
+        .replace(/\b(\d{4})\s+Q([1-4])\b/g, (_, year, quarter) => {
+          const quarterMap: Record<string, string> = { "1": "Α' τρίμηνο", "2": "Β' τρίμηνο", "3": "Γ' τρίμηνο", "4": "Δ' τρίμηνο" };
+          return `${quarterMap[quarter] || "τρίμηνο"} ${year}`;
+        })
+        // Αφαίρεση μορφής "LABEL: NUMBER/100" → κράτα μόνο το νόημα
+        .replace(/:\s*(\d+)\/100/g, ": $1%")
+        .trim();
+    })
+    .filter(Boolean);
+
+  return cleaned.join("\n");
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const {
       micro_agenda_id,
       micro_agenda,
+      // FIX: Δέχεται και το active_event_id + active_event_title για εστιακό prompt
+      active_event_id = null as string | null,
+      active_event_title = null as string | null,
       party_key = "elas",
       party_name = "ΕΛΑΣ",
       red_lines = [] as string[],
@@ -105,7 +136,6 @@ export async function POST(req: NextRequest) {
       real_news_coverage_score = null as number | null,
       real_trend_score = null as number | null,
       score = 0,
-      // Ιστορικά δεδομένα από political-memory (περνιούνται από το page)
       memory_lines = [] as string[],
     } = body;
 
@@ -114,7 +144,8 @@ export async function POST(req: NextRequest) {
     }
 
     const supabase = svc();
-    const key = cacheKey(micro_agenda_id, party_key);
+    // FIX: Χρησιμοποιεί το active_event_id στο cache key
+    const key = cacheKey(micro_agenda_id, party_key, active_event_id);
 
     // 1. Έλεγχος cache
     const cached = await readCache(supabase, key);
@@ -122,15 +153,29 @@ export async function POST(req: NextRequest) {
       return json({ ok: true, body: cached, source: "cache" });
     }
 
-    // 2. Φτιάχνω το prompt
-    const eventContext = event_titles.slice(0, 5).join(" · ") || micro_agenda;
+    // 2. Φτιάχνω το context
+
+    // FIX: Το ενεργό γεγονός μπαίνει πρώτο και ξεχωριστά
+    const activeEventLine = active_event_title
+      ? `ΕΝΕΡΓΟ ΓΕΓΟΝΟΣ (αυτό αναλύεις): ${active_event_title}`
+      : "";
+
+    // Τα υπόλοιπα γεγονότα ως πλαίσιο (όχι focal point)
+    const otherEvents = event_titles
+      .filter((t: string) => t !== active_event_title)
+      .slice(0, 4)
+      .join(" · ");
+    const contextEventsLine = otherEvents
+      ? `Συναφή γεγονότα (για πλαίσιο): ${otherEvents}`
+      : "";
+
     const articleContext = article_titles.slice(0, 6).join("\n- ") || "—";
     const sourceContext = sources.slice(0, 5).join(", ") || "—";
     const redLinesText = red_lines.length ? red_lines.join(", ") : "—";
     const positionsText = known_positions.length ? known_positions.join(", ") : "—";
-    const memoryText = memory_lines.length
-      ? memory_lines.slice(0, 8).join("\n") 
-      : "Δεν υπάρχουν διαθέσιμα ιστορικά δεδομένα.";
+
+    // FIX: Καθαρισμός raw memory lines πριν μπουν στο prompt
+    const memoryText = formatMemoryLines(memory_lines);
 
     const coverageLabel =
       real_news_coverage_score === null ? "άγνωστη"
@@ -143,18 +188,18 @@ export async function POST(req: NextRequest) {
       : real_trend_score >= 30 ? "σταθερό"
       : "χαμηλό";
 
-    const prompt = `Είσαι κορυφαίος πολιτικός σύμβουλος με βαθύ αναλυτικό υπόβαθρο. Γράφεις τη «Στρατηγική ανάγνωση» για το παρακάτω πολιτικό γεγονός.
+    const prompt = `Είσαι κορυφαίος πολιτικός σύμβουλος με βαθύ αναλυτικό υπόβαθρο. Γράφεις τη «Στρατηγική ανάγνωση» για ένα συγκεκριμένο πολιτικό γεγονός.
 
 ΚΟΜΜΑ: ${party_name} (${party_key})
 ΤΟΝΟΣ: ${tone}
 ΘΕΣΕΙΣ: ${positionsText}
 ΚΟΚΚΙΝΕΣ ΓΡΑΜΜΕΣ (ΑΠΑΓΟΡΕΥΕΤΑΙ να πλησιάσεις): ${redLinesText}
 
-ΓΕΓΟΝΟΣ / ΜΙΚΡΟΑΤΖΕΝΤΑ: ${micro_agenda}
-ΣΥΓΚΕΚΡΙΜΕΝΑ ΓΕΓΟΝΟΤΑ ΠΟΥ ΚΑΛΥΠΤΕΙ:
-${eventContext}
+ΘΕΜΑΤΙΚΗ ΚΛΑΣΤΕΡ: ${micro_agenda}
+${activeEventLine}
+${contextEventsLine}
 
-ΑΡΘΡΑ ΠΟΥ ΤΟ ΣΤΗΡΙΖΟΥΝ:
+ΑΡΘΡΑ ΠΟΥ ΣΤΗΡΙΖΟΥΝ ΤΟ ΓΕΓΟΝΟΣ:
 - ${articleContext}
 
 ΠΗΓΕΣ: ${sourceContext}
@@ -162,17 +207,17 @@ ${eventContext}
 ΤΑΣΕΙΣ ΑΝΑΖΗΤΗΣΗΣ: ${trendsLabel} (score: ${real_trend_score ?? "—"})
 NORAYA PRIORITY: ${score}
 
-ΙΣΤΟΡΙΚΑ ΔΕΔΟΜΕΝΑ (Eurobarometer / κοινή γνώμη / αρχηγοί):
+ΙΣΤΟΡΙΚΑ ΔΕΔΟΜΕΝΑ (Eurobarometer / κοινή γνώμη):
 ${memoryText}
 
 ΟΔΗΓΙΕΣ:
-- Γράψε 3-4 παραγράφους αυστηρά για ΑΥΤΟ το γεγονός — ΟΧΙ γενικά για τη θεματική
-- Δέσε το γεγονός με τα ιστορικά δεδομένα όπου υπάρχουν (π.χ. «σύμφωνα με το Eurobarometer...», «ιστορικά το κοινό αντιδρά...»)
-- Ανάλυσε: (α) τι πραγματικά συμβαίνει πολιτικά, (β) ποιο πλαίσιο επιβάλλεται, (γ) ποιο ρίσκο υπάρχει ΓΙΑ ΑΥΤΟ ΤΟ ΚΟΜΜΑ
-- Δώσε μια μοναδική, οξεία πολιτική εκτίμηση — όχι γενικολογίες
-- Ποτέ ΜΗΝ αντιγράψεις τις κόκκινες γραμμές ή τις θέσεις word-for-word μέσα στο κείμενο
-- Γλώσσα: ελληνικά, πυκνή, συνθετική, σαν εσωτερικό πολιτικό brief
-- ΜΟΝΟ κείμενο, χωρίς headers, χωρίς bullets, χωρίς markdown`;
+- Εστίασε αποκλειστικά στο «ΕΝΕΡΓΟ ΓΕΓΟΝΟΣ» — όχι στη γενική θεματική
+- Γράψε 3-4 συμπαγείς παραγράφους: (α) τι πραγματικά κινείται πολιτικά, (β) ποιο πλαίσιο επιβάλλεται, (γ) ποιο ρίσκο/ευκαιρία υπάρχει ΓΙΑ ΑΥΤΟ ΤΟ ΚΟΜΜΑ συγκεκριμένα
+- Αν υπάρχουν ιστορικά δεδομένα: ενσωμάτωσέ τα αναλυτικά (π.χ. «Ιστορικά, το κοινό αντιδρά σε αυτό το θέμα με...», «Σύμφωνα με Eurobarometer...»). ΜΗΝ αντιγράψεις ποτέ τεχνικούς όρους ή ονόματα πεδίων — μεταφρασέ τα σε νόημα
+- Δώσε μια οξεία, εσωτερική πολιτική εκτίμηση — όχι δημόσια ανακοίνωση, όχι γενικολογίες
+- Ποτέ ΜΗΝ επαναλάβεις κόκκινες γραμμές ή θέσεις word-for-word
+- Γλώσσα: ελληνικά, πυκνή, σαν εμπιστευτικό brief επιτελείου
+- ΜΟΝΟ κείμενο: χωρίς headers, χωρίς bullets, χωρίς markdown, χωρίς αριθμημένες λίστες`;
 
     const generated = await callClaude(prompt);
 
