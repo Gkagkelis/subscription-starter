@@ -1135,6 +1135,8 @@ export default function StrategyRoomPage() {
   const [situationEngine, setSituationEngine] =
     useState<SituationEngineResponse | null>(null);
   const [agendaProbe, setAgendaProbe] = useState<ProbeV4Response | null>(null);
+  const [strategicImageCache, setStrategicImageCache] = useState<Record<string, string>>({});
+  const fetchingStrategicRef = useRef<Set<string>>(new Set());
   const [activeProbeSelection, setActiveProbeSelection] =
     useState<AgendaProbeSelection | null>(null);
   const [loading, setLoading] = useState(true);
@@ -1333,6 +1335,65 @@ export default function StrategyRoomPage() {
   const probeSituationCount = useMemo(() => {
     return probeAgendaMap.reduce((sum, item) => sum + item.events.length, 0);
   }, [probeAgendaMap]);
+
+  // On-demand AI strategic image — καλείται όταν αλλάζει το active cluster
+  useEffect(() => {
+    if (!activeProbeItem) return;
+    const raw = activeProbeItem.raw;
+    const id = String(raw.micro_agenda_id || raw.micro_agenda || "");
+    if (!id) return;
+    if (strategicImageCache[id]) return; // ήδη έχουμε
+    if (fetchingStrategicRef.current.has(id)) return; // ήδη φέρνουμε
+    if (raw.requires_human_review || raw.sensitivity_level === "high") return; // sensitive — δεν το στέλνουμε
+
+    fetchingStrategicRef.current.add(id);
+
+    const partyKey = (data as any)?.profile?.party_key || "elas";
+    const partyName = (data as any)?.profile?.party_profile_snapshot?.party_name || "ΕΛΑΣ";
+    const partyProfile = (data as any)?.profile;
+    const redLines: string[] = Array.isArray(partyProfile?.red_lines) ? partyProfile.red_lines : [];
+    const knownPositions: string[] = Array.isArray(partyProfile?.known_positions) ? partyProfile.known_positions : [];
+    const tone: string = partyProfile?.default_tone || "προοδευτικός, θεσμικός, κυβερνητικός, ενωτικός";
+
+    const eventTitles: string[] = (raw.top_events || []).map((e: any) => String(e.title || "")).filter(Boolean);
+    const articleTitles: string[] = (raw.evidence_articles || []).map((a: any) => String(a.title || "")).filter(Boolean);
+    const sourcesArr: string[] = Array.from(new Set((raw.evidence_articles || []).map((a: any) => String(a.source || "")).filter(Boolean))) as string[];
+
+    (async () => {
+      try {
+        const resp = await fetch("/api/situation-engine/strategic-image", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            micro_agenda_id: id,
+            micro_agenda: raw.micro_agenda,
+            party_key: partyKey,
+            party_name: partyName,
+            red_lines: redLines,
+            known_positions: knownPositions,
+            tone,
+            event_titles: eventTitles,
+            article_titles: articleTitles,
+            sources: sourcesArr,
+            real_news_coverage_score: raw.real_news_coverage_score ?? null,
+            real_trend_score: raw.real_trend_score ?? null,
+            score: raw.score ?? 0,
+            memory_lines: [],
+          }),
+        });
+        if (resp.ok) {
+          const json = await resp.json();
+          if (json.ok && json.body) {
+            setStrategicImageCache((prev) => ({ ...prev, [id]: json.body }));
+          }
+        }
+      } catch {
+        // best-effort — fallback στο template
+      } finally {
+        fetchingStrategicRef.current.delete(id);
+      }
+    })();
+  }, [activeProbeItem, data, strategicImageCache]);
 
   useEffect(() => {
     if (!activeOverviewTopic && agendaOverview.length > 0) {
@@ -1879,6 +1940,7 @@ export default function StrategyRoomPage() {
               selectedPartyImplication={selectedPartyImplication}
               probeView={activeProbeView}
               probeEvidenceArticles={activeProbeEvidenceArticles}
+              aiStrategicBody={activeProbeItem ? (strategicImageCache[String(activeProbeItem.raw.micro_agenda_id || activeProbeItem.raw.micro_agenda || "")] || null) : null}
             />
 
             <AdvisorDock
@@ -2519,6 +2581,7 @@ function ActiveSituationWorkspace({
   selectedPartyImplication,
   probeView,
   probeEvidenceArticles,
+  aiStrategicBody,
 }: {
   activeTab: SituationTab;
   onTabChange: (tab: SituationTab) => void;
@@ -2539,6 +2602,7 @@ function ActiveSituationWorkspace({
   selectedPartyImplication: string;
   probeView?: EventIntelligenceView | null;
   probeEvidenceArticles?: EvidenceArticleItem[];
+  aiStrategicBody?: string | null;
 }) {
   const issue = brief.issue || {};
   const daily = brief.daily_brief || {};
@@ -2669,7 +2733,7 @@ function ActiveSituationWorkspace({
             >
               <div className="grid gap-5 xl:grid-cols-[1fr_150px]">
                 <p className="text-[13px] leading-7 text-zinc-300/95">
-                  {strategicSection?.body || readStrategicText(situation, brief)}
+                  {aiStrategicBody || strategicSection?.body || readStrategicText(situation, brief)}
                 </p>
                                 <div className="rounded-2xl border border-white/[0.07] bg-black/15 p-4">
                   <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
