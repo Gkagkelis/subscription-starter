@@ -6,8 +6,8 @@
       "schedule": "*/30 * * * *"
     },
     {
-      "path": "/api/classify?token=dev&limit=10",
-      "schedule": "10 * * * *"
+      "path": "/api/classify?token=dev&limit=50",
+      "schedule": "*/10 * * * *"
     },
     {
       "path": "/api/external-signals/news-coverage?token=dev",
