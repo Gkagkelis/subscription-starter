@@ -29,7 +29,7 @@ const classifierModel =
   process.env.ANTHROPIC_CLASSIFIER_MODEL || "claude-haiku-4-5-20251001";
 
 // Ταξινομεί ΕΝΑ batch. Επιστρέφει πόσα ταξινόμησε (0 = τέλος ή σφάλμα).
-async function classifyBatch(limit: number): Promise<{ done: number; total: number; error?: string }> {
+async function classifyBatch(limit: number): Promise<{ done: number; total: number; error?: string; writeErrors?: number; lastWriteError?: string }> {
   const { data: articles, error: fetchError } = await supabase
     .from("articles")
     .select("id, title, description, category, source_name, published_at")
@@ -107,6 +107,8 @@ ${articlesList}`;
   }
 
   let updated = 0;
+  let writeErrors = 0;
+  let lastWriteError: string | undefined;
   for (const c of classifications) {
     const article = articles[c.index];
     if (!article) continue;
@@ -137,10 +139,15 @@ ${articlesList}`;
       })
       .eq("id", article.id);
 
-    if (!updateError) updated++;
+    if (!updateError) {
+      updated++;
+    } else {
+      writeErrors++;
+      lastWriteError = updateError.message;
+    }
   }
 
-  return { done: updated, total: articles.length };
+  return { done: updated, total: articles.length, writeErrors, lastWriteError };
 }
 
 export async function GET(req: Request) {
@@ -151,18 +158,23 @@ export async function GET(req: Request) {
   }
 
   const batchSize = 25;
+  const MAX_BATCHES = 20; // 20 x 25 = 500 άρθρα ανά τρέξιμο (σταθερά writes, χωρίς disconnect)
   const startedAt = Date.now();
-  const BUDGET_MS = 270000; // 4.5 λεπτά (κάτω από maxDuration 300)
+  const BUDGET_MS = 240000; // 4 λεπτά ασφάλεια
 
   let totalClassified = 0;
+  let totalWriteErrors = 0;
+  let lastWriteErrorMsg: string | undefined;
   let batches = 0;
   let lastError: string | undefined;
 
-  while (Date.now() - startedAt < BUDGET_MS) {
+  while (batches < MAX_BATCHES && Date.now() - startedAt < BUDGET_MS) {
     const r = await classifyBatch(batchSize);
     if (r.error) { lastError = r.error; if (r.done === 0) break; }
     if (r.total === 0) break; // τέλος — δεν υπάρχουν άλλα άρθρα
     totalClassified += r.done;
+    totalWriteErrors += r.writeErrors || 0;
+    if (r.lastWriteError) lastWriteErrorMsg = r.lastWriteError;
     batches += 1;
   }
 
@@ -177,6 +189,8 @@ export async function GET(req: Request) {
     mode: "bulk_loop",
     batches,
     total_classified: totalClassified,
+    total_write_errors: totalWriteErrors,
+    last_write_error: lastWriteErrorMsg || null,
     remaining_unclassified: remaining ?? null,
     last_error: lastError || null,
     note: remaining && remaining > 0
