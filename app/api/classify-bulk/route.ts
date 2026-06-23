@@ -144,7 +144,7 @@ ${articlesList}`;
       updated++;
     } else {
       writeErrors++;
-      lastWriteError = updateError.message;
+      lastWriteError = updateError?.message || "no rows written (RLS/commit)";
     }
   }
 
