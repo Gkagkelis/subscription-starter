@@ -30,10 +30,12 @@ const classifierModel =
 
 // Ταξινομεί ΕΝΑ batch. Επιστρέφει πόσα ταξινόμησε (0 = τέλος ή σφάλμα).
 async function classifyBatch(limit: number, excludeIds: string[]): Promise<{ done: number; total: number; error?: string; writeErrors?: number; lastWriteError?: string; processedIds: string[] }> {
+  const freshCutoff = new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString();
   let query = supabase
     .from("articles")
     .select("id, title, description, category, source_name, published_at")
-    .is("classified_at", null);
+    .is("classified_at", null)
+    .gte("published_at", freshCutoff);
   if (excludeIds.length > 0) {
     query = query.not("id", "in", "(" + excludeIds.join(",") + ")");
   }
@@ -189,10 +191,12 @@ export async function GET(req: Request) {
   }
 
   // Πόσα έμειναν;
+  const freshCutoff2 = new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString();
   const { count: remaining } = await supabase
     .from("articles")
     .select("id", { count: "exact", head: true })
-    .is("classified_at", null);
+    .is("classified_at", null)
+    .gte("published_at", freshCutoff2);
 
   return NextResponse.json({
     success: true,
