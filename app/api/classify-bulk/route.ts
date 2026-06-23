@@ -92,12 +92,15 @@ ${articlesList}`;
     },
     body: JSON.stringify({
       model: classifierModel,
-      max_tokens: 12000,
+      max_tokens: 10000,
       messages: [{ role: "user", content: prompt }],
     }),
   });
 
-  if (!response.ok) return { done: 0, total: articles.length, error: "AI error", processedIds: [] };
+  if (!response.ok) {
+    const errText = await response.text();
+    return { done: 0, total: articles.length, error: "AI " + response.status + ": " + errText.slice(0, 200), processedIds: [] };
+  }
 
   const data = await response.json();
   const text =
@@ -165,7 +168,7 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const batchSize = 40;
+  const batchSize = 30;
   const MAX_BATCHES = 30; // 20 x 25 = 500 άρθρα ανά τρέξιμο (σταθερά writes, χωρίς disconnect)
   const startedAt = Date.now();
   const BUDGET_MS = 240000; // 4 λεπτά ασφάλεια
