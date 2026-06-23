@@ -95,7 +95,7 @@ ${articlesList}`;
     }),
   });
 
-  if (!response.ok) return { done: 0, total: articles.length, error: "AI error" };
+  if (!response.ok) return { done: 0, total: articles.length, error: "AI error", processedIds: [] };
 
   const data = await response.json();
   const text =
@@ -107,7 +107,7 @@ ${articlesList}`;
     const jsonMatch = cleaned.match(/\[[\s\S]*\]/);
     classifications = JSON.parse(jsonMatch ? jsonMatch[0] : cleaned);
   } catch {
-    return { done: 0, total: articles.length, error: "parse_ai_json" };
+    return { done: 0, total: articles.length, error: "parse_ai_json", processedIds: [] };
   }
 
   let updated = 0;
