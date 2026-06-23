@@ -169,9 +169,9 @@ export async function GET(req: Request) {
   }
 
   const batchSize = 30;
-  const MAX_BATCHES = 30; // 20 x 25 = 500 άρθρα ανά τρέξιμο (σταθερά writes, χωρίς disconnect)
+  const MAX_BATCHES = 8; // 20 x 25 = 500 άρθρα ανά τρέξιμο (σταθερά writes, χωρίς disconnect)
   const startedAt = Date.now();
-  const BUDGET_MS = 240000; // 4 λεπτά ασφάλεια
+  const BUDGET_MS = 90000; // 4 λεπτά ασφάλεια
 
   let totalClassified = 0;
   let totalWriteErrors = 0;
