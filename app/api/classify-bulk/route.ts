@@ -116,7 +116,7 @@ ${articlesList}`;
     const publicRelevance = c.public_relevance === true && !isNoise;
     const isPolitical = c.is_political === true || publicRelevance;
 
-    const { error: updateError } = await supabase
+    const { data: updRows, error: updateError } = await supabase
       .from("articles")
       .update({
         topic: c.topic || null,
@@ -137,9 +137,10 @@ ${articlesList}`;
         classified_at: new Date().toISOString(),
         model_used: classifierModel,
       })
-      .eq("id", article.id);
+      .eq("id", article.id)
+      .select("id");
 
-    if (!updateError) {
+    if (!updateError && Array.isArray(updRows) && updRows.length > 0) {
       updated++;
     } else {
       writeErrors++;
@@ -176,6 +177,8 @@ export async function GET(req: Request) {
     totalWriteErrors += r.writeErrors || 0;
     if (r.lastWriteError) lastWriteErrorMsg = r.lastWriteError;
     batches += 1;
+    // Μικρή παύση ώστε να γίνει commit το write πριν το επόμενο select (αποφυγή race condition)
+    await new Promise((resolve) => setTimeout(resolve, 400));
   }
 
   // Πόσα έμειναν;
