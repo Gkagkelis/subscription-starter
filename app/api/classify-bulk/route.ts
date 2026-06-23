@@ -92,7 +92,7 @@ ${articlesList}`;
     },
     body: JSON.stringify({
       model: classifierModel,
-      max_tokens: 8000,
+      max_tokens: 12000,
       messages: [{ role: "user", content: prompt }],
     }),
   });
@@ -165,8 +165,8 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const batchSize = 25;
-  const MAX_BATCHES = 20; // 20 x 25 = 500 άρθρα ανά τρέξιμο (σταθερά writes, χωρίς disconnect)
+  const batchSize = 40;
+  const MAX_BATCHES = 30; // 20 x 25 = 500 άρθρα ανά τρέξιμο (σταθερά writes, χωρίς disconnect)
   const startedAt = Date.now();
   const BUDGET_MS = 240000; // 4 λεπτά ασφάλεια
 
@@ -187,7 +187,7 @@ export async function GET(req: Request) {
     if (r.lastWriteError) lastWriteErrorMsg = r.lastWriteError;
     batches += 1;
     // Μικρή παύση ώστε να γίνει commit το write πριν το επόμενο select (αποφυγή race condition)
-    await new Promise((resolve) => setTimeout(resolve, 400));
+    await new Promise((resolve) => setTimeout(resolve, 200));
   }
 
   // Πόσα έμειναν;
