@@ -29,16 +29,20 @@ const classifierModel =
   process.env.ANTHROPIC_CLASSIFIER_MODEL || "claude-haiku-4-5-20251001";
 
 // Ταξινομεί ΕΝΑ batch. Επιστρέφει πόσα ταξινόμησε (0 = τέλος ή σφάλμα).
-async function classifyBatch(limit: number): Promise<{ done: number; total: number; error?: string; writeErrors?: number; lastWriteError?: string }> {
-  const { data: articles, error: fetchError } = await supabase
+async function classifyBatch(limit: number, excludeIds: string[]): Promise<{ done: number; total: number; error?: string; writeErrors?: number; lastWriteError?: string; processedIds: string[] }> {
+  let query = supabase
     .from("articles")
     .select("id, title, description, category, source_name, published_at")
-    .is("classified_at", null)
+    .is("classified_at", null);
+  if (excludeIds.length > 0) {
+    query = query.not("id", "in", "(" + excludeIds.join(",") + ")");
+  }
+  const { data: articles, error: fetchError } = await query
     .order("published_at", { ascending: false, nullsFirst: false })
     .limit(limit);
 
-  if (fetchError) return { done: 0, total: 0, error: fetchError.message };
-  if (!articles || articles.length === 0) return { done: 0, total: 0 };
+  if (fetchError) return { done: 0, total: 0, error: fetchError.message, processedIds: [] };
+  if (!articles || articles.length === 0) return { done: 0, total: 0, processedIds: [] };
 
   const articlesList = articles
     .map(
@@ -109,6 +113,7 @@ ${articlesList}`;
   let updated = 0;
   let writeErrors = 0;
   let lastWriteError: string | undefined;
+  const processedIds: string[] = articles.map((a: any) => a.id);
   for (const c of classifications) {
     const article = articles[c.index];
     if (!article) continue;
@@ -148,7 +153,7 @@ ${articlesList}`;
     }
   }
 
-  return { done: updated, total: articles.length, writeErrors, lastWriteError };
+  return { done: updated, total: articles.length, writeErrors, lastWriteError, processedIds };
 }
 
 export async function GET(req: Request) {
@@ -169,8 +174,10 @@ export async function GET(req: Request) {
   let batches = 0;
   let lastError: string | undefined;
 
+  const seenIds: string[] = [];
   while (batches < MAX_BATCHES && Date.now() - startedAt < BUDGET_MS) {
-    const r = await classifyBatch(batchSize);
+    const r = await classifyBatch(batchSize, seenIds);
+    for (const pid of r.processedIds) seenIds.push(pid);
     if (r.error) { lastError = r.error; if (r.done === 0) break; }
     if (r.total === 0) break; // τέλος — δεν υπάρχουν άλλα άρθρα
     totalClassified += r.done;
