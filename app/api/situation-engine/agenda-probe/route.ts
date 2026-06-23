@@ -632,14 +632,13 @@ function forcedClassification(
 }
 
 function stableFallbackSignature(event: any): string {
-  const index = makeTextIndex(eventText(event));
-  const meaningful = index.tokens
-    .filter((token) => token.length >= 5)
-    .filter((token) => !STOPWORDS.has(token))
-    .slice(0, 5);
-
-  if (meaningful.length >= 2) return meaningful.sort().join("_");
-  const title = makeTextIndex(event?.title || event?.topic || "unknown").tokens.slice(0, 4).join("_");
+  // Ομαδοποιούμε τα αταξινόμητα events με βάση το ΓΟΝΙΚΟ ΘΕΜΑ (π.χ. Γεωπολιτική),
+  // ώστε άρθρα του ίδιου θέματος να ΜΗΝ σπάνε σε δεκάδες ξεχωριστά clusters.
+  const parent = String(event?.topic || event?.parent_topic || "").trim();
+  if (parent && parent !== "Μη ταξινομημένο") {
+    return makeTextIndex(parent).tokens.slice(0, 3).join("_") || "unclassified";
+  }
+  const title = makeTextIndex(event?.title || "unknown").tokens.slice(0, 4).join("_");
   return title || "unclassified";
 }
 
@@ -694,9 +693,14 @@ function classifyMicroAgenda(event: any): ClassificationResult {
   }
 
   const signature = stableFallbackSignature(event);
+  const parentLabel = String(event?.topic || event?.parent_topic || "").trim();
+  const niceLabel =
+    parentLabel && parentLabel !== "Μη ταξινομημένο"
+      ? parentLabel
+      : `Νέα υπο-ατζέντα: ${signature.replace(/_/g, " ")}`;
   return {
     micro_agenda_id: `fallback_${signature}`,
-    micro_agenda: `Νέα / μη ταξινομημένη υπο-ατζέντα: ${signature.replace(/_/g, " ")}`,
+    micro_agenda: niceLabel,
     confidence: CONFIG.fallbackConfidence,
     matches: [],
     mode: "fallback_low_confidence",
