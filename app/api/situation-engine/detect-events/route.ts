@@ -15,6 +15,10 @@ export const maxDuration = 300;
 // Αν το φθηνό μοντέλο δεν είναι διαθέσιμο, κάνει ΑΣΦΑΛΕΣ fallback σε Sonnet.
 //
 // Κρατά ΜΟΝΟ πολιτικά σημαντικά γεγονότα που δένουν με τις θεματικές του προφίλ.
+//
+// ΟΡΑΤΟΤΗΤΑ: αν το AI αποτύχει (credit/rate-limit/glitch), ΔΕΝ σταματάει τη ροή
+// — απλώς καταγράφει το σφάλμα στο πεδίο ai_failures της απάντησης, ώστε να
+// ξεχωρίζεις "0 events επειδή δεν υπήρχε υλικό" από "0 events επειδή έσπασε το AI".
 // ============================================================
 
 const FILTER_MODEL = process.env.ANTHROPIC_FILTER_MODEL || "claude-haiku-4-5";
@@ -34,6 +38,14 @@ type DetectedEvent = {
   summary: string;
   article_ids: string[];
   matched_theme?: string;
+};
+
+// Αποτέλεσμα ανά θεματική: events που φτιάχτηκαν + προαιρετικό σφάλμα AI.
+type TopicResult = {
+  topic: string;
+  events: number;
+  ai_error?: string | null;
+  articles_seen?: number;
 };
 
 function svc() {
@@ -131,9 +143,15 @@ ${lines}
 
 // Καλεί το AI με ΦΘΗΝΟ μοντέλο + prompt caching· αν το μοντέλο δεν υπάρχει,
 // επαναλαμβάνει ΜΙΑ φορά με το σίγουρο Sonnet.
-async function callAnthropic(system: string, user: string): Promise<string | null> {
+//
+// Επιστρέφει { text } σε επιτυχία, ή { error } σε αποτυχία — ΠΟΤΕ δεν πετάει,
+// ώστε η ροή να συνεχίζει στις υπόλοιπες θεματικές.
+async function callAnthropic(
+  system: string,
+  user: string
+): Promise<{ text: string | null; error: string | null }> {
   const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) return null;
+  if (!key) return { text: null, error: "ANTHROPIC_API_KEY missing" };
 
   const doCall = async (model: string) => {
     return fetch("https://api.anthropic.com/v1/messages", {
@@ -158,23 +176,33 @@ async function callAnthropic(system: string, user: string): Promise<string | nul
     });
   };
 
-  let res = await doCall(FILTER_MODEL);
+  try {
+    let res = await doCall(FILTER_MODEL);
+    let usedModel = FILTER_MODEL;
 
-  if (!res.ok && (res.status === 404 || res.status === 400)) {
-    // πιθανό λάθος όνομα φθηνού μοντέλου -> ασφαλές fallback
-    res = await doCall(FALLBACK_MODEL);
+    if (!res.ok && (res.status === 404 || res.status === 400)) {
+      // πιθανό λάθος όνομα φθηνού μοντέλου -> ασφαλές fallback
+      res = await doCall(FALLBACK_MODEL);
+      usedModel = FALLBACK_MODEL;
+    }
+
+    if (!res.ok) {
+      const body = (await res.text()).slice(0, 200);
+      return { text: null, error: `model=${usedModel} status=${res.status} ${body}` };
+    }
+
+    const data = await res.json();
+    const text = (data?.content || [])
+      .filter((b: any) => b?.type === "text")
+      .map((b: any) => b.text)
+      .join("\n");
+
+    if (!text) return { text: null, error: `model=${usedModel} empty_response` };
+
+    return { text, error: null };
+  } catch (e: any) {
+    return { text: null, error: `exception: ${String(e?.message || e).slice(0, 200)}` };
   }
-
-  if (!res.ok) return null;
-
-  const data = await res.json();
-
-  const text = (data?.content || [])
-    .filter((b: any) => b?.type === "text")
-    .map((b: any) => b.text)
-    .join("\n");
-
-  return text || null;
 }
 
 function stableEventKey(topic: string, articleIds: string[]) {
@@ -190,7 +218,7 @@ async function processTopic(
   supabase: ReturnType<typeof svc>,
   topic: string,
   themes: string[]
-): Promise<{ topic: string; events: number }> {
+): Promise<TopicResult> {
   const since = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
 
   const { data: articles } = await supabase
@@ -203,18 +231,21 @@ async function processTopic(
 
   const list = (articles || []) as ArticleRow[];
 
-  if (list.length < 2) return { topic, events: 0 };
+  if (list.length < 2) return { topic, events: 0, ai_error: null, articles_seen: list.length };
 
   const validIds = new Set(list.map((a) => a.id));
 
-  const raw = await callAnthropic(
+  const { text: raw, error: aiError } = await callAnthropic(
     buildSystemPrompt(themes),
     buildUserPrompt(topic, list)
   );
 
+  // Αν το AI απέτυχε, ΔΕΝ σταματάμε — επιστρέφουμε 0 events ΜΕ το σφάλμα ορατό.
+  if (aiError) return { topic, events: 0, ai_error: aiError, articles_seen: list.length };
+
   const parsed = raw ? parseAiJson(raw) : null;
 
-  if (!parsed) return { topic, events: 0 };
+  if (!parsed) return { topic, events: 0, ai_error: "ai_returned_unparseable_json", articles_seen: list.length };
 
   let count = 0;
 
@@ -241,7 +272,7 @@ async function processTopic(
     if (!rpcErr) count += 1;
   }
 
-  return { topic, events: count };
+  return { topic, events: count, ai_error: null, articles_seen: list.length };
 }
 
 async function handle(request: Request) {
@@ -266,6 +297,7 @@ async function handle(request: Request) {
         mode: "single",
         processed: [r],
         themes_loaded: themes.length,
+        ai_failures: r.ai_error ? [{ topic: r.topic, error: r.ai_error }] : [],
       });
     }
 
@@ -273,7 +305,7 @@ async function handle(request: Request) {
     const startedAt = Date.now();
     const BUDGET_MS = 120000; // 2 λεπτά ασφάλεια κάτω από το maxDuration 300
 
-    const results: Array<{ topic: string; events: number }> = [];
+    const results: TopicResult[] = [];
 
     while (Date.now() - startedAt < BUDGET_MS) {
       const { data: next } = await supabase.rpc("pick_next_topic_for_detection");
@@ -293,6 +325,11 @@ async function handle(request: Request) {
 
     const { data: more } = await supabase.rpc("pick_next_topic_for_detection");
 
+    // Μάζεψε τυχόν AI σφάλματα ώστε να είναι ΟΡΑΤΑ στην απάντηση.
+    const aiFailures = results
+      .filter((r) => r.ai_error)
+      .map((r) => ({ topic: r.topic, error: r.ai_error }));
+
     return NextResponse.json({
       ok: true,
       mode: "drain",
@@ -300,6 +337,8 @@ async function handle(request: Request) {
       events_created: results.reduce((s, r) => s + r.events, 0),
       themes_loaded: themes.length,
       remaining_topic: (more as string) || null,
+      ai_failures: aiFailures,
+      ai_ok: aiFailures.length === 0,
       detail: results,
     });
   } catch (e: any) {
