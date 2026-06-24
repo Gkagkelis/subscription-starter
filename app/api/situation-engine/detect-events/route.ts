@@ -8,17 +8,12 @@ export const maxDuration = 300;
 // ============================================================
 // NORAYA — Event Detection (φιλτράρισμα = ΦΘΗΝΟ μοντέλο)
 //
-// Ένα τρέξιμο ΑΔΕΙΑΖΕΙ όλες τις εκκρεμείς θεματικές (loop με time-budget),
-// ώστε να καλείται ΛΙΓΕΣ φορές τη μέρα (βλ. vercel.json), όχι συνεχώς.
+// Ένα τρέξιμο ΑΔΕΙΑΖΕΙ όλες τις εκκρεμείς θεματικές (loop με time-budget).
+// Χρησιμοποιεί ΦΘΗΝΟ μοντέλο (Haiku)· fallback σε Sonnet αν χρειαστεί.
+// Κρατά ΜΟΝΟ πολιτικά σημαντικά γεγονότα που δένουν με τις θεματικές.
 //
-// Χρησιμοποιεί ΦΘΗΝΟ μοντέλο (Haiku) για το φιλτράρισμα/clustering.
-// Αν το φθηνό μοντέλο δεν είναι διαθέσιμο, κάνει ΑΣΦΑΛΕΣ fallback σε Sonnet.
-//
-// Κρατά ΜΟΝΟ πολιτικά σημαντικά γεγονότα που δένουν με τις θεματικές του προφίλ.
-//
-// ΟΡΑΤΟΤΗΤΑ: αν το AI αποτύχει (credit/rate-limit/glitch), ΔΕΝ σταματάει τη ροή
-// — απλώς καταγράφει το σφάλμα στο πεδίο ai_failures της απάντησης, ώστε να
-// ξεχωρίζεις "0 events επειδή δεν υπήρχε υλικό" από "0 events επειδή έσπασε το AI".
+// ΟΡΑΤΟΤΗΤΑ: αν το AI αποτύχει, ΔΕΝ σταματάει τη ροή — καταγράφει το σφάλμα
+// στο πεδίο ai_failures της απάντησης.
 // ============================================================
 
 const FILTER_MODEL = process.env.ANTHROPIC_FILTER_MODEL || "claude-haiku-4-5";
@@ -40,7 +35,6 @@ type DetectedEvent = {
   matched_theme?: string;
 };
 
-// Αποτέλεσμα ανά θεματική: events που φτιάχτηκαν + προαιρετικό σφάλμα AI.
 type TopicResult = {
   topic: string;
   events: number;
@@ -89,10 +83,17 @@ function parseAiJson(raw: string): { events: DetectedEvent[] } | null {
     }
   };
 
-  let parsed = tryParse(raw);
+  // Καθάρισε τυχόν markdown code fences (```json ... ```) που βάζει το AI.
+  let cleaned = raw
+    .replace(/```json\s*/gi, "")
+    .replace(/```\s*/g, "")
+    .trim();
+
+  let parsed = tryParse(cleaned);
 
   if (!parsed) {
-    const match = raw.match(/\{[\s\S]*\}/);
+    // Πιάσε το JSON object από το πρώτο { μέχρι το τελευταίο }.
+    const match = cleaned.match(/\{[\s\S]*\}/);
     if (match) parsed = tryParse(match[0]);
   }
 
@@ -135,17 +136,14 @@ function buildUserPrompt(topic: string, articles: ArticleRow[]) {
 ΑΡΘΡΑ:
 ${lines}
 
-Επίστρεψε ΜΟΝΟ έγκυρο JSON, χωρίς markdown:
+Επίστρεψε ΜΟΝΟ έγκυρο JSON, χωρίς markdown, χωρίς \`\`\`:
 { "events": [ { "title": "...", "summary": "...", "matched_theme": "...", "article_ids": ["id1"] } ] }
 
 Αν ΚΑΝΕΝΑ άρθρο δεν είναι πολιτικά σημαντικό: { "events": [] }`;
 }
 
-// Καλεί το AI με ΦΘΗΝΟ μοντέλο + prompt caching· αν το μοντέλο δεν υπάρχει,
-// επαναλαμβάνει ΜΙΑ φορά με το σίγουρο Sonnet.
-//
-// Επιστρέφει { text } σε επιτυχία, ή { error } σε αποτυχία — ΠΟΤΕ δεν πετάει,
-// ώστε η ροή να συνεχίζει στις υπόλοιπες θεματικές.
+// Καλεί το AI με ΦΘΗΝΟ μοντέλο· fallback σε Sonnet αν χρειαστεί.
+// Επιστρέφει { text } σε επιτυχία, ή { error } σε αποτυχία — ΠΟΤΕ δεν πετάει.
 async function callAnthropic(
   system: string,
   user: string
@@ -163,7 +161,7 @@ async function callAnthropic(
       },
       body: JSON.stringify({
         model,
-        max_tokens: 1500,
+        max_tokens: 4000,
         system: [
           {
             type: "text",
@@ -181,7 +179,6 @@ async function callAnthropic(
     let usedModel = FILTER_MODEL;
 
     if (!res.ok && (res.status === 404 || res.status === 400)) {
-      // πιθανό λάθος όνομα φθηνού μοντέλου -> ασφαλές fallback
       res = await doCall(FALLBACK_MODEL);
       usedModel = FALLBACK_MODEL;
     }
@@ -207,9 +204,8 @@ async function callAnthropic(
 
 function stableEventKey(topic: string, articleIds: string[]) {
   // Το κλειδί βασίζεται στο "άγκυρα" άρθρο (το μικρότερο id αλφαβητικά),
-  // ΟΧΙ στον τίτλο. Έτσι το ίδιο πραγματικό γεγονός παράγει ΙΔΙΟ κλειδί
-  // ακόμα κι αν το AI του δώσει διαφορετικό τίτλο σε άλλο τρέξιμο,
-  // και ακόμα κι αν προστεθούν νέα άρθρα αργότερα (η άγκυρα μένει σταθερή).
+  // ΟΧΙ στον τίτλο. Έτσι το ίδιο γεγονός παράγει ΙΔΙΟ κλειδί ακόμα κι αν
+  // το AI του δώσει διαφορετικό τίτλο, και ακόμα κι αν προστεθούν νέα άρθρα.
   const anchor = [...articleIds].sort()[0] || "none";
   return `evt:ai:${topic.toLowerCase()}|anchor:${anchor}`;
 }
@@ -240,12 +236,11 @@ async function processTopic(
     buildUserPrompt(topic, list)
   );
 
-  // Αν το AI απέτυχε, ΔΕΝ σταματάμε — επιστρέφουμε 0 events ΜΕ το σφάλμα ορατό.
   if (aiError) return { topic, events: 0, ai_error: aiError, articles_seen: list.length };
 
   const parsed = raw ? parseAiJson(raw) : null;
 
-  if (!parsed) return { topic, events: 0, ai_error: "ai_returned_unparseable_json", articles_seen: list.length, raw_preview: (raw || "").slice(0, 400) } as any;
+  if (!parsed) return { topic, events: 0, ai_error: "ai_returned_unparseable_json", articles_seen: list.length };
 
   let count = 0;
 
@@ -284,7 +279,6 @@ async function handle(request: Request) {
 
     const themes = await loadActiveThemes(supabase);
 
-    // Χειροκίνητο: μία συγκεκριμένη θεματική
     if (requestedTopic) {
       const r = await processTopic(supabase, requestedTopic, themes);
 
@@ -298,12 +292,12 @@ async function handle(request: Request) {
         processed: [r],
         themes_loaded: themes.length,
         ai_failures: r.ai_error ? [{ topic: r.topic, error: r.ai_error }] : [],
+        ai_ok: !r.ai_error,
       });
     }
 
-    // Αυτόματο: ΑΔΕΙΑΣΕ όλες τις εκκρεμείς θεματικές σε αυτό το τρέξιμο
     const startedAt = Date.now();
-    const BUDGET_MS = 120000; // 2 λεπτά ασφάλεια κάτω από το maxDuration 300
+    const BUDGET_MS = 120000;
 
     const results: TopicResult[] = [];
 
@@ -325,7 +319,6 @@ async function handle(request: Request) {
 
     const { data: more } = await supabase.rpc("pick_next_topic_for_detection");
 
-    // Μάζεψε τυχόν AI σφάλματα ώστε να είναι ΟΡΑΤΑ στην απάντηση.
     const aiFailures = results
       .filter((r) => r.ai_error)
       .map((r) => ({ topic: r.topic, error: r.ai_error }));
