@@ -245,7 +245,7 @@ async function processTopic(
 
   const parsed = raw ? parseAiJson(raw) : null;
 
-  if (!parsed) return { topic, events: 0, ai_error: "ai_returned_unparseable_json", articles_seen: list.length };
+  if (!parsed) return { topic, events: 0, ai_error: "ai_returned_unparseable_json", articles_seen: list.length, raw_preview: (raw || "").slice(0, 400) } as any;
 
   let count = 0;
 
