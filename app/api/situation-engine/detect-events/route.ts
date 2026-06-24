@@ -129,11 +129,14 @@ ${lines}
 Αν ΚΑΝΕΝΑ άρθρο δεν είναι πολιτικά σημαντικό: { "events": [] }`;
 }
 
-// Καλεί το AI με ΦΘΗΝΟ μοντέλο + prompt caching· αν το μοντέλο δεν υπάρχει,
-// επαναλαμβάνει ΜΙΑ φορά με το σίγουρο Sonnet.
+// Diagnostic version: αντί να επιστρέφει σιωπηλά null,
+// πετάει σφάλμα με μοντέλο, status και σώμα απάντησης.
 async function callAnthropic(system: string, user: string): Promise<string | null> {
   const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) return null;
+
+  if (!key) {
+    throw new Error("DIAG: ANTHROPIC_API_KEY is MISSING from environment");
+  }
 
   const doCall = async (model: string) => {
     return fetch("https://api.anthropic.com/v1/messages", {
@@ -159,13 +162,23 @@ async function callAnthropic(system: string, user: string): Promise<string | nul
   };
 
   let res = await doCall(FILTER_MODEL);
+  let usedModel = FILTER_MODEL;
 
   if (!res.ok && (res.status === 404 || res.status === 400)) {
-    // πιθανό λάθος όνομα φθηνού μοντέλου -> ασφαλές fallback
     res = await doCall(FALLBACK_MODEL);
+    usedModel = FALLBACK_MODEL;
   }
 
-  if (!res.ok) return null;
+  if (!res.ok) {
+    const errBody = await res.text();
+
+    throw new Error(
+      `DIAG: AI call failed. model=${usedModel} status=${res.status} body=${errBody.slice(
+        0,
+        300
+      )}`
+    );
+  }
 
   const data = await res.json();
 
@@ -174,7 +187,16 @@ async function callAnthropic(system: string, user: string): Promise<string | nul
     .map((b: any) => b.text)
     .join("\n");
 
-  return text || null;
+  if (!text) {
+    throw new Error(
+      `DIAG: AI replied but no text. model=${usedModel} raw=${JSON.stringify(data).slice(
+        0,
+        300
+      )}`
+    );
+  }
+
+  return text;
 }
 
 function stableEventKey(topic: string, articleIds: string[]) {
