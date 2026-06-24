@@ -50,14 +50,21 @@ async function loadActiveThemes(supabase: ReturnType<typeof svc>): Promise<strin
     .select("themes, issues, updated_at, onboarding_completed")
     .order("updated_at", { ascending: false })
     .limit(5);
+
   const rows = (data || []) as any[];
   const org = rows.find((r) => r?.onboarding_completed) || rows[0];
+
   const themes: string[] = [];
+
   const push = (v: unknown) => {
-    if (Array.isArray(v)) v.forEach((x) => typeof x === "string" && themes.push(x));
+    if (Array.isArray(v)) {
+      v.forEach((x) => typeof x === "string" && themes.push(x));
+    }
   };
+
   push(org?.themes);
   push(org?.issues);
+
   return Array.from(new Set(themes));
 }
 
@@ -69,12 +76,16 @@ function parseAiJson(raw: string): { events: DetectedEvent[] } | null {
       return null;
     }
   };
+
   let parsed = tryParse(raw);
+
   if (!parsed) {
     const match = raw.match(/\{[\s\S]*\}/);
     if (match) parsed = tryParse(match[0]);
   }
+
   if (!parsed || !Array.isArray(parsed.events)) return null;
+
   return parsed as { events: DetectedEvent[] };
 }
 
@@ -82,6 +93,7 @@ function buildSystemPrompt(themes: string[]) {
   const themesText = themes.length
     ? themes.map((t) => `- ${t}`).join("\n")
     : "- (δεν έχουν οριστεί θεματικές — κράτα μόνο ό,τι έχει σαφή πολιτική σημασία)";
+
   return `Είσαι ο μηχανισμός ανίχνευσης γεγονότων του Noraya, για ΠΟΛΙΤΙΚΟ ΚΟΜΜΑ.
 
 Σου δίνεται μια ΘΕΜΑΤΙΚΗ και πρόσφατα άρθρα. Χώρισέ τα σε διακριτά ΓΕΓΟΝΟΤΑ.
@@ -105,6 +117,7 @@ function buildUserPrompt(topic: string, articles: ArticleRow[]) {
   const lines = articles
     .map((a) => `- [id:${a.id}] (${a.source_name || "—"}) ${a.title}`)
     .join("\n");
+
   return `ΘΕΜΑΤΙΚΗ: ${topic}
 
 ΑΡΘΡΑ:
@@ -133,30 +146,44 @@ async function callAnthropic(system: string, user: string): Promise<string | nul
       body: JSON.stringify({
         model,
         max_tokens: 1500,
-        system: [{ type: "text", text: system, cache_control: { type: "ephemeral" } }],
+        system: [
+          {
+            type: "text",
+            text: system,
+            cache_control: { type: "ephemeral" },
+          },
+        ],
         messages: [{ role: "user", content: user }],
       }),
     });
   };
 
   let res = await doCall(FILTER_MODEL);
+
   if (!res.ok && (res.status === 404 || res.status === 400)) {
     // πιθανό λάθος όνομα φθηνού μοντέλου -> ασφαλές fallback
     res = await doCall(FALLBACK_MODEL);
   }
+
   if (!res.ok) return null;
 
   const data = await res.json();
+
   const text = (data?.content || [])
     .filter((b: any) => b?.type === "text")
     .map((b: any) => b.text)
     .join("\n");
+
   return text || null;
 }
 
-function stableEventKey(topic: string, title: string) {
-  const norm = (title || "").toLowerCase().replace(/\s+/g, " ").trim().slice(0, 80);
-  return `evt:ai:${topic.toLowerCase()}|${norm}`;
+function stableEventKey(topic: string, articleIds: string[]) {
+  // Το κλειδί βασίζεται στο "άγκυρα" άρθρο (το μικρότερο id αλφαβητικά),
+  // ΟΧΙ στον τίτλο. Έτσι το ίδιο πραγματικό γεγονός παράγει ΙΔΙΟ κλειδί
+  // ακόμα κι αν το AI του δώσει διαφορετικό τίτλο σε άλλο τρέξιμο,
+  // και ακόμα κι αν προστεθούν νέα άρθρα αργότερα (η άγκυρα μένει σταθερή).
+  const anchor = [...articleIds].sort()[0] || "none";
+  return `evt:ai:${topic.toLowerCase()}|anchor:${anchor}`;
 }
 
 async function processTopic(
@@ -165,6 +192,7 @@ async function processTopic(
   themes: string[]
 ): Promise<{ topic: string; events: number }> {
   const since = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
+
   const { data: articles } = await supabase
     .from("articles")
     .select("id,title,source_name,topic,published_at,ingested_at")
@@ -174,59 +202,92 @@ async function processTopic(
     .limit(60);
 
   const list = (articles || []) as ArticleRow[];
+
   if (list.length < 2) return { topic, events: 0 };
 
   const validIds = new Set(list.map((a) => a.id));
-  const raw = await callAnthropic(buildSystemPrompt(themes), buildUserPrompt(topic, list));
+
+  const raw = await callAnthropic(
+    buildSystemPrompt(themes),
+    buildUserPrompt(topic, list)
+  );
+
   const parsed = raw ? parseAiJson(raw) : null;
+
   if (!parsed) return { topic, events: 0 };
 
   let count = 0;
+
   for (const ev of parsed.events) {
     const ids = (ev.article_ids || []).filter((id) => validIds.has(id));
+
     if (ids.length === 0) continue;
+
     const title = (ev.title || "").trim();
+
     if (!title) continue;
+
     const { error: rpcErr } = await supabase.rpc("upsert_political_event", {
       p_organization_id: null,
       p_topic: topic,
-      p_event_key: stableEventKey(topic, title),
+      p_event_key: stableEventKey(topic, ids),
       p_title: title,
       p_summary: (ev.summary || "").trim() || null,
       p_article_ids: ids,
       p_detection_method: "ai",
       p_detection_terms: ev.matched_theme ? [ev.matched_theme] : [],
     });
+
     if (!rpcErr) count += 1;
   }
+
   return { topic, events: count };
 }
 
 async function handle(request: Request) {
   try {
     const supabase = svc();
+
     const url = new URL(request.url);
     const requestedTopic = url.searchParams.get("topic");
+
     const themes = await loadActiveThemes(supabase);
 
     // Χειροκίνητο: μία συγκεκριμένη θεματική
     if (requestedTopic) {
       const r = await processTopic(supabase, requestedTopic, themes);
-      await supabase.rpc("mark_topic_detected", { p_topic: requestedTopic });
-      return NextResponse.json({ ok: true, mode: "single", processed: [r], themes_loaded: themes.length });
+
+      await supabase.rpc("mark_topic_detected", {
+        p_topic: requestedTopic,
+      });
+
+      return NextResponse.json({
+        ok: true,
+        mode: "single",
+        processed: [r],
+        themes_loaded: themes.length,
+      });
     }
 
     // Αυτόματο: ΑΔΕΙΑΣΕ όλες τις εκκρεμείς θεματικές σε αυτό το τρέξιμο
     const startedAt = Date.now();
     const BUDGET_MS = 120000; // 2 λεπτά ασφάλεια κάτω από το maxDuration 300
+
     const results: Array<{ topic: string; events: number }> = [];
 
     while (Date.now() - startedAt < BUDGET_MS) {
       const { data: next } = await supabase.rpc("pick_next_topic_for_detection");
+
       const topic = (next as string) || null;
+
       if (!topic) break;
+
       const r = await processTopic(supabase, topic, themes);
-      await supabase.rpc("mark_topic_detected", { p_topic: topic });
+
+      await supabase.rpc("mark_topic_detected", {
+        p_topic: topic,
+      });
+
       results.push(r);
     }
 
@@ -242,13 +303,20 @@ async function handle(request: Request) {
       detail: results,
     });
   } catch (e: any) {
-    return NextResponse.json({ ok: false, error: String(e?.message || e) }, { status: 500 });
+    return NextResponse.json(
+      {
+        ok: false,
+        error: String(e?.message || e),
+      },
+      { status: 500 }
+    );
   }
 }
 
 export async function GET(request: Request) {
   return handle(request);
 }
+
 export async function POST(request: Request) {
   return handle(request);
 }
