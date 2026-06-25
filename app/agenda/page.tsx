@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useId, useMemo, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
+import TopNav from "../../components/TopNav";
 import { IBM_Plex_Sans } from "next/font/google";
 
 const plex = IBM_Plex_Sans({
@@ -34,16 +34,6 @@ type TimelineResponse = {
   day_keys: string[];
   topics: Topic[];
 };
-
-const navTabs: { label: string; href: string | null }[] = [
-  { label: "Σήμερα", href: "/strategy-room" },
-  { label: "Ατζέντα", href: "/agenda" },
-  { label: "Καταστάσεις", href: null },
-  { label: "Σενάρια", href: null },
-  { label: "Πρόσωπα", href: null },
-  { label: "Αρχεία", href: null },
-  { label: "Δεδομένα", href: null },
-];
 
 const clamp = (v: number, min: number, max: number) => Math.max(min, Math.min(max, v));
 
@@ -80,6 +70,7 @@ function LiveSparkline({ data, color = "#22d3ee", className = "" }: { data: numb
   const area = `${line} L${w},${h} L0,${h} Z`;
   const gradId = `lsg-${uid}`;
   const pathId = `lsp-${uid}`;
+
   return (
     <svg
       viewBox={`0 0 ${w} ${h}`}
@@ -159,6 +150,7 @@ function AgendaRadar({ topics, onPick }: { topics: Topic[]; onPick: (t: Topic) =
       {topics.map((t) => {
         const m = stanceMeta(t.stance);
         const showLabel = labelSet.has(t.topic);
+
         return (
           <g key={t.topic} className="cursor-pointer" onClick={() => onPick(t)}>
             <circle cx={x(t)} cy={yOf(t.change_7d)} r={r(t)} fill={m.dot} fillOpacity="0.18" stroke={m.dot} strokeWidth="1.5" />
@@ -184,6 +176,7 @@ export default function AgendaPage() {
   useEffect(() => {
     (async () => {
       let pk = "elas";
+
       try {
         const pr = await fetch("/api/onboarding", { cache: "no-store" });
         if (pr.ok) {
@@ -194,12 +187,14 @@ export default function AgendaPage() {
       } catch {
         /* default elas */
       }
+
       try {
         const r = await fetch(`/api/agenda/timeline?token=dev&party=${encodeURIComponent(pk)}`, { cache: "no-store" });
         if (r.ok) setData((await r.json()) as TimelineResponse);
       } catch {
         /* ignore */
       }
+
       setLoading(false);
     })();
   }, []);
@@ -235,26 +230,9 @@ export default function AgendaPage() {
               <div className="text-[10px] tracking-wide text-zinc-600">Πολιτική ευφυΐα</div>
             </div>
           </div>
-          <nav className="flex items-center gap-1">
-            {navTabs.map((tab) => {
-              const active = tab.label === "Ατζέντα";
-              const base = "rounded-2xl px-3 py-2 text-xs transition";
-              if (tab.href) {
-                return (
-                  <Link
-                    key={tab.label}
-                    href={tab.href}
-                    className={`${base} ${active ? "border border-cyan-300/25 bg-cyan-300/10 text-cyan-100" : "text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-300"}`}
-                  >
-                    {tab.label}
-                  </Link>
-                );
-              }
-              return (
-                <span key={tab.label} className={`${base} cursor-not-allowed text-zinc-700`}>{tab.label}</span>
-              );
-            })}
-          </nav>
+
+          <TopNav />
+
           <div className="rounded-2xl border border-[#1a2640] bg-[#0c1220] px-3 py-2 text-[11px] text-zinc-400">{partyLabel}</div>
         </div>
       </header>
@@ -285,10 +263,12 @@ export default function AgendaPage() {
                 <h2 className="text-base font-semibold text-zinc-200">{hasRising ? "Τα 3 θέματα που ανεβαίνουν" : "Τα 3 ισχυρότερα σήματα τώρα"}</h2>
                 <span className="text-[11px] text-zinc-600">{hasRising ? "τα ισχυρότερα ανερχόμενα σήματα" : "δεν υπάρχει σαφής άνοδος αυτή τη στιγμή"}</span>
               </div>
+
               <div className="grid gap-4 md:grid-cols-3">
                 {rising.map((t) => {
                   const m = stanceMeta(t.stance);
                   const lbl = microLabel(t);
+
                   return (
                     <button
                       key={t.topic}
@@ -328,6 +308,7 @@ export default function AgendaPage() {
                 <h2 className="text-base font-semibold text-zinc-200">Ραντάρ ατζέντας</h2>
                 <span className="text-[11px] text-zinc-600">μέγεθος = όγκος άρθρων · χρώμα = ευκαιρία / απειλή</span>
               </div>
+
               <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
                 <div className="rounded-3xl border border-[#1a2640] bg-[#0a0f1c] p-4">
                   <div className="aspect-[2/1] w-full">
@@ -339,11 +320,13 @@ export default function AgendaPage() {
                     <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full" style={{ background: "#94a3b8" }} /> Ουδέτερο</span>
                   </div>
                 </div>
+
                 <div className="rounded-3xl border border-[#1a2640] bg-[#0c1220] p-4">
                   <div className="mb-2 text-xs font-medium text-zinc-400">Ισχυρότερα σήματα</div>
                   <div className="grid gap-1">
                     {strongest.map((t) => {
                       const m = stanceMeta(t.stance);
+
                       return (
                         <button key={t.topic} type="button" onClick={() => pickTopic(t)} className="flex items-center gap-2 rounded-xl px-2 py-2 text-left transition hover:bg-white/[0.04]">
                           <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: m.dot }} />
@@ -364,6 +347,7 @@ export default function AgendaPage() {
                   <h2 className="text-base font-semibold text-emerald-300">Πού να επιτεθείς</h2>
                   <p className="text-[11px] text-zinc-600">Ευκαιρίες για {partyLabel} — πού μπορείς να κερδίσεις ατζέντα</p>
                 </div>
+
                 <div className="grid gap-3">
                   {opportunities.length === 0 ? (
                     <div className="rounded-2xl border border-[#1a2640] bg-[#0c1220] p-4 text-xs text-zinc-500">Καμία καθαρή ευκαιρία αυτή τη στιγμή.</div>
@@ -389,6 +373,7 @@ export default function AgendaPage() {
                   <h2 className="text-base font-semibold text-red-300">Πού να αμυνθείς</h2>
                   <p className="text-[11px] text-zinc-600">Απειλές για {partyLabel} — πού μπορεί να σε στριμώξει η επικαιρότητα</p>
                 </div>
+
                 <div className="grid gap-3">
                   {threats.length === 0 ? (
                     <div className="rounded-2xl border border-[#1a2640] bg-[#0c1220] p-4 text-xs text-zinc-500">Καμία καθαρή απειλή αυτή τη στιγμή.</div>
@@ -416,6 +401,7 @@ export default function AgendaPage() {
                 {allRanked.map((t) => {
                   const m = stanceMeta(t.stance);
                   const lbl = microLabel(t);
+
                   return (
                     <button
                       key={t.topic}
