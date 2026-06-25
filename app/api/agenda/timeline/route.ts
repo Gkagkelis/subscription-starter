@@ -145,7 +145,15 @@ export async function GET(request: Request) {
   const topics = Array.from(groups.values())
     .map((g) => {
       const change7d = g.last7 - g.prev7;
-      const changePct = g.prev7 > 0 ? Math.round(((g.last7 - g.prev7) / g.prev7) * 100) : g.last7 > 0 ? 100 : 0;
+      // Ποσοστό μεταβολής με «καπάκι»: αποφεύγουμε τερατώδη νούμερα όταν η προηγούμενη
+      // εβδομάδα έχει αραιά/ελλιπή ιστορικά δεδομένα. Όριο: -100% έως +200%.
+      let changePct: number;
+      if (g.prev7 > 0) {
+        const raw = Math.round(((g.last7 - g.prev7) / g.prev7) * 100);
+        changePct = Math.max(-100, Math.min(200, raw));
+      } else {
+        changePct = g.last7 > 0 ? 200 : 0;
+      }
       return {
         topic: g.topic,
         total: g.total,
