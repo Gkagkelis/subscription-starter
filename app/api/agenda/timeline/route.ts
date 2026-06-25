@@ -9,13 +9,51 @@ type ArticleRow = { topic: string | null; published_at: string | null };
 type TopicAgg = {
   topic: string;
   total: number;
-  daily: number[]; // 30 τιμές, παλιότερο → νεότερο
+  daily: number[]; // N τιμές, παλιότερο → νεότερο
   last7: number;
   prev7: number;
 };
 
 function dayKey(d: Date): string {
   return d.toISOString().slice(0, 10);
+}
+
+// ── Φέρνει το ζωντανό score ανά parent_topic από το agenda-probe (η ΙΔΙΑ πηγή με το Strategy Room) ──
+// Επιστρέφει Map<parent_topic, maxScore>. Αν αποτύχει, επιστρέφει null (ώστε να πέσουμε σε fallback).
+async function fetchAgendaProbeScores(request: Request, token: string): Promise<Map<string, number> | null> {
+  try {
+    const origin = new URL(request.url).origin;
+    const r = await fetch(
+      `${origin}/api/situation-engine/agenda-probe?token=${encodeURIComponent(token)}&hours=48&view=brief`,
+      { cache: "no-store" }
+    );
+    if (!r.ok) return null;
+    const j = await r.json();
+    const clusters: any[] = Array.isArray(j?.agenda_clusters) ? j.agenda_clusters : [];
+    if (clusters.length === 0) return null;
+
+    // Μέγιστο score ανά parent_topic (ένα parent μπορεί να έχει πολλά micro-agenda).
+    const byParent = new Map<string, number>();
+    for (const c of clusters) {
+      const score = typeof c?.score === "number" ? c.score : null;
+      if (score === null) continue;
+      // Κάθε cluster μπορεί να αγγίζει πολλά parent topics.
+      const parents: string[] = Array.isArray(c?.parent_topics) && c.parent_topics.length
+        ? c.parent_topics
+        : c?.parent_topic
+        ? [c.parent_topic]
+        : [];
+      for (const p of parents) {
+        const key = String(p).trim();
+        if (!key) continue;
+        const prev = byParent.get(key) ?? 0;
+        if (score > prev) byParent.set(key, score);
+      }
+    }
+    return byParent.size > 0 ? byParent : null;
+  } catch {
+    return null;
+  }
 }
 
 export async function GET(request: Request) {
@@ -90,20 +128,26 @@ export async function GET(request: Request) {
     else if (di >= days - 14) g.prev7 += 1;
   }
 
-  // ── agenda_score ανά θέμα (best-effort enrichment) ──
+  // ── agenda_score ανά θέμα: ΠΡΟΤΕΡΑΙΟΤΗΤΑ στο ζωντανό agenda-probe (ίδια πηγή με Strategy Room) ──
+  // Fallback: η παλιά πηγή v_advisor_agenda_briefs_recent, αν το probe δεν απαντήσει.
   const scoreByTopic = new Map<string, number>();
-  try {
-    const { data } = await supabase
-      .from("v_advisor_agenda_briefs_recent")
-      .select("topic, agenda_score")
-      .limit(200);
-    if (Array.isArray(data)) {
-      for (const r of data as any[]) {
-        if (r?.topic && typeof r.agenda_score === "number") scoreByTopic.set(String(r.topic), r.agenda_score);
+  const probeScores = await fetchAgendaProbeScores(request, token);
+  if (probeScores) {
+    for (const [k, v] of probeScores) scoreByTopic.set(k, v);
+  } else {
+    try {
+      const { data } = await supabase
+        .from("v_advisor_agenda_briefs_recent")
+        .select("topic, agenda_score")
+        .limit(200);
+      if (Array.isArray(data)) {
+        for (const r of data as any[]) {
+          if (r?.topic && typeof r.agenda_score === "number") scoreByTopic.set(String(r.topic), r.agenda_score);
+        }
       }
+    } catch {
+      /* αγνοούμε */
     }
-  } catch {
-    /* αγνοούμε */
   }
 
   const topics = Array.from(groups.values())
@@ -124,7 +168,9 @@ export async function GET(request: Request) {
         angle: "",
       };
     })
-    .sort((a, b) => (b.agenda_score ?? b.total) - (a.agenda_score ?? a.total))
+    // Κατάταξη: πρώτα όσα έχουν ζωντανό agenda-probe score (ίδια σειρά με Strategy Room),
+    // μετά τα υπόλοιπα κατά όγκο.
+    .sort((a, b) => (b.agenda_score ?? -1) - (a.agenda_score ?? -1) || b.total - a.total)
     .slice(0, 14);
 
   // ── Στοχευμένη ανάγνωση ανά κόμμα (1 φθηνή κλήση Haiku, batched, guarded) ──
@@ -189,6 +235,7 @@ export async function GET(request: Request) {
     days,
     generated_at: new Date().toISOString(),
     has_party_profile: !!partyProfile,
+    agenda_score_source: probeScores ? "agenda_probe_live" : "advisor_briefs_fallback",
     day_keys: dayKeys,
     topics,
   });
