@@ -133,7 +133,7 @@ export async function GET(request: Request) {
   const scoreByTopic = new Map<string, number>();
   const probeScores = await fetchAgendaProbeScores(request, token);
   if (probeScores) {
-    for (const [k, v] of probeScores) scoreByTopic.set(k, v);
+    probeScores.forEach((v, k) => scoreByTopic.set(k, v));
   } else {
     try {
       const { data } = await supabase
