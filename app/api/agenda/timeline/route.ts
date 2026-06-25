@@ -95,7 +95,8 @@ export async function GET(request: Request) {
       .select("topic, published_at")
       .gte("published_at", sinceIso)
       .not("topic", "is", null)
-      .limit(20000);
+      .order("published_at", { ascending: false })
+      .limit(40000);
     articles = Array.isArray(data) ? (data as ArticleRow[]) : [];
   } catch {
     articles = [];
