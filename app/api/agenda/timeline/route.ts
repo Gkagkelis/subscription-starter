@@ -5,7 +5,6 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-type ArticleRow = { topic: string | null; published_at: string | null };
 type TopicAgg = {
   topic: string;
   total: number;
@@ -85,21 +84,14 @@ export async function GET(request: Request) {
     partyProfile = null;
   }
 
-  // ── Πραγματικά άρθρα τελευταίων N ημερών (ταξινομημένα, πολιτικά) ──
-  const sinceMs = Date.now() - days * 24 * 60 * 60 * 1000;
-  const sinceIso = new Date(sinceMs).toISOString();
-  let articles: ArticleRow[] = [];
+  // ── Ημερήσια counts ανά θέμα από τη βάση (group by στη βάση, χωρίς όρια άρθρων) ──
+  type CountRow = { topic: string; day: string; n: number };
+  let countRows: CountRow[] = [];
   try {
-    const { data } = await supabase
-      .from("articles")
-      .select("topic, published_at")
-      .gte("published_at", sinceIso)
-      .not("topic", "is", null)
-      .order("published_at", { ascending: false })
-      .limit(40000);
-    articles = Array.isArray(data) ? (data as ArticleRow[]) : [];
+    const { data } = await supabase.rpc("agenda_daily_counts", { p_days: days });
+    countRows = Array.isArray(data) ? (data as CountRow[]) : [];
   } catch {
-    articles = [];
+    countRows = [];
   }
 
   // ── Ημερήσια buckets ανά θέμα ──
@@ -110,22 +102,22 @@ export async function GET(request: Request) {
   const idxOf = new Map(dayKeys.map((k, i) => [k, i]));
   const groups = new Map<string, TopicAgg>();
 
-  for (const a of articles) {
-    const topic = (a.topic || "").trim();
+  for (const row of countRows) {
+    const topic = (row.topic || "").trim();
     if (!topic || topic === "Μη ταξινομημένο") continue;
-    if (!a.published_at) continue;
-    const k = String(a.published_at).slice(0, 10);
+    const k = String(row.day).slice(0, 10);
     const di = idxOf.get(k);
     if (di === undefined) continue;
+    const n = Number(row.n) || 0;
     let g = groups.get(topic);
     if (!g) {
       g = { topic, total: 0, daily: new Array(days).fill(0), last7: 0, prev7: 0 };
       groups.set(topic, g);
     }
-    g.daily[di] += 1;
-    g.total += 1;
-    if (di >= days - 7) g.last7 += 1;
-    else if (di >= days - 14) g.prev7 += 1;
+    g.daily[di] += n;
+    g.total += n;
+    if (di >= days - 7) g.last7 += n;
+    else if (di >= days - 14) g.prev7 += n;
   }
 
   // ── agenda_score ανά θέμα: ΠΡΟΤΕΡΑΙΟΤΗΤΑ στο ζωντανό agenda-probe (ίδια πηγή με Strategy Room) ──
