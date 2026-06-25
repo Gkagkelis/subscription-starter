@@ -95,8 +95,7 @@ export async function GET(request: Request) {
       .select("topic, published_at")
       .gte("published_at", sinceIso)
       .not("topic", "is", null)
-      .eq("is_political", true)
-      .limit(8000);
+      .limit(20000);
     articles = Array.isArray(data) ? (data as ArticleRow[]) : [];
   } catch {
     articles = [];
