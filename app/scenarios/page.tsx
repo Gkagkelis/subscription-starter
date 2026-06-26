@@ -481,17 +481,8 @@ export default function ScenariosPage() {
                 <h2 className="mt-1 text-2xl font-semibold text-zinc-50">{selectedEvent?.title}</h2>
                 <p className="mt-3 max-w-xl text-sm text-zinc-400">Ο Noraya θα προβλέψει 2-3 πιθανές εξελίξεις και θα προσομοιώσει τις κινήσεις σου, με βάση τα πραγματικά στοιχεία του γεγονότος και το προφίλ σου.</p>
 
-                <CustomInputs
-                  customLink={customLink}
-                  setCustomLink={setCustomLink}
-                  customText={customText}
-                  setCustomText={setCustomText}
-                  customFiles={customFiles}
-                  setCustomFiles={setCustomFiles}
-                />
-
                 <button type="button" onClick={() => selectedEvent && generate(selectedEvent.id)} className="mt-5 rounded-2xl border border-cyan-300/30 bg-cyan-300/10 px-5 py-2.5 text-sm font-medium text-cyan-100 transition hover:bg-cyan-300/20">
-                  ▶ Ανάλυσε σενάρια{(customText || customLink || customFiles.length) ? " (με τα στοιχεία μου)" : ""}
+                  ▶ Ανάλυσε σενάρια
                 </button>
               </div>
               )
