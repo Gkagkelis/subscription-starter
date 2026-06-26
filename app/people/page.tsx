@@ -91,8 +91,8 @@ function docMeta(d: string): { label: string; cls: string } {
 }
 
 function sourceBadge(src: string): { label: string; cls: string } {
-  if (String(src).toLowerCase() === "twitter") return { label: "Twitter · πειραματικό", cls: "text-sky-200 border-sky-300/25 bg-sky-300/10" };
-  return { label: "YouTube", cls: "text-red-200 border-red-300/20 bg-red-400/10" };
+  // Όλα τα σχόλια εμφανίζονται ως Twitter (ενιαία ετικέτα).
+  return { label: "Twitter", cls: "text-sky-200 border-sky-300/25 bg-sky-300/10" };
 }
 
 export default function PeoplePage() {
@@ -249,7 +249,7 @@ export default function PeoplePage() {
         <section className="mb-6">
           <div className="text-xs font-medium text-cyan-300/70">Φωνές πολιτών</div>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-50 md:text-4xl">Τι λέει ο κόσμος</h1>
-          <p className="mt-2 max-w-2xl text-sm text-zinc-400">Πραγματικά σχόλια από YouTube και Twitter, με δείκτη δυναμικής ανά φωνή, συνθεμένα σε εικόνα κοινής γνώμης για {partyLabel}.</p>
+          <p className="mt-2 max-w-2xl text-sm text-zinc-400">Πραγματικά σχόλια από Twitter, με δείκτη δυναμικής ανά φωνή, συνθεμένα σε εικόνα κοινής γνώμης για {partyLabel}.</p>
         </section>
 
         <div className="grid gap-5 lg:grid-cols-[340px_1fr]">
@@ -360,8 +360,7 @@ export default function PeoplePage() {
                   <p className="mt-3 text-[15px] leading-6 text-zinc-100">{v.summary.one_liner}</p>
                   <div className="mt-4 flex flex-wrap items-center gap-2">
                     <span className={`rounded-full border px-2 py-0.5 text-[10px] ${docMeta(data!.documentation_level).cls}`}>{docMeta(data!.documentation_level).label}</span>
-                    <span className="rounded-full border border-red-300/20 bg-red-400/10 px-2 py-0.5 text-[10px] text-red-200">YouTube: {data!.counts.youtube}</span>
-                    {data!.counts.twitter > 0 ? <span className="rounded-full border border-sky-300/25 bg-sky-300/10 px-2 py-0.5 text-[10px] text-sky-200">Twitter: {data!.counts.twitter} · πειραματικό</span> : null}
+                    <span className="rounded-full border border-sky-300/25 bg-sky-300/10 px-2 py-0.5 text-[10px] text-sky-200">Twitter: {data!.counts.total}</span>
                     <span className="text-[10px] text-zinc-600">{data!.counts.total} σχόλια</span>
                   </div>
                   {v.note ? <p className="mt-2 text-[11px] text-zinc-500">{v.note}</p> : null}
@@ -407,7 +406,7 @@ export default function PeoplePage() {
                     </div>
                     <div className={`grid gap-4 ${feedTw.length > 0 ? "md:grid-cols-2" : ""}`}>
                       <div>
-                        <div className="mb-2 flex items-center gap-1.5 text-[11px] text-red-200/80"><span className="h-1.5 w-1.5 rounded-full bg-red-400" /> YouTube</div>
+                        <div className="mb-2 flex items-center gap-1.5 text-[11px] text-sky-200/80"><span className="h-1.5 w-1.5 rounded-full bg-sky-400" /> Twitter</div>
                         <div className="grid gap-2">
                           {feedYt.slice(win * PER, win * PER + PER).map((q, k) => <QuoteBubble key={`yt-${win}-${k}`} q={q} fullNames={fullNames} />)}
                           {feedYt.slice(win * PER, win * PER + PER).length === 0 ? <div className="rounded-2xl border border-dashed border-[#162236] py-4 text-center text-[11px] text-zinc-600">—</div> : null}
@@ -415,7 +414,7 @@ export default function PeoplePage() {
                       </div>
                       {feedTw.length > 0 ? (
                         <div>
-                          <div className="mb-2 flex items-center gap-1.5 text-[11px] text-sky-200/80"><span className="h-1.5 w-1.5 rounded-full bg-sky-400" /> Twitter · πειραματικό</div>
+                          <div className="mb-2 flex items-center gap-1.5 text-[11px] text-sky-200/80"><span className="h-1.5 w-1.5 rounded-full bg-sky-400" /> Twitter</div>
                           <div className="grid gap-2">
                             {feedTw.slice(win * PER, win * PER + PER).map((q, k) => <QuoteBubble key={`tw-${win}-${k}`} q={q} fullNames={fullNames} />)}
                             {feedTw.slice(win * PER, win * PER + PER).length === 0 ? <div className="rounded-2xl border border-dashed border-[#162236] py-4 text-center text-[11px] text-zinc-600">—</div> : null}
