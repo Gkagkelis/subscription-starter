@@ -1,4 +1,4 @@
-  "use client";
+ "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode } from "react";
@@ -2197,11 +2197,19 @@ export default function StrategyRoomPage() {
   const advisorSituationKey = useMemo(() => {
     const partyKey =
       data?.profile?.party_key || partyShortName(profile) || "unknown-party";
+    // Το κλειδί δένει με ΤΟ ΕΠΙΛΕΓΜΕΝΟ ΓΕΓΟΝΟΣ του Χάρτη ατζέντας (probe event),
+    // ώστε ΜΟΛΙΣ αλλάζεις γεγονός να αλλάζει το κλειδί → tabula rasa (καθαρή κουβέντα).
+    const probeKey = activeProbeSelection
+      ? `${activeProbeSelection.clusterId || ""}::${activeProbeSelection.eventId || ""}`
+      : "";
     const situationKey = String(
-      (activeSituation as any)?.id || activeTitle || "no-active-situation",
+      probeKey ||
+        (activeSituation as any)?.id ||
+        activeTitle ||
+        "no-active-situation",
     );
     return `noraya-advisor:${partyKey}:${situationKey}`;
-  }, [activeSituation, activeTitle, data?.profile?.party_key, profile]);
+  }, [activeProbeSelection, activeSituation, activeTitle, data?.profile?.party_key, profile]);
 
   useEffect(() => {
     setAdvisorStorageReady(false);
