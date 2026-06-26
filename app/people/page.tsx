@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import Link from "next/link";
+import TopNav from "../../components/TopNav";
+import { buildAgendaMap, type ProbeV4Response, type AgendaMapItem } from "../../lib/noraya/strategy-room-intelligence";
 import { IBM_Plex_Sans } from "next/font/google";
 
 const plex = IBM_Plex_Sans({ subsets: ["greek", "latin"], weight: ["400", "500", "600", "700"], display: "swap" });
 
-type Situation = Record<string, unknown>;
 type Quote = { text: string; name: string; source: string; likes: number; followers: number | null; influence: number; retweets?: number; quotes?: number; replies?: number };
 type Theme = { label: string; gist: string; share_hint: string; quotes: Quote[] };
 type Voices = {
@@ -31,15 +31,19 @@ function quoteKey(q: Quote): string {
   return `${q.name || ""}|${(q.text || "").slice(0, 40)}`;
 }
 
-const navTabs: { label: string; href: string | null }[] = [
-  { label: "Σήμερα", href: "/strategy-room" },
-  { label: "Ατζέντα", href: "/agenda" },
-  { label: "Καταστάσεις", href: "/situations" },
-  { label: "Σενάρια", href: "/scenarios" },
-  { label: "Πρόσωπα", href: "/people" },
-  { label: "Αρχεία", href: null },
-  { label: "Δεδομένα", href: null },
-];
+// Ένα γεγονός μέσα σε μια θεματική (επίπεδο 2)
+type AgendaEventItem = {
+  id: string;
+  title: string;
+  score: number;
+};
+// Μια θεματική (επίπεδο 1) που ανοίγει σε γεγονότα
+type AgendaThemeItem = {
+  clusterId: string;
+  topic: string;
+  score: number;
+  events: AgendaEventItem[];
+};
 
 function num(v: unknown, f = 0): number {
   const n = typeof v === "number" ? v : parseFloat(String(v ?? ""));
@@ -92,11 +96,13 @@ function sourceBadge(src: string): { label: string; cls: string } {
 }
 
 export default function PeoplePage() {
-  const [situations, setSituations] = useState<Situation[]>([]);
+  // Θεματικές (επίπεδο 1) από τον Χάρτη ατζέντας (agenda-probe), ίδια σειρά/score με το «Σήμερα».
+  const [themes, setThemes] = useState<AgendaThemeItem[]>([]);
   const [party, setParty] = useState("elas");
   const [partyLabel, setPartyLabel] = useState("ΕΛΑΣ");
   const [loadingList, setLoadingList] = useState(true);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [expandedTopic, setExpandedTopic] = useState<string | null>(null);
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [data, setData] = useState<VoicesResponse | null>(null);
   const [listening, setListening] = useState(false);
   const [errMsg, setErrMsg] = useState<string | null>(null);
@@ -120,11 +126,28 @@ export default function PeoplePage() {
         /* default */
       }
       setParty(pk);
+      // Πηγή = ο ΙΔΙΟΣ Χάρτης ατζέντας με το «Σήμερα»: agenda-probe → buildAgendaMap.
       try {
-        const r = await fetch(`/api/situation-engine?token=dev&party=${encodeURIComponent(pk)}`, { cache: "no-store" });
+        const r = await fetch(
+          `/api/situation-engine/agenda-probe?token=dev&hours=168&party=${encodeURIComponent(pk)}`,
+          { cache: "no-store" }
+        );
         if (r.ok) {
-          const j = await r.json();
-          if (Array.isArray(j?.situations)) setSituations(j.situations as Situation[]);
+          const probe = (await r.json()) as ProbeV4Response;
+          const map: AgendaMapItem[] = probe?.success ? buildAgendaMap(probe) : [];
+          const built: AgendaThemeItem[] = map.slice(0, 12).map((item) => ({
+            clusterId: item.id,
+            topic: item.title,
+            score: Math.round(num(item.score)),
+            events: (item.events || [])
+              .filter((ev) => ev.id)
+              .map((ev) => ({
+                id: String(ev.id),
+                title: ev.title || item.title,
+                score: Math.round(num(ev.event_score, item.score)),
+              })),
+          })).filter((t) => t.events.length > 0);
+          setThemes(built);
         }
       } catch {
         /* ignore */
@@ -133,21 +156,14 @@ export default function PeoplePage() {
     })();
   }, []);
 
-  const list = useMemo(
-    () =>
-      situations
-        .map((s) => ({
-          id: String(s["id"] ?? s["topic"] ?? ""),
-          title: String(s["title"] ?? s["topic"] ?? "Χωρίς τίτλο"),
-          topic: String(s["topic"] ?? s["category"] ?? ""),
-          score: Math.round(num(s["priority_score"] ?? s["strategic_index_score"] ?? s["event_score"])),
-        }))
-        .filter((s) => s.id)
-        .sort((a, b) => b.score - a.score),
-    [situations]
-  );
-
-  const selected = useMemo(() => list.find((s) => s.id === selectedId) || null, [list, selectedId]);
+  // Το επιλεγμένο γεγονός — θέλουμε topic (θεματική) + title + id για το listen().
+  const selected = useMemo(() => {
+    for (const t of themes) {
+      const ev = t.events.find((e) => e.id === selectedEventId);
+      if (ev) return { id: ev.id, title: ev.title, topic: t.topic };
+    }
+    return null;
+  }, [themes, selectedEventId]);
 
   async function listen(topic: string, title: string, eventId: string) {
     setData(null);
@@ -170,8 +186,8 @@ export default function PeoplePage() {
     setListening(false);
   }
 
-  function pick(id: string) {
-    setSelectedId(id);
+  function pickEvent(eventId: string) {
+    setSelectedEventId(eventId);
     setData(null);
     setErrMsg(null);
     setFeedYt([]);
@@ -224,20 +240,7 @@ export default function PeoplePage() {
               <div className="text-[10px] tracking-wide text-zinc-600">Πολιτική ευφυΐα</div>
             </div>
           </div>
-          <nav className="flex items-center gap-1">
-            {navTabs.map((tab) => {
-              const active = tab.label === "Πρόσωπα";
-              const base = "rounded-2xl px-3 py-2 text-xs transition";
-              if (tab.href) {
-                return (
-                  <Link key={tab.label} href={tab.href} className={`${base} ${active ? "border border-cyan-300/25 bg-cyan-300/10 text-cyan-100" : "text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-300"}`}>
-                    {tab.label}
-                  </Link>
-                );
-              }
-              return <span key={tab.label} className={`${base} cursor-not-allowed text-zinc-700`}>{tab.label}</span>;
-            })}
-          </nav>
+          <TopNav />
           <div className="rounded-2xl border border-[#1a2640] bg-[#0c1220] px-3 py-2 text-[11px] text-zinc-400">{partyLabel}</div>
         </div>
       </header>
@@ -249,24 +252,68 @@ export default function PeoplePage() {
           <p className="mt-2 max-w-2xl text-sm text-zinc-400">Πραγματικά σχόλια από YouTube και Twitter, με δείκτη δυναμικής ανά φωνή, συνθεμένα σε εικόνα κοινής γνώμης για {partyLabel}.</p>
         </section>
 
-        <div className="grid gap-5 lg:grid-cols-[320px_1fr]">
+        <div className="grid gap-5 lg:grid-cols-[340px_1fr]">
+          {/* Picker: Χάρτης ατζέντας — θεματική → ανοίγει → γεγονότα (ίδιο με «Σήμερα») */}
           <aside className="rounded-3xl border border-[#1a2640] bg-[#0c1220] p-3">
-            <div className="mb-2 px-1 text-xs font-medium text-zinc-400">Θέματα</div>
+            <div className="mb-2 px-1 text-xs font-medium text-zinc-400">Χάρτης ατζέντας</div>
             {loadingList ? (
               <div className="grid gap-2">{[0, 1, 2, 3].map((i) => <div key={i} className="h-14 animate-pulse rounded-2xl bg-white/[0.04]" />)}</div>
-            ) : list.length === 0 ? (
-              <div className="px-1 py-6 text-center text-xs text-zinc-500">Καμία ενεργή κατάσταση αυτή τη στιγμή.</div>
+            ) : themes.length === 0 ? (
+              <div className="px-1 py-6 text-center text-xs text-zinc-500">Καμία ενεργή θεματική αυτή τη στιγμή.</div>
             ) : (
-              <div className="grid max-h-[70vh] gap-1.5 overflow-y-auto pr-1">
-                {list.map((s) => (
-                  <button key={s.id} type="button" onClick={() => pick(s.id)} className={`rounded-2xl border p-2.5 text-left transition ${selectedId === s.id ? "border-cyan-300/40 bg-cyan-300/10" : "border-[#162236] bg-[#0a0f1c] hover:border-cyan-300/20 hover:bg-white/[0.03]"}`}>
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="truncate text-[10px] text-zinc-500">{s.topic || "—"}</span>
-                      <span className="shrink-0 text-[10px] text-zinc-500">{s.score}</span>
+              <div className="grid max-h-[72vh] gap-2 overflow-y-auto pr-1">
+                {themes.map((t, i) => {
+                  const tone = t.score >= 70 ? "red" : t.score >= 50 ? "amber" : "emerald";
+                  const priorityLabel = t.score >= 70 ? "Υψηλή" : t.score >= 50 ? "Μεσαία" : "Χαμηλή";
+                  const isExpanded = expandedTopic === t.topic;
+                  const hasActiveChild = t.events.some((e) => e.id === selectedEventId);
+                  return (
+                    <div
+                      key={`${t.clusterId}-${i}`}
+                      className={`overflow-hidden rounded-2xl border transition ${
+                        hasActiveChild ? "border-cyan-300/40 bg-cyan-300/[0.06]" : "border-[#162236] bg-[#0a0f1c]"
+                      }`}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setExpandedTopic((prev) => (prev === t.topic ? null : t.topic))}
+                        className="group flex w-full items-center gap-2 p-3 text-left transition hover:bg-cyan-300/[0.04]"
+                      >
+                        <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[11px] font-semibold ${
+                          tone === "red" ? "border-red-400/40 bg-red-400/15 text-red-200"
+                          : tone === "amber" ? "border-amber-400/40 bg-amber-400/15 text-amber-200"
+                          : "border-emerald-400/40 bg-emerald-400/15 text-emerald-200"
+                        }`}>{i + 1}</span>
+                        <div className="min-w-0 flex-1">
+                          <div className="line-clamp-2 text-xs font-medium leading-5 text-zinc-200 group-hover:text-cyan-100">{t.topic}</div>
+                          <div className={`mt-0.5 text-[10px] ${tone === "red" ? "text-red-300/80" : tone === "amber" ? "text-amber-300/80" : "text-emerald-300/80"}`}>
+                            {priorityLabel} · {t.events.length} {t.events.length === 1 ? "γεγονός" : "γεγονότα"}
+                          </div>
+                        </div>
+                        <span className="shrink-0 text-[10px] text-zinc-500">{isExpanded ? "▾" : "▸"}</span>
+                      </button>
+                      {isExpanded ? (
+                        <div className="grid gap-1 border-t border-[#162236] px-2 pb-2 pt-2">
+                          {t.events.map((ev) => {
+                            const selectedChild = ev.id === selectedEventId;
+                            return (
+                              <button
+                                key={ev.id}
+                                type="button"
+                                onClick={() => pickEvent(ev.id)}
+                                className={`rounded-xl px-2 py-1.5 text-left text-[11px] leading-4 transition ${
+                                  selectedChild ? "bg-cyan-300/15 text-cyan-100" : "text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
+                                }`}
+                              >
+                                <span className="line-clamp-2">{ev.title}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      ) : null}
                     </div>
-                    <div className="mt-0.5 line-clamp-2 text-[12px] font-medium leading-4 text-zinc-100">{s.title}</div>
-                  </button>
-                ))}
+                  );
+                })}
               </div>
             )}
           </aside>
@@ -274,7 +321,7 @@ export default function PeoplePage() {
           <section>
             {!selected ? (
               <div className="flex h-full min-h-[400px] items-center justify-center rounded-3xl border border-dashed border-[#1a2640] bg-[#0a0f1c]/50 p-8 text-center text-sm text-zinc-500">
-                Διάλεξε ένα θέμα από αριστερά για να ακούσεις τι λέει ο κόσμος.
+                Διάλεξε θεματική από αριστερά, άνοιξέ τη και επίλεξε γεγονός για να ακούσεις τι λέει ο κόσμος.
               </div>
             ) : !data && !listening && !errMsg ? (
               <div className="rounded-3xl border border-[#1a2640] bg-gradient-to-b from-[#0d1525] to-[#0a0f1c] p-8">
