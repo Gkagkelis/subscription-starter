@@ -1,4 +1,4 @@
-  "use client";
+    "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode } from "react";
@@ -2351,6 +2351,28 @@ export default function StrategyRoomPage() {
       return;
     }
 
+    // ΤΟ ΣΩΣΤΟ ΕΝΕΡΓΟ ΓΕΓΟΝΟΣ: όταν έχεις διαλέξει γεγονός από τον Χάρτη ατζέντας
+    // (probe), στέλνουμε ΑΥΤΟ στον advisor — όχι το παλιό activeSituation που
+    // μπορεί να αφορά άλλο θέμα. Έτσι ο σύμβουλος κλειδώνει στο σωστό γεγονός.
+    const advisorActiveSituation = activeProbeItem
+      ? {
+          id:
+            activeProbeSelection?.eventId ||
+            activeProbeEvent?.id ||
+            activeProbeItem.id,
+          title: activeProbeView?.eventTitle || activeProbeEvent?.title || activeProbeItem.title,
+          topic: activeProbeView?.microAgenda || activeProbeItem.title,
+          summary: activeProbeView?.summary || "",
+          status: "live",
+          event_score: activeProbeView?.score ?? activeProbeEvent?.event_score ?? activeProbeItem.score,
+          documentation_level: activeProbeView?.evidenceLabel || "",
+          article_count: numberValue(activeProbeItem.raw?.article_count, 0),
+          source_count: numberValue(activeProbeItem.raw?.source_count, 0),
+          evidence_articles: activeProbeEvidenceArticles || [],
+          advisor_brief: (activeSituation as any)?.advisor_brief || null,
+        }
+      : activeSituation;
+
     const localConversationId = conversationId || `local-${Date.now()}`;
     const userMessage: ChatMessage = { role: "user", content: question };
     const nextUserMessages = [...chatMessages, userMessage];
@@ -2378,7 +2400,7 @@ export default function StrategyRoomPage() {
           agenda_used: data?.agenda_used || [],
           party: partyName,
           articles: evidenceArticles,
-          active_situation: activeSituation || null,
+          active_situation: advisorActiveSituation || null,
           advisor_mode: activeTab === "overview" && agendaArchitectResult ? "agenda_architect" : "event",
           agenda_architect_display: agendaArchitectResult?.displayText || "",
           agenda_architect_context: agendaArchitectResult?.chatContext || null,
