@@ -1,4 +1,4 @@
-"use client";
+  "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode } from "react";
@@ -2362,7 +2362,7 @@ export default function StrategyRoomPage() {
             activeProbeItem.id,
           title: activeProbeView?.eventTitle || activeProbeEvent?.title || activeProbeItem.title,
           topic: activeProbeView?.microAgenda || activeProbeItem.title,
-          summary: activeProbeView?.summary || "",
+          summary: pickString(activeProbeView as unknown, ["summary"], ""),
           status: "live",
           event_score: activeProbeView?.score ?? activeProbeEvent?.event_score ?? activeProbeItem.score,
           documentation_level: activeProbeView?.evidenceLabel || "",
