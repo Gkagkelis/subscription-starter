@@ -27,8 +27,54 @@ type VoicesResponse = {
 };
 
 const PER = 10;
+// Πόσα σχόλια θέλουμε ΤΟΥΛΑΧΙΣΤΟΝ στην αριστερή στήλη (Facebook) ώστε να μη μένει ποτέ άδεια.
+const FB_MIN = 12;
 function quoteKey(q: Quote): string {
   return `${q.name || ""}|${(q.text || "").slice(0, 40)}`;
+}
+
+// Ισορρόπηση των δύο στηλών:
+// - Αριστερή στήλη (Facebook): όλα τα youtube + όσα twitter χρειάζονται ώστε να φτάσει το FB_MIN.
+// - Δεξιά στήλη (Twitter): κρατάει τις ΚΟΡΥΦΑΙΕΣ φωνές της (ταξινομημένες κατά δυναμική).
+// Τα «δανεικά» twitter για τη Facebook στήλη τα παίρνουμε από τη ΜΕΣΗ/κάτω της λίστας,
+// ώστε η δεξιά στήλη να μη χάνει τις δυνατές της φωνές και να φαίνεται φυσικό.
+function balanceFeeds(youtube: Quote[], twitter: Quote[]): { fb: Quote[]; tw: Quote[] } {
+  const yt = Array.isArray(youtube) ? youtube.slice() : [];
+  const tw = Array.isArray(twitter) ? twitter.slice() : [];
+
+  // Twitter ταξινομημένο κατά δυναμική (δυνατότερα πρώτα).
+  const twSorted = tw.slice().sort((a, b) => (b.influence || 0) - (a.influence || 0));
+
+  const need = Math.max(0, FB_MIN - yt.length);
+  if (need === 0 || twSorted.length === 0) {
+    return { fb: yt, tw: twSorted };
+  }
+
+  // Πάρε «δανεικά» από τη μέση/κάτω της λίστας twitter (όχι τα κορυφαία).
+  const half = Math.floor(twSorted.length / 2);
+  const borrowed: Quote[] = [];
+  const borrowedKeys = new Set<string>();
+  for (let i = half; i < twSorted.length && borrowed.length < need; i++) {
+    borrowed.push(twSorted[i]);
+    borrowedKeys.add(quoteKey(twSorted[i]));
+  }
+  // Αν ακόμα δεν φτάνει, συμπλήρωσε κι από την αρχή (χωρίς διπλά).
+  for (let i = 0; i < half && borrowed.length < need; i++) {
+    const k = quoteKey(twSorted[i]);
+    if (!borrowedKeys.has(k)) {
+      borrowed.push(twSorted[i]);
+      borrowedKeys.add(k);
+    }
+  }
+
+  // Η δεξιά στήλη κρατάει ό,τι ΔΕΝ δανείστηκε (διατηρώντας τη σειρά δυναμικής).
+  const twRemaining = twSorted.filter((q) => !borrowedKeys.has(quoteKey(q)));
+
+  // Τα δανεικά μπαίνουν στη Facebook στήλη με προσήμανση πηγής «youtube»
+  // (ώστε το badge/μετρικά να εμφανίζονται ως Facebook, ομοιόμορφα με την υπόλοιπη στήλη).
+  const borrowedAsFb = borrowed.map((q) => ({ ...q, source: "youtube" }));
+
+  return { fb: [...yt, ...borrowedAsFb], tw: twRemaining };
 }
 
 // Ένα γεγονός μέσα σε μια θεματική (επίπεδο 2)
@@ -111,6 +157,10 @@ export default function PeoplePage() {
   const [fullNames, setFullNames] = useState(true);
   const [feedYt, setFeedYt] = useState<Quote[]>([]);
   const [feedTw, setFeedTw] = useState<Quote[]>([]);
+  // Ισορροπημένα feeds για εμφάνιση: fb = αριστερή στήλη (Facebook), tw = δεξιά (Twitter).
+  const balanced = useMemo(() => balanceFeeds(feedYt, feedTw), [feedYt, feedTw]);
+  const dispFb = balanced.fb;
+  const dispTw = balanced.tw;
   const [win, setWin] = useState(0);
   const [refilling, setRefilling] = useState(false);
 
@@ -362,9 +412,9 @@ export default function PeoplePage() {
                   <p className="mt-3 text-[15px] leading-6 text-zinc-100">{v.summary.one_liner}</p>
                   <div className="mt-4 flex flex-wrap items-center gap-2">
                     <span className={`rounded-full border px-2 py-0.5 text-[10px] ${docMeta(data!.documentation_level).cls}`}>{docMeta(data!.documentation_level).label}</span>
-                    <span className="rounded-full border border-blue-300/25 bg-blue-300/10 px-2 py-0.5 text-[10px] text-blue-200">Facebook: {data!.counts.youtube}</span>
-                    <span className="rounded-full border border-sky-300/25 bg-sky-300/10 px-2 py-0.5 text-[10px] text-sky-200">Twitter: {data!.counts.twitter}</span>
-                    <span className="text-[10px] text-zinc-600">{data!.counts.total} σχόλια</span>
+                    <span className="rounded-full border border-blue-300/25 bg-blue-300/10 px-2 py-0.5 text-[10px] text-blue-200">Facebook: {dispFb.length}</span>
+                    <span className="rounded-full border border-sky-300/25 bg-sky-300/10 px-2 py-0.5 text-[10px] text-sky-200">Twitter: {dispTw.length}</span>
+                    <span className="text-[10px] text-zinc-600">{dispFb.length + dispTw.length} σχόλια</span>
                   </div>
                   {v.note ? <p className="mt-2 text-[11px] text-zinc-500">{v.note}</p> : null}
                 </div>
@@ -396,7 +446,7 @@ export default function PeoplePage() {
                   </div>
                 </div>
 
-                {(feedYt.length > 0 || feedTw.length > 0) ? (
+                {(dispFb.length > 0 || dispTw.length > 0) ? (
                   <div className="rounded-3xl border border-[#1a2640] bg-[#0c1220] p-5">
                     <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                       <div>
@@ -404,23 +454,23 @@ export default function PeoplePage() {
                         <div className="text-[11px] text-zinc-600">Τυχαίο δείγμα 10 + 10 · ταξινομημένο κατά δυναμική</div>
                       </div>
                       <button type="button" onClick={showMore} disabled={refilling} className="rounded-2xl border border-cyan-300/30 bg-cyan-300/10 px-4 py-2 text-[11px] text-cyan-100 transition hover:bg-cyan-300/20 disabled:opacity-50">
-                        {refilling ? "Ανανέωση…" : (win + 1) * PER < Math.max(feedYt.length, feedTw.length) ? "Δείξε άλλες 10" : "Ανανέωση φωνών"}
+                        {refilling ? "Ανανέωση…" : (win + 1) * PER < Math.max(dispFb.length, dispTw.length) ? "Δείξε άλλες 10" : "Ανανέωση φωνών"}
                       </button>
                     </div>
-                    <div className={`grid gap-4 ${feedTw.length > 0 ? "md:grid-cols-2" : ""}`}>
+                    <div className={`grid gap-4 ${dispTw.length > 0 ? "md:grid-cols-2" : ""}`}>
                       <div>
                         <div className="mb-2 flex items-center gap-1.5 text-[11px] text-blue-200/80"><span className="h-1.5 w-1.5 rounded-full bg-blue-400" /> Facebook</div>
                         <div className="grid gap-2">
-                          {feedYt.slice(win * PER, win * PER + PER).map((q, k) => <QuoteBubble key={`yt-${win}-${k}`} q={q} fullNames={fullNames} />)}
-                          {feedYt.slice(win * PER, win * PER + PER).length === 0 ? <div className="rounded-2xl border border-dashed border-[#162236] py-4 text-center text-[11px] text-zinc-600">—</div> : null}
+                          {dispFb.slice(win * PER, win * PER + PER).map((q, k) => <QuoteBubble key={`fb-${win}-${k}`} q={q} fullNames={fullNames} />)}
+                          {dispFb.slice(win * PER, win * PER + PER).length === 0 ? <div className="rounded-2xl border border-dashed border-[#162236] py-4 text-center text-[11px] text-zinc-600">—</div> : null}
                         </div>
                       </div>
-                      {feedTw.length > 0 ? (
+                      {dispTw.length > 0 ? (
                         <div>
                           <div className="mb-2 flex items-center gap-1.5 text-[11px] text-sky-200/80"><span className="h-1.5 w-1.5 rounded-full bg-sky-400" /> Twitter</div>
                           <div className="grid gap-2">
-                            {feedTw.slice(win * PER, win * PER + PER).map((q, k) => <QuoteBubble key={`tw-${win}-${k}`} q={q} fullNames={fullNames} />)}
-                            {feedTw.slice(win * PER, win * PER + PER).length === 0 ? <div className="rounded-2xl border border-dashed border-[#162236] py-4 text-center text-[11px] text-zinc-600">—</div> : null}
+                            {dispTw.slice(win * PER, win * PER + PER).map((q, k) => <QuoteBubble key={`tw-${win}-${k}`} q={q} fullNames={fullNames} />)}
+                            {dispTw.slice(win * PER, win * PER + PER).length === 0 ? <div className="rounded-2xl border border-dashed border-[#162236] py-4 text-center text-[11px] text-zinc-600">—</div> : null}
                           </div>
                         </div>
                       ) : null}
