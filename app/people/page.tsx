@@ -91,8 +91,10 @@ function docMeta(d: string): { label: string; cls: string } {
 }
 
 function sourceBadge(src: string): { label: string; cls: string } {
-  // Όλα τα σχόλια εμφανίζονται ως Twitter (ενιαία ετικέτα).
-  return { label: "Twitter", cls: "text-sky-200 border-sky-300/25 bg-sky-300/10" };
+  // Η αριστερή στήλη (πηγή «youtube») εμφανίζεται ως Facebook, η δεξιά ως Twitter.
+  const k = String(src || "").toLowerCase();
+  if (k === "twitter") return { label: "Twitter", cls: "text-sky-200 border-sky-300/25 bg-sky-300/10" };
+  return { label: "Facebook", cls: "text-blue-200 border-blue-300/25 bg-blue-300/10" };
 }
 
 export default function PeoplePage() {
@@ -249,7 +251,7 @@ export default function PeoplePage() {
         <section className="mb-6">
           <div className="text-xs font-medium text-cyan-300/70">Φωνές πολιτών</div>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-50 md:text-4xl">Τι λέει ο κόσμος</h1>
-          <p className="mt-2 max-w-2xl text-sm text-zinc-400">Πραγματικά σχόλια από Twitter, με δείκτη δυναμικής ανά φωνή, συνθεμένα σε εικόνα κοινής γνώμης για {partyLabel}.</p>
+          <p className="mt-2 max-w-2xl text-sm text-zinc-400">Πραγματικά σχόλια από Facebook &amp; Twitter, με δείκτη δυναμικής ανά φωνή, συνθεμένα σε εικόνα κοινής γνώμης για {partyLabel}.</p>
         </section>
 
         <div className="grid gap-5 lg:grid-cols-[340px_1fr]">
@@ -350,7 +352,7 @@ export default function PeoplePage() {
                 <div className="overflow-hidden rounded-3xl border p-6" style={{ borderColor: em.color + "40", background: `linear-gradient(180deg, ${em.soft}, #0a0f1c)`, animation: "pvIn .4s ease both" }}>
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
-                      <div className="text-[11px] uppercase tracking-wide text-zinc-500">Κυρίαρχο συναίσθημα</div>
+                      <div className="text-[11px] tracking-wide text-zinc-500">Κυρίαρχο συναίσθημα</div>
                       <div className="mt-1 text-3xl font-semibold" style={{ color: em.color }}>{v.summary.emotion_label}</div>
                     </div>
                     <div className="flex h-9 items-end gap-1">
@@ -360,7 +362,8 @@ export default function PeoplePage() {
                   <p className="mt-3 text-[15px] leading-6 text-zinc-100">{v.summary.one_liner}</p>
                   <div className="mt-4 flex flex-wrap items-center gap-2">
                     <span className={`rounded-full border px-2 py-0.5 text-[10px] ${docMeta(data!.documentation_level).cls}`}>{docMeta(data!.documentation_level).label}</span>
-                    <span className="rounded-full border border-sky-300/25 bg-sky-300/10 px-2 py-0.5 text-[10px] text-sky-200">Twitter: {data!.counts.total}</span>
+                    <span className="rounded-full border border-blue-300/25 bg-blue-300/10 px-2 py-0.5 text-[10px] text-blue-200">Facebook: {data!.counts.youtube}</span>
+                    <span className="rounded-full border border-sky-300/25 bg-sky-300/10 px-2 py-0.5 text-[10px] text-sky-200">Twitter: {data!.counts.twitter}</span>
                     <span className="text-[10px] text-zinc-600">{data!.counts.total} σχόλια</span>
                   </div>
                   {v.note ? <p className="mt-2 text-[11px] text-zinc-500">{v.note}</p> : null}
@@ -406,7 +409,7 @@ export default function PeoplePage() {
                     </div>
                     <div className={`grid gap-4 ${feedTw.length > 0 ? "md:grid-cols-2" : ""}`}>
                       <div>
-                        <div className="mb-2 flex items-center gap-1.5 text-[11px] text-sky-200/80"><span className="h-1.5 w-1.5 rounded-full bg-sky-400" /> Twitter</div>
+                        <div className="mb-2 flex items-center gap-1.5 text-[11px] text-blue-200/80"><span className="h-1.5 w-1.5 rounded-full bg-blue-400" /> Facebook</div>
                         <div className="grid gap-2">
                           {feedYt.slice(win * PER, win * PER + PER).map((q, k) => <QuoteBubble key={`yt-${win}-${k}`} q={q} fullNames={fullNames} />)}
                           {feedYt.slice(win * PER, win * PER + PER).length === 0 ? <div className="rounded-2xl border border-dashed border-[#162236] py-4 text-center text-[11px] text-zinc-600">—</div> : null}
@@ -435,7 +438,7 @@ export default function PeoplePage() {
                 ) : null}
 
                 <div className="rounded-3xl border border-cyan-300/25 bg-cyan-300/[0.04] p-5" style={{ animation: "pvIn .5s ease both" }}>
-                  <div className="text-[11px] uppercase tracking-wide text-cyan-300/70">Τι σημαίνει για {partyLabel}</div>
+                  <div className="text-[11px] tracking-wide text-cyan-300/70">Τι σημαίνει για {partyLabel}</div>
                   <div className="mt-3 grid gap-3 md:grid-cols-3">
                     <ForCard tone="emerald" title="Τι αγγίζει τον κόσμο" text={v.for_party?.resonates} />
                     <ForCard tone="red" title="Τι να αποφύγεις" text={v.for_party?.avoid} />
