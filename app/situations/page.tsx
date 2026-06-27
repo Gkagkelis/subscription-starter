@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import TopNav from "../../components/TopNav";
+import { buildAgendaMap, type ProbeV4Response, type AgendaMapItem } from "../../lib/noraya/strategy-room-intelligence";
 import { IBM_Plex_Sans } from "next/font/google";
 
 const plex = IBM_Plex_Sans({
@@ -121,6 +122,13 @@ function toCard(s: Situation): Card {
   };
 }
 
+// Από το ΕΠΙΛΕΓΜΕΝΟ γεγονός score βγάζουμε επίπεδο ρίσκου (ίδια λογική με τον Χάρτη).
+function riskFromScore(score: number): string {
+  if (score >= 70) return "high";
+  if (score >= 50) return "medium";
+  return "low";
+}
+
 export default function SituationsPage() {
   const router = useRouter();
 
@@ -148,14 +156,40 @@ export default function SituationsPage() {
         /* default elas */
       }
 
+      // ΠΗΓΗ = ο ΙΔΙΟΣ Χάρτης ατζέντας με το «Σήμερα»/Σενάρια/Πρόσωπα:
+      // agenda-probe → buildAgendaMap. Κάθε ΓΕΓΟΝΟΣ γίνεται μία κάρτα στον πίνακα.
       try {
-        const r = await fetch(`/api/situation-engine?token=dev&party=${encodeURIComponent(pk)}`, {
-          cache: "no-store",
-        });
+        const r = await fetch(
+          `/api/situation-engine/agenda-probe?token=dev&hours=168&party=${encodeURIComponent(pk)}`,
+          { cache: "no-store" }
+        );
 
         if (r.ok) {
-          const j = await r.json();
-          if (Array.isArray(j?.situations)) setSituations(j.situations as Situation[]);
+          const probe = (await r.json()) as ProbeV4Response;
+          const map: AgendaMapItem[] = probe?.success ? buildAgendaMap(probe) : [];
+
+          const built: Situation[] = [];
+          map.slice(0, 12).forEach((item) => {
+            const themeTopic = item.title;
+            const raw = (item as any).raw || {};
+            (item.events || [])
+              .filter((ev) => ev.id)
+              .forEach((ev) => {
+                const evRaw = (ev as any).raw || {};
+                const evScore = Math.round(num((ev as any).event_score, num(item.score)));
+                built.push({
+                  id: String(ev.id),
+                  title: ev.title || themeTopic,
+                  topic: themeTopic,
+                  event_score: evScore,
+                  political_risk_level: riskFromScore(evScore),
+                  article_count: num(evRaw.article_count ?? raw.article_count, 0),
+                  source_count: num(evRaw.source_count ?? raw.source_count, 0),
+                });
+              });
+          });
+
+          setSituations(built);
         }
       } catch {
         /* ignore */
@@ -184,9 +218,13 @@ export default function SituationsPage() {
   const highRisk = useMemo(() => cards.filter((c) => c.risk.label === "Υψηλό ρίσκο").length, [cards]);
 
   function openTopic(c: Card) {
-    setLoadingTopic(c.topic || c.title);
+    setLoadingTopic(c.title || c.topic);
 
-    const q = c.topic ? `?topic=${encodeURIComponent(c.topic)}` : "";
+    // Στέλνουμε ΚΑΙ το event UUID (για να κλειδώνει στο σωστό γεγονός) ΚΑΙ το topic (συμβατότητα).
+    const params = new URLSearchParams();
+    if (c.id) params.set("event", c.id);
+    if (c.topic) params.set("topic", c.topic);
+    const q = params.toString() ? `?${params.toString()}` : "";
 
     setTimeout(() => router.push(`/strategy-room${q}`), 600);
   }
@@ -329,7 +367,7 @@ export default function SituationsPage() {
                           </div>
 
                           <div className="mt-2 rounded-xl bg-white/[0.03] px-2 py-1.5">
-                            <div className="text-[9px] uppercase tracking-wide text-zinc-600">
+                            <div className="text-[9px] tracking-wide text-zinc-600">
                               Επόμενη κίνηση
                             </div>
                             <div className="mt-0.5 line-clamp-2 text-[11px] leading-4 text-zinc-300">
