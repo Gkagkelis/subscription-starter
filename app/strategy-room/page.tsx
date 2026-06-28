@@ -1,4 +1,4 @@
-  "use client";
+   "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode } from "react";
@@ -2790,9 +2790,11 @@ function LeftSidebar({
   politicalEnvironment: PoliticalEnvironment | null;
 }) {
   const polls = recentPolls(politicalEnvironment);
-  const [expandedTopic, setExpandedTopic] = useState<string | null>(null);
+  const [expandedTheme, setExpandedTheme] = useState<string | null>(null);
+  const [expandedMicro, setExpandedMicro] = useState<string | null>(null);
 
-  // #1: Θέματα (επισκόπηση) που ανοίγουν σε ΣΥΓΚΕΚΡΙΜΕΝΑ γεγονότα. Καμία αλληλοκάλυψη, τίποτα generic.
+  // 3 επίπεδα: Κεντρικό θέμα → Μικροατζέντα → Γεγονός.
+  // Ομαδοποιούμε ΜΟΝΟ εδώ (στο μενού), χωρίς να αγγίξουμε το buildAgendaMap.
   type AgendaEvent = {
     id: string;
     title: string;
@@ -2801,36 +2803,76 @@ function LeftSidebar({
     probeClusterId?: string;
     probeEventId?: string | null;
   };
-  type AgendaSidebarItem = {
-    topic: string;
+  type MicroAgenda = {
+    clusterId: string;
+    title: string;
     score: number;
-    count: number;
-    rank: number;
-    events: AgendaEvent[];
-    probeClusterId?: string;
     statusLabel?: string;
+    events: AgendaEvent[];
   };
-  const agendaItems = useMemo<AgendaSidebarItem[]>(() => {
+  type ThemeGroup = {
+    theme: string;
+    score: number;
+    microCount: number;
+    eventCount: number;
+    rank: number;
+    micros: MicroAgenda[];
+  };
+  const themeGroups = useMemo<ThemeGroup[]>(() => {
     if (agendaMap && agendaMap.length) {
-      return agendaMap.slice(0, 8).map((item, index) => ({
-        topic: item.title,
-        score: item.score,
-        count: item.events.length,
-        rank: index + 1,
-        probeClusterId: item.id,
-        statusLabel: item.statusLabel,
-        events: item.events.map((event, eventIndex) => ({
-          id: String(event.id || `${item.id}-${eventIndex}`),
-          title: event.title || item.title,
-          score: numberValue(event.event_score, item.score),
-          status: String(event.status || item.statusLabel || "live"),
-          probeClusterId: item.id,
-          probeEventId: event.id ? String(event.id) : null,
-        })),
-      }));
+      const order: string[] = [];
+      const byTheme = new Map<string, MicroAgenda[]>();
+
+      agendaMap.forEach((item) => {
+        const parents = (item as any).parentTopics;
+        const theme =
+          (Array.isArray(parents) && parents[0]) || item.title || "Άλλα";
+        const micro: MicroAgenda = {
+          clusterId: item.id,
+          title: item.title,
+          score: item.score,
+          statusLabel: item.statusLabel,
+          events: item.events.map((event, eventIndex) => ({
+            id: String(event.id || `${item.id}-${eventIndex}`),
+            title: event.title || item.title,
+            score: numberValue(event.event_score, item.score),
+            status: String(event.status || item.statusLabel || "live"),
+            probeClusterId: item.id,
+            probeEventId: event.id ? String(event.id) : null,
+          })),
+        };
+        const existing = byTheme.get(theme);
+        if (existing) {
+          existing.push(micro);
+        } else {
+          byTheme.set(theme, [micro]);
+          order.push(theme);
+        }
+      });
+
+      return order
+        .map((theme) => {
+          const micros = (byTheme.get(theme) || []).sort(
+            (a, b) => b.score - a.score,
+          );
+          const score = micros.reduce((m, x) => Math.max(m, x.score), 0);
+          const eventCount = micros.reduce((s, x) => s + x.events.length, 0);
+          return {
+            theme,
+            score,
+            micros,
+            microCount: micros.length,
+            eventCount,
+            rank: 0,
+          };
+        })
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 6)
+        .map((g, i) => ({ ...g, rank: i + 1 }));
     }
 
     if (situations && situations.length) {
+      const order: string[] = [];
       const groups = new Map<
         string,
         { topic: string; score: number; events: AgendaEvent[] }
@@ -2849,34 +2891,63 @@ function LeftSidebar({
         const ex = groups.get(topic);
         if (!ex) {
           groups.set(topic, { topic, score: sc, events: [ev] });
+          order.push(topic);
         } else {
           ex.events.push(ev);
           if (sc > ex.score) ex.score = sc;
         }
       });
-      return (
-        Array.from(groups.values())
-          .map((g) => ({
-            topic: g.topic,
+
+      return order
+        .map((topic) => {
+          const g = groups.get(topic) || { topic, score: 0, events: [] };
+          const micro: MicroAgenda = {
+            clusterId: topic,
+            title: topic,
             score: g.score,
-            count: g.events.length,
             events: g.events.sort((a, b) => b.score - a.score),
-          }))
-          // Κατάταξη κατά Agenda Score (σημαντικότητα) — ΙΔΙΟ κριτήριο με τη μηχανή, άρα συμφωνεί με το κέντρο.
-          .sort((a, b) => b.score - a.score)
-          .slice(0, 8)
-          .map((g, i) => ({ ...g, rank: i + 1 }))
+          };
+          return {
+            theme: topic,
+            score: g.score,
+            micros: [micro],
+            microCount: 1,
+            eventCount: g.events.length,
+            rank: 0,
+          };
+        })
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 8)
+        .map((g, i) => ({ ...g, rank: i + 1 }));
+    }
+
+    // Fallback: classified θέματα όταν δεν υπάρχουν ακόμη live γεγονότα.
+    return (agenda || []).slice(0, 8).map((a, i): ThemeGroup => {
+      const sc = numberValue(a.score, 0);
+      const topic = String(a.topic || "Γενικά");
+      return {
+        theme: topic,
+        score: sc,
+        micros: [
+          { clusterId: topic, title: topic, score: sc, events: [] as AgendaEvent[] },
+        ],
+        microCount: 1,
+        eventCount: 0,
+        rank: i + 1,
+      };
+    });
+  }, [agendaMap, situations, agenda]);
+
+  // Προεπιλογή: άνοιξε το πρώτο κεντρικό θέμα και την πρώτη του μικροατζέντα,
+  // ώστε το μενού να μη φαίνεται ποτέ άδειο όταν μπαίνεις.
+  useEffect(() => {
+    if (themeGroups.length) {
+      setExpandedTheme((prev) => prev ?? themeGroups[0].theme);
+      setExpandedMicro(
+        (prev) => prev ?? themeGroups[0].micros[0]?.clusterId ?? null,
       );
     }
-    // Fallback: classified θέματα όταν δεν υπάρχουν ακόμη live γεγονότα.
-    return (agenda || []).slice(0, 8).map((a, i): AgendaSidebarItem => ({
-      topic: String(a.topic || "Γενικά"),
-      score: numberValue(a.score, 0),
-      count: 0,
-      rank: i + 1,
-      events: [] as AgendaEvent[],
-    }));
-  }, [agendaMap, situations, agenda]);
+  }, [themeGroups]);
 
   return (
     <aside className="flex w-[256px] shrink-0 flex-col overflow-hidden bg-[#060a14]">
@@ -2886,7 +2957,7 @@ function LeftSidebar({
           info
           action="Δες όλη την ατζέντα"
           footer={
-            agendaItems.length
+            themeGroups.length
               ? `${situationCount || situations.length} γεγονότα · ${situationSource}`
               : "αναμονή ατζέντας"
           }
@@ -2894,30 +2965,32 @@ function LeftSidebar({
           {situationWarning ? (
             <TinyWarning>{situationWarning}</TinyWarning>
           ) : null}
-          {agendaItems.length ? (
+          {themeGroups.length ? (
             <div className="grid gap-2">
-              {agendaItems.map((item) => {
+              {themeGroups.map((group) => {
                 const tone =
-                  item.score >= 70
+                  group.score >= 70
                     ? "red"
-                    : item.score >= 50
+                    : group.score >= 50
                       ? "amber"
                       : "emerald";
                 const priorityLabel =
-                  item.score >= 70
+                  group.score >= 70
                     ? "Υψηλή"
-                    : item.score >= 50
+                    : group.score >= 50
                       ? "Μεσαία"
                       : "Χαμηλή";
-                const isExpanded = expandedTopic === item.topic;
-                const hasActiveChild = item.probeClusterId
-                  ? activeProbeSelection?.clusterId === item.probeClusterId
-                  : item.events.some((e) => e.id === activeSituationId);
+                const themeOpen = expandedTheme === group.theme;
+                const themeActive = group.micros.some((m) =>
+                  activeProbeSelection?.clusterId
+                    ? m.clusterId === activeProbeSelection.clusterId
+                    : m.events.some((e) => e.id === activeSituationId),
+                );
                 return (
                   <div
-                    key={`${item.topic}-${item.rank}`}
+                    key={`theme-${group.theme}-${group.rank}`}
                     className={`overflow-hidden rounded-2xl border transition ${
-                      hasActiveChild
+                      themeActive
                         ? "border-cyan-300/40 bg-cyan-300/[0.06]"
                         : "border-[#1a2640] bg-[#0c1220]"
                     }`}
@@ -2925,25 +2998,15 @@ function LeftSidebar({
                     <button
                       type="button"
                       onClick={() => {
-                        const topicKey: string | null = item.topic ?? null;
-                        setExpandedTopic((prev) =>
-                          prev === topicKey ? null : topicKey,
-                        );
-                        if (item.probeClusterId && onSelectProbeEvent) {
-                          onSelectProbeEvent({
-                            clusterId: item.probeClusterId,
-                            eventId: item.events[0]?.probeEventId ?? null,
-                          });
-                        } else if (item.events[0]?.id) {
-                          onSelectSituation(item.events[0].id);
-                        }
+                        const key = group.theme;
+                        setExpandedTheme((prev) => (prev === key ? null : key));
                       }}
                       className="group flex w-full items-center gap-2 p-3 text-left transition hover:bg-cyan-300/[0.04]"
                     >
-                      <NumberBadge value={item.rank} tone={tone} />
+                      <NumberBadge value={group.rank} tone={tone} />
                       <div className="min-w-0 flex-1">
-                        <div className="line-clamp-2 text-xs font-medium leading-5 text-zinc-200 group-hover:text-cyan-100">
-                          {item.topic}
+                        <div className="line-clamp-2 text-xs font-semibold leading-5 text-zinc-100 group-hover:text-cyan-100">
+                          {group.theme}
                         </div>
                         <div
                           className={`mt-0.5 text-[10px] ${
@@ -2954,54 +3017,105 @@ function LeftSidebar({
                                 : "text-emerald-300/80"
                           }`}
                         >
-                          {priorityLabel}
-                          {item.count
-                            ? ` · ${item.count} ${item.count === 1 ? "γεγονός" : "γεγονότα"}`
-                            : ""}
+                          {priorityLabel} · {group.microCount}{" "}
+                          {group.microCount === 1 ? "μικροατζέντα" : "μικροατζέντες"} ·{" "}
+                          {group.eventCount}{" "}
+                          {group.eventCount === 1 ? "γεγονός" : "γεγονότα"}
                         </div>
                       </div>
                       <Sparkline
-                        seed={`agenda-${item.topic}-${item.rank}`}
-                        score={item.score}
-                        series={deterministicTrendSeries(item.score, undefined)}
-                        color={sparkColor(item.score)}
+                        seed={`theme-${group.theme}-${group.rank}`}
+                        score={group.score}
+                        series={deterministicTrendSeries(group.score, undefined)}
+                        color={sparkColor(group.score)}
                         className="h-6 w-9 shrink-0"
                       />
-                      {item.events.length ? (
-                        <span className="shrink-0 text-[10px] text-zinc-500">
-                          {isExpanded ? "▾" : "▸"}
-                        </span>
-                      ) : null}
+                      <span className="shrink-0 text-[10px] text-zinc-500">
+                        {themeOpen ? "▾" : "▸"}
+                      </span>
                     </button>
-                    {isExpanded && item.events.length ? (
+
+                    {themeOpen ? (
                       <div className="grid gap-1 border-t border-[#1a2640] px-2 pb-2 pt-2">
-                        {item.events.map((ev) => {
-                          const selected = ev.probeClusterId
-                            ? activeProbeSelection?.clusterId === ev.probeClusterId &&
-                              activeProbeSelection?.eventId === ev.probeEventId
-                            : ev.id === activeSituationId;
+                        {group.micros.map((micro) => {
+                          const microOpen = expandedMicro === micro.clusterId;
+                          const microActive =
+                            activeProbeSelection?.clusterId === micro.clusterId;
                           return (
-                            <button
-                              key={ev.id}
-                              type="button"
-                              onClick={() => {
-                                if (ev.probeClusterId && onSelectProbeEvent) {
-                                  onSelectProbeEvent({
-                                    clusterId: ev.probeClusterId,
-                                    eventId: ev.probeEventId ?? null,
-                                  });
-                                } else {
-                                  onSelectSituation(ev.id);
-                                }
-                              }}
-                              className={`rounded-xl px-2 py-1.5 text-left text-[11px] leading-4 transition ${
-                                selected
-                                  ? "bg-cyan-300/15 text-cyan-100"
-                                  : "text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
-                              }`}
-                            >
-                              <span className="line-clamp-2">{ev.title}</span>
-                            </button>
+                            <div key={micro.clusterId}>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const key = micro.clusterId;
+                                  setExpandedMicro((prev) =>
+                                    prev === key ? null : key,
+                                  );
+                                  if (onSelectProbeEvent) {
+                                    onSelectProbeEvent({
+                                      clusterId: micro.clusterId,
+                                      eventId: micro.events[0]?.probeEventId ?? null,
+                                    });
+                                  } else if (micro.events[0]?.id) {
+                                    onSelectSituation(micro.events[0].id);
+                                  }
+                                }}
+                                className={`flex w-full items-center gap-2 rounded-xl px-2 py-1.5 text-left transition ${
+                                  microActive
+                                    ? "bg-cyan-300/10 text-cyan-100"
+                                    : "text-zinc-300 hover:bg-white/[0.04] hover:text-zinc-100"
+                                }`}
+                              >
+                                <span className="min-w-0 flex-1 line-clamp-2 text-[11px] font-medium leading-4">
+                                  {micro.title}
+                                </span>
+                                {micro.events.length ? (
+                                  <span className="shrink-0 text-[10px] text-zinc-500">
+                                    {microOpen ? "▾" : "▸"}
+                                  </span>
+                                ) : null}
+                              </button>
+
+                              {microOpen && micro.events.length ? (
+                                <div className="ml-1 grid gap-1 border-l border-[#1a2640] py-1 pl-2">
+                                  {micro.events.map((ev) => {
+                                    const selected = ev.probeClusterId
+                                      ? activeProbeSelection?.clusterId ===
+                                          ev.probeClusterId &&
+                                        activeProbeSelection?.eventId ===
+                                          ev.probeEventId
+                                      : ev.id === activeSituationId;
+                                    return (
+                                      <button
+                                        key={ev.id}
+                                        type="button"
+                                        onClick={() => {
+                                          if (
+                                            ev.probeClusterId &&
+                                            onSelectProbeEvent
+                                          ) {
+                                            onSelectProbeEvent({
+                                              clusterId: ev.probeClusterId,
+                                              eventId: ev.probeEventId ?? null,
+                                            });
+                                          } else {
+                                            onSelectSituation(ev.id);
+                                          }
+                                        }}
+                                        className={`rounded-lg px-2 py-1.5 text-left text-[11px] leading-4 transition ${
+                                          selected
+                                            ? "bg-cyan-300/15 text-cyan-100"
+                                            : "text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
+                                        }`}
+                                      >
+                                        <span className="line-clamp-2">
+                                          {ev.title}
+                                        </span>
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              ) : null}
+                            </div>
                           );
                         })}
                       </div>
