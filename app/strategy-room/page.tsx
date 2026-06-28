@@ -1,4 +1,4 @@
-    "use client";
+      "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode } from "react";
@@ -1930,6 +1930,9 @@ export default function StrategyRoomPage() {
           body: JSON.stringify({
             micro_agenda_id: id,
             micro_agenda: raw.micro_agenda,
+            theme: String(raw.parent_topic || raw.parent_topics?.[0] || ""),
+            active_event_id: eventId || null,
+            active_event_title: String(activeProbeEvent?.title || "") || null,
             party_key: partyKey,
             party_name: partyName,
             red_lines: redLines,
@@ -3573,9 +3576,27 @@ function ActiveSituationWorkspace({
               subtitle="Ατζέντα → Πλαίσιο → Ρίσκο"
             >
               <div className="grid gap-5 xl:grid-cols-[1fr_150px]">
-                <p className="text-[13px] leading-7 text-zinc-300/95">
-                  {aiStrategicBody || strategicSection?.body || readStrategicText(situation, brief)}
-                </p>
+                {(() => {
+                  const full =
+                    aiStrategicBody ||
+                    strategicSection?.body ||
+                    readStrategicText(situation, brief);
+                  const idx = full.indexOf("\n\n");
+                  const lead = idx > -1 ? full.slice(0, idx).trim() : "";
+                  const rest = idx > -1 ? full.slice(idx + 2).trim() : full;
+                  return (
+                    <div className="min-w-0">
+                      {lead ? (
+                        <p className="mb-3 border-l-2 border-cyan-300/50 pl-3 text-[15px] font-semibold leading-7 tracking-[-0.01em] text-zinc-50">
+                          {lead}
+                        </p>
+                      ) : null}
+                      <p className="whitespace-pre-line text-[13px] leading-7 text-zinc-300/95">
+                        {rest}
+                      </p>
+                    </div>
+                  );
+                })()}
                                 <div className="rounded-2xl border border-white/[0.07] bg-black/15 p-4">
                   <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
                     Βάση εκτίμησης
