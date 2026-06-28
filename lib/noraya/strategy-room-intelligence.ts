@@ -161,6 +161,7 @@ export type PriorityCard = {
   id: string;
   rank: 1 | 2 | 3;
   label: string;
+  labelMeaning: string;
   title: string;
   subtitle: string;
   score: number;
@@ -932,23 +933,54 @@ export function buildAgendaMap(raw: ProbeV4Response): AgendaMapItem[] {
   }).sort((a, b) => b.score - a.score);
 }
 
+type PriorityCardSignal = { label: string; meaning: string; tone: PriorityCard['tone'] };
+
+function buildPriorityCardSignal(item: AgendaMapItem): PriorityCardSignal {
+  const raw = item.raw;
+  const score = n(item.score);
+  const eventCount = n(raw.event_count);
+  const sourceCount = n(raw.source_count);
+  const trend = n(raw.real_trend_score ?? raw.search_interest_score);
+  const rising = item.sparklineTone === 'rising';
+  const cooling = item.sparklineTone === 'cooling';
+  const sensitive = Boolean(raw.requires_human_review) || raw.sensitivity_level === 'high';
+
+  if (sensitive) {
+    return { label: 'Χρειάζεται προσοχή', meaning: 'Ευαίσθητο θέμα — θέλει προσεκτικό, θεσμικό χειρισμό πριν από δημόσια κίνηση.', tone: 'red' };
+  }
+  if (rising || trend >= 55) {
+    return { label: 'Ανεβαίνει', meaning: 'Κερδίζει δυναμική τώρα: φρέσκα γεγονότα και κάλυψη τις τελευταίες ώρες.', tone: 'red' };
+  }
+  if (score >= 70 && eventCount >= 2 && sourceCount >= 2) {
+    return { label: 'Εδραιωμένο', meaning: 'Σταθερά ισχυρό θέμα με αρκετές πηγές — ήδη στο κέντρο της ατζέντας.', tone: 'yellow' };
+  }
+  if (cooling) {
+    return { label: 'Υποχωρεί', meaning: 'Έχει χάσει ένταση — κράτα το στο ραντάρ χωρίς βιασύνη.', tone: 'green' };
+  }
+  if (eventCount <= 1 && sourceCount <= 1) {
+    return { label: 'Πρώιμο σήμα', meaning: 'Νέο σήμα με λίγη ακόμη τεκμηρίωση — αξίζει παρακολούθηση πριν κινηθείς.', tone: 'green' };
+  }
+  return { label: 'Στην ατζέντα', meaning: 'Ενεργό θέμα που παρακολουθούμε σήμερα.', tone: 'yellow' };
+}
+
 export function buildPriorityCards(raw: ProbeV4Response): PriorityCard[] {
   const eligible = buildAgendaMap(raw).filter((item) => item.raw.show_in_strategy_room !== 'review_required').filter((item) => item.events.length > 0).slice(0, 3);
   return eligible.map((item, index) => {
     const rank = (index + 1) as 1 | 2 | 3;
-    const tone: PriorityCard['tone'] = rank === 1 ? 'red' : rank === 2 ? 'yellow' : 'green';
+    const signal = buildPriorityCardSignal(item);
     const topEvent = item.events[0];
     return {
       id: item.id,
       rank,
-      label: rank === 1 ? 'Προτεραιότητα 1' : rank === 2 ? 'Σήμα ατζέντας' : 'Σημείο προσοχής',
+      label: signal.label,
+      labelMeaning: signal.meaning,
       title: safeText(topEvent?.title, item.title),
       subtitle: buildPrioritySubtitle(item.raw),
       score: clamp(n(topEvent?.event_score, item.score)),
       statusLabel: item.statusLabel,
       priorityLabel: scoreLabel(item.score),
       actionHint: buildActionHint(item.raw),
-      tone,
+      tone: signal.tone,
       raw: item.raw,
     };
   });
