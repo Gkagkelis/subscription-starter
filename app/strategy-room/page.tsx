@@ -1,4 +1,4 @@
-          "use client";
+         "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode } from "react";
@@ -3440,6 +3440,16 @@ function PriorityStrip({
   );
 }
 
+type DecisionCardOption = {
+  label: string;
+  title: string;
+  move?: string;
+  gain: string;
+  risk: string;
+  recommendation: string;
+  success?: number;
+};
+
 function ActiveSituationWorkspace({
   activeTab,
   onTabChange,
@@ -3775,7 +3785,7 @@ function ActiveSituationWorkspace({
                 subtitle="Τρεις διαδρομές απόφασης"
               >
                 <div className="grid gap-3 md:grid-cols-3 2xl:grid-cols-1">
-                  {effectiveDecisionOptions.map((opt) => (
+                  {effectiveDecisionOptions.map((opt: DecisionCardOption) => (
                     <DecisionCard
                       key={opt.label}
                       label={opt.label}
@@ -4119,7 +4129,7 @@ function ActiveSituationWorkspace({
             subtitle="Τρεις διαδρομές απόφασης — όταν λείπει πλήρης ανάλυση, μένουν σε αναμονή"
           >
             <div className="grid gap-3 xl:grid-cols-3">
-              {effectiveDecisionOptions.map((option) => (
+              {effectiveDecisionOptions.map((option: DecisionCardOption) => (
                 <DecisionCard key={option.label} {...option} />
               ))}
             </div>
