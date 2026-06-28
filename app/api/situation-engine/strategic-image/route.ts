@@ -17,9 +17,10 @@ function json(payload: unknown, status = 200) {
   return NextResponse.json(payload, { status });
 }
 
-// FIX: Cache key περιέχει και το event_id — κάθε γεγονός παίρνει τη δική του ανάλυση
+// Cache key περιέχει και το event_id — κάθε γεγονός παίρνει τη δική του ανάλυση.
+// v2: άλλαξα έκδοση ώστε να φρεσκάρει αμέσως (να μη σερβίρει τα παλιά «Μήλο» για 6 ώρες).
 function cacheKey(microAgendaId: string, partyKey: string, eventId?: string | null) {
-  const base = "strategic_image_v1__" + microAgendaId + "__" + partyKey;
+  const base = "strategic_image_v2__" + microAgendaId + "__" + partyKey;
   return eventId ? base + "__" + eventId : base;
 }
 
@@ -46,7 +47,7 @@ async function writeCache(supabase: ReturnType<typeof svc>, key: string, body: s
     situation_id: null,
     organization_id: null,
     analysis_kind: key,
-    input_hash: "v1",
+    input_hash: "v2",
     model_used: "claude-sonnet-4-6",
     result: { body, generated_at: new Date().toISOString() },
   };
@@ -75,7 +76,7 @@ async function callClaude(prompt: string): Promise<string> {
     },
     body: JSON.stringify({
       model: "claude-sonnet-4-6",
-      max_tokens: 700,
+      max_tokens: 1300,
       messages: [{ role: "user", content: prompt }],
     }),
   });
@@ -88,8 +89,7 @@ async function callClaude(prompt: string): Promise<string> {
   return text.trim();
 }
 
-// FIX: Μετατρέπει raw memory lines σε αναγνώσιμο αναλυτικό κείμενο
-// Αποφεύγει τεχνικές ετικέτες όπως "female:", "Q4", "2022 Q4" κλπ
+// Μετατρέπει raw memory lines σε αναγνώσιμο κείμενο (χωρίς τεχνικές ετικέτες).
 function formatMemoryLines(lines: string[]): string {
   if (!lines || lines.length === 0) {
     return "Δεν υπάρχουν διαθέσιμα ιστορικά δεδομένα.";
@@ -98,16 +98,13 @@ function formatMemoryLines(lines: string[]): string {
   const cleaned = lines
     .slice(0, 8)
     .map((line: string) => {
-      // Αφαίρεση τεχνικών ετικετών που εμφανίζονται raw
       return line
-        // Π.χ. "female: 61/100 (2022 Q4)" → αντικατάσταση με ανθρώπινο κείμενο
         .replace(/\bfemale\b/gi, "γυναίκες")
         .replace(/\bmale\b/gi, "άνδρες")
         .replace(/\b(\d{4})\s+Q([1-4])\b/g, (_, year, quarter) => {
           const quarterMap: Record<string, string> = { "1": "Α' τρίμηνο", "2": "Β' τρίμηνο", "3": "Γ' τρίμηνο", "4": "Δ' τρίμηνο" };
           return `${quarterMap[quarter] || "τρίμηνο"} ${year}`;
         })
-        // Αφαίρεση μορφής "LABEL: NUMBER/100" → κράτα μόνο το νόημα
         .replace(/:\s*(\d+)\/100/g, ": $1%")
         .trim();
     })
@@ -122,7 +119,9 @@ export async function POST(req: NextRequest) {
     const {
       micro_agenda_id,
       micro_agenda,
-      // FIX: Δέχεται και το active_event_id + active_event_title για εστιακό prompt
+      // Κεντρικό θέμα (parent topic) — για να διαβάζεται το γεγονός ΜΕΣΑ στο θέμα.
+      theme = "" as string,
+      // Το γεγονός που πάτησε ο χρήστης — εστιακό σημείο της ανάλυσης.
       active_event_id = null as string | null,
       active_event_title = null as string | null,
       party_key = "elas",
@@ -144,7 +143,6 @@ export async function POST(req: NextRequest) {
     }
 
     const supabase = svc();
-    // FIX: Χρησιμοποιεί το active_event_id στο cache key
     const key = cacheKey(micro_agenda_id, party_key, active_event_id);
 
     // 1. Έλεγχος cache
@@ -154,27 +152,25 @@ export async function POST(req: NextRequest) {
     }
 
     // 2. Φτιάχνω το context
+    const centralTheme = String(theme || micro_agenda || "").trim();
 
-    // FIX: Το ενεργό γεγονός μπαίνει πρώτο και ξεχωριστά
     const activeEventLine = active_event_title
-      ? `ΕΝΕΡΓΟ ΓΕΓΟΝΟΣ (αυτό αναλύεις): ${active_event_title}`
+      ? `ΕΝΕΡΓΟ ΓΕΓΟΝΟΣ (αυτό αναλύεις, ΕΠΙΚΕΝΤΡΟ): ${active_event_title}`
       : "";
 
-    // Τα υπόλοιπα γεγονότα ως πλαίσιο (όχι focal point)
+    // Τα υπόλοιπα γεγονότα ως πλαίσιο (όχι επίκεντρο).
     const otherEvents = event_titles
       .filter((t: string) => t !== active_event_title)
       .slice(0, 4)
       .join(" · ");
     const contextEventsLine = otherEvents
-      ? `Συναφή γεγονότα (για πλαίσιο): ${otherEvents}`
+      ? `Συναφή γεγονότα (μόνο για πλαίσιο, ΟΧΙ επίκεντρο): ${otherEvents}`
       : "";
 
     const articleContext = article_titles.slice(0, 6).join("\n- ") || "—";
     const sourceContext = sources.slice(0, 5).join(", ") || "—";
     const redLinesText = red_lines.length ? red_lines.join(", ") : "—";
     const positionsText = known_positions.length ? known_positions.join(", ") : "—";
-
-    // FIX: Καθαρισμός raw memory lines πριν μπουν στο prompt
     const memoryText = formatMemoryLines(memory_lines);
 
     const coverageLabel =
@@ -195,7 +191,8 @@ export async function POST(req: NextRequest) {
 ΘΕΣΕΙΣ: ${positionsText}
 ΚΟΚΚΙΝΕΣ ΓΡΑΜΜΕΣ (ΑΠΑΓΟΡΕΥΕΤΑΙ να πλησιάσεις): ${redLinesText}
 
-ΘΕΜΑΤΙΚΗ ΚΛΑΣΤΕΡ: ${micro_agenda}
+ΚΕΝΤΡΙΚΟ ΘΕΜΑ: ${centralTheme}
+ΘΕΜΑΤΙΚΗ / ΜΙΚΡΟΑΤΖΕΝΤΑ: ${micro_agenda}
 ${activeEventLine}
 ${contextEventsLine}
 
@@ -211,13 +208,15 @@ NORAYA PRIORITY: ${score}
 ${memoryText}
 
 ΟΔΗΓΙΕΣ:
-- Εστίασε αποκλειστικά στο «ΕΝΕΡΓΟ ΓΕΓΟΝΟΣ» — όχι στη γενική θεματική
-- Γράψε 3-4 συμπαγείς παραγράφους: (α) τι πραγματικά κινείται πολιτικά, (β) ποιο πλαίσιο επιβάλλεται, (γ) ποιο ρίσκο/ευκαιρία υπάρχει ΓΙΑ ΑΥΤΟ ΤΟ ΚΟΜΜΑ συγκεκριμένα
-- Αν υπάρχουν ιστορικά δεδομένα: ενσωμάτωσέ τα αναλυτικά (π.χ. «Ιστορικά, το κοινό αντιδρά σε αυτό το θέμα με...», «Σύμφωνα με Eurobarometer...»). ΜΗΝ αντιγράψεις ποτέ τεχνικούς όρους ή ονόματα πεδίων — μεταφρασέ τα σε νόημα
-- Δώσε μια οξεία, εσωτερική πολιτική εκτίμηση — όχι δημόσια ανακοίνωση, όχι γενικολογίες
-- Ποτέ ΜΗΝ επαναλάβεις κόκκινες γραμμές ή θέσεις word-for-word
-- Γλώσσα: ελληνικά, πυκνή, σαν εμπιστευτικό brief επιτελείου
-- ΜΟΝΟ κείμενο: χωρίς headers, χωρίς bullets, χωρίς markdown, χωρίς αριθμημένες λίστες`;
+- ΞΕΚΙΝΑ με ΜΙΑ μόνο πρόταση-ρεζουμέ (το «so what»): καθαρά ελληνικά, χωρίς εισαγωγικά, κάτω από 25 λέξεις, που λέει αμέσως τι σημαίνει πολιτικά αυτό το γεγονός για το κόμμα. Μετά άφησε ΜΙΑ ΚΕΝΗ ΓΡΑΜΜΗ.
+- Μετά γράψε 3-4 συμπαγείς παραγράφους με επίκεντρο το «ΕΝΕΡΓΟ ΓΕΓΟΝΟΣ», διαβασμένο ΜΕΣΑ στο ΚΕΝΤΡΙΚΟ ΘΕΜΑ: (α) τι πραγματικά κινείται πολιτικά σε αυτό το συγκεκριμένο γεγονός, (β) πώς δένει με την ευρύτερη θεματική «${centralTheme}» και ποιο πλαίσιο επιβάλλεται, (γ) ποιο ρίσκο/ευκαιρία υπάρχει ΓΙΑ ΑΥΤΟ ΤΟ ΚΟΜΜΑ συγκεκριμένα.
+- Χώρισε τις παραγράφους με κενή γραμμή μεταξύ τους.
+- ΜΗ μεταφέρεις την ανάλυση σε άλλο γεγονός του κλάστερ· το επίκεντρο μένει στο ΕΝΕΡΓΟ ΓΕΓΟΝΟΣ. Τα συναφή γεγονότα τα χρησιμοποιείς μόνο ως πλαίσιο.
+- Αν υπάρχουν ιστορικά δεδομένα: ενσωμάτωσέ τα σε νόημα (π.χ. «Ιστορικά, το κοινό αντιδρά...», «Σύμφωνα με Eurobarometer...»). ΜΗΝ αντιγράψεις ποτέ τεχνικούς όρους ή ονόματα πεδίων.
+- Δώσε οξεία, εσωτερική πολιτική εκτίμηση — όχι δημόσια ανακοίνωση, όχι γενικολογίες.
+- Ποτέ ΜΗΝ επαναλάβεις κόκκινες γραμμές ή θέσεις αυτολεξεί.
+- Γλώσσα: ελληνικά, πυκνά, σαν εμπιστευτικό brief επιτελείου.
+- ΜΟΝΟ κείμενο: χωρίς headers, χωρίς bullets, χωρίς markdown, χωρίς αριθμημένες λίστες.`;
 
     const generated = await callClaude(prompt);
 
