@@ -3204,8 +3204,14 @@ function PriorityStrip({
   avoidToday?: string;
 }) {
   const mappedCards = probeCards?.length
-    ? probeCards.slice(0, 3).map((card, index) => ({
+    ? probeCards.slice(0, 3).map((card) => ({
         label: card.label,
+        theme:
+          text(card.raw.parent_topic, "") ||
+          (Array.isArray(card.raw.parent_topics)
+            ? text(card.raw.parent_topics[0], "")
+            : ""),
+        meaning: text(card.labelMeaning, ""),
         title: card.title,
         badge: card.priorityLabel,
         tone:
@@ -3257,10 +3263,20 @@ function PriorityStrip({
     },
   ];
 
-  const badgeTone = {
-    red: "border-red-400/30 bg-red-400/10 text-red-200",
-    amber: "border-amber-400/30 bg-amber-400/10 text-amber-200",
-    emerald: "border-emerald-400/30 bg-emerald-400/10 text-emerald-200",
+  const accentBar = {
+    red: "bg-gradient-to-r from-red-400/0 via-red-400/60 to-red-400/0",
+    amber: "bg-gradient-to-r from-amber-400/0 via-amber-400/60 to-amber-400/0",
+    emerald: "bg-gradient-to-r from-emerald-400/0 via-emerald-400/60 to-emerald-400/0",
+  };
+  const dotTone = {
+    red: "bg-red-400 shadow-[0_0_10px_rgba(248,113,113,0.7)]",
+    amber: "bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.7)]",
+    emerald: "bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.7)]",
+  };
+  const labelTone = {
+    red: "text-red-200",
+    amber: "text-amber-200",
+    emerald: "text-emerald-200",
   };
 
   return (
@@ -3287,44 +3303,70 @@ function PriorityStrip({
       </div>
 
       <div className="grid gap-3 xl:grid-cols-3">
-        {cards.map((card, index) => (
-          <article
-            key={card.label}
-            className="rounded-[1.5rem] border border-[#1a2640] bg-[#0c1220] p-4"
-          >
-            <div className="flex items-start gap-3">
-              <NumberBadge value={index + 1} tone={card.tone} size="lg" />
-              <div className="min-w-0 flex-1">
-                <div className="text-[10px] font-semibold tracking-[0.01em] text-cyan-100/65">
-                  {card.label}
-                </div>
-                <h2 className="mt-1 line-clamp-2 text-sm font-semibold leading-6 text-zinc-100">
-                  {card.title}
-                </h2>
-                <span
-                  className={`mt-2 inline-block rounded-full border px-2 py-0.5 text-[10px] ${badgeTone[card.tone]}`}
-                >
-                  {card.badge}
-                </span>
-              </div>
-            </div>
-            <div className="mt-3 flex items-end justify-between gap-3">
-              <p className="line-clamp-3 flex-1 text-xs leading-5 text-zinc-400">
-                {card.textValue}
-              </p>
-              <Sparkline
-                seed={`priority-${card.label}`}
-                score={card.score}
-                series={deterministicTrendSeries(
-                  card.score,
-                  (card as any).change_7d,
-                )}
-                color={sparkColor(card.score)}
-                className="h-8 w-20 shrink-0"
+        {cards.map((card, index) => {
+          const theme = (card as any).theme as string | undefined;
+          const meaning = (card as any).meaning as string | undefined;
+          return (
+            <article
+              key={`${card.label}-${index}`}
+              className="group relative overflow-hidden rounded-[1.5rem] border border-white/[0.07] bg-gradient-to-b from-[#0e1626] via-[#0b1322] to-[#0a101e] p-[1.15rem] shadow-[0_18px_60px_rgba(0,0,0,0.32)] transition hover:border-cyan-300/25"
+            >
+              <span
+                className={`pointer-events-none absolute inset-x-0 top-0 h-[2px] ${accentBar[card.tone]}`}
               />
-            </div>
-          </article>
-        ))}
+              <div className="flex items-start gap-3">
+                <NumberBadge value={index + 1} tone={card.tone} size="lg" />
+                <div className="min-w-0 flex-1">
+                  {theme ? (
+                    <div className="mb-1 truncate text-[9px] font-semibold tracking-[0.22em] text-cyan-300/70">
+                      {theme}
+                    </div>
+                  ) : null}
+                  <h2
+                    title={card.title}
+                    className="line-clamp-2 text-[15px] font-semibold leading-[1.3] tracking-[-0.02em] text-zinc-50"
+                  >
+                    {card.title}
+                  </h2>
+                </div>
+              </div>
+
+              <div className="mt-3">
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`h-1.5 w-1.5 shrink-0 rounded-full ${dotTone[card.tone]}`}
+                  />
+                  <span
+                    className={`text-[12px] font-semibold tracking-[0.01em] ${labelTone[card.tone]}`}
+                  >
+                    {card.label}
+                  </span>
+                </div>
+                {meaning ? (
+                  <p className="mt-1.5 line-clamp-2 text-[11px] leading-5 text-zinc-400/90">
+                    {meaning}
+                  </p>
+                ) : null}
+              </div>
+
+              <div className="mt-3.5 flex items-end justify-between gap-3 border-t border-white/[0.05] pt-3">
+                <p className="line-clamp-2 flex-1 text-[11px] leading-5 text-zinc-500">
+                  {card.textValue}
+                </p>
+                <Sparkline
+                  seed={`priority-${card.label}-${index}`}
+                  score={card.score}
+                  series={deterministicTrendSeries(
+                    card.score,
+                    (card as any).change_7d,
+                  )}
+                  color={sparkColor(card.score)}
+                  className="h-8 w-20 shrink-0"
+                />
+              </div>
+            </article>
+          );
+        })}
       </div>
     </section>
   );
