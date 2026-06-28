@@ -937,30 +937,38 @@ type PriorityCardSignal = { label: string; meaning: string; tone: PriorityCard['
 
 function buildPriorityCardSignal(item: AgendaMapItem): PriorityCardSignal {
   const raw = item.raw;
-  const score = n(item.score);
   const eventCount = n(raw.event_count);
   const sourceCount = n(raw.source_count);
+  const articleCount = n(raw.article_count);
   const trend = n(raw.real_trend_score ?? raw.search_interest_score);
-  const rising = item.sparklineTone === 'rising';
   const cooling = item.sparklineTone === 'cooling';
   const sensitive = Boolean(raw.requires_human_review) || raw.sensitivity_level === 'high';
+  const lowConfidence =
+    String(raw.classification_mode || '').includes('fallback') ||
+    n(raw.micro_agenda_confidence, 100) < 50;
 
   if (sensitive) {
     return { label: 'Χρειάζεται προσοχή', meaning: 'Ευαίσθητο θέμα — θέλει προσεκτικό, θεσμικό χειρισμό πριν από δημόσια κίνηση.', tone: 'red' };
   }
-  if (rising || trend >= 55) {
-    return { label: 'Ανεβαίνει', meaning: 'Κερδίζει δυναμική τώρα: φρέσκα γεγονότα και κάλυψη τις τελευταίες ώρες.', tone: 'red' };
+  if (sourceCount >= 3 && articleCount >= 8) {
+    return { label: 'Εδραιωμένο', meaning: `Επιβεβαιωμένο από ${sourceCount} πηγές και ${articleCount} άρθρα — σταθερά στο κέντρο της ατζέντας.`, tone: 'yellow' };
   }
-  if (score >= 70 && eventCount >= 2 && sourceCount >= 2) {
-    return { label: 'Εδραιωμένο', meaning: 'Σταθερά ισχυρό θέμα με αρκετές πηγές — ήδη στο κέντρο της ατζέντας.', tone: 'yellow' };
+  if (trend >= 55) {
+    return { label: 'Ανεβαίνει', meaning: 'Υψηλός δημόσιος παλμός τώρα — ο κόσμος το αναζητά και ανεβαίνει στην ατζέντα.', tone: 'red' };
+  }
+  if (lowConfidence) {
+    return { label: 'Υπό διαμόρφωση', meaning: 'Ευρύ θέμα που δεν έχει παγιωθεί ακόμη σε σαφή ατζέντα — το παρακολουθούμε καθώς διαμορφώνεται.', tone: 'yellow' };
+  }
+  if (trend >= 40) {
+    return { label: 'Ανεβαίνει', meaning: 'Ανεβαίνει ο δημόσιος παλμός — κερδίζει χώρο στην ατζέντα.', tone: 'red' };
   }
   if (cooling) {
     return { label: 'Υποχωρεί', meaning: 'Έχει χάσει ένταση — κράτα το στο ραντάρ χωρίς βιασύνη.', tone: 'green' };
   }
-  if (eventCount <= 1 && sourceCount <= 1) {
+  if (sourceCount <= 1 || eventCount <= 1) {
     return { label: 'Πρώιμο σήμα', meaning: 'Νέο σήμα με λίγη ακόμη τεκμηρίωση — αξίζει παρακολούθηση πριν κινηθείς.', tone: 'green' };
   }
-  return { label: 'Στην ατζέντα', meaning: 'Ενεργό θέμα που παρακολουθούμε σήμερα.', tone: 'yellow' };
+  return { label: 'Σταθερό', meaning: 'Ενεργό θέμα με σταθερή παρουσία στην ατζέντα σήμερα.', tone: 'yellow' };
 }
 
 export function buildPriorityCards(raw: ProbeV4Response): PriorityCard[] {
