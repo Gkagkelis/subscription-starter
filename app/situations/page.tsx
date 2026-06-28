@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import TopNav from "../../components/TopNav";
-import { buildAgendaMap, type ProbeV4Response, type AgendaMapItem } from "../../lib/noraya/strategy-room-intelligence";
+import { buildAgendaMap, buildEventIntelligenceView, type ProbeV4Response, type AgendaMapItem } from "../../lib/noraya/strategy-room-intelligence";
 import { IBM_Plex_Sans } from "next/font/google";
 
 const plex = IBM_Plex_Sans({
@@ -171,20 +171,29 @@ export default function SituationsPage() {
           const built: Situation[] = [];
           map.slice(0, 12).forEach((item) => {
             const themeTopic = item.title;
-            const raw = (item as any).raw || {};
             (item.events || [])
               .filter((ev) => ev.id)
               .forEach((ev) => {
-                const evRaw = (ev as any).raw || {};
+                // ΙΔΙΟ στάδιο με το «Σήμερα»: καλούμε την ΙΔΙΑ συνάρτηση (buildEventIntelligenceView)
+                // και διαβάζουμε το escalation.currentLevel — εγγυημένα ίδιο, όχι εκτίμηση.
+                let level = 0;
+                try {
+                  const view = buildEventIntelligenceView(item.raw, ev);
+                  level = num(view?.escalation?.currentLevel, 0);
+                } catch {
+                  level = 0;
+                }
+
                 const evScore = Math.round(num((ev as any).event_score, num(item.score)));
                 built.push({
                   id: String(ev.id),
                   title: ev.title || themeTopic,
                   topic: themeTopic,
                   event_score: evScore,
+                  escalation_level: level > 0 ? level : undefined,
                   political_risk_level: riskFromScore(evScore),
-                  article_count: num(evRaw.article_count ?? raw.article_count, 0),
-                  source_count: num(evRaw.source_count ?? raw.source_count, 0),
+                  article_count: num((ev as any).article_count ?? (item as any).raw?.article_count, 0),
+                  source_count: num((ev as any).source_count ?? (item as any).raw?.source_count, 0),
                 });
               });
           });
