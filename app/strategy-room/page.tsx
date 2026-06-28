@@ -1,4 +1,4 @@
-      "use client";
+        "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode } from "react";
@@ -3575,7 +3575,7 @@ function ActiveSituationWorkspace({
               title="1. Στρατηγική ανάγνωση"
               subtitle="Ατζέντα → Πλαίσιο → Ρίσκο"
             >
-              <div className="grid gap-5 xl:grid-cols-[1fr_150px]">
+              <div>
                 {(() => {
                   const full =
                     aiStrategicBody ||
@@ -3591,23 +3591,13 @@ function ActiveSituationWorkspace({
                           {lead}
                         </p>
                       ) : null}
-                      <p className="whitespace-pre-line text-[13px] leading-7 text-zinc-300/95">
+                      <p className="whitespace-pre-line text-justify text-[13px] leading-7 text-zinc-300/95">
                         {rest}
                       </p>
                     </div>
                   );
                 })()}
-                                <div className="rounded-2xl border border-white/[0.07] bg-black/15 p-4">
-                  <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
-                    Βάση εκτίμησης
-                  </div>
-                  <div className="mt-3 text-lg font-semibold text-zinc-100">
-                    {effectiveDocumentationLabel}
-                  </div>
-                  <p className="mt-2 text-[11px] leading-5 text-zinc-500">
-                    Η εικόνα βασίζεται στα διαθέσιμα σήματα της ημέρας.
-                  </p>
-                </div>
+                
               </div>
             </CockpitSection>
 
