@@ -1,4 +1,4 @@
-   "use client";
+    "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode } from "react";
@@ -3324,7 +3324,7 @@ function PriorityStrip({
                   ) : null}
                   <h2
                     title={card.title}
-                    className="line-clamp-2 text-[15px] font-semibold leading-[1.3] tracking-[-0.02em] text-zinc-50"
+                    className="text-[15px] font-semibold leading-[1.3] tracking-[-0.02em] text-zinc-50"
                   >
                     {card.title}
                   </h2>
@@ -3343,14 +3343,14 @@ function PriorityStrip({
                   </span>
                 </div>
                 {meaning ? (
-                  <p className="mt-1.5 line-clamp-2 text-[11px] leading-5 text-zinc-400/90">
+                  <p className="mt-1.5 text-[11px] leading-5 text-zinc-400/90">
                     {meaning}
                   </p>
                 ) : null}
               </div>
 
               <div className="mt-3.5 flex items-end justify-between gap-3 border-t border-white/[0.05] pt-3">
-                <p className="line-clamp-2 flex-1 text-[11px] leading-5 text-zinc-500">
+                <p className="flex-1 text-[11px] leading-5 text-zinc-500">
                   {card.textValue}
                 </p>
                 <Sparkline
