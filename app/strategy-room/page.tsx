@@ -1,4 +1,4 @@
-        "use client";
+          "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode } from "react";
@@ -1687,6 +1687,8 @@ export default function StrategyRoomPage() {
   const [agendaProbe, setAgendaProbe] = useState<ProbeV4Response | null>(null);
   const [strategicImageCache, setStrategicImageCache] = useState<Record<string, string>>({});
   const fetchingStrategicRef = useRef<Set<string>>(new Set());
+  const [strategicPlayCache, setStrategicPlayCache] = useState<Record<string, any>>({});
+  const fetchingPlayRef = useRef<Set<string>>(new Set());
   const [activeProbeSelection, setActiveProbeSelection] =
     useState<AgendaProbeSelection | null>(null);
   const [loading, setLoading] = useState(true);
@@ -1960,6 +1962,68 @@ export default function StrategyRoomPage() {
       }
     })();
   }, [activeProbeItem, activeProbeEvent, activeProbeSelection, data, strategicImageCache]);
+
+  // On-demand AI «Πώς κερδίζεται» + «Επιλογές» ανά γεγονός (premium, μη-generic)
+  useEffect(() => {
+    if (!activeProbeItem) return;
+    const raw = activeProbeItem.raw;
+    const eventId = String(activeProbeEvent?.id || activeProbeSelection?.eventId || "");
+    const id = String((raw.micro_agenda_id || raw.micro_agenda || "") + (eventId ? "__" + eventId : ""));
+    if (!id) return;
+    if (strategicPlayCache[id]) return;
+    if (fetchingPlayRef.current.has(id)) return;
+    if (raw.requires_human_review || raw.sensitivity_level === "high") return;
+
+    fetchingPlayRef.current.add(id);
+
+    const partyKey = (data as any)?.profile?.party_key || "elas";
+    const partyName = (data as any)?.profile?.party_profile_snapshot?.party_name || "ΕΛΑΣ";
+    const partyProfile = (data as any)?.profile;
+    const redLines: string[] = Array.isArray(partyProfile?.red_lines) ? partyProfile.red_lines : [];
+    const knownPositions: string[] = Array.isArray(partyProfile?.known_positions) ? partyProfile.known_positions : [];
+    const tone: string = partyProfile?.default_tone || "προοδευτικός, θεσμικός, κυβερνητικός, ενωτικός";
+
+    const eventTitles: string[] = (raw.top_events || []).map((e: any) => String(e.title || "")).filter(Boolean);
+    const articleTitles: string[] = (raw.evidence_articles || []).map((a: any) => String(a.title || "")).filter(Boolean);
+    const sourcesArr: string[] = Array.from(new Set((raw.evidence_articles || []).map((a: any) => String(a.source || "")).filter(Boolean))) as string[];
+
+    (async () => {
+      try {
+        const resp = await fetch("/api/situation-engine/strategic-play", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            micro_agenda_id: id,
+            micro_agenda: raw.micro_agenda,
+            theme: String(raw.parent_topic || raw.parent_topics?.[0] || ""),
+            active_event_id: eventId || null,
+            active_event_title: String(activeProbeEvent?.title || "") || null,
+            party_key: partyKey,
+            party_name: partyName,
+            red_lines: redLines,
+            known_positions: knownPositions,
+            tone,
+            event_titles: eventTitles,
+            article_titles: articleTitles,
+            sources: sourcesArr,
+            real_news_coverage_score: raw.real_news_coverage_score ?? null,
+            real_trend_score: raw.real_trend_score ?? null,
+            score: raw.score ?? 0,
+          }),
+        });
+        if (resp.ok) {
+          const json = await resp.json();
+          if (json.ok && json.body) {
+            setStrategicPlayCache((prev) => ({ ...prev, [id]: json.body }));
+          }
+        }
+      } catch {
+        // best-effort — fallback στα templates
+      } finally {
+        fetchingPlayRef.current.delete(id);
+      }
+    })();
+  }, [activeProbeItem, activeProbeEvent, activeProbeSelection, data, strategicPlayCache]);
 
   useEffect(() => {
     if (
@@ -2594,6 +2658,7 @@ export default function StrategyRoomPage() {
               probeItem={activeProbeItem}
               probeEvent={activeProbeEvent}
               aiStrategicBody={activeProbeItem ? (strategicImageCache[String((activeProbeItem.raw.micro_agenda_id || activeProbeItem.raw.micro_agenda || "") + (activeProbeSelection?.eventId ? "__" + activeProbeSelection.eventId : ""))] || null) : null}
+              aiPlay={activeProbeItem ? (strategicPlayCache[String((activeProbeItem.raw.micro_agenda_id || activeProbeItem.raw.micro_agenda || "") + (activeProbeSelection?.eventId ? "__" + activeProbeSelection.eventId : ""))] || null) : null}
               agendaArchitectResult={agendaArchitectResult}
               agendaArchitectLoading={agendaArchitectLoading}
               agendaArchitectError={agendaArchitectError}
@@ -3399,6 +3464,7 @@ function ActiveSituationWorkspace({
   probeItem,
   probeEvent,
   aiStrategicBody,
+  aiPlay,
   agendaArchitectResult,
   agendaArchitectLoading,
   agendaArchitectError,
@@ -3428,6 +3494,7 @@ function ActiveSituationWorkspace({
   probeItem?: ProbeAgendaMapItem | null;
   probeEvent?: ProbeAgendaEventItem | null;
   aiStrategicBody?: string | null;
+  aiPlay?: any | null;
   agendaArchitectResult?: AgendaArchitectResult | null;
   agendaArchitectLoading?: boolean;
   agendaArchitectError?: string;
@@ -3452,7 +3519,19 @@ function ActiveSituationWorkspace({
   const whySection = probeSection("why_exists");
   const sourcesSection = probeSection("sources_factors");
   const pulseSection = probeSection("public_pulse");
-  const winSection = probeSection("how_to_win");
+  const winSectionBase = probeSection("how_to_win");
+  const winSection: any = aiPlay
+    ? {
+        ...(winSectionBase || {}),
+        body: aiPlay.game_today || winSectionBase?.body || "",
+        bullets: [
+          aiPlay.trap || winSectionBase?.bullets?.[0] || "",
+          aiPlay.favorable || winSectionBase?.bullets?.[1] || "",
+          aiPlay.realign_move || winSectionBase?.bullets?.[2] || "",
+          aiPlay.sequence || winSectionBase?.bullets?.[3] || "",
+        ],
+      }
+    : winSectionBase;
   const actionSection = probeSection("action_options");
   const materialSection = probeSection("material");
   const effectiveTitle = probeView?.eventTitle || title;
@@ -3475,7 +3554,21 @@ function ActiveSituationWorkspace({
       : "border-cyan-300/25 bg-cyan-300/10 text-cyan-100"
     : signalToneClass(urgency);
   const effectiveDecisionOptions =
-    actionSection?.actions?.length
+    aiPlay?.options?.length
+      ? aiPlay.options.map((option: any) => ({
+          label: option.key,
+          title: option.title,
+          move: option.body,
+          gain: option.gain,
+          risk: option.risk,
+          recommendation: option.avoid
+            ? "avoid"
+            : option.recommended
+              ? "prefer"
+              : "acceptable",
+          success: option.success,
+        }))
+      : actionSection?.actions?.length
       ? actionSection.actions.map((option) => ({
           label: option.key,
           title: option.title,
@@ -3605,6 +3698,11 @@ function ActiveSituationWorkspace({
               title={`2. ${probeView?.primaryTabLabel || "Πώς κερδίζεται το θέμα"}`}
               subtitle={winSection?.kicker || "Στρατηγική δυναμική"}
             >
+              {aiPlay?.headline ? (
+                <p className="mb-3 border-l-2 border-cyan-300/50 pl-3 text-[14px] font-semibold leading-7 tracking-[-0.01em] text-zinc-50">
+                  {aiPlay.headline}
+                </p>
+              ) : null}
               <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-5">
                 <WinCard
                   title="Το παιχνίδι σήμερα"
@@ -3663,6 +3761,7 @@ function ActiveSituationWorkspace({
                   title="Ακολουθία"
                   tone="zinc"
                   textValue={
+                    aiPlay?.sequence ||
                     list(actionPlan.next_24h)[0] ||
                     "Πρώτα παρακολούθηση, μετά ασφαλής δημόσια γραμμή, μετά κλιμάκωση μόνο με νέα στοιχεία."
                   }
