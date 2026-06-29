@@ -35,7 +35,7 @@ function json(payload: unknown, status = 200) {
 }
 
 function cacheKey(microAgendaId: string, partyKey: string, eventId?: string | null) {
-  const base = "strategic_play_v8__" + microAgendaId + "__" + partyKey;
+  const base = "strategic_play_v9__" + microAgendaId + "__" + partyKey;
   return eventId ? base + "__" + eventId : base;
 }
 
@@ -62,7 +62,7 @@ async function writeCache(supabase: ReturnType<typeof svc>, key: string, body: a
     situation_id: null,
     organization_id: null,
     analysis_kind: key,
-    input_hash: "v8",
+    input_hash: "v9",
     model_used: MODEL,
     result: { body, generated_at: new Date().toISOString() },
   };
@@ -281,6 +281,16 @@ ${otherEvents ? "Συναφή γεγονότα (μόνο πλαίσιο, ΟΧΙ 
       deliverable_brief: cleanStr(src?.deliverable_brief, ""),
     });
 
+    // ΕΓΓΥΗΣΗ: η Γ (προς αποφυγή) ΠΟΤΕ κενή. Αν το AI την άφησε άδεια,
+    // τη γεμίζουμε από κώδικα με συγκεκριμένη "κίνηση υψηλού ρίσκου" για ΑΥΤΟ το γεγονός.
+    const cOpt = mk(o.C, "Γ", "Προς αποφυγή", 28, false, true);
+    if (cOpt.body === "—" || !cleanStr(o?.C?.body)) {
+      cOpt.title = "Επιθετική μετωπική τοποθέτηση";
+      cOpt.body = `Άμεση, υψηλού τόνου μετωπική επίθεση στην κυβέρνηση με αφορμή «${activeTitle}», χωρίς θεσμική πρόταση από πίσω.`;
+      cOpt.gain = "Φωνή και ορατότητα βραχυπρόθεσμα — ικανοποιεί τη σκληρή βάση.";
+      cOpt.risk = `Διαβάζεται ως αντιπολιτευτικός αυτοματισμός χωρίς λύση· εκθέτει το ${party_name} σε «μηδενική πρόταση» και χάνει το κεντρώο κοινό.`;
+    }
+
     const result = {
       headline: cleanStr(parsed.headline, ""),
       game_today: cleanStr(parsed.game_today, ""),
@@ -291,7 +301,7 @@ ${otherEvents ? "Συναφή γεγονότα (μόνο πλαίσιο, ΟΧΙ 
       options: [
         mk(o.A, "A", "Προτεινόμενη", 70, true, false),
         mk(o.B, "B", "Αποδεκτή", 52, false, false),
-        mk(o.C, "Γ", "Προς αποφυγή", 28, false, true),
+        cOpt,
       ],
     };
 
