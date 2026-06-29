@@ -3849,12 +3849,20 @@ function ActiveSituationWorkspace({
                       risk={opt.risk}
                       recommendation={opt.recommendation}
                       success={opt.success}
-                      deliverableLabel={opt.deliverableLabel}
                       deliverableBrief={opt.deliverableBrief}
+                      deliverableLabel={
+                        opt.deliverableLabel ||
+                        (opt.recommendation !== "avoid" ? "Γράψε μου τι να πω" : "")
+                      }
                       onDeliverable={
-                        opt.deliverableLabel
+                        opt.recommendation !== "avoid"
                           ? (format?: string) =>
-                              onDeliverable?.(opt.deliverableBrief || "", opt.title, format)
+                              onDeliverable?.(
+                                opt.deliverableBrief ||
+                                  `Ετοίμασέ μου το κατάλληλο παραδοτέο για την κίνηση «${opt.title}».`,
+                                opt.title,
+                                format,
+                              )
                           : undefined
                       }
                     />
