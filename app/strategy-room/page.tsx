@@ -1,4 +1,4 @@
-         "use client";
+                "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode } from "react";
@@ -1689,6 +1689,7 @@ export default function StrategyRoomPage() {
   const fetchingStrategicRef = useRef<Set<string>>(new Set());
   const [strategicPlayCache, setStrategicPlayCache] = useState<Record<string, any>>({});
   const fetchingPlayRef = useRef<Set<string>>(new Set());
+  const [aiBusyIds, setAiBusyIds] = useState<Record<string, boolean>>({});
   const [activeProbeSelection, setActiveProbeSelection] =
     useState<AgendaProbeSelection | null>(null);
   const [loading, setLoading] = useState(true);
@@ -1912,6 +1913,7 @@ export default function StrategyRoomPage() {
     if (raw.requires_human_review || raw.sensitivity_level === "high") return; // sensitive — δεν το στέλνουμε
 
     fetchingStrategicRef.current.add(id);
+    setAiBusyIds((p) => ({ ...p, [id + "|img"]: true }));
 
     const partyKey = (data as any)?.profile?.party_key || "elas";
     const partyName = (data as any)?.profile?.party_profile_snapshot?.party_name || "ΕΛΑΣ";
@@ -1959,6 +1961,7 @@ export default function StrategyRoomPage() {
         // best-effort — fallback στο template
       } finally {
         fetchingStrategicRef.current.delete(id);
+        setAiBusyIds((p) => ({ ...p, [id + "|img"]: false }));
       }
     })();
   }, [activeProbeItem, activeProbeEvent, activeProbeSelection, data, strategicImageCache]);
@@ -1975,6 +1978,7 @@ export default function StrategyRoomPage() {
     if (raw.requires_human_review || raw.sensitivity_level === "high") return;
 
     fetchingPlayRef.current.add(id);
+    setAiBusyIds((p) => ({ ...p, [id + "|play"]: true }));
 
     const partyKey = (data as any)?.profile?.party_key || "elas";
     const partyName = (data as any)?.profile?.party_profile_snapshot?.party_name || "ΕΛΑΣ";
@@ -2021,6 +2025,7 @@ export default function StrategyRoomPage() {
         // best-effort — fallback στα templates
       } finally {
         fetchingPlayRef.current.delete(id);
+        setAiBusyIds((p) => ({ ...p, [id + "|play"]: false }));
       }
     })();
   }, [activeProbeItem, activeProbeEvent, activeProbeSelection, data, strategicPlayCache]);
@@ -2659,6 +2664,8 @@ export default function StrategyRoomPage() {
               probeEvent={activeProbeEvent}
               aiStrategicBody={activeProbeItem ? (strategicImageCache[String((activeProbeItem.raw.micro_agenda_id || activeProbeItem.raw.micro_agenda || "") + (activeProbeSelection?.eventId ? "__" + activeProbeSelection.eventId : ""))] || null) : null}
               aiPlay={activeProbeItem ? (strategicPlayCache[String((activeProbeItem.raw.micro_agenda_id || activeProbeItem.raw.micro_agenda || "") + (activeProbeSelection?.eventId ? "__" + activeProbeSelection.eventId : ""))] || null) : null}
+              aiBusyStrategic={activeProbeItem ? Boolean(aiBusyIds[String((activeProbeItem.raw.micro_agenda_id || activeProbeItem.raw.micro_agenda || "") + (activeProbeSelection?.eventId ? "__" + activeProbeSelection.eventId : "")) + "|img"]) : false}
+              aiBusyPlay={activeProbeItem ? Boolean(aiBusyIds[String((activeProbeItem.raw.micro_agenda_id || activeProbeItem.raw.micro_agenda || "") + (activeProbeSelection?.eventId ? "__" + activeProbeSelection.eventId : "")) + "|play"]) : false}
               agendaArchitectResult={agendaArchitectResult}
               agendaArchitectLoading={agendaArchitectLoading}
               agendaArchitectError={agendaArchitectError}
@@ -3475,6 +3482,8 @@ function ActiveSituationWorkspace({
   probeEvent,
   aiStrategicBody,
   aiPlay,
+  aiBusyStrategic,
+  aiBusyPlay,
   agendaArchitectResult,
   agendaArchitectLoading,
   agendaArchitectError,
@@ -3505,6 +3514,8 @@ function ActiveSituationWorkspace({
   probeEvent?: ProbeAgendaEventItem | null;
   aiStrategicBody?: string | null;
   aiPlay?: any | null;
+  aiBusyStrategic?: boolean;
+  aiBusyPlay?: boolean;
   agendaArchitectResult?: AgendaArchitectResult | null;
   agendaArchitectLoading?: boolean;
   agendaArchitectError?: string;
@@ -3679,7 +3690,9 @@ function ActiveSituationWorkspace({
               subtitle="Ατζέντα → Πλαίσιο → Ρίσκο"
             >
               <div>
-                {(() => {
+                {aiBusyStrategic && !aiStrategicBody ? (
+                  <AnalysisLoading lines={5} label="Ο Noraya γράφει τη στρατηγική ανάγνωση…" />
+                ) : (() => {
                   const full =
                     aiStrategicBody ||
                     strategicSection?.body ||
@@ -3708,6 +3721,10 @@ function ActiveSituationWorkspace({
               title={`2. ${probeView?.primaryTabLabel || "Πώς κερδίζεται το θέμα"}`}
               subtitle={winSection?.kicker || "Στρατηγική δυναμική"}
             >
+              {aiBusyPlay && !aiPlay ? (
+                <AnalysisLoading lines={4} label="Ο Noraya χτίζει το «Πώς κερδίζεται»…" />
+              ) : (
+              <>
               {aiPlay?.headline ? (
                 <p className="mb-3 border-l-2 border-cyan-300/50 pl-3 text-[14px] font-semibold leading-7 tracking-[-0.01em] text-zinc-50">
                   {aiPlay.headline}
@@ -3777,6 +3794,8 @@ function ActiveSituationWorkspace({
                   }
                 />
               </div>
+              </>
+              )}
             </CockpitSection>
 
             <div className="grid gap-4 2xl:grid-cols-2">
@@ -3784,6 +3803,9 @@ function ActiveSituationWorkspace({
                 title="3. Τι κάνουμε τώρα — επιλογές"
                 subtitle="Τρεις διαδρομές απόφασης"
               >
+                {aiBusyPlay && !aiPlay ? (
+                  <AnalysisLoading lines={4} label="Ο Noraya ετοιμάζει τις επιλογές δράσης…" />
+                ) : (
                 <div className="grid gap-3 md:grid-cols-3 2xl:grid-cols-1">
                   {effectiveDecisionOptions.map((opt: DecisionCardOption) => (
                     <DecisionCard
@@ -3798,6 +3820,7 @@ function ActiveSituationWorkspace({
                     />
                   ))}
                 </div>
+                )}
               </CockpitSection>
 
               <CockpitSection
@@ -6093,6 +6116,32 @@ function EmptyState({
       className={`rounded-2xl border border-dashed border-[#1a2640] bg-black/10 ${small ? "px-3 py-3 text-[11px]" : "px-4 py-5 text-sm"} leading-6 text-zinc-600`}
     >
       {children}
+    </div>
+  );
+}
+
+function AnalysisLoading({
+  lines = 4,
+  label = "Ο Noraya αναλύει το γεγονός…",
+}: {
+  lines?: number;
+  label?: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-cyan-300/15 bg-cyan-300/[0.03] p-4">
+      <div className="mb-3 flex items-center gap-2 text-[11px] font-medium text-cyan-100/90">
+        <span className="h-2 w-2 animate-pulse rounded-full bg-cyan-300 shadow-[0_0_12px_rgba(103,232,249,0.85)]" />
+        {label}
+      </div>
+      <div className="grid gap-2">
+        {Array.from({ length: lines }).map((_, i) => (
+          <div
+            key={i}
+            className="h-3 animate-pulse rounded-full bg-gradient-to-r from-white/[0.10] via-white/[0.04] to-white/[0.10]"
+            style={{ width: `${92 - i * 9}%`, animationDelay: `${i * 120}ms` }}
+          />
+        ))}
+      </div>
     </div>
   );
 }
