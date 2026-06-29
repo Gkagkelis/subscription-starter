@@ -1,4 +1,4 @@
-                      "use client";
+           "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode } from "react";
@@ -2666,6 +2666,13 @@ export default function StrategyRoomPage() {
               aiPlay={activeProbeItem ? (strategicPlayCache[String((activeProbeItem.raw.micro_agenda_id || activeProbeItem.raw.micro_agenda || "") + (activeProbeSelection?.eventId ? "__" + activeProbeSelection.eventId : ""))] || null) : null}
               aiBusyStrategic={activeProbeItem ? Boolean(aiBusyIds[String((activeProbeItem.raw.micro_agenda_id || activeProbeItem.raw.micro_agenda || "") + (activeProbeSelection?.eventId ? "__" + activeProbeSelection.eventId : "")) + "|img"]) : false}
               aiBusyPlay={activeProbeItem ? Boolean(aiBusyIds[String((activeProbeItem.raw.micro_agenda_id || activeProbeItem.raw.micro_agenda || "") + (activeProbeSelection?.eventId ? "__" + activeProbeSelection.eventId : "")) + "|play"]) : false}
+              onDeliverable={(brief, optionTitle) => {
+                const msg = `Γράψε μου ΕΤΟΙΜΟ προς χρήση παραδοτέο για το ενεργό γεγονός.
+Κίνηση: «${optionTitle}».
+Οδηγία: ${brief || optionTitle}
+Γράψ' το στη φωνή και την πολιτική γραμμή του κόμματος, έτοιμο να χρησιμοποιηθεί.`;
+                askNorayaAdvisor(msg);
+              }}
               agendaArchitectResult={agendaArchitectResult}
               agendaArchitectLoading={agendaArchitectLoading}
               agendaArchitectError={agendaArchitectError}
@@ -3455,6 +3462,8 @@ type DecisionCardOption = {
   risk: string;
   recommendation: string;
   success?: number;
+  deliverableLabel?: string;
+  deliverableBrief?: string;
 };
 
 function ActiveSituationWorkspace({
@@ -3484,6 +3493,7 @@ function ActiveSituationWorkspace({
   aiPlay,
   aiBusyStrategic,
   aiBusyPlay,
+  onDeliverable,
   agendaArchitectResult,
   agendaArchitectLoading,
   agendaArchitectError,
@@ -3516,6 +3526,7 @@ function ActiveSituationWorkspace({
   aiPlay?: any | null;
   aiBusyStrategic?: boolean;
   aiBusyPlay?: boolean;
+  onDeliverable?: (brief: string, title: string) => void;
   agendaArchitectResult?: AgendaArchitectResult | null;
   agendaArchitectLoading?: boolean;
   agendaArchitectError?: string;
@@ -3588,6 +3599,8 @@ function ActiveSituationWorkspace({
               ? "prefer"
               : "acceptable",
           success: option.success,
+          deliverableLabel: option.deliverable_label,
+          deliverableBrief: option.deliverable_brief,
         }))
       : actionSection?.actions?.length
       ? actionSection.actions.map((option) => ({
@@ -3817,6 +3830,13 @@ function ActiveSituationWorkspace({
                       risk={opt.risk}
                       recommendation={opt.recommendation}
                       success={opt.success}
+                      deliverableLabel={opt.deliverableLabel}
+                      deliverableBrief={opt.deliverableBrief}
+                      onDeliverable={
+                        opt.deliverableLabel
+                          ? () => onDeliverable?.(opt.deliverableBrief || "", opt.title)
+                          : undefined
+                      }
                     />
                   ))}
                 </div>
@@ -5863,6 +5883,8 @@ function DecisionCard({
   risk,
   recommendation,
   success,
+  deliverableLabel,
+  onDeliverable,
 }: {
   label: string;
   title: string;
@@ -5871,6 +5893,9 @@ function DecisionCard({
   risk: string;
   recommendation: string;
   success?: number;
+  deliverableLabel?: string;
+  deliverableBrief?: string;
+  onDeliverable?: () => void;
 }) {
   return (
     <article
@@ -5907,6 +5932,16 @@ function DecisionCard({
             />
           </div>
         </div>
+      ) : null}
+      {deliverableLabel && onDeliverable ? (
+        <button
+          type="button"
+          onClick={onDeliverable}
+          className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border border-cyan-300/30 bg-cyan-300/10 px-3 py-2.5 text-[11px] font-semibold text-cyan-100 transition hover:border-cyan-200/50 hover:bg-cyan-300/15"
+        >
+          <span aria-hidden>✍️</span>
+          {deliverableLabel}
+        </button>
       ) : null}
     </article>
   );
