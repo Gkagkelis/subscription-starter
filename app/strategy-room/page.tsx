@@ -1,4 +1,4 @@
-                    "use client";
+                      "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode } from "react";
@@ -3798,7 +3798,7 @@ function ActiveSituationWorkspace({
               )}
             </CockpitSection>
 
-            <div className="grid gap-4 2xl:grid-cols-2">
+            <div className="grid gap-4">
               <CockpitSection
                 title="3. Τι κάνουμε τώρα — επιλογές"
                 subtitle="Τρεις διαδρομές απόφασης"
@@ -3806,7 +3806,7 @@ function ActiveSituationWorkspace({
                 {aiBusyPlay && !aiPlay ? (
                   <AnalysisLoading lines={4} label="Ο Noraya ετοιμάζει τις επιλογές δράσης…" />
                 ) : (
-                <div className="grid gap-3 md:grid-cols-3 2xl:grid-cols-1">
+                <div className="grid gap-3 md:grid-cols-3">
                   {effectiveDecisionOptions.map((opt: DecisionCardOption) => (
                     <DecisionCard
                       key={opt.label}
@@ -3822,29 +3822,10 @@ function ActiveSituationWorkspace({
                 </div>
                 )}
               </CockpitSection>
-
-              <CockpitSection
-                title="4. Τι θα άλλαζε την εκτίμηση"
-                subtitle="Σήματα επανεκτίμησης"
-              >
-                <BulletList
-                  compact
-                  items={probeView?.escalation?.triggerLines || list(monitoring.escalation_triggers)}
-                  fallback={[
-                    "Νέο δημοσκοπικό εύρημα ή verified internal poll.",
-                    "Θεσμική αντίδραση που αλλάζει το επίπεδο κλιμάκωσης.",
-                    "Μετατόπιση framing σε προσωπική ή ηθική στόχευση.",
-                  ]}
-                />
-                <div className="mt-3 rounded-2xl border border-amber-300/25 bg-amber-300/10 px-4 py-3 text-xs leading-6 text-amber-100">
-                  Το κοινό αλλάζει γρήγορα. Η σύσταση πρέπει να αναθεωρείται
-                  όταν εμφανιστούν νέα σήματα.
-                </div>
-              </CockpitSection>
             </div>
 
             <CockpitSection
-              title="5. Ένταση & δυναμική"
+              title="4. Ένταση & δυναμική"
               subtitle="6 gauges — αρχικά από διαθέσιμα live signals"
             >
               <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
@@ -3930,7 +3911,7 @@ function ActiveSituationWorkspace({
             </CockpitSection>
 
             <CockpitSection
-              title="6. Κλίμακα κλιμάκωσης"
+              title="5. Κλίμακα κλιμάκωσης"
               subtitle="Αποφυγή πρόωρης κλιμάκωσης"
             >
               <EscalationLadder
