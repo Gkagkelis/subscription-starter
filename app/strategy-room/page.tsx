@@ -1,4 +1,4 @@
-                                   "use client";
+                                                                   "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode } from "react";
@@ -3667,6 +3667,8 @@ function ActiveSituationWorkspace({
               aiPlay={aiPlay}
               winSection={winSection}
               options={effectiveDecisionOptions}
+              gauges={probeView?.gauges || []}
+              escalationCurrent={probeView?.escalation?.currentLevel ?? null}
             />
           </div>
         </div>
@@ -6218,6 +6220,8 @@ function ExportEventButton({
   aiPlay,
   winSection,
   options,
+  gauges,
+  escalationCurrent,
 }: {
   title: string;
   category: string;
@@ -6227,8 +6231,22 @@ function ExportEventButton({
   aiPlay?: any | null;
   winSection?: any;
   options?: DecisionCardOption[];
+  gauges?: { key: string; label: string; value: number }[];
+  escalationCurrent?: number | null;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const escalationSteps = [
+    "Παρακολούθηση",
+    "Χαμηλή επίπτωση",
+    "Θεσμική πρόκληση",
+    "Κοινωνική πίεση",
+    "Παρέμβαση αρχηγού",
+    "Σύγκρουση",
+  ];
+  const escIdx =
+    typeof escalationCurrent === "number"
+      ? Math.min(6, Math.max(1, Math.round(escalationCurrent)))
+      : null;
 
   function buildPlainText() {
     const L: string[] = [];
@@ -6256,6 +6274,20 @@ function ExportEventButton({
       L.push(`Κέρδος: ${opt.gain}`);
       L.push(`Ρίσκο: ${opt.risk}`);
     });
+    L.push("");
+    L.push("— 4. ΕΝΤΑΣΗ & ΔΥΝΑΜΙΚΗ —");
+    if (gauges && gauges.length) {
+      gauges.forEach((g) => L.push(`${g.label}: ${Math.round(g.value)}/100`));
+    } else {
+      L.push("—");
+    }
+    L.push("");
+    L.push("— 5. ΚΛΙΜΑΚΑ ΚΛΙΜΑΚΩΣΗΣ —");
+    L.push(
+      escIdx
+        ? `Τρέχον στάδιο: ${escIdx}/6 — ${escalationSteps[escIdx - 1]}`
+        : "—"
+    );
     L.push("");
     L.push("———————————————");
     L.push("Παράχθηκε από το Noraya · Political Intelligence");
@@ -6306,6 +6338,8 @@ function ExportEventButton({
   .muted { color: #555; font-style: italic; }
   p { margin: 4px 0; font-size: 13px; }
   .foot { margin-top: 28px; padding-top: 12px; border-top: 1px solid #ddd; font-size: 11px; color: #777; font-family: Arial, sans-serif; }
+  .gauges { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 18px; }
+  .gauge { display: flex; justify-content: space-between; border-bottom: 1px dotted #ccc; padding: 3px 0; font-size: 12px; font-family: Arial, sans-serif; }
   @media print { body { margin: 0 auto; } }
 </style></head><body>
   <div class="brand">Noraya · Political Intelligence</div>
@@ -6325,6 +6359,21 @@ function ExportEventButton({
 
   <h2>3. Τι κάνουμε τώρα — επιλογές</h2>
   ${optionsHtml}
+
+  <h2>4. Ένταση & δυναμική</h2>
+  ${
+    gauges && gauges.length
+      ? `<div class="gauges">${gauges
+          .map(
+            (g) =>
+              `<div class="gauge"><span>${esc(g.label)}</span><b>${Math.round(g.value)}/100</b></div>`
+          )
+          .join("")}</div>`
+      : "<p>—</p>"
+  }
+
+  <h2>5. Κλίμακα κλιμάκωσης</h2>
+  <p>${escIdx ? `Τρέχον στάδιο: <b>${escIdx}/6</b> — ${esc(escalationSteps[escIdx - 1])}` : "—"}</p>
 
   <div class="foot">Παράχθηκε από το Noraya · Political Intelligence</div>
   <script>window.onload = function(){ window.print(); }</script>
