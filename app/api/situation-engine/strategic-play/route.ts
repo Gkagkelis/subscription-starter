@@ -35,7 +35,7 @@ function json(payload: unknown, status = 200) {
 }
 
 function cacheKey(microAgendaId: string, partyKey: string, eventId?: string | null) {
-  const base = "strategic_play_v5__" + microAgendaId + "__" + partyKey;
+  const base = "strategic_play_v6__" + microAgendaId + "__" + partyKey;
   return eventId ? base + "__" + eventId : base;
 }
 
@@ -62,7 +62,7 @@ async function writeCache(supabase: ReturnType<typeof svc>, key: string, body: a
     situation_id: null,
     organization_id: null,
     analysis_kind: key,
-    input_hash: "v5",
+    input_hash: "v6",
     model_used: MODEL,
     result: { body, generated_at: new Date().toISOString() },
   };
@@ -126,7 +126,7 @@ async function callClaude(prompt: string): Promise<string> {
     },
     body: JSON.stringify({
       model: MODEL,
-      max_tokens: 2200,
+      max_tokens: 4000,
       messages: [{ role: "user", content: prompt }],
     }),
   });
@@ -224,7 +224,7 @@ ${otherEvents ? "Συναφή γεγονότα (μόνο πλαίσιο, ΟΧΙ 
 - Κάθε επιλογή = ΔΙΑΦΟΡΕΤΙΚΗ απόφαση (όχι παραλλαγή της ίδιας).
 - ΥΠΟΧΡΕΩΤΙΚΟ: ΚΑΙ ΟΙ ΤΡΕΙΣ επιλογές (A, B, Γ) γεμίζουν ΠΛΗΡΩΣ: title, body, gain, risk — ΠΟΤΕ "—", ΠΟΤΕ κενό. Η Γ είναι ΠΡΑΓΜΑΤΙΚΗ, συγκεκριμένη κίνηση που απλώς ΔΕΝ συνιστάς (έχει αληθινό τίτλο, αληθινό body, αληθινό gain, και risk που εξηγεί ΓΙΑΤΙ είναι επικίνδυνη). ΜΗΝ αφήσεις τη Γ μισοάδεια.
 - Αποφασιστικός τόνος. Ελληνικά, πυκνά, σαν εμπιστευτικό brief. Χωρίς markdown.
-- Κράτα κάθε πεδίο 1-3 προτάσεις (το headline ΜΙΑ πρόταση).
+- Κράτα κάθε πεδίο 1-3 προτάσεις (το headline ΜΙΑ πρόταση). ΜΗΝ ξοδεύεις όλο τον χώρο στην A — μοίρασέ τον ΙΣΑ ώστε B και Γ να είναι ΕΞΙΣΟΥ πλήρεις. Είναι ΛΑΘΟΣ να τελειώσεις με μισοάδεια B ή Γ.
 
 ΕΞΥΠΝΟ ΠΑΡΑΔΟΤΕΟ ΑΝΑ ΕΠΙΛΟΓΗ (ΠΟΛΥ ΣΗΜΑΝΤΙΚΟ):
 Για κάθε επιλογή σκέψου σαν ΚΟΡΥΦΑΙΟΣ ΕΠΙΚΟΙΝΩΝΙΟΛΟΓΟΣ: «Για να ΕΚΤΕΛΕΣΤΕΙ αυτή ακριβώς η κίνηση, τι ΧΕΙΡΟΠΙΑΣΤΟ θα ετοίμαζα για το επιτελείο;»
