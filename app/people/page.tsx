@@ -163,6 +163,11 @@ export default function PeoplePage() {
   const dispTw = balanced.tw;
   const [win, setWin] = useState(0);
   const [refilling, setRefilling] = useState(false);
+  const [ownChips, setOwnChips] = useState<{ label: string; query: string }[]>([]);
+  const [oppChips, setOppChips] = useState<{ label: string; query: string; group: string }[]>([]);
+  const [freeQuery, setFreeQuery] = useState("");
+  const [showOpponents, setShowOpponents] = useState(false);
+  const [personSearch, setPersonSearch] = useState<{ topic: string; title: string; id: string } | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -178,6 +183,17 @@ export default function PeoplePage() {
         /* default */
       }
       setParty(pk);
+      // Πρόσωπα & λέξεις-κλειδιά (σταθερή λίστα κόμμα→αρχηγός, χωρίς AI).
+      try {
+        const kr = await fetch(`/api/voices-keywords?token=dev&party=${encodeURIComponent(pk)}`, { cache: "no-store" });
+        if (kr.ok) {
+          const kj = await kr.json();
+          if (Array.isArray(kj?.own)) setOwnChips(kj.own);
+          if (Array.isArray(kj?.opponents)) setOppChips(kj.opponents);
+        }
+      } catch {
+        /* ignore */
+      }
       // Πηγή = ο ΙΔΙΟΣ Χάρτης ατζέντας με το «Σήμερα»: agenda-probe → buildAgendaMap.
       try {
         const r = await fetch(
@@ -217,6 +233,18 @@ export default function PeoplePage() {
     return null;
   }, [themes, selectedEventId]);
 
+  const activeSelection = selected || personSearch;
+
+  function searchPerson(label: string, query: string) {
+    const q = (query || label).trim();
+    if (!q) return;
+    const nextSearch = { topic: "Πρόσωπα", title: q, id: "" };
+    setPersonSearch(nextSearch);
+    setSelectedEventId(null);
+    setExpandedTopic(null);
+    listen(nextSearch.topic, nextSearch.title, nextSearch.id);
+  }
+
   async function listen(topic: string, title: string, eventId: string) {
     setData(null);
     setErrMsg(null);
@@ -240,6 +268,7 @@ export default function PeoplePage() {
 
   function pickEvent(eventId: string) {
     setSelectedEventId(eventId);
+    setPersonSearch(null);
     setData(null);
     setErrMsg(null);
     setFeedYt([]);
@@ -250,10 +279,10 @@ export default function PeoplePage() {
   async function showMore() {
     const nextStart = (win + 1) * PER;
     const exhausted = nextStart >= feedYt.length && nextStart >= feedTw.length;
-    if (exhausted && selected) {
+    if (exhausted && activeSelection) {
       setRefilling(true);
       try {
-        const r = await fetch(`/api/voices?token=dev&party=${encodeURIComponent(party)}&topic=${encodeURIComponent(selected.topic)}&q=${encodeURIComponent(selected.title)}&event_id=${encodeURIComponent(selected.id)}&feed_only=1`, { cache: "no-store" });
+        const r = await fetch(`/api/voices?token=dev&party=${encodeURIComponent(party)}&topic=${encodeURIComponent(activeSelection.topic)}&q=${encodeURIComponent(activeSelection.title)}&event_id=${encodeURIComponent(activeSelection.id)}&feed_only=1`, { cache: "no-store" });
         const j = await r.json();
         if (j?.feed) {
           setFeedYt((prev) => {
@@ -306,6 +335,54 @@ export default function PeoplePage() {
 
         <div className="grid gap-5 lg:grid-cols-[340px_1fr]">
           {/* Picker: Χάρτης ατζέντας — θεματική → ανοίγει → γεγονότα (ίδιο με «Σήμερα») */}
+          <div className="space-y-3">
+          <div className="rounded-3xl border border-cyan-300/25 bg-cyan-300/[0.04] p-3">
+            <div className="mb-2 px-1 text-xs font-medium text-cyan-300/80">Πρόσωπα &amp; λέξεις-κλειδιά</div>
+
+            {/* Ελεύθερη αναζήτηση */}
+            <div className="mb-1 flex gap-1.5">
+              <input
+                type="text"
+                value={freeQuery}
+                onChange={(e) => setFreeQuery(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") searchPerson(freeQuery, freeQuery); }}
+                placeholder="Γράψε όνομα ή 1-3 λέξεις-κλειδιά"
+                className="min-w-0 flex-1 rounded-xl border border-[#1a2640] bg-[#0a0f1c] px-3 py-2 text-[12px] text-zinc-200 placeholder:text-zinc-600 outline-none focus:border-cyan-300/40"
+              />
+              <button type="button" onClick={() => searchPerson(freeQuery, freeQuery)} className="shrink-0 rounded-xl border border-cyan-300/30 bg-cyan-300/10 px-3 py-2 text-[12px] text-cyan-100 transition hover:bg-cyan-300/20">Ψάξε</button>
+            </div>
+            <div className="mb-3 px-1 text-[10px] text-zinc-600">π.χ. «Τσίπρας ΔΕΘ» — λέξεις-κλειδιά, όχι ολόκληρη πρόταση.</div>
+
+            {/* Το κόμμα μου */}
+            {ownChips.length > 0 ? (
+              <div className="mb-3">
+                <div className="mb-1.5 px-1 text-[10px] uppercase tracking-wide text-zinc-500">Το κόμμα μου</div>
+                <div className="flex flex-wrap gap-1.5">
+                  {ownChips.map((c, i) => (
+                    <button key={`own-${i}`} type="button" onClick={() => searchPerson(c.label, c.query)} className="rounded-full border border-cyan-300/30 bg-cyan-300/10 px-2.5 py-1 text-[11px] text-cyan-100 transition hover:bg-cyan-300/20">{c.label}</button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            {/* Αντίπαλοι (συρτάρι) */}
+            {oppChips.length > 0 ? (
+              <div>
+                <button type="button" onClick={() => setShowOpponents((s) => !s)} className="flex w-full items-center justify-between rounded-xl border border-[#1a2640] bg-[#0a0f1c] px-3 py-2 text-[11px] text-zinc-300 transition hover:text-zinc-100">
+                  <span>Αντίπαλοι</span>
+                  <span className="text-zinc-500">{showOpponents ? "▾" : "▸"}</span>
+                </button>
+                {showOpponents ? (
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {oppChips.map((c, i) => (
+                      <button key={`opp-${i}`} type="button" onClick={() => searchPerson(c.label, c.query)} className="rounded-full border border-[#243049] bg-white/[0.03] px-2.5 py-1 text-[11px] text-zinc-300 transition hover:border-cyan-300/40 hover:bg-cyan-300/10 hover:text-cyan-100">{c.label}</button>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
+
           <aside className="rounded-3xl border border-[#1a2640] bg-[#0c1220] p-3">
             <div className="mb-2 px-1 text-xs font-medium text-zinc-400">Χάρτης ατζέντας</div>
             {loadingList ? (
@@ -369,18 +446,19 @@ export default function PeoplePage() {
               </div>
             )}
           </aside>
+          </div>
 
           <section>
-            {!selected ? (
+            {!activeSelection ? (
               <div className="flex h-full min-h-[400px] items-center justify-center rounded-3xl border border-dashed border-[#1a2640] bg-[#0a0f1c]/50 p-8 text-center text-sm text-zinc-500">
                 Διάλεξε θεματική από αριστερά, άνοιξέ τη και επίλεξε γεγονός για να ακούσεις τι λέει ο κόσμος.
               </div>
             ) : !data && !listening && !errMsg ? (
               <div className="rounded-3xl border border-[#1a2640] bg-gradient-to-b from-[#0d1525] to-[#0a0f1c] p-8">
-                <div className="text-[11px] text-zinc-500">{selected.topic}</div>
-                <h2 className="mt-1 text-2xl font-semibold text-zinc-50">{selected.title}</h2>
+                <div className="text-[11px] text-zinc-500">{activeSelection.topic}</div>
+                <h2 className="mt-1 text-2xl font-semibold text-zinc-50">{activeSelection.title}</h2>
                 <p className="mt-3 max-w-xl text-sm text-zinc-400">Ο Noraya θα μαζέψει πραγματικά σχόλια πολιτών, θα μετρήσει τη δυναμική κάθε φωνής (likes + followers) και θα τα συνθέσει σε θεματικές.</p>
-                <button type="button" onClick={() => listen(selected.topic, selected.title, selected.id)} className="mt-5 rounded-2xl border border-cyan-300/30 bg-cyan-300/10 px-5 py-2.5 text-sm font-medium text-cyan-100 transition hover:bg-cyan-300/20">▶ Άκου τον κόσμο</button>
+                <button type="button" onClick={() => listen(activeSelection.topic, activeSelection.title, activeSelection.id)} className="mt-5 rounded-2xl border border-cyan-300/30 bg-cyan-300/10 px-5 py-2.5 text-sm font-medium text-cyan-100 transition hover:bg-cyan-300/20">▶ Άκου τον κόσμο</button>
               </div>
             ) : listening ? (
               <div className="flex min-h-[400px] flex-col items-center justify-center rounded-3xl border border-cyan-300/20 bg-[#0a0f1c] p-8 text-center">
@@ -393,7 +471,7 @@ export default function PeoplePage() {
             ) : errMsg ? (
               <div className="rounded-3xl border border-[#1a2640] bg-[#0c1220] p-8 text-center">
                 <div className="text-sm text-zinc-300">{errMsg}</div>
-                <button type="button" onClick={() => selected && listen(selected.topic, selected.title, selected.id)} className="mt-4 rounded-2xl border border-cyan-300/30 bg-cyan-300/10 px-4 py-2 text-xs text-cyan-100 transition hover:bg-cyan-300/20">Δοκίμασε ξανά</button>
+                <button type="button" onClick={() => activeSelection && listen(activeSelection.topic, activeSelection.title, activeSelection.id)} className="mt-4 rounded-2xl border border-cyan-300/30 bg-cyan-300/10 px-4 py-2 text-xs text-cyan-100 transition hover:bg-cyan-300/20">Δοκίμασε ξανά</button>
               </div>
             ) : data?.empty ? (
               <div className="rounded-3xl border border-[#1a2640] bg-[#0c1220] p-8 text-center text-sm text-zinc-400">{data.message || "Δεν βρέθηκαν σχόλια πολιτών γι' αυτό το θέμα αυτή τη στιγμή."}</div>
@@ -494,7 +572,7 @@ export default function PeoplePage() {
                     <ForCard tone="red" title="Τι να αποφύγεις" text={v.for_party?.avoid} />
                     <ForCard tone="cyan" title="Πού είναι η ευκαιρία" text={v.for_party?.opportunity} />
                   </div>
-                  <button type="button" onClick={() => selected && listen(selected.topic, selected.title, selected.id)} className="mt-4 rounded-xl border border-[#243049] bg-white/[0.03] px-3 py-1.5 text-[11px] text-zinc-400 transition hover:text-zinc-200">↻ Νέα ακρόαση</button>
+                  <button type="button" onClick={() => activeSelection && listen(activeSelection.topic, activeSelection.title, activeSelection.id)} className="mt-4 rounded-xl border border-[#243049] bg-white/[0.03] px-3 py-1.5 text-[11px] text-zinc-400 transition hover:text-zinc-200">↻ Νέα ακρόαση</button>
                 </div>
               </div>
             ) : null}
