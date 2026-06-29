@@ -1,4 +1,4 @@
-           "use client";
+                   "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode } from "react";
@@ -2666,10 +2666,15 @@ export default function StrategyRoomPage() {
               aiPlay={activeProbeItem ? (strategicPlayCache[String((activeProbeItem.raw.micro_agenda_id || activeProbeItem.raw.micro_agenda || "") + (activeProbeSelection?.eventId ? "__" + activeProbeSelection.eventId : ""))] || null) : null}
               aiBusyStrategic={activeProbeItem ? Boolean(aiBusyIds[String((activeProbeItem.raw.micro_agenda_id || activeProbeItem.raw.micro_agenda || "") + (activeProbeSelection?.eventId ? "__" + activeProbeSelection.eventId : "")) + "|img"]) : false}
               aiBusyPlay={activeProbeItem ? Boolean(aiBusyIds[String((activeProbeItem.raw.micro_agenda_id || activeProbeItem.raw.micro_agenda || "") + (activeProbeSelection?.eventId ? "__" + activeProbeSelection.eventId : "")) + "|play"]) : false}
-              onDeliverable={(brief, optionTitle) => {
+              onDeliverable={(brief, optionTitle, format) => {
+                const formatLine =
+                  format === "bullets"
+                    ? "Μορφή: σε σύντομα bullets (κουκκίδες, κοφτά, εύκολα να διαβαστούν)."
+                    : "Μορφή: αναλυτικό κείμενο, έτοιμο να εκφωνηθεί/δημοσιευτεί.";
                 const msg = `Γράψε μου ΕΤΟΙΜΟ προς χρήση παραδοτέο για το ενεργό γεγονός.
 Κίνηση: «${optionTitle}».
 Οδηγία: ${brief || optionTitle}
+${formatLine}
 Γράψ' το στη φωνή και την πολιτική γραμμή του κόμματος, έτοιμο να χρησιμοποιηθεί.`;
                 askNorayaAdvisor(msg);
               }}
@@ -3526,7 +3531,7 @@ function ActiveSituationWorkspace({
   aiPlay?: any | null;
   aiBusyStrategic?: boolean;
   aiBusyPlay?: boolean;
-  onDeliverable?: (brief: string, title: string) => void;
+  onDeliverable?: (brief: string, title: string, format?: string) => void;
   agendaArchitectResult?: AgendaArchitectResult | null;
   agendaArchitectLoading?: boolean;
   agendaArchitectError?: string;
@@ -3834,7 +3839,8 @@ function ActiveSituationWorkspace({
                       deliverableBrief={opt.deliverableBrief}
                       onDeliverable={
                         opt.deliverableLabel
-                          ? () => onDeliverable?.(opt.deliverableBrief || "", opt.title)
+                          ? (format?: string) =>
+                              onDeliverable?.(opt.deliverableBrief || "", opt.title, format)
                           : undefined
                       }
                     />
@@ -5895,8 +5901,10 @@ function DecisionCard({
   success?: number;
   deliverableLabel?: string;
   deliverableBrief?: string;
-  onDeliverable?: () => void;
+  onDeliverable?: (format?: string) => void;
 }) {
+  const [deliverMenuOpen, setDeliverMenuOpen] = useState(false);
+
   return (
     <article
       className={`min-w-0 rounded-[1.5rem] border p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)] ${recommendationClass(recommendation)}`}
@@ -5934,14 +5942,41 @@ function DecisionCard({
         </div>
       ) : null}
       {deliverableLabel && onDeliverable ? (
-        <button
-          type="button"
-          onClick={onDeliverable}
-          className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border border-cyan-300/30 bg-cyan-300/10 px-3 py-2.5 text-[11px] font-semibold text-cyan-100 transition hover:border-cyan-200/50 hover:bg-cyan-300/15"
-        >
-          <span aria-hidden>✍️</span>
-          {deliverableLabel}
-        </button>
+        <div className="relative mt-4">
+          <button
+            type="button"
+            onClick={() => setDeliverMenuOpen((v) => !v)}
+            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-cyan-300/30 bg-cyan-300/10 px-3 py-2.5 text-[11px] font-semibold text-cyan-100 transition hover:border-cyan-200/50 hover:bg-cyan-300/15"
+          >
+            <span aria-hidden>✍️</span>
+            {deliverableLabel}
+            <span aria-hidden className="text-[9px] opacity-70">▾</span>
+          </button>
+          {deliverMenuOpen ? (
+            <div className="absolute left-0 right-0 z-20 mt-1 overflow-hidden rounded-2xl border border-cyan-300/25 bg-[#0c1424] shadow-xl shadow-black/40">
+              <button
+                type="button"
+                onClick={() => {
+                  setDeliverMenuOpen(false);
+                  onDeliverable("analytic");
+                }}
+                className="block w-full px-3 py-2.5 text-left text-[11px] text-zinc-200 transition hover:bg-cyan-300/10 hover:text-cyan-100"
+              >
+                Αναλυτικά
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setDeliverMenuOpen(false);
+                  onDeliverable("bullets");
+                }}
+                className="block w-full border-t border-white/[0.06] px-3 py-2.5 text-left text-[11px] text-zinc-200 transition hover:bg-cyan-300/10 hover:text-cyan-100"
+              >
+                Σε bullets
+              </button>
+            </div>
+          ) : null}
+        </div>
       ) : null}
     </article>
   );
