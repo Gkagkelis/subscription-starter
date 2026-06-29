@@ -35,7 +35,7 @@ function json(payload: unknown, status = 200) {
 }
 
 function cacheKey(microAgendaId: string, partyKey: string, eventId?: string | null) {
-  const base = "strategic_play_v6__" + microAgendaId + "__" + partyKey;
+  const base = "strategic_play_v7__" + microAgendaId + "__" + partyKey;
   return eventId ? base + "__" + eventId : base;
 }
 
@@ -62,7 +62,7 @@ async function writeCache(supabase: ReturnType<typeof svc>, key: string, body: a
     situation_id: null,
     organization_id: null,
     analysis_kind: key,
-    input_hash: "v6",
+    input_hash: "v7",
     model_used: MODEL,
     result: { body, generated_at: new Date().toISOString() },
   };
@@ -224,7 +224,8 @@ ${otherEvents ? "Συναφή γεγονότα (μόνο πλαίσιο, ΟΧΙ 
 - Κάθε επιλογή = ΔΙΑΦΟΡΕΤΙΚΗ απόφαση (όχι παραλλαγή της ίδιας).
 - ΥΠΟΧΡΕΩΤΙΚΟ: ΚΑΙ ΟΙ ΤΡΕΙΣ επιλογές (A, B, Γ) γεμίζουν ΠΛΗΡΩΣ: title, body, gain, risk — ΠΟΤΕ "—", ΠΟΤΕ κενό. Η Γ είναι ΠΡΑΓΜΑΤΙΚΗ, συγκεκριμένη κίνηση που απλώς ΔΕΝ συνιστάς (έχει αληθινό τίτλο, αληθινό body, αληθινό gain, και risk που εξηγεί ΓΙΑΤΙ είναι επικίνδυνη). ΜΗΝ αφήσεις τη Γ μισοάδεια.
 - Αποφασιστικός τόνος. Ελληνικά, πυκνά, σαν εμπιστευτικό brief. Χωρίς markdown.
-- Κράτα κάθε πεδίο 1-3 προτάσεις (το headline ΜΙΑ πρόταση). ΜΗΝ ξοδεύεις όλο τον χώρο στην A — μοίρασέ τον ΙΣΑ ώστε B και Γ να είναι ΕΞΙΣΟΥ πλήρεις. Είναι ΛΑΘΟΣ να τελειώσεις με μισοάδεια B ή Γ.
+- Κράτα κάθε πεδίο 1-3 προτάσεις (το headline ΜΙΑ πρόταση). Μοίρασε ίσα τον χώρο ώστε A, B, Γ να είναι ΟΛΕΣ πλήρεις. ΠΟΤΕ μη σταματάς στη μέση.
+- ΚΡΙΣΙΜΟ — ΜΗΝ ΤΟ ΠΑΡΑΛΕΙΨΕΙΣ ΠΟΤΕ: τα πεδία "deliverable_label" και "deliverable_brief" στις A και B είναι ΥΠΟΧΡΕΩΤΙΚΑ και κορυφαίας σημασίας. ΠΟΤΕ μην τα αφήσεις κενά "" στις A/B για να κερδίσεις χώρο — προτίμησε να συντομεύσεις άλλα πεδία. Κάθε A και B ΠΡΕΠΕΙ να έχει γεμάτο deliverable_label (όνομα κουμπιού) και deliverable_brief (οδηγία). Αυτό είναι πιο σημαντικό από το μήκος των gain/risk.
 
 ΕΞΥΠΝΟ ΠΑΡΑΔΟΤΕΟ ΑΝΑ ΕΠΙΛΟΓΗ (ΠΟΛΥ ΣΗΜΑΝΤΙΚΟ):
 Για κάθε επιλογή σκέψου σαν ΚΟΡΥΦΑΙΟΣ ΕΠΙΚΟΙΝΩΝΙΟΛΟΓΟΣ: «Για να ΕΚΤΕΛΕΣΤΕΙ αυτή ακριβώς η κίνηση, τι ΧΕΙΡΟΠΙΑΣΤΟ θα ετοίμαζα για το επιτελείο;»
