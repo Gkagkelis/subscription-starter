@@ -6,9 +6,9 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 // ============================================================
-// NORAYA — "Πώς κερδίζεται" + "Επιλογές δράσης" ανά ΓΕΓΟΝΟΣ (AI, premium)
+// NORAYA — "Πώς κερδίζεται" (5 κάρτες) + "Επιλογές δράσης" (3) ανά ΓΕΓΟΝΟΣ
 //
-// Αντικαθιστά τα generic family-templates με ανάλυση εστιασμένη
+// Αντικαθιστά τα generic family-templates με AI ανάλυση εστιασμένη
 // στο ΣΥΓΚΕΚΡΙΜΕΝΟ γεγονός, διαβασμένο μέσα στο κεντρικό θέμα.
 // Cache 6 ώρες ανά γεγονός (όπως το strategic-image).
 // ============================================================
@@ -28,7 +28,7 @@ function json(payload: unknown, status = 200) {
 }
 
 function cacheKey(microAgendaId: string, partyKey: string, eventId?: string | null) {
-  const base = "strategic_play_v1__" + microAgendaId + "__" + partyKey;
+  const base = "strategic_play_v2__" + microAgendaId + "__" + partyKey;
   return eventId ? base + "__" + eventId : base;
 }
 
@@ -55,7 +55,7 @@ async function writeCache(supabase: ReturnType<typeof svc>, key: string, body: a
     situation_id: null,
     organization_id: null,
     analysis_kind: key,
-    input_hash: "v1",
+    input_hash: "v2",
     model_used: MODEL,
     result: { body, generated_at: new Date().toISOString() },
   };
@@ -119,7 +119,7 @@ async function callClaude(prompt: string): Promise<string> {
     },
     body: JSON.stringify({
       model: MODEL,
-      max_tokens: 1600,
+      max_tokens: 1800,
       messages: [{ role: "user", content: prompt }],
     }),
   });
@@ -212,23 +212,27 @@ ${otherEvents ? "Συναφή γεγονότα (μόνο πλαίσιο, ΟΧΙ 
 Δώσε αγωνιστικό σχέδιο ΓΙΑ ΑΥΤΟ ΤΟ ΣΥΓΚΕΚΡΙΜΕΝΟ ΓΕΓΟΝΟΣ. Πρέπει να αναφέρεσαι ρητά στο γεγονός «${activeTitle}» και στα πραγματικά του στοιχεία — ΟΧΙ γενικές φράσεις που ταιριάζουν σε οποιοδήποτε θέμα.
 
 ΑΥΣΤΗΡΟΙ ΚΑΝΟΝΕΣ:
-- ΑΠΑΓΟΡΕΥΟΝΤΑΙ generic μπαλώματα: «κανόνες στην αγορά», «σοβαρή εναλλακτική διακυβέρνηση», «καθαρό πώς», «κοινωνική πίεση» χωρίς συγκεκριμένο περιεχόμενο. Αν τα χρησιμοποιήσεις, πρέπει να τα γεμίσεις με στοιχεία ΑΥΤΟΥ του γεγονότος.
+- ΑΠΑΓΟΡΕΥΟΝΤΑΙ generic μπαλώματα («κανόνες στην αγορά», «σοβαρή εναλλακτική διακυβέρνηση», «καθαρό πώς», «κοινωνική πίεση») χωρίς συγκεκριμένο περιεχόμενο ΑΥΤΟΥ του γεγονότος.
 - ΜΗ μεταφέρεις την ανάλυση σε άλλο γεγονός του κλάστερ.
-- Κάθε επιλογή να είναι ΔΙΑΦΟΡΕΤΙΚΗ απόφαση (όχι παραλλαγή της ίδιας).
-- Αποφασιστικός τόνος: πες ξεκάθαρα τι θα έκανες.
-- Ελληνικά, πυκνά, σαν εμπιστευτικό brief. Χωρίς markdown.
+- Κάθε επιλογή = ΔΙΑΦΟΡΕΤΙΚΗ απόφαση (όχι παραλλαγή της ίδιας).
+- Αποφασιστικός τόνος. Ελληνικά, πυκνά, σαν εμπιστευτικό brief. Χωρίς markdown.
+- Κράτα κάθε πεδίο 1-3 προτάσεις (το headline ΜΙΑ πρόταση).
 
 ΕΠΕΣΤΡΕΨΕ ΜΟΝΟ έγκυρο JSON με ΑΚΡΙΒΩΣ αυτή τη μορφή (χωρίς code fences, χωρίς σχόλια):
 {
-  "win_lead": "ΜΙΑ πρόταση (<22 λέξεις): η μετατόπιση που κερδίζει σε αυτό το γεγονός.",
-  "win_body": "2-3 προτάσεις: το νικηφόρο πλαίσιο, η προϋπόθεση αξιοπιστίας και το timing — δεμένα με το συγκεκριμένο γεγονός.",
+  "headline": "ΜΙΑ πρόταση (<22 λέξεις): η μετατόπιση που κερδίζει σε αυτό το γεγονός.",
+  "game_today": "Το παιχνίδι σήμερα: τι πραγματικά κρίνεται πολιτικά σε αυτό το γεγονός.",
+  "trap": "Η παγίδα: το λάθος που θα έκανε το κόμμα να χάσει σε αυτό το γεγονός.",
+  "favorable": "Ευνοϊκή διάσταση: το άνοιγμα/η ευκαιρία ειδικά εδώ.",
+  "realign_move": "Κίνηση αναδιάταξης: η μετατόπιση πλαισίου που πρέπει να κάνει το κόμμα.",
+  "sequence": "Ακολουθία: τα επόμενα βήματα/timing με σειρά.",
   "options": {
     "A": { "title": "σύντομος τίτλος κίνησης", "body": "1-2 προτάσεις τι κάνουμε ακριβώς", "gain": "τι κερδίζουμε", "risk": "ο κίνδυνος/η προϋπόθεση", "success": 70 },
     "B": { "title": "σύντομος τίτλος", "body": "1-2 προτάσεις", "gain": "τι κερδίζουμε", "risk": "ο κίνδυνος", "success": 52 },
-    "C": { "title": "σύντομος τίτλος (κίνηση προς αποφυγή)", "body": "1-2 προτάσεις", "gain": "τι θα μπορούσε να δώσει", "risk": "γιατί είναι επικίνδυνη", "success": 28 }
+    "C": { "title": "σύντομος τίτλος (προς αποφυγή)", "body": "1-2 προτάσεις", "gain": "τι θα μπορούσε να δώσει", "risk": "γιατί είναι επικίνδυνη", "success": 28 }
   }
 }
-Η A είναι η προτεινόμενη (υψηλότερο success), η C είναι προς αποφυγή (χαμηλότερο success).`;
+Η A είναι η προτεινόμενη (υψηλότερο success), η C προς αποφυγή (χαμηλότερο success).`;
 
     const rawText = await callClaude(prompt);
     const parsed = parseAiJson(rawText);
@@ -258,8 +262,12 @@ ${otherEvents ? "Συναφή γεγονότα (μόνο πλαίσιο, ΟΧΙ 
     });
 
     const result = {
-      win_lead: cleanStr(parsed.win_lead, ""),
-      win_body: cleanStr(parsed.win_body, ""),
+      headline: cleanStr(parsed.headline, ""),
+      game_today: cleanStr(parsed.game_today, ""),
+      trap: cleanStr(parsed.trap, ""),
+      favorable: cleanStr(parsed.favorable, ""),
+      realign_move: cleanStr(parsed.realign_move, ""),
+      sequence: cleanStr(parsed.sequence, ""),
       options: [
         mk(o.A, "A", "Προτεινόμενη", 70, true, false),
         mk(o.B, "B", "Αποδεκτή", 52, false, false),
