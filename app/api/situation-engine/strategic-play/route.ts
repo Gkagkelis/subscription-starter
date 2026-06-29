@@ -35,7 +35,7 @@ function json(payload: unknown, status = 200) {
 }
 
 function cacheKey(microAgendaId: string, partyKey: string, eventId?: string | null) {
-  const base = "strategic_play_v4__" + microAgendaId + "__" + partyKey;
+  const base = "strategic_play_v5__" + microAgendaId + "__" + partyKey;
   return eventId ? base + "__" + eventId : base;
 }
 
@@ -62,7 +62,7 @@ async function writeCache(supabase: ReturnType<typeof svc>, key: string, body: a
     situation_id: null,
     organization_id: null,
     analysis_kind: key,
-    input_hash: "v4",
+    input_hash: "v5",
     model_used: MODEL,
     result: { body, generated_at: new Date().toISOString() },
   };
@@ -222,6 +222,7 @@ ${otherEvents ? "Συναφή γεγονότα (μόνο πλαίσιο, ΟΧΙ 
 - ΑΠΑΓΟΡΕΥΟΝΤΑΙ generic μπαλώματα («κανόνες στην αγορά», «σοβαρή εναλλακτική διακυβέρνηση», «καθαρό πώς», «κοινωνική πίεση») χωρίς συγκεκριμένο περιεχόμενο ΑΥΤΟΥ του γεγονότος.
 - ΜΗ μεταφέρεις την ανάλυση σε άλλο γεγονός του κλάστερ.
 - Κάθε επιλογή = ΔΙΑΦΟΡΕΤΙΚΗ απόφαση (όχι παραλλαγή της ίδιας).
+- ΥΠΟΧΡΕΩΤΙΚΟ: ΚΑΙ ΟΙ ΤΡΕΙΣ επιλογές (A, B, Γ) γεμίζουν ΠΛΗΡΩΣ: title, body, gain, risk — ΠΟΤΕ "—", ΠΟΤΕ κενό. Η Γ είναι ΠΡΑΓΜΑΤΙΚΗ, συγκεκριμένη κίνηση που απλώς ΔΕΝ συνιστάς (έχει αληθινό τίτλο, αληθινό body, αληθινό gain, και risk που εξηγεί ΓΙΑΤΙ είναι επικίνδυνη). ΜΗΝ αφήσεις τη Γ μισοάδεια.
 - Αποφασιστικός τόνος. Ελληνικά, πυκνά, σαν εμπιστευτικό brief. Χωρίς markdown.
 - Κράτα κάθε πεδίο 1-3 προτάσεις (το headline ΜΙΑ πρόταση).
 
@@ -245,7 +246,7 @@ ${otherEvents ? "Συναφή γεγονότα (μόνο πλαίσιο, ΟΧΙ 
   "options": {
     "A": { "title": "σύντομος τίτλος κίνησης", "body": "1-2 προτάσεις τι κάνουμε ακριβώς", "gain": "τι κερδίζουμε", "risk": "ο κίνδυνος/η προϋπόθεση", "success": 70, "deliverable_label": "όνομα κουμπιού σε προστακτική ή \"\" αν δεν χρειάζεται", "deliverable_brief": "οδηγία προς τον σύμβουλο για το τι να παραχθεί, ή \"\"" },
     "B": { "title": "σύντομος τίτλος", "body": "1-2 προτάσεις", "gain": "τι κερδίζουμε", "risk": "ο κίνδυνος", "success": 52, "deliverable_label": "...", "deliverable_brief": "..." },
-    "C": { "title": "σύντομος τίτλος (προς αποφυγή)", "body": "1-2 προτάσεις", "gain": "τι θα μπορούσε να δώσει", "risk": "γιατί είναι επικίνδυνη", "success": 28, "deliverable_label": "...", "deliverable_brief": "..." }
+    "C": { "title": "ΠΡΑΓΜΑΤΙΚΟΣ τίτλος κίνησης (όχι κενό)", "body": "1-2 προτάσεις: τι ΑΚΡΙΒΩΣ θα έκανε αυτή η κίνηση", "gain": "τι θα μπορούσε να δώσει (γέμισέ το)", "risk": "γιατί είναι επικίνδυνη / προς αποφυγή (γέμισέ το)", "success": 28, "deliverable_label": "...", "deliverable_brief": "..." }
   }
 }
 Η A είναι η προτεινόμενη (υψηλότερο success), η C προς αποφυγή (χαμηλότερο success).`;
