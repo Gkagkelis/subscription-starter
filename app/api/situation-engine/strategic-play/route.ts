@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+export const maxDuration = 120;
 
 // ============================================================
 // NORAYA — "Πώς κερδίζεται" (5 κάρτες) + "Επιλογές δράσης" (3) ανά ΓΕΓΟΝΟΣ
@@ -35,7 +35,7 @@ function json(payload: unknown, status = 200) {
 }
 
 function cacheKey(microAgendaId: string, partyKey: string, eventId?: string | null) {
-  const base = "strategic_play_v7__" + microAgendaId + "__" + partyKey;
+  const base = "strategic_play_v8__" + microAgendaId + "__" + partyKey;
   return eventId ? base + "__" + eventId : base;
 }
 
@@ -62,7 +62,7 @@ async function writeCache(supabase: ReturnType<typeof svc>, key: string, body: a
     situation_id: null,
     organization_id: null,
     analysis_kind: key,
-    input_hash: "v7",
+    input_hash: "v8",
     model_used: MODEL,
     result: { body, generated_at: new Date().toISOString() },
   };
@@ -126,7 +126,7 @@ async function callClaude(prompt: string): Promise<string> {
     },
     body: JSON.stringify({
       model: MODEL,
-      max_tokens: 4000,
+      max_tokens: 2800,
       messages: [{ role: "user", content: prompt }],
     }),
   });
