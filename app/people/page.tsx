@@ -351,7 +351,7 @@ export default function PeoplePage() {
               />
               <button type="button" onClick={() => searchPerson(freeQuery, freeQuery)} className="shrink-0 rounded-xl border border-cyan-300/30 bg-cyan-300/10 px-3 py-2 text-[12px] text-cyan-100 transition hover:bg-cyan-300/20">Ψάξε</button>
             </div>
-            <div className="mb-3 px-1 text-[10px] text-zinc-600">π.χ. «Τσίπρας ΔΕΘ» — λέξεις-κλειδιά, όχι ολόκληρη πρόταση.</div>
+            <div className="mb-3 px-1 text-[10px] text-zinc-600">π.χ. «Noraya ΔΕΘ» — λέξεις-κλειδιά, όχι ολόκληρη πρόταση.</div>
 
             {/* Το κόμμα μου */}
             {ownChips.length > 0 ? (
