@@ -3,17 +3,23 @@ import { createClient as createServiceClient } from "@supabase/supabase-js";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+export const maxDuration = 30;
 
 // ============================================================
 // NORAYA — Voices Keywords ("Πρόσωπα & λέξεις-κλειδιά")
-// Διαβάζει το προφίλ κόμματος + τον αρχηγό και βγάζει, ΜΕΣΩ AI,
-// 6-8 κρίσιμα ΠΡΟΣΩΠΑ/ΟΡΟΥΣ που πρέπει να παρακολουθεί ο σύμβουλος
-// στα social — όπως θα σκεφτόταν ένας κορυφαίος σύμβουλος επικοινωνίας.
-// Cache 24 ώρες ανά κόμμα (analysis_cache).
+//
+// ΣΤΑΘΕΡΗ λίστα κόμμα → αρχηγός. ΤΟ AI ΔΕΝ ΜΑΝΤΕΥΕΙ ΠΟΤΕ.
+// Ενημερώνεται ΜΟΝΟ εδώ, χειροκίνητα, όταν αλλάζει κάτι πολιτικά.
+//
+// Επιστρέφει:
+//   own        = chips του ΔΙΚΟΥ σου κόμματος (κόμμα + αρχηγός)
+//   opponents  = λίστα αντιπάλων (κόμμα + αρχηγός) για το συρτάρι
+//
+// Κάθε chip έχει:
+//   label  = τι βλέπει ο χρήστης στο κουμπί (π.χ. "Τσίπρας")
+//   query  = τι ψάχνουμε στα social (π.χ. "Τσίπρας Ελληνική Αριστερή Συμπαράταξη")
+//            — το query είναι ξεκάθαρο ώστε να ΜΗ μπερδεύεται (π.χ. ΕΛΑΣ≠Αστυνομία).
 // ============================================================
-
-const MODEL = "claude-sonnet-4-6";
 
 function svc() {
   return createServiceClient(
@@ -27,118 +33,51 @@ function json(payload: unknown, status = 200) {
   return NextResponse.json(payload, { status });
 }
 
-function cacheKey(partyKey: string) {
-  return "voices_keywords_v1__" + partyKey;
-}
+type Party = {
+  key: string;          // party_key όπως στο προφίλ (πεζά, χωρίς κενά)
+  party: string;        // πλήρες όνομα κόμματος
+  partySearch: string;  // πώς ψάχνεται το ΚΟΜΜΑ στα social (ξεκάθαρο, χωρίς μπέρδεμα)
+  leader: string;       // πλήρες όνομα αρχηγού
+  leaderSearch: string; // πώς ψάχνεται ο ΑΡΧΗΓΟΣ στα social
+};
 
-async function readCache(supabase: ReturnType<typeof svc>, key: string): Promise<string[] | null> {
-  try {
-    const { data } = await supabase
-      .from("analysis_cache")
-      .select("result, updated_at")
-      .is("situation_id", null)
-      .eq("analysis_kind", key)
-      .limit(1);
-    if (!Array.isArray(data) || !data[0]) return null;
-    const result = (data[0] as any).result;
-    const updatedAt = new Date((data[0] as any).updated_at || 0).getTime();
-    if (Date.now() - updatedAt > 24 * 60 * 60 * 1000) return null;
-    const arr = result?.body;
-    return Array.isArray(arr) && arr.length ? arr : null;
-  } catch {
-    return null;
-  }
-}
+// ── Η ΕΠΙΣΗΜΗ ΛΙΣΤΑ (ενημερώνεται μόνο εδώ) ──────────────────
+// ΠΡΟΣΟΧΗ: ΕΛΑΣ = το κόμμα του Τσίπρα (Ελληνική Αριστερή Συμπαράταξη),
+// ΟΧΙ η Ελληνική Αστυνομία. Γι' αυτό το partySearch λέει ρητά το πλήρες όνομα.
+const PARTIES: Party[] = [
+  { key: "elas",      party: "ΕΛΑΣ",              partySearch: "Ελληνική Αριστερή Συμπαράταξη Τσίπρας", leader: "Αλέξης Τσίπρας",       leaderSearch: "Αλέξης Τσίπρας" },
+  { key: "nd",        party: "Νέα Δημοκρατία",    partySearch: "Νέα Δημοκρατία",                          leader: "Κυριάκος Μητσοτάκης", leaderSearch: "Κυριάκος Μητσοτάκης" },
+  { key: "pasok",     party: "ΠΑΣΟΚ",             partySearch: "ΠΑΣΟΚ",                                    leader: "Νίκος Ανδρουλάκης",   leaderSearch: "Νίκος Ανδρουλάκης" },
+  { key: "syriza",    party: "ΣΥΡΙΖΑ",            partySearch: "ΣΥΡΙΖΑ",                                   leader: "Σωκράτης Φάμελλος",   leaderSearch: "Σωκράτης Φάμελλος" },
+  { key: "dpk",       party: "Δημοκράτες – Προοδευτικό Κέντρο", partySearch: "Δημοκράτες Προοδευτικό Κέντρο Κασσελάκης", leader: "Στέφανος Κασσελάκης", leaderSearch: "Στέφανος Κασσελάκης" },
+  { key: "kke",       party: "ΚΚΕ",              partySearch: "ΚΚΕ",                                      leader: "Δημήτρης Κουτσούμπας", leaderSearch: "Δημήτρης Κουτσούμπας" },
+  { key: "elliniki_lysi", party: "Ελληνική Λύση", partySearch: "Ελληνική Λύση",                           leader: "Κυριάκος Βελόπουλος", leaderSearch: "Κυριάκος Βελόπουλος" },
+  { key: "niki",      party: "Νίκη",             partySearch: "Νίκη κόμμα Νατσιός",                       leader: "Δημήτρης Νατσιός",    leaderSearch: "Δημήτρης Νατσιός" },
+  { key: "plefsi",    party: "Πλεύση Ελευθερίας", partySearch: "Πλεύση Ελευθερίας",                       leader: "Ζωή Κωνσταντοπούλου",  leaderSearch: "Ζωή Κωνσταντοπούλου" },
+  { key: "nea_aristera", party: "Νέα Αριστερά",  partySearch: "Νέα Αριστερά",                             leader: "Γαβριήλ Σακελλαρίδης", leaderSearch: "Γαβριήλ Σακελλαρίδης" },
+  { key: "mera25",    party: "ΜέΡΑ25",           partySearch: "ΜέΡΑ25 Βαρουφάκης",                        leader: "Γιάνης Βαρουφάκης",   leaderSearch: "Γιάνης Βαρουφάκης" },
+  { key: "foni_logikis", party: "Φωνή Λογικής",  partySearch: "Φωνή Λογικής Λατινοπούλου",                leader: "Αφροδίτη Λατινοπούλου", leaderSearch: "Αφροδίτη Λατινοπούλου" },
+];
 
-async function writeCache(supabase: ReturnType<typeof svc>, key: string, body: string[]) {
-  const row = {
-    situation_id: null,
-    organization_id: null,
-    analysis_kind: key,
-    input_hash: "v1",
-    model_used: MODEL,
-    result: { body, generated_at: new Date().toISOString() },
-  };
-  try {
-    const { data: upd } = await supabase
-      .from("analysis_cache")
-      .update(row)
-      .is("situation_id", null)
-      .eq("analysis_kind", key)
-      .select("analysis_kind");
-    if (!upd || upd.length === 0) {
-      await supabase.from("analysis_cache").insert(row);
-    }
-  } catch {
-    /* best-effort */
-  }
-}
+// Συνώνυμα/εναλλακτικά κλειδιά για να ταιριάζει το party_key του προφίλ.
+const ALIASES: Record<string, string> = {
+  elas: "elas", ela: "elas", tsipras: "elas",
+  nd: "nd", neadimokratia: "nd", "nea_dimokratia": "nd",
+  pasok: "pasok",
+  syriza: "syriza",
+  dpk: "dpk", kasselakis: "dpk", dimokrates: "dpk",
+  kke: "kke",
+  elliniki_lysi: "elliniki_lysi", elliniki_lush: "elliniki_lysi",
+  niki: "niki",
+  plefsi: "plefsi", plefsi_eleftherias: "plefsi",
+  nea_aristera: "nea_aristera",
+  mera25: "mera25",
+  foni_logikis: "foni_logikis",
+};
 
-async function loadPartyProfile(supabase: ReturnType<typeof svc>, partyKey: string) {
-  if (!partyKey) return null;
-  try {
-    const { data } = await supabase
-      .from("political_party_profiles")
-      .select("*")
-      .eq("party_key", partyKey)
-      .maybeSingle();
-    return data || null;
-  } catch {
-    return null;
-  }
-}
-
-function parseAiJson(raw: string): any | null {
-  let s = (raw || "").trim();
-  s = s.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim();
-  const tryParse = (str: string) => {
-    try { return JSON.parse(str); } catch { return null; }
-  };
-  let parsed = tryParse(s);
-  if (!parsed) {
-    const m = s.match(/\{[\s\S]*\}/);
-    if (m) parsed = tryParse(m[0]);
-  }
-  return parsed || null;
-}
-
-async function callClaude(prompt: string): Promise<string> {
-  const resp = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": process.env.ANTHROPIC_API_KEY || "",
-      "anthropic-version": "2023-06-01",
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      max_tokens: 700,
-      messages: [{ role: "user", content: prompt }],
-    }),
-  });
-  if (!resp.ok) throw new Error("Claude API error " + resp.status);
-  const data = await resp.json();
-  return (data?.content || [])
-    .filter((b: any) => b.type === "text")
-    .map((b: any) => b.text)
-    .join("")
-    .trim();
-}
-
-function cleanList(arr: unknown): string[] {
-  if (!Array.isArray(arr)) return [];
-  const seen = new Set<string>();
-  const out: string[] = [];
-  for (const item of arr) {
-    const t = String(item || "").trim();
-    if (t.length < 2 || t.length > 40) continue;
-    const k = t.toLowerCase();
-    if (seen.has(k)) continue;
-    seen.add(k);
-    out.push(t);
-    if (out.length >= 8) break;
-  }
-  return out;
+function resolveKey(raw: string): string {
+  const k = String(raw || "").toLowerCase().replace(/\s+/g, "_");
+  return ALIASES[k] || k;
 }
 
 async function handle(request: Request) {
@@ -149,57 +88,25 @@ async function handle(request: Request) {
       return json({ error: "Unauthorized" }, 401);
     }
 
-    const partyKey = (url.searchParams.get("party") || "elas").trim();
-    const force = url.searchParams.get("force") === "1";
+    const rawParty = url.searchParams.get("party") || "elas";
+    const myKey = resolveKey(rawParty);
 
-    const supabase = svc();
-    const key = cacheKey(partyKey);
+    const me = PARTIES.find((p) => p.key === myKey) || PARTIES[0];
+    const opponents = PARTIES.filter((p) => p.key !== me.key);
 
-    if (!force) {
-      const cached = await readCache(supabase, key);
-      if (cached) return json({ ok: true, keywords: cached, source: "cache" });
-    }
+    // Chips του δικού σου κόμματος: κόμμα + αρχηγός
+    const own = [
+      { label: me.party,  query: me.partySearch },
+      { label: me.leader, query: me.leaderSearch },
+    ];
 
-    const profile = await loadPartyProfile(supabase, partyKey);
-    const partyName = String((profile as any)?.party_name || partyKey);
+    // Αντίπαλοι: για κάθε κόμμα, κόμμα + αρχηγός
+    const opp = opponents.flatMap((p) => [
+      { label: p.party,  query: p.partySearch,  group: p.party },
+      { label: p.leader, query: p.leaderSearch, group: p.party },
+    ]);
 
-    const prompt = `Είσαι κορυφαίος σύμβουλος πολιτικής επικοινωνίας. Δουλεύεις για το κόμμα "${partyName}".
-
-ΠΡΟΦΙΛ ΚΟΜΜΑΤΟΣ (JSON):
-${JSON.stringify(profile || { party_key: partyKey, party_name: partyName })}
-
-ΣΗΜΑΝΤΙΚΟ ΙΣΤΟΡΙΚΟ (για να μην μπερδευτείς):
-- Ο Αλέξης Τσίπρας ηγείται ΤΩΡΑ του νέου κόμματος ΕΛΑΣ (Ελληνική Αριστερή Συμπαράταξη), που ίδρυσε τον Μάιο 2026.
-- Ήταν αρχηγός ΣΥΡΙΖΑ έως το 2023. ΣΥΡΙΖΑ ≠ ΕΛΑΣ. Μην τα μπερδέψεις.
-
-ΣΤΟΧΟΣ:
-Δώσε 6-8 ΛΕΞΕΙΣ-ΚΛΕΙΔΙΑ / ΠΡΟΣΩΠΑ που ο σύμβουλος ΑΥΤΟΥ του κόμματος πρέπει να παρακολουθεί στα social media (Facebook/Twitter), για να ακούει τι λέει ο κόσμος για το κόμμα και τα πρόσωπά του.
-- Συμπερίλαβε: το όνομα του κόμματος, τον αρχηγό, βασικά στελέχη/πρόσωπα, και 1-2 κρίσιμους πολιτικούς αντιπάλους ή όρους που το αφορούν άμεσα.
-- Πραγματικά, αναζητήσιμα ονόματα/όροι — ΟΧΙ γενικές έννοιες όπως "οικονομία" ή "δικαιοσύνη".
-- Σύντομα (1-3 λέξεις το καθένα), στα ελληνικά.
-
-ΕΠΕΣΤΡΕΨΕ ΜΟΝΟ έγκυρο JSON, χωρίς markdown/fences:
-{ "keywords": ["...", "...", "..."] }`;
-
-    let keywords: string[] = [];
-    try {
-      const raw = await callClaude(prompt);
-      const parsed = parseAiJson(raw);
-      keywords = cleanList(parsed?.keywords);
-    } catch {
-      keywords = [];
-    }
-
-    // Δίχτυ ασφαλείας: αν το AI αποτύχει, δώσε τουλάχιστον το όνομα του κόμματος.
-    if (keywords.length === 0) {
-      keywords = cleanList([partyName]);
-    }
-
-    if (keywords.length) {
-      await writeCache(supabase, key, keywords);
-    }
-
-    return json({ ok: true, keywords, source: "generated" });
+    return json({ ok: true, party_key: me.key, party_name: me.party, own, opponents: opp });
   } catch (e: any) {
     return json({ ok: false, error: String(e?.message || e) }, 500);
   }
