@@ -1,4 +1,4 @@
-                   "use client";
+                                   "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode } from "react";
@@ -3647,14 +3647,26 @@ function ActiveSituationWorkspace({
             </p>
           </div>
 
-                  <div className="grid shrink-0 grid-cols-2 gap-3">
-            <MiniMetric
-              label="Προτεραιότητα ημέρας"
-              value={effectiveScore ? Math.round(effectiveScore).toString() : "—"}
-            />
-            <MiniMetric
-              label="Βάση εκτίμησης"
-              value={effectiveDocumentationLabel}
+                  <div className="flex shrink-0 flex-col items-end gap-3">
+            <div className="grid grid-cols-2 gap-3">
+              <MiniMetric
+                label="Προτεραιότητα ημέρας"
+                value={effectiveScore ? Math.round(effectiveScore).toString() : "—"}
+              />
+              <MiniMetric
+                label="Βάση εκτίμησης"
+                value={effectiveDocumentationLabel}
+              />
+            </div>
+            <ExportEventButton
+              title={effectiveTitle}
+              category={effectiveCategory}
+              score={effectiveScore}
+              docLabel={effectiveDocumentationLabel}
+              strategicBody={aiStrategicBody || strategicSection?.body || readStrategicText(situation, brief)}
+              aiPlay={aiPlay}
+              winSection={winSection}
+              options={effectiveDecisionOptions}
             />
           </div>
         </div>
@@ -6193,6 +6205,169 @@ function AnalysisLoading({
           />
         ))}
       </div>
+    </div>
+  );
+}
+
+function ExportEventButton({
+  title,
+  category,
+  score,
+  docLabel,
+  strategicBody,
+  aiPlay,
+  winSection,
+  options,
+}: {
+  title: string;
+  category: string;
+  score: number;
+  docLabel: string;
+  strategicBody?: string;
+  aiPlay?: any | null;
+  winSection?: any;
+  options?: DecisionCardOption[];
+}) {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  function buildPlainText() {
+    const L: string[] = [];
+    L.push(`NORAYA — ΑΝΑΛΥΣΗ ΓΕΓΟΝΟΤΟΣ`);
+    L.push(`${title}`);
+    L.push(`${category}  ·  Προτεραιότητα: ${score ? Math.round(score) : "—"}  ·  ${docLabel}`);
+    L.push(`Ημερομηνία: ${new Date().toLocaleDateString("el-GR")}`);
+    L.push("");
+    L.push("— 1. ΣΤΡΑΤΗΓΙΚΗ ΑΝΑΓΝΩΣΗ —");
+    L.push(String(strategicBody || "—"));
+    L.push("");
+    L.push("— 2. ΠΩΣ ΚΕΡΔΙΖΕΤΑΙ —");
+    if (aiPlay?.headline) L.push(aiPlay.headline);
+    L.push(`Το παιχνίδι σήμερα: ${aiPlay?.game_today || winSection?.body || "—"}`);
+    L.push(`Η παγίδα: ${aiPlay?.trap || winSection?.bullets?.[0] || "—"}`);
+    L.push(`Ευνοϊκή διάσταση: ${aiPlay?.favorable || winSection?.bullets?.[1] || "—"}`);
+    L.push(`Κίνηση αναδιάταξης: ${aiPlay?.realign_move || winSection?.bullets?.[2] || "—"}`);
+    L.push(`Ακολουθία: ${aiPlay?.sequence || winSection?.bullets?.[3] || "—"}`);
+    L.push("");
+    L.push("— 3. ΤΙ ΚΑΝΟΥΜΕ ΤΩΡΑ — ΕΠΙΛΟΓΕΣ —");
+    (options || []).forEach((opt) => {
+      L.push("");
+      L.push(`[${opt.label}] ${opt.title}  (${recommendationLabel(opt.recommendation)}${typeof opt.success === "number" ? ` · ${opt.success}%` : ""})`);
+      if (opt.move) L.push(opt.move);
+      L.push(`Κέρδος: ${opt.gain}`);
+      L.push(`Ρίσκο: ${opt.risk}`);
+    });
+    L.push("");
+    L.push("———————————————");
+    L.push("Παράχθηκε από το Noraya · Political Intelligence");
+    return L.join("\n");
+  }
+
+  async function handleCopy() {
+    setMenuOpen(false);
+    try {
+      await navigator.clipboard.writeText(buildPlainText());
+      alert("Η ανάλυση αντιγράφηκε στο πρόχειρο.");
+    } catch {
+      alert("Δεν ήταν δυνατή η αντιγραφή.");
+    }
+  }
+
+  function handlePrint() {
+    setMenuOpen(false);
+    const esc = (s: string) =>
+      String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const optionsHtml = (options || [])
+      .map(
+        (opt) => `
+        <div class="opt">
+          <div class="opt-h">[${esc(opt.label)}] ${esc(opt.title)}
+            <span class="tag">${esc(recommendationLabel(opt.recommendation))}${typeof opt.success === "number" ? ` · ${opt.success}%` : ""}</span>
+          </div>
+          ${opt.move ? `<p class="muted">${esc(opt.move)}</p>` : ""}
+          <p><b>Κέρδος:</b> ${esc(opt.gain)}</p>
+          <p><b>Ρίσκο:</b> ${esc(opt.risk)}</p>
+        </div>`
+      )
+      .join("");
+
+    const html = `<!doctype html><html lang="el"><head><meta charset="utf-8">
+<title>${esc(title)}</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: Georgia, 'Times New Roman', serif; color: #111; max-width: 760px; margin: 32px auto; padding: 0 24px; line-height: 1.6; }
+  .brand { font-size: 11px; letter-spacing: .18em; color: #0e7490; font-family: Arial, sans-serif; text-transform: uppercase; }
+  h1 { font-size: 24px; margin: 6px 0 4px; }
+  .meta { font-size: 12px; color: #555; font-family: Arial, sans-serif; border-bottom: 2px solid #0e7490; padding-bottom: 12px; margin-bottom: 20px; }
+  h2 { font-size: 14px; font-family: Arial, sans-serif; color: #0e7490; text-transform: uppercase; letter-spacing: .04em; margin: 24px 0 8px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+  .lead { font-weight: bold; font-size: 15px; }
+  .opt { border: 1px solid #ddd; border-radius: 10px; padding: 12px 14px; margin: 10px 0; }
+  .opt-h { font-weight: bold; font-size: 14px; font-family: Arial, sans-serif; margin-bottom: 6px; }
+  .tag { font-weight: normal; font-size: 11px; color: #0e7490; }
+  .muted { color: #555; font-style: italic; }
+  p { margin: 4px 0; font-size: 13px; }
+  .foot { margin-top: 28px; padding-top: 12px; border-top: 1px solid #ddd; font-size: 11px; color: #777; font-family: Arial, sans-serif; }
+  @media print { body { margin: 0 auto; } }
+</style></head><body>
+  <div class="brand">Noraya · Political Intelligence</div>
+  <h1>${esc(title)}</h1>
+  <div class="meta">${esc(category)} &nbsp;·&nbsp; Προτεραιότητα: ${score ? Math.round(score) : "—"} &nbsp;·&nbsp; ${esc(docLabel)} &nbsp;·&nbsp; ${new Date().toLocaleDateString("el-GR")}</div>
+
+  <h2>1. Στρατηγική ανάγνωση</h2>
+  <p>${esc(strategicBody || "—").replace(/\n+/g, "</p><p>")}</p>
+
+  <h2>2. Πώς κερδίζεται</h2>
+  ${aiPlay?.headline ? `<p class="lead">${esc(aiPlay.headline)}</p>` : ""}
+  <p><b>Το παιχνίδι σήμερα:</b> ${esc(aiPlay?.game_today || winSection?.body || "—")}</p>
+  <p><b>Η παγίδα:</b> ${esc(aiPlay?.trap || winSection?.bullets?.[0] || "—")}</p>
+  <p><b>Ευνοϊκή διάσταση:</b> ${esc(aiPlay?.favorable || winSection?.bullets?.[1] || "—")}</p>
+  <p><b>Κίνηση αναδιάταξης:</b> ${esc(aiPlay?.realign_move || winSection?.bullets?.[2] || "—")}</p>
+  <p><b>Ακολουθία:</b> ${esc(aiPlay?.sequence || winSection?.bullets?.[3] || "—")}</p>
+
+  <h2>3. Τι κάνουμε τώρα — επιλογές</h2>
+  ${optionsHtml}
+
+  <div class="foot">Παράχθηκε από το Noraya · Political Intelligence</div>
+  <script>window.onload = function(){ window.print(); }</script>
+</body></html>`;
+
+    const w = window.open("", "_blank");
+    if (!w) {
+      alert("Επίτρεψε τα pop-ups για να ανοίξει η εκτύπωση.");
+      return;
+    }
+    w.document.write(html);
+    w.document.close();
+  }
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => setMenuOpen((v) => !v)}
+        className="flex items-center gap-2 rounded-2xl border border-cyan-300/25 bg-cyan-300/10 px-3 py-2 text-[11px] font-semibold text-cyan-100 transition hover:border-cyan-200/50 hover:bg-cyan-300/15"
+      >
+        <span aria-hidden>⤓</span>
+        Εξαγωγή
+        <span aria-hidden className="text-[9px] opacity-70">▾</span>
+      </button>
+      {menuOpen ? (
+        <div className="absolute right-0 z-30 mt-1 w-56 overflow-hidden rounded-2xl border border-cyan-300/25 bg-[#0c1424] shadow-xl shadow-black/40">
+          <button
+            type="button"
+            onClick={handlePrint}
+            className="block w-full px-3 py-2.5 text-left text-[11px] text-zinc-200 transition hover:bg-cyan-300/10 hover:text-cyan-100"
+          >
+            Εκτύπωση / Αποθήκευση PDF
+          </button>
+          <button
+            type="button"
+            onClick={handleCopy}
+            className="block w-full border-t border-white/[0.06] px-3 py-2.5 text-left text-[11px] text-zinc-200 transition hover:bg-cyan-300/10 hover:text-cyan-100"
+          >
+            Αντιγραφή κειμένου
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }
