@@ -1,4 +1,4 @@
-                                                                                                                                                                     "use client";
+                                                                                                                                                                                     "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode } from "react";
@@ -1672,6 +1672,12 @@ function evidenceConfidenceScore(articleCount: number, sourceCount: number) {
   return Math.round(Math.min(100, Math.max(0, score)));
 }
 
+function cleanInspector(v: unknown): string {
+  if (typeof v !== "string") return "";
+  const t = v.trim();
+  return t.length > 1 ? t : "";
+}
+
 function docLabelFromScore(score?: number | null) {
   const sc = numberValue(score, 0);
   if (sc >= 65) return "Στερεή βάση εκτίμησης";
@@ -2881,6 +2887,7 @@ ${formatLine}
           probeView={activeProbeView}
           probeItem={activeProbeItem}
           probeEvidenceArticles={activeProbeEvidenceArticles}
+          aiPlay={personalEvent ? (strategicPlayCache[personalId] || null) : (activeProbeItem ? (strategicPlayCache[String((activeProbeItem.raw.micro_agenda_id || activeProbeItem.raw.micro_agenda || "") + (activeProbeSelection?.eventId ? "__" + activeProbeSelection.eventId : ""))] || null) : null)}
         />
       </div>
 
@@ -5071,6 +5078,7 @@ function RightInspector({
   probeView,
   probeItem,
   probeEvidenceArticles,
+  aiPlay,
 }: {
   situation: ΕνεργόSituationRow | null;
   title: string;
@@ -5083,8 +5091,8 @@ function RightInspector({
   probeView?: EventIntelligenceView | null;
   probeItem?: ProbeAgendaMapItem | null;
   probeEvidenceArticles?: EvidenceArticleItem[];
+  aiPlay?: any | null;
 }) {
-  const issue = brief.issue || {};
   const probeSourcesSection = probeView?.sections.find(
     (section) => section.tab === "sources_factors",
   );
@@ -5118,35 +5126,62 @@ function RightInspector({
           })))
   ).filter((row) => row.label && row.label.trim());
 
-  // ΣΥΝΟΠΤΙΚΗ ΑΞΙΟΛΟΓΗΣΗ — από το probe/personal (συνδεδεμένο στο σωστό γεγονός).
+  // ΣΥΝΟΠΤΙΚΗ ΑΞΙΟΛΟΓΗΣΗ — από την ΕΞΥΠΝΗ AI ανάλυση του γεγονότος (strategic-play).
+  // Το aiPlay έχει ήδη γραφτεί για ΑΥΤΟ το γεγονός: headline/favorable/trap/realign/sequence.
+  // Fallback στο probeView (κι αυτό συνδεδεμένο), ποτέ στο παλιό brief.
+  const probeWhyBody =
+    probeView?.sections.find((s) => s.tab === "why_exists")?.body || "";
+  const probeStrategicBody =
+    probeView?.sections.find((s) => s.tab === "strategic_image")?.body || "";
+
+  const firstSentence = (txt: string) => {
+    const t = String(txt || "").trim();
+    if (!t) return "";
+    const m = t.match(/^[^.!;]+[.!;]?/);
+    return (m ? m[0] : t).trim();
+  };
+
+  const ai = aiPlay || null;
   const summaryRows = [
     {
       label: "Στρατηγική σημασία",
-      value: probeView?.scoreLabel
-        ? `${probeView.scoreLabel} · ${probeView.eventTitle || title}`
-        : text(brief.daily_brief?.why_it_matters_now, "Υπό αξιολόγηση"),
+      value:
+        cleanInspector(ai?.headline) ||
+        cleanInspector(ai?.game_today) ||
+        (probeView?.scoreLabel
+          ? `${probeView.scoreLabel} · ${probeView.eventTitle || title}`
+          : "Υπό αξιολόγηση"),
     },
     {
       label: "Ευκαιρία",
-      value: text(
-        brief.strategic_diagnosis?.strategic_opportunity,
-        text(issue.opportunity, "Πεδίο για καθαρή πλαισίωση πριν κλειδώσει η ερμηνεία."),
-      ),
+      value:
+        cleanInspector(ai?.favorable) ||
+        firstSentence(probeStrategicBody) ||
+        "Πεδίο για καθαρή πλαισίωση πριν κλειδώσει η ερμηνεία του γεγονότος.",
     },
     {
       label: "Κίνδυνος",
-      value: text(
-        brief.strategic_diagnosis?.strategic_risk,
-        text(issue.political_risk, "Πρόωρη ή άστοχη τοποθέτηση χωρίς τεκμηρίωση."),
-      ),
+      value:
+        cleanInspector(ai?.trap) ||
+        firstSentence(probeWhyBody) ||
+        "Πρόωρη ή άστοχη τοποθέτηση χωρίς τεκμηρίωση μπορεί να εκθέσει το κόμμα.",
     },
     {
-      label: "Χρονικό παράθυρο",
-      value: "24–48 ώρες αν ενισχυθεί το σήμα",
+      label: "Κίνηση-κλειδί",
+      value:
+        cleanInspector(ai?.realign_move) ||
+        "Μετατόπιση από άμυνα σε τεκμηριωμένη, καθαρή πρόταση.",
+    },
+    {
+      label: "Επόμενα βήματα",
+      value:
+        cleanInspector(ai?.sequence) ||
+        "Πρώτα παρακολούθηση, μετά ασφαλής δημόσια γραμμή, μετά κλιμάκωση μόνο με νέα στοιχεία.",
     },
     {
       label: "Βαθμός τεκμηρίωσης",
-      value: probeView?.evidenceLabel ||
+      value:
+        probeView?.evidenceLabel ||
         docLabelFromScore(evidenceConfidenceScore(inspectorArticleCount, inspectorSourceCount)),
     },
   ];
