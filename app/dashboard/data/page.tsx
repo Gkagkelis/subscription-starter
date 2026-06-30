@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { themes } from "@/lib/noraya/taxonomy";
 
 // ============================================================
-// NORAYA — Σελίδα «Δεδομένα» (v3, με βαθιά Ανάλυση Noraya)
+// NORAYA — Σελίδα «Δεδομένα» (v4, premium dark)
 // ============================================================
 
 type Trend = [number, number][];
@@ -13,7 +13,7 @@ interface DimBlock { key: string; label: string; groups: OutRow[]; }
 interface TrustRow { key: string; label: string; recent: number; low_sample: boolean; }
 interface MatchResult {
   ok: boolean; matched: boolean; kind?: "survey" | "noraya_only"; message?: string;
-  match?: { topic_key: string | null; topic_label: string | null; method: string };
+  match?: { topic_key: string | null; topic_label: string | null; umbrella?: string | null; method: string };
   input?: { theme: string; event_title: string };
   data?: {
     recent_window: [number, number]; year_range: [number, number];
@@ -28,7 +28,7 @@ interface Analysis {
 
 function barColor(v: number, max: number): string {
   const r = max > 0 ? v / max : 0;
-  return r >= 0.66 ? "#D85A30" : r >= 0.33 ? "#F0997B" : "#F5C4B3";
+  return r >= 0.66 ? "#e0613a" : r >= 0.33 ? "#d98a6a" : "#caa493";
 }
 
 export default function DataPage() {
@@ -50,7 +50,7 @@ export default function DataPage() {
     };
     return {
       topic_key: m.match?.topic_key ?? null,
-      topic_label: m.match?.topic_label ?? "θέμα",
+      topic_label: m.match?.umbrella || m.match?.topic_label || "θέμα",
       kind: m.kind || "survey",
       event_title: activeEvent || m.input?.event_title || "",
       data: d
@@ -79,7 +79,7 @@ export default function DataPage() {
       const j = await res.json();
       if (j?.ok && j.analysis) setAnalysis(j.analysis);
     } catch {
-      // σιωπηλά — η σελίδα δείχνει τα νούμερα ούτως ή άλλως
+      // σιωπηλά
     } finally {
       setAnalysisLoading(false);
     }
@@ -121,38 +121,41 @@ export default function DataPage() {
 
   const dimBlock = useMemo(() => result?.data?.dimensions.find((d) => d.key === activeDim), [result, activeDim]);
   const dimMax = useMemo(() => (dimBlock ? dimBlock.groups.reduce((m, g) => Math.max(m, g.recent), 0) : 0), [dimBlock]);
-  const recentTrend = useMemo(() => (result?.data ? result.data.trend.filter((p) => p[0] >= 2016) : []), [result]);
-  const trendMax = useMemo(() => recentTrend.reduce((m, p) => Math.max(m, p[1]), 0), [recentTrend]);
+  const fullTrend = useMemo(() => (result?.data ? result.data.trend : []), [result]);
+  const trendMax = useMemo(() => fullTrend.reduce((m, p) => Math.max(m, p[1]), 0), [fullTrend]);
   const visibleThemes = showAllThemes ? themes : themes.slice(0, 10);
+
+  const card = "rounded-[1.5rem] border border-white/[0.07] bg-[#0a111f] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]";
+  const pill = "text-xs px-3 py-1 rounded-full border transition";
 
   function exploreBlock(compact: boolean) {
     return (
-      <div className={"bg-white rounded-xl border border-gray-200 p-4 space-y-3 " + (compact ? "shadow-none" : "shadow-sm")}>
-        {compact
-          ? <div className="text-xs font-medium text-gray-400 uppercase tracking-wide">ή εξερεύνησε άλλο θέμα</div>
-          : <div className="text-sm font-medium text-gray-700">Διάλεξε ένα θέμα</div>}
+      <div className={card + " p-4 space-y-3"}>
+        <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-200/70">
+          {compact ? "ή εξερεύνησε άλλο θέμα" : "Διάλεξε ένα θέμα"}
+        </div>
         <div className="flex gap-2">
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") { setActiveEvent(""); runMatch(query); } }}
             placeholder="Γράψε θέμα ή γεγονός (π.χ. φωτιές, ακρίβεια)…"
-            className="flex-1 px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 outline-none"
+            className="flex-1 px-3 py-2 text-zinc-100 bg-white/[0.04] border border-white/10 rounded-xl text-sm placeholder-zinc-500 focus:ring-2 focus:ring-cyan-400/40 outline-none"
           />
           <button onClick={() => { setActiveEvent(""); runMatch(query); }} disabled={loading}
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 disabled:opacity-60">
+            className="px-4 py-2 bg-cyan-400/90 text-[#06121a] rounded-xl text-sm font-semibold hover:bg-cyan-300 disabled:opacity-60">
             {loading ? "…" : "Δες"}
           </button>
         </div>
         <div className="flex flex-wrap gap-2">
           {visibleThemes.map((c) => (
             <button key={c} onClick={() => { setQuery(c); setActiveEvent(""); runMatch(c); }}
-              className="text-xs px-3 py-1 rounded-full border border-gray-200 text-gray-600 hover:border-purple-400 hover:text-purple-700">
+              className={pill + " border-white/10 text-zinc-400 hover:border-cyan-300/40 hover:text-cyan-100"}>
               {c}
             </button>
           ))}
           {!showAllThemes && themes.length > 10 ? (
-            <button onClick={() => setShowAllThemes(true)} className="text-xs px-3 py-1 rounded-full text-purple-600 hover:underline">
+            <button onClick={() => setShowAllThemes(true)} className={pill + " border-transparent text-cyan-300/80 hover:text-cyan-200"}>
               +{themes.length - 10} ακόμη
             </button>
           ) : null}
@@ -164,37 +167,43 @@ export default function DataPage() {
   function analysisCard() {
     if (analysisLoading) {
       return (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-          <div className="text-[11px] font-medium uppercase tracking-wide text-purple-500 mb-3">Ανάλυση Noraya</div>
-          <div className="text-sm text-gray-400">Ο Noraya σκέφτεται…</div>
+        <div className={card + " p-5"}>
+          <div className="flex items-center gap-2 mb-3">
+            <span className="h-1.5 w-1.5 rounded-full bg-cyan-300 shadow-[0_0_10px_rgba(103,232,249,0.8)]" />
+            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-200/70">Ανάλυση Noraya</div>
+          </div>
+          <div className="text-sm text-zinc-500">Ο Noraya σκέφτεται…</div>
           <div className="mt-3 space-y-2">
-            <div className="h-3 bg-gray-100 rounded w-3/4 animate-pulse" />
-            <div className="h-3 bg-gray-100 rounded w-full animate-pulse" />
-            <div className="h-3 bg-gray-100 rounded w-2/3 animate-pulse" />
+            <div className="h-3 bg-white/[0.05] rounded w-3/4 animate-pulse" />
+            <div className="h-3 bg-white/[0.05] rounded w-full animate-pulse" />
+            <div className="h-3 bg-white/[0.05] rounded w-2/3 animate-pulse" />
           </div>
         </div>
       );
     }
     if (!analysis) return null;
-    const cells: Array<[string, string | undefined]> = [
+    const cells: Array<[string, string]> = ([
       ["ποιους να κινητοποιήσεις", analysis.who_to_mobilize],
       ["εμπιστοσύνη", analysis.trust_angle],
       ["το άνοιγμα", analysis.opening],
       ["ο κίνδυνος", analysis.risk],
       ["γειτονικά θέματα", analysis.adjacent],
       ["επόμενη κίνηση", analysis.next_move],
-    ].filter((c) => c[1] && c[1] !== "—") as Array<[string, string]>;
+    ].filter((c) => c[1] && c[1] !== "—") as Array<[string, string]>);
     return (
-      <div className="bg-white rounded-xl shadow-sm border border-purple-200 p-5">
-        <div className="text-[11px] font-medium uppercase tracking-wide text-purple-500 mb-2">Ανάλυση Noraya</div>
-        {analysis.headline ? <div className="text-base font-semibold text-gray-900 leading-snug">{analysis.headline}</div> : null}
-        {analysis.deep_read ? <p className="text-sm text-gray-700 mt-2 leading-relaxed">{analysis.deep_read}</p> : null}
+      <div className="rounded-[1.5rem] border border-cyan-300/20 bg-gradient-to-b from-cyan-300/[0.05] to-[#0a111f] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="h-1.5 w-1.5 rounded-full bg-cyan-300 shadow-[0_0_10px_rgba(103,232,249,0.8)]" />
+          <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-200/80">Ανάλυση Noraya</div>
+        </div>
+        {analysis.headline ? <div className="text-[15px] font-semibold text-zinc-50 leading-snug">{analysis.headline}</div> : null}
+        {analysis.deep_read ? <p className="text-sm text-zinc-300 mt-2 leading-relaxed">{analysis.deep_read}</p> : null}
         {cells.length ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-4">
             {cells.map(([label, val]) => (
-              <div key={label} className="bg-gray-50 rounded-lg p-3">
-                <div className="text-[10px] uppercase tracking-wide text-gray-400 mb-1">{label}</div>
-                <div className="text-[13px] text-gray-700 leading-relaxed">{val}</div>
+              <div key={label} className="rounded-xl border border-white/[0.05] bg-white/[0.02] p-3">
+                <div className="text-[9px] uppercase tracking-[0.18em] text-cyan-200/50 mb-1">{label}</div>
+                <div className="text-[13px] text-zinc-200 leading-relaxed">{val}</div>
               </div>
             ))}
           </div>
@@ -208,34 +217,34 @@ export default function DataPage() {
     if (!d) return null;
     return (
       <div className="space-y-5">
-        <div className="text-xs font-medium text-gray-400 uppercase tracking-wide px-1">Τα δεδομένα από κάτω</div>
+        <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-500 px-1">Τα δεδομένα από κάτω</div>
 
-        {recentTrend.length > 1 ? (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-            <div className="text-sm font-medium text-gray-700 mb-1">Πόσο «καίει» το θέμα στον χρόνο</div>
-            <div className="text-xs text-gray-400 mb-4">% που το βάζουν στα κορυφαία προβλήματα της χώρας</div>
-            <div className="flex items-end gap-1.5 h-28 border-b border-gray-100">
-              {recentTrend.map((p) => {
+        {fullTrend.length > 1 ? (
+          <div className={card + " p-5"}>
+            <div className="text-sm font-medium text-zinc-200 mb-1">Πόσο «καίει» το θέμα στον χρόνο</div>
+            <div className="text-xs text-zinc-500 mb-4">% που το βάζουν στα κορυφαία προβλήματα της χώρας · {d.year_range[0]}–{d.year_range[1]}</div>
+            <div className="flex items-end gap-1 h-28 border-b border-white/[0.06]">
+              {fullTrend.map((p) => {
                 const h = trendMax > 0 ? Math.round((p[1] / trendMax) * 100) : 0;
                 return (
                   <div key={p[0]} className="flex-1 flex flex-col items-center justify-end h-full" title={p[0] + ": " + Math.round(p[1]) + "%"}>
-                    <div style={{ height: h + "%", background: barColor(p[1], trendMax) }} className="w-full max-w-[26px] rounded-t" />
+                    <div style={{ height: h + "%", background: barColor(p[1], trendMax) }} className="w-full max-w-[22px] rounded-t" />
                   </div>
                 );
               })}
             </div>
-            <div className="flex gap-1.5 mt-1">
-              {recentTrend.map((p) => <div key={p[0]} className="flex-1 text-center text-[10px] text-gray-400">{"'" + String(p[0]).slice(2)}</div>)}
+            <div className="flex gap-1 mt-1">
+              {fullTrend.map((p) => <div key={p[0]} className="flex-1 text-center text-[9px] text-zinc-600">{"'" + String(p[0]).slice(2)}</div>)}
             </div>
           </div>
         ) : null}
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-          <div className="text-sm font-medium text-gray-700 mb-3">Ποιον αφορά — διάλεξε πώς να κόψεις τον κόσμο</div>
+        <div className={card + " p-5"}>
+          <div className="text-sm font-medium text-zinc-200 mb-3">Ποιον αφορά — διάλεξε πώς να κόψεις τον κόσμο</div>
           <div className="flex flex-wrap gap-2 mb-4">
             {d.dimensions.map((dim) => (
               <button key={dim.key} onClick={() => setActiveDim(dim.key)}
-                className={"text-xs px-3 py-1 rounded-full border " + (dim.key === activeDim ? "bg-purple-50 border-purple-300 text-purple-700" : "border-gray-200 text-gray-500 hover:border-gray-300")}>
+                className={pill + (dim.key === activeDim ? " bg-cyan-300/10 border-cyan-300/40 text-cyan-100" : " border-white/10 text-zinc-400 hover:border-white/20")}>
                 {dim.label}
               </button>
             ))}
@@ -245,48 +254,51 @@ export default function DataPage() {
               const w = dimMax > 0 ? Math.round((g.recent / dimMax) * 100) : 0;
               return (
                 <div key={g.key} className="flex items-center gap-3">
-                  <div className="w-40 text-[13px] text-gray-700 flex items-center gap-1">
-                    {g.label}{g.low_sample ? <span className="text-[10px] text-amber-600" title="λίγα δεδομένα">⚠</span> : null}
-                  </div>
-                  <div className="flex-1 h-4 bg-gray-100 rounded overflow-hidden">
+                  <div className="w-40 text-[13px] text-zinc-300">{g.label}</div>
+                  <div className="flex-1 h-4 bg-white/[0.05] rounded overflow-hidden">
                     <div style={{ width: w + "%", background: barColor(g.recent, dimMax) }} className="h-full rounded" />
                   </div>
-                  <div className="w-9 text-right text-[13px] font-medium text-gray-800">{g.recent}%</div>
+                  <div className="w-9 text-right text-[13px] font-semibold text-zinc-100">{g.recent}%</div>
                 </div>
               );
             })}
           </div>
-          <div className="text-[11px] text-amber-600 mt-3">⚠ = λίγα δεδομένα σε αυτή την ομάδα, διάβασέ το με επιφύλαξη.</div>
         </div>
 
-        <div className="text-[11px] text-gray-400 px-1">
-          Πηγή: έρευνες Ευρωβαρόμετρου, {d.year_range[0]}–{d.year_range[1]}. Τα ποσοστά «ποιον αφορά» είναι μέσος όρος {d.recent_window[0]}–{d.recent_window[1]}.
+        <div className="text-[11px] text-zinc-600 px-1 leading-relaxed">
+          Πηγή: έρευνες Ευρωβαρόμετρου, {d.year_range[0]}–{d.year_range[1]}. Η ιστορική τάση καλύπτει όλα τα έτη· η εικόνα «ποιον αφορά» δείχνει την πιο πρόσφατη περίοδο, γιατί το ποιον νοιάζει αλλάζει στον χρόνο.
         </div>
       </div>
     );
   }
 
   function topicHeader() {
-    if (!result?.match?.topic_label) return null;
-    const gray = result.kind === "noraya_only";
+    const m = result?.match;
+    if (!m) return null;
+    const shown = m.umbrella || m.topic_label;
+    const gray = result?.kind === "noraya_only";
+    const proxy = result?.kind === "survey" && m.umbrella && m.topic_label && m.umbrella !== m.topic_label ? m.topic_label : "";
     return (
-      <span className={"text-xs px-2 py-0.5 rounded-full " + (gray ? "bg-gray-100 text-gray-600" : "bg-orange-100 text-orange-800")}>
-        θέμα: {result.match.topic_label}
-      </span>
+      <div className="flex items-center gap-2 flex-wrap px-1">
+        <span className={"text-xs px-2.5 py-0.5 rounded-full border " + (gray ? "border-white/15 text-zinc-400" : "border-cyan-300/30 text-cyan-100 bg-cyan-300/[0.06]")}>
+          θέμα: {shown}
+        </span>
+        {proxy ? <span className="text-[11px] text-zinc-500">δεδομένα βάσει: {proxy}</span> : null}
+      </div>
     );
   }
 
-  function body() {
+  function bodySection() {
     if (!result) return null;
     if (!result.matched) {
-      return <div className="bg-white rounded-xl border border-gray-200 p-5 text-sm text-gray-600">Δεν ταίριαξε κάποιο θέμα. Δοκίμασε ένα κουμπί ή άλλη λέξη.</div>;
+      return <div className={card + " p-5 text-sm text-zinc-400"}>Δεν ταίριαξε κάποιο θέμα. Δοκίμασε ένα κουμπί ή άλλη λέξη.</div>;
     }
     return (
       <div className="space-y-5">
-        <div className="px-1">{topicHeader()}</div>
+        {topicHeader()}
         {analysisCard()}
         {result.kind === "noraya_only" ? (
-          <div className="text-[11px] text-gray-400 px-1">
+          <div className="text-[11px] text-zinc-600 px-1">
             Δεν υπάρχει σκληρή έρευνα Ευρωβαρόμετρου γι' αυτό το θέμα — η παραπάνω είναι ανάγνωση του Noraya.
           </div>
         ) : (
@@ -297,32 +309,32 @@ export default function DataPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
+    <div className="min-h-screen bg-[#060b16] py-8 px-4">
       <div className="max-w-3xl mx-auto space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Δεδομένα</h1>
-          <p className="text-gray-500 mt-1 text-sm">Ποιον αφορά ένα θέμα και τι πιστεύει — από έρευνες Ευρωβαρόμετρου.</p>
+          <h1 className="text-2xl font-bold text-zinc-50">Δεδομένα</h1>
+          <p className="text-zinc-500 mt-1 text-sm">Ποιον αφορά ένα θέμα και τι πιστεύει — από έρευνες Ευρωβαρόμετρου.</p>
         </div>
 
         {activeEvent ? (
           <>
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-              <div className="text-xs text-gray-400 mb-1">Ανάλυση γεγονότος</div>
-              <div className="text-lg font-semibold text-gray-900">«{activeEvent}»</div>
-              <div className="text-sm text-gray-500 mt-1">Δες ποιον αγγίζει και τι πιστεύει ήδη ο κόσμος.</div>
+            <div className={card + " p-5"}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-200/70 mb-1">Ανάλυση γεγονότος</div>
+              <div className="text-lg font-semibold text-zinc-50">«{activeEvent}»</div>
+              <div className="text-sm text-zinc-400 mt-1">Δες ποιον αγγίζει και τι πιστεύει ήδη ο κόσμος.</div>
             </div>
-            {error ? <div className="bg-red-50 text-red-700 p-3 rounded-lg text-sm">{error}</div> : null}
-            {loading && !result ? <div className="text-sm text-gray-400 px-1">Φόρτωση…</div> : null}
-            {body()}
+            {error ? <div className="rounded-xl border border-red-400/20 bg-red-500/10 text-red-200 p-3 text-sm">{error}</div> : null}
+            {loading && !result ? <div className="text-sm text-zinc-500 px-1">Φόρτωση…</div> : null}
+            {bodySection()}
             {exploreBlock(true)}
           </>
         ) : (
           <>
             {exploreBlock(false)}
-            {error ? <div className="bg-red-50 text-red-700 p-3 rounded-lg text-sm">{error}</div> : null}
-            {loading && !result ? <div className="text-sm text-gray-400 px-1">Φόρτωση…</div> : null}
-            {body()}
-            {!result && !loading ? <div className="text-sm text-gray-400 px-1">Διάλεξε ένα θέμα πιο πάνω για να ξεκινήσεις.</div> : null}
+            {error ? <div className="rounded-xl border border-red-400/20 bg-red-500/10 text-red-200 p-3 text-sm">{error}</div> : null}
+            {loading && !result ? <div className="text-sm text-zinc-500 px-1">Φόρτωση…</div> : null}
+            {bodySection()}
+            {!result && !loading ? <div className="text-sm text-zinc-500 px-1">Διάλεξε ένα θέμα πιο πάνω για να ξεκινήσεις.</div> : null}
           </>
         )}
       </div>
