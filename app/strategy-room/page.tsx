@@ -1,4 +1,4 @@
-                                                                                                                                                                                     "use client";
+                                                                                                                                                                                      "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode } from "react";
@@ -5216,7 +5216,7 @@ function RightInspector({
                 return (
                   <div key={`${row.label}-${index}`}>
                     <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0 text-[11px] leading-5 text-zinc-300">
+                      <div className="min-w-0 flex-1 text-[11px] leading-5 text-zinc-300 text-justify">
                         {row.label}
                       </div>
                       <div
@@ -5263,10 +5263,10 @@ function RightInspector({
                 key={row.label}
                 className="rounded-2xl border border-white/[0.05] bg-black/20 px-3 py-2.5"
               >
-                <div className="text-[9px] font-medium uppercase tracking-[0.12em] text-cyan-300/60">
+                <div className="text-[10px] font-semibold tracking-[0.02em] text-cyan-300/70">
                   {row.label}
                 </div>
-                <div className="mt-1 text-[11px] leading-5 text-zinc-300">
+                <div className="mt-1 text-[11px] leading-5 text-zinc-300 text-justify">
                   {row.value}
                 </div>
               </div>
