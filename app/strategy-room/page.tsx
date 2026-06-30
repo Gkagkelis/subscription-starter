@@ -5203,6 +5203,25 @@ function RightInspector({
           </div>
         </section>
 
+        {/* ΚΟΥΜΠΙ: ΣΥΝΔΕΣΗ ΜΕ ΔΕΔΟΜΕΝΑ */}
+        {title ? (
+          <a
+            href={
+              "/dashboard/data?theme=" +
+              encodeURIComponent(
+                ((probeItem?.raw as any)?.theme as string) ||
+                  ((probeItem?.raw as any)?.micro_agenda as string) ||
+                  title
+              ) +
+              "&event=" +
+              encodeURIComponent(title)
+            }
+            className="mb-3 flex items-center justify-center gap-1.5 rounded-[1.25rem] border border-cyan-300/30 bg-cyan-300/[0.06] px-4 py-3 text-[11px] font-semibold tracking-[0.02em] text-cyan-100 transition hover:bg-cyan-300/[0.12]"
+          >
+            Σύνδεση με δεδομένα →
+          </a>
+        ) : null}
+
         {/* ΣΥΝΟΠΤΙΚΗ ΑΞΙΟΛΟΓΗΣΗ */}
         <section className="mb-3 overflow-hidden rounded-[1.5rem] border border-white/[0.07] bg-[#0a111f] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
           <div className="border-b border-white/[0.05] bg-gradient-to-r from-cyan-300/[0.06] to-transparent px-4 py-3">
