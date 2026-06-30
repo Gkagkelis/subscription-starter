@@ -1,4 +1,4 @@
-                                                                                                                                        "use client";
+                                                                                                                                                                     "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode } from "react";
@@ -5084,292 +5084,160 @@ function RightInspector({
   probeItem?: ProbeAgendaMapItem | null;
   probeEvidenceArticles?: EvidenceArticleItem[];
 }) {
-  const diagnosis = brief.strategic_diagnosis || {};
   const issue = brief.issue || {};
-  const daily = brief.daily_brief || {};
-  const pulse = asRecord(situation?.public_pulse);
-  const summary = asRecord(situation?.summary_assessment);
-  const redTeam = redTeamItems(situation?.red_team);
-  const polls = recentPolls(politicalEnvironment);
-  const actors = topActorTrends(politicalEnvironment);
-  const probeWhySection = probeView?.sections.find(
-    (section) => section.tab === "why_exists",
-  );
   const probeSourcesSection = probeView?.sections.find(
     (section) => section.tab === "sources_factors",
   );
-  const probePulseSection = probeView?.sections.find(
-    (section) => section.tab === "public_pulse",
-  );
-  const inspectorTopic = probeView?.microAgenda || text(
-    situation?.topic || situation?.category || issue.topic,
-    "Πολιτική ατζέντα",
-  );
-  const inspectorEvidenceArticles = probeEvidenceArticles?.length
+  const probeEvidenceArticlesSafe = probeEvidenceArticles?.length
     ? probeEvidenceArticles
     : evidenceArticlesFromSituation(situation);
   const inspectorArticleCount = probeItem
-    ? numberValue(probeItem.raw.article_count, inspectorEvidenceArticles.length)
+    ? numberValue(probeItem.raw.article_count, probeEvidenceArticlesSafe.length)
     : numberValue(situation?.article_count, 0);
   const inspectorSourceCount = probeItem
     ? numberValue(
         probeItem.raw.source_count,
-        new Set(inspectorEvidenceArticles.map((article) => article.source).filter(Boolean)).size,
+        new Set(probeEvidenceArticlesSafe.map((a) => a.source).filter(Boolean)).size,
       )
     : numberValue(situation?.source_count, 0);
-  const inspectorDocumentationLabel =
-    probeView?.evidenceLabel ||
-    docLabelFromScore(evidenceConfidenceScore(inspectorArticleCount, inspectorSourceCount));
+
+  // ΚΥΡΙΟΙ ΠΑΡΑΓΟΝΤΕΣ — από το ΙΔΙΟ probe που βλέπει το κέντρο (πάντα συνδεδεμένο).
+  const factorRows = (probeSourcesSection?.bullets?.length
+    ? probeSourcesSection.bullets.slice(0, 5).map((textValue, index) => ({
+        label: textValue,
+        score: probeView?.gauges?.[index]?.value ?? score,
+      }))
+    : (Array.isArray(brief.key_drivers) && brief.key_drivers.length
+        ? brief.key_drivers.slice(0, 5).map((d) => ({
+            label: text(d?.label, "Παράγοντας"),
+            score: numberValue(d?.value, score),
+          }))
+        : agenda.slice(0, 4).map((item) => ({
+            label: item.topic || "Παράγοντας",
+            score: numberValue(item.score, score),
+          })))
+  ).filter((row) => row.label && row.label.trim());
+
+  // ΣΥΝΟΠΤΙΚΗ ΑΞΙΟΛΟΓΗΣΗ — από το probe/personal (συνδεδεμένο στο σωστό γεγονός).
+  const summaryRows = [
+    {
+      label: "Στρατηγική σημασία",
+      value: probeView?.scoreLabel
+        ? `${probeView.scoreLabel} · ${probeView.eventTitle || title}`
+        : text(brief.daily_brief?.why_it_matters_now, "Υπό αξιολόγηση"),
+    },
+    {
+      label: "Ευκαιρία",
+      value: text(
+        brief.strategic_diagnosis?.strategic_opportunity,
+        text(issue.opportunity, "Πεδίο για καθαρή πλαισίωση πριν κλειδώσει η ερμηνεία."),
+      ),
+    },
+    {
+      label: "Κίνδυνος",
+      value: text(
+        brief.strategic_diagnosis?.strategic_risk,
+        text(issue.political_risk, "Πρόωρη ή άστοχη τοποθέτηση χωρίς τεκμηρίωση."),
+      ),
+    },
+    {
+      label: "Χρονικό παράθυρο",
+      value: "24–48 ώρες αν ενισχυθεί το σήμα",
+    },
+    {
+      label: "Βαθμός τεκμηρίωσης",
+      value: probeView?.evidenceLabel ||
+        docLabelFromScore(evidenceConfidenceScore(inspectorArticleCount, inspectorSourceCount)),
+    },
+  ];
 
   return (
-    <aside className="flex w-[240px] shrink-0 flex-col overflow-hidden bg-[#060a14]">
+    <aside className="flex w-[260px] shrink-0 flex-col overflow-hidden bg-gradient-to-b from-[#070d18] to-[#060a14]">
       <div className="flex-1 overflow-y-auto p-3">
-        <InspectorPanel title="Γιατί το βλέπει ο Noraya">
-          <div className="rounded-2xl border border-cyan-300/20 bg-cyan-300/[0.06] p-3">
-            <div className="text-[10px] font-semibold tracking-[0.01em] text-cyan-300/85">
-              {inspectorTopic}
+        {/* Επικεφαλίδα στήλης */}
+        <div className="mb-3 flex items-center gap-2 px-1">
+          <span className="h-1.5 w-1.5 rounded-full bg-cyan-300 shadow-[0_0_10px_rgba(103,232,249,0.8)]" />
+          <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-200/75">
+            Ανάλυση γεγονότος
+          </div>
+        </div>
+
+        {/* ΚΥΡΙΟΙ ΠΑΡΑΓΟΝΤΕΣ */}
+        <section className="mb-3 overflow-hidden rounded-[1.5rem] border border-white/[0.07] bg-[#0a111f] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+          <div className="border-b border-white/[0.05] bg-gradient-to-r from-cyan-300/[0.06] to-transparent px-4 py-3">
+            <div className="text-[11px] font-semibold tracking-[0.02em] text-cyan-100/90">
+              Κύριοι παράγοντες
             </div>
-            <div className="mt-2 text-xs font-semibold leading-5 text-zinc-100">
-              {title}
-            </div>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <span className="rounded-full border border-cyan-300/25 bg-cyan-300/10 px-2 py-1 text-[10px] text-cyan-100">
-                {scoreSignalText(score)}
-              </span>
-              <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-1 text-[10px] text-zinc-300">
-                {inspectorArticleCount} άρθρα · {inspectorSourceCount} πηγές
-              </span>
+            <div className="mt-0.5 text-[9px] text-zinc-500">
+              Τι σηκώνει το γεγονός — συνδεδεμένο live
             </div>
           </div>
-          <p className="mt-3 text-[11px] leading-6 text-zinc-400">
-            {probeWhySection?.body || readWhyText(situation, brief)}
-          </p>
-          <div className="mt-3 text-[10px] leading-5 text-zinc-500">
-            Βάση εκτίμησης: {inspectorDocumentationLabel}
-          </div>
-        </InspectorPanel>
-
-        <InspectorPanel title="Πηγές γεγονότος">
-          <EventEvidenceList articles={inspectorEvidenceArticles} compact />
-        </InspectorPanel>
-
-        <InspectorPanel title="Κύριοι παράγοντες">
-          <div className="grid gap-3">
-            {probeSourcesSection?.bullets?.length
-              ? probeSourcesSection.bullets.slice(0, 5).map((item, index) => (
-                  <DriverBar
-                    key={`${item}-${index}`}
-                    label={item}
-                    score={probeView?.gauges?.[index]?.value ?? score}
-                    trend={probeView?.statusLabel || ""}
-                    compact
-                  />
-                ))
-              : Array.isArray(brief.key_drivers) && brief.key_drivers.length
-                ? brief.key_drivers
-                    .slice(0, 5)
-                    .map((d, index) => (
-                      <DriverBar
-                        key={`${d?.label || "driver"}-${index}`}
-                        label={text(d?.label, "Παράγοντας")}
-                        score={numberValue(d?.value, score)}
-                        trend=""
-                        compact
+          <div className="grid gap-3 p-4">
+            {factorRows.length ? (
+              factorRows.map((row, index) => {
+                const val = clamp(numberValue(row.score, 0));
+                const barColor =
+                  val >= 70 ? "#f87171" : val >= 50 ? "#fbbf24" : "#34d399";
+                return (
+                  <div key={`${row.label}-${index}`}>
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 text-[11px] leading-5 text-zinc-300">
+                        {row.label}
+                      </div>
+                      <div
+                        className="shrink-0 text-[10px] font-semibold"
+                        style={{ color: barColor }}
+                      >
+                        {Math.round(val)}
+                      </div>
+                    </div>
+                    <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
+                      <div
+                        className="h-full rounded-full transition-all"
+                        style={{
+                          width: `${Math.max(val, 5)}%`,
+                          background: barColor,
+                          boxShadow: `0 0 8px ${barColor}66`,
+                        }}
                       />
-                    ))
-                : (agenda.length
-                    ? agenda.slice(0, 4)
-                    : [
-                        {
-                          topic: title,
-                          score,
-                          signalLabel: riskLabel(situation?.political_risk_level),
-                        },
-                      ]
-                  ).map((item, index) => (
-                    <DriverBar
-                      key={`${item.topic}-${index}`}
-                      label={item.topic || "Παράγοντας"}
-                      score={numberValue(
-                        (item as RankedAgenda).score ?? score,
-                        score,
-                      )}
-                      trend={
-                        (item as RankedAgenda).signalLabel ||
-                        riskLabel(situation?.political_risk_level)
-                      }
-                      compact
-                    />
-                  ))}
-          </div>
-        </InspectorPanel>
-
-        <InspectorPanel title="PUBLIC PULSE">
-          <div className="space-y-3">
-            <MiniBox
-              compact
-              title="Δημόσιος παλμός"
-              textValue={
-                probePulseSection?.body ||
-                pickString(
-                  pulse,
-                  ["dominant_public_frame", "frame"],
-                  text(issue.dominant_frame, "Δεν έχει υπολογιστεί."),
-                )
-              }
-            />
-            <MiniBox
-              compact
-              title="Διάθεση"
-              textValue={
-                probeView?.sensitiveMode
-                  ? "Προσεκτικός χειρισμός"
-                  : pickString(
-                      pulse,
-                      ["dominant_emotion", "emotion"],
-                      "Signal υπό επεξεργασία",
-                    )
-              }
-            />
-            <BarMeter
-              score={probeView?.gauges?.find((gauge) => gauge.key === "public_pulse")?.value ?? publicPulseScore(situation)}
-              label="mood"
-            />
-            <TinyWarning>
-              {probeView
-                ? "Δημόσιος παλμός = ένδειξη, όχι κοινή γνώμη χωρίς δημοσκόπηση."
-                : pickString(
-                    pulse,
-                    ["bias_warning"],
-                    "Public pulse = ένδειξη, όχι κοινή γνώμη χωρίς δημοσκόπηση.",
-                  )}
-            </TinyWarning>
-          </div>
-        </InspectorPanel>
-
-        <InspectorPanel title="RED TEAM">
-          {Array.isArray(brief.red_team) && brief.red_team.length ? (
-            <div className="grid gap-2">
-              {brief.red_team.slice(0, 5).map((item, index) => (
-                <div
-                  key={index}
-                  className="rounded-2xl border border-red-300/20 bg-red-300/[0.06] p-3"
-                >
-                  <div className="text-[10px] text-red-100">#{index + 1}</div>
-                  <div className="mt-1 text-[11px] leading-5 text-zinc-200">
-                    {item}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          ) : redTeam.length ? (
-            <div className="grid gap-2">
-              {redTeam.map((item, index) => (
-                <div
-                  key={`${item.attack_text}-${index}`}
-                  className="rounded-2xl border border-red-300/20 bg-red-300/[0.06] p-3"
-                >
-                  <div className="text-[10px] text-red-100">
-                    #{index + 1} · {item.risk_level}
-                  </div>
-                  <div className="mt-1 text-[11px] leading-5 text-zinc-200">
-                    {item.attack_text}
-                  </div>
-                  <div className="mt-2 text-[10px] leading-5 text-zinc-500">
-                    {item.suggested_defense}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <EmptyState small>
-              Δεν υπάρχει ακόμη red team object για αυτή την κατάσταση.
-            </EmptyState>
-          )}
-          <button
-            type="button"
-            className="mt-3 text-[11px] text-cyan-200 hover:text-cyan-100"
-          >
-            Προετοιμάσου σήμερα →
-          </button>
-        </InspectorPanel>
-
-        <InspectorPanel title="ΣΥΝΟΠΤΙΚΗ ΑΞΙΟΛΟΓΗΣΗ">
-          <div className="grid gap-2">
-            <SummaryLine
-              label="Στρατηγική σημασία"
-              value={pickString(
-                summary,
-                ["strategic_importance", "importance"],
-                text(daily.why_it_matters_now, "Υπό αξιολόγηση"),
-              )}
-            />
-            <SummaryLine
-              label="Ευκαιρία"
-              value={pickString(
-                summary,
-                ["opportunity"],
-                text(
-                  diagnosis.strategic_opportunity,
-                  text(issue.opportunity, "—"),
-                ),
-              )}
-            />
-            <SummaryLine
-              label="Κίνδυνος"
-              value={pickString(
-                summary,
-                ["risk"],
-                text(diagnosis.strategic_risk, text(issue.political_risk, "—")),
-              )}
-            />
-            <SummaryLine
-              label="Χρονικό παράθυρο"
-              value={pickString(
-                summary,
-                ["time_window", "window"],
-                "24–48 ώρες αν ενισχυθεί το σήμα",
-              )}
-            />
-            <SummaryLine
-              label="Βαθμός τεκμηρίωσης"
-              value={docLabelFromScore(evidenceConfidenceScore(inspectorArticleCount, inspectorSourceCount))}
-            />
-          </div>
-        </InspectorPanel>
-
-        <InspectorPanel title="ΔΗΜΟΣΚΟΠΗΣΕΙΣ">
-          <div className="grid grid-cols-2 gap-2">
-            <MiniMetric label="Loaded" value={String(polls.length)} small />
-            <MiniMetric label="Actors" value={String(actors.length)} small />
-            <MiniMetric
-              label="Verified"
-              value={String(
-                polls.filter((poll) =>
-                  String(poll.verification_status || "").includes("verified"),
-                ).length,
-              )}
-              small
-            />
-            <MiniMetric
-              label="Review"
-              value={String(
-                polls.filter((poll) =>
-                  String(poll.verification_status || "").includes("review"),
-                ).length,
-              )}
-              small
-            />
-          </div>
-          <div className="mt-3 text-[10px] leading-5 text-zinc-500">
-            Τελευταία ενημέρωση:{" "}
-            {shortDate(
-              polls[0]?.published_at ||
-                polls[0]?.fieldwork_end ||
-                politicalEnvironment?.snapshot_date,
+                );
+              })
+            ) : (
+              <div className="rounded-xl border border-dashed border-[#1a2640] px-3 py-4 text-center text-[10px] text-zinc-600">
+                Δεν υπάρχουν ακόμη διαθέσιμοι παράγοντες.
+              </div>
             )}
           </div>
-        </InspectorPanel>
+        </section>
+
+        {/* ΣΥΝΟΠΤΙΚΗ ΑΞΙΟΛΟΓΗΣΗ */}
+        <section className="mb-3 overflow-hidden rounded-[1.5rem] border border-white/[0.07] bg-[#0a111f] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+          <div className="border-b border-white/[0.05] bg-gradient-to-r from-cyan-300/[0.06] to-transparent px-4 py-3">
+            <div className="text-[11px] font-semibold tracking-[0.02em] text-cyan-100/90">
+              Συνοπτική αξιολόγηση
+            </div>
+            <div className="mt-0.5 text-[9px] text-zinc-500">
+              Η εικόνα του γεγονότος με μια ματιά
+            </div>
+          </div>
+          <div className="grid gap-2 p-4">
+            {summaryRows.map((row) => (
+              <div
+                key={row.label}
+                className="rounded-2xl border border-white/[0.05] bg-black/20 px-3 py-2.5"
+              >
+                <div className="text-[9px] font-medium uppercase tracking-[0.12em] text-cyan-300/60">
+                  {row.label}
+                </div>
+                <div className="mt-1 text-[11px] leading-5 text-zinc-300">
+                  {row.value}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
       </div>
 
       <footer className="border-t border-[#1a2640] bg-[#060a14] p-3">
