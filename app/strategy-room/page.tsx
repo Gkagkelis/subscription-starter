@@ -1614,53 +1614,6 @@ function publicPulseScore(situation: ΕνεργόSituationRow | null | undefined
     ),
   );
 }
-
-function redTeamItems(value: unknown) {
-  if (!Array.isArray(value)) return [];
-
-  return value
-    .slice(0, 5)
-    .map((item, index) => {
-      if (typeof item === "string") {
-        return {
-          attack_text: item,
-          risk_level: "medium",
-          likely_actor: "—",
-          suggested_defense:
-            "Να προετοιμαστεί ασφαλής απάντηση πριν από δημόσια κλιμάκωση.",
-        };
-      }
-
-      const record = asRecord(item);
-      if (!record) return null;
-
-      return {
-        attack_text: pickString(
-          record,
-          ["attack_text", "attack", "text"],
-          `Αντεπίθεση ${index + 1}`,
-        ),
-        risk_level: pickString(record, ["risk_level", "risk"], "medium"),
-        likely_actor: pickString(record, ["likely_actor", "actor"], "—"),
-        suggested_defense: pickString(
-          record,
-          ["suggested_defense", "defense", "response"],
-          "Να ετοιμαστεί γραμμή άμυνας.",
-        ),
-      };
-    })
-    .filter(
-      (
-        item,
-      ): item is {
-        attack_text: string;
-        risk_level: string;
-        likely_actor: string;
-        suggested_defense: string;
-      } => Boolean(item),
-    );
-}
-
 // ΠΡΑΓΜΑΤΙΚΗ τεκμηρίωση από πλήθος άρθρων/πηγών (όχι καρφωτό 34).
 // Ευθυγραμμισμένο με τα κατώφλια: ~5 ανεξάρτητες πηγές & ~8 άρθρα = ισχυρή.
 function evidenceConfidenceScore(articleCount: number, sourceCount: number) {
