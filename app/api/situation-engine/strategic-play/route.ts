@@ -39,20 +39,31 @@ function cacheKey(microAgendaId: string, partyKey: string, eventId?: string | nu
   return eventId ? base + "__" + eventId : base;
 }
 
+// DEBUG: επιστρέφει και το σφάλμα ανάγνωσης, για διάγνωση.
+const _cacheDebug: Record<string, unknown> = {};
+
 async function readCache(supabase: ReturnType<typeof svc>, key: string): Promise<any | null> {
   try {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("analysis_cache")
       .select("result, updated_at")
       .is("situation_id", null)
       .eq("analysis_kind", key)
       .limit(1);
+    _cacheDebug.read_error = error ? String(error.message || error) : null;
+    _cacheDebug.read_rows = Array.isArray(data) ? data.length : 0;
     if (!Array.isArray(data) || !data[0]) return null;
     const result = (data[0] as any).result;
     const updatedAt = new Date((data[0] as any).updated_at || 0).getTime();
-    if (Date.now() - updatedAt > 6 * 60 * 60 * 1000) return null;
+    const ageMs = Date.now() - updatedAt;
+    _cacheDebug.read_age_hours = Math.round((ageMs / 3.6e6) * 10) / 10;
+    if (ageMs > 6 * 60 * 60 * 1000) {
+      _cacheDebug.read_expired = true;
+      return null;
+    }
     return result?.body && typeof result.body === "object" ? result.body : null;
-  } catch {
+  } catch (e: any) {
+    _cacheDebug.read_threw = String(e?.message || e);
     return null;
   }
 }
@@ -67,17 +78,24 @@ async function writeCache(supabase: ReturnType<typeof svc>, key: string, body: a
     result: { body, generated_at: new Date().toISOString() },
   };
   try {
-    const { data: upd } = await supabase
+    const { data: upd, error: updErr } = await supabase
       .from("analysis_cache")
       .update(row)
       .is("situation_id", null)
       .eq("analysis_kind", key)
       .select("analysis_kind");
+    _cacheDebug.update_error = updErr ? String(updErr.message || updErr) : null;
+    _cacheDebug.update_rows = Array.isArray(upd) ? upd.length : 0;
     if (!upd || upd.length === 0) {
-      await supabase.from("analysis_cache").insert(row);
+      const { data: ins, error: insErr } = await supabase
+        .from("analysis_cache")
+        .insert(row)
+        .select("analysis_kind");
+      _cacheDebug.insert_error = insErr ? String(insErr.message || insErr) : null;
+      _cacheDebug.insert_rows = Array.isArray(ins) ? ins.length : 0;
     }
-  } catch {
-    // best-effort
+  } catch (e: any) {
+    _cacheDebug.write_threw = String(e?.message || e);
   }
 }
 
@@ -183,7 +201,7 @@ export async function POST(req: NextRequest) {
 
     const cached = await readCache(supabase, key);
     if (cached) {
-      return json({ ok: true, body: cached, source: "cache" });
+      return json({ ok: true, body: cached, source: "cache", cache_debug: _cacheDebug });
     }
 
     const centralTheme = cleanStr(theme, micro_agenda);
@@ -306,7 +324,7 @@ ${otherEvents ? "Συναφή γεγονότα (μόνο πλαίσιο, ΟΧΙ 
     };
 
     await writeCache(supabase, key, result);
-    return json({ ok: true, body: result, source: "generated" });
+    return json({ ok: true, body: result, source: "generated", cache_debug: _cacheDebug, cache_key: key });
   } catch (err) {
     return json({ ok: false, error: String(err) }, 500);
   }
