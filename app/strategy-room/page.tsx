@@ -1,4 +1,4 @@
-                                                                                                                                                                                                 "use client";
+                                                                                                                                                                                                   "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode } from "react";
@@ -5186,6 +5186,9 @@ function RightInspector({
     },
   ];
 
+  // RED TEAM — από το AI του γεγονότος (strategic-play). Premium, συνδεδεμένο.
+  const redTeamItems = Array.isArray(aiPlay?.red_team) ? aiPlay.red_team : [];
+
   return (
     <aside className="flex w-[260px] shrink-0 flex-col overflow-hidden bg-gradient-to-b from-[#070d18] to-[#060a14]">
       <div className="flex-1 overflow-y-auto p-3">
@@ -5273,6 +5276,63 @@ function RightInspector({
             ))}
           </div>
         </section>
+
+        {/* RED TEAM — πώς θα μας χτυπήσουν, με έτοιμη απάντηση */}
+        {redTeamItems.length ? (
+          <section className="mb-3 overflow-hidden rounded-[1.5rem] border border-red-400/15 bg-[#13090c] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+            <div className="border-b border-red-400/10 bg-gradient-to-r from-red-400/[0.08] to-transparent px-4 py-3">
+              <div className="flex items-center gap-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-red-400 shadow-[0_0_10px_rgba(248,113,113,0.8)]" />
+                <div className="text-[11px] font-semibold tracking-[0.02em] text-red-100/90">
+                  Red Team
+                </div>
+              </div>
+              <div className="mt-0.5 pl-3.5 text-[9px] text-zinc-500">
+                Πώς θα μας χτυπήσουν — με έτοιμη απάντηση
+              </div>
+            </div>
+            <div className="grid gap-2.5 p-4">
+              {redTeamItems.slice(0, 4).map((rt: any, index: number) => {
+                const lvl = String(rt?.risk_level || "medium").toLowerCase();
+                const lvlColor =
+                  lvl === "high" ? "#f87171" : lvl === "low" ? "#34d399" : "#fbbf24";
+                const lvlLabel =
+                  lvl === "high" ? "Υψηλό" : lvl === "low" ? "Χαμηλό" : "Μεσαίο";
+                return (
+                  <div
+                    key={index}
+                    className="rounded-2xl border border-white/[0.06] bg-black/25 p-3"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="text-[10px] font-semibold text-zinc-200">
+                        {rt?.attacker || "Αντίπαλος"}
+                      </div>
+                      <span
+                        className="shrink-0 rounded-full px-2 py-0.5 text-[8px] font-bold"
+                        style={{ background: lvlColor + "22", color: lvlColor }}
+                      >
+                        {lvlLabel}
+                      </span>
+                    </div>
+                    <p className="mt-1.5 text-[11px] leading-5 text-zinc-300">
+                      «{rt?.attack || ""}»
+                    </p>
+                    {rt?.response ? (
+                      <div className="mt-2 rounded-xl border-l-2 border-emerald-400/40 bg-emerald-400/[0.05] py-1.5 pl-2.5 pr-2">
+                        <div className="text-[8px] font-semibold uppercase tracking-[0.1em] text-emerald-300/70">
+                          Απάντηση
+                        </div>
+                        <p className="mt-0.5 text-[11px] leading-5 text-emerald-50/90">
+                          {rt.response}
+                        </p>
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        ) : null}
       </div>
 
       <footer className="border-t border-[#1a2640] bg-[#060a14] p-3">
