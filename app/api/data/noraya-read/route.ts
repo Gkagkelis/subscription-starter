@@ -77,6 +77,28 @@ function parseAiJson(raw: string): any | null {
     const m = s.match(/\{[\s\S]*\}/);
     if (m) parsed = tryParse(m[0]);
   }
+  if (!parsed) {
+    const start = s.indexOf("{");
+    if (start >= 0) {
+      let body = s.slice(start);
+      let dCurly = 0, dSquare = 0, inStr = false, esc = false;
+      for (const ch of body) {
+        if (esc) { esc = false; continue; }
+        if (ch === "\\") { esc = true; continue; }
+        if (ch === '"') { inStr = !inStr; continue; }
+        if (inStr) continue;
+        if (ch === "{") dCurly++;
+        else if (ch === "}") dCurly--;
+        else if (ch === "[") dSquare++;
+        else if (ch === "]") dSquare--;
+      }
+      if (inStr) body += '"';
+      body = body.replace(/,\s*$/, "");
+      while (dSquare-- > 0) body += "]";
+      while (dCurly-- > 0) body += "}";
+      parsed = tryParse(body);
+    }
+  }
   return parsed || null;
 }
 
@@ -106,10 +128,10 @@ function fmtGroups(rows: LR[] | undefined): string {
 }
 function fmtTrend(trend: [number, number][] | undefined): string {
   if (!Array.isArray(trend) || !trend.length) return "—";
-  return trend.filter((p) => p[0] >= 2016).map((p) => p[0] + ":" + Math.round(p[1]) + "%").join("  ");
+  return trend.map((p) => p[0] + ":" + Math.round(p[1]) + "%").join("  ");
 }
 
-function fallback(d: any, topicLabel: string): any {
+function fallback(d: any, topicLabel: string, reason = ""): any {
   const occ: LR[] = d?.occupation || [];
   const top = occ.slice(0, 2).map((r) => r.label).join(" και ") || "βασικές ομάδες";
   return {
@@ -123,6 +145,7 @@ function fallback(d: any, topicLabel: string): any {
     adjacent: "—",
     next_move: "Στόχευσε την πιο επηρεασμένη ομάδα με συγκεκριμένο μήνυμα.",
     _fallback: true,
+    _debug: reason,
   };
 }
 
@@ -185,9 +208,11 @@ export async function POST(req: NextRequest) {
     try {
       const raw = await callClaude(buildPrompt(d, topicLabel, kind, eventTitle, partyName));
       const parsed = parseAiJson(raw);
-      analysis = parsed && parsed.headline ? parsed : fallback(d, topicLabel);
-    } catch {
-      analysis = fallback(d, topicLabel);
+      analysis = parsed && parsed.headline
+        ? parsed
+        : fallback(d, topicLabel, "parse_failed:" + (raw || "").slice(0, 120));
+    } catch (err: any) {
+      analysis = fallback(d, topicLabel, "call_failed:" + String(err?.message || err));
     }
 
     if (!analysis._fallback) {
