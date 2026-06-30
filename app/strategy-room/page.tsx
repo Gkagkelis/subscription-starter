@@ -1,4 +1,4 @@
-                                                                   "use client";
+                                                                     "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode } from "react";
@@ -2624,6 +2624,10 @@ export default function StrategyRoomPage() {
               activeTitle={activeTitle}
               immediateRecommendation={daily.immediate_recommendation}
               avoidToday={daily.avoid_today}
+              onSelectProbeEvent={(selection) => {
+                setActiveProbeSelection(selection);
+                setActiveTab("strategic");
+              }}
             />
 
             {analyzingId &&
@@ -3283,12 +3287,14 @@ function PriorityStrip({
   activeTitle,
   immediateRecommendation,
   avoidToday,
+  onSelectProbeEvent,
 }: {
   agenda: RankedAgenda[];
   probeCards?: ProbePriorityCard[];
   activeTitle: string;
   immediateRecommendation?: string;
   avoidToday?: string;
+  onSelectProbeEvent?: (selection: AgendaProbeSelection) => void;
 }) {
   const mappedCards = probeCards?.length
     ? probeCards.slice(0, 3).map((card) => ({
@@ -3309,6 +3315,12 @@ function PriorityStrip({
               : ("emerald" as const),
         score: card.score,
         textValue: card.actionHint,
+        clusterId: card.id,
+        firstEventId:
+          (Array.isArray((card.raw as any).top_events) &&
+            (card.raw as any).top_events[0]?.id != null
+            ? String((card.raw as any).top_events[0].id)
+            : null),
       }))
     : null;
 
@@ -3396,7 +3408,33 @@ function PriorityStrip({
           return (
             <article
               key={`${card.label}-${index}`}
-              className="group relative overflow-hidden rounded-[1.5rem] border border-white/[0.07] bg-gradient-to-b from-[#0e1626] via-[#0b1322] to-[#0a101e] p-[1.15rem] shadow-[0_18px_60px_rgba(0,0,0,0.32)] transition hover:border-cyan-300/25"
+              onClick={() => {
+                const cid = (card as any).clusterId as string | undefined;
+                if (cid && onSelectProbeEvent) {
+                  onSelectProbeEvent({
+                    clusterId: cid,
+                    eventId: (card as any).firstEventId ?? null,
+                  });
+                }
+              }}
+              role={(card as any).clusterId ? "button" : undefined}
+              tabIndex={(card as any).clusterId ? 0 : undefined}
+              onKeyDown={(e) => {
+                if (
+                  ((card as any).clusterId) &&
+                  onSelectProbeEvent &&
+                  (e.key === "Enter" || e.key === " ")
+                ) {
+                  e.preventDefault();
+                  onSelectProbeEvent({
+                    clusterId: (card as any).clusterId,
+                    eventId: (card as any).firstEventId ?? null,
+                  });
+                }
+              }}
+              className={`group relative overflow-hidden rounded-[1.5rem] border border-white/[0.07] bg-gradient-to-b from-[#0e1626] via-[#0b1322] to-[#0a101e] p-[1.15rem] shadow-[0_18px_60px_rgba(0,0,0,0.32)] transition hover:border-cyan-300/25 ${
+                (card as any).clusterId ? "cursor-pointer hover:border-cyan-300/40" : ""
+              }`}
             >
               <span
                 className={`pointer-events-none absolute inset-x-0 top-0 h-[2px] ${accentBar[card.tone]}`}
@@ -6754,4 +6792,4 @@ function NumberBadge({
       {value}
     </span>
   );
-}
+}                                                              
