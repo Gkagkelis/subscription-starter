@@ -2800,6 +2800,9 @@ export default function StrategyRoomPage() {
               activeTab={activeTab}
               onTabChange={setActiveTab}
               situation={activeSituation}
+              personalActive={Boolean(personalEvent)}
+              personalTitle={personalEvent ? personalEvent.active_event_title : ""}
+              personalCategory={personalEvent ? personalEvent.theme : ""}
               title={personalEvent ? personalEvent.active_event_title : activeTitle}
               category={personalEvent ? personalEvent.theme : activeCategory}
               status={activeStatus}
@@ -3732,6 +3735,9 @@ function ActiveSituationWorkspace({
   activeTab,
   onTabChange,
   situation,
+  personalActive,
+  personalTitle,
+  personalCategory,
   title,
   category,
   status,
@@ -3765,6 +3771,9 @@ function ActiveSituationWorkspace({
   activeTab: SituationTab;
   onTabChange: (tab: SituationTab) => void;
   situation: ΕνεργόSituationRow | null;
+  personalActive?: boolean;
+  personalTitle?: string;
+  personalCategory?: string;
   title: string;
   category: string;
   status: string;
@@ -3828,9 +3837,9 @@ function ActiveSituationWorkspace({
     : winSectionBase;
   const actionSection = probeSection("action_options");
   const materialSection = probeSection("material");
-  const effectiveTitle = probeView?.eventTitle || title;
-  const effectiveCategory = probeView?.microAgenda || category;
-  const effectiveScore = probeView?.score ?? score;
+  const effectiveTitle = personalActive ? (personalTitle || title) : (probeView?.eventTitle || title);
+  const effectiveCategory = personalActive ? (personalCategory || category) : (probeView?.microAgenda || category);
+  const effectiveScore = personalActive ? score : (probeView?.score ?? score);
   const effectiveDocumentationLabel =
     probeView?.evidenceLabel || docLabelFromScore(documentationScore);
   const effectiveStatusLabel = probeView?.statusLabel || statusLabel(status);
@@ -7011,4 +7020,4 @@ function NumberBadge({
       {value}
     </span>
   );
-}   
+} 
