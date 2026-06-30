@@ -35,7 +35,7 @@ function json(payload: unknown, status = 200) {
 }
 
 function cacheKey(microAgendaId: string, partyKey: string, eventId?: string | null) {
-  const base = "strategic_play_v9__" + microAgendaId + "__" + partyKey;
+  const base = "strategic_play_v10__" + microAgendaId + "__" + partyKey;
   return eventId ? base + "__" + eventId : base;
 }
 
@@ -67,7 +67,7 @@ async function writeCache(supabase: ReturnType<typeof svc>, key: string, body: a
     situation_id: null,
     organization_id: null,
     analysis_kind: key,
-    input_hash: "v9",
+    input_hash: "v10",
     model_used: MODEL,
     result: { body, generated_at: new Date().toISOString() },
   };
