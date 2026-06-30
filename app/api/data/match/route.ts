@@ -77,7 +77,6 @@ const THEME_TO_TOPIC: Record<string, string | null> = {
   "Μεταναστευτικό": "immigration",
   "Ασφάλεια / εγκληματικότητα": "crime_security",
   "Περιβάλλον / κλιματική κρίση": "environment_climate",
-  "Πολιτική προστασία": "environment_climate",
   // τα υπόλοιπα 22 -> ανάγνωση Noraya (δεν τα ρωτά / δεν τα τραβήξαμε ακόμα)
   "Οικονομία": null, "Φορολογία": null, "Ασφαλιστικό / συντάξεις": null,
   "Παιδεία": null, "Πανεπιστήμια": null, "Νεολαία": null,
@@ -85,11 +84,11 @@ const THEME_TO_TOPIC: Record<string, string | null> = {
   "Άμυνα": null, "Γεωπολιτική": null, "Εξωτερική πολιτική": null, "Ενέργεια": null,
   "Αγροτικά": null, "Υποδομές / μεταφορές": null, "Ψηφιακή πολιτική / τεχνολογία": null,
   "Πολιτισμός": null, "Αθλητισμός": null, "Τοπική αυτοδιοίκηση": null,
-  "Ευρωπαϊκή πολιτική": null, "Ανθρώπινα δικαιώματα": null, "Ισότητα / συμπερίληψη": null,
+  "Ευρωπαϊκή πολιτική": null, "Πολιτική προστασία": null, "Ανθρώπινα δικαιώματα": null, "Ισότητα / συμπερίληψη": null,
 };
 
 const KEYWORDS: Record<string, string[]> = {
-  environment_climate: ["φωτια","φωτιες","πυρκαγ","καυσων","κλιμα","κλιματικ","περιβαλλον","πλημμυρ","ρυπανσ","οικολογ","δασος","δαση","καιρικ","θερμοκρασ","υπερθερμανσ","εκπομπ ρυπων","ανεμογεννητρ","πολιτικη προστασια"],
+  environment_climate: ["φωτια","φωτιες","πυρκαγ","καυσων","κλιμα","κλιματικ","περιβαλλον","πλημμυρ","ρυπανσ","οικολογ","δασος","δαση","καιρικ","θερμοκρασ","υπερθερμανσ","εκπομπ ρυπων","ανεμογεννητρ"],
   inflation: ["ακριβεια","πληθωρισμ","τιμες","τιμων","κοστος ζωης","ενεργειακ","ρευμα","λογαριασμ","βενζιν","καυσιμ","καλαθι","φπα","αυξησ τιμων","πανακριβ"],
   unemployment: ["ανεργ","απολυσ","θεσεις εργασιας","χωρις δουλεια","αγορα εργασιας","εργασια"],
   immigration: ["μεταναστ","προσφυγ","συνορα","λαθρομεταναστ","εβρος","frontex","ροες","αλλοδαπ","hotspot"],
@@ -119,21 +118,16 @@ function buildRows(rows: GroupRow[]): OutRow[] {
     }));
 }
 
-// ---- Επίλυση θέματος: ομπρέλα (exact) -> χάρτης, αλλιώς λέξεις-κλειδιά ----
+// ---- Επίλυση θέματος ----
+// ΤΟ ΠΕΡΙΕΧΟΜΕΝΟ ΚΕΡΔΙΖΕΙ: πρώτα λέξεις-κλειδιά σε ΟΛΟ το κείμενο
+// (θέμα+τίτλος+σύνοψη)· αλλιώς πέφτουμε στην ομπρέλα (exact theme).
+// Έτσι «Κίνδυνος πυρκαγιών»/Πολιτική προστασία -> περιβάλλον, ενώ
+// «Δομικές αστοχίες»/Πολιτική προστασία -> καμία έρευνα -> ανάγνωση Noraya.
 interface Resolved { topic: string | null; umbrella: string | null; method: string; terms: string[] }
-function resolve(text: string): Resolved {
-  const norm = normalize(text);
+function resolve(fullText: string, themeRaw: string): Resolved {
+  const norm = normalize(fullText);
 
-  // 1) exact ομπρέλα
-  let umbrellaHit: string | null = null;
-  Object.keys(THEME_TO_TOPIC).forEach((u) => {
-    if (!umbrellaHit && normalize(u) === norm) umbrellaHit = u;
-  });
-  if (umbrellaHit) {
-    return { topic: THEME_TO_TOPIC[umbrellaHit], umbrella: umbrellaHit, method: "theme", terms: [] };
-  }
-
-  // 2) λέξεις-κλειδιά
+  // 1) λέξεις-κλειδιά στο ΟΛΟ κείμενο (περιεχόμενο)
   let best: string | null = null;
   let bestCount = 0;
   let bestTerms: string[] = [];
@@ -141,7 +135,23 @@ function resolve(text: string): Resolved {
     const hits = KEYWORDS[topic].filter((kw) => norm.includes(normalize(kw)));
     if (hits.length > bestCount) { bestCount = hits.length; best = topic; bestTerms = hits; }
   });
-  return { topic: best, umbrella: null, method: best ? "keywords" : "none", terms: bestTerms };
+
+  // 2) exact ομπρέλα (από το καθαρό θέμα)
+  const themeNorm = normalize(themeRaw);
+  let umbrellaHit: string | null = null;
+  Object.keys(THEME_TO_TOPIC).forEach((u) => {
+    if (!umbrellaHit && normalize(u) === themeNorm) umbrellaHit = u;
+  });
+
+  if (best) {
+    // το περιεχόμενο νίκησε· κρατάμε και την ομπρέλα αν υπάρχει (για ετικέτα)
+    return { topic: best, umbrella: umbrellaHit, method: "keywords", terms: bestTerms };
+  }
+  if (umbrellaHit) {
+    // χωρίς keyword: ακολουθούμε τον χάρτη της ομπρέλας (μπορεί να είναι null = γκρι)
+    return { topic: THEME_TO_TOPIC[umbrellaHit], umbrella: umbrellaHit, method: "theme", terms: [] };
+  }
+  return { topic: null, umbrella: null, method: "none", terms: [] };
 }
 
 function trendDirection(trend: Trend, win: [number, number]): { rose: boolean; fromYear: number | null } {
@@ -185,7 +195,7 @@ export async function POST(req: NextRequest) {
     const text = [theme, eventTitle, eventSummary].filter(Boolean).join(" ");
     if (!text.trim()) return NextResponse.json({ ok: false, error: "no_input" }, { status: 400 });
 
-    const r = resolve(theme || text);
+    const r = resolve(text, theme);
 
     // Δεν ταίριαξε τίποτα
     if (!r.topic && !r.umbrella) {
@@ -200,7 +210,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         ok: true, matched: true, kind: "noraya_only",
         input: { theme, event_title: eventTitle },
-        match: { topic_key: null, topic_label: r.umbrella, method: r.method },
+        match: { topic_key: null, topic_label: r.umbrella, umbrella: r.umbrella, method: r.method },
         message: "Δεν υπάρχει σκληρή έρευνα γι' αυτό το θέμα — εδώ μπαίνει η ανάγνωση Noraya.",
       });
     }
