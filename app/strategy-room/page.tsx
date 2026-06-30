@@ -1,4 +1,4 @@
-                                                                     "use client";
+                                                                                                                                        "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode } from "react";
@@ -1692,6 +1692,11 @@ export default function StrategyRoomPage() {
   const [aiBusyIds, setAiBusyIds] = useState<Record<string, boolean>>({});
   const [activeProbeSelection, setActiveProbeSelection] =
     useState<AgendaProbeSelection | null>(null);
+  const [personalEvent, setPersonalEvent] = useState<any | null>(null);
+  const [showLinkModal, setShowLinkModal] = useState(false);
+  const [linkUrl, setLinkUrl] = useState("");
+  const [linkBusy, setLinkBusy] = useState(false);
+  const [linkError, setLinkError] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [situationWarning, setSituationWarning] = useState("");
@@ -1784,6 +1789,125 @@ export default function StrategyRoomPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  async function analyzeLink() {
+    const url = linkUrl.trim();
+    if (!url || !/^https?:\/\//i.test(url)) {
+      setLinkError("Βάλε έγκυρο σύνδεσμο (https://…).");
+      return;
+    }
+
+    setLinkBusy(true);
+    setLinkError("");
+
+    try {
+      const partyKey = (data as any)?.profile?.party_key || "elas";
+      const partyName =
+        (data as any)?.profile?.party_profile_snapshot?.party_name || "ΕΛΑΣ";
+
+      const r = await fetch("/api/analyze-link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url, party_key: partyKey, party_name: partyName }),
+      });
+
+      const j = await r.json();
+
+      if (!j?.ok || !j?.event) {
+        setLinkError(
+          j?.error === "could_not_read_article"
+            ? "Δεν μπόρεσα να διαβάσω το άρθρο από αυτόν τον σύνδεσμο. Δοκίμασε άλλο link."
+            : "Κάτι πήγε στραβά. Δοκίμασε ξανά.",
+        );
+        setLinkBusy(false);
+        return;
+      }
+
+      const ev = j.event;
+      setPersonalEvent(ev);
+      setShowLinkModal(false);
+      setLinkUrl("");
+
+      // Τρέχουμε ΤΑ ΙΔΙΑ routes (strategic-image + strategic-play) με τα πεδία
+      // του προσωπικού γεγονότος, και αποθηκεύουμε στο ΙΔΙΟ cache-key pattern
+      // που διαβάζει το workspace.
+      const id = String(
+        (ev.micro_agenda_id || ev.micro_agenda || "") +
+          (ev.active_event_id ? "__" + ev.active_event_id : ""),
+      );
+
+      const partyProfile = (data as any)?.profile;
+      const redLines: string[] = Array.isArray(partyProfile?.red_lines)
+        ? partyProfile.red_lines
+        : [];
+      const knownPositions: string[] = Array.isArray(partyProfile?.known_positions)
+        ? partyProfile.known_positions
+        : [];
+      const toneStr: string =
+        partyProfile?.default_tone ||
+        "προοδευτικός, θεσμικός, κυβερνητικός, ενωτικός";
+
+      const payload = {
+        micro_agenda_id: ev.micro_agenda_id,
+        micro_agenda: ev.micro_agenda,
+        theme: ev.theme,
+        active_event_id: ev.active_event_id,
+        active_event_title: ev.active_event_title,
+        active_event_summary: ev.active_event_summary || "",
+        party_key: partyKey,
+        party_name: partyName,
+        red_lines: redLines,
+        known_positions: knownPositions,
+        tone: toneStr,
+        event_titles: ev.event_titles || [],
+        article_titles: ev.article_titles || [],
+        sources: ev.sources || [],
+        real_news_coverage_score: null,
+        real_trend_score: null,
+        score: ev.score ?? 60,
+      };
+
+      setAiBusyIds((p) => ({ ...p, [id + "|img"]: true, [id + "|play"]: true }));
+
+      // Strategic image
+      fetch("/api/situation-engine/strategic-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+        .then((resp) => (resp.ok ? resp.json() : null))
+        .then((json) => {
+          if (json?.ok && json?.body) {
+            setStrategicImageCache((prev) => ({ ...prev, [id]: json.body }));
+          }
+        })
+        .catch(() => {})
+        .finally(() => setAiBusyIds((p) => ({ ...p, [id + "|img"]: false })));
+
+      // Strategic play (Πώς κερδίζεται + Επιλογές)
+      fetch("/api/situation-engine/strategic-play", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+        .then((resp) => (resp.ok ? resp.json() : null))
+        .then((json) => {
+          if (json?.ok && json?.body) {
+            setStrategicPlayCache((prev) => ({ ...prev, [id]: json.body }));
+          }
+        })
+        .catch(() => {})
+        .finally(() => setAiBusyIds((p) => ({ ...p, [id + "|play"]: false })));
+    } catch {
+      setLinkError("Πρόβλημα σύνδεσης. Δοκίμασε ξανά.");
+    }
+
+    setLinkBusy(false);
+  }
+
+  function exitPersonalEvent() {
+    setPersonalEvent(null);
   }
 
   useEffect(() => {
@@ -1892,6 +2016,16 @@ export default function StrategyRoomPage() {
     if (!activeProbeItem) return null;
     return buildEventIntelligenceView(activeProbeItem.raw, activeProbeEvent);
   }, [activeProbeEvent, activeProbeItem]);
+
+  // Το cache-id του προσωπικού γεγονότος (ίδιο pattern με το probe).
+  const personalId = personalEvent
+    ? String(
+        (personalEvent.micro_agenda_id || personalEvent.micro_agenda || "") +
+          (personalEvent.active_event_id
+            ? "__" + personalEvent.active_event_id
+            : ""),
+      )
+    : "";
 
   const activeProbeEvidenceArticles = useMemo(() => {
     return evidenceArticlesFromProbeItem(activeProbeItem);
@@ -2628,7 +2762,29 @@ export default function StrategyRoomPage() {
                 setActiveProbeSelection(selection);
                 setActiveTab("strategic");
               }}
+              onOpenLink={() => {
+                setLinkError("");
+                setShowLinkModal(true);
+              }}
             />
+
+            {personalEvent ? (
+              <div className="mb-3 flex items-center justify-between gap-3 rounded-2xl border border-amber-300/30 bg-amber-300/[0.07] px-4 py-3">
+                <div className="min-w-0 text-xs text-amber-100">
+                  <span className="font-semibold">📎 Προσωπικό συμβάν από άρθρο</span>
+                  <span className="ml-2 text-amber-200/70">
+                    {personalEvent.active_event_title}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={exitPersonalEvent}
+                  className="shrink-0 rounded-xl border border-amber-300/30 bg-amber-300/10 px-3 py-1.5 text-[11px] font-medium text-amber-100 transition hover:bg-amber-300/20"
+                >
+                  ← Πίσω στην ατζέντα
+                </button>
+              </div>
+            ) : null}
 
             {analyzingId &&
             activeSituation &&
@@ -2644,8 +2800,8 @@ export default function StrategyRoomPage() {
               activeTab={activeTab}
               onTabChange={setActiveTab}
               situation={activeSituation}
-              title={activeTitle}
-              category={activeCategory}
+              title={personalEvent ? personalEvent.active_event_title : activeTitle}
+              category={personalEvent ? personalEvent.theme : activeCategory}
               status={activeStatus}
               urgency={activeUrgency}
               score={activeScore}
@@ -2666,10 +2822,10 @@ export default function StrategyRoomPage() {
               probeEvidenceArticles={activeProbeEvidenceArticles}
               probeItem={activeProbeItem}
               probeEvent={activeProbeEvent}
-              aiStrategicBody={activeProbeItem ? (strategicImageCache[String((activeProbeItem.raw.micro_agenda_id || activeProbeItem.raw.micro_agenda || "") + (activeProbeSelection?.eventId ? "__" + activeProbeSelection.eventId : ""))] || null) : null}
-              aiPlay={activeProbeItem ? (strategicPlayCache[String((activeProbeItem.raw.micro_agenda_id || activeProbeItem.raw.micro_agenda || "") + (activeProbeSelection?.eventId ? "__" + activeProbeSelection.eventId : ""))] || null) : null}
-              aiBusyStrategic={activeProbeItem ? Boolean(aiBusyIds[String((activeProbeItem.raw.micro_agenda_id || activeProbeItem.raw.micro_agenda || "") + (activeProbeSelection?.eventId ? "__" + activeProbeSelection.eventId : "")) + "|img"]) : false}
-              aiBusyPlay={activeProbeItem ? Boolean(aiBusyIds[String((activeProbeItem.raw.micro_agenda_id || activeProbeItem.raw.micro_agenda || "") + (activeProbeSelection?.eventId ? "__" + activeProbeSelection.eventId : "")) + "|play"]) : false}
+              aiStrategicBody={personalEvent ? (strategicImageCache[personalId] || null) : (activeProbeItem ? (strategicImageCache[String((activeProbeItem.raw.micro_agenda_id || activeProbeItem.raw.micro_agenda || "") + (activeProbeSelection?.eventId ? "__" + activeProbeSelection.eventId : ""))] || null) : null)}
+              aiPlay={personalEvent ? (strategicPlayCache[personalId] || null) : (activeProbeItem ? (strategicPlayCache[String((activeProbeItem.raw.micro_agenda_id || activeProbeItem.raw.micro_agenda || "") + (activeProbeSelection?.eventId ? "__" + activeProbeSelection.eventId : ""))] || null) : null)}
+              aiBusyStrategic={personalEvent ? Boolean(aiBusyIds[personalId + "|img"]) : (activeProbeItem ? Boolean(aiBusyIds[String((activeProbeItem.raw.micro_agenda_id || activeProbeItem.raw.micro_agenda || "") + (activeProbeSelection?.eventId ? "__" + activeProbeSelection.eventId : "")) + "|img"]) : false)}
+              aiBusyPlay={personalEvent ? Boolean(aiBusyIds[personalId + "|play"]) : (activeProbeItem ? Boolean(aiBusyIds[String((activeProbeItem.raw.micro_agenda_id || activeProbeItem.raw.micro_agenda || "") + (activeProbeSelection?.eventId ? "__" + activeProbeSelection.eventId : "")) + "|play"]) : false)}
               onDeliverable={(brief, optionTitle, format) => {
                 const formatLine =
                   format === "bullets"
@@ -2724,6 +2880,66 @@ ${formatLine}
           probeEvidenceArticles={activeProbeEvidenceArticles}
         />
       </div>
+
+      {showLinkModal ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+          onClick={() => !linkBusy && setShowLinkModal(false)}
+        >
+          <div
+            className="w-full max-w-lg rounded-[1.75rem] border border-cyan-300/25 bg-[#0c1424] p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-[12px] font-semibold tracking-[0.01em] text-cyan-200/85">
+              Καταγραφή νέου συμβάντος
+            </div>
+            <h3 className="mt-2 text-lg font-semibold text-zinc-50">
+              Ανάλυση από σύνδεσμο άρθρου
+            </h3>
+            <p className="mt-2 text-xs leading-6 text-zinc-400">
+              Βάλε τον σύνδεσμο ενός άρθρου που σε αφορά. Ο Noraya θα το διαβάσει και
+              θα τρέξει την ίδια πλήρη ανάλυση όπως στον Χάρτη ατζέντας.
+            </p>
+
+            <input
+              type="url"
+              value={linkUrl}
+              onChange={(e) => setLinkUrl(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !linkBusy) analyzeLink();
+              }}
+              placeholder="https://…"
+              disabled={linkBusy}
+              className="mt-4 w-full rounded-2xl border border-[#1a2640] bg-[#070d18] px-4 py-3 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-cyan-300/45 disabled:opacity-50"
+            />
+
+            {linkError ? (
+              <div className="mt-3 rounded-2xl border border-red-300/25 bg-red-300/10 px-3 py-2 text-xs text-red-100">
+                {linkError}
+              </div>
+            ) : null}
+
+            <div className="mt-5 flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setShowLinkModal(false)}
+                disabled={linkBusy}
+                className="rounded-2xl border border-[#1a2640] bg-white/[0.03] px-4 py-2.5 text-xs text-zinc-400 transition hover:text-zinc-200 disabled:opacity-50"
+              >
+                Άκυρο
+              </button>
+              <button
+                type="button"
+                onClick={analyzeLink}
+                disabled={linkBusy || !linkUrl.trim()}
+                className="rounded-2xl border border-cyan-300/30 bg-cyan-300 px-5 py-2.5 text-xs font-bold text-slate-950 transition hover:bg-cyan-200 disabled:opacity-50"
+              >
+                {linkBusy ? "Διαβάζω το άρθρο…" : "Ανάλυση"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </main>
   );
 }
@@ -3288,6 +3504,7 @@ function PriorityStrip({
   immediateRecommendation,
   avoidToday,
   onSelectProbeEvent,
+  onOpenLink,
 }: {
   agenda: RankedAgenda[];
   probeCards?: ProbePriorityCard[];
@@ -3295,6 +3512,7 @@ function PriorityStrip({
   immediateRecommendation?: string;
   avoidToday?: string;
   onSelectProbeEvent?: (selection: AgendaProbeSelection) => void;
+  onOpenLink?: () => void;
 }) {
   const mappedCards = probeCards?.length
     ? probeCards.slice(0, 3).map((card) => ({
@@ -3394,7 +3612,8 @@ function PriorityStrip({
         </div>
         <button
           type="button"
-          className="flex items-center gap-2 rounded-2xl border border-cyan-300/25 bg-cyan-300/10 px-3 py-2 text-xs text-cyan-100"
+          onClick={onOpenLink}
+          className="flex items-center gap-2 rounded-2xl border border-cyan-300/25 bg-cyan-300/10 px-3 py-2 text-xs text-cyan-100 transition hover:bg-cyan-300/20"
         >
           <IconPlus className="h-4 w-4" />
           Καταγραφή νέου συμβάντος
@@ -6792,4 +7011,4 @@ function NumberBadge({
       {value}
     </span>
   );
-}                                                              
+}   
