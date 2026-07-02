@@ -1,4 +1,4 @@
-                                                                                                                                                                                                     "use client";
+                                                                                                                                                                                                    "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode } from "react";
@@ -3845,10 +3845,18 @@ function blendSocialPulse(
 ): { key: string; label: string; value: number }[] {
   const voicesPulse =
     brief && typeof brief === "object" ? (brief as any).voices_pulse : null;
-  const social =
-    voicesPulse && voicesPulse.social_mood_score != null
-      ? Math.min(100, Math.max(0, Number(voicesPulse.social_mood_score) || 0))
-      : null;
+  // ΟΓΚΟΣ κουβέντας (παλμός), ΟΧΙ διάθεση: social_spread (από τον αριθμό σχολίων).
+  let social: number | null = null;
+  if (voicesPulse) {
+    const spread = String(voicesPulse.social_spread || "");
+    if (spread === "high") social = 85;
+    else if (spread === "medium") social = 55;
+    else if (spread === "low") social = 30;
+    if (social == null && voicesPulse.total != null) {
+      const total = Number(voicesPulse.total) || 0;
+      social = total >= 40 ? 85 : total >= 15 ? 55 : total > 0 ? 30 : null;
+    }
+  }
   if (social == null) return gauges;
   // «Δημόσιος παλμός» = 40% τάσεις (Google) + 60% social (Apify/YouTube).
   // Κλειδωμένο στο στιγμιότυπο του voices_pulse. ΔΕΝ αγγίζει την κατάταξη.
