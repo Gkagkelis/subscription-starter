@@ -713,7 +713,33 @@ function classifySensitivity(events: any[], microAgenda: string): SensitivityRes
   const index = makeTextIndex(text);
   const result = scoreKeywords(PREPARED_SENSITIVE_KEYWORDS, index);
 
+  // ΠΟΛΙΤΙΚΑ ΚΡΙΣΙΜΟ: επίθεση/τρομοκρατία εναντίον κόμματος, πολιτικού, θεσμού.
+  // Αυτά ΠΡΕΠΕΙ να φαίνονται ψηλά στην ατζέντα (είναι κορυφαία πολιτικά γεγονότα),
+  // αλλά με προσεκτικό χειρισμό — ΟΧΙ engagement-optimization πάνω σε θύματα.
+  const politicalTargetTokens = [
+    "νεα δημοκρατια", "συριζα", "πασοκ", "κομμα", "κομματος", "βουλευτ",
+    "υπουργ", "στελεχ", "γραφεια", "πολιτικου", "κυβερνησ", "αντιπολιτευσ",
+    "ονεδ", "οννεδ", "νεολαια κομματος",
+  ];
+  const terrorTokens = [
+    "τρομοκρατ", "εμπρηστ", "εμπρησμ", "γκαζακ", "βομβιστ", "επιθεση",
+    "αντιποινα", "αντιεξουσιαστ", "πυρηνας",
+  ];
+  const hasPoliticalTarget = politicalTargetTokens.some((t) => text.toLowerCase().indexOf(t) !== -1);
+  const hasTerror = terrorTokens.some((t) => text.toLowerCase().indexOf(t) !== -1);
+  const isPoliticallyCritical = hasPoliticalTarget && hasTerror;
+
   if (result.score >= 18) {
+    // Αν είναι πολιτικά κρίσιμο (επίθεση σε κόμμα), κρατάμε careful_context
+    // ώστε να ΜΗΝ κόβεται το σκορ στο 49 — παραμένει ορατό ψηλά.
+    if (isPoliticallyCritical) {
+      return {
+        level: "medium",
+        requires_human_review: true,
+        ranking_policy: "careful_context",
+        reasons: result.matches.concat(["political_attack_stays_visible"]),
+      };
+    }
     return {
       level: "high",
       requires_human_review: true,
