@@ -19,8 +19,14 @@ function json(payload: unknown, status = 200) {
 
 // Cache key περιέχει και το event_id — κάθε γεγονός παίρνει τη δική του ανάλυση.
 // v2: άλλαξα έκδοση ώστε να φρεσκάρει αμέσως (να μη σερβίρει τα παλιά «Μήλο» για 6 ώρες).
-function cacheKey(microAgendaId: string, partyKey: string, eventId?: string | null) {
-  const base = "strategic_image_v2__" + microAgendaId + "__" + partyKey;
+function priorityTier(score: unknown): string {
+  const s = Number(score) || 0;
+  if (s >= 60) return "t1";
+  if (s >= 35) return "t2";
+  return "t3";
+}
+function cacheKey(microAgendaId: string, partyKey: string, eventId?: string | null, tier = "") {
+  const base = "strategic_image_v2__" + microAgendaId + "__" + partyKey + (tier ? "__" + tier : "");
   return eventId ? base + "__" + eventId : base;
 }
 
@@ -35,7 +41,7 @@ async function readCache(supabase: ReturnType<typeof svc>, key: string): Promise
     if (!Array.isArray(data) || !data[0]) return null;
     const result = (data[0] as any).result;
     const updatedAt = new Date((data[0] as any).updated_at || 0).getTime();
-    if (Date.now() - updatedAt > 6 * 60 * 60 * 1000) return null;
+    if (Date.now() - updatedAt > 7 * 24 * 60 * 60 * 1000) return null;
     return typeof result?.body === "string" ? result.body : null;
   } catch {
     return null;
@@ -143,7 +149,7 @@ export async function POST(req: NextRequest) {
     }
 
     const supabase = svc();
-    const key = cacheKey(micro_agenda_id, party_key, active_event_id);
+    const key = cacheKey(micro_agenda_id, party_key, active_event_id, priorityTier(score));
 
     // 1. Έλεγχος cache
     const cached = await readCache(supabase, key);
