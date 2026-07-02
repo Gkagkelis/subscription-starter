@@ -134,7 +134,7 @@ export default function DataPage() {
   function exploreBlock(compact: boolean) {
     return (
       <div className={card + " p-4 space-y-3"}>
-        <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-200/70">
+        <div className="text-[10px] font-semibold tracking-tight text-cyan-100/80">
           {compact ? "ή εξερεύνησε άλλο θέμα" : "Διάλεξε ένα θέμα"}
         </div>
         <div className="flex gap-2">
@@ -257,7 +257,7 @@ export default function DataPage() {
     if (!d) return null;
     return (
       <div className="space-y-5">
-        <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-500 px-1">Τα δεδομένα από κάτω</div>
+        <div className="text-[10px] font-semibold tracking-tight text-zinc-400 px-1">Τα δεδομένα από κάτω</div>
 
         {fullTrend.length > 1 ? (
           <div className={card + " p-5"}>
@@ -359,7 +359,7 @@ export default function DataPage() {
         {activeEvent ? (
           <>
             <div className={card + " p-5"}>
-              <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-200/70 mb-1">Ανάλυση γεγονότος</div>
+              <div className="text-[10px] font-semibold tracking-tight text-cyan-100/80 mb-1">Ανάλυση γεγονότος</div>
               <div className="text-lg font-semibold text-zinc-50">«{activeEvent}»</div>
               <div className="text-sm text-zinc-400 mt-1">Δες ποιον αγγίζει και τι πιστεύει ήδη ο κόσμος.</div>
             </div>
