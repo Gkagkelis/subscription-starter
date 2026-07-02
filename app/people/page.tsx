@@ -245,12 +245,12 @@ export default function PeoplePage() {
     listen(nextSearch.topic, nextSearch.title, nextSearch.id);
   }
 
-  async function listen(topic: string, title: string, eventId: string) {
+  async function listen(topic: string, title: string, eventId: string, forceRefresh = false) {
     setData(null);
     setErrMsg(null);
     setListening(true);
     try {
-      const r = await fetch(`/api/voices?token=dev&party=${encodeURIComponent(party)}&topic=${encodeURIComponent(topic)}&q=${encodeURIComponent(title)}&event_id=${encodeURIComponent(eventId)}`, { cache: "no-store" });
+      const r = await fetch(`/api/voices?token=dev&party=${encodeURIComponent(party)}&topic=${encodeURIComponent(topic)}&q=${encodeURIComponent(title)}&event_id=${encodeURIComponent(eventId)}${forceRefresh ? "&refresh=1" : ""}`, { cache: "no-store" });
       const j = await r.json();
       if (r.ok && j?.success) {
         setData(j as VoicesResponse);
@@ -572,7 +572,7 @@ export default function PeoplePage() {
                     <ForCard tone="red" title="Τι να αποφύγεις" text={v.for_party?.avoid} />
                     <ForCard tone="cyan" title="Πού είναι η ευκαιρία" text={v.for_party?.opportunity} />
                   </div>
-                  <button type="button" onClick={() => activeSelection && listen(activeSelection.topic, activeSelection.title, activeSelection.id)} className="mt-4 rounded-xl border border-[#243049] bg-white/[0.03] px-3 py-1.5 text-[11px] text-zinc-400 transition hover:text-zinc-200">↻ Νέα ακρόαση</button>
+                  <button type="button" onClick={() => activeSelection && listen(activeSelection.topic, activeSelection.title, activeSelection.id, true)} className="mt-4 rounded-xl border border-[#243049] bg-white/[0.03] px-3 py-1.5 text-[11px] text-zinc-400 transition hover:text-zinc-200">↻ Νέα ακρόαση</button>
                 </div>
               </div>
             ) : null}
