@@ -2003,7 +2003,7 @@ export default function StrategyRoomPage() {
     if (!id) return;
     if (strategicImageCache[id]) return; // ήδη έχουμε
     if (fetchingStrategicRef.current.has(id)) return; // ήδη φέρνουμε
-    if (raw.requires_human_review || raw.sensitivity_level === "high") return; // sensitive — δεν το στέλνουμε
+    if (raw.sensitivity_level === "high" && raw.ranking_policy === "do_not_optimize_for_engagement") return; // μόνο βαθιά ευαίσθητα (γυναικοκτονία/αυτοκτονία/ανήλικοι) — όχι πολιτική βία
 
     fetchingStrategicRef.current.add(id);
     setAiBusyIds((p) => ({ ...p, [id + "|img"]: true }));
@@ -2068,7 +2068,7 @@ export default function StrategyRoomPage() {
     if (!id) return;
     if (strategicPlayCache[id]) return;
     if (fetchingPlayRef.current.has(id)) return;
-    if (raw.requires_human_review || raw.sensitivity_level === "high") return;
+    if (raw.sensitivity_level === "high" && raw.ranking_policy === "do_not_optimize_for_engagement") return;
 
     fetchingPlayRef.current.add(id);
     setAiBusyIds((p) => ({ ...p, [id + "|play"]: true }));
