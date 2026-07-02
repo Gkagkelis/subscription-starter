@@ -1272,21 +1272,16 @@ function buildAgendaItem(
       breadthBonus
   );
 
-  const sensitiveRawScore = clampScore(
-    0.42 * topEventScore +
-      0.2 * coverageScore +
-      0.18 * freshness +
-      0.2 * doc
-  );
-
-  const rawScore = sensitivity.ranking_policy === "do_not_optimize_for_engagement" ? sensitiveRawScore : standardRawScore;
+  // ΕΝΑ σκορ για όλα τα γεγονότα, με βάση τα πραγματικά σήματα (εξώφυλλα + κάλυψη +
+  // αναζητήσεις). Τα ευαίσθητα ΔΕΝ έχουν πλέον ξεχωριστή, υποβαθμισμένη φόρμουλα:
+  // αν παίζουν στα πρωτοσέλιδα, παίρνουν το ίδιο frontpage bonus με όλα τα άλλα.
+  const rawScore = standardRawScore;
   let finalScore = type === "monitoring_event" ? Math.min(rawScore, CONFIG.monitoringCap) : rawScore;
-  if (sensitivity.ranking_policy === "do_not_optimize_for_engagement") {
-    // Sensitive cases must remain visible, but they must not dominate the normal daily agenda ranking.
-    finalScore = Math.min(finalScore, 49);
-  } else if (sensitivity.ranking_policy === "careful_context") {
-    finalScore = Math.min(finalScore, 64);
-  }
+  // ΑΡΧΗ: η κατάταξη ορίζεται από τα ΠΡΑΓΜΑΤΙΚΑ σήματα (εξώφυλλα, κάλυψη, αναζητήσεις).
+  // ΔΕΝ επιβάλλουμε τεχνητό κόφτη σε βίαια/ευαίσθητα γεγονότα: αν κάτι παίζει στα
+  // πρωτοσέλιδα, ανεβαίνει — είτε είναι τρομοκρατική επίθεση, είτε γυναικοκτονία, είτε
+  // μολότοφ. Η ευαισθησία (requires_human_review / ranking_policy / show_in_strategy_room)
+  // επηρεάζει ΜΟΝΟ τον ΤΟΝΟ και τον χειρισμό του περιεχομένου, όχι το αν/πόσο ψηλά φαίνεται.
   const eventLimit = debug ? CONFIG.topDebugEventsPerAgenda : CONFIG.topBriefEventsPerAgenda;
   const evidenceLimit = debug ? CONFIG.topDebugEvidencePerAgenda : CONFIG.topBriefEvidencePerAgenda;
   const researchContext = buildAgendaResearchContext({
