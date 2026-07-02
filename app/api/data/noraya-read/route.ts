@@ -22,7 +22,7 @@ function norm(s: string): string {
   return (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/ς/g, "σ").replace(/\s+/g, "_").trim();
 }
 function cacheKey(topicKey: string | null, topicLabel: string): string {
-  return "noraya_read_v1__" + (topicKey || norm(topicLabel));
+  return "noraya_read_v2__" + (topicKey || norm(topicLabel));
 }
 
 async function readCache(supabase: ReturnType<typeof svc>, key: string): Promise<any | null> {
@@ -49,7 +49,7 @@ async function writeCache(supabase: ReturnType<typeof svc>, key: string, body: a
     situation_id: null,
     organization_id: null,
     analysis_kind: key,
-    input_hash: "v1",
+    input_hash: "v2",
     model_used: MODEL,
     result: { body, generated_at: new Date().toISOString() },
   };
@@ -102,7 +102,16 @@ function parseAiJson(raw: string): any | null {
   return parsed || null;
 }
 
-async function callClaude(prompt: string): Promise<string> {
+// Καλεί τον Claude. useWeb=true -> ενεργοποιεί το εργαλείο web search (server-side).
+async function callClaude(prompt: string, useWeb = false): Promise<string> {
+  const bodyObj: any = {
+    model: MODEL,
+    max_tokens: useWeb ? 3200 : 1800,
+    messages: [{ role: "user", content: prompt }],
+  };
+  if (useWeb) {
+    bodyObj.tools = [{ type: "web_search_20250305", name: "web_search", max_uses: 4 }];
+  }
   const resp = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
@@ -110,11 +119,7 @@ async function callClaude(prompt: string): Promise<string> {
       "x-api-key": process.env.ANTHROPIC_API_KEY || "",
       "anthropic-version": "2023-06-01",
     },
-    body: JSON.stringify({
-      model: MODEL,
-      max_tokens: 1800,
-      messages: [{ role: "user", content: prompt }],
-    }),
+    body: JSON.stringify(bodyObj),
   });
   if (!resp.ok) throw new Error("Claude API error " + resp.status);
   const data = await resp.json();
@@ -144,6 +149,9 @@ function fallback(d: any, topicLabel: string, reason = ""): any {
     risk: "Μην το χάσεις σε γενικότητες.",
     adjacent: "—",
     next_move: "Στόχευσε την πιο επηρεασμένη ομάδα με συγκεκριμένο μήνυμα.",
+    web_findings: "—",
+    left_right: "—",
+    sources: [],
     _fallback: true,
     _debug: reason,
   };
@@ -159,7 +167,7 @@ function buildPrompt(d: any, topicLabel: string, kind: string, eventTitle: strin
 - Ανά κοινωνική τάξη: ${fmtGroups(d?.social_class)}
 - Εμπιστοσύνη ΣΤΗΝ ΚΥΒΕΡΝΗΣΗ αυτών των επαγγελμάτων: ${fmtGroups(d?.trust_occupation)}
 - Ιστορική τάση: ${fmtTrend(d?.trend)}`
-    : `ΔΕΝ υπάρχουν σκληρά δεδομένα έρευνας γι' αυτό το θέμα (το Ευρωβαρόμετρο δεν το ρωτά ως «πρόβλημα της χώρας»). Βασίσου στην πολιτική σου γνώση για την Ελλάδα και σε συναφή δεδομένα.`;
+    : `ΔΕΝ υπάρχουν σκληρά δεδομένα έρευνας γι' αυτό το θέμα (το Ευρωβαρόμετρο δεν το ρωτά ως «πρόβλημα της χώρας»). Βασίσου σε ζωντανή αναζήτηση και στην πολιτική σου γνώση για την Ελλάδα.`;
 
   return `Είσαι κορυφαίος πολιτικός σύμβουλος επιτελείου για το κόμμα ${partyName} (προοδευτικός, αριστερός χώρος). Γράφεις μια ΒΑΘΙΑ, πανέξυπνη ανάγνωση για ΕΝΑ θέμα, που θα διαβάσει σύμβουλος για να καταλάβει ποιον αφορά και πώς κερδίζεται.
 
@@ -168,11 +176,13 @@ ${eventTitle ? "ΣΥΝΔΕΔΕΜΕΝΟ ΓΕΓΟΝΟΣ: " + eventTitle : ""}
 
 ${ctx}
 
-ΚΑΝΟΝΕΣ:
+ΕΧΕΙΣ ΕΡΓΑΛΕΙΟ WEB SEARCH — ΧΡΗΣΙΜΟΠΟΙΗΣΕ ΤΟ:
+- Ψάξε ζωντανά ΕΓΚΥΡΕΣ ελληνικές πηγές για: (α) την ΑΡΙΣΤΕΡΑ–ΔΕΞΙΑ τοποθέτηση πάνω στο θέμα (δημοσκόποι όπως MRB, Metron Analysis, Marc, Pulse, Kapa Research, Prorata, Alco, GPO, ή σοβαρά δημοσιεύματα)· (β) αν ΔΕΝ υπάρχουν σκληρά δεδομένα παραπάνω, συμπληρωματικά ευρήματα/νούμερα για το θέμα ή το γεγονός.
+- ΑΥΣΤΗΡΟΣ ΚΑΝΟΝΑΣ ΤΙΜΙΟΤΗΤΑΣ: ΜΗΝ επινοείς κανένα νούμερο ή ισχυρισμό. Κάθε νούμερο/ισχυρισμός που γράφεις ΠΡΕΠΕΙ να προέρχεται από πηγή που όντως βρήκες τώρα, και να μπει στο "sources" με ΠΡΑΓΜΑΤΙΚΟ URL. Αν δεν βρεις αξιόπιστα στοιχεία, γράψε ρητά «δεν βρέθηκαν αξιόπιστα στοιχεία» — ΜΗΝ μαντεύεις.
+
+ΚΑΝΟΝΕΣ ΓΡΑΦΗΣ:
 - Πήγαινε ΒΑΘΙΑ, σαν άριστος αναλυτής. ΟΧΙ γενικότητες — αναφέρσου στα ΣΥΓΚΕΚΡΙΜΕΝΑ νούμερα/ομάδες όταν υπάρχουν.
-- ΠΛΕΞΕ την εμπιστοσύνη στην κυβέρνηση μέσα στη σκέψη: όπου ανησυχία ψηλή + εμπιστοσύνη χαμηλή = άνοιγμα· όπου εμπιστοσύνη καλή = δυσκολία.
-- Διάβασε το ΙΣΤΟΡΙΚΟ μοτίβο (αν ανέβηκε/έπεσε και πότε) και τι σημαίνει.
-- Σύνδεσε με 1-2 ΓΕΙΤΟΝΙΚΑ θέματα όπου έχει νόημα.
+- ΠΛΕΞΕ την εμπιστοσύνη στην κυβέρνηση: όπου ανησυχία ψηλή + εμπιστοσύνη χαμηλή = άνοιγμα· όπου εμπιστοσύνη καλή = δυσκολία.
 - Ελληνικά, πυκνά, αποφασιστικά, σαν εμπιστευτικό brief. Χωρίς markdown.
 
 ΕΠΕΣΤΡΕΨΕ ΜΟΝΟ έγκυρο JSON, ακριβώς αυτή τη μορφή:
@@ -184,7 +194,10 @@ ${ctx}
   "opening": "το καθαρό άνοιγμα για το κόμμα.",
   "risk": "η παγίδα/ο κίνδυνος προς αποφυγή.",
   "adjacent": "σύνδεση με 1-2 γειτονικά θέματα.",
-  "next_move": "ΜΙΑ συγκεκριμένη, εκτελέσιμη επόμενη κίνηση."
+  "next_move": "ΜΙΑ συγκεκριμένη, εκτελέσιμη επόμενη κίνηση.",
+  "web_findings": "2-4 προτάσεις με ό,τι βρήκες ΖΩΝΤΑΝΑ στο διαδίκτυο, με αναφορά στην πηγή μέσα στο κείμενο· ή «δεν βρέθηκαν αξιόπιστα στοιχεία».",
+  "left_right": "τι δείχνει η αριστερά–δεξιά τοποθέτηση πάνω στο θέμα, από πηγές· ή «δεν βρέθηκαν αξιόπιστα στοιχεία».",
+  "sources": [{ "title": "όνομα πηγής", "url": "https://..." }]
 }`;
 }
 
@@ -206,14 +219,30 @@ export async function POST(req: NextRequest) {
 
     let analysis: any;
     try {
-      const raw = await callClaude(buildPrompt(d, topicLabel, kind, eventTitle, partyName));
+      // 1) Με ζωντανή αναζήτηση
+      const raw = await callClaude(buildPrompt(d, topicLabel, kind, eventTitle, partyName), true);
       const parsed = parseAiJson(raw);
-      analysis = parsed && parsed.headline
-        ? parsed
-        : fallback(d, topicLabel, "parse_failed:" + (raw || "").slice(0, 120));
-    } catch (err: any) {
-      analysis = fallback(d, topicLabel, "call_failed:" + String(err?.message || err));
+      if (parsed && parsed.headline) analysis = parsed;
+      else throw new Error("web_parse_failed");
+    } catch (errWeb: any) {
+      try {
+        // 2) Fallback: κανονική ανάλυση χωρίς αναζήτηση (δεν σπάει τίποτα)
+        const raw = await callClaude(buildPrompt(d, topicLabel, kind, eventTitle, partyName), false);
+        const parsed = parseAiJson(raw);
+        analysis = parsed && parsed.headline
+          ? parsed
+          : fallback(d, topicLabel, "parse_failed_noweb");
+      } catch (err: any) {
+        analysis = fallback(d, topicLabel, "call_failed:" + String(err?.message || err));
+      }
     }
+
+    // Ντετερμινιστική τιμιότητα (ΠΑΝΤΑ ακριβές, όχι από AI):
+    analysis.has_internal_data = kind === "survey";
+    analysis.data_note = kind === "survey"
+      ? `Οι μπάρες πιο πάνω είναι από το κοντινότερο θέμα με σκληρά δεδομένα Ευρωβαρομέτρου: «${topicLabel}». Για ειδικές πτυχές του γεγονότος και για αριστερά–δεξιά, η ανάγνωση παρακάτω βγαίνει από ζωντανή αναζήτηση — με πηγές.`
+      : `Ο εγκέφαλος του Noraya δεν έχει σκληρά δεδομένα Ευρωβαρομέτρου για «${topicLabel}». Η ανάγνωση παρακάτω βγαίνει από ζωντανή αναζήτηση σε έγκυρες πηγές — με links.`;
+    if (!Array.isArray(analysis.sources)) analysis.sources = [];
 
     if (!analysis._fallback) {
       await writeCache(supabase, key, analysis);
