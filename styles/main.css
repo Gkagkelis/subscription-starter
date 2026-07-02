@@ -57,3 +57,13 @@ p a {
 .height-screen-helper {
   min-height: calc(100vh - 80px);
 }
+
+/* Premium text selection (branded, αντί για το default μπλε του browser) */
+::selection {
+  background: rgba(103, 232, 249, 0.28);
+  color: #eaf6f8;
+}
+::-moz-selection {
+  background: rgba(103, 232, 249, 0.28);
+  color: #eaf6f8;
+}
