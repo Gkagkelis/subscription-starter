@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 120;
 
 const MODEL = "claude-sonnet-4-6";
-const TTL_MS = 6 * 60 * 60 * 1000;
+const TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 function svc() {
   return createClient(
