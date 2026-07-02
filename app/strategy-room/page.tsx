@@ -1,4 +1,4 @@
-                                                                                                                                                                                                      "use client";
+                                                                                                                                                                                                                     "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode } from "react";
@@ -4026,7 +4026,7 @@ function ActiveSituationWorkspace({
                 {effectiveDocumentationLabel}
               </StatusChip>
             </div>
-            <h1 className="max-w-[760px] text-[1.35rem] font-semibold leading-[1.22] tracking-[-0.03em] text-zinc-50 xl:text-[1.65rem]">
+            <h1 className="max-w-[760px] font-display text-[1.55rem] font-semibold leading-[1.2] text-zinc-50 xl:text-[2rem]">
               {effectiveTitle}
             </h1>
             <p className="mt-2 text-xs font-medium tracking-wide text-zinc-500">
@@ -4035,14 +4035,11 @@ function ActiveSituationWorkspace({
           </div>
 
                   <div className="flex shrink-0 flex-col items-end gap-3">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3">
               <MiniMetric
                 label="Προτεραιότητα ημέρας"
                 value={effectiveScore ? Math.round(effectiveScore).toString() : "—"}
-              />
-              <MiniMetric
-                label="Βάση εκτίμησης"
-                value={effectiveDocumentationLabel}
+                display
               />
             </div>
             <ExportEventButton
@@ -5742,10 +5739,12 @@ function MiniMetric({
   label,
   value,
   small,
+  display,
 }: {
   label: string;
   value: string;
   small?: boolean;
+  display?: boolean;
 }) {
   return (
     <div
@@ -5755,7 +5754,7 @@ function MiniMetric({
         {label}
       </div>
       <div
-        className={`${small ? "mt-1 text-sm" : "mt-2 text-xl"} font-semibold text-cyan-100`}
+        className={`${small ? "mt-1 text-sm" : "mt-2 text-2xl"} font-semibold text-cyan-100 ${display ? "font-display" : ""}`}
       >
         {value}
       </div>
