@@ -1,4 +1,4 @@
-                                                                                                                                                                                                       "use client";
+                                                                                                                                                                                                     "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode } from "react";
@@ -383,7 +383,6 @@ const situationTabs: Array<{ id: SituationTab; label: string }> = [
   { id: "overview", label: "Συνολική εικόνα" },
   { id: "why", label: "Γιατί υπάρχει" },
   { id: "pulse", label: "Δημόσιος παλμός" },
-  { id: "comms", label: "Υλικό" },
   { id: "poion", label: "Ποιον αφορά" },
 ];
 
@@ -4409,46 +4408,6 @@ function ActiveSituationWorkspace({
           </div>
         ) : null}
 
-        {activeTab === "drivers" ? (
-          <div className="grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
-            <CockpitSection
-              title="Παράγοντες"
-              subtitle="Agenda signals behind the selected situation"
-            >
-              <div className="grid gap-3">
-                {sourcesSection?.bullets?.length
-                  ? sourcesSection.bullets.slice(0, 5).map((item, index) => (
-                      <DriverBar
-                        key={`${item}-${index}`}
-                        label={item}
-                        score={probeView?.gauges?.[index]?.value ?? effectiveScore}
-                        trend={probeView?.statusLabel}
-                      />
-                    ))
-                  : (agenda.length ? agenda.slice(0, 5) : []).map((item) => (
-                      <DriverBar
-                        key={`${item.topic}-${item.rank}`}
-                        label={item.topic || "Θέμα"}
-                        score={item.score}
-                        trend={item.signalLabel}
-                      />
-                    ))}
-                {!sourcesSection?.bullets?.length && !agenda.length ? (
-                  <EmptyState>
-                    Δεν υπάρχουν διαθέσιμοι παράγοντες ατζέντας.
-                  </EmptyState>
-                ) : null}
-              </div>
-            </CockpitSection>
-            <CockpitSection
-              title="Πηγές γεγονότος"
-              subtitle="Άρθρα που στηρίζουν το επιλεγμένο γεγονός"
-            >
-              <EventEvidenceList articles={activeEvidenceArticles} />
-            </CockpitSection>
-          </div>
-        ) : null}
-
         {activeTab === "pulse" ? (
           pulseSection ? (
             <CockpitSection title={pulseSection.title} subtitle={pulseSection.kicker}>
@@ -4471,139 +4430,6 @@ function ActiveSituationWorkspace({
           )
         ) : null}
 
-        {activeTab === "win" ? (
-          <CockpitSection
-            title={probeView?.primaryTabLabel || "Πώς κερδίζεται το θέμα"}
-            subtitle={winSection?.kicker || "Στρατηγική δυναμική και καθαρό framing"}
-          >
-            <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-5">
-              <WinCard
-                title="Το παιχνίδι σήμερα"
-                tone="red"
-                textValue={
-                  winSection?.body ||
-                  text(
-                    diagnosis.agenda_reading,
-                    text(
-                      issue.dominant_frame,
-                      "Το παιχνίδι δεν έχει ακόμη πλήρως οριστεί.",
-                    ),
-                  )
-                }
-              />
-              <WinCard
-                title="Η παγίδα"
-                tone="amber"
-                textValue={
-                  winSection?.bullets?.[0] ||
-                  text(
-                    diagnosis.strategic_risk,
-                    text(
-                      issue.priming_risk,
-                      "Το ρίσκο είναι πρόωρη ή άστοχη αντίδραση.",
-                    ),
-                  )
-                }
-              />
-              <WinCard
-                title="Ευνοϊκή διάσταση"
-                tone="emerald"
-                textValue={
-                  winSection?.bullets?.[1] ||
-                  text(
-                    diagnosis.strategic_opportunity,
-                    text(
-                      issue.opportunity,
-                      "Να εισαχθεί διάσταση θεσμικής σοβαρότητας και λύσης.",
-                    ),
-                  )
-                }
-              />
-              <WinCard
-                title="Κίνηση αναδιάταξης"
-                tone="purple"
-                textValue={
-                  winSection?.bullets?.[2] ||
-                  text(
-                    diagnosis.recommended_posture,
-                    "Μετατόπιση από άμυνα σε τεκμηριωμένη πρόταση.",
-                  )
-                }
-              />
-              <WinCard
-                title="Ακολουθία"
-                tone="zinc"
-                textValue={
-                  winSection?.bullets?.[3] ||
-                  list(actionPlan.next_24h)[0] ||
-                  "Πρώτα παρακολούθηση, μετά ασφαλής δημόσια γραμμή, μετά κλιμάκωση μόνο με νέα στοιχεία."
-                }
-              />
-            </div>
-          </CockpitSection>
-        ) : null}
-
-        {activeTab === "options" ? (
-          <CockpitSection
-            title="ΕΠΙΛΟΓΕΣ ΔΡΑΣΗΣ"
-            subtitle="Τρεις διαδρομές απόφασης — όταν λείπει πλήρης ανάλυση, μένουν σε αναμονή"
-          >
-            <div className="grid gap-3 xl:grid-cols-3">
-              {effectiveDecisionOptions.map((option: DecisionCardOption) => (
-                <DecisionCard key={option.label} {...option} />
-              ))}
-            </div>
-          </CockpitSection>
-        ) : null}
-
-        {activeTab === "comms" ? (
-          <div className="grid gap-4 xl:grid-cols-[1fr_1fr]">
-            <CockpitSection
-              title="Κεντρική γραμμή"
-              subtitle="Υλικό επικοινωνίας"
-            >
-              <p className="text-lg font-semibold leading-8 text-zinc-100">
-                {materialSection?.material?.briefing ||
-                  text(
-                    messages.central_line,
-                    "Δεν υπάρχει ακόμη κεντρική γραμμή από το strategy brief.",
-                  )}
-              </p>
-            </CockpitSection>
-            <CockpitSection
-              title="Θεσμική εκδοχή"
-              subtitle="Ασφαλής δημόσια εκδοχή"
-            >
-              <p className="text-sm leading-7 text-zinc-300">
-                {materialSection?.material?.suggestedStatement ||
-                  text(
-                    messages.institutional_version,
-                    "Εκκρεμεί θεσμική εκδοχή.",
-                  )}
-              </p>
-            </CockpitSection>
-            <CockpitSection title="Αν μας επιτεθούν" subtitle="Πρώτη γραμμή απάντησης">
-              <p className="text-sm leading-7 text-zinc-300">
-                {materialSection?.material?.internalNote ||
-                  text(
-                    messages.answer_if_attacked,
-                    "Εκκρεμεί απάντηση σε πιθανή επίθεση.",
-                  )}
-              </p>
-            </CockpitSection>
-            <CockpitSection
-              title="Για το συγκεκριμένο κόμμα"
-              subtitle="Επίπτωση για το προφίλ"
-            >
-              <p className="text-sm leading-7 text-zinc-300">
-                {text(
-                  selectedPartyImplication,
-                  "Δεν υπάρχει ακόμη ειδική επίπτωση για το επιλεγμένο προφίλ στο σημερινό πολιτικό περιβάλλον.",
-                )}
-              </p>
-            </CockpitSection>
-          </div>
-        ) : null}
       </div>
     </section>
   );
