@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=GFS+Didot:ital@0;1&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -66,4 +67,10 @@ p a {
 ::-moz-selection {
   background: rgba(103, 232, 249, 0.28);
   color: #eaf6f8;
+}
+
+/* Premium display γραμματοσειρά (GFS Didot) για τίτλους/νούμερα */
+.font-display {
+  font-family: 'GFS Didot', 'Times New Roman', serif;
+  font-feature-settings: "kern" 1;
 }
