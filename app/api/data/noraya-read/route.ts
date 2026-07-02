@@ -22,7 +22,7 @@ function norm(s: string): string {
   return (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/ς/g, "σ").replace(/\s+/g, "_").trim();
 }
 function cacheKey(topicKey: string | null, topicLabel: string): string {
-  return "noraya_read_v5__" + (topicKey || norm(topicLabel));
+  return "noraya_read_v6__" + (topicKey || norm(topicLabel));
 }
 
 async function readCache(supabase: ReturnType<typeof svc>, key: string): Promise<any | null> {
@@ -49,7 +49,7 @@ async function writeCache(supabase: ReturnType<typeof svc>, key: string, body: a
     situation_id: null,
     organization_id: null,
     analysis_kind: key,
-    input_hash: "v5",
+    input_hash: "v6",
     model_used: MODEL,
     result: { body, generated_at: new Date().toISOString() },
   };
@@ -240,6 +240,9 @@ export async function POST(req: NextRequest) {
     analysis.data_note = inDb
       ? `Τα σκληρά δεδομένα πιο κάτω είναι από το θέμα «${topicLabel}» (Ευρωβαρόμετρο). Για ειδικές πτυχές και για αριστερά–δεξιά, η ανάγνωση παραπάνω βγαίνει από ζωντανή αναζήτηση — με πηγές.`
       : `«${realSubject}» δεν υπάρχει αυτή τη στιγμή στη βάση δεδομένων του Noraya. Η ανάλυση παραπάνω βγαίνει από ζωντανή αναζήτηση στο πραγματικό θέμα. Τα σκληρά δεδομένα πιο κάτω είναι από το κοντινότερο διαθέσιμο θέμα, «${topicLabel}» — δείχνουν τη γενική εικόνα, όχι το ίδιο το γεγονός.`;
+    analysis.bars_note = inDb
+      ? ""
+      : `Διασταύρωση με τη βάση του Noraya: το πλησιέστερο μετρήσιμο θέμα σε αυτό είναι «${topicLabel}». Τα παρακάτω δίνουν το γενικό πλαίσιο στάσης της κοινωνίας γύρω από αυτό — ως συμπληρωματικό πλαίσιο, όχι ως μέτρηση του ίδιου του γεγονότος.`;
     if (!Array.isArray(analysis.sources)) analysis.sources = [];
 
     if (!analysis._fallback) {
