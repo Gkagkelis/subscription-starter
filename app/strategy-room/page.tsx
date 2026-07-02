@@ -1,4 +1,4 @@
-                                                             "use client";
+                                                                                                                       "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode } from "react";
@@ -3690,6 +3690,72 @@ type DecisionCardOption = {
   deliverableBrief?: string;
 };
 
+function PoionFrame({ src }: { src: string }) {
+  const frameRef = useRef<HTMLIFrameElement | null>(null);
+  const [frameHeight, setFrameHeight] = useState(760);
+
+  useEffect(() => {
+    const frame = frameRef.current;
+    if (!frame) return;
+
+    let observer: ResizeObserver | null = null;
+    let ticker: ReturnType<typeof setInterval> | null = null;
+
+    const measure = () => {
+      try {
+        const doc = frame.contentWindow?.document;
+        if (doc?.body) {
+          const next = Math.max(
+            doc.body.scrollHeight,
+            doc.documentElement?.scrollHeight || 0,
+          );
+          if (next > 0) setFrameHeight(next + 24);
+        }
+      } catch {
+        // ignore
+      }
+    };
+
+    const handleLoad = () => {
+      measure();
+      try {
+        const doc = frame.contentWindow?.document;
+        if (doc?.body && typeof ResizeObserver !== "undefined") {
+          observer = new ResizeObserver(() => measure());
+          observer.observe(doc.body);
+        }
+      } catch {
+        // ignore
+      }
+
+      let n = 0;
+      ticker = setInterval(() => {
+        measure();
+        if (++n > 24 && ticker) clearInterval(ticker);
+      }, 500);
+    };
+
+    frame.addEventListener("load", handleLoad);
+
+    return () => {
+      frame.removeEventListener("load", handleLoad);
+      if (observer) observer.disconnect();
+      if (ticker) clearInterval(ticker);
+    };
+  }, [src]);
+
+  return (
+    <iframe
+      ref={frameRef}
+      key={src}
+      src={src}
+      style={{ height: frameHeight + "px" }}
+      className="w-full border-0"
+      title="Ποιον αφορά"
+    />
+  );
+}
+
 function ActiveSituationWorkspace({
   activeTab,
   onTabChange,
@@ -4308,8 +4374,7 @@ function ActiveSituationWorkspace({
               subtitle="Ποιες ομάδες αγγίζει το θέμα και τι πιστεύουν — Ευρωβαρόμετρο"
             >
               <div className="overflow-hidden rounded-3xl border border-[#1a2640] bg-black/20">
-                <iframe
-                  key={title}
+                <PoionFrame
                   src={
                     "/dashboard/data?theme=" +
                     encodeURIComponent(
@@ -4320,8 +4385,6 @@ function ActiveSituationWorkspace({
                     "&event=" +
                     encodeURIComponent(title)
                   }
-                  className="h-[720px] w-full border-0"
-                  title="Ποιον αφορά"
                 />
               </div>
             </CockpitSection>
