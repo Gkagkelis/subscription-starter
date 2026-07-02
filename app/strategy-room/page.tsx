@@ -1,4 +1,4 @@
-                "use client";
+                               "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode } from "react";
@@ -381,10 +381,7 @@ const situationTabs: Array<{ id: SituationTab; label: string }> = [
   { id: "strategic", label: "Στρατηγική εικόνα" },
   { id: "overview", label: "Συνολική εικόνα" },
   { id: "why", label: "Γιατί υπάρχει" },
-  { id: "drivers", label: "Πηγές & παράγοντες" },
   { id: "pulse", label: "Δημόσιος παλμός" },
-  { id: "win", label: "Πώς κερδίζεται" },
-  { id: "options", label: "Επιλογές δράσης" },
   { id: "comms", label: "Υλικό" },
 ];
 
@@ -4249,6 +4246,36 @@ function ActiveSituationWorkspace({
             </CockpitSection>
 
             <CockpitSection
+              title="Κύριοι παράγοντες"
+              subtitle="Τι σηκώνει το γεγονός — συνδεδεμένο live"
+            >
+              <div className="grid gap-3">
+                {sourcesSection?.bullets?.length
+                  ? sourcesSection.bullets.slice(0, 5).map((item, index) => (
+                      <DriverBar
+                        key={`${item}-${index}`}
+                        label={item}
+                        score={probeView?.gauges?.[index]?.value ?? effectiveScore}
+                        trend={probeView?.statusLabel}
+                      />
+                    ))
+                  : (agenda.length ? agenda.slice(0, 5) : []).map((item) => (
+                      <DriverBar
+                        key={`${item.topic}-${item.rank}`}
+                        label={item.topic || "Θέμα"}
+                        score={item.score}
+                        trend={item.signalLabel}
+                      />
+                    ))}
+                {!sourcesSection?.bullets?.length && !agenda.length ? (
+                  <EmptyState>
+                    Δεν υπάρχουν διαθέσιμοι παράγοντες ατζέντας.
+                  </EmptyState>
+                ) : null}
+              </div>
+            </CockpitSection>
+
+            <CockpitSection
               title="Τι θα ξεκαθάριζε την εικόνα"
               subtitle="Σήματα που αλλάζουν την εκτίμηση"
             >
@@ -4261,6 +4288,13 @@ function ActiveSituationWorkspace({
                       "Χρειάζεται νέο σήμα, δεύτερη πηγή ή πολιτική αντίδραση για να αναθεωρηθεί η εκτίμηση.",
                     )}
               </p>
+            </CockpitSection>
+
+            <CockpitSection
+              title="Πηγές γεγονότος"
+              subtitle="Άρθρα που στηρίζουν το επιλεγμένο γεγονός"
+            >
+              <EventEvidenceList articles={activeEvidenceArticles} />
             </CockpitSection>
           </div>
         ) : null}
