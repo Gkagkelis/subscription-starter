@@ -1,4 +1,4 @@
-                                                                                                                                                                                                                                                     "use client";
+                                                                                                                                                                                                       "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode } from "react";
@@ -3840,6 +3840,26 @@ function PulseGauges({
   );
 }
 
+function blendSocialPulse(
+  gauges: { key: string; label: string; value: number }[],
+  brief: any,
+): { key: string; label: string; value: number }[] {
+  const voicesPulse =
+    brief && typeof brief === "object" ? (brief as any).voices_pulse : null;
+  const social =
+    voicesPulse && voicesPulse.social_mood_score != null
+      ? Math.min(100, Math.max(0, Number(voicesPulse.social_mood_score) || 0))
+      : null;
+  if (social == null) return gauges;
+  // «Δημόσιος παλμός» = 40% τάσεις (Google) + 60% social (Apify/YouTube).
+  // Κλειδωμένο στο στιγμιότυπο του voices_pulse. ΔΕΝ αγγίζει την κατάταξη.
+  return gauges.map((g) =>
+    g.key === "public_pulse"
+      ? { ...g, value: Math.round(g.value * 0.4 + social * 0.6) }
+      : g,
+  );
+}
+
 function ActiveSituationWorkspace({
   activeTab,
   onTabChange,
@@ -4437,7 +4457,7 @@ function ActiveSituationWorkspace({
               </p>
               {pulseSection.gauges?.length ? (
                 <PulseGauges
-                  gauges={pulseSection.gauges}
+                  gauges={blendSocialPulse(pulseSection.gauges, brief as any)}
                   eventTitle={title}
                   theme={category}
                   eventId={String(
