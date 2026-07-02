@@ -1,4 +1,4 @@
-                                                                                                                       "use client";
+                                                                                                                                                                                                                                                     "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode } from "react";
@@ -2002,7 +2002,7 @@ export default function StrategyRoomPage() {
     if (!id) return;
     if (strategicImageCache[id]) return; // ήδη έχουμε
     if (fetchingStrategicRef.current.has(id)) return; // ήδη φέρνουμε
-   if (raw.sensitivity_level === "high") return; // sensitive — δεν το στέλνουμε
+    if (raw.sensitivity_level === "high") return; // sensitive — δεν το στέλνουμε
 
     fetchingStrategicRef.current.add(id);
     setAiBusyIds((p) => ({ ...p, [id + "|img"]: true }));
@@ -3693,14 +3693,11 @@ type DecisionCardOption = {
 function PoionFrame({ src }: { src: string }) {
   const frameRef = useRef<HTMLIFrameElement | null>(null);
   const [frameHeight, setFrameHeight] = useState(760);
-
   useEffect(() => {
     const frame = frameRef.current;
     if (!frame) return;
-
     let observer: ResizeObserver | null = null;
     let ticker: ReturnType<typeof setInterval> | null = null;
-
     const measure = () => {
       try {
         const doc = frame.contentWindow?.document;
@@ -3715,7 +3712,6 @@ function PoionFrame({ src }: { src: string }) {
         // ignore
       }
     };
-
     const handleLoad = () => {
       measure();
       try {
@@ -3727,23 +3723,19 @@ function PoionFrame({ src }: { src: string }) {
       } catch {
         // ignore
       }
-
       let n = 0;
       ticker = setInterval(() => {
         measure();
         if (++n > 24 && ticker) clearInterval(ticker);
       }, 500);
     };
-
     frame.addEventListener("load", handleLoad);
-
     return () => {
       frame.removeEventListener("load", handleLoad);
       if (observer) observer.disconnect();
       if (ticker) clearInterval(ticker);
     };
   }, [src]);
-
   return (
     <iframe
       ref={frameRef}
@@ -3753,6 +3745,98 @@ function PoionFrame({ src }: { src: string }) {
       className="w-full border-0"
       title="Ποιον αφορά"
     />
+  );
+}
+
+function PulseGauges({
+  gauges,
+  eventTitle,
+  theme,
+  eventId,
+}: {
+  gauges: { key: string; label: string; value: number }[];
+  eventTitle: string;
+  theme: string;
+  eventId: string;
+}) {
+  const [selected, setSelected] = useState<string | null>(null);
+  const [explanations, setExplanations] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(false);
+
+  const onPick = async (g: { key: string; label: string; value: number }) => {
+    if (selected === g.key) {
+      setSelected(null);
+      return;
+    }
+    setSelected(g.key);
+    if (explanations[g.key]) return;
+    setLoading(true);
+    try {
+      const resp = await fetch("/api/situation-engine/gauge-explain", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          metric_label: g.label,
+          metric_value: g.value,
+          event_title: eventTitle,
+          theme,
+          event_id: eventId,
+          all_gauges: gauges.map((x) => ({ label: x.label, value: x.value })),
+        }),
+      });
+      const data = await resp.json();
+      if (data?.ok && data.explanation) {
+        setExplanations((prev) => ({ ...prev, [g.key]: data.explanation }));
+      }
+    } catch {
+      // best-effort
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const activeGauge = gauges.find((g) => g.key === selected) || null;
+
+  return (
+    <div className="mt-5">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+        {gauges.map((gauge) => (
+          <button
+            key={gauge.key}
+            type="button"
+            onClick={() => onPick(gauge)}
+            className={`rounded-2xl p-1 transition ${
+              selected === gauge.key
+                ? "bg-cyan-300/[0.06] ring-1 ring-cyan-300/40"
+                : "hover:bg-white/[0.03]"
+            }`}
+          >
+            <Gauge score={gauge.value} label={gauge.label} small />
+          </button>
+        ))}
+      </div>
+      {activeGauge ? (
+        <div className="mt-4 rounded-2xl border border-cyan-300/20 bg-gradient-to-b from-cyan-300/[0.05] to-[#0a111f] p-4">
+          <div className="mb-1 flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-cyan-300 shadow-[0_0_10px_rgba(103,232,249,0.8)]" />
+            <div className="text-[12px] font-semibold tracking-tight text-cyan-100/85">
+              {activeGauge.label} · {Math.round(activeGauge.value)}/100
+            </div>
+          </div>
+          {loading && !explanations[activeGauge.key] ? (
+            <div className="text-[12px] text-zinc-500">Ο Noraya εξηγεί…</div>
+          ) : (
+            <p className="text-[13px] leading-relaxed text-zinc-300">
+              {explanations[activeGauge.key] || "—"}
+            </p>
+          )}
+        </div>
+      ) : (
+        <div className="mt-3 text-center text-[11px] text-zinc-600">
+          Πάτα ένα gauge για εξήγηση
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -3964,7 +4048,7 @@ function ActiveSituationWorkspace({
           </div>
         </div>
 
-       <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-1 border-b border-white/[0.07]">
+        <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-1 border-b border-white/[0.07]">
           {situationTabs.map((tab) => (
             <button
               key={tab.id}
@@ -4164,93 +4248,7 @@ function ActiveSituationWorkspace({
             </div>
 
             <CockpitSection
-              title="4. Ένταση & δυναμική"
-              subtitle="6 gauges — αρχικά από διαθέσιμα live signals"
-            >
-              <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-                {probeView?.gauges?.length ? (
-                  probeView.gauges.map((gauge) => (
-                    <Gauge
-                      key={gauge.key}
-                      score={gauge.value}
-                      label={gauge.label}
-                      small
-                    />
-                  ))
-                ) : (
-                  <>
-                    <Gauge
-                      score={clamp(
-                        numberValue(
-                          situation?.news_coverage_level,
-                          numberValue(
-                            situation?.article_count,
-                            agenda[0]?.article_count || 0,
-                          ) * 8,
-                        ),
-                      )}
-                      label="Ένταση κάλυψης"
-                      small
-                    />
-                    <Gauge
-                      score={clamp(
-                        numberValue(
-                          situation?.google_trends_score,
-                          numberValue(
-                            situation?.source_count,
-                            agenda[0]?.source_count || 0,
-                          ) * 15,
-                        ),
-                      )}
-                      label="Δημόσια αναζήτηση"
-                      small
-                    />
-                    <Gauge
-                      score={clamp(
-                        numberValue(
-                          situation?.confidence_score,
-                          documentationScore,
-                        ),
-                      )}
-                      label="Πολιτική ένταση"
-                      small
-                    />
-                    <Gauge
-                      score={clamp(
-                        numberValue(
-                          issue.emotion_intensity,
-                          publicPulseScore(situation),
-                        ),
-                      )}
-                      label="Συναισθηματική ένταση"
-                      small
-                    />
-                    <Gauge
-                      score={clamp(
-                        Math.round(
-                          numberValue(
-                            issue.emotion_intensity,
-                            publicPulseScore(situation),
-                          ) *
-                            0.6 +
-                            (effectiveScore >= 70 ? 20 : effectiveScore >= 50 ? 10 : 0),
-                        ),
-                      )}
-                      label="Κίνδυνος υπερβολής"
-                      small
-                    />
-                    <Gauge
-                      score={clamp(Math.max(effectiveScore, documentationScore))}
-                      label="Δυναμική ατζέντας"
-                      small
-                    />
-                  </>
-                )}
-              </div>
-            </CockpitSection>
-
-            <CockpitSection
-              title="5. Κλίμακα κλιμάκωσης"
+              title="4. Κλίμακα κλιμάκωσης"
               subtitle="Αποφυγή πρόωρης κλιμάκωσης"
             >
               <EscalationLadder
@@ -4438,16 +4436,14 @@ function ActiveSituationWorkspace({
                 {pulseSection.body}
               </p>
               {pulseSection.gauges?.length ? (
-                <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-                  {pulseSection.gauges.map((gauge) => (
-                    <Gauge
-                      key={gauge.key}
-                      score={gauge.value}
-                      label={gauge.label}
-                      small
-                    />
-                  ))}
-                </div>
+                <PulseGauges
+                  gauges={pulseSection.gauges}
+                  eventTitle={title}
+                  theme={category}
+                  eventId={String(
+                    probeEvent?.id || (probeItem?.raw as any)?.micro_agenda_id || "",
+                  )}
+                />
               ) : null}
             </CockpitSection>
           ) : (
