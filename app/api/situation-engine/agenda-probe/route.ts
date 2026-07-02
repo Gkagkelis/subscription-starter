@@ -1200,7 +1200,20 @@ function buildAgendaItem(
   partyKey: string | null = null,
   partyProfile: PoliticalPartyProfile | null = null
 ) {
-  const sortedEvents = [...group.events].sort((a, b) => toNumber(b?.event_score) - toNumber(a?.event_score));
+  // Ιεράρχηση γεγονότων ΜΕΣΑ στο cluster: όχι μόνο event_score (που δίνει άδικα
+  // 71 σε μονό άρθρο), αλλά συνδυασμός με ΠΡΑΓΜΑΤΙΚΗ κάλυψη (άρθρα + πηγές) και
+  // φρεσκάδα. Έτσι η πολυκαλυμμένη είδηση της ημέρας (π.χ. τρομοκρατική επίθεση με
+  // 11 άρθρα / 5 πηγές) ανεβαίνει πάνω από ένα μονό-άρθρο event.
+  const eventRankScore = (e: any): number => {
+    const base = toNumber(e?.event_score);
+    const articles = toNumber(e?.article_count);
+    const sources = toNumber(e?.source_count);
+    const hoursAgo = hoursOld(e?.last_article_at ?? e?.newest_article_at);
+    const freshBonus = hoursAgo === null ? 0 : hoursAgo <= 24 ? 12 : hoursAgo <= 48 ? 6 : 0;
+    const coverageBonus = Math.min(30, articles * 2 + sources * 3);
+    return base + coverageBonus + freshBonus;
+  };
+  const sortedEvents = [...group.events].sort((a, b) => eventRankScore(b) - eventRankScore(a));
   const bestEvent = sortedEvents[0];
   const topicCandidates = [group.classification.micro_agenda, group.parentTopic, ...Array.from(group.parentTopics)];
   const trend = trendForAgenda(topicCandidates, trends, group.classification.micro_agenda, group.parentTopic);
