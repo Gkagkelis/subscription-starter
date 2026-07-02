@@ -5145,14 +5145,6 @@ function RightInspector({
   return (
     <aside className="flex w-[260px] shrink-0 flex-col overflow-hidden bg-gradient-to-b from-[#070d18] to-[#060a14]">
       <div className="flex-1 overflow-y-auto p-3">
-        {/* Επικεφαλίδα στήλης */}
-        <div className="mb-3 flex items-center gap-2 px-1">
-          <span className="h-1.5 w-1.5 rounded-full bg-cyan-300 shadow-[0_0_10px_rgba(103,232,249,0.8)]" />
-          <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-200/75">
-            Ανάλυση γεγονότος
-          </div>
-        </div>
-
         {/* RED TEAM — πώς θα μας χτυπήσουν, με έτοιμη απάντηση */}
         {redTeamItems.length ? (
           <section className="mb-3 overflow-hidden rounded-[1.5rem] border border-red-400/15 bg-[#13090c] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
