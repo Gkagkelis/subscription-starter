@@ -24,6 +24,8 @@ interface MatchResult {
 interface Analysis {
   headline?: string; deep_read?: string; who_to_mobilize?: string; trust_angle?: string;
   opening?: string; risk?: string; adjacent?: string; next_move?: string;
+  web_findings?: string; left_right?: string; data_note?: string; has_internal_data?: boolean;
+  sources?: { title?: string; url?: string }[];
 }
 
 function barColor(v: number, max: number): string {
@@ -196,6 +198,11 @@ export default function DataPage() {
           <span className="h-1.5 w-1.5 rounded-full bg-cyan-300 shadow-[0_0_10px_rgba(103,232,249,0.8)]" />
           <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-200/80">Ανάλυση Noraya</div>
         </div>
+        {analysis.data_note ? (
+          <div className="mb-3 rounded-xl border border-amber-300/20 bg-amber-300/[0.05] px-3 py-2 text-[11px] leading-relaxed text-amber-100/80">
+            {analysis.data_note}
+          </div>
+        ) : null}
         {analysis.headline ? <div className="text-[15px] font-semibold text-zinc-50 leading-snug">{analysis.headline}</div> : null}
         {analysis.deep_read ? <p className="text-sm text-zinc-300 mt-2 leading-relaxed">{analysis.deep_read}</p> : null}
         {cells.length ? (
@@ -206,6 +213,37 @@ export default function DataPage() {
                 <div className="text-[13px] text-zinc-200 leading-relaxed">{val}</div>
               </div>
             ))}
+          </div>
+        ) : null}
+        {(analysis.web_findings && analysis.web_findings !== "—") ||
+        (analysis.left_right && analysis.left_right !== "—") ||
+        (Array.isArray(analysis.sources) && analysis.sources.length) ? (
+          <div className="mt-4 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
+              <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-emerald-200/70">Ζωντανή αναζήτηση</div>
+            </div>
+            {analysis.web_findings && analysis.web_findings !== "—" ? (
+              <p className="text-[13px] text-zinc-200 leading-relaxed">{analysis.web_findings}</p>
+            ) : null}
+            {analysis.left_right && analysis.left_right !== "—" ? (
+              <div className="mt-3">
+                <div className="text-[9px] uppercase tracking-[0.18em] text-emerald-200/50 mb-1">αριστερά–δεξιά</div>
+                <p className="text-[13px] text-zinc-200 leading-relaxed">{analysis.left_right}</p>
+              </div>
+            ) : null}
+            {Array.isArray(analysis.sources) && analysis.sources.length ? (
+              <div className="mt-3">
+                <div className="text-[9px] uppercase tracking-[0.18em] text-zinc-500 mb-1.5">πηγές</div>
+                <div className="flex flex-col gap-1">
+                  {analysis.sources.map((sourceItem, i) => (
+                    <a key={i} href={sourceItem?.url || "#"} target="_blank" rel="noopener noreferrer" className="text-[12px] text-cyan-300 hover:text-cyan-200 underline decoration-cyan-300/30 truncate">
+                      {sourceItem?.title || sourceItem?.url}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ) : null}
           </div>
         ) : null}
       </div>
