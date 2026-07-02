@@ -1,4 +1,4 @@
-                                                                                                                                                                                                    "use client";
+                                                                                                                                                                                                      "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode } from "react";
@@ -3291,13 +3291,7 @@ function LeftSidebar({
                           {group.eventCount === 1 ? "γεγονός" : "γεγονότα"}
                         </div>
                       </div>
-                      <Sparkline
-                        seed={`theme-${group.theme}-${group.rank}`}
-                        score={group.score}
-                        series={deterministicTrendSeries(group.score, undefined)}
-                        color={sparkColor(group.score)}
-                        className="h-6 w-9 shrink-0"
-                      />
+                      <IntensityBars score={group.score} className="shrink-0" />
                       <span className="shrink-0 text-[10px] text-zinc-500">
                         {themeOpen ? "▾" : "▸"}
                       </span>
@@ -3658,16 +3652,7 @@ function PriorityStrip({
                 <p className="flex-1 text-[11px] leading-5 text-zinc-500">
                   {card.textValue}
                 </p>
-                <Sparkline
-                  seed={`priority-${card.label}-${index}`}
-                  score={card.score}
-                  series={deterministicTrendSeries(
-                    card.score,
-                    (card as any).change_7d,
-                  )}
-                  color={sparkColor(card.score)}
-                  className="h-8 w-20 shrink-0"
-                />
+                <IntensityBars score={card.score} className="shrink-0" />
               </div>
             </article>
           );
@@ -4522,17 +4507,7 @@ function PublicPulsePanel({
           <div className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-2">
             <span className="text-[11px] text-zinc-400">Συναίσθημα</span>
             <div className="flex items-center gap-2">
-              <Sparkline
-                seed={`pulse-emotion-${emotion}`}
-                score={intensity}
-                series={deterministicTrendSeries(
-                  intensity,
-                  undefined,
-                  intensity,
-                )}
-                color={sparkColor(intensity)}
-                className="h-6 w-24 shrink-0"
-              />
+              <IntensityBars score={intensity} />
               <span className="text-xs font-semibold text-zinc-100">
                 {intensity}%
               </span>
@@ -4541,17 +4516,7 @@ function PublicPulsePanel({
           <div className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-2">
             <span className="text-[11px] text-zinc-400">Κοινωνική διάδοση</span>
             <div className="flex items-center gap-2">
-              <Sparkline
-                seed={`pulse-spread-${spreadKey}`}
-                score={spreadScore}
-                series={deterministicTrendSeries(
-                  spreadScore,
-                  undefined,
-                  spreadScore,
-                )}
-                color={sparkColor(spreadScore)}
-                className="h-6 w-24 shrink-0"
-              />
+              <IntensityBars score={spreadScore} />
               <span className="text-xs font-semibold text-zinc-100">
                 {spreadLabel}
               </span>
@@ -6726,6 +6691,37 @@ function deterministicTrendSeries(
     pts.push(clamp(base + wave, 4, 96));
   }
   return pts;
+}
+
+function IntensityBars({ score, className = "" }: { score: number; className?: string }) {
+  const s = clamp(score);
+  const color = s >= 60 ? "#f0625d" : s >= 35 ? "#f0b83f" : "#00c8ff";
+  const glow =
+    s >= 60
+      ? "0 0 8px rgba(240,98,93,.55)"
+      : s >= 35
+        ? "0 0 8px rgba(240,184,63,.55)"
+        : "0 0 8px rgba(0,200,255,.5)";
+  const heights = [8, 13, 20];
+  return (
+    <div
+      className={`flex shrink-0 items-end gap-[3px] ${className}`}
+      style={{ height: 20 }}
+    >
+      {heights.map((h, i) => (
+        <span
+          key={i}
+          style={{
+            width: 4,
+            height: h,
+            borderRadius: 2,
+            background: color,
+            boxShadow: i === 2 ? glow : "none",
+          }}
+        />
+      ))}
+    </div>
+  );
 }
 
 function Sparkline({
