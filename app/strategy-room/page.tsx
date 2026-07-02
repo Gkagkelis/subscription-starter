@@ -1,4 +1,4 @@
-        "use client";
+                "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode } from "react";
@@ -5152,102 +5152,6 @@ function RightInspector({
             Ανάλυση γεγονότος
           </div>
         </div>
-
-        {/* ΚΥΡΙΟΙ ΠΑΡΑΓΟΝΤΕΣ */}
-        <section className="mb-3 overflow-hidden rounded-[1.5rem] border border-white/[0.07] bg-[#0a111f] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
-          <div className="border-b border-white/[0.05] bg-gradient-to-r from-cyan-300/[0.06] to-transparent px-4 py-3">
-            <div className="text-[11px] font-semibold tracking-[0.02em] text-cyan-100/90">
-              Κύριοι παράγοντες
-            </div>
-            <div className="mt-0.5 text-[9px] text-zinc-500">
-              Τι σηκώνει το γεγονός — συνδεδεμένο live
-            </div>
-          </div>
-          <div className="grid gap-3 p-4">
-            {factorRows.length ? (
-              factorRows.map((row, index) => {
-                const val = clamp(numberValue(row.score, 0));
-                const barColor =
-                  val >= 70 ? "#f87171" : val >= 50 ? "#fbbf24" : "#34d399";
-                return (
-                  <div key={`${row.label}-${index}`}>
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0 flex-1 text-[11px] leading-5 text-zinc-300">
-                        {row.label}
-                      </div>
-                      <div
-                        className="shrink-0 text-[10px] font-semibold"
-                        style={{ color: barColor }}
-                      >
-                        {Math.round(val)}
-                      </div>
-                    </div>
-                    <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
-                      <div
-                        className="h-full rounded-full transition-all"
-                        style={{
-                          width: `${Math.max(val, 5)}%`,
-                          background: barColor,
-                          boxShadow: `0 0 8px ${barColor}66`,
-                        }}
-                      />
-                    </div>
-                  </div>
-                );
-              })
-            ) : (
-              <div className="rounded-xl border border-dashed border-[#1a2640] px-3 py-4 text-center text-[10px] text-zinc-600">
-                Δεν υπάρχουν ακόμη διαθέσιμοι παράγοντες.
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* ΚΟΥΜΠΙ: ΣΥΝΔΕΣΗ ΜΕ ΔΕΔΟΜΕΝΑ */}
-        {title ? (
-          <a
-            href={
-              "/dashboard/data?theme=" +
-              encodeURIComponent(
-                ((probeItem?.raw as any)?.theme as string) ||
-                  ((probeItem?.raw as any)?.micro_agenda as string) ||
-                  title
-              ) +
-              "&event=" +
-              encodeURIComponent(title)
-            }
-            className="mb-3 flex items-center justify-center gap-1.5 rounded-[1.25rem] border border-cyan-300/30 bg-cyan-300/[0.06] px-4 py-3 text-[11px] font-semibold tracking-[0.02em] text-cyan-100 transition hover:bg-cyan-300/[0.12]"
-          >
-            Σύνδεση με δεδομένα →
-          </a>
-        ) : null}
-
-        {/* ΣΥΝΟΠΤΙΚΗ ΑΞΙΟΛΟΓΗΣΗ */}
-        <section className="mb-3 overflow-hidden rounded-[1.5rem] border border-white/[0.07] bg-[#0a111f] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
-          <div className="border-b border-white/[0.05] bg-gradient-to-r from-cyan-300/[0.06] to-transparent px-4 py-3">
-            <div className="text-[11px] font-semibold tracking-[0.02em] text-cyan-100/90">
-              Συνοπτική αξιολόγηση
-            </div>
-            <div className="mt-0.5 text-[9px] text-zinc-500">
-              Η εικόνα του γεγονότος με μια ματιά
-            </div>
-          </div>
-          <div className="grid gap-2 p-4">
-            {summaryRows.map((row) => (
-              <div
-                key={row.label}
-                className="rounded-2xl border border-white/[0.05] bg-black/20 px-3 py-2.5"
-              >
-                <div className="text-[10px] font-semibold tracking-[0.02em] text-cyan-300/70">
-                  {row.label}
-                </div>
-                <div className="mt-1 text-[11px] leading-5 text-zinc-300">
-                  {row.value}
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
 
         {/* RED TEAM — πώς θα μας χτυπήσουν, με έτοιμη απάντηση */}
         {redTeamItems.length ? (
