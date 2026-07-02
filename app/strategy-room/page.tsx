@@ -3896,16 +3896,16 @@ function ActiveSituationWorkspace({
           </div>
         </div>
 
-        <div className="mt-4 flex flex-wrap gap-2">
+       <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-1 border-b border-white/[0.07]">
           {situationTabs.map((tab) => (
             <button
               key={tab.id}
               type="button"
               onClick={() => onTabChange(tab.id)}
-              className={`rounded-2xl border px-3 py-2 text-[11px] font-medium transition ${
+              className={`-mb-px border-b-2 px-1 pb-2.5 pt-1 text-[12px] font-medium transition ${
                 activeTab === tab.id
-                  ? "border-cyan-300/30 bg-cyan-300/10 text-cyan-100"
-                  : "border-[#1a2640] bg-black/15 text-zinc-500 hover:text-zinc-300"
+                  ? "border-cyan-300 text-cyan-50 shadow-[0_10px_14px_-10px_rgba(103,232,249,0.8)]"
+                  : "border-transparent text-zinc-500 hover:text-zinc-300"
               }`}
             >
               {tab.id === "win" && probeView ? probeView.primaryTabLabel : tab.label}
