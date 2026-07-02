@@ -24,7 +24,7 @@ interface MatchResult {
 interface Analysis {
   headline?: string; deep_read?: string; who_to_mobilize?: string; trust_angle?: string;
   opening?: string; risk?: string; adjacent?: string; next_move?: string;
-  interpretation?: string; groups_affected?: string; trust_read?: string;
+  interpretation?: string; groups_affected?: string; trust_read?: string; bars_note?: string;
   web_findings?: string; left_right?: string; data_note?: string; has_internal_data?: boolean;
   sources?: { title?: string; url?: string }[];
 }
@@ -258,6 +258,11 @@ export default function DataPage() {
     return (
       <div className="space-y-5">
         <div className="text-[10px] font-semibold tracking-tight text-zinc-400 px-1">Τα δεδομένα από κάτω</div>
+        {analysis?.bars_note ? (
+          <div className="rounded-xl border border-cyan-300/15 bg-cyan-300/[0.04] px-3 py-2 text-[11px] leading-relaxed text-cyan-100/75">
+            {analysis.bars_note}
+          </div>
+        ) : null}
 
         {fullTrend.length > 1 ? (
           <div className={card + " p-5"}>
