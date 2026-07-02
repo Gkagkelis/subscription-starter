@@ -2003,7 +2003,7 @@ export default function StrategyRoomPage() {
     if (!id) return;
     if (strategicImageCache[id]) return; // ήδη έχουμε
     if (fetchingStrategicRef.current.has(id)) return; // ήδη φέρνουμε
-    if (raw.sensitivity_level === "high" && raw.ranking_policy === "do_not_optimize_for_engagement") return; // μόνο βαθιά ευαίσθητα (γυναικοκτονία/αυτοκτονία/ανήλικοι) — όχι πολιτική βία
+    if (raw.requires_human_review || raw.sensitivity_level === "high") return; // sensitive — δεν το στέλνουμε
 
     fetchingStrategicRef.current.add(id);
     setAiBusyIds((p) => ({ ...p, [id + "|img"]: true }));
@@ -2068,7 +2068,7 @@ export default function StrategyRoomPage() {
     if (!id) return;
     if (strategicPlayCache[id]) return;
     if (fetchingPlayRef.current.has(id)) return;
-    if (raw.sensitivity_level === "high" && raw.ranking_policy === "do_not_optimize_for_engagement") return;
+    if (raw.requires_human_review || raw.sensitivity_level === "high") return;
 
     fetchingPlayRef.current.add(id);
     setAiBusyIds((p) => ({ ...p, [id + "|play"]: true }));
@@ -5153,56 +5153,6 @@ function RightInspector({
           </div>
         </div>
 
-        {/* ΚΥΡΙΟΙ ΠΑΡΑΓΟΝΤΕΣ */}
-        <section className="mb-3 overflow-hidden rounded-[1.5rem] border border-white/[0.07] bg-[#0a111f] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
-          <div className="border-b border-white/[0.05] bg-gradient-to-r from-cyan-300/[0.06] to-transparent px-4 py-3">
-            <div className="text-[11px] font-semibold tracking-[0.02em] text-cyan-100/90">
-              Κύριοι παράγοντες
-            </div>
-            <div className="mt-0.5 text-[9px] text-zinc-500">
-              Τι σηκώνει το γεγονός — συνδεδεμένο live
-            </div>
-          </div>
-          <div className="grid gap-3 p-4">
-            {factorRows.length ? (
-              factorRows.map((row, index) => {
-                const val = clamp(numberValue(row.score, 0));
-                const barColor =
-                  val >= 70 ? "#f87171" : val >= 50 ? "#fbbf24" : "#34d399";
-                return (
-                  <div key={`${row.label}-${index}`}>
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0 flex-1 text-[11px] leading-5 text-zinc-300">
-                        {row.label}
-                      </div>
-                      <div
-                        className="shrink-0 text-[10px] font-semibold"
-                        style={{ color: barColor }}
-                      >
-                        {Math.round(val)}
-                      </div>
-                    </div>
-                    <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
-                      <div
-                        className="h-full rounded-full transition-all"
-                        style={{
-                          width: `${Math.max(val, 5)}%`,
-                          background: barColor,
-                          boxShadow: `0 0 8px ${barColor}66`,
-                        }}
-                      />
-                    </div>
-                  </div>
-                );
-              })
-            ) : (
-              <div className="rounded-xl border border-dashed border-[#1a2640] px-3 py-4 text-center text-[10px] text-zinc-600">
-                Δεν υπάρχουν ακόμη διαθέσιμοι παράγοντες.
-              </div>
-            )}
-          </div>
-        </section>
-
         {/* ΚΟΥΜΠΙ: ΣΥΝΔΕΣΗ ΜΕ ΔΕΔΟΜΕΝΑ */}
         {title ? (
           <a
@@ -5221,33 +5171,6 @@ function RightInspector({
             Σύνδεση με δεδομένα →
           </a>
         ) : null}
-
-        {/* ΣΥΝΟΠΤΙΚΗ ΑΞΙΟΛΟΓΗΣΗ */}
-        <section className="mb-3 overflow-hidden rounded-[1.5rem] border border-white/[0.07] bg-[#0a111f] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
-          <div className="border-b border-white/[0.05] bg-gradient-to-r from-cyan-300/[0.06] to-transparent px-4 py-3">
-            <div className="text-[11px] font-semibold tracking-[0.02em] text-cyan-100/90">
-              Συνοπτική αξιολόγηση
-            </div>
-            <div className="mt-0.5 text-[9px] text-zinc-500">
-              Η εικόνα του γεγονότος με μια ματιά
-            </div>
-          </div>
-          <div className="grid gap-2 p-4">
-            {summaryRows.map((row) => (
-              <div
-                key={row.label}
-                className="rounded-2xl border border-white/[0.05] bg-black/20 px-3 py-2.5"
-              >
-                <div className="text-[10px] font-semibold tracking-[0.02em] text-cyan-300/70">
-                  {row.label}
-                </div>
-                <div className="mt-1 text-[11px] leading-5 text-zinc-300">
-                  {row.value}
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
 
         {/* RED TEAM — πώς θα μας χτυπήσουν, με έτοιμη απάντηση */}
         {redTeamItems.length ? (
