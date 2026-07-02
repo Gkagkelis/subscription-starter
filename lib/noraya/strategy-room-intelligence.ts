@@ -971,8 +971,67 @@ function buildPriorityCardSignal(item: AgendaMapItem): PriorityCardSignal {
   return { label: 'Σταθερό', meaning: 'Ενεργό θέμα με σταθερή παρουσία στην ατζέντα σήμερα.', tone: 'yellow' };
 }
 
+const PRIORITY_STOPWORDS = new Set([
+  'στην', 'στον', 'στους', 'στισ', 'τουσ', 'των', 'τησ', 'του', 'την', 'τον',
+  'και', 'για', 'απο', 'μια', 'ενα', 'που', 'θυμα', 'μετα', 'προσ', 'κατα', 'αυτο',
+]);
+
+function prioritySigTokens(title: string): string[] {
+  return String(title || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/ς/g, 'σ')
+    .replace(/[^0-9a-z\u03b1-\u03c9]+/gi, ' ')
+    .split(' ')
+    .filter((t) => t.length >= 4 && !PRIORITY_STOPWORDS.has(t));
+}
+
+function sharedSignificant(a: string[], b: string[]): number {
+  let shared = 0;
+  const used = new Set<string>();
+  for (const ta of a) {
+    if (used.has(ta)) continue;
+    for (const tb of b) {
+      const common = Math.min(ta.length, tb.length);
+      if (ta === tb || (common >= 4 && (ta.startsWith(tb) || tb.startsWith(ta)))) {
+        shared++;
+        used.add(ta);
+        break;
+      }
+    }
+  }
+  return shared;
+}
+
+// Ίδιο πραγματικό γεγονός; (π.χ. «...Θεσσαλονίκη - Θάνατος Βάγιας Νέστορα»
+// vs «Δολοφονική επίθεση στη Θεσσαλονίκη με θύμα την Βάγια Νέστορα»)
+function isSameRealEvent(a: string[], b: string[]): boolean {
+  const shared = sharedSignificant(a, b);
+  const minLen = Math.min(a.length, b.length) || 1;
+  return shared >= 3 || (shared >= 2 && shared / minLen >= 0.5);
+}
+
 export function buildPriorityCards(raw: ProbeV4Response): PriorityCard[] {
-  const eligible = buildAgendaMap(raw).filter((item) => item.raw.show_in_strategy_room !== 'review_required').filter((item) => item.events.length > 0).slice(0, 3);
+  const all = buildAgendaMap(raw)
+    .filter((item) => item.raw.show_in_strategy_room !== 'review_required')
+    .filter((item) => item.events.length > 0);
+
+  const eligible: typeof all = [];
+  const usedEventIds = new Set<string>();
+  const keptSigs: string[][] = [];
+  for (const item of all) {
+    const topEvent = item.events[0];
+    const eid = String(topEvent?.id || '');
+    if (eid && usedEventIds.has(eid)) continue; // σίγουρο dedup: ίδιο event id
+    const sig = prioritySigTokens(safeText(topEvent?.title, item.title));
+    if (keptSigs.some((prev) => isSameRealEvent(prev, sig))) continue; // fuzzy dedup
+    eligible.push(item);
+    if (eid) usedEventIds.add(eid);
+    keptSigs.push(sig);
+    if (eligible.length >= 3) break;
+  }
+
   return eligible.map((item, index) => {
     const rank = (index + 1) as 1 | 2 | 3;
     const signal = buildPriorityCardSignal(item);
