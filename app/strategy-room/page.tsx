@@ -1,4 +1,4 @@
-                               "use client";
+                                                             "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode } from "react";
@@ -357,7 +357,8 @@ type SituationTab =
   | "pulse"
   | "win"
   | "options"
-  | "comms";
+  | "comms"
+  | "poion";
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
 
@@ -383,6 +384,7 @@ const situationTabs: Array<{ id: SituationTab; label: string }> = [
   { id: "why", label: "Γιατί υπάρχει" },
   { id: "pulse", label: "Δημόσιος παλμός" },
   { id: "comms", label: "Υλικό" },
+  { id: "poion", label: "Ποιον αφορά" },
 ];
 
 const navTabs = [
@@ -4295,6 +4297,33 @@ function ActiveSituationWorkspace({
               subtitle="Άρθρα που στηρίζουν το επιλεγμένο γεγονός"
             >
               <EventEvidenceList articles={activeEvidenceArticles} />
+            </CockpitSection>
+          </div>
+        ) : null}
+
+        {activeTab === "poion" ? (
+          <div className="grid gap-4">
+            <CockpitSection
+              title="Ποιον αφορά"
+              subtitle="Ποιες ομάδες αγγίζει το θέμα και τι πιστεύουν — Ευρωβαρόμετρο"
+            >
+              <div className="overflow-hidden rounded-3xl border border-[#1a2640] bg-black/20">
+                <iframe
+                  key={title}
+                  src={
+                    "/dashboard/data?theme=" +
+                    encodeURIComponent(
+                      ((probeItem?.raw as any)?.theme as string) ||
+                        ((probeItem?.raw as any)?.micro_agenda as string) ||
+                        title,
+                    ) +
+                    "&event=" +
+                    encodeURIComponent(title)
+                  }
+                  className="h-[720px] w-full border-0"
+                  title="Ποιον αφορά"
+                />
+              </div>
             </CockpitSection>
           </div>
         ) : null}
