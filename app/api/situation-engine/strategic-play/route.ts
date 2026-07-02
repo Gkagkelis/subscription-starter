@@ -34,8 +34,14 @@ function json(payload: unknown, status = 200) {
   return NextResponse.json(payload, { status });
 }
 
-function cacheKey(microAgendaId: string, partyKey: string, eventId?: string | null) {
-  const base = "strategic_play_v12__" + microAgendaId + "__" + partyKey;
+function priorityTier(score: unknown): string {
+  const s = Number(score) || 0;
+  if (s >= 60) return "t1";
+  if (s >= 35) return "t2";
+  return "t3";
+}
+function cacheKey(microAgendaId: string, partyKey: string, eventId?: string | null, tier = "") {
+  const base = "strategic_play_v12__" + microAgendaId + "__" + partyKey + (tier ? "__" + tier : "");
   return eventId ? base + "__" + eventId : base;
 }
 
@@ -55,7 +61,7 @@ async function readCache(supabase: ReturnType<typeof svc>, key: string): Promise
       result?.generated_at || result?.body?.generated_at || null;
     const updatedAt = genIso ? new Date(genIso).getTime() : 0;
     // Αν δεν έχουμε timestamp, θεωρούμε το cache έγκυρο (καλύτερα από το να ξαναπληρώσουμε AI).
-    if (updatedAt && Date.now() - updatedAt > 6 * 60 * 60 * 1000) return null;
+    if (updatedAt && Date.now() - updatedAt > 7 * 24 * 60 * 60 * 1000) return null;
     return result?.body && typeof result.body === "object" ? result.body : null;
   } catch {
     return null;
@@ -184,7 +190,7 @@ export async function POST(req: NextRequest) {
     }
 
     const supabase = svc();
-    const key = cacheKey(micro_agenda_id, party_key, active_event_id);
+    const key = cacheKey(micro_agenda_id, party_key, active_event_id, priorityTier(score));
 
     const cached = await readCache(supabase, key);
     if (cached) {
