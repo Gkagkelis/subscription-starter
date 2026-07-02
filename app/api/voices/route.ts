@@ -24,6 +24,41 @@ function svc() {
   return createServiceClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, { auth: { persistSession: false } });
 }
 
+const VOICES_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+function vNorm(x: unknown): string {
+  return String(x || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^0-9a-z\u03b1-\u03c9]+/gi, "_")
+    .replace(/_+/g, "_")
+    .slice(0, 80);
+}
+function voicesCacheKey(party: string, eventId: string, query: string): string {
+  return "voices_snapshot_v1__" + (party || "elas") + "__" + (eventId || vNorm(query));
+}
+async function readVoicesCache(sb: ReturnType<typeof svc>, key: string): Promise<any | null> {
+  try {
+    const { data } = await sb.from("analysis_cache").select("result").is("situation_id", null).eq("analysis_kind", key).limit(1);
+    if (!Array.isArray(data) || !data[0]) return null;
+    const result = (data[0] as any).result;
+    const t = result?.generated_at ? new Date(result.generated_at).getTime() : 0;
+    if (t && Date.now() - t > VOICES_TTL_MS) return null;
+    return result?.body && typeof result.body === "object" ? result.body : null;
+  } catch {
+    return null;
+  }
+}
+async function writeVoicesCache(sb: ReturnType<typeof svc>, key: string, body: any) {
+  const row = { situation_id: null, organization_id: null, analysis_kind: key, input_hash: "v1", model_used: ANALYSIS_MODEL, result: { body, generated_at: new Date().toISOString() } };
+  try {
+    const { data: upd } = await sb.from("analysis_cache").update(row).is("situation_id", null).eq("analysis_kind", key).select("analysis_kind");
+    if (!upd || upd.length === 0) await sb.from("analysis_cache").insert(row);
+  } catch {
+    // best-effort
+  }
+}
+
 type Comment = {
   ref: number;
   text: string;
@@ -476,6 +511,17 @@ async function handle(request: Request) {
     const partyKey = url.searchParams.get("party") || "elas";
     if (!topic && !extra) return NextResponse.json({ error: "missing topic" }, { status: 400 });
 
+    // ---- CACHE «στιγμιότυπο»: αν υπάρχει και δεν ζητήθηκε refresh, γύρνα το αποθηκευμένο ----
+    const refresh = url.searchParams.get("refresh") === "1";
+    const feedOnly = url.searchParams.get("feed_only") === "1";
+    const evIdForCache = url.searchParams.get("event_id") || "";
+    const vKey = voicesCacheKey(partyKey, evIdForCache, extra || topic);
+    const sbCache = svc();
+    if (!refresh && !feedOnly) {
+      const cachedVoices = await readVoicesCache(sbCache, vKey);
+      if (cachedVoices) return NextResponse.json({ ...cachedVoices, source: "cache" });
+    }
+
     // Λέξεις-κλειδιά (κύρια ονόματα), ΟΧΙ όλος ο τίτλος — αλλιώς 0 αποτελέσματα.
     const headline = (extra || topic).trim();
     const narrowQuery = (coreTerms(headline, 4) || headline).slice(0, 80);
@@ -525,7 +571,7 @@ async function handle(request: Request) {
     const eventId = url.searchParams.get("event_id");
     if (eventId) await storePulse(supabase, eventId, partyKey, parsed, counts.total);
 
-    return NextResponse.json({
+    const responseBody = {
       success: true,
       topic,
       party: partyKey,
@@ -534,7 +580,9 @@ async function handle(request: Request) {
       voices: parsed,
       feed,
       generated_at: new Date().toISOString(),
-    });
+    };
+    await writeVoicesCache(sbCache, vKey, responseBody);
+    return NextResponse.json({ ...responseBody, source: "generated" });
   } catch (e: any) {
     return NextResponse.json({ error: "server_error", detail: String(e?.message || e) }, { status: 500 });
   }
