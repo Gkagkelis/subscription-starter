@@ -21,7 +21,7 @@ function today() {
   return new Date().toISOString().slice(0, 10); // yyyy-mm-dd
 }
 function cacheKey(party: string) {
-  return `agenda_synopsis_v1__${party}__${today()}`;
+  return `agenda_synopsis_v2__${party}__${today()}`;
 }
 
 async function readCache(sb: ReturnType<typeof svc>, key: string): Promise<string | null> {
@@ -44,7 +44,7 @@ async function writeCache(sb: ReturnType<typeof svc>, key: string, synopsis: str
     situation_id: null,
     organization_id: null,
     analysis_kind: key,
-    input_hash: "v1",
+    input_hash: "v2",
     model_used: MODEL,
     result: { body: { synopsis }, generated_at: new Date().toISOString() },
   };
@@ -85,7 +85,7 @@ async function callClaude(prompt: string): Promise<string> {
     },
     body: JSON.stringify({
       model: MODEL,
-      max_tokens: 700,
+      max_tokens: 1300,
       messages: [{ role: "user", content: prompt }],
     }),
   });
@@ -108,7 +108,7 @@ function buildPrompt(partyName: string, profile: unknown, themes: ThemeLite[]): 
 ΠΛΗΡΗΣ ΚΑΤΑΤΑΞΗ ΘΕΜΑΤΩΝ ΤΗΣ ΗΜΕΡΑΣ:
 ${themesText(themes)}
 
-Γράψε μια ΣΥΝΟΛΙΚΗ ΑΝΑΓΝΩΣΗ της ημέρας, ΣΥΝΤΟΜΗ αλλά ΜΕ ΒΑΘΟΣ (4-6 προτάσεις, μία παράγραφος, χωρίς markdown, χωρίς λίστες). Πρέπει να:
+Γράψε μια ΣΥΝΟΛΙΚΗ ΑΝΑΓΝΩΣΗ της ημέρας, ΣΥΝΤΟΜΗ αλλά ΜΕ ΒΑΘΟΣ (5-8 προτάσεις, μία παράγραφος, χωρίς markdown, χωρίς λίστες). Πρέπει να:
 1) Λες τι κυριαρχεί σήμερα και ποιος είναι ο κεντρικός άξονας του πεδίου.
 2) Επισημαίνεις τι ανεβαίνει ή τι μπορεί να μπει σύντομα στο κάδρο.
 3) ΚΡΙΣΙΜΟ: εξηγείς τι σημαίνει αυτή η εικόνα ΕΙΔΙΚΑ ΓΙΑ ΤΟ «${partyName}» — πού έχει έδαφος/ευκαιρία, πού είναι εκτεθειμένο ή αμυντικό, με βάση το προφίλ του. Συγκεκριμένα, όχι γενικόλογα.
