@@ -185,24 +185,24 @@ export default function AgendaLandscape({
       {high.length ? (
         <>
           <div className="mb-1 mt-4 text-[10px] tracking-[0.08em] text-red-300">ΨΗΛΑ ΣΤΗΝ ΑΤΖΕΝΤΑ</div>
-          {high.map((t) => (
-            <ThemeRow key={t.topic} t={t} />
+          {high.map((t, i) => (
+            <ThemeRow key={t.topic + "-" + i} t={t} />
           ))}
         </>
       ) : null}
       {mid.length ? (
         <>
           <div className="mb-1 mt-4 text-[10px] tracking-[0.08em] text-amber-300">ΣΤΟ ΜΕΣΟ</div>
-          {mid.map((t) => (
-            <ThemeRow key={t.topic} t={t} />
+          {mid.map((t, i) => (
+            <ThemeRow key={t.topic + "-" + i} t={t} />
           ))}
         </>
       ) : null}
       {low.length ? (
         <>
           <div className="mb-1 mt-4 text-[10px] tracking-[0.08em] text-cyan-300">ΑΝΕΡΧΟΜΕΝΑ / ΧΑΜΗΛΑ</div>
-          {low.map((t) => (
-            <ThemeRow key={t.topic} t={t} />
+          {low.map((t, i) => (
+            <ThemeRow key={t.topic + "-" + i} t={t} />
           ))}
         </>
       ) : null}
