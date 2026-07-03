@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, type ReactNode, type Dispatch, type SetStateAction } from "react";
+import SaveToArchiveButton from "../../components/SaveToArchiveButton";
 import TopNav from "../../components/TopNav";
 import { buildAgendaMap, type ProbeV4Response, type AgendaMapItem } from "../../lib/noraya/strategy-room-intelligence";
 import { IBM_Plex_Sans } from "next/font/google";
@@ -215,6 +216,37 @@ footer { margin-top:16px; border-top:1px solid #e2e8f0; padding-top:7px; font-si
   w.document.write(html);
   w.document.close();
   w.focus();
+}
+
+function scenarioToText(sc: Scenarios): string {
+  const lines: string[] = [];
+  if (sc?.situation?.headline) lines.push(sc.situation.headline);
+  if (sc?.situation?.where_it_stands) lines.push("", "Πού στέκεται:", sc.situation.where_it_stands);
+  if (Array.isArray(sc?.foresight) && sc.foresight.length) {
+    lines.push("", "Πιθανές εξελίξεις:");
+    sc.foresight.forEach((f) => {
+      lines.push(`• ${f.label} (${Math.round(num(f.probability))}%${f.window ? ", " + f.window : ""})`);
+      if (f.rationale) lines.push(`  ${f.rationale}`);
+    });
+  }
+  if (sc?.connection) lines.push("", "Σύνδεση:", sc.connection);
+  if (Array.isArray(sc?.moves) && sc.moves.length) {
+    lines.push("", "Κινήσεις:");
+    sc.moves.forEach((mv) => {
+      lines.push(`• ${mv.label}: ${mv.move}`);
+      if (mv.upside) lines.push(`  Κέρδος: ${mv.upside}`);
+      if (mv.downside) lines.push(`  Ρίσκο: ${mv.downside}`);
+    });
+  }
+  if (sc?.recommendation) {
+    lines.push("", "Πρόταση:", sc.recommendation.move_label || "");
+    if (sc.recommendation.because) lines.push(sc.recommendation.because);
+    if (Array.isArray(sc.recommendation.watch) && sc.recommendation.watch.length) {
+      lines.push("Πρόσεχε:");
+      sc.recommendation.watch.forEach((w) => lines.push(`• ${w}`));
+    }
+  }
+  return lines.join("\n").trim();
 }
 
 export default function ScenariosPage() {
@@ -502,7 +534,14 @@ export default function ScenariosPage() {
             ) : scenarios ? (
               <div className="grid gap-5">
                 {/* Export PDF */}
-                <div className="flex items-center justify-end">
+                <div className="flex items-center justify-end gap-2">
+                  <SaveToArchiveButton
+                    kind="scenario"
+                    content={scenarioToText(scenarios)}
+                    defaultTitle={scenarios.situation?.headline || "Ανάλυση Σεναρίων"}
+                    eventTitle={selectedEvent?.title || scenarios.situation?.headline || null}
+                    eventId={selectedEventId}
+                  />
                   <button
                     type="button"
                     onClick={() => exportScenarioPdf(scenarios, partyLabel, scenarios.situation?.headline || "Ανάλυση Σεναρίων")}
