@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import SaveToArchiveButton from "../../components/SaveToArchiveButton";
 import EventNote from "../../components/EventNote";
+import AgendaLandscape from "../../components/AgendaLandscape";
 import type { MutableRefObject, ReactNode } from "react";
 import {
   buildAgendaMap,
@@ -3237,10 +3238,9 @@ function LeftSidebar({
           title="Χάρτης ατζέντας"
           info
           action="Δες όλη την ατζέντα"
-          actionHref="/agenda"
           footer={
             themeGroups.length
-              ? `${situationCount || situations.length} γεγονότα`
+              ? `${situationCount || situations.length} γεγονότα · ${situationSource}`
               : "αναμονή ατζέντας"
           }
         >
@@ -4054,23 +4054,18 @@ function ActiveSituationWorkspace({
       <div className="p-5 xl:p-6">
         {activeTab === "overview" ? (
           <div className="grid gap-4">
-            <AgendaOverviewPanel
-              overview={agendaOverview}
-              selectedRow={selectedAgendaOverview}
-              activeTopic={activeOverviewTopic}
-              onSelectTopic={onSelectOverviewTopic}
-              onSelectProbeEvent={(selection) => {
-                onSelectProbeEvent?.(selection);
-                onTabChange("strategic");
-              }}
-            />
-
-            <AgendaArchitectPanel
-              result={agendaArchitectResult || null}
-              loading={Boolean(agendaArchitectLoading)}
-              error={agendaArchitectError || ""}
-              onRun={onRunAgendaArchitect}
-              onContinue={onContinueAgendaArchitect}
+            <AgendaLandscape
+              themes={agendaOverview.map((row) => ({
+                topic: row.topic,
+                score: strategicIndexFromAgenda(row),
+                events: Array.isArray(row.related_events) ? row.related_events.length : 0,
+                rising: /ανερχ/i.test(String(row.signal_label || "")),
+              }))}
+              architectResult={agendaArchitectResult || null}
+              architectLoading={Boolean(agendaArchitectLoading)}
+              architectError={agendaArchitectError || ""}
+              onRunArchitect={onRunAgendaArchitect}
+              onContinueArchitect={onContinueAgendaArchitect}
             />
           </div>
         ) : null}
@@ -5624,14 +5619,12 @@ function AdvisorDock({
 function SidebarPanel({
   title,
   action,
-  actionHref,
   footer,
   info,
   children,
 }: {
   title: string;
   action?: string;
-  actionHref?: string;
   footer?: string;
   info?: boolean;
   children: ReactNode;
@@ -5647,14 +5640,7 @@ function SidebarPanel({
       {children}
       {action || footer ? (
         <div className="mt-3 flex items-center justify-between gap-2 text-[10px]">
-          {action && actionHref ? (
-            <a
-              href={actionHref}
-              className="text-cyan-200 transition hover:text-cyan-100"
-            >
-              {action}
-            </a>
-          ) : action ? (
+          {action ? (
             <button type="button" className="text-cyan-200 hover:text-cyan-100">
               {action}
             </button>
