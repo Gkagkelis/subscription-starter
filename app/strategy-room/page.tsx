@@ -1,6 +1,7 @@
                                                                                                                                                                                                                      "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import SaveToArchiveButton from "../../components/SaveToArchiveButton";
 import type { MutableRefObject, ReactNode } from "react";
 import {
   buildAgendaMap,
@@ -4101,6 +4102,15 @@ function ActiveSituationWorkspace({
 
         {activeTab === "strategic" ? (
           <div className="grid gap-4">
+            <div className="flex justify-end">
+              <SaveToArchiveButton
+                kind="analysis"
+                content={aiStrategicBody || strategicSection?.body || readStrategicText(situation, brief)}
+                defaultTitle={effectiveTitle}
+                eventTitle={effectiveTitle}
+                eventId={probeEvent?.id ? String(probeEvent.id) : null}
+              />
+            </div>
             <CockpitSection
               title="1. Στρατηγική ανάγνωση"
               subtitle="Ατζέντα → Πλαίσιο → Ρίσκο"
