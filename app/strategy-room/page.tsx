@@ -3776,9 +3776,9 @@ function PulseGauges({
       </div>
       {activeGauge ? (
         <div className="mt-4 rounded-2xl border border-cyan-300/20 bg-gradient-to-b from-cyan-300/[0.05] to-[#0a111f] p-4">
-          <div className="mb-1 flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-cyan-300 shadow-[0_0_10px_rgba(103,232,249,0.8)]" />
-            <div className="text-[12px] font-semibold tracking-tight text-cyan-100/85">
+          <div className="mb-1 flex items-start gap-2">
+            <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-300 shadow-[0_0_10px_rgba(103,232,249,0.8)]" />
+            <div className="min-w-0 break-words text-[12px] font-semibold tracking-tight text-cyan-100/85">
               {activeGauge.label} · {Math.round(activeGauge.value)}/100
             </div>
           </div>
@@ -5825,7 +5825,7 @@ function Gauge({
           </span>
         </div>
       </div>
-      <div className="text-center text-[10px] leading-4 text-zinc-500">
+      <div className="w-full break-words px-0.5 text-center text-[10px] leading-4 text-zinc-500">
         {label}
       </div>
     </div>
