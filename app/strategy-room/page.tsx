@@ -3237,9 +3237,10 @@ function LeftSidebar({
           title="Χάρτης ατζέντας"
           info
           action="Δες όλη την ατζέντα"
+          actionHref="/agenda"
           footer={
             themeGroups.length
-              ? `${situationCount || situations.length} γεγονότα · ${situationSource}`
+              ? `${situationCount || situations.length} γεγονότα`
               : "αναμονή ατζέντας"
           }
         >
@@ -5623,12 +5624,14 @@ function AdvisorDock({
 function SidebarPanel({
   title,
   action,
+  actionHref,
   footer,
   info,
   children,
 }: {
   title: string;
   action?: string;
+  actionHref?: string;
   footer?: string;
   info?: boolean;
   children: ReactNode;
@@ -5644,7 +5647,14 @@ function SidebarPanel({
       {children}
       {action || footer ? (
         <div className="mt-3 flex items-center justify-between gap-2 text-[10px]">
-          {action ? (
+          {action && actionHref ? (
+            <a
+              href={actionHref}
+              className="text-cyan-200 transition hover:text-cyan-100"
+            >
+              {action}
+            </a>
+          ) : action ? (
             <button type="button" className="text-cyan-200 hover:text-cyan-100">
               {action}
             </button>
