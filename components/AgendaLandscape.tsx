@@ -1,45 +1,50 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-type Theme = { topic: string; score: number; events?: number; rising?: boolean };
+type Micro = { title: string; score: number; events?: number; rising?: boolean };
+type ActiveTheme = { topic: string; score: number; events?: number; micros?: Micro[] };
 type ArchitectResult = { title?: string; displayText?: string } | null;
 
-function tierColor(score: number): string {
+function norm(s: string): string {
+  return (s || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/ς/g, "σ")
+    .replace(/[^a-zα-ω0-9]+/gi, " ")
+    .trim();
+}
+function barColor(score: number): string {
   if (score >= 68) return "#ef4444";
   if (score >= 45) return "#f59e0b";
   return "#22d3ee";
 }
-
-function ThemeRow({ t }: { t: Theme }) {
-  const score = Math.max(0, Math.min(100, Math.round(t.score || 0)));
-  const color = tierColor(score);
+function scoreColor(score: number): string {
+  if (score >= 68) return "#f87171";
+  if (score >= 45) return "#fbbf24";
+  return "#7dd3fc";
+}
+function Bar({ score }: { score: number }) {
+  const s = Math.max(0, Math.min(100, Math.round(score || 0)));
   return (
-    <div className="flex items-center gap-2.5 px-0.5 py-[7px]">
-      <div className="min-w-0 flex-1 break-words text-[12.5px] text-zinc-200">
-        <span className="align-middle">{t.topic}</span>
-        {t.events ? (
-          <span className="align-middle text-[11px] text-zinc-500"> · {t.events} γεγ.</span>
-        ) : null}
-        {t.rising ? <span className="align-middle text-cyan-300"> ↑</span> : null}
-      </div>
-      <div className="h-[5px] w-[84px] shrink-0 overflow-hidden rounded-full bg-white/[0.08]">
-        <div className="h-full rounded-full" style={{ width: `${score}%`, background: color }} />
-      </div>
-      <div className="w-6 shrink-0 text-right text-[12px] font-semibold text-zinc-100">{score}</div>
+    <div className="h-[5px] w-[70px] shrink-0 overflow-hidden rounded-full bg-white/[0.08]">
+      <div className="h-full rounded-full" style={{ width: `${s}%`, background: barColor(s) }} />
     </div>
   );
 }
 
 export default function AgendaLandscape({
-  themes,
+  activeThemes,
+  allThemes = [],
   architectResult = null,
   architectLoading = false,
   architectError = "",
   onRunArchitect,
   onContinueArchitect,
 }: {
-  themes: Theme[];
+  activeThemes: ActiveTheme[];
+  allThemes?: string[];
   architectResult?: ArchitectResult;
   architectLoading?: boolean;
   architectError?: string;
@@ -49,16 +54,23 @@ export default function AgendaLandscape({
   const [synopsis, setSynopsis] = useState("");
   const [synLoading, setSynLoading] = useState(true);
   const [showTip, setShowTip] = useState(false);
+  const [open, setOpen] = useState<Record<string, boolean>>({});
 
-  const sorted = [...themes].sort((a, b) => (b.score || 0) - (a.score || 0));
-  const high = sorted.filter((t) => t.score >= 68);
-  const mid = sorted.filter((t) => t.score >= 45 && t.score < 68);
-  const low = sorted.filter((t) => t.score < 45);
+  const active = useMemo(
+    () => [...activeThemes].sort((a, b) => (b.score || 0) - (a.score || 0)),
+    [activeThemes],
+  );
+  const activeNorm = useMemo(() => new Set(active.map((t) => norm(t.topic))), [active]);
+  const quiet = useMemo(
+    () => (allThemes || []).filter((t) => !activeNorm.has(norm(t))),
+    [allThemes, activeNorm],
+  );
+  const total = active.length + quiet.length;
 
   useEffect(() => {
     let cancel = false;
     (async () => {
-      if (!themes.length) {
+      if (!active.length) {
         setSynLoading(false);
         return;
       }
@@ -85,11 +97,10 @@ export default function AgendaLandscape({
             party,
             party_name: partyName,
             profile,
-            themes: sorted.map((t) => ({
+            themes: active.map((t) => ({
               topic: t.topic,
               score: t.score,
               events: t.events || 0,
-              rising: !!t.rising,
             })),
           }),
         });
@@ -105,7 +116,7 @@ export default function AgendaLandscape({
       cancel = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [themes.length]);
+  }, [active.length]);
 
   const archText = architectResult?.displayText || "";
 
@@ -115,10 +126,8 @@ export default function AgendaLandscape({
         <div className="min-w-0">
           <div className="text-[11px] tracking-[0.08em] text-cyan-100/80">ΣΥΝΟΛΙΚΗ ΕΙΚΟΝΑ</div>
           <div className="mt-1 text-[15px] font-semibold text-zinc-50">
-            Όλο το πεδίο της ημέρας{" "}
-            <span className="text-[12px] font-normal text-zinc-500">
-              · {themes.length} θέματα · κατάταξη ατζέντας
-            </span>
+            Και τα {total} θέματα{" "}
+            <span className="text-[12px] font-normal text-zinc-500">· {active.length} ενεργά σήμερα</span>
           </div>
         </div>
         <div
@@ -174,7 +183,7 @@ export default function AgendaLandscape({
         </div>
       ) : null}
 
-      <div className="mb-1 rounded-2xl border border-[#1a2640] bg-[#080f1c] p-4">
+      <div className="mb-3 rounded-2xl border border-[#1a2640] bg-[#080f1c] p-4">
         {synLoading ? (
           <div className="text-[12px] text-zinc-500">Ο Noraya διαβάζει το πεδίο…</div>
         ) : (
@@ -182,35 +191,72 @@ export default function AgendaLandscape({
         )}
       </div>
 
-      {high.length ? (
+      {active.length ? (
         <>
-          <div className="mb-1 mt-4 text-[10px] tracking-[0.08em] text-red-300">ΨΗΛΑ ΣΤΗΝ ΑΤΖΕΝΤΑ</div>
-          {high.map((t, i) => (
-            <ThemeRow key={t.topic + "-" + i} t={t} />
-          ))}
-        </>
-      ) : null}
-      {mid.length ? (
-        <>
-          <div className="mb-1 mt-4 text-[10px] tracking-[0.08em] text-amber-300">ΣΤΟ ΜΕΣΟ</div>
-          {mid.map((t, i) => (
-            <ThemeRow key={t.topic + "-" + i} t={t} />
-          ))}
-        </>
-      ) : null}
-      {low.length ? (
-        <>
-          <div className="mb-1 mt-4 text-[10px] tracking-[0.08em] text-cyan-300">ΑΝΕΡΧΟΜΕΝΑ / ΧΑΜΗΛΑ</div>
-          {low.map((t, i) => (
-            <ThemeRow key={t.topic + "-" + i} t={t} />
-          ))}
+          <div className="mb-1 text-[10px] tracking-[0.08em] text-red-300">ΕΝΕΡΓΑ ΣΗΜΕΡΑ</div>
+          {active.map((t) => {
+            const isOpen = !!open[t.topic];
+            const micros = Array.isArray(t.micros) ? t.micros : [];
+            return (
+              <div key={t.topic} className="border-t border-white/[0.05] py-2 first:border-t-0">
+                <button
+                  type="button"
+                  onClick={() => setOpen((o) => ({ ...o, [t.topic]: !o[t.topic] }))}
+                  className="flex w-full items-center gap-2 text-left"
+                >
+                  <span className="w-3.5 shrink-0 text-[12px] text-zinc-500">{micros.length ? (isOpen ? "▾" : "▸") : "·"}</span>
+                  <span className="min-w-0 flex-1 break-words text-[13px] font-semibold text-zinc-100">{t.topic}</span>
+                  {micros.length ? (
+                    <span className="shrink-0 text-[10.5px] text-zinc-500">
+                      {micros.length} {micros.length === 1 ? "μικρο" : "μικρο"}
+                    </span>
+                  ) : null}
+                  <Bar score={t.score} />
+                  <span className="w-6 shrink-0 text-right text-[12px] font-semibold" style={{ color: scoreColor(t.score) }}>
+                    {Math.round(t.score || 0)}
+                  </span>
+                </button>
+                {isOpen && micros.length ? (
+                  <div className="mt-1">
+                    {micros.map((m, i) => (
+                      <div key={m.title + "-" + i} className="flex items-center gap-2.5 py-[5px] pl-[22px]">
+                        <span className="min-w-0 flex-1 break-words text-[11.5px] text-zinc-300">
+                          {m.title}
+                          {m.events ? <span className="text-zinc-500"> · {m.events} γεγ.</span> : null}
+                          {m.rising ? <span className="text-cyan-300"> ↑</span> : null}
+                        </span>
+                        <Bar score={m.score} />
+                        <span className="w-6 shrink-0 text-right text-[11.5px] font-medium text-zinc-200">
+                          {Math.round(m.score || 0)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            );
+          })}
         </>
       ) : null}
 
-      {!themes.length ? (
-        <div className="mt-2 text-[12px] text-zinc-500">
-          Δεν υπάρχουν διαθέσιμες θεματικές αυτή τη στιγμή.
-        </div>
+      {quiet.length ? (
+        <>
+          <div className="mb-2 mt-5 text-[10px] tracking-[0.08em] text-zinc-500">ΗΣΥΧΑ ΣΗΜΕΡΑ · {quiet.length}</div>
+          <div className="flex flex-wrap gap-1.5">
+            {quiet.map((t) => (
+              <span
+                key={t}
+                className="rounded-full border border-[#17233a] px-2.5 py-1 text-[11px] text-zinc-500"
+              >
+                {t}
+              </span>
+            ))}
+          </div>
+        </>
+      ) : null}
+
+      {!total ? (
+        <div className="mt-2 text-[12px] text-zinc-500">Δεν υπάρχουν διαθέσιμα θέματα αυτή τη στιγμή.</div>
       ) : null}
     </section>
   );
