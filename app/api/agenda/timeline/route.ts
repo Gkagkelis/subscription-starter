@@ -163,7 +163,7 @@ export async function GET(request: Request) {
         change_pct: changePct,
         trend: change7d > 1 ? "up" : change7d < -1 ? "down" : "flat",
         agenda_score: scoreByTopic.get(g.topic) ?? null,
-        daily: g.daily,
+        daily: g.daily.slice(-7),
         stance: "neutral" as "opportunity" | "threat" | "neutral",
         angle: "",
       };
@@ -232,7 +232,7 @@ export async function GET(request: Request) {
   return NextResponse.json({
     success: true,
     party,
-    days,
+    days: 7,
     generated_at: new Date().toISOString(),
     has_party_profile: !!partyProfile,
     agenda_score_source: probeScores ? "agenda_probe_live" : "advisor_briefs_fallback",
