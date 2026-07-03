@@ -84,6 +84,16 @@ export default function ArchivePage() {
     }
   }
 
+  function askAdvisor(item: ArchiveItem) {
+    const text = item.content ? `${item.title}\n\n${item.content}` : item.title;
+    try {
+      sessionStorage.setItem("noraya_advisor_prefill", text);
+    } catch {
+      /* ignore */
+    }
+    window.location.href = "/strategy-room";
+  }
+
   function startRename(item: ArchiveItem) {
     setEditingId(item.id);
     setEditTitle(item.title);
@@ -202,6 +212,14 @@ export default function ArchivePage() {
                     ) : null}
                   </div>
                   <div className="flex shrink-0 items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => askAdvisor(item)}
+                      title="Ρώτα τον Σύμβουλο"
+                      className="rounded-lg border border-cyan-300/20 px-2 py-1 text-[12px] text-cyan-200/80 transition hover:bg-cyan-300/10 hover:text-cyan-100"
+                    >
+                      💬
+                    </button>
                     <button
                       type="button"
                       onClick={() => startRename(item)}
