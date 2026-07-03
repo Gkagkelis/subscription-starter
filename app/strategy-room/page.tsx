@@ -1673,6 +1673,17 @@ export default function StrategyRoomPage() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatLoading, setChatLoading] = useState(false);
   const [chatError, setChatError] = useState("");
+  useEffect(() => {
+    try {
+      const pre = sessionStorage.getItem("noraya_advisor_prefill");
+      if (pre) {
+        sessionStorage.removeItem("noraya_advisor_prefill");
+        setChatQuestion(pre);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
   const [agendaArchitectLoading, setAgendaArchitectLoading] = useState(false);
   const [agendaArchitectError, setAgendaArchitectError] = useState("");
   const [agendaArchitectResult, setAgendaArchitectResult] =
