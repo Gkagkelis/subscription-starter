@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import SaveToArchiveButton from "../../components/SaveToArchiveButton";
 import EventNote from "../../components/EventNote";
 import AgendaLandscape from "../../components/AgendaLandscape";
+import { themes as taxonomyThemes } from "../../lib/noraya/taxonomy";
 import type { MutableRefObject, ReactNode } from "react";
 import {
   buildAgendaMap,
@@ -4055,23 +4056,18 @@ function ActiveSituationWorkspace({
         {activeTab === "overview" ? (
           <div className="grid gap-4">
             <AgendaLandscape
-              themes={(() => {
-                const micro = agendaOverview.flatMap((row) =>
-                  (row.micro_agendas || []).map((m) => ({
-                    topic: m.title,
-                    score: Math.round(Number(m.score) || 0),
-                    events: m.eventCount || 0,
-                    rising: /ανερχ/i.test(String(m.statusLabel || "")),
-                  })),
-                );
-                if (micro.length) return micro;
-                return agendaOverview.map((row) => ({
-                  topic: row.topic,
-                  score: strategicIndexFromAgenda(row),
-                  events: Array.isArray(row.related_events) ? row.related_events.length : 0,
-                  rising: /ανερχ/i.test(String(row.signal_label || "")),
-                }));
-              })()}
+              activeThemes={agendaOverview.map((row) => ({
+                topic: row.topic,
+                score: strategicIndexFromAgenda(row),
+                events: Array.isArray(row.related_events) ? row.related_events.length : 0,
+                micros: (row.micro_agendas || []).map((m) => ({
+                  title: m.title,
+                  score: Math.round(Number(m.score) || 0),
+                  events: m.eventCount || 0,
+                  rising: /ανερχ/i.test(String(m.statusLabel || "")),
+                })),
+              }))}
+              allThemes={taxonomyThemes}
               architectResult={agendaArchitectResult || null}
               architectLoading={Boolean(agendaArchitectLoading)}
               architectError={agendaArchitectError || ""}
