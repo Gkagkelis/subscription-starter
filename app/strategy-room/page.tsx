@@ -4055,12 +4055,23 @@ function ActiveSituationWorkspace({
         {activeTab === "overview" ? (
           <div className="grid gap-4">
             <AgendaLandscape
-              themes={agendaOverview.map((row) => ({
-                topic: row.topic,
-                score: strategicIndexFromAgenda(row),
-                events: Array.isArray(row.related_events) ? row.related_events.length : 0,
-                rising: /ανερχ/i.test(String(row.signal_label || "")),
-              }))}
+              themes={(() => {
+                const micro = agendaOverview.flatMap((row) =>
+                  (row.micro_agendas || []).map((m) => ({
+                    topic: m.title,
+                    score: Math.round(Number(m.score) || 0),
+                    events: m.eventCount || 0,
+                    rising: /ανερχ/i.test(String(m.statusLabel || "")),
+                  })),
+                );
+                if (micro.length) return micro;
+                return agendaOverview.map((row) => ({
+                  topic: row.topic,
+                  score: strategicIndexFromAgenda(row),
+                  events: Array.isArray(row.related_events) ? row.related_events.length : 0,
+                  rising: /ανερχ/i.test(String(row.signal_label || "")),
+                }));
+              })()}
               architectResult={agendaArchitectResult || null}
               architectLoading={Boolean(agendaArchitectLoading)}
               architectError={agendaArchitectError || ""}
