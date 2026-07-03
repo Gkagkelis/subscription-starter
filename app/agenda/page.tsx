@@ -242,7 +242,7 @@ export default function AgendaPage() {
           <div className="text-xs font-medium text-cyan-300/70">Κέντρο Ατζέντας</div>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-50 md:text-4xl">Ατζέντα σε κίνηση</h1>
           <p className="mt-2 max-w-2xl text-sm text-zinc-400">
-            Τα θέματα που αλλάζουν το πολιτικό πεδίο τις τελευταίες {data?.days ?? 30} ημέρες — και τι σημαίνουν για {partyLabel}.
+            Τα θέματα που αλλάζουν το πολιτικό πεδίο τις τελευταίες {data?.days ?? 7} ημέρες — και τι σημαίνουν για {partyLabel}.
           </p>
         </section>
 
