@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import SaveToArchiveButton from "../../components/SaveToArchiveButton";
+import EventNote from "../../components/EventNote";
 import type { MutableRefObject, ReactNode } from "react";
 import {
   buildAgendaMap,
@@ -3394,60 +3395,22 @@ function LeftSidebar({
           )}
         </SidebarPanel>
 
-        <SidebarPanel title="Εσωτερικά δεδομένα">
-          <div className="grid gap-2 text-[11px] text-zinc-400">
-            <DataRow
-              label="Δημοσκοπήσεις"
-              value={String(polls.length)}
-              badge={polls.length ? "Νέο" : undefined}
-            />
-            <DataRow label="Ομάδες συζήτησης" value="—" />
-            <DataRow
-              label="Ενημερώσεις"
-              value={politicalEnvironment?.snapshot_date ? "1" : "—"}
-            />
-            <DataRow label="Κόκκινες γραμμές" value="προφίλ" />
-          </div>
-        </SidebarPanel>
-
         <SidebarPanel title="Γρήγορη καταγραφή">
-          <div className="grid grid-cols-2 gap-2">
-            {[
-              { label: "Σημείωση / Ιδέα", Glyph: IconNote },
-              { label: "Σύνδεσμος / Άρθρο", Glyph: IconLink },
-              { label: "Στιγμιότυπο", Glyph: IconCamera },
-              { label: "Ηχητική σημείωση", Glyph: IconMic },
-            ].map(({ label, Glyph }) => (
-              <button
-                key={label}
-                type="button"
-                className="flex items-center gap-2 rounded-2xl border border-[#1a2640] bg-[#0c1220] px-2.5 py-3 text-[10px] leading-4 text-zinc-400 transition hover:border-cyan-300/25 hover:text-cyan-100"
-              >
-                <Glyph className="h-4 w-4 shrink-0" />
-                <span className="text-left">{label}</span>
-              </button>
-            ))}
-          </div>
+          <EventNote
+            eventId={activeProbeSelection?.eventId ? String(activeProbeSelection.eventId) : null}
+            eventTitle={(() => {
+              const id = activeProbeSelection?.eventId ? String(activeProbeSelection.eventId) : null;
+              if (!id) return null;
+              for (const g of themeGroups) {
+                for (const m of g.micros) {
+                  const ev = m.events.find((e) => e.id === id);
+                  if (ev) return ev.title;
+                }
+              }
+              return null;
+            })()}
+          />
         </SidebarPanel>
-
-        <SidebarPanel title="Εσωτερική μνήμη" action="Όλες οι σημειώσεις">
-          <div className="grid gap-2">
-            <MemoryLine date="Σήμερα" title="Έλεγχος Strategy Room" />
-            <MemoryLine date="Ενεργό" title="Situation engine ενεργό" />
-          </div>
-        </SidebarPanel>
-      </div>
-
-      <div className="grid grid-cols-4 border-t border-[#1a2640] bg-[#060a14] text-[10px] text-zinc-600">
-        {["Εμπειρία", "Αρχεία", "Σημειώσεις", "Θεωρήσεις"].map((item) => (
-          <button
-            key={item}
-            type="button"
-            className="px-1 py-3 hover:bg-white/[0.03] hover:text-zinc-300"
-          >
-            {item}
-          </button>
-        ))}
       </div>
     </aside>
   );
