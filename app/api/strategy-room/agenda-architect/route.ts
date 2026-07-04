@@ -1,4 +1,13 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
+
+function svcClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { persistSession: false } },
+  );
+}
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -166,6 +175,35 @@ export async function POST(req: Request) {
   const politicalEnvironment = body.political_environment || null;
   const strategicBrief = body.strategic_brief || null;
 
+  const partyKey = String(
+    body.party_key ||
+      body.profile?.party_key ||
+      body.profile?.party_profile_snapshot?.party_key ||
+      "",
+  ).trim();
+  let institutionalBlock = "";
+  if (partyKey) {
+    try {
+      const { data: profRows } = await svcClient()
+        .from("political_party_profiles")
+        .select("strategic_positioning, advisor_instructions, issue_lens")
+        .eq("party_key", partyKey)
+        .limit(1);
+      const prof: any = Array.isArray(profRows) ? profRows[0] : null;
+      if (prof) {
+        const pos = (prof.strategic_positioning || "").toString().trim();
+        const adv = (prof.advisor_instructions || "").toString().trim();
+        const lens = prof.issue_lens ? JSON.stringify(prof.issue_lens) : "";
+        institutionalBlock =
+          (pos ? "ΘΕΣΜΙΚΗ ΘΕΣΗ: " + pos + "\n" : "") +
+          (adv ? "ΤΑΥΤΟΤΗΤΑ & ΟΔΗΓΙΕΣ:\n" + adv + "\n" : "") +
+          (lens ? "ΔΟΜΗΜΕΝΟΣ ΦΑΚΟΣ ΑΝΑ ΘΕΜΑ (JSON): " + lens : "");
+      }
+    } catch {
+      /* συνεχιζουμε χωρις */
+    }
+  }
+
   const prompt = `Είσαι ο κορυφαίος πολιτικός στρατηγικός σύμβουλος της Noraya.
 
 Αποστολή: γράψε την premium ανάλυση "Στρατηγική Αναδιάταξη Ημέρας" για το ${party}.
@@ -175,6 +213,7 @@ export async function POST(req: Request) {
 ΔΕΔΟΜΕΝΑ:
 ΚΟΜΜΑ / PROFILE:
 ${safeJson(profile, 7000)}
+${institutionalBlock ? "\nΘΕΣΜΙΚΗ ΘΕΣΗ & ΤΑΥΤΟΤΗΤΑ (ΚΡΙΣΙΜΟ):\n" + institutionalBlock : ""}
 
 ΣΥΝΟΛΙΚΗ ΕΙΚΟΝΑ ΘΕΜΑΤΙΚΩΝ:
 ${safeJson(compactAgendaOverview(agendaOverview), 13000)}
@@ -189,6 +228,8 @@ STRATEGIC BRIEF:
 ${safeJson(strategicBrief, 5000)}
 
 ΚΑΝΟΝΕΣ:
+- ΘΕΣΜΙΚΗ ΣΥΜΒΑΤΟΤΗΤΑ (ΚΟΡΥΦΑΙΟΣ): πρότεινε ΜΟΝΟ κινήσεις που το κόμμα ΜΠΟΡΕΙ να κάνει βάσει της ΘΕΣΜΙΚΗΣ ΘΕΣΗΣ. Αν είναι ΕΚΤΟΣ Βουλής, ΚΑΜΙΑ κοινοβουλευτική ενέργεια (ερωτήσεις/επερωτήσεις/τροπολογίες/κατάθεση στη Βουλή)· χρησιμοποίησε τον «φακό ανά θέμα» (issue_lens).
+- ΟΡΙΟ ΠΕΡΙΕΧΟΜΕΝΟΥ: Αποτύπωσε τη στρατηγική ΓΡΑΜΜΗ και το ΥΦΟΣ του κόμματος (ακόμη κι αν είναι σκληρό/εθνικό/ριζοσπαστικό). ΑΛΛΑ ΜΗΝ παράγεις ρατσιστικό, μισαλλόδοξο ή υβριστικό περιεχόμενο, ούτε ρητορική μίσους ή στοχοποίηση ομάδων — πλαισίωσε/περίγραψε τη γραμμή, χωρίς να αναπαράγεις το μίσος.
 - Γράψε ελληνικά.
 - Περίπου 350-470 λέξεις.
 - Όχι raw JSON. Όχι markdown table. Όχι bullet list ως βασική μορφή.
