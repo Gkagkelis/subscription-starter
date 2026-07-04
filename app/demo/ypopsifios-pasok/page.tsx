@@ -31,6 +31,7 @@ export default function DemoCandidatePasok() {
   const [dailyLoading, setDailyLoading] = useState(true);
   const [plan, setPlan] = useState<{ day: string; move: string; why: string }[]>([]);
   const [planLoading, setPlanLoading] = useState(false);
+  const [planError, setPlanError] = useState("");
   const [messages, setMessages] = useState<{ role: "user" | "assistant"; content: string }[]>([]);
   const [input, setInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
@@ -117,18 +118,33 @@ export default function DemoCandidatePasok() {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, chatLoading]);
 
-  async function makeWeekPlan() {
-    setPlanLoading(true);
+  async function postJson(bodyObj: any, ms = 45000) {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), ms);
     try {
       const r = await fetch("/api/demo-candidate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mode: "week", themes: themeNames, local }),
+        body: JSON.stringify(bodyObj),
+        signal: ctrl.signal,
       });
-      const j = await r.json();
-      setPlan(Array.isArray(j?.plan) ? j.plan : []);
-    } catch {
+      return await r.json();
+    } finally {
+      clearTimeout(t);
+    }
+  }
+
+  async function makeWeekPlan() {
+    setPlanLoading(true);
+    setPlanError("");
+    try {
+      const j = await postJson({ mode: "week", themes: themeNames, local });
+      const days = Array.isArray(j?.plan) ? j.plan : [];
+      setPlan(days);
+      if (days.length === 0) setPlanError("Δεν βγηκε σχεδιο αυτη τη φορα — δοκιμασε ξανα.");
+    } catch (e: any) {
       setPlan([]);
+      setPlanError(e?.name === "AbortError" ? "Αργησε πολυ — δοκιμασε ξανα." : "Σφαλμα — δοκιμασε ξανα.");
     } finally {
       setPlanLoading(false);
     }
@@ -429,7 +445,7 @@ export default function DemoCandidatePasok() {
           </div>
           {plan.length === 0 ? (
             <div className="text-[13px] text-zinc-500">
-              Πατα «Φτιαξε μου το σχεδιο» — ο Noraya βγαζει προγραμμα κινησεων καμπανιας για τη βδομαδα, με βαση εθνικη + τοπικη ατζεντα.
+              {planError || "Πατα «Φτιαξε μου το σχεδιο» — ο Noraya βγαζει προγραμμα κινησεων καμπανιας για τη βδομαδα, με βαση εθνικη + τοπικη ατζεντα."}
             </div>
           ) : (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
