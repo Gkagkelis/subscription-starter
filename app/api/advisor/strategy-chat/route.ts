@@ -1,3 +1,11 @@
+import { createClient as __naCreateClient } from "@supabase/supabase-js";
+function __naSvc() {
+  return __naCreateClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { persistSession: false } },
+  );
+}
 import { NextResponse } from "next/server";
 import { getMemoryBlock, getAudienceMemoryBlock } from "@/lib/noraya/political-memory";
 import { buildCompetitiveContext } from "@/lib/noraya/competitive-memory";
@@ -212,6 +220,40 @@ export async function POST(req: Request) {
   const profile = body.profile || null;
   const party = cleanText(body.party || profile?.party_name || profile?.party_profile_snapshot?.party_name || "", 200);
 
+  const partyKey = cleanText(
+    body.party_key || profile?.party_key || profile?.party_profile_snapshot?.party_key || "",
+    80,
+  );
+  let partyIdentityBlock = "";
+  if (partyKey) {
+    try {
+      const { data: __profRows } = await __naSvc()
+        .from("political_party_profiles")
+        .select("strategic_positioning, advisor_instructions, issue_lens, known_positions, red_lines")
+        .eq("party_key", partyKey)
+        .limit(1);
+      const prof: any = Array.isArray(__profRows) ? __profRows[0] : null;
+      if (prof) {
+        const pos = (prof.strategic_positioning || "").toString().trim();
+        const adv = (prof.advisor_instructions || "").toString().trim();
+        const lens = prof.issue_lens ? JSON.stringify(prof.issue_lens) : "";
+        const kp = Array.isArray(prof.known_positions) ? prof.known_positions.join(" · ") : "";
+        const rl = Array.isArray(prof.red_lines) ? prof.red_lines.join(" · ") : "";
+        partyIdentityBlock =
+          "\n=== ΤΑΥΤΟΤΗΤΑ ΚΟΜΜΑΤΟΣ (ΚΡΙΣΙΜΟ — σεβάσου την απόλυτα) ===\n" +
+          (pos ? "ΘΕΣΜΙΚΗ ΘΕΣΗ: " + pos + "\n" : "") +
+          (kp ? "ΘΕΣΕΙΣ: " + kp + "\n" : "") +
+          (rl ? "ΚΟΚΚΙΝΕΣ ΓΡΑΜΜΕΣ: " + rl + "\n" : "") +
+          (adv ? "ΟΔΗΓΙΕΣ & ΦΑΚΟΣ:\n" + adv + "\n" : "") +
+          (lens ? "ΔΟΜΗΜΕΝΟΣ ΦΑΚΟΣ ΑΝΑ ΘΕΜΑ (JSON): " + lens + "\n" : "") +
+          "ΚΑΝΟΝΑΣ ΘΕΣΜΙΚΗΣ ΣΥΜΒΑΤΟΤΗΤΑΣ: πρότεινε ΜΟΝΟ κινήσεις που το κόμμα μπορεί πραγματικά να κάνει βάσει της θεσμικής θέσης. Αν είναι ΕΚΤΟΣ Βουλής, ΚΑΜΙΑ κοινοβουλευτική ενέργεια (ερωτήσεις/επερωτήσεις/τροπολογίες/κατάθεση στη Βουλή).\n" +
+          "ΟΡΙΟ ΠΕΡΙΕΧΟΜΕΝΟΥ: αποτύπωσε τη γραμμή & το ύφος του κόμματος, αλλά ΜΗΝ παράγεις ρατσιστικό/μισαλλόδοξο/υβριστικό περιεχόμενο ή ρητορική μίσους.\n";
+      }
+    } catch {
+      /* συνεχιζουμε χωρις */
+    }
+  }
+
   // Αν υπάρχει επιλεγμένο γεγονός με δικό του advisor_brief, αυτό γίνεται το primary brief.
   const strategicBrief =
     activeSituation?.advisor_brief ||
@@ -392,6 +434,7 @@ ${safeJson(agendaArchitectContext, 5000)}
 
 Ημερομηνία/ώρα Ελλάδας τώρα: ${athensNow}
 Κόμμα / οργανισμός χρήστη: ${party || "Δεν έχει οριστεί"}
+${partyIdentityBlock}
 
 ΚΡΙΣΙΜΟ — ACTIVE LIVE SITUATION:
 ${hasActiveSituation ? "ΥΠΑΡΧΕΙ επιλεγμένο Live Situation. Αυτό είναι το κύριο context." : "Δεν υπάρχει επιλεγμένο Live Situation."}
