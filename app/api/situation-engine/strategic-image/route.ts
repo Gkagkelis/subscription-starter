@@ -26,7 +26,7 @@ function priorityTier(score: unknown): string {
   return "t3";
 }
 function cacheKey(microAgendaId: string, partyKey: string, eventId?: string | null, tier = "") {
-  const base = "strategic_image_v2__" + microAgendaId + "__" + partyKey + (tier ? "__" + tier : "");
+  const base = "strategic_image_v3__" + microAgendaId + "__" + partyKey + (tier ? "__" + tier : "");
   return eventId ? base + "__" + eventId : base;
 }
 
@@ -53,7 +53,7 @@ async function writeCache(supabase: ReturnType<typeof svc>, key: string, body: s
     situation_id: null,
     organization_id: null,
     analysis_kind: key,
-    input_hash: "v2",
+    input_hash: "v3",
     model_used: "claude-sonnet-4-6",
     result: { body, generated_at: new Date().toISOString() },
   };
@@ -177,6 +177,27 @@ export async function POST(req: NextRequest) {
     const sourceContext = sources.slice(0, 5).join(", ") || "—";
     const redLinesText = red_lines.length ? red_lines.join(", ") : "—";
     const positionsText = known_positions.length ? known_positions.join(", ") : "—";
+
+    let institutionalBlock = "";
+    try {
+      const { data: profRows } = await supabase
+        .from("political_party_profiles")
+        .select("strategic_positioning, advisor_instructions, issue_lens")
+        .eq("party_key", party_key)
+        .limit(1);
+      const prof: any = Array.isArray(profRows) ? profRows[0] : null;
+      if (prof) {
+        const pos = (prof.strategic_positioning || "").toString().trim();
+        const adv = (prof.advisor_instructions || "").toString().trim();
+        const lens = prof.issue_lens ? JSON.stringify(prof.issue_lens) : "";
+        institutionalBlock =
+          (pos ? "ΘΕΣΜΙΚΗ ΘΕΣΗ: " + pos + "\n" : "") +
+          (adv ? "ΤΑΥΤΟΤΗΤΑ & ΟΔΗΓΙΕΣ:\n" + adv + "\n" : "") +
+          (lens ? "ΔΟΜΗΜΕΝΟΣ ΦΑΚΟΣ ΑΝΑ ΘΕΜΑ (JSON): " + lens : "");
+      }
+    } catch {
+      /* συνεχιζουμε χωρις */
+    }
     const memoryText = formatMemoryLines(memory_lines);
 
     const coverageLabel =
@@ -196,6 +217,7 @@ export async function POST(req: NextRequest) {
 ΤΟΝΟΣ: ${tone}
 ΘΕΣΕΙΣ: ${positionsText}
 ΚΟΚΚΙΝΕΣ ΓΡΑΜΜΕΣ (ΑΠΑΓΟΡΕΥΕΤΑΙ να πλησιάσεις): ${redLinesText}
+${institutionalBlock ? institutionalBlock + "\n" : ""}
 
 ΚΕΝΤΡΙΚΟ ΘΕΜΑ: ${centralTheme}
 ΘΕΜΑΤΙΚΗ / ΜΙΚΡΟΑΤΖΕΝΤΑ: ${micro_agenda}
@@ -214,6 +236,8 @@ NORAYA PRIORITY: ${score}
 ${memoryText}
 
 ΟΔΗΓΙΕΣ:
+- ΘΕΣΜΙΚΗ ΣΥΜΒΑΤΟΤΗΤΑ: διάβασε το γεγονός ΜΕΣΑ από τη ΘΕΣΜΙΚΗ ΘΕΣΗ και τον «φακό ανά θέμα» (issue_lens). Αν το κόμμα είναι ΕΚΤΟΣ Βουλής, μη μιλάς σαν κοινοβουλευτικό κόμμα.
+- ΟΡΙΟ ΠΕΡΙΕΧΟΜΕΝΟΥ: Αποτύπωσε τη στρατηγική ΓΡΑΜΜΗ και το ΥΦΟΣ του κόμματος (ακόμη κι αν είναι σκληρό/εθνικό/ριζοσπαστικό). ΑΛΛΑ ΜΗΝ παράγεις ρατσιστικό, μισαλλόδοξο ή υβριστικό περιεχόμενο, ούτε ρητορική μίσους ή στοχοποίηση ομάδων — πλαισίωσε/περίγραψε τη γραμμή, χωρίς να αναπαράγεις το μίσος.
 - ΞΕΚΙΝΑ με ΜΙΑ μόνο πρόταση-ρεζουμέ (το «so what»): καθαρά ελληνικά, χωρίς εισαγωγικά, κάτω από 25 λέξεις, που λέει αμέσως τι σημαίνει πολιτικά αυτό το γεγονός για το κόμμα. Μετά άφησε ΜΙΑ ΚΕΝΗ ΓΡΑΜΜΗ.
 - Μετά γράψε 3-4 συμπαγείς παραγράφους με επίκεντρο το «ΕΝΕΡΓΟ ΓΕΓΟΝΟΣ», διαβασμένο ΜΕΣΑ στο ΚΕΝΤΡΙΚΟ ΘΕΜΑ: (α) τι πραγματικά κινείται πολιτικά σε αυτό το συγκεκριμένο γεγονός, (β) πώς δένει με την ευρύτερη θεματική «${centralTheme}» και ποιο πλαίσιο επιβάλλεται, (γ) ποιο ρίσκο/ευκαιρία υπάρχει ΓΙΑ ΑΥΤΟ ΤΟ ΚΟΜΜΑ συγκεκριμένα.
 - Χώρισε τις παραγράφους με κενή γραμμή μεταξύ τους.
