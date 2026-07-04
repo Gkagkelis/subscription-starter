@@ -41,7 +41,7 @@ function priorityTier(score: unknown): string {
   return "t3";
 }
 function cacheKey(microAgendaId: string, partyKey: string, eventId?: string | null, tier = "") {
-  const base = "strategic_play_v12__" + microAgendaId + "__" + partyKey + (tier ? "__" + tier : "");
+  const base = "strategic_play_v13__" + microAgendaId + "__" + partyKey + (tier ? "__" + tier : "");
   return eventId ? base + "__" + eventId : base;
 }
 
@@ -73,7 +73,7 @@ async function writeCache(supabase: ReturnType<typeof svc>, key: string, body: a
     situation_id: null,
     organization_id: null,
     analysis_kind: key,
-    input_hash: "v10",
+    input_hash: "v11",
     model_used: MODEL,
     result: { body, generated_at: new Date().toISOString() },
   };
@@ -208,12 +208,35 @@ export async function POST(req: NextRequest) {
     const redLinesText = (red_lines || []).length ? red_lines.join(", ") : "—";
     const positionsText = (known_positions || []).length ? known_positions.join(", ") : "—";
 
+    // Πληρες προφιλ κομματος απο τη βαση (πηγη αληθειας): θεσμικη θεση + issue_lens
+    let institutionalBlock = "";
+    try {
+      const { data: profRows } = await supabase
+        .from("political_party_profiles")
+        .select("strategic_positioning, advisor_instructions, issue_lens")
+        .eq("party_key", party_key)
+        .limit(1);
+      const prof: any = Array.isArray(profRows) ? profRows[0] : null;
+      if (prof) {
+        const pos = (prof.strategic_positioning || "").toString().trim();
+        const adv = (prof.advisor_instructions || "").toString().trim();
+        const lens = prof.issue_lens ? JSON.stringify(prof.issue_lens) : "";
+        institutionalBlock =
+          (pos ? "ΘΕΣΜΙΚΗ ΘΕΣΗ: " + pos + "\n" : "") +
+          (adv ? "ΤΑΥΤΟΤΗΤΑ & ΟΔΗΓΙΕΣ:\n" + adv + "\n" : "") +
+          (lens ? "ΔΟΜΗΜΕΝΟΣ ΦΑΚΟΣ ΑΝΑ ΘΕΜΑ (JSON): " + lens : "");
+      }
+    } catch {
+      /* αν αποτυχει, συνεχιζουμε χωρις — δεν σπαμε τη ροη */
+    }
+
     const prompt = `Είσαι κορυφαίος πολιτικός σύμβουλος επιτελείου. Γράφεις το αγωνιστικό σχέδιο («Πώς κερδίζεται» + 3 επιλογές δράσης) για ΕΝΑ συγκεκριμένο πολιτικό γεγονός.
 
 ΚΟΜΜΑ: ${party_name} (${party_key})
 ΤΟΝΟΣ: ${tone}
 ΘΕΣΕΙΣ: ${positionsText}
 ΚΟΚΚΙΝΕΣ ΓΡΑΜΜΕΣ (ΑΠΑΓΟΡΕΥΕΤΑΙ να πλησιάσεις): ${redLinesText}
+${institutionalBlock ? institutionalBlock + "\n" : ""}
 
 ΚΕΝΤΡΙΚΟ ΘΕΜΑ: ${centralTheme}
 ΘΕΜΑΤΙΚΗ / ΜΙΚΡΟΑΤΖΕΝΤΑ: ${micro_agenda}
@@ -230,6 +253,7 @@ ${otherEvents ? "Συναφή γεγονότα (μόνο πλαίσιο, ΟΧΙ 
 Δώσε αγωνιστικό σχέδιο ΓΙΑ ΑΥΤΟ ΤΟ ΣΥΓΚΕΚΡΙΜΕΝΟ ΓΕΓΟΝΟΣ. Πρέπει να αναφέρεσαι ρητά στο γεγονός «${activeTitle}» και στα πραγματικά του στοιχεία — ΟΧΙ γενικές φράσεις που ταιριάζουν σε οποιοδήποτε θέμα.
 
 ΑΥΣΤΗΡΟΙ ΚΑΝΟΝΕΣ:
+- ΚΟΡΥΦΑΙΟΣ ΚΑΝΟΝΑΣ (ΘΕΣΜΙΚΗ ΣΥΜΒΑΤΟΤΗΤΑ): Πρότεινε ΜΟΝΟ κινήσεις που το κόμμα ΜΠΟΡΕΙ ΠΡΑΓΜΑΤΙΚΑ να κάνει με βάση τη ΘΕΣΜΙΚΗ ΘΕΣΗ παραπάνω. Αν το κόμμα είναι ΕΚΤΟΣ Βουλής, ΑΠΑΓΟΡΕΥΟΝΤΑΙ ΑΥΣΤΗΡΑ κοινοβουλευτικές ενέργειες (ερωτήσεις, επερωτήσεις, τροπολογίες, «κατάθεση στη Βουλή», παρεμβάσεις σε επιτροπές) — προτίμησε δηλώσεις, ΜΜΕ, κοινωνικά δίκτυα, κινηματική/τοπική δράση, νομικές/θεσμικές πιέσεις, ευρωπαϊκό επίπεδο. Πλαισίωσε ΠΑΝΤΑ το γεγονός με τον «φακό ανά θέμα» του κόμματος (issue_lens).
 - ΑΠΑΓΟΡΕΥΟΝΤΑΙ generic μπαλώματα («κανόνες στην αγορά», «σοβαρή εναλλακτική διακυβέρνηση», «καθαρό πώς», «κοινωνική πίεση») χωρίς συγκεκριμένο περιεχόμενο ΑΥΤΟΥ του γεγονότος.
 - ΜΗ μεταφέρεις την ανάλυση σε άλλο γεγονός του κλάστερ.
 - Κάθε επιλογή = ΔΙΑΦΟΡΕΤΙΚΗ απόφαση (όχι παραλλαγή της ίδιας).
