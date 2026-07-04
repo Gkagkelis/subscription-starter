@@ -21,7 +21,7 @@ function today() {
   return new Date().toISOString().slice(0, 10); // yyyy-mm-dd
 }
 function cacheKey(party: string) {
-  return `agenda_synopsis_v2__${party}__${today()}`;
+  return `agenda_synopsis_v3__${party}__${today()}`;
 }
 
 async function readCache(sb: ReturnType<typeof svc>, key: string): Promise<string | null> {
@@ -44,7 +44,7 @@ async function writeCache(sb: ReturnType<typeof svc>, key: string, synopsis: str
     situation_id: null,
     organization_id: null,
     analysis_kind: key,
-    input_hash: "v2",
+    input_hash: "v3",
     model_used: MODEL,
     result: { body: { synopsis }, generated_at: new Date().toISOString() },
   };
@@ -132,9 +132,33 @@ export async function POST(req: NextRequest) {
     const cached = await readCache(sb, key);
     if (cached) return json({ ok: true, synopsis: cached, source: "cache" });
 
+    let institutionalBlock = "";
+    try {
+      const { data: __pr } = await sb
+        .from("political_party_profiles")
+        .select("strategic_positioning, issue_lens, red_lines")
+        .eq("party_key", party)
+        .limit(1);
+      const prof: any = Array.isArray(__pr) ? __pr[0] : null;
+      if (prof) {
+        const pos = (prof.strategic_positioning || "").toString().trim();
+        const lens = prof.issue_lens ? JSON.stringify(prof.issue_lens) : "";
+        const rl = Array.isArray(prof.red_lines) ? prof.red_lines.join(" · ") : "";
+        institutionalBlock =
+          "ΤΑΥΤΟΤΗΤΑ ΚΟΜΜΑΤΟΣ — σεβάσου τη θεσμική θέση & τον φακό ανά θέμα:\n" +
+          (pos ? "ΘΕΣΜΙΚΗ ΘΕΣΗ: " + pos + "\n" : "") +
+          (rl ? "ΚΟΚΚΙΝΕΣ ΓΡΑΜΜΕΣ: " + rl + "\n" : "") +
+          (lens ? "ΦΑΚΟΣ ΑΝΑ ΘΕΜΑ (JSON): " + lens + "\n" : "") +
+          "Αν το κόμμα είναι ΕΚΤΟΣ Βουλής, μη μιλάς σαν κοινοβουλευτικό κόμμα. Μην παράγεις μισαλλόδοξο περιεχόμενο.";
+      }
+    } catch {
+      institutionalBlock = "";
+    }
+
     let synopsis = "";
     try {
-      synopsis = await callClaude(buildPrompt(partyName, profile, themes));
+      const __bp = buildPrompt(partyName, profile, themes);
+      synopsis = await callClaude(institutionalBlock ? __bp + "\n\n" + institutionalBlock : __bp);
     } catch {
       synopsis = "";
     }
