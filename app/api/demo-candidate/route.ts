@@ -172,9 +172,18 @@ export async function POST(req: NextRequest) {
       const user = `Με βαση ο,τι «καιει» σημερα (${themesText})${localText ? " και τα τοπικα:\n" + localText : ""}, δωσε ΣΧΕΔΙΟ ΕΒΔΟΜΑΔΑΣ.
 Επεστρεψε ΜΟΝΟ εγκυρο JSON:
 {"days":[{"day":"Δευτερα","move":"συγκεκριμενη κινηση καμπανιας στη Β' Θεσσαλονικης","why":"γιατι κερδιζει σταυρους"}, ... 5-6 μερες]}`;
-      const text = await callClaude(system, user, 1200);
-      const parsed = parseJsonLoose(text);
-      return json({ ok: true, plan: parsed?.days || [], raw: parsed ? undefined : text });
+      const text = await callClaude(system, user, 1500);
+      let days = parseJsonLoose(text)?.days;
+      if (!Array.isArray(days) || days.length === 0) {
+        // Σωσε ο,τι μερες προλαβε ακομα κι αν κοπηκε το JSON
+        days = [];
+        const re = /"day"\s*:\s*"([^"]+)"\s*,\s*"move"\s*:\s*"([^"]+)"\s*,\s*"why"\s*:\s*"([^"]*)"/g;
+        let m: RegExpExecArray | null;
+        while ((m = re.exec(text)) !== null) {
+          days.push({ day: m[1], move: m[2], why: m[3] });
+        }
+      }
+      return json({ ok: true, plan: Array.isArray(days) ? days : [] });
     }
 
     if (mode === "redteam") {
