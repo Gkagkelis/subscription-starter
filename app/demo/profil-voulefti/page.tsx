@@ -57,6 +57,11 @@ export default function ProfileQuiz() {
   const [answers, setAnswers] = useState<Answers>({});
   const [ranked, setRanked] = useState<string[]>(ISSUE_TOPICS);
   const [done, setDone] = useState(false);
+  const [narrative, setNarrative] = useState("");
+  const [messageFit, setMessageFit] = useState<{ issue: string; frame: string; avoid: string }[]>([]);
+  const [redTeam, setRedTeam] = useState<{ vulnerability: string; attack: string; response: string }[]>([]);
+  const [narrLoading, setNarrLoading] = useState(false);
+  const [narrError, setNarrError] = useState("");
 
   const items = useMemo(() => (mode ? itemsForMode(mode) : []), [mode]);
   const hasRanking = mode === "full";
@@ -91,6 +96,36 @@ export default function ProfileQuiz() {
   function answer(it: Item, v: number) {
     setAnswers((a) => ({ ...a, [it.id]: v }));
     setTimeout(() => setStep((s) => Math.min(totalSteps, s + 1)), 180);
+  }
+
+  async function genNarrative() {
+    if (!profile) return;
+    setNarrLoading(true);
+    setNarrError("");
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 45000);
+    try {
+      const r = await fetch("/api/demo-profile-narrative", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ profile, issues: ranked }),
+        signal: ctrl.signal,
+      });
+      const j = await r.json();
+      if (j?.ok) {
+        setNarrative(j.narrative || "");
+        setMessageFit(Array.isArray(j.messageFit) ? j.messageFit : []);
+        setRedTeam(Array.isArray(j.redTeam) ? j.redTeam : []);
+        if (!j.narrative) setNarrError("Δεν βγηκε αναλυση — δοκιμασε ξανα.");
+      } else {
+        setNarrError("Δεν βγηκε αναλυση — δοκιμασε ξανα.");
+      }
+    } catch (e: any) {
+      setNarrError(e?.name === "AbortError" ? "Αργησε — δοκιμασε ξανα." : "Σφαλμα — δοκιμασε ξανα.");
+    } finally {
+      clearTimeout(t);
+      setNarrLoading(false);
+    }
   }
 
   function reset() {
@@ -228,9 +263,56 @@ export default function ProfileQuiz() {
           </div>
 
           <div className="mt-6 rounded-2xl border p-4" style={{ borderColor: CYAN + "33", background: CYAN + "0d" }}>
-            <div className="text-[13px] text-zinc-200">
-              <b style={{ color: CYAN_L }}>Επομενο βημα:</b> πανω σε αυτα τα σκορ, ο Noraya θα γραψει το «αφηγημα ταυτοτητας», το message-market fit (ποια ηθικα frames να χρησιμοποιεις), τη θεση σου vs το κομμα σου & τον μεσο ψηφοφορο, και το Red Team.
+            <div className="mb-3 flex items-center justify-between">
+              <div className="text-[12px] font-semibold tracking-[0.06em]" style={{ color: CYAN_L }}>AI ΑΝΑΛΥΣΗ ΠΡΟΦΙΛ</div>
+              <button
+                onClick={genNarrative}
+                disabled={narrLoading}
+                className="rounded-xl px-3.5 py-1.5 text-[12px] font-semibold text-slate-950 transition disabled:opacity-50"
+                style={{ background: CYAN }}
+              >
+                {narrLoading ? "Αναλυει…" : narrative ? "Ξανα" : "Δημιουργησε αναλυση"}
+              </button>
             </div>
+            {narrError && <div className="mb-2 text-[12px] text-amber-300">{narrError}</div>}
+            {!narrative && !narrLoading && !narrError && (
+              <div className="text-[13px] leading-relaxed text-zinc-300">
+                Πατα «Δημιουργησε αναλυση» — ο Noraya θα γραψει, πανω στα σκορ σου: το <b>αφηγημα ταυτοτητας</b>, το <b>message-market fit</b> ανα θεμα (ποια ηθικα frames να χρησιμοποιεις), και το <b>Red Team</b> (οι πιο ευαλωτες πλευρες σου + ετοιμες απαντησεις).
+              </div>
+            )}
+            {narrative && (
+              <div className="space-y-4">
+                <p className="whitespace-pre-line text-[13.5px] leading-relaxed text-zinc-200">{narrative}</p>
+                {messageFit.length > 0 && (
+                  <div>
+                    <div className="mb-2 text-[11px] tracking-[0.08em]" style={{ color: CYAN_L }}>MESSAGE-MARKET FIT</div>
+                    <div className="space-y-2">
+                      {messageFit.map((m, i) => (
+                        <div key={i} className="rounded-xl border border-white/[0.06] bg-[#0a1120] p-3">
+                          <div className="text-[13px] font-semibold text-zinc-100">{m.issue}</div>
+                          <div className="mt-1 text-[12px] text-emerald-300/90">Χρησιμοποιησε: {m.frame}</div>
+                          <div className="mt-0.5 text-[12px] text-zinc-500">Αποφυγε: {m.avoid}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {redTeam.length > 0 && (
+                  <div>
+                    <div className="mb-2 text-[11px] tracking-[0.08em] text-red-300">RED TEAM</div>
+                    <div className="grid gap-2 sm:grid-cols-3">
+                      {redTeam.map((rt, i) => (
+                        <div key={i} className="rounded-xl border border-white/[0.06] bg-[#0a1120] p-3">
+                          <div className="text-[11px] text-zinc-400">{rt.vulnerability}</div>
+                          <div className="mt-1 text-[12px] italic text-zinc-300">«{rt.attack}»</div>
+                          <div className="mt-1.5 border-t border-white/[0.06] pt-1.5 text-[12px] text-zinc-200">→ {rt.response}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </Shell>
