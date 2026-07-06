@@ -9,7 +9,7 @@ import {
   type Item,
   type Answers,
 } from "../../../lib/noraya/psychometrics";
-import { PARTY_POSITIONS, AVERAGE_VOTER, closestParty } from "../../../lib/noraya/party-positions";
+import { PARTY_POSITIONS, AVERAGE_VOTER, euclidean, type PartyPos } from "../../../lib/noraya/party-positions";
 
 // ============================================================
 // NORAYA — Ερωτηματολογιο Προφιλ Βουλευτη/Υποψηφιου (DEMO, ασυνδετο)
@@ -63,6 +63,7 @@ export default function ProfileQuiz() {
   const [redTeam, setRedTeam] = useState<{ vulnerability: string; attack: string; response: string }[]>([]);
   const [narrLoading, setNarrLoading] = useState(false);
   const [narrError, setNarrError] = useState("");
+  const [parties, setParties] = useState<PartyPos[]>(PARTY_POSITIONS);
 
   const items = useMemo(() => (mode ? itemsForMode(mode) : []), [mode]);
   const hasRanking = mode === "full";
@@ -80,6 +81,16 @@ export default function ProfileQuiz() {
         if (typeof s.step === "number") setStep(s.step);
       }
     } catch {}
+  }, []);
+  // party positions απο τη βαση (fallback: τοπικο αρχειο)
+  useEffect(() => {
+    (async () => {
+      try {
+        const r = await fetch("/api/party-positions", { cache: "no-store" });
+        const j = await r.json();
+        if (j?.ok && Array.isArray(j.parties) && j.parties.length) setParties(j.parties);
+      } catch {}
+    })();
   }, []);
   // persist
   useEffect(() => {
@@ -214,18 +225,23 @@ export default function ProfileQuiz() {
 
             {/* Compass 2D */}
             <Card title="Πολιτικη πυξιδα">
-              <Compass x={comp.economic} y={comp.social} />
+              <Compass x={comp.economic} y={comp.social} parties={parties} />
               <div className="mt-2 text-center text-[11px] text-zinc-500">
                 Οικονομικα: {comp.economic! < 0 ? "Αριστερα" : comp.economic! > 0 ? "Δεξια" : "Κεντρο"} ({comp.economic}) ·
                 Κοινωνικα: {comp.social! < 0 ? "Φιλελευθερος" : comp.social! > 0 ? "Συντηρητικος" : "Κεντρο"} ({comp.social})
               </div>
-              {comp.economic != null && comp.social != null && (() => {
-                const c = closestParty(comp.economic, comp.social);
-                return c ? (
+              {comp.economic != null && comp.social != null && parties.length > 0 && (() => {
+                let best = parties[0];
+                let bd = Infinity;
+                for (const p of parties) {
+                  const d = euclidean(comp.economic!, comp.social!, p.economic, p.social);
+                  if (d < bd) { bd = d; best = p; }
+                }
+                return (
                   <div className="mt-1 text-center text-[11px] text-zinc-400">
-                    Πιο κοντινο κομμα: <span style={{ color: c.party.color }}>{c.party.name}</span> · αποσταση {c.distance}
+                    Πιο κοντινο κομμα: <span style={{ color: best.color }}>{best.name}</span> · αποσταση {Math.round(bd * 10) / 10}
                   </div>
-                ) : null;
+                );
               })()}
             </Card>
 
@@ -463,7 +479,7 @@ function Bar({ label, v, max, signed }: { label: string; v: number | null; max: 
   );
 }
 
-function Compass({ x, y }: { x: number | null; y: number | null }) {
+function Compass({ x, y, parties }: { x: number | null; y: number | null; parties: PartyPos[] }) {
   const toX = (e: number) => ((e + 10) / 20) * 100;
   const toY = (sv: number) => ((10 - sv) / 20) * 100;
   return (
@@ -475,7 +491,7 @@ function Compass({ x, y }: { x: number | null; y: number | null }) {
       <span className="absolute top-1 left-1/2 -translate-x-1/2 text-[8px] text-zinc-600">ΣΥΝΤΗΡ.</span>
       <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[8px] text-zinc-600">ΦΙΛΕΛ.</span>
 
-      {PARTY_POSITIONS.map((p) => (
+      {parties.map((p) => (
         <div
           key={p.key}
           className="absolute flex -translate-x-1/2 -translate-y-1/2 items-center gap-0.5"
