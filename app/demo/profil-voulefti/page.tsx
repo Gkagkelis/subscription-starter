@@ -9,6 +9,7 @@ import {
   type Item,
   type Answers,
 } from "../../../lib/noraya/psychometrics";
+import { PARTY_POSITIONS, AVERAGE_VOTER, closestParty } from "../../../lib/noraya/party-positions";
 
 // ============================================================
 // NORAYA — Ερωτηματολογιο Προφιλ Βουλευτη/Υποψηφιου (DEMO, ασυνδετο)
@@ -218,6 +219,14 @@ export default function ProfileQuiz() {
                 Οικονομικα: {comp.economic! < 0 ? "Αριστερα" : comp.economic! > 0 ? "Δεξια" : "Κεντρο"} ({comp.economic}) ·
                 Κοινωνικα: {comp.social! < 0 ? "Φιλελευθερος" : comp.social! > 0 ? "Συντηρητικος" : "Κεντρο"} ({comp.social})
               </div>
+              {comp.economic != null && comp.social != null && (() => {
+                const c = closestParty(comp.economic, comp.social);
+                return c ? (
+                  <div className="mt-1 text-center text-[11px] text-zinc-400">
+                    Πιο κοντινο κομμα: <span style={{ color: c.party.color }}>{c.party.name}</span> · αποσταση {c.distance}
+                  </div>
+                ) : null;
+              })()}
             </Card>
 
             {/* MFQ */}
@@ -455,20 +464,45 @@ function Bar({ label, v, max, signed }: { label: string; v: number | null; max: 
 }
 
 function Compass({ x, y }: { x: number | null; y: number | null }) {
-  const px = ((x ?? 0) + 10) / 20 * 100;
-  const py = (10 - (y ?? 0)) / 20 * 100; // y+ = συντηρητικος = κατω
+  const toX = (e: number) => ((e + 10) / 20) * 100;
+  const toY = (sv: number) => ((10 - sv) / 20) * 100;
   return (
-    <div className="relative mx-auto h-44 w-44 rounded-lg border border-white/10 bg-[#0a1120]">
+    <div className="relative mx-auto aspect-square w-full max-w-[280px] rounded-lg border border-white/10 bg-[#0a1120]">
       <div className="absolute left-1/2 top-0 h-full w-px bg-white/10" />
       <div className="absolute top-1/2 left-0 h-px w-full bg-white/10" />
       <span className="absolute left-1 top-1/2 -translate-y-1/2 text-[8px] text-zinc-600">ΑΡΙΣΤ.</span>
       <span className="absolute right-1 top-1/2 -translate-y-1/2 text-[8px] text-zinc-600">ΔΕΞΙΑ</span>
       <span className="absolute top-1 left-1/2 -translate-x-1/2 text-[8px] text-zinc-600">ΣΥΝΤΗΡ.</span>
       <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[8px] text-zinc-600">ΦΙΛΕΛ.</span>
+
+      {PARTY_POSITIONS.map((p) => (
+        <div
+          key={p.key}
+          className="absolute flex -translate-x-1/2 -translate-y-1/2 items-center gap-0.5"
+          style={{ left: toX(p.economic) + "%", top: toY(p.social) + "%" }}
+        >
+          <span className="h-2 w-2 rounded-full" style={{ background: p.color }} />
+          <span className="text-[7px] text-zinc-500">{p.abbr}</span>
+        </div>
+      ))}
+
       <div
-        className="absolute h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-[#060a14]"
-        style={{ left: px + "%", top: py + "%", background: CYAN }}
-      />
+        className="absolute flex -translate-x-1/2 -translate-y-1/2 items-center gap-0.5"
+        style={{ left: toX(AVERAGE_VOTER.economic) + "%", top: toY(AVERAGE_VOTER.social) + "%" }}
+      >
+        <span className="h-2.5 w-2.5 rounded-full border-2 border-white/70" />
+        <span className="text-[7px] font-semibold text-white/70">ΜΕΣΟΣ</span>
+      </div>
+
+      {x != null && y != null && (
+        <div
+          className="absolute z-10 flex -translate-x-1/2 -translate-y-1/2 items-center gap-0.5"
+          style={{ left: toX(x) + "%", top: toY(y) + "%" }}
+        >
+          <span className="h-3.5 w-3.5 rounded-full ring-2 ring-[#060a14]" style={{ background: CYAN }} />
+          <span className="text-[8px] font-bold" style={{ color: CYAN_L }}>ΕΣΥ</span>
+        </div>
+      )}
     </div>
   );
 }
