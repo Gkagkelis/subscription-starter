@@ -64,6 +64,7 @@ export default function ProfileQuiz() {
   const [narrLoading, setNarrLoading] = useState(false);
   const [narrError, setNarrError] = useState("");
   const [parties, setParties] = useState<PartyPos[]>(PARTY_POSITIONS);
+  const [saved, setSaved] = useState<"idle" | "saving" | "done" | "error">("idle");
 
   const items = useMemo(() => (mode ? itemsForMode(mode) : []), [mode]);
   const hasRanking = mode === "full";
@@ -104,6 +105,20 @@ export default function ProfileQuiz() {
     if (!done || !mode) return null;
     return buildProfile({ answers, mode, issueRanking: hasRanking ? ranked : undefined });
   }, [done, mode, answers, ranked, hasRanking]);
+
+  // Flywheel: auto-save ολοκληρωμενου προφιλ (χτιζει τα norms)
+  useEffect(() => {
+    if (!done || !profile || saved !== "idle") return;
+    setSaved("saving");
+    fetch("/api/demo-profile-save", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mode, answers, scores: profile, issueRanking: hasRanking ? ranked : null }),
+    })
+      .then((r) => r.json())
+      .then((j) => setSaved(j?.ok ? "done" : "error"))
+      .catch(() => setSaved("error"));
+  }, [done, profile, saved, mode, answers, ranked, hasRanking]);
 
   function answer(it: Item, v: number) {
     setAnswers((a) => ({ ...a, [it.id]: v }));
@@ -207,6 +222,9 @@ export default function ProfileQuiz() {
             <div>
               <div className="text-[11px] tracking-[0.15em]" style={{ color: CYAN_L }}>ΤΟ ΠΡΟΦΙΛ ΣΟΥ</div>
               <h1 className="mt-1 text-2xl font-bold text-zinc-50">Πρωτη εικονα</h1>
+              <div className="mt-1 text-[10px] text-zinc-600">
+                {saved === "done" ? "Αποθηκευτηκε · χτιζει τα norms" : saved === "saving" ? "Αποθηκευση…" : saved === "error" ? "Δεν αποθηκευτηκε" : ""}
+              </div>
             </div>
             <button onClick={reset} className="rounded-xl border border-white/10 px-3 py-1.5 text-[12px] text-zinc-400 hover:text-zinc-200">
               Απο την αρχη
