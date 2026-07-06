@@ -58,6 +58,14 @@ function buildProfile(body: any, partyProfile: any, isGuest: boolean) {
     org_name: orgName,
     org_type: orgType,
 
+    district: body.organization?.district?.trim() || null,
+    representative_name:
+      body.organization?.representativeName?.trim() ||
+      body.organization?.euroRepresentativeName?.trim() ||
+      null,
+    mp_status: body.organization?.mpStatus || null,
+    phase: body.organization?.phase || null,
+
     party_key: partySnapshot?.party_key || body.partyKey || body.organization?.partyKey || null,
     selected_party_profile_id: partySnapshot?.id || null,
     party_profile_snapshot: partySnapshot,
