@@ -13,6 +13,7 @@ import {
   themes,
   institutions
 } from "@/lib/noraya/taxonomy";
+import { ELECTORAL_DISTRICTS } from "@/lib/noraya/electoral-districts";
 
 type StepId =
   | "identity"
@@ -100,6 +101,8 @@ export default function OnboardingPage() {
 
   const [representativeName, setRepresentativeName] = useState("");
   const [district, setDistrict] = useState("");
+  const [mpStatus, setMpStatus] = useState("active");
+  const [phase, setPhase] = useState("pre_election");
   const [euroRepresentativeName, setEuroRepresentativeName] = useState("");
   const [municipalFactionName, setMunicipalFactionName] = useState("");
   const [municipality, setMunicipality] = useState("");
@@ -329,6 +332,8 @@ export default function OnboardingPage() {
         partyKey: selectedPartyKey || null,
         representativeName: representativeName.trim(),
         district: district.trim(),
+        mpStatus: orgType === "Γραφείο Βουλευτή" ? mpStatus : null,
+        phase: orgType === "Γραφείο Βουλευτή" ? phase : null,
         euroRepresentativeName: euroRepresentativeName.trim(),
         municipalFactionName: municipalFactionName.trim(),
         municipality: municipality.trim(),
@@ -465,12 +470,71 @@ export default function OnboardingPage() {
                       placeholder="π.χ. Μαρία Παπαδοπούλου"
                     />
 
-                    <Field
-                      label="Εκλογική περιφέρεια"
-                      value={district}
-                      onChange={setDistrict}
-                      placeholder="π.χ. Α΄ Αθήνας, Β΄ Θεσσαλονίκης"
-                    />
+                    <div>
+                      <label className="text-sm font-medium text-zinc-200">Εκλογική περιφέρεια</label>
+                      <select
+                        value={district}
+                        onChange={(event) => setDistrict(event.target.value)}
+                        className="mt-3 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm outline-none transition focus:border-cyan-300/40"
+                      >
+                        <option value="">— Επίλεξε περιφέρεια —</option>
+                        {ELECTORAL_DISTRICTS.map((d) => (
+                          <option key={d.code} value={d.name}>
+                            {d.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 grid gap-4 md:grid-cols-2">
+                    <div>
+                      <label className="text-sm font-medium text-zinc-200">Ιδιότητα</label>
+                      <div className="mt-3 grid grid-cols-2 gap-2">
+                        {[
+                          { v: "active", l: "Ενεργός βουλευτής" },
+                          { v: "candidate", l: "Υποψήφιος" },
+                        ].map((o) => (
+                          <button
+                            type="button"
+                            key={o.v}
+                            onClick={() => setMpStatus(o.v)}
+                            className={
+                              "rounded-2xl border px-4 py-3 text-sm transition " +
+                              (mpStatus === o.v
+                                ? "border-cyan-300/60 bg-cyan-300/10 text-cyan-100"
+                                : "border-white/10 bg-black/30 text-zinc-300")
+                            }
+                          >
+                            {o.l}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium text-zinc-200">Φάση</label>
+                      <div className="mt-3 grid grid-cols-2 gap-2">
+                        {[
+                          { v: "pre_election", l: "Προεκλογική" },
+                          { v: "parliamentary", l: "Κοινοβουλευτική" },
+                        ].map((o) => (
+                          <button
+                            type="button"
+                            key={o.v}
+                            onClick={() => setPhase(o.v)}
+                            className={
+                              "rounded-2xl border px-4 py-3 text-sm transition " +
+                              (phase === o.v
+                                ? "border-cyan-300/60 bg-cyan-300/10 text-cyan-100"
+                                : "border-white/10 bg-black/30 text-zinc-300")
+                            }
+                          >
+                            {o.l}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </RolePanel>
               )}
