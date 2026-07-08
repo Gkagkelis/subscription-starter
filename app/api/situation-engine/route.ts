@@ -9,6 +9,14 @@ function isSensitiveEvent(title?: string | null): boolean {
   return SENSITIVE_EVENT_RE.test(String(title || ""));
 }
 
+// Φιλτρο ξενων-εταιρικων/διεθνων ΧΩΡΙΣ ελληνικο πολιτικο αντικτυπο (θορυβος)
+const FOREIGN_NOISE_RE = /(microsoft|google|amazon|\bapple\b|\bmeta\b|tesla|nvidia|openai|samsung|\bintel\b|boeing|volkswagen|\bbmw\b|mercedes|toyota|nasdaq|dow jones|wall street|silicon valley|federal reserve|γερμανικ[ήη][^.]{0,25}(αυτοκινητο|βιομηχαν)|κινεζικ[ήη][^.]{0,25}(ανταγωνισ|βιομηχαν|αυτοκινητο))/i;
+const GREEK_CONTEXT_RE = /(ελλ[αά]δ|ελληνικ|αθ[ηή]ν|θεσσαλον|κυβ[εέ]ρν|βουλ[ήη]|υπουργ|μητσοτ[αά]κ|ΕΛΑΣ|ΠΑΣΟΚ|ΣΥΡΙΖΑ|ΚΚΕ|τσ[ιί]πρα|ανδρουλ[αά]κ)/i;
+function isForeignNoise(title?: string | null): boolean {
+  const t = String(title || "");
+  return FOREIGN_NOISE_RE.test(t) && !GREEK_CONTEXT_RE.test(t);
+}
+
 export const dynamic = "force-dynamic";
 
 const supabase = createClient(
@@ -442,7 +450,7 @@ export async function GET(req: Request) {
   }
 
   const allEventRows = (!eventError && Array.isArray(eventRows) ? eventRows : []).filter(
-    (r: any) => !isSensitiveEvent((r as any)?.title),
+    (r: any) => !isSensitiveEvent((r as any)?.title) && !isForeignNoise((r as any)?.title),
   );
   // ΒΗΜΑ 1 — ΦΙΛΤΡΟ (gate): μόνο ΦΡΕΣΚΑ θέματα (≤48 ώρες, βάσει ημερομηνίας πιο πρόσφατου άρθρου).
   //          Η φρεσκάδα ΔΕΝ είναι κριτήριο σημαντικότητας — μόνο "ποιος μπαίνει στο γήπεδο".
