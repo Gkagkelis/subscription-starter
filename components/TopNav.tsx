@@ -21,6 +21,7 @@ const NAV_TABS: NavTab[] = [
   { label: "Καταστάσεις", href: "/situations" },
   { label: "Σενάρια", href: "/scenarios" },
   { label: "Πρόσωπα", href: "/people" },
+  { label: "Επιθέσεις", href: "/attacks" },
   { label: "Αρχεία", href: "/archive" },
   { label: "Δεδομένα", href: null },
 ];
