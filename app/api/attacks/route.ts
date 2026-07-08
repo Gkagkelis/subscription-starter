@@ -248,7 +248,7 @@ async function doScenario(partyKey: string, partyLabel: string, attack: any) {
 {
  "situation": { "headline": "συντομος τιτλος", "where_it_stands": "1-2 προτασεις: που στεκεται τωρα" },
  "foresight": [ { "label": "Κλιμακωση", "path": "escalate", "probability": 55, "rationale": "γιατι", "signals": ["σημα 1","σημα 2"], "window": "π.χ. 24-48 ωρες" } ],
- "moves": [ { "label": "Δηλωση τωρα", "move": "act_now", "best_for_path": "escalate", "upside": "...", "downside": "...", "opponent_counter": "...", "risk": "medium" } ],
+ "moves": [ { "label": "Δηλωση τωρα", "move": "act_now", "best_for_path": "escalate", "upside": "...", "downside": "...", "who_gains": "...", "who_loses": "...", "opponent_counter": "...", "risk": "medium" } ],
  "connection": "ο συλλογισμος που ενωνει foresight & κινηση",
  "recommendation": { "move_label": "...", "because": "γιατι αυτη", "watch": ["τι να παρακολουθεις 1","2"] }
 }
