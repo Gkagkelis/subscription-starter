@@ -50,6 +50,11 @@ function svc() {
   );
 }
 
+const SENSITIVE_EVENT_RE = /(αν[ηή]λικ|εξαφ[αά]νι|αγνο[οό]?[υύ]μεν|βιασμ|αποπλ[αά]ν|κακοπο[ιί]η|παιδεραστ|αυτοκτον|απαγωγ|πνιγμ|τροχα[ιί]ο)/i;
+function isSensitiveEvent(title?: string | null): boolean {
+  return SENSITIVE_EVENT_RE.test(String(title || ""));
+}
+
 async function loadActiveThemes(supabase: ReturnType<typeof svc>): Promise<string[]> {
   const { data } = await supabase
     .from("organizations")
@@ -117,7 +122,9 @@ ${themesText}
 ΚΡΑΤΑ ΜΟΝΟ γεγονότα με ΠΟΛΙΤΙΚΗ ΣΗΜΑΣΙΑ για κόμμα (κυβέρνηση/κόμματα/θεσμοί/
 πολιτική ευθύνη/ζητήματα πολιτών/δημόσια ατζέντα) που συνδέονται με τις θεματικές.
 
-ΚΟΨΕ τελείως: μεμονωμένες συλλήψεις/αστυνομικό δελτίο/τροχαία/εγκλήματα χωρίς
+ΚΟΨΕ ΑΠΟΛΥΤΩΣ (ΠΟΤΕ ως γεγονός): περιστατικά με ανηλίκους, εξαφανίσεις/αγνοούμενους,
+σεξουαλικά/κακοποίηση, αυτοκτονίες, τροχαία/δυστυχήματα, ατομικά εγκλήματα-τραγωδίες.
+Επίσης ΚΟΨΕ: μεμονωμένες συλλήψεις/αστυνομικό δελτίο/τροχαία/εγκλήματα χωρίς
 πολιτική διάσταση, showbiz/lifestyle/celebrities/πορνογραφία/κουτσομπολιό,
 αθλητικά, διεθνή ψιλά χωρίς ελληνικό/πολιτικό αντίκτυπο, εμπορικά/διαφημιστικά.
 Αν είναι οριακό, ΚΟΨΕ το. Λίγα και σημαντικά.
@@ -252,6 +259,7 @@ async function processTopic(
     const title = (ev.title || "").trim();
 
     if (!title) continue;
+    if (isSensitiveEvent(title)) continue; // μη-πολιτικα/ευαισθητα: εξαιρουνται
 
     const { error: rpcErr } = await supabase.rpc("upsert_political_event", {
       p_organization_id: null,
