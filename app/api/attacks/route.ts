@@ -88,10 +88,40 @@ async function callClaude(system: string, user: string, maxTokens = 1800): Promi
   return (data?.content || []).filter((b: any) => b.type === "text").map((b: any) => b.text).join("").trim();
 }
 function parseJsonLoose(raw: string): any | null {
-  const s = (raw || "").trim().replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim();
+  let s = (raw || "").trim().replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim();
   try { return JSON.parse(s); } catch {}
   const m = s.match(/\{[\s\S]*\}/);
   if (m) { try { return JSON.parse(m[0]); } catch {} }
+  // Δευτερη ευκαιρια: μαζεψε ο,τι μπορεις ακομα κι αν κοπηκε το JSON
+  const grab = (key: string) => {
+    const i = s.indexOf('"' + key + '"');
+    if (i < 0) return null;
+    const start = s.indexOf("[", i);
+    if (start < 0) return null;
+    let depth = 0;
+    for (let j = start; j < s.length; j++) {
+      if (s[j] === "[") depth++;
+      else if (s[j] === "]") { depth--; if (depth === 0) { try { return JSON.parse(s.slice(start, j + 1)); } catch { return null; } } }
+    }
+    // ανοιχτος πινακας -> κλεισε τον στο τελευταιο ολοκληρωμενο }
+    const last = s.lastIndexOf("}");
+    if (last > start) { try { return JSON.parse(s.slice(start, last + 1) + "]"); } catch { return null; } }
+    return null;
+  };
+  const foresight = grab("foresight");
+  const moves = grab("moves");
+  if (foresight || moves) {
+    const hm = s.match(/"headline"\s*:\s*"([^"]*)"/);
+    const wm = s.match(/"where_it_stands"\s*:\s*"([^"]*)"/);
+    const mm = s.match(/"move_label"\s*:\s*"([^"]*)"/);
+    const bm = s.match(/"because"\s*:\s*"([^"]*)"/);
+    return {
+      situation: { headline: hm?.[1] || "Ανάλυση", where_it_stands: wm?.[1] || "" },
+      foresight: foresight || [],
+      moves: moves || [],
+      recommendation: mm ? { move_label: mm[1], because: bm?.[1] || "", watch: [] } : undefined,
+    };
+  }
   return null;
 }
 
@@ -224,8 +254,13 @@ async function doScenario(partyKey: string, partyLabel: string, attack: any) {
 }
 Επιτρεπτα path: escalate | deescalate | pivot | stall. Επιτρεπτα move: act_now | wait | institutional | attack | silent. Επιτρεπτο risk: low | medium | high.`;
 
-  const text = await callClaude(system, user, 1600);
-  return parseJsonLoose(text);
+  let parsed = parseJsonLoose(await callClaude(system, user, 2200));
+  if (!parsed || (!parsed.foresight?.length && !parsed.moves?.length)) {
+    // retry μια φορα, πιο αυστηρα
+    const retryUser = user + "\n\nΠΡΟΣΟΧΗ: επεστρεψε ΜΟΝΟ το JSON, ΟΛΟΚΛΗΡΩΜΕΝΟ, χωρις κειμενο πριν/μετα.";
+    parsed = parseJsonLoose(await callClaude(system, retryUser, 2600));
+  }
+  return parsed;
 }
 
 export async function POST(req: NextRequest) {
