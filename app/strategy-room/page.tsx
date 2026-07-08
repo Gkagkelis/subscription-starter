@@ -396,6 +396,7 @@ const navTabs = [
   "Καταστάσεις",
   "Σενάρια",
   "Πρόσωπα",
+  "Επιθέσεις",
   "Αρχεία",
   "Δεδομένα",
 ];
@@ -2981,6 +2982,13 @@ function TopNavigation({
             if (tab === "Πρόσωπα") {
               return (
                 <a key={tab} href="/people" className={cls}>
+                  {tab}
+                </a>
+              );
+            }
+            if (tab === "Επιθέσεις") {
+              return (
+                <a key={tab} href="/attacks" className={cls}>
                   {tab}
                 </a>
               );
