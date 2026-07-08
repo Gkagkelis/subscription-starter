@@ -7,7 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 const CYAN = "#22d3ee";
 const CYAN_L = "#67e8f9";
 
-type Attack = { attacker: string; claim: string; target?: string; source: string; url: string; published: string; title: string; credible?: boolean; isLeader?: boolean };
+type Attack = { attacker: string; claim: string; target?: string; source: string; url: string; published: string; title: string; credible?: boolean; isLeader?: boolean; count?: number; sources?: string[] };
 type Scenario = any;
 
 function riskColor(r: string) {
@@ -113,6 +113,15 @@ export default function AttacksPage() {
     );
   }
 
+  function CoverBadge({ a }: { a: Attack }) {
+    if (!a.count || a.count <= 1) return null;
+    return (
+      <span className="shrink-0 rounded-full bg-cyan-300/10 px-1.5 py-0.5 text-[8px] uppercase tracking-wide text-cyan-200/80">
+        {a.count} πηγές
+      </span>
+    );
+  }
+
   function AttackCard({ a, kk }: { a: Attack; kk: string }) {
     const sc = scenarios[kk];
     return (
@@ -128,6 +137,7 @@ export default function AttacksPage() {
               {a.source || "πηγή"} ↗
             </a>
             <Badge a={a} />
+            <CoverBadge a={a} />
           </div>
           <button
             onClick={() => makeScenario(kk, a)}
