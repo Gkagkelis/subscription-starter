@@ -54,6 +54,13 @@ export default function AttacksPage() {
   const [checked, setChecked] = useState<string[]>([]);
   const [ran, setRan] = useState(false);
   const [scenarios, setScenarios] = useState<Record<string, { loading: boolean; data: Scenario | null }>>({});
+  const [open, setOpen] = useState<{ key: string; attack: Attack } | null>(null);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) { if (e.key === "Escape") setOpen(null); }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -87,6 +94,11 @@ export default function AttacksPage() {
     } catch (e: any) {
       setErr(e?.name === "AbortError" ? "Αργησε — δοκίμασε ξανά." : "Σφάλμα — δοκίμασε ξανά.");
     } finally { clearTimeout(t); setLoading(false); }
+  }
+
+  function openScenario(key: string, attack: Attack) {
+    setOpen({ key, attack });
+    if (!scenarios[key]?.data && !scenarios[key]?.loading) makeScenario(key, attack);
   }
 
   async function makeScenario(key: string, attack: Attack) {
@@ -240,14 +252,12 @@ export default function AttacksPage() {
             <Badge a={a} />
             <CoverBadge a={a} />
           </span>
-          <button onClick={() => makeScenario(kk, a)} disabled={sc?.loading}
-            className="shrink-0 rounded-lg border px-2.5 py-1 text-[11px] font-medium transition disabled:opacity-50"
+          <button onClick={() => openScenario(kk, a)}
+            className="shrink-0 rounded-lg border px-2.5 py-1 text-[11px] font-medium transition"
             style={{ borderColor: CYAN + "55", color: CYAN_L, background: CYAN + "12" }}>
-            {sc?.loading ? "Σενάριο…" : sc?.data ? "Ξανά" : "Βγάλε σενάριο"}
+            {sc?.data ? "Δες σενάριο" : "Βγάλε σενάριο"}
           </button>
         </div>
-        {sc?.data && <ScenarioView s={sc.data} onRegen={() => makeScenario(kk, a)} />}
-        {sc && !sc.loading && !sc.data && <div className="mt-2 text-[11px] text-amber-300">Δεν βγήκε σενάριο — ξαναδοκίμασε.</div>}
       </div>
     );
   }
@@ -292,6 +302,32 @@ export default function AttacksPage() {
           </div>
         )}
       </div>
+
+      {open && (() => {
+        const sc = scenarios[open.key];
+        const a = open.attack;
+        return (
+          <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/75 p-3 sm:p-8" onClick={() => setOpen(null)}>
+            <div className="relative w-full max-w-4xl rounded-3xl border border-[#1a2640] bg-[#0a0f1c] p-5 shadow-2xl sm:p-7" onClick={(e) => e.stopPropagation()}>
+              <button onClick={() => setOpen(null)} aria-label="Κλείσιμο"
+                className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-zinc-400 transition hover:text-zinc-100">✕</button>
+              <div className="mb-1 text-[11px] uppercase tracking-wide text-cyan-300/60">Σενάριο απάντησης</div>
+              <div className="mb-4 pr-10 text-[13px] text-zinc-400">
+                <b className="text-zinc-200">{a.attacker && a.attacker !== "—" ? a.attacker : "Επίθεση"}</b>
+                {a.target ? <> → <b className="text-zinc-200">{a.target}</b></> : <> → {partyLabel}</>}: {a.claim}
+              </div>
+              {sc?.loading && <div className="py-16 text-center text-[13px] text-zinc-500">Ο Noraya χτίζει το σενάριο…</div>}
+              {sc?.data && <ScenarioView s={sc.data} onRegen={() => makeScenario(open.key, a)} />}
+              {sc && !sc.loading && !sc.data && (
+                <div className="py-10 text-center">
+                  <div className="text-[13px] text-amber-300">Δεν βγήκε σενάριο.</div>
+                  <button onClick={() => makeScenario(open.key, a)} className="mt-3 rounded-xl px-4 py-2 text-[13px] font-semibold text-slate-950" style={{ background: CYAN }}>Δοκίμασε ξανά</button>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
