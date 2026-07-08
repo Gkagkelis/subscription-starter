@@ -102,7 +102,25 @@ function parseAiJson(raw: string): { events: DetectedEvent[] } | null {
     if (match) parsed = tryParse(match[0]);
   }
 
-  if (!parsed || !Array.isArray(parsed.events)) return null;
+  if (!parsed || !Array.isArray(parsed.events)) {
+    // Salvage: μαζεψε ολοκληρωμενα event objects ακομα κι αν κοπηκε/χαλασε το JSON
+    const evAt = cleaned.indexOf('"events"');
+    if (evAt >= 0) {
+      const arrAt = cleaned.indexOf("[", evAt);
+      if (arrAt >= 0) {
+        const objs: any[] = [];
+        const re = /\{[^{}]*\}/g;
+        const slice = cleaned.slice(arrAt);
+        let m: RegExpExecArray | null;
+        while ((m = re.exec(slice)) !== null) {
+          const o = tryParse(m[0]);
+          if (o && (o.title || o.article_ids)) objs.push(o);
+        }
+        if (objs.length) return { events: objs as DetectedEvent[] };
+      }
+    }
+    return null;
+  }
 
   return parsed as { events: DetectedEvent[] };
 }
@@ -126,7 +144,7 @@ ${themesText}
 σεξουαλικά/κακοποίηση, αυτοκτονίες, τροχαία/δυστυχήματα, ατομικά εγκλήματα-τραγωδίες.
 Επίσης ΚΟΨΕ: μεμονωμένες συλλήψεις/αστυνομικό δελτίο/τροχαία/εγκλήματα χωρίς
 πολιτική διάσταση, showbiz/lifestyle/celebrities/πορνογραφία/κουτσομπολιό,
-αθλητικά, διεθνή ψιλά χωρίς ελληνικό/πολιτικό αντίκτυπο, εμπορικά/διαφημιστικά.
+αθλητικά, διεθνή/ξένα χωρίς ελληνικό αντίκτυπο, ΞΕΝΕΣ ΕΤΑΙΡΕΙΕΣ (Microsoft, Google, Amazon, Tesla κ.λπ.) & ξένη βιομηχανία/οικονομία χωρίς Ελλάδα, εμπορικά/διαφημιστικά.
 Αν είναι οριακό, ΚΟΨΕ το. Λίγα και σημαντικά.
 
 Τίτλος: κοφτός, συγκεκριμένος, σαν briefing — ΟΧΙ το όνομα της θεματικής.
@@ -245,7 +263,16 @@ async function processTopic(
 
   if (aiError) return { topic, events: 0, ai_error: aiError, articles_seen: list.length };
 
-  const parsed = raw ? parseAiJson(raw) : null;
+  let parsed = raw ? parseAiJson(raw) : null;
+
+  if (!parsed) {
+    // Retry μια φορα, ζητωντας αυστηρα ολοκληρωμενο JSON
+    const retry = await callAnthropic(
+      buildSystemPrompt(themes),
+      buildUserPrompt(topic, list) + "\n\nΠΡΟΣΟΧΗ: επεστρεψε ΜΟΝΟ εγκυρο, ΟΛΟΚΛΗΡΩΜΕΝΟ JSON. Χωρις κειμενο πριν/μετα."
+    );
+    parsed = retry.text ? parseAiJson(retry.text) : null;
+  }
 
   if (!parsed) return { topic, events: 0, ai_error: "ai_returned_unparseable_json", articles_seen: list.length };
 
