@@ -2,6 +2,13 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { computeNorayaPriorityScore } from "@/lib/noraya-priority-score";
 
+// Φιλτρο ευαισθητων/μη-πολιτικων περιστατικων (αστυνομικο δελτιο, ανηλικοι, τραγωδιες)
+// — ΔΕΝ εμφανιζονται ΠΟΤΕ ως πολιτικες προτεραιοτητες.
+const SENSITIVE_EVENT_RE = /(αν[ηή]λικ|εξαφ[αά]νι|αγνο[οό]?[υύ]μεν|βιασμ|αποπλ[αά]ν|κακοπο[ιί]η|παιδεραστ|αυτοκτον|απαγωγ|πνιγμ|τροχα[ιί]ο)/i;
+function isSensitiveEvent(title?: string | null): boolean {
+  return SENSITIVE_EVENT_RE.test(String(title || ""));
+}
+
 export const dynamic = "force-dynamic";
 
 const supabase = createClient(
@@ -434,7 +441,9 @@ export async function GET(req: Request) {
     }
   }
 
-  const allEventRows = !eventError && Array.isArray(eventRows) ? eventRows : [];
+  const allEventRows = (!eventError && Array.isArray(eventRows) ? eventRows : []).filter(
+    (r: any) => !isSensitiveEvent((r as any)?.title),
+  );
   // ΒΗΜΑ 1 — ΦΙΛΤΡΟ (gate): μόνο ΦΡΕΣΚΑ θέματα (≤48 ώρες, βάσει ημερομηνίας πιο πρόσφατου άρθρου).
   //          Η φρεσκάδα ΔΕΝ είναι κριτήριο σημαντικότητας — μόνο "ποιος μπαίνει στο γήπεδο".
   const FRESH_GATE = 75; // freshnessScore >= 75  ⇔  ≤48 ώρες
