@@ -2,15 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-// ============================================================
-// NORAYA — Καρτελα «Επιθεσεις» (/attacks) v2
-// ΠΡΑΓΜΑΤΙΚΕΣ επιθεσεις (τελευταιες 48h) + σεναριο απαντησης ανα επιθεση.
-// ============================================================
+// NORAYA — Καρτελα «Επιθεσεις» v3 · ΠΡΑΓΜΑΤΙΚΕΣ (48h) + εγκυροτητα + σεναριο ανα επιθεση.
 
 const CYAN = "#22d3ee";
 const CYAN_L = "#67e8f9";
 
-type Attack = { attacker: string; claim: string; target?: string; source: string; url: string; published: string; title: string };
+type Attack = { attacker: string; claim: string; target?: string; source: string; url: string; published: string; title: string; credible?: boolean; isLeader?: boolean };
 type Scenario = any;
 
 function riskColor(r: string) {
@@ -95,7 +92,6 @@ export default function AttacksPage() {
     }
   }
 
-  // ομαδοποιηση προσωπων ανα στοχο
   const byPerson = useMemo(() => {
     const m = new Map<string, Attack[]>();
     for (const a of persons) {
@@ -105,6 +101,17 @@ export default function AttacksPage() {
     }
     return Array.from(m.entries());
   }, [persons]);
+
+  function Badge({ a }: { a: Attack }) {
+    return (
+      <span
+        className="shrink-0 rounded-full px-1.5 py-0.5 text-[8px] uppercase tracking-wide"
+        style={a.credible ? { background: "rgba(52,211,153,0.15)", color: "#6ee7b7" } : { background: "rgba(161,161,170,0.12)", color: "#a1a1aa" }}
+      >
+        {a.credible ? "έγκυρη πηγή" : "χαμηλή απήχηση"}
+      </span>
+    );
+  }
 
   function AttackCard({ a, kk }: { a: Attack; kk: string }) {
     const sc = scenarios[kk];
@@ -116,9 +123,12 @@ export default function AttacksPage() {
         </div>
         <div className="text-[13px] leading-snug text-zinc-300">{a.claim || a.title}</div>
         <div className="mt-2 flex items-center justify-between gap-2">
-          <a href={a.url} target="_blank" rel="noreferrer" className="truncate text-[11px] text-cyan-300/80 hover:text-cyan-200">
-            {a.source || "πηγή"} ↗
-          </a>
+          <div className="flex min-w-0 items-center gap-2">
+            <a href={a.url} target="_blank" rel="noreferrer" className="truncate text-[11px] text-cyan-300/80 hover:text-cyan-200">
+              {a.source || "πηγή"} ↗
+            </a>
+            <Badge a={a} />
+          </div>
           <button
             onClick={() => makeScenario(kk, a)}
             disabled={sc?.loading}
@@ -207,11 +217,9 @@ export default function AttacksPage() {
           </button>
         </div>
         <p className="mt-1 text-[13px] text-zinc-400">
-          Πραγματικές επιθέσεις των <b>τελευταίων 48 ωρών</b> — κατά του κόμματος & κατά στελεχών. Βγάλε σενάριο απάντησης σε όποια θέλεις.
+          Πραγματικές επιθέσεις των <b>τελευταίων 48 ωρών</b> — κατά του κόμματος & κατά στελεχών (έγκυρες πηγές πρώτα). Βγάλε σενάριο σε όποια θέλεις.
         </p>
-        {checked.length > 0 && (
-          <div className="mt-1 text-[11px] text-zinc-600">Ελέγχθηκαν: {checked.join(" · ")}</div>
-        )}
+        {checked.length > 0 && <div className="mt-1 text-[11px] text-zinc-600">Ελέγχθηκαν: {checked.join(" · ")}</div>}
         {err && <div className="mt-3 text-[12px] text-amber-300">{err}</div>}
 
         {loading && <div className="mt-8 text-center text-[13px] text-zinc-500">Ο Noraya ψάχνει πραγματικές επιθέσεις (48ωρο)…</div>}
@@ -237,7 +245,10 @@ export default function AttacksPage() {
             <div className="space-y-4">
               {byPerson.map(([person, list]) => (
                 <div key={person}>
-                  <div className="mb-2 text-[13px] font-semibold text-zinc-200">{person} <span className="text-[11px] text-zinc-500">· {list.length} επιθέσεις</span></div>
+                  <div className="mb-2 text-[13px] font-semibold text-zinc-200">
+                    {person} <span className="text-[11px] text-zinc-500">· {list.length} επιθέσεις</span>
+                    {list[0]?.isLeader && <span className="ml-2 rounded-full bg-cyan-300/15 px-2 py-0.5 text-[9px] uppercase text-cyan-200">αρχηγός</span>}
+                  </div>
                   <div className="grid gap-3 md:grid-cols-2">
                     {list.map((a, i) => <AttackCard key={"p" + person + i} a={a} kk={"p" + person + i} />)}
                   </div>
