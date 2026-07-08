@@ -6,14 +6,16 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 // ============================================================
-// NORAYA — «Επιθεσεις» v3 (ΠΡΑΓΜΑΤΙΚΕΣ, 48h, ζυγισμενη εγκυροτητα)
-// research: Google News (48h) ανα στελεχος με ΕΠΩΝΥΜΟ+κλισεις+λεξεις-επιθεσης,
-//           προτεραιοτητα ΑΡΧΗΓΟΥ, καταταξη με εγκυρα ΜΜΕ πρωτα (β: ζυγισμενο).
-// scenario: σεναριο απαντησης — ΙΔΙΑ ΜΗΤΡΑ με «Σεναρια».
+// NORAYA — «Επιθεσεις» v3 (ΠΡΑΓΜΑΤΙΚΕΣ, καθαρες, ενοποιημενες)
+// research: Google News 48h · αρχηγος=κλισεις επωνυμου, μη-αρχηγοι=ΠΛΗΡΕΣ ΟΝΟΜΑ
+//           · μονο καθαρες επιθεσεις · συγχωνευση διπλοτυπων (N πηγες)
+//           · εγκυροτητα πηγων (whitelist) · προτεραιοτητα αρχηγου.
+// scenario: σεναριο απαντησης ανα επιθεση — ΙΔΙΑ ΜΗΤΡΑ με «Σεναρια».
 // ============================================================
 
 const MODEL = "claude-sonnet-4-6";
 const WINDOW_HOURS_DEFAULT = 48;
+const ATTACK = "(επίθεση OR κατά OR παραλήρημα OR επιτέθηκε OR ξέσπασε OR καταγγελία OR κριτική)";
 
 function svc() {
   return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, { auth: { persistSession: false } });
@@ -23,12 +25,25 @@ function json(p: unknown, s = 200) { return NextResponse.json(p, { status: s });
 function decode(s: string): string {
   return s.replace(/<!\[CDATA\[/g, "").replace(/\]\]>/g, "").replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").trim();
 }
-
-// Εγκυρα/υψηλης απηχησης ΜΜΕ (whitelist) — ζυγισμενη καταταξη, οχι κοψιμο
-const CREDIBLE = ["efsyn","καθημεριν","kathimerini","βημα","vima","tovima","τα νεα","tanea","in.gr","ερτ","ertnews","ναυτεμπορ","naftempor","σκαι","skai","πρωτο θεμα","protothema","news247","newsit","documento","ntokoumento","protagon","iefimerida","ημεριδα","cnn.gr","reader","έθνος","εθνος","ethnos","lifo","tvxs","αυγη","avgi","parapolitika","παραπολιτικ","kontranews","liberal"];
+function norm(x: string): string {
+  return (x || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9α-ω]/gi, "");
+}
+const CREDIBLE_TOKENS = [
+  "efsyn", "εφημεριδατωνσυντακτων", "καθημερινη", "kathimerini", "τοβημα", "tovima", "τανεα", "tanea",
+  "ingr", "ναυτεμπορικη", "naftemporiki", "ερτ", "ertnews", "σκαι", "skai", "πρωτοθεμα", "protothema",
+  "news247", "newsit", "documento", "protagon", "iefimerida", "ιεφημεριδα", "cnn", "εθνος", "ethnos",
+  "lifo", "tvxs", "αυγη", "avgi", "megatv", "mega", "star", "alpha",
+];
 function isCredible(source: string): boolean {
-  const t = (source || "").toLowerCase();
-  return CREDIBLE.some((k) => t.includes(k));
+  const n = norm(source);
+  return !!n && CREDIBLE_TOKENS.some((t) => n.includes(t));
+}
+function surnameForms(name: string): string[] {
+  const parts = (name || "").trim().split(/\s+/);
+  const sn = parts[parts.length - 1] || name;
+  const forms = new Set<string>([sn]);
+  if (sn.endsWith("ς")) forms.add(sn.slice(0, -1)); // «κατα Τσιπρα»
+  return Array.from(forms);
 }
 
 type NewsItem = { title: string; url: string; source: string; published: string; ageHours: number };
@@ -62,7 +77,7 @@ async function googleNews(query: string, windowHours: number): Promise<NewsItem[
   } catch { return []; }
 }
 
-async function callClaude(system: string, user: string, maxTokens = 2000): Promise<string> {
+async function callClaude(system: string, user: string, maxTokens = 1800): Promise<string> {
   const resp = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: { "Content-Type": "application/json", "x-api-key": process.env.ANTHROPIC_API_KEY || "", "anthropic-version": "2023-06-01" },
@@ -72,7 +87,6 @@ async function callClaude(system: string, user: string, maxTokens = 2000): Promi
   const data = await resp.json();
   return (data?.content || []).filter((b: any) => b.type === "text").map((b: any) => b.text).join("").trim();
 }
-
 function parseJsonLoose(raw: string): any | null {
   const s = (raw || "").trim().replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim();
   try { return JSON.parse(s); } catch {}
@@ -90,74 +104,91 @@ async function doResearch(partyKey: string, partyLabel: string, windowHours: num
     if (row?.key_officials && Array.isArray(row.key_officials)) officials = row.key_officials.slice(0, 5);
   } catch {}
   if (officials.length === 0) officials = [{ name: partyLabel, role: "κόμμα" }];
-
   const leaderName = officials[0]?.name || "";
-  const ATTACK = "(επίθεση OR κατά OR παραλήρημα OR ξέσπασε OR κόντρα OR επιτίθεται OR κατηγορεί OR εναντίον OR πυρά OR απάντηση)";
+
+  type Col = { person: string; role: string; isLeader: boolean; credible: boolean; item: NewsItem };
+  const collected: Col[] = [];
   const seen = new Set<string>();
-  const collected: { person: string; role: string; isLeader: boolean; item: NewsItem }[] = [];
 
   await Promise.all(
     officials.map(async (o) => {
-      const parts = o.name.trim().split(/\s+/);
-      const surname = parts[parts.length - 1];
-      const stem = surname.replace(/[ςσ]$/, ""); // Τσιπρας -> Τσιπρα (κλισεις)
       const isLeader = o.name === leaderName;
-      const queries = [`"${o.name}"`, `(${surname} OR ${stem}) ${ATTACK}`];
+      // Αρχηγος: κλισεις επωνυμου + λεξεις-επιθεσης. Μη-αρχηγοι: ΠΛΗΡΕΣ ΟΝΟΜΑ (κοβει συνωνυμους).
+      const queries = isLeader
+        ? [...surnameForms(o.name), `${surnameForms(o.name).slice(-1)[0]} ${ATTACK}`]
+        : [`"${o.name}"`];
       const results = await Promise.all(queries.map((q) => googleNews(q, windowHours)));
-      for (const item of results.flat()) {
-        if (!item.url || seen.has(item.url)) continue;
-        seen.add(item.url);
-        collected.push({ person: o.name, role: o.role, isLeader, item });
+      for (const items of results) {
+        for (const item of items.slice(0, 8)) {
+          if (!item.url || seen.has(item.url)) continue;
+          seen.add(item.url);
+          collected.push({ person: o.name, role: o.role, isLeader, credible: isCredible(item.source), item });
+        }
       }
     }),
   );
 
-  collected.sort((a, b) => (Number(b.isLeader) - Number(a.isLeader)) || (a.item.ageHours - b.item.ageHours));
-  collected.splice(40);
-
   if (collected.length === 0) {
-    return { orgAttacks: [], personAttacks: [], checked: officials.map((o) => o.name), sourcesFound: 0 };
+    return { orgAttacks: [], personAttacks: [], officials, checked: officials.map((o) => o.name), sourcesFound: 0 };
   }
 
-  const refList = collected.map((c, i) => `[${i + 1}] (${c.item.source || "—"} · ${c.item.ageHours}h${c.isLeader ? " · ΑΡΧΗΓΟΣ" : ""}) ΓΙΑ: ${c.person} — ${c.item.title}`).join("\n");
+  const refList = collected
+    .map((c, i) => `[${i + 1}] ${c.credible ? "[ΕΓΚΥΡΗ]" : "[χαμηλή]"} (${c.item.source || "—"} · ${c.item.ageHours}h)${c.isLeader ? " [ΑΡΧΗΓΟΣ]" : ""} ΓΙΑ: ${c.person} — ${c.item.title}`)
+    .join("\n");
 
-  const system = `Εισαι αναλυτης του Noraya. Σου δινονται ΠΡΑΓΜΑΤΙΚΟΙ τιτλοι ειδησεων (τελευταιων ${windowHours} ωρων) για στελεχη του κομματος "${partyLabel}".
-Εντοπισε ΠΟΙΟΙ τιτλοι ειναι ΕΠΙΘΕΣΕΙΣ/ΚΡΙΤΙΚΗ εναντιον του κομματος η των προσωπων του. ΜΗΝ εφευρισκεις — ΜΟΝΟ απο τους τιτλους, με ref.
-ΠΡΟΤΕΡΑΙΟΤΗΤΑ: επιθεσεις στον ΑΡΧΗΓΟ ειναι οι ΠΙΟ ΣΗΜΑΝΤΙΚΕΣ — μη τις χανεις.
-Ξεχωρισε: (α) κατα ΚΟΜΜΑΤΟΣ (γραμμη/συνολο), (β) κατα ΠΡΟΣΩΠΟΥ (συγκεκριμενο στελεχος). Αν τιτλος δεν ειναι επιθεση, ΑΓΝΟΗΣΕ.
-Για καθε επιθεση: attacker (ποιος επιτιθεται, αν φαινεται· αλλιως «—»), claim (τι λεει, συντομα), ref.`;
+  const officialNames = officials.map((o) => o.name).join(", ");
+  const system = `Εισαι αναλυτης του Noraya. Σου δινονται ΠΡΑΓΜΑΤΙΚΟΙ τιτλοι ειδησεων (τελευταιων ${windowHours} ωρων).
+Στοχος: ΚΑΘΑΡΕΣ επιθεσεις/κριτικη εναντιον του κομματος "${partyLabel}" η των στελεχων του: ${officialNames}.
+
+ΚΡΙΣΙΜΟΙ ΚΑΝΟΝΕΣ:
+1) ΜΟΝΟ ουσιαστικες ΕΠΙΘΕΣΕΙΣ/ΚΡΙΤΙΚΗ. ΑΓΝΟΗΣΕ ουδετερες ειδησεις, ρεπορταζ χωρις αιχμη, διαδικαστικα («ασιστ», «παρεμβαση») που ΔΕΝ ειναι επιθεση.
+2) ΛΑΘΟΣ ΠΡΟΣΩΠΟ: αν τιτλος αφορα ΑΛΛΟ προσωπο με ιδιο επωνυμο (οχι το στελεχος της λιστας), ΑΓΝΟΗΣΕ τον τελειως.
+3) ΣΥΓΧΩΝΕΥΣΗ: αν ΠΟΛΛΟΙ τιτλοι περιγραφουν την ΙΔΙΑ επιθεση, ΕΝΩΣΕ τους σε ΜΙΑ εγγραφη με ΟΛΑ τα refs. Οχι διπλοτυπα.
+4) ΠΡΟΤΕΡΑΙΟΤΗΤΑ: επιθεσεις στον [ΑΡΧΗΓΟΣ] = υψιστης σημασιας. Οι [ΕΓΚΥΡΗ] πηγες μετρανε πιο πολυ.
+
+Για καθε ενοποιημενη επιθεση: attacker (ποιος επιτιθεται), claim (τι λεει, συντομα), refs (πινακας ΟΛΩΝ των σχετικων αριθμων).`;
 
   const user = `ΤΙΤΛΟΙ (τελευταιες ${windowHours}h):
 ${refList}
 
-Επεστρεψε ΜΟΝΟ εγκυρο JSON:
+Επεστρεψε ΜΟΝΟ εγκυρο JSON (καθε επιθεση ΜΙΑ φορα, με ολα τα refs της):
 {
- "orgAttacks":   [ { "attacker": "...", "claim": "...", "ref": 1 } ],
- "personAttacks":[ { "target": "ονομα στελεχους", "attacker": "...", "claim": "...", "ref": 2 } ]
+ "orgAttacks":   [ { "attacker": "...", "claim": "...", "refs": [1,3] } ],
+ "personAttacks":[ { "target": "πληρες ονομα στελεχους", "attacker": "...", "claim": "...", "refs": [2,5] } ]
 }
-Αν καμια επιθεση: {"orgAttacks":[],"personAttacks":[]}`;
+Αν δεν υπαρχει καμια καθαρη επιθεση: {"orgAttacks":[],"personAttacks":[]}`;
 
-  const text = await callClaude(system, user, 1800);
+  const text = await callClaude(system, user, 1900);
   const parsed = parseJsonLoose(text) || {};
+
   const attach = (a: any) => {
-    const c = collected[Number(a?.ref) - 1];
+    const refs: number[] = (Array.isArray(a?.refs) ? a.refs : a?.ref != null ? [a.ref] : [])
+      .map((n: any) => Number(n) - 1)
+      .filter((i: number) => i >= 0 && i < collected.length);
+    const items = refs.map((i) => collected[i]).filter(Boolean) as Col[];
+    if (!items.length) return null;
+    const primary = items.slice().sort((x, y) => (y.credible ? 1 : 0) - (x.credible ? 1 : 0) || x.item.ageHours - y.item.ageHours)[0];
+    const sources = Array.from(new Set(items.map((i) => i.item.source).filter(Boolean)));
     return {
       attacker: String(a?.attacker || "—").trim(),
       claim: String(a?.claim || "").trim(),
       target: a?.target ? String(a.target).trim() : undefined,
-      source: c?.item.source || "",
-      url: c?.item.url || "",
-      published: c?.item.published || "",
-      title: c?.item.title || "",
-      credible: c ? isCredible(c.item.source) : false,
-      isLeader: c?.isLeader || false,
+      source: primary.item.source || "",
+      url: primary.item.url || "",
+      published: primary.item.published || "",
+      title: primary.item.title || "",
+      credible: items.some((i) => i.credible),
+      isLeader: !!primary.isLeader,
+      count: items.length,
+      sources,
     };
   };
-  const orgAttacks = (Array.isArray(parsed.orgAttacks) ? parsed.orgAttacks : []).map(attach).filter((x: any) => x.claim && x.url)
-    .sort((a: any, b: any) => Number(b.credible) - Number(a.credible));
-  const personAttacks = (Array.isArray(parsed.personAttacks) ? parsed.personAttacks : []).map(attach).filter((x: any) => x.claim && x.url)
-    .sort((a: any, b: any) => (Number(b.isLeader) - Number(a.isLeader)) || (Number(b.credible) - Number(a.credible)));
-  return { orgAttacks, personAttacks, checked: officials.map((o) => o.name), sourcesFound: collected.length };
+  const rank = (a: any, b: any) => (b.credible ? 1 : 0) - (a.credible ? 1 : 0) || b.count - a.count;
+  const orgAttacks = (Array.isArray(parsed.orgAttacks) ? parsed.orgAttacks : []).map(attach).filter((x: any) => x && x.claim && x.url).sort(rank);
+  const personAttacks = (Array.isArray(parsed.personAttacks) ? parsed.personAttacks : []).map(attach).filter((x: any) => x && x.claim && x.url)
+    .sort((a: any, b: any) => (b.isLeader ? 1 : 0) - (a.isLeader ? 1 : 0) || rank(a, b));
+
+  return { orgAttacks, personAttacks, officials, checked: officials.map((o) => o.name), sourcesFound: collected.length };
 }
 
 // ---------------- SCENARIO ----------------
@@ -185,11 +216,11 @@ async function doScenario(partyKey: string, partyLabel: string, attack: any) {
 
 Δωσε ΣΕΝΑΡΙΟ ΑΠΑΝΤΗΣΗΣ. ΕΠΙΣΤΡΕΨΕ ΜΟΝΟ εγκυρο JSON με ΑΚΡΙΒΩΣ αυτο το σχημα:
 {
- "situation": { "headline": "συντομος τιτλος", "where_it_stands": "1-2 προτασεις" },
+ "situation": { "headline": "συντομος τιτλος", "where_it_stands": "1-2 προτασεις: που στεκεται τωρα" },
  "foresight": [ { "label": "Κλιμακωση", "path": "escalate", "probability": 55, "rationale": "γιατι", "signals": ["σημα 1","σημα 2"], "window": "π.χ. 24-48 ωρες" } ],
  "moves": [ { "label": "Δηλωση τωρα", "move": "act_now", "best_for_path": "escalate", "upside": "...", "downside": "...", "opponent_counter": "...", "risk": "medium" } ],
- "connection": "ο συλλογισμος",
- "recommendation": { "move_label": "...", "because": "γιατι", "watch": ["1","2"] }
+ "connection": "ο συλλογισμος που ενωνει foresight & κινηση",
+ "recommendation": { "move_label": "...", "because": "γιατι αυτη", "watch": ["τι να παρακολουθεις 1","2"] }
 }
 Επιτρεπτα path: escalate | deescalate | pivot | stall. Επιτρεπτα move: act_now | wait | institutional | attack | silent. Επιτρεπτο risk: low | medium | high.`;
 
