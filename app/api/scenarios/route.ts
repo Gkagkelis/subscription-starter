@@ -208,6 +208,7 @@ async function handle(request: Request) {
     const eventId = url.searchParams.get("event_id");
     const partyKey = url.searchParams.get("party") || "elas";
     const standalone = url.searchParams.get("standalone") === "1";
+    const force = url.searchParams.get("force") === "1";
     if (!eventId && !standalone) return NextResponse.json({ error: "missing event_id" }, { status: 400 });
 
     // ΔΙΚΑ ΣΟΥ ΣΤΟΙΧΕΙΑ (Φάση 1): κείμενο (paste/CSV/TXT) + link
@@ -257,6 +258,36 @@ async function handle(request: Request) {
         return NextResponse.json({ error: "event_not_found", detail: error?.message || null }, { status: 404 });
       }
       ev = evRow;
+
+      // ΕΞΟΙΚΟΝΟΜΗΣΗ: αν υπαρχει αποθηκευμενο σεναριο για το ΙΔΙΟ γεγονος (και δεν αλλαξε τιποτα),
+      // δωσε το ετοιμο χωρις AI. Το force=1 (κουμπι «Νεα αναλυση») παρακαμπτει.
+      const hasCustom = Boolean(customText || linkText || (customFilesRaw && customFilesRaw.length));
+      if (!hasCustom) {
+        const scenSignature = JSON.stringify([
+          ev.title || "",
+          (ev as any).article_count ?? null,
+          (ev as any).source_count ?? null,
+          Math.round(Number((ev as any).event_score) || 0),
+        ]);
+        const scenKey = "scenario_v1__" + eventId + "__" + partyKey;
+        if (!force) {
+          try {
+            const { data: cRows } = await supabase
+              .from("analysis_cache")
+              .select("result, updated_at")
+              .is("situation_id", null)
+              .eq("analysis_kind", scenKey)
+              .limit(1);
+            const row: any = Array.isArray(cRows) ? cRows[0] : null;
+            const ageOk = row && Date.now() - new Date(row.updated_at || 0).getTime() < 24 * 60 * 60 * 1000;
+            if (ageOk && row.result?.input_signature === scenSignature && row.result?.payload?.scenarios) {
+              return NextResponse.json({ ...row.result.payload, source: "cache" });
+            }
+          } catch {
+            /* συνεχιζουμε κανονικα */
+          }
+        }
+      }
     } else {
       ev = {
         id: null,
@@ -382,13 +413,45 @@ async function handle(request: Request) {
       // μη μπλοκάρεις την απάντηση αν αποτύχει η αποθήκευση
     }
 
-    return NextResponse.json({
+    const responsePayload = {
       success: true,
       event: { id: ev.id, title: ev.title, topic: ev.topic },
       party: partyKey,
       scenarios: parsed,
       generated_at: new Date().toISOString(),
-    });
+    };
+
+    // Αποθηκευση αποτελεσματος για επαναχρηση (0 κοστος στα ιδια) — μονο event-based, χωρις custom στοιχεια
+    const cacheableScenario =
+      Boolean(eventId && !standalone) && !Boolean(customText || linkText || (customFilesRaw && customFilesRaw.length));
+    if (cacheableScenario) try {
+      const scenKeyW = "scenario_v1__" + eventId + "__" + partyKey;
+      const scenSigW = JSON.stringify([
+        ev.title || "",
+        (ev as any).article_count ?? null,
+        (ev as any).source_count ?? null,
+        Math.round(Number((ev as any).event_score) || 0),
+      ]);
+      const row = {
+        situation_id: null,
+        organization_id: null,
+        analysis_kind: scenKeyW,
+        input_hash: "v1",
+        model_used: "claude-sonnet-4-6",
+        result: { payload: responsePayload, input_signature: scenSigW, generated_at: new Date().toISOString() },
+      };
+      const { data: upd } = await supabase
+        .from("analysis_cache")
+        .update(row)
+        .is("situation_id", null)
+        .eq("analysis_kind", scenKeyW)
+        .select("analysis_kind");
+      if (!upd || upd.length === 0) await supabase.from("analysis_cache").insert(row);
+    } catch {
+      /* best-effort */
+    }
+
+    return NextResponse.json(responsePayload);
   } catch (e: any) {
     return NextResponse.json({ error: "server_error", detail: String(e?.message || e) }, { status: 500 });
   }
