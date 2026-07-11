@@ -250,8 +250,9 @@ async function processOneEvent(
   system: string,
   eventId: string,
   partyKey: string,
-  origin: string
-): Promise<{ status: "ai" | "ai_down"; title?: string; ai_error?: string | null }> {
+  origin: string,
+  force = false
+): Promise<{ status: "ai" | "ai_down" | "skipped"; title?: string; ai_error?: string | null }> {
   const { data: ev, error } = await supabase
     .from("v_political_events_live")
     .select("*")
@@ -259,6 +260,31 @@ async function processOneEvent(
     .single();
 
   if (error || !ev) return { status: "ai_down", ai_error: error?.message || "event_not_found" };
+
+  // ΕΞΟΙΚΟΝΟΜΗΣΗ: υπογραφη εισοδου του γεγονοτος. Αν ΔΕΝ αλλαξε απο το τελευταιο brief,
+  // δεν ξαναγραφουμε (κρατιεται το ηδη αποθηκευμενο) — μηδενικη απωλεια ποιοτητας.
+  const inputSignature = JSON.stringify([
+    ev.title || "",
+    (ev as any).article_count ?? null,
+    (ev as any).source_count ?? null,
+    Math.round(Number((ev as any).event_score) || 0),
+    (ev as any).last_seen_at || (ev as any).updated_at || null,
+  ]);
+  let existingBriefEarly: any = null;
+  try {
+    const { data: existingRowEarly } = await supabase
+      .from("event_party_briefs")
+      .select("advisor_brief")
+      .eq("event_id", eventId)
+      .eq("party_key", partyKey)
+      .maybeSingle();
+    existingBriefEarly = existingRowEarly?.advisor_brief || null;
+  } catch {
+    existingBriefEarly = null;
+  }
+  if (!force && existingBriefEarly && existingBriefEarly._input_signature === inputSignature) {
+    return { status: "skipped", title: ev.title };
+  }
 
   // ΔΕΔΟΜΕΝΑ ΜΝΗΜΗΣ: τροφοδότηση του brief από CSV #1/#2/#3 + ζωντανές δημοσκοπήσεις
   let dataContext = "";
@@ -300,20 +326,10 @@ async function processOneEvent(
   const redTeam = brief?.strategic_diagnosis?.strategic_risk || brief?.issue?.political_risk || null;
   const summary = brief?.daily_brief?.what_is_happening || ev.summary || null;
 
-  // Διατήρησε τυχόν voices_pulse (από τα Πρόσωπα) ώστε να μη χαθεί όταν ξαναγράφεται το brief.
-  let mergedBrief: any = brief;
-  try {
-    const { data: existingRow } = await supabase
-      .from("event_party_briefs")
-      .select("advisor_brief")
-      .eq("event_id", eventId)
-      .eq("party_key", partyKey)
-      .maybeSingle();
-    const prevPulse = (existingRow?.advisor_brief as any)?.voices_pulse;
-    if (prevPulse) mergedBrief = { ...brief, voices_pulse: prevPulse };
-  } catch {
-    /* αν αποτύχει, γράφουμε το brief κανονικά */
-  }
+  // Διατήρησε τυχόν voices_pulse (από τα Πρόσωπα) + αποθηκευσε την υπογραφη εισοδου.
+  let mergedBrief: any = { ...brief, _input_signature: inputSignature };
+  const prevPulse = existingBriefEarly?.voices_pulse;
+  if (prevPulse) mergedBrief = { ...mergedBrief, voices_pulse: prevPulse };
 
   await supabase
     .from("event_party_briefs")
@@ -371,7 +387,7 @@ async function handle(request: Request) {
 
       for (const id of ids) {
         if (Date.now() - startedAt > BUDGET_MS) break;
-        const r = await processOneEvent(supabase, system, id, partyKey, url.origin);
+        const r = await processOneEvent(supabase, system, id, partyKey, url.origin, true);
         if (r.status === "ai_down") {
           aiError = r.ai_error || "ai_down";
           break;
