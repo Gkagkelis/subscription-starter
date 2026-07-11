@@ -76,14 +76,14 @@ export default function AttacksPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function research(pk = party, pl = partyLabel) {
+  async function research(pk = party, pl = partyLabel, force = false) {
     setLoading(true); setErr(""); setRan(true);
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), 55000);
     try {
       const r = await fetch("/api/attacks", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mode: "research", party: pk, partyLabel: pl, windowHours: 48 }), signal: ctrl.signal,
+        body: JSON.stringify({ mode: "research", party: pk, partyLabel: pl, windowHours: 48, force }), signal: ctrl.signal,
       });
       const j = await r.json();
       if (j?.ok) {
@@ -101,12 +101,12 @@ export default function AttacksPage() {
     if (!scenarios[key]?.data && !scenarios[key]?.loading) makeScenario(key, attack);
   }
 
-  async function makeScenario(key: string, attack: Attack) {
+  async function makeScenario(key: string, attack: Attack, force = false) {
     setScenarios((s) => ({ ...s, [key]: { loading: true, data: null } }));
     try {
       const r = await fetch("/api/attacks", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mode: "scenario", party, partyLabel, attack }),
+        body: JSON.stringify({ mode: "scenario", party, partyLabel, attack, force }),
       });
       const j = await r.json();
       setScenarios((s) => ({ ...s, [key]: { loading: false, data: j?.ok ? j.scenario : null } }));
@@ -268,7 +268,7 @@ export default function AttacksPage() {
         <div className="mb-1 text-[11px] tracking-[0.15em]" style={{ color: CYAN_L }}>NORAYA · ΕΠΙΘΕΣΕΙΣ</div>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-2xl font-bold text-zinc-50">Επιθέσεις στον οργανισμό — <span style={{ color: CYAN_L }}>{partyLabel}</span></h1>
-          <button onClick={() => research()} disabled={loading} className="rounded-xl px-4 py-2 text-[13px] font-semibold text-slate-950 transition disabled:opacity-50" style={{ background: CYAN }}>
+          <button onClick={() => research(party, partyLabel, true)} disabled={loading} className="rounded-xl px-4 py-2 text-[13px] font-semibold text-slate-950 transition disabled:opacity-50" style={{ background: CYAN }}>
             {loading ? "Ψάχνει…" : "Ανανέωση"}
           </button>
         </div>
@@ -317,7 +317,7 @@ export default function AttacksPage() {
                 {a.target ? <> → <b className="text-zinc-200">{a.target}</b></> : <> → {partyLabel}</>}: {a.claim}
               </div>
               {sc?.loading && <div className="py-16 text-center text-[13px] text-zinc-500">Ο Noraya χτίζει το σενάριο…</div>}
-              {sc?.data && <ScenarioView s={sc.data} onRegen={() => makeScenario(open.key, a)} />}
+              {sc?.data && <ScenarioView s={sc.data} onRegen={() => makeScenario(open.key, a, true)} />}
               {sc && !sc.loading && !sc.data && (
                 <div className="py-10 text-center">
                   <div className="text-[13px] text-amber-300">Δεν βγήκε σενάριο.</div>
