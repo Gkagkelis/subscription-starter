@@ -3,7 +3,7 @@
   "crons": [
     {
       "path": "/api/ingest?token=dev",
-      "schedule": "*/30 * * * *"
+      "schedule": "0 * * * *"
     },
     {
       "path": "/api/classify-bulk?token=dev",
@@ -23,19 +23,19 @@
     },
     {
       "path": "/api/situation-engine/detect-events",
-      "schedule": "25 */3 * * *"
+      "schedule": "25 4,7,10,13,16,19 * * *"
     },
     {
       "path": "/api/situation-engine/advise-event",
-      "schedule": "45 */3 * * *"
+      "schedule": "45 4,7,10,13,16,19 * * *"
     },
     {
       "path": "/api/advisor/strategy-brief-precompute",
-      "schedule": "55 */3 * * *"
+      "schedule": "55 4,7,10,13,16,19 * * *"
     },
     {
       "path": "/api/radar-tick",
-      "schedule": "5 */3 * * *"
+      "schedule": "5 4,7,10,13,16,19 * * *"
     },
     {
       "path": "/api/cron/fetch-topic-trends?token=dev&limit=20",
