@@ -128,6 +128,28 @@ export async function GET(req: Request) {
     .filter((r) => r.topic && r.topic !== "Μη ταξινομημένο")
     .slice(0, 3);
 
+  // ΕΞΟΙΚΟΝΟΜΗΣΗ: υπογραφη εισοδου. Αν η ατζεντα ΔΕΝ αλλαξε απο το τελευταιο brief,
+  // δεν ξαναγραφουμε — το αποθηκευμενο ισχυει ακομα (μηδενικη απωλεια ποιοτητας).
+  const inputSignature = JSON.stringify(
+    signals.map((s: any) => [s.topic, s.article_count ?? null, s.source_count ?? null, Math.round(Number(s.agenda_score) || 0)])
+  );
+  const forceRun = new URL(req.url).searchParams.get("force") === "1";
+  if (!forceRun) {
+    try {
+      const { data: existingCache } = await supabase
+        .from("analysis_cache")
+        .select("result")
+        .is("situation_id", null)
+        .eq("analysis_kind", CACHE_KEY)
+        .maybeSingle();
+      if ((existingCache?.result as any)?.input_signature === inputSignature) {
+        return NextResponse.json({ ok: true, source: "cache_unchanged", stored: false, elapsed_ms: Date.now() - t0 });
+      }
+    } catch {
+      /* αν αποτυχει ο ελεγχος, προχωραμε κανονικα */
+    }
+  }
+
   if (signals.length === 0) {
     return NextResponse.json({
       ok: false,
@@ -253,6 +275,7 @@ export async function GET(req: Request) {
     ...parsed,
     profile: orgData || null,
     agenda_used: signals,
+    input_signature: inputSignature,
     generated_at: new Date().toISOString(),
   };
 
