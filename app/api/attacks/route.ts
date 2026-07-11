@@ -87,6 +87,45 @@ async function callClaude(system: string, user: string, maxTokens = 1800): Promi
   const data = await resp.json();
   return (data?.content || []).filter((b: any) => b.type === "text").map((b: any) => b.text).join("").trim();
 }
+// --- Result cache (μοτιβο analysis_cache, οπως strategic-image) ---
+function strHash(x: string): string {
+  let h = 5381;
+  for (let i = 0; i < x.length; i++) h = ((h << 5) + h + x.charCodeAt(i)) >>> 0;
+  return h.toString(36);
+}
+async function readResultCache(key: string, ttlMs: number): Promise<any | null> {
+  try {
+    const { data } = await svc()
+      .from("analysis_cache")
+      .select("result, updated_at")
+      .is("situation_id", null)
+      .eq("analysis_kind", key)
+      .limit(1);
+    const row: any = Array.isArray(data) ? data[0] : null;
+    if (!row) return null;
+    if (Date.now() - new Date(row.updated_at || 0).getTime() > ttlMs) return null;
+    return row.result?.payload ?? null;
+  } catch { return null; }
+}
+async function writeResultCache(key: string, payload: any) {
+  try {
+    const row = {
+      situation_id: null,
+      organization_id: null,
+      analysis_kind: key,
+      input_hash: "v1",
+      model_used: MODEL,
+      result: { payload, generated_at: new Date().toISOString() },
+    };
+    const sb = svc();
+    const { data: upd } = await sb
+      .from("analysis_cache").update(row)
+      .is("situation_id", null).eq("analysis_kind", key)
+      .select("analysis_kind");
+    if (!upd || upd.length === 0) await sb.from("analysis_cache").insert(row);
+  } catch { /* best-effort */ }
+}
+
 function parseJsonLoose(raw: string): any | null {
   let s = (raw || "").trim().replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim();
   try { return JSON.parse(s); } catch {}
@@ -271,15 +310,32 @@ export async function POST(req: NextRequest) {
     const partyLabel = String(body?.partyLabel || partyKey || "το κομμα").trim();
     if (!partyKey) return json({ ok: false, error: "no_party" }, 400);
 
+    const force = body?.force === true;
+
     if (mode === "scenario") {
-      const scenario = await doScenario(partyKey, partyLabel, body?.attack || {});
+      const atk = body?.attack || {};
+      const scenKey = "attacks_scenario_v1__" + partyKey + "__" + strHash(String(atk?.claim || "") + "|" + String(atk?.url || ""));
+      if (!force) {
+        const cached = await readResultCache(scenKey, 24 * 60 * 60 * 1000);
+        if (cached) return json({ ...cached, source: "cache" });
+      }
+      const scenario = await doScenario(partyKey, partyLabel, atk);
       if (!scenario) return json({ ok: false, error: "scenario_parse" });
-      return json({ ok: true, scenario });
+      const payload = { ok: true, scenario };
+      await writeResultCache(scenKey, payload);
+      return json(payload);
     }
 
     const windowHours = Number(body?.windowHours) > 0 ? Number(body.windowHours) : WINDOW_HOURS_DEFAULT;
+    const resKey = "attacks_research_v1__" + partyKey + "__" + windowHours;
+    if (!force) {
+      const cached = await readResultCache(resKey, 30 * 60 * 1000);
+      if (cached) return json({ ...cached, source: "cache" });
+    }
     const res = await doResearch(partyKey, partyLabel, windowHours);
-    return json({ ok: true, windowHours, ...res });
+    const payload = { ok: true, windowHours, ...res };
+    if ((res.orgAttacks?.length || 0) + (res.personAttacks?.length || 0) > 0) await writeResultCache(resKey, payload);
+    return json(payload);
   } catch (err) {
     return json({ ok: false, error: String(err) }, 500);
   }
