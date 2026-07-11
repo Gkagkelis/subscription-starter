@@ -78,9 +78,11 @@ Noise αν είναι καθαρά: αθλητικά χωρίς θεσμική �
 - noise_reason: reason ή null
 
 ΑΠΑΝΤΗΣΕ ΜΟΝΟ ΣΕ JSON ARRAY, χωρίς markdown:
-[{"index":0,"topic":"...","sentiment":"...","relevance":N,"is_political":true,"public_relevance":true,"relevance_domain":"...","situation_potential":N,"agenda_potential":N,"urgency":N,"affected_groups":["..."],"why_it_matters":"...","is_noise":false,"noise_reason":null}]
+[{"index":0,"topic":"...","sentiment":"...","relevance":N,"is_political":true,"public_relevance":true,"relevance_domain":"...","situation_potential":N,"agenda_potential":N,"urgency":N,"affected_groups":["..."],"why_it_matters":"...","is_noise":false,"noise_reason":null}]`;
 
-ΑΡΘΡΑ:
+  // Το μεταβλητο μερος (τα αρθρα του batch) παει στο user message —
+  // ωστε το σταθερο (οδηγιες+θεματα+schema) να κασαρεται (prompt caching, -90% στις επαναληψεις).
+  const userPrompt = `ΑΡΘΡΑ:
 ${articlesList}`;
 
   const response = await fetch("https://api.anthropic.com/v1/messages", {
@@ -93,7 +95,8 @@ ${articlesList}`;
     body: JSON.stringify({
       model: classifierModel,
       max_tokens: 10000,
-      messages: [{ role: "user", content: prompt }],
+      system: [{ type: "text", text: prompt, cache_control: { type: "ephemeral" } }],
+      messages: [{ role: "user", content: userPrompt }],
     }),
   });
 
