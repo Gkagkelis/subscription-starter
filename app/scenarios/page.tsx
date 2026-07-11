@@ -346,12 +346,12 @@ export default function ScenariosPage() {
     }
   }
 
-  async function generate(eventId: string) {
+  async function generate(eventId: string, force = false) {
     setScenarios(null);
     setErrMsg(null);
     setGenerating(true);
     try {
-      const r = await fetch(`/api/scenarios?token=dev&party=${encodeURIComponent(party)}&event_id=${encodeURIComponent(eventId)}`, {
+      const r = await fetch(`/api/scenarios?token=dev&party=${encodeURIComponent(party)}&event_id=${encodeURIComponent(eventId)}${force ? "&force=1" : ""}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ custom_text: customText, custom_link: customLink, custom_files: customFiles }),
@@ -649,7 +649,7 @@ export default function ScenariosPage() {
                       </div>
                     </div>
                   ) : null}
-                  <button type="button" onClick={() => selectedEvent && generate(selectedEvent.id)} className="mt-5 rounded-xl border border-[#243049] bg-white/[0.03] px-3 py-1.5 text-[11px] text-zinc-400 transition hover:text-zinc-200">↻ Νέα ανάλυση</button>
+                  <button type="button" onClick={() => selectedEvent && generate(selectedEvent.id, true)} className="mt-5 rounded-xl border border-[#243049] bg-white/[0.03] px-3 py-1.5 text-[11px] text-zinc-400 transition hover:text-zinc-200">↻ Νέα ανάλυση</button>
                 </div>
               </div>
             ) : null}
