@@ -158,18 +158,30 @@ showbiz/lifestyle/celebrities/πορνογραφία/κουτσομπολιό,
 Σύνοψη: ΜΙΑ πρόταση με βάση ΜΟΝΟ τους τίτλους. Μην εφευρίσκεις.`;
 }
 
-function buildUserPrompt(topic: string, articles: ArticleRow[]) {
+type ExistingEvent = { event_key: string; title: string; topic: string };
+
+function buildUserPrompt(topic: string, articles: ArticleRow[], existing: ExistingEvent[] = []) {
   const lines = articles
     .map((a) => `- [id:${a.id}] (${a.source_name || "—"}) ${a.title}`)
     .join("\n");
 
-  return `ΘΕΜΑΤΙΚΗ: ${topic}
+  const existingBlock = existing.length
+    ? `\nΥΠΑΡΧΟΝΤΑ ΕΝΕΡΓΑ ΓΕΓΟΝΟΤΑ (για συγχώνευση):\n${existing
+        .map((e, i) => `- [K${i + 1}] ${e.title}`)
+        .join("\n")}\n
+ΚΑΝΟΝΑΣ ΣΥΓΧΩΝΕΥΣΗΣ: Αν κάποια άρθρα αφορούν την ΙΔΙΑ ιστορία με υπάρχον γεγονός
+(ίδιο περιστατικό/υπόθεση, έστω με άλλη διατύπωση ή νέα εξέλιξη), ΜΗΝ δημιουργήσεις
+νέο γεγονός — βάλε "existing_ref": "K<αριθμός>" ώστε τα άρθρα να προστεθούν στο υπάρχον.
+ΕΝΑ γεγονός ανά ιστορία. Νέο γεγονός ΜΟΝΟ για πραγματικά νέα ιστορία (existing_ref: null).\n`
+    : "";
 
+  return `ΘΕΜΑΤΙΚΗ: ${topic}
+${existingBlock}
 ΑΡΘΡΑ:
 ${lines}
 
 Επίστρεψε ΜΟΝΟ έγκυρο JSON, χωρίς markdown, χωρίς \`\`\`:
-{ "events": [ { "title": "...", "summary": "...", "matched_theme": "...", "article_ids": ["id1"] } ] }
+{ "events": [ { "existing_ref": "K1-ή-null", "title": "...", "summary": "...", "matched_theme": "...", "article_ids": ["id1"] } ] }
 
 Αν ΚΑΝΕΝΑ άρθρο δεν είναι πολιτικά σημαντικό: { "events": [] }`;
 }
@@ -263,9 +275,28 @@ async function processTopic(
 
   const validIds = new Set(list.map((a) => a.id));
 
+  // ΣΥΓΧΩΝΕΥΣΗ: φερε τα υπαρχοντα ενεργα γεγονοτα (7 ημερων, ΟΛΩΝ των θεματων —
+  // η ιδια ιστορια συχνα μοιραζεται σε 2 θεματα, π.χ. Δικαιοσυνη & Ασφαλεια).
+  // Fail-safe: αν αποτυχει το query, existing=[] και η συμπεριφορα μενει ως εχει.
+  let existing: ExistingEvent[] = [];
+  try {
+    const since7d = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const { data: exRows } = await supabase
+      .from("political_events")
+      .select("event_key,title,topic,last_article_at")
+      .gte("last_article_at", since7d)
+      .order("last_article_at", { ascending: false })
+      .limit(40);
+    existing = (Array.isArray(exRows) ? exRows : [])
+      .filter((r: any) => r?.event_key && r?.title)
+      .map((r: any) => ({ event_key: String(r.event_key), title: String(r.title), topic: String(r.topic || topic) }));
+  } catch {
+    existing = [];
+  }
+
   const { text: raw, error: aiError } = await callAnthropic(
     buildSystemPrompt(themes),
-    buildUserPrompt(topic, list)
+    buildUserPrompt(topic, list, existing)
   );
 
   if (aiError) return { topic, events: 0, ai_error: aiError, articles_seen: list.length };
@@ -276,7 +307,7 @@ async function processTopic(
     // Retry μια φορα, ζητωντας αυστηρα ολοκληρωμενο JSON
     const retry = await callAnthropic(
       buildSystemPrompt(themes),
-      buildUserPrompt(topic, list) + "\n\nΠΡΟΣΟΧΗ: επεστρεψε ΜΟΝΟ εγκυρο, ΟΛΟΚΛΗΡΩΜΕΝΟ JSON. Χωρις κειμενο πριν/μετα."
+      buildUserPrompt(topic, list, existing) + "\n\nΠΡΟΣΟΧΗ: επεστρεψε ΜΟΝΟ εγκυρο, ΟΛΟΚΛΗΡΩΜΕΝΟ JSON. Χωρις κειμενο πριν/μετα."
     );
     parsed = retry.text ? parseAiJson(retry.text) : null;
   }
@@ -295,11 +326,21 @@ async function processTopic(
     if (!title) continue;
     if (isSensitiveEvent(title)) continue; // μη-πολιτικα/ευαισθητα: εξαιρουνται
 
+    // Συγχωνευση σε υπαρχον γεγονος: ιδιο event_key/τιτλος/θεμα ωστε το upsert
+    // να ΠΡΟΣΘΕΣΕΙ τα αρθρα στο υπαρχον αντι να δημιουργησει παραλλαγη.
+    let target: ExistingEvent | null = null;
+    const refRaw = String((ev as any).existing_ref || "").trim().toUpperCase();
+    const refIdx = /^K(\d+)$/.exec(refRaw);
+    if (refIdx) {
+      const i = Number(refIdx[1]) - 1;
+      if (i >= 0 && i < existing.length) target = existing[i];
+    }
+
     const { error: rpcErr } = await supabase.rpc("upsert_political_event", {
       p_organization_id: null,
-      p_topic: topic,
-      p_event_key: stableEventKey(topic, ids),
-      p_title: title,
+      p_topic: target ? target.topic : topic,
+      p_event_key: target ? target.event_key : stableEventKey(topic, ids),
+      p_title: target ? target.title : title,
       p_summary: (ev.summary || "").trim() || null,
       p_article_ids: ids,
       p_detection_method: "ai",
