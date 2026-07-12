@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { computeNorayaPriorityScore } from "@/lib/noraya-priority-score";
-import { isSensitiveEvent, isForeignNoise, isCommercialNoise, isForeignPolitics, politicalCatalystBoost } from "@/lib/noraya/noise-filters";
+import { isSensitiveEvent, isForeignNoise, isCommercialNoise, isForeignPolitics, politicalCatalystBoost, stateAccountabilityBoost } from "@/lib/noraya/noise-filters";
 
 // Φιλτρο ευαισθητων/μη-πολιτικων περιστατικων (αστυνομικο δελτιο, ανηλικοι, τραγωδιες)
 // — ΔΕΝ εμφανιζονται ΠΟΤΕ ως πολιτικες προτεραιοτητες.
@@ -293,7 +293,9 @@ function buildAgendaOverview(agendaRows: any[] = [], eventRows: any[] = [], tren
     const politicalWeight = Math.round(politicalFactor * eventsFactor * 100) / 100;
     // Πολιτικος καταλυτης: αν γεγονος του θεματος εμπλεκει πρωθυπουργο/υπουργους/κομματα -> +6
     const catalystBonus = relatedEventsRaw.some((e: any) => politicalCatalystBoost(e?.title) > 0) ? 6 : 0;
-    const weightedScore = Math.round(score * politicalWeight) + catalystBonus;
+    // Κρατικη λογοδοσια: ανθρωπινο κοστος + κρατικη ευθυνη στο θεμα -> ισχυρο bonus (top-3 by design)
+    const stateBonus = relatedEventsRaw.some((e: any) => stateAccountabilityBoost(e?.title) > 0) ? 10 : 0;
+    const weightedScore = Math.round(score * politicalWeight) + catalystBonus + stateBonus;
 
     const strategicIndex = strategicIndexScore(weightedScore, trendInfo.search_interest_score, boost, opportunityBonus);
     const norayaPriority = computeNorayaPriorityScore({
@@ -333,6 +335,7 @@ function buildAgendaOverview(agendaRows: any[] = [], eventRows: any[] = [], tren
         raw_signal: score,
         political_weight: politicalWeight,
         political_catalyst_bonus: catalystBonus,
+        state_accountability_bonus: stateBonus,
         political_weighted_signal: weightedScore,
         search_interest: trendInfo.search_interest_score,
         strategic_boost: boost,
