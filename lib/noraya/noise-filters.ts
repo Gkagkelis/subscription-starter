@@ -52,3 +52,11 @@ export function isForeignPolitics(title?: string | null): boolean {
 export function isNoiseTitle(title?: string | null): boolean {
   return isSensitiveEvent(title) || isForeignNoise(title) || isCommercialNoise(title) || isForeignPolitics(title);
 }
+
+// 5) Πολιτικος καταλυτης: οταν το γεγονος εμπλεκει πρωθυπουργο/υπουργους/αρχηγους/Βουλη,
+//    ειναι η στιγμη που το επιτελειο ΠΡΕΠΕΙ να το δει — μικρο, σταθερο boost.
+export const POLITICAL_CATALYST_RE =
+  /(πρωθυπουργ|μητσοτ[αά]κ|υπουργ|κυβ[εέ]ρνησ|τσ[ιί]πρα|ανδρουλ[αά]κ|φ[αά]μελλ|κουτσο[υύ]μπα|βελ[οό]πουλ|κ[οό]μμα\b|βουλ[ηή]|κοινοβουλ|αντιπολ[ιί]τευσ|πολιτικ[ηή] θ[υύ]ελλα|πολιτικ[εέ]ς αντιδρ[αά]σεις)/i;
+export function politicalCatalystBoost(title?: string | null): number {
+  return POLITICAL_CATALYST_RE.test(String(title || "")) ? 8 : 0;
+}
