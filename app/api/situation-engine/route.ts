@@ -15,6 +15,15 @@ const GREEK_CONTEXT_RE = /(ελλ[αά]δ|ελληνικ|αθ[ηή]ν|θεσσα
 // Εμπορικος/καταναλωτικος θορυβος (εκπτωσεις κ.λπ.) — ΕΚΤΟΣ αν εχει πολιτικη αναφορα (φοροι/μετρα/κυβερνηση)
 const COMMERCIAL_NOISE_RE = /((θεριν|χειμεριν|ενδιαμεσ)\w*\s+εκπτ[ωώ]σε|εκπτ[ωώ]σεις\s+(ξεκιν|αρχιζ|λ[ηή]γ)|black friday|cyber monday|εκπτωσιακ)/i;
 const POLITICAL_CONTEXT_RE = /(φ[οό]ρο|φορολογ|κυβ[εέ]ρν|υπουργ|μ[εέ]τρ[οα]|νομοσχ[εέ]δι|επ[ιί]δομ|βουλ[ηή])/i;
+// Εσωτερικη πολιτικη ΞΕΝΩΝ χωρων — κοβεται ΕΚΤΟΣ αν αφορα Τουρκια/ελληνοτουρκικα,
+// αποφασεις ΕΕ/ΝΑΤΟ που δεσμευουν την Ελλαδα, ή αναφερει ρητα την Ελλαδα.
+const FOREIGN_POLITICS_RE = /(στ[αά]ρμερ|starmer|μακρ[οό]ν|σολτς|\bμερτς|βρεταν|ηνωμ[εέ]νο βασ[ιί]λειο|γαλλικ[ηή] κυβ[εέ]ρν|γερμανικ[ηή] κυβ[εέ]ρν|ιταλικ[ηή] κυβ[εέ]ρν|ισπανικ|πολωνικ|ολλανδικ|λευκ[οό]ς ο[ιί]κος|αμερικανικ[εέ]ς εκλογ|πρωθυπουργ[οό]ς (της )?(βρεταν|γαλλ|γερμαν|ιταλ|ισπαν))/i;
+const GREEK_STAKE_RE = /(ελλ[αά]δ|ελλην|ελληνοτουρκ|τουρκ|ερντογ[αά]ν|κ[υύ]προ|αιγα[ιί]|casus belli|μητσοτ[αά]κ|ευρωπαϊκ[οό] συμβο[υύ]λιο|σ[υύ]νοδο[ςυ]? κορυφ[ηή]ς|αποφ[αά]σ\w* (ΕΕ|νατο)|δασμ)/i;
+function isForeignPolitics(title?: string | null): boolean {
+  const t = String(title || "");
+  return FOREIGN_POLITICS_RE.test(t) && !GREEK_STAKE_RE.test(t);
+}
+
 function isCommercialNoise(title?: string | null): boolean {
   const t = String(title || "");
   return COMMERCIAL_NOISE_RE.test(t) && !POLITICAL_CONTEXT_RE.test(t);
@@ -473,7 +482,7 @@ export async function GET(req: Request) {
   }
 
   const allEventRows = (!eventError && Array.isArray(eventRows) ? eventRows : []).filter(
-    (r: any) => !isSensitiveEvent((r as any)?.title) && !isForeignNoise((r as any)?.title) && !isCommercialNoise((r as any)?.title),
+    (r: any) => !isSensitiveEvent((r as any)?.title) && !isForeignNoise((r as any)?.title) && !isCommercialNoise((r as any)?.title) && !isForeignPolitics((r as any)?.title),
   );
   // ΒΗΜΑ 1 — ΦΙΛΤΡΟ (gate): μόνο ΦΡΕΣΚΑ θέματα (≤48 ώρες, βάσει ημερομηνίας πιο πρόσφατου άρθρου).
   //          Η φρεσκάδα ΔΕΝ είναι κριτήριο σημαντικότητας — μόνο "ποιος μπαίνει στο γήπεδο".
