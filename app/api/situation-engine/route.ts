@@ -1,38 +1,11 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { computeNorayaPriorityScore } from "@/lib/noraya-priority-score";
+import { isSensitiveEvent, isForeignNoise, isCommercialNoise, isForeignPolitics } from "@/lib/noraya/noise-filters";
 
 // Φιλτρο ευαισθητων/μη-πολιτικων περιστατικων (αστυνομικο δελτιο, ανηλικοι, τραγωδιες)
 // — ΔΕΝ εμφανιζονται ΠΟΤΕ ως πολιτικες προτεραιοτητες.
-const SENSITIVE_EVENT_RE = /(αν[ηή]λικ|εξαφ[αά]νι|αγνο[οό]?[υύ]μεν|βιασμ|αποπλ[αά]ν|κακοπο[ιί]η|παιδεραστ|αυτοκτον|απαγωγ|πνιγμ|τροχα[ιί]ο)/i;
-function isSensitiveEvent(title?: string | null): boolean {
-  return SENSITIVE_EVENT_RE.test(String(title || ""));
-}
-
-// Φιλτρο ξενων-εταιρικων/διεθνων ΧΩΡΙΣ ελληνικο πολιτικο αντικτυπο (θορυβος)
-const FOREIGN_NOISE_RE = /(microsoft|google|amazon|\bapple\b|\bmeta\b|tesla|nvidia|openai|samsung|\bintel\b|boeing|volkswagen|\bbmw\b|mercedes|toyota|nasdaq|dow jones|wall street|silicon valley|federal reserve|γερμανικ[ήη][^.]{0,25}(αυτοκινητο|βιομηχαν)|κινεζικ[ήη][^.]{0,25}(ανταγωνισ|βιομηχαν|αυτοκινητο))/i;
-const GREEK_CONTEXT_RE = /(ελλ[αά]δ|ελληνικ|αθ[ηή]ν|θεσσαλον|κυβ[εέ]ρν|βουλ[ήη]|υπουργ|μητσοτ[αά]κ|ΕΛΑΣ|ΠΑΣΟΚ|ΣΥΡΙΖΑ|ΚΚΕ|τσ[ιί]πρα|ανδρουλ[αά]κ)/i;
-// Εμπορικος/καταναλωτικος θορυβος (εκπτωσεις κ.λπ.) — ΕΚΤΟΣ αν εχει πολιτικη αναφορα (φοροι/μετρα/κυβερνηση)
-const COMMERCIAL_NOISE_RE = /((θεριν|χειμεριν|ενδιαμεσ)\w*\s+εκπτ[ωώ]σε|εκπτ[ωώ]σεις\s+(ξεκιν|αρχιζ|λ[ηή]γ)|black friday|cyber monday|εκπτωσιακ)/i;
-const POLITICAL_CONTEXT_RE = /(φ[οό]ρο|φορολογ|κυβ[εέ]ρν|υπουργ|μ[εέ]τρ[οα]|νομοσχ[εέ]δι|επ[ιί]δομ|βουλ[ηή])/i;
-// Εσωτερικη πολιτικη ΞΕΝΩΝ χωρων — κοβεται ΕΚΤΟΣ αν αφορα Τουρκια/ελληνοτουρκικα,
-// αποφασεις ΕΕ/ΝΑΤΟ που δεσμευουν την Ελλαδα, ή αναφερει ρητα την Ελλαδα.
-const FOREIGN_POLITICS_RE = /(στ[αά]ρμερ|starmer|μακρ[οό]ν|σολτς|\bμερτς|βρεταν|ηνωμ[εέ]νο βασ[ιί]λειο|γαλλικ[ηή] κυβ[εέ]ρν|γερμανικ[ηή] κυβ[εέ]ρν|ιταλικ[ηή] κυβ[εέ]ρν|ισπανικ|πολωνικ|ολλανδικ|λευκ[οό]ς ο[ιί]κος|αμερικανικ[εέ]ς εκλογ|πρωθυπουργ[οό]ς (της )?(βρεταν|γαλλ|γερμαν|ιταλ|ισπαν))/i;
-const GREEK_STAKE_RE = /(ελλ[αά]δ|ελλην|ελληνοτουρκ|τουρκ|ερντογ[αά]ν|κ[υύ]προ|αιγα[ιί]|casus belli|μητσοτ[αά]κ|ευρωπαϊκ[οό] συμβο[υύ]λιο|σ[υύ]νοδο[ςυ]? κορυφ[ηή]ς|αποφ[αά]σ\w* (ΕΕ|νατο)|δασμ)/i;
-function isForeignPolitics(title?: string | null): boolean {
-  const t = String(title || "");
-  return FOREIGN_POLITICS_RE.test(t) && !GREEK_STAKE_RE.test(t);
-}
-
-function isCommercialNoise(title?: string | null): boolean {
-  const t = String(title || "");
-  return COMMERCIAL_NOISE_RE.test(t) && !POLITICAL_CONTEXT_RE.test(t);
-}
-
-function isForeignNoise(title?: string | null): boolean {
-  const t = String(title || "");
-  return FOREIGN_NOISE_RE.test(t) && !GREEK_CONTEXT_RE.test(t);
-}
+// Φιλτρα θορυβου: κοινο module lib/noraya/noise-filters.ts (JS-σωστα ελληνικα regex)
 
 export const dynamic = "force-dynamic";
 
