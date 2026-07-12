@@ -294,6 +294,34 @@ function buildFallbackResponse(params: {
   });
 }
 
+// Διχτυ ασφαλειας: αν σκοντηψει η βαση, γυρνα το αποθηκευμενο brief αντι για 500
+// (το cockpit δεν πρεπει να «μαυριζει» οσο υπαρχει ετοιμο brief).
+async function precomputedFallback(serviceClient: any, profile: any) {
+  try {
+    const { data: cachedRow } = await serviceClient
+      .from("analysis_cache")
+      .select("result, created_at")
+      .is("situation_id", null)
+      .eq("analysis_kind", "strategy_brief_latest")
+      .maybeSingle();
+    if (!cachedRow?.result) return null;
+    const cached = cachedRow.result as any;
+    return NextResponse.json({
+      profile,
+      strategic_brief: { ...cached, profile },
+      agenda_used: cached.agenda_used || [],
+      political_environment: null,
+      political_environment_status: "cache_fallback",
+      processing_status: null,
+      source: "ai",
+      model: "claude-sonnet-4-6 (precomputed, fallback)",
+      generated_at: cached.generated_at || cachedRow.created_at,
+    });
+  } catch {
+    return null;
+  }
+}
+
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
 
@@ -340,6 +368,8 @@ export async function GET(req: Request) {
     .maybeSingle();
 
   if (orgError) {
+    const fb = await precomputedFallback(serviceClient, null);
+    if (fb) return fb;
     return NextResponse.json({ error: orgError.message }, { status: 500 });
   }
 
@@ -408,6 +438,8 @@ export async function GET(req: Request) {
     .limit(limit + 4);
 
   if (agendaError) {
+    const fb = await precomputedFallback(serviceClient, profile);
+    if (fb) return fb;
     return NextResponse.json({ error: agendaError.message }, { status: 500 });
   }
 
