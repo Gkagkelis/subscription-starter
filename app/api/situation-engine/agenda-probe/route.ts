@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { isNoiseTitle, politicalCatalystBoost } from "@/lib/noraya/noise-filters";
+import { isNoiseTitle, politicalCatalystBoost, stateAccountabilityBoost } from "@/lib/noraya/noise-filters";
 import { buildAgendaResearchContext, RESEARCH_CONTEXT_VERSION, type PoliticalPartyProfile } from "../../../../lib/noraya/research-context";
 
 export const dynamic = "force-dynamic";
@@ -1548,7 +1548,7 @@ export async function GET(req: Request) {
     // Κοινα φιλτρα θορυβου: ευαισθητα, ξενα εταιρικα, εμπορικα, ξενη εσωτερικη πολιτικη
     .filter((ev: any) => !isNoiseTitle(ev?.title))
     // Πολιτικος καταλυτης: γεγονοτα με εμπλοκη πρωθυπουργου/υπουργων/κομματων παιρνουν boost
-    .map((ev: any) => ({ ...ev, event_score: Number(ev?.event_score || 0) + politicalCatalystBoost(ev?.title) }));
+    .map((ev: any) => ({ ...ev, event_score: Number(ev?.event_score || 0) + politicalCatalystBoost(ev?.title) + stateAccountabilityBoost(ev?.title) }));
   const trends = Array.isArray(trendsResult.data) ? trendsResult.data : [];
   const agendaTopics = Array.isArray(agendaTopicsResult.data) ? agendaTopicsResult.data : [];
   const advisorBriefs = Array.isArray(advisorBriefsResult.data) ? advisorBriefsResult.data : [];
