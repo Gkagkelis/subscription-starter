@@ -12,6 +12,14 @@ function isSensitiveEvent(title?: string | null): boolean {
 // Φιλτρο ξενων-εταιρικων/διεθνων ΧΩΡΙΣ ελληνικο πολιτικο αντικτυπο (θορυβος)
 const FOREIGN_NOISE_RE = /(microsoft|google|amazon|\bapple\b|\bmeta\b|tesla|nvidia|openai|samsung|\bintel\b|boeing|volkswagen|\bbmw\b|mercedes|toyota|nasdaq|dow jones|wall street|silicon valley|federal reserve|γερμανικ[ήη][^.]{0,25}(αυτοκινητο|βιομηχαν)|κινεζικ[ήη][^.]{0,25}(ανταγωνισ|βιομηχαν|αυτοκινητο))/i;
 const GREEK_CONTEXT_RE = /(ελλ[αά]δ|ελληνικ|αθ[ηή]ν|θεσσαλον|κυβ[εέ]ρν|βουλ[ήη]|υπουργ|μητσοτ[αά]κ|ΕΛΑΣ|ΠΑΣΟΚ|ΣΥΡΙΖΑ|ΚΚΕ|τσ[ιί]πρα|ανδρουλ[αά]κ)/i;
+// Εμπορικος/καταναλωτικος θορυβος (εκπτωσεις κ.λπ.) — ΕΚΤΟΣ αν εχει πολιτικη αναφορα (φοροι/μετρα/κυβερνηση)
+const COMMERCIAL_NOISE_RE = /((θεριν|χειμεριν|ενδιαμεσ)\w*\s+εκπτ[ωώ]σε|εκπτ[ωώ]σεις\s+(ξεκιν|αρχιζ|λ[ηή]γ)|black friday|cyber monday|εκπτωσιακ)/i;
+const POLITICAL_CONTEXT_RE = /(φ[οό]ρο|φορολογ|κυβ[εέ]ρν|υπουργ|μ[εέ]τρ[οα]|νομοσχ[εέ]δι|επ[ιί]δομ|βουλ[ηή])/i;
+function isCommercialNoise(title?: string | null): boolean {
+  const t = String(title || "");
+  return COMMERCIAL_NOISE_RE.test(t) && !POLITICAL_CONTEXT_RE.test(t);
+}
+
 function isForeignNoise(title?: string | null): boolean {
   const t = String(title || "");
   return FOREIGN_NOISE_RE.test(t) && !GREEK_CONTEXT_RE.test(t);
@@ -290,9 +298,22 @@ function buildAgendaOverview(agendaRows: any[] = [], eventRows: any[] = [], tren
       updated_at: row?.updated_at,
     });
     const opportunityBonus = trendInfo.search_interest_score >= 65 && String(row?.coverage_level || "").toLowerCase() === "low" ? 5 : 0;
-    const strategicIndex = strategicIndexScore(score, trendInfo.search_interest_score, boost, opportunityBonus);
+
+    // ΠΟΛΙΤΙΚΗ ΒΑΡΥΤΗΤΑ (Φαση Α): θεματα χωρις πολιτικη διασταση δεν ανεβαινουν απο σκετο ογκο/αναζητησεις.
+    // Χρησιμοποιει ΥΠΑΡΚΤΑ σηματα: political_risk_level (απο ταξινομηση) + υπαρξη πολιτικων γεγονοτων.
+    const prl = String(row?.political_risk_level || "").toLowerCase();
+    const politicalFactor =
+      prl.includes("high") || prl.includes("υψηλ") ? 1.0
+      : prl.includes("medium") || prl.includes("μεσ") || prl.includes("μετρ") ? 0.92
+      : prl.includes("low") || prl.includes("χαμηλ") ? 0.78
+      : 0.88;
+    const eventsFactor = relatedEventsRaw.length === 0 ? 0.85 : 1.0; // κανενα πολιτικο γεγονος = ενδειξη θορυβου
+    const politicalWeight = Math.round(politicalFactor * eventsFactor * 100) / 100;
+    const weightedScore = Math.round(score * politicalWeight);
+
+    const strategicIndex = strategicIndexScore(weightedScore, trendInfo.search_interest_score, boost, opportunityBonus);
     const norayaPriority = computeNorayaPriorityScore({
-      norayaScore: score,
+      norayaScore: weightedScore,
       googleTrendsScore: trendsMap.get(topic) ?? realSearchInterestScore(trendInfo),
       gdeltScore: coverageMap.get(topic) ?? null,
       clientRelevanceScore: null,
@@ -326,6 +347,8 @@ function buildAgendaOverview(agendaRows: any[] = [], eventRows: any[] = [], tren
 
       strategic_index_components: {
         raw_signal: score,
+        political_weight: politicalWeight,
+        political_weighted_signal: weightedScore,
         search_interest: trendInfo.search_interest_score,
         strategic_boost: boost,
         opportunity_bonus: opportunityBonus,
@@ -450,7 +473,7 @@ export async function GET(req: Request) {
   }
 
   const allEventRows = (!eventError && Array.isArray(eventRows) ? eventRows : []).filter(
-    (r: any) => !isSensitiveEvent((r as any)?.title) && !isForeignNoise((r as any)?.title),
+    (r: any) => !isSensitiveEvent((r as any)?.title) && !isForeignNoise((r as any)?.title) && !isCommercialNoise((r as any)?.title),
   );
   // ΒΗΜΑ 1 — ΦΙΛΤΡΟ (gate): μόνο ΦΡΕΣΚΑ θέματα (≤48 ώρες, βάσει ημερομηνίας πιο πρόσφατου άρθρου).
   //          Η φρεσκάδα ΔΕΝ είναι κριτήριο σημαντικότητας — μόνο "ποιος μπαίνει στο γήπεδο".
