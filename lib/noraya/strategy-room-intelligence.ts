@@ -1,3 +1,4 @@
+import { stateAccountabilityBoost } from "./noise-filters";
 // NORAYA Strategy Room intelligence mapping layer
 // Version: strategy_room_intelligence_v5_5_advisor_case_pattern_intelligence
 //
@@ -1014,7 +1015,15 @@ function isSameRealEvent(a: string[], b: string[]): boolean {
 
 export function buildPriorityCards(raw: ProbeV4Response): PriorityCard[] {
   const all = buildAgendaMap(raw)
-    .filter((item) => item.raw.show_in_strategy_room !== 'review_required')
+    .filter((item) => {
+      if (item.raw.show_in_strategy_room !== 'review_required') return true;
+      // ΚΡΑΤΙΚΗ ΛΟΓΟΔΟΣΙΑ (π.χ. αστυνομικη βια, καταστροφες με κρατικη ευθυνη):
+      // ευαισθητο ΝΑΙ — αλλα πολιτικο πρωτης γραμμης. Εμφανιζεται στην τριαδα
+      // με προσεκτικο τονο («Χρειαζεται προσοχη»), δεν αποκλειεται.
+      // Τα υπολοιπα review_required (εμφυλη βια, ανηλικοι κ.λπ.) μενουν εκτος, ως ειχε.
+      const probe = safeText(item.events[0]?.title, item.title);
+      return stateAccountabilityBoost(probe) > 0;
+    })
     .filter((item) => item.events.length > 0);
 
   const eligible: typeof all = [];
