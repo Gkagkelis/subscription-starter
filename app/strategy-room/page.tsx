@@ -1,4 +1,4 @@
-                                                                                                                                                                                                                     "use client";
+                                                                                                                                                                                                                               "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import SaveToArchiveButton from "../../components/SaveToArchiveButton";
@@ -2206,8 +2206,9 @@ export default function StrategyRoomPage() {
 
   useEffect(() => {
     if (!activeSituationId && liveSituations.length > 0) {
-      // Αν ήρθαμε από την Ατζέντα με ?topic=, προεπίλεξε το αντίστοιχο θέμα· αλλιώς το πρώτο.
-      let targetId = situationId(liveSituations[0], 0);
+      // ΔΕΝ προεπιλέγουμε πλέον το πρώτο γεγονός: το cockpit ανοίγει «κλειστό»
+      // (μόνο επισκόπηση), και η ανάλυση τρέχει ΜΟΝΟ όταν πατήσει ο χρήστης.
+      // Εξαίρεση: αν ήρθαμε από την Ατζέντα με ?topic=, ανοίγουμε αυτό το θέμα.
       try {
         const wanted = (
           new URLSearchParams(window.location.search).get("topic") || ""
@@ -2221,27 +2222,23 @@ export default function StrategyRoomPage() {
               .toLowerCase();
             return tp === wanted;
           });
-          if (idx >= 0) targetId = situationId(liveSituations[idx], idx);
+          if (idx >= 0) setActiveSituationId(situationId(liveSituations[idx], idx));
         }
       } catch {
-        /* αγνοούμε — fallback στο πρώτο */
+        /* αγνοούμε */
       }
-      setActiveSituationId(targetId);
     }
   }, [activeSituationId, liveSituations]);
 
   const activeSituation = useMemo(() => {
     if (!liveSituations.length) return null;
+    // Χωρίς ρητή επιλογή χρήστη -> ΚΑΝΕΝΑ ενεργό γεγονός (κλειστό cockpit, μηδέν κόστος).
+    if (!activeSituationId) return null;
     return (
       liveSituations.find(
         (situation, index) =>
           situationId(situation, index) === activeSituationId,
-      ) ||
-      liveSituations.find(
-        (situation) =>
-          String(situation.status || "").toLowerCase() === "active",
-      ) ||
-      liveSituations[0]
+      ) || null
     );
   }, [activeSituationId, liveSituations]);
 
@@ -2769,6 +2766,34 @@ export default function StrategyRoomPage() {
               </div>
             ) : null}
 
+            {activeSituation && !personalEvent ? (
+              <div className="mb-3 flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-2.5">
+                <div className="min-w-0 text-[12px] text-zinc-400">
+                  Ανάλυση για: <span className="font-semibold text-zinc-200">{activeTitle}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setActiveSituationId(null)}
+                  className="shrink-0 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] font-medium text-zinc-400 transition hover:text-zinc-100"
+                  title="Καθαρισμός επιλογής — ο σύμβουλος μιλά για τη γενική εικόνα"
+                >
+                  ✕ Καθαρισμός επιλογής
+                </button>
+              </div>
+            ) : null}
+
+            {!activeSituation && !personalEvent ? (
+              <div className="rounded-3xl border border-dashed border-white/10 bg-white/[0.02] px-6 py-14 text-center">
+                <div className="text-[13px] font-semibold text-zinc-300">
+                  Διάλεξε γεγονός για ανάλυση
+                </div>
+                <p className="mx-auto mt-2 max-w-md text-[12px] leading-6 text-zinc-500">
+                  Πάτησε μια από τις <span className="text-zinc-300">Προτεραιότητες σήμερα</span> ή ένα
+                  γεγονός από τον <span className="text-zinc-300">Χάρτη ατζέντας</span> στα αριστερά.
+                  Ο Noraya θα ετοιμάσει τη στρατηγική εικόνα για το κόμμα σου.
+                </p>
+              </div>
+            ) : (
             <ActiveSituationWorkspace
               activeTab={activeTab}
               onTabChange={setActiveTab}
@@ -2820,6 +2845,7 @@ ${formatLine}
               onRunAgendaArchitect={runAgendaArchitect}
               onContinueAgendaArchitect={continueAgendaArchitectInAdvisor}
             />
+            )}
 
             <AdvisorDock
               partyName={partyName}
