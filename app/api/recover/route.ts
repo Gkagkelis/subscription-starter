@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { checkCostGuard, guardMessage } from "@/lib/noraya/cost-guard";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -56,6 +57,20 @@ export async function GET(request: Request) {
   }
   const origin = url.origin;
   const step = url.searchParams.get("step") || "ingest";
+
+  // ΦΡΕΝΟ ΚΟΣΤΟΥΣ: το recover ταξινομει χιλιαδες αρθρα + ολα τα θεματα (ακριβο).
+  // Επιτρεπεται 1 φορα/ωρα. Ο ελεγχος γινεται ΜΟΝΟ στο πρωτο βημα (ingest),
+  // ωστε να μη διακοπτεται μια ηδη ξεκινημενη αλυσιδα βηματων.
+  if (step === "ingest" && url.searchParams.get("force") !== "1") {
+    const g = await checkCostGuard("recover", 60);
+    if (!g.allowed) {
+      return page("Επαναφορά", [
+        `<span class="run">⏸️ Η Επαναφορά έτρεξε πρόσφατα (ακριβή λειτουργία).</span>`,
+        `<span class="ok">Ξαναδοκίμασε σε ~${g.retry_in_minutes} λεπτά.</span>`,
+        `<span class="run">Το σύστημα ενημερώνεται ούτως ή άλλως μόνο του κάθε ώρα.</span>`,
+      ], null);
+    }
+  }
   const round = Math.max(1, Number(url.searchParams.get("round")) || 1);
   const base = `/api/recover?token=${encodeURIComponent(token!)}`;
 
