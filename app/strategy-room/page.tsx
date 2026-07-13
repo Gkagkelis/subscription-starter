@@ -1,4 +1,4 @@
-                                                                                                                                                                                                                               "use client";
+                                                                                                                                                                                                                     "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import SaveToArchiveButton from "../../components/SaveToArchiveButton";
@@ -1958,15 +1958,8 @@ export default function StrategyRoomPage() {
     return agendaProbe?.success ? buildPriorityCards(agendaProbe) : [];
   }, [agendaProbe]);
 
-  useEffect(() => {
-    if (!activeProbeSelection && probeAgendaMap.length > 0) {
-      const firstItem = probeAgendaMap[0];
-      setActiveProbeSelection({
-        clusterId: firstItem.id,
-        eventId: firstItem.events[0]?.id ?? null,
-      });
-    }
-  }, [activeProbeSelection, probeAgendaMap]);
+  // (Αφαιρέθηκε η αυτόματη προεπιλογή του πρώτου cluster: το cockpit ανοίγει «κλειστό»
+  //  και η ανάλυση τρέχει ΜΟΝΟ μετά από ρητό κλικ του χρήστη — καθαρή εικόνα, μηδέν κόστος.)
 
   const activeProbeItem = useMemo(() => {
     if (!probeAgendaMap.length) return null;
@@ -2232,15 +2225,33 @@ export default function StrategyRoomPage() {
 
   const activeSituation = useMemo(() => {
     if (!liveSituations.length) return null;
-    // Χωρίς ρητή επιλογή χρήστη -> ΚΑΝΕΝΑ ενεργό γεγονός (κλειστό cockpit, μηδέν κόστος).
-    if (!activeSituationId) return null;
-    return (
-      liveSituations.find(
-        (situation, index) =>
-          situationId(situation, index) === activeSituationId,
-      ) || null
-    );
-  }, [activeSituationId, liveSituations]);
+    // Ρητή επιλογή από τη λίστα καταστάσεων
+    if (activeSituationId) {
+      return (
+        liveSituations.find(
+          (situation, index) => situationId(situation, index) === activeSituationId,
+        ) || null
+      );
+    }
+    // Ρητή επιλογή από κάρτα/Χάρτη (agenda-probe): βρες την αντίστοιχη κατάσταση με βάση το θέμα
+    if (activeProbeSelection) {
+      const wantTopic = String(
+        (activeProbeSelection as any).parentTopic ||
+        (activeProbeSelection as any).topic ||
+        (activeProbeSelection as any).theme ||
+        "",
+      ).trim().toLowerCase();
+      if (wantTopic) {
+        const hit = liveSituations.find((sit: any) =>
+          String(sit?.topic || sit?.category || "").trim().toLowerCase() === wantTopic,
+        );
+        if (hit) return hit;
+      }
+      return liveSituations[0] || null;
+    }
+    // Καμία επιλογή -> κλειστό cockpit (μηδέν κόστος)
+    return null;
+  }, [activeSituationId, activeProbeSelection, liveSituations]);
 
   // Α: On-demand ανάλυση — αν το επιλεγμένο γεγονός δεν έχει ακόμη άποψη, ζήτα την τώρα (cached μετά).
   useEffect(() => {
@@ -2773,7 +2784,7 @@ export default function StrategyRoomPage() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => setActiveSituationId(null)}
+                  onClick={() => { setActiveSituationId(null); setActiveProbeSelection(null); }}
                   className="shrink-0 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] font-medium text-zinc-400 transition hover:text-zinc-100"
                   title="Καθαρισμός επιλογής — ο σύμβουλος μιλά για τη γενική εικόνα"
                 >
