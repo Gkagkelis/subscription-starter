@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { checkCostGuard, guardMessage } from "@/lib/noraya/cost-guard";
 import { createClient } from "@supabase/supabase-js";
 
 /* ---------------------------------------------------------------------------
@@ -134,6 +135,15 @@ export async function GET(req: Request) {
     signals.map((s: any) => [s.topic, s.article_count ?? null, s.source_count ?? null, Math.round(Number(s.agenda_score) || 0)])
   );
   const forceRun = new URL(req.url).searchParams.get("force") === "1";
+
+  // ΦΡΕΝΟ ΚΟΣΤΟΥΣ: το force=1 αναγκαζει ΝΕΑ αναλυση Sonnet. Επιτρεπεται 1 φορα / 5 λεπτα.
+  if (forceRun) {
+    const isCronCall = (req.headers.get("user-agent") || "").includes("vercel-cron/1.0");
+    const g = await checkCostGuard("precompute_force", 5, isCronCall);
+    if (!g.allowed) {
+      return NextResponse.json(guardMessage("Νέο brief (force)", g), { status: 429 });
+    }
+  }
   if (!forceRun) {
     try {
       const { data: existingCache } = await supabase
