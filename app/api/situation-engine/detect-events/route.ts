@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { checkCostGuard, guardMessage } from "@/lib/noraya/cost-guard";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 
 export const runtime = "nodejs";
@@ -363,6 +364,15 @@ async function handle(request: Request) {
 
     const url = new URL(request.url);
     const requestedTopic = url.searchParams.get("topic");
+
+    // ΦΡΕΝΟ ΚΟΣΤΟΥΣ: καθε χειροκινητη κληση διαβαζει ~60 αρθρα με AI.
+    // Επιτρεπεται 1 φορα / 15 λεπτα ανα θεμα. Τα crons (χωρις ?topic=) δεν επηρεαζονται.
+    if (requestedTopic && url.searchParams.get("force") !== "1") {
+      const g = await checkCostGuard("detect__" + requestedTopic, 15);
+      if (!g.allowed) {
+        return NextResponse.json(guardMessage("Ανίχνευση γεγονότων: " + requestedTopic, g), { status: 429 });
+      }
+    }
 
     const themes = await loadActiveThemes(supabase);
 
