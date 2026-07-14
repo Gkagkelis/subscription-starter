@@ -1943,25 +1943,39 @@ export default function StrategyRoomPage() {
   }, [situationEngine?.agenda_overview]);
 
   // Θεματικες που επελεξε ο χρηστης στο onboarding (organizations.themes).
-  // Αν εχει επιλεξει συγκεκριμενες -> ο Χαρτης & οι Προτεραιοτητες δειχνουν ΜΟΝΟ αυτες.
-  const userThemes = useMemo<Set<string>>(() => {
+  // ΑΝΕΚΤΙΚΟ ταιριασμα: αγνοει τονους/κεφαλαια και δεχεται μερικη αντιστοιχια
+  // (π.χ. «Δικαιοσυνη» ταιριαζει με «Δικαιοσυνη / κρατος δικαιου»).
+  const normalizeTheme = (v: any) =>
+    String(v || "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-zα-ω0-9]+/g, " ")
+      .trim();
+  const themeMatches = (candidate: string, selected: string[]) => {
+    const c = normalizeTheme(candidate);
+    if (!c) return false;
+    return selected.some((sel) => c.includes(sel) || sel.includes(c));
+  };
+  const userThemes = useMemo<string[]>(() => {
     const arr = Array.isArray((data as any)?.profile?.themes)
       ? ((data as any).profile.themes as any[])
       : [];
-    return new Set(
-      arr.map((t) => String(t).trim().toLowerCase()).filter(Boolean),
-    );
+    return arr.map(normalizeTheme).filter(Boolean);
   }, [data]);
 
   const probeAgendaMap = useMemo<ProbeAgendaMapItem[]>(() => {
     const items = agendaProbe?.success ? buildAgendaMap(agendaProbe) : [];
-    if (!userThemes.size) return items;
-    return items.filter((it) => {
-      const th = String(((it as any).parentTopics?.[0] || it.title || ""))
-        .trim()
-        .toLowerCase();
-      return userThemes.has(th);
+    if (!userThemes.length) return items;
+    const filtered = items.filter((it) => {
+      const parents: any[] = Array.isArray((it as any).parentTopics)
+        ? (it as any).parentTopics
+        : [];
+      const candidates = [...parents, it.title];
+      return candidates.some((c) => themeMatches(String(c || ""), userThemes));
     });
+    // Fail-open: αν το φιλτρο αδειασει τον Χαρτη, δειξε τα παντα (ποτε κενη οθονη).
+    return filtered.length ? filtered : items;
   }, [agendaProbe, userThemes]);
 
   const probeThematicOverview = useMemo<AgendaOverviewRow[]>(() => {
@@ -1974,14 +1988,13 @@ export default function StrategyRoomPage() {
 
   const probePriorityCards = useMemo<ProbePriorityCard[]>(() => {
     const cards = agendaProbe?.success ? buildPriorityCards(agendaProbe) : [];
-    if (!userThemes.size) return cards;
-    return cards.filter((c) => {
+    if (!userThemes.length) return cards;
+    const filtered = cards.filter((c) => {
       const raw: any = (c as any).raw || {};
-      const tps = [...(raw.parent_topics ?? []), raw.parent_topic]
-        .filter(Boolean)
-        .map((t: any) => String(t).trim().toLowerCase());
-      return tps.some((t: string) => userThemes.has(t));
+      const tps = [...(raw.parent_topics ?? []), raw.parent_topic, c.title].filter(Boolean);
+      return tps.some((t: any) => themeMatches(String(t), userThemes));
     });
+    return filtered.length ? filtered : cards;
   }, [agendaProbe, userThemes]);
 
   // (Αφαιρέθηκε η αυτόματη προεπιλογή του πρώτου cluster: το cockpit ανοίγει «κλειστό»
