@@ -258,9 +258,9 @@ export async function POST(req: Request) {
   // Στελεχη + προσφατες επιθεσεις — φθηνα reads απο τη βαση, μπαινουν στο STATIC (cached) system.
   let officialsBlock = "";
   let recentAttacksBlock = "";
-  if (supabase && partyKey) {
+  if (partyKey) {
     try {
-      const { data: orgRow } = await supabase
+      const { data: orgRow } = await __naSvc()
         .from("organizations")
         .select("id, party_profile_snapshot")
         .eq("party_key", partyKey)
@@ -278,7 +278,7 @@ export async function POST(req: Request) {
           "\n";
       }
       // Προσφατες επιθεσεις κατα κομματος/στελεχων (τελευταιο brief απο analysis_cache, χωρις AI)
-      const { data: atkRows } = await supabase
+      const { data: atkRows } = await __naSvc()
         .from("analysis_cache")
         .select("result, updated_at")
         .is("situation_id", null)
