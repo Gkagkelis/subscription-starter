@@ -1942,9 +1942,27 @@ export default function StrategyRoomPage() {
     return rows.filter((row) => row?.topic && row.topic !== "Μη ταξινομημένο");
   }, [situationEngine?.agenda_overview]);
 
+  // Θεματικες που επελεξε ο χρηστης στο onboarding (organizations.themes).
+  // Αν εχει επιλεξει συγκεκριμενες -> ο Χαρτης & οι Προτεραιοτητες δειχνουν ΜΟΝΟ αυτες.
+  const userThemes = useMemo<Set<string>>(() => {
+    const arr = Array.isArray((data as any)?.profile?.themes)
+      ? ((data as any).profile.themes as any[])
+      : [];
+    return new Set(
+      arr.map((t) => String(t).trim().toLowerCase()).filter(Boolean),
+    );
+  }, [data]);
+
   const probeAgendaMap = useMemo<ProbeAgendaMapItem[]>(() => {
-    return agendaProbe?.success ? buildAgendaMap(agendaProbe) : [];
-  }, [agendaProbe]);
+    const items = agendaProbe?.success ? buildAgendaMap(agendaProbe) : [];
+    if (!userThemes.size) return items;
+    return items.filter((it) => {
+      const th = String(((it as any).parentTopics?.[0] || it.title || ""))
+        .trim()
+        .toLowerCase();
+      return userThemes.has(th);
+    });
+  }, [agendaProbe, userThemes]);
 
   const probeThematicOverview = useMemo<AgendaOverviewRow[]>(() => {
     return buildProbeThematicOverview(probeAgendaMap, agendaOverview);
@@ -1955,8 +1973,16 @@ export default function StrategyRoomPage() {
   }, [probeThematicOverview, agendaOverview]);
 
   const probePriorityCards = useMemo<ProbePriorityCard[]>(() => {
-    return agendaProbe?.success ? buildPriorityCards(agendaProbe) : [];
-  }, [agendaProbe]);
+    const cards = agendaProbe?.success ? buildPriorityCards(agendaProbe) : [];
+    if (!userThemes.size) return cards;
+    return cards.filter((c) => {
+      const raw: any = (c as any).raw || {};
+      const tps = [...(raw.parent_topics ?? []), raw.parent_topic]
+        .filter(Boolean)
+        .map((t: any) => String(t).trim().toLowerCase());
+      return tps.some((t: string) => userThemes.has(t));
+    });
+  }, [agendaProbe, userThemes]);
 
   // (Αφαιρέθηκε η αυτόματη προεπιλογή του πρώτου cluster: το cockpit ανοίγει «κλειστό»
   //  και η ανάλυση τρέχει ΜΟΝΟ μετά από ρητό κλικ του χρήστη — καθαρή εικόνα, μηδέν κόστος.)
@@ -3169,9 +3195,26 @@ function LeftSidebar({
             probeEventId: event.id ? String(event.id) : null,
           })),
         };
+        // Γεγονοτα χωρις υπο-κατηγορια (fallback): μπαινουν ΑΠΕΥΘΕΙΑΣ στο θεμα,
+        // χωρις ενδιαμεσο κουτι/ονομα — ολα μαζι σε ενα αορατο "direct".
+        const isFallback = String(item.id || "").startsWith("fallback_");
+        if (isFallback) {
+          micro.clusterId = "direct__" + theme;
+          micro.title = "";
+        }
         const existing = byTheme.get(theme);
         if (existing) {
-          existing.push(micro);
+          if (isFallback) {
+            const direct = existing.find((m) => m.clusterId === micro.clusterId);
+            if (direct) {
+              direct.events.push(...micro.events);
+              direct.score = Math.max(direct.score, micro.score);
+            } else {
+              existing.push(micro);
+            }
+          } else {
+            existing.push(micro);
+          }
         } else {
           byTheme.set(theme, [micro]);
           order.push(theme);
@@ -3360,11 +3403,13 @@ function LeftSidebar({
                     {themeOpen ? (
                       <div className="grid gap-1 border-t border-[#1a2640] px-2 pb-2 pt-2">
                         {group.micros.map((micro) => {
-                          const microOpen = expandedMicro === micro.clusterId;
+                          const microOpen =
+                            !micro.title || expandedMicro === micro.clusterId;
                           const microActive =
                             activeProbeSelection?.clusterId === micro.clusterId;
                           return (
                             <div key={micro.clusterId}>
+                              {micro.title ? (
                               <button
                                 type="button"
                                 onClick={() => {
@@ -3396,6 +3441,7 @@ function LeftSidebar({
                                   </span>
                                 ) : null}
                               </button>
+                              ) : null}
 
                               {microOpen && micro.events.length ? (
                                 <div className="ml-1 grid gap-1 border-l border-[#1a2640] py-1 pl-2">
