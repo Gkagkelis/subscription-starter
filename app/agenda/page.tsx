@@ -25,6 +25,14 @@ type Topic = {
   daily: number[];
   stance: Stance;
   angle: string;
+  top_events?: { title: string; article_count: number }[];
+  why_signals?: {
+    score: number;
+    search_interest_score: number | null;
+    editorial_prominence_score: number | null;
+    source_count: number | null;
+    article_count: number | null;
+  } | null;
 };
 
 type TimelineResponse = {
@@ -36,6 +44,55 @@ type TimelineResponse = {
 };
 
 const clamp = (v: number, min: number, max: number) => Math.max(min, Math.min(max, v));
+
+function whyExplanation(t: Topic): string[] {
+  const lines: string[] = [];
+  const sig = t.why_signals || null;
+
+  // 1) Ενταση καλυψης ΜΜΕ (αρθρα + πηγες + πρωτοσελιδα)
+  const cov: string[] = [];
+  if (t.prev7 > 0) {
+    cov.push(`${t.last7} άρθρα αυτή την εβδομάδα έναντι ${t.prev7} την προηγούμενη (${t.change_pct >= 0 ? "+" : ""}${t.change_pct}%)`);
+  } else if (t.last7 > 0) {
+    cov.push(`${t.last7} άρθρα αυτή την εβδομάδα — νέο σήμα`);
+  }
+  if (sig?.source_count) cov.push(`${sig.source_count} διαφορετικές πηγές`);
+  if (typeof sig?.editorial_prominence_score === "number" && sig.editorial_prominence_score > 0) {
+    cov.push(
+      `παρουσία σε πρωτοσέλιδα/κεντρικά θέματα: ${sig.editorial_prominence_score >= 60 ? "υψηλή" : sig.editorial_prominence_score >= 30 ? "μέτρια" : "χαμηλή"}`,
+    );
+  }
+  if (cov.length) lines.push("Κάλυψη ΜΜΕ: " + cov.join(" · ") + ".");
+
+  // 2) Δημοσιο ενδιαφερον (Google Trends — τι αναζητα ο κοσμος)
+  if (typeof sig?.search_interest_score === "number" && sig.search_interest_score > 0) {
+    const s = sig.search_interest_score;
+    lines.push(
+      `Δημόσιο ενδιαφέρον (Google Trends): ${Math.round(s)}/100 — ${s >= 60 ? "ο κόσμος το αναζητά έντονα" : s >= 35 ? "σταθερό ενδιαφέρον αναζητήσεων" : "χαμηλές αναζητήσεις προς το παρόν"}.`,
+    );
+  }
+
+  // 3) Πως προκυπτει η βαθμολογια
+  if (typeof t.agenda_score === "number") {
+    lines.push(
+      `Βαθμολογία ${t.agenda_score}: σύνθεση κάλυψης ΜΜΕ + δημόσιου ενδιαφέροντος + πολιτικής βαρύτητας (πολιτικά γεγονότα, εμπλοκή προσώπων, κρατική λογοδοσία όπου ισχύει).`,
+    );
+  }
+
+  // 4) Τα γεγονοτα που το οδηγουν
+  const evs = (t.top_events || []).filter((e) => e.title);
+  if (evs.length) {
+    lines.push(
+      "Οδηγείται από: " +
+        evs.map((e) => `«${e.title}»${e.article_count ? ` (${e.article_count} άρθρα)` : ""}`).join(" · "),
+    );
+  }
+
+  // 5) Τι σημαινει για το κομμα (απο το προφιλ)
+  if (t.stance === "opportunity" && t.angle) lines.push(`Για το κόμμα: Ευκαιρία — ${t.angle}`);
+  else if (t.stance === "threat" && t.angle) lines.push(`Για το κόμμα: Απειλή — ${t.angle}`);
+  return lines;
+}
 
 function microLabel(t: Topic): { text: string; tone: string } {
   if (t.prev7 === 0 && t.last7 > 0) return { text: "Νέο σήμα", tone: "text-cyan-200 border-cyan-300/30 bg-cyan-300/10" };
@@ -172,6 +229,7 @@ export default function AgendaPage() {
   const [loading, setLoading] = useState(true);
   const [partyLabel, setPartyLabel] = useState("ΕΛΑΣ");
   const [loadingTopic, setLoadingTopic] = useState<string | null>(null);
+  const [whyOpen, setWhyOpen] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -423,6 +481,30 @@ export default function AgendaPage() {
                         <div className={`shrink-0 text-xs font-semibold ${t.change_pct >= 0 ? "text-emerald-300" : "text-zinc-400"}`}>{changeLabel(t)}</div>
                       </div>
                       <span className={`mt-2 inline-block rounded-full border px-2 py-0.5 text-[10px] ${lbl.tone}`}>{lbl.text}</span>
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setWhyOpen((prev) => (prev === t.topic ? null : t.topic));
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.stopPropagation();
+                            setWhyOpen((prev) => (prev === t.topic ? null : t.topic));
+                          }
+                        }}
+                        className="ml-2 mt-2 inline-block cursor-pointer rounded-full border border-cyan-300/25 px-2 py-0.5 text-[10px] text-cyan-200/90 transition hover:bg-cyan-300/10"
+                      >
+                        {whyOpen === t.topic ? "Κλείσιμο" : "Γιατί;"}
+                      </span>
+                      {whyOpen === t.topic ? (
+                        <div className="mt-2 rounded-xl border border-cyan-300/15 bg-cyan-300/[0.04] p-2.5 text-[11px] leading-5 text-zinc-300">
+                          {whyExplanation(t).map((line, i) => (
+                            <p key={i} className={i ? "mt-1.5" : ""}>{line}</p>
+                          ))}
+                        </div>
+                      ) : null}
                     </button>
                   );
                 })}
