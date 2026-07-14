@@ -254,6 +254,55 @@ export async function POST(req: Request) {
     }
   }
 
+  // === ΠΛΗΡΕΣ CONTEXT ΚΟΜΜΑΤΟΣ (Βημα 1 «Απολυτου Συμβουλου») ===
+  // Στελεχη + προσφατες επιθεσεις — φθηνα reads απο τη βαση, μπαινουν στο STATIC (cached) system.
+  let officialsBlock = "";
+  let recentAttacksBlock = "";
+  if (supabase && partyKey) {
+    try {
+      const { data: orgRow } = await supabase
+        .from("organizations")
+        .select("id, party_profile_snapshot")
+        .eq("party_key", partyKey)
+        .limit(1)
+        .maybeSingle();
+      const snap: any = orgRow?.party_profile_snapshot || null;
+      const officials: any[] = Array.isArray(snap?.key_officials) ? snap.key_officials : [];
+      if (officials.length) {
+        officialsBlock =
+          "\n=== ΒΑΣΙΚΑ ΣΤΕΛΕΧΗ ===\n" +
+          officials
+            .slice(0, 12)
+            .map((o: any) => `- ${o?.name || ""}${o?.role ? ` (${o.role})` : ""}`)
+            .join("\n") +
+          "\n";
+      }
+      // Προσφατες επιθεσεις κατα κομματος/στελεχων (τελευταιο brief απο analysis_cache, χωρις AI)
+      const { data: atkRows } = await supabase
+        .from("analysis_cache")
+        .select("result, updated_at")
+        .is("situation_id", null)
+        .like("analysis_kind", "attacks_research_v1__" + partyKey + "%")
+        .order("updated_at", { ascending: false })
+        .limit(1);
+      const atk: any = Array.isArray(atkRows) ? atkRows[0]?.result?.payload : null;
+      const items: any[] = [
+        ...(Array.isArray(atk?.orgAttacks) ? atk.orgAttacks : []),
+        ...(Array.isArray(atk?.personAttacks) ? atk.personAttacks : []),
+      ].slice(0, 6);
+      if (items.length) {
+        recentAttacksBlock =
+          "\n=== ΠΡΟΣΦΑΤΕΣ ΕΠΙΘΕΣΕΙΣ ΕΝΑΝΤΙΟΝ ΜΑΣ (48ωρο) ===\n" +
+          items
+            .map((a: any) => `- ${a?.attacker || a?.source || "—"}: ${cleanText(a?.claim || a?.title || "", 220)}`)
+            .join("\n") +
+          "\n";
+      }
+    } catch {
+      /* προαιρετικο context */
+    }
+  }
+
   // Αν υπάρχει επιλεγμένο γεγονός με δικό του advisor_brief, αυτό γίνεται το primary brief.
   const strategicBrief =
     activeSituation?.advisor_brief ||
@@ -434,7 +483,22 @@ ${safeJson(agendaArchitectContext, 5000)}
 
 Ημερομηνία/ώρα Ελλάδας τώρα: ${athensNow}
 Κόμμα / οργανισμός χρήστη: ${party || "Δεν έχει οριστεί"}
-${partyIdentityBlock}
+${partyIdentityBlock}${officialsBlock}${recentAttacksBlock}
+
+=== ΔΟΓΜΑ ΤΟΥ ΣΥΝΘΕΤΗ (heresthetic) ===
+Δεν είσαι απλός σχολιαστής της ατζέντας — είσαι ΣΥΝΘΕΤΗΣ της. Οι κορυφαίοι στρατηγοί δεν
+απαντούν σε ένα-ένα γεγονός· ΔΕΝΟΥΝ πολλά γεγονότα σε ΕΝΑ αφήγημα και αλλάζουν το πλαίσιο
+της συζήτησης (heresthetic — αλλαγή της διάστασης πάνω στην οποία κρίνεται το θέμα).
+Παράδειγμα λογικής (αντιπάλου): κυβέρνηση υπό πίεση για κρατική βία → φέρνει συλλήψεις για
+παλιά τρομοκρατία + επέτειο θύματος → μετατρέπεται από «κατηγορούμενος» σε «υπερασπιστής της
+Δημοκρατίας», αποπροσανατολίζει, πολώνει, συσπειρώνει — «βρώμικο» αλλά εντός θεσμών.
+ΟΤΑΝ ο χρήστης ζητά σύνθεση/κίνηση/«τι παίζουμε», σκέψου ΕΤΣΙ:
+- Ποια 2-3 ενεργά γεγονότα δένουν σε ΕΝΑ αφήγημα υπέρ μας;
+- Ποιο είναι το frame που μας βγάζει από την άμυνα;
+- Με ποια σειρά/χρόνο (24-72 ώρες) — ποιος αποπροσανατολίζεται, πού συσπειρώνουμε;
+- Ποια τα ΡΙΣΚΑ και το αντεπιχείρημα του αντιπάλου;
+Πάντα εντός των κόκκινων γραμμών & της θεσμικής θέσης του κόμματος. Framing/timing/επιλογή
+αλήθειας: ΝΑΙ. Κατασκευή ψεύδους ή ρητορική μίσους: ΠΟΤΕ.
 
 ΚΡΙΣΙΜΟ — ACTIVE LIVE SITUATION:
 ${hasActiveSituation ? "ΥΠΑΡΧΕΙ επιλεγμένο Live Situation. Αυτό είναι το κύριο context." : "Δεν υπάρχει επιλεγμένο Live Situation."}
@@ -549,7 +613,9 @@ ${question}`
     const payload: any = {
       model: process.env.ANTHROPIC_MODEL || "claude-sonnet-4-6",
       max_tokens: 3200,
-      system: systemPrompt,
+      // Prompt caching: το βαρύ σταθερό context (ταυτότητα, στελέχη, δόγμα, οδηγίες ύφους)
+      // κασάρεται -> -90% κόστος στις επόμενες ερωτήσεις της ΙΔΙΑΣ συνομιλίας. Ίδια ποιότητα.
+      system: [{ type: "text", text: systemPrompt, cache_control: { type: "ephemeral" } }],
       messages: [...chatHistory, { role: "user", content: userInstruction }],
     };
 
