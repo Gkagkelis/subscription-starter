@@ -1967,15 +1967,19 @@ export default function StrategyRoomPage() {
   const probeAgendaMap = useMemo<ProbeAgendaMapItem[]>(() => {
     const items = agendaProbe?.success ? buildAgendaMap(agendaProbe) : [];
     if (!userThemes.length) return items;
-    const filtered = items.filter((it) => {
+    // Οι θεματικες του χρηστη = ΠΡΟΤΕΡΑΙΟΤΗΤΑ (μπαινουν πρωτες), οχι τσεκουρι:
+    // ο Χαρτης μενει ΠΑΝΤΑ γεματος — συμπληρωνει με τα υπολοιπα κατα σκορ.
+    const isMatch = (it: ProbeAgendaMapItem) => {
       const parents: any[] = Array.isArray((it as any).parentTopics)
         ? (it as any).parentTopics
         : [];
-      const candidates = [...parents, it.title];
-      return candidates.some((c) => themeMatches(String(c || ""), userThemes));
-    });
-    // Fail-open: αν το φιλτρο αδειασει τον Χαρτη, δειξε τα παντα (ποτε κενη οθονη).
-    return filtered.length ? filtered : items;
+      return [...parents, it.title].some((c) =>
+        themeMatches(String(c || ""), userThemes),
+      );
+    };
+    const preferred = items.filter(isMatch);
+    const rest = items.filter((it) => !isMatch(it));
+    return [...preferred, ...rest];
   }, [agendaProbe, userThemes]);
 
   const probeThematicOverview = useMemo<AgendaOverviewRow[]>(() => {
@@ -1989,12 +1993,18 @@ export default function StrategyRoomPage() {
   const probePriorityCards = useMemo<ProbePriorityCard[]>(() => {
     const cards = agendaProbe?.success ? buildPriorityCards(agendaProbe) : [];
     if (!userThemes.length) return cards;
-    const filtered = cards.filter((c) => {
+    // ΠΑΝΤΑ 3 καρτες: δικες του θεματικες μπροστα, συμπληρωση απο τις υπολοιπες.
+    const matches = (c: ProbePriorityCard) => {
       const raw: any = (c as any).raw || {};
       const tps = [...(raw.parent_topics ?? []), raw.parent_topic, c.title].filter(Boolean);
       return tps.some((t: any) => themeMatches(String(t), userThemes));
-    });
-    return filtered.length ? filtered : cards;
+    };
+    const preferred = cards.filter(matches);
+    const rest = cards.filter((c) => !matches(c));
+    return [...preferred, ...rest].map((c, i) => ({
+      ...c,
+      rank: (i + 1) as 1 | 2 | 3,
+    }));
   }, [agendaProbe, userThemes]);
 
   // (Αφαιρέθηκε η αυτόματη προεπιλογή του πρώτου cluster: το cockpit ανοίγει «κλειστό»
