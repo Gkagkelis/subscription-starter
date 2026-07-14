@@ -19,7 +19,15 @@ function dayKey(d: Date): string {
 
 // ── Φέρνει το ζωντανό score ανά parent_topic από το agenda-probe (η ΙΔΙΑ πηγή με το Strategy Room) ──
 // Επιστρέφει Map<parent_topic, maxScore>. Αν αποτύχει, επιστρέφει null (ώστε να πέσουμε σε fallback).
-async function fetchAgendaProbeScores(request: Request, token: string): Promise<Map<string, number> | null> {
+type ProbeSignals = {
+  score: number;
+  search_interest_score: number | null;
+  editorial_prominence_score: number | null;
+  source_count: number | null;
+  article_count: number | null;
+};
+
+async function fetchAgendaProbeScores(request: Request, token: string): Promise<Map<string, ProbeSignals> | null> {
   try {
     const origin = new URL(request.url).origin;
     const r = await fetch(
@@ -32,11 +40,19 @@ async function fetchAgendaProbeScores(request: Request, token: string): Promise<
     if (clusters.length === 0) return null;
 
     // Μέγιστο score ανά parent_topic (ένα parent μπορεί να έχει πολλά micro-agenda).
-    const byParent = new Map<string, number>();
+    const byParent = new Map<string, ProbeSignals>();
+    const num = (v: any): number | null => (typeof v === "number" && Number.isFinite(v) ? v : null);
     for (const c of clusters) {
-      const score = typeof c?.score === "number" ? c.score : null;
+      const score = num(c?.score);
       if (score === null) continue;
-      // Κάθε cluster μπορεί να αγγίζει πολλά parent topics.
+      const sig: ProbeSignals = {
+        score,
+        search_interest_score: num(c?.search_interest_score ?? c?.real_trend_score),
+        editorial_prominence_score: num(c?.editorial_prominence_score ?? c?.frontpage_score),
+        source_count: num(c?.source_count),
+        article_count: num(c?.article_count),
+      };
+      // Καθε cluster μπορει να αγγιζει πολλα parent topics.
       const parents: string[] = Array.isArray(c?.parent_topics) && c.parent_topics.length
         ? c.parent_topics
         : c?.parent_topic
@@ -45,8 +61,8 @@ async function fetchAgendaProbeScores(request: Request, token: string): Promise<
       for (const p of parents) {
         const key = String(p).trim();
         if (!key) continue;
-        const prev = byParent.get(key) ?? 0;
-        if (score > prev) byParent.set(key, score);
+        const prev = byParent.get(key);
+        if (!prev || score > prev.score) byParent.set(key, sig);
       }
     }
     return byParent.size > 0 ? byParent : null;
@@ -123,9 +139,13 @@ export async function GET(request: Request) {
   // ── agenda_score ανά θέμα: ΠΡΟΤΕΡΑΙΟΤΗΤΑ στο ζωντανό agenda-probe (ίδια πηγή με Strategy Room) ──
   // Fallback: η παλιά πηγή v_advisor_agenda_briefs_recent, αν το probe δεν απαντήσει.
   const scoreByTopic = new Map<string, number>();
+  const signalsByTopic = new Map<string, ProbeSignals>();
   const probeScores = await fetchAgendaProbeScores(request, token);
   if (probeScores) {
-    probeScores.forEach((v, k) => scoreByTopic.set(k, v));
+    probeScores.forEach((v, k) => {
+      scoreByTopic.set(k, v.score);
+      signalsByTopic.set(k, v);
+    });
   } else {
     try {
       const { data } = await supabase
@@ -140,6 +160,29 @@ export async function GET(request: Request) {
     } catch {
       /* αγνοούμε */
     }
+  }
+
+  // «Γιατι;»: τα 3 κορυφαια γεγονοτα ανα θεμα (7 ημερων) — τεκμηριωση χωρις AI.
+  const topEventsByTopic = new Map<string, { title: string; article_count: number }[]>();
+  try {
+    const since7 = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const { data: evRows } = await supabase
+      .from("v_political_events_live")
+      .select("topic,title,event_score,article_count,last_article_at")
+      .gte("last_article_at", since7)
+      .order("event_score", { ascending: false })
+      .limit(300);
+    for (const ev of (Array.isArray(evRows) ? evRows : []) as any[]) {
+      const tp = String(ev?.topic || "").trim();
+      if (!tp) continue;
+      const list = topEventsByTopic.get(tp) || [];
+      if (list.length < 3) {
+        list.push({ title: String(ev.title || ""), article_count: Number(ev.article_count) || 0 });
+        topEventsByTopic.set(tp, list);
+      }
+    }
+  } catch {
+    /* προαιρετικο — αν αποτυχει, απλα δεν δειχνουμε οδηγους */
   }
 
   const topics = Array.from(groups.values())
@@ -166,6 +209,8 @@ export async function GET(request: Request) {
         daily: g.daily.slice(-7),
         stance: "neutral" as "opportunity" | "threat" | "neutral",
         angle: "",
+        top_events: topEventsByTopic.get(g.topic) ?? [],
+        why_signals: signalsByTopic.get(g.topic) ?? null,
       };
     })
     // Κατάταξη: πρώτα όσα έχουν ζωντανό agenda-probe score (ίδια σειρά με Strategy Room),
