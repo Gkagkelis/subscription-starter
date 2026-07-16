@@ -160,6 +160,7 @@ async function handle(reqDistrict: string | null, force: boolean) {
 
   // Θεματα: απο το Προφιλ Περιφερειας (coreProblems titles) + σταθεροι πυλωνες
   let themes: string[] = [...BASE_THEMES];
+  let coreProblemWords: string[] = []; // για issue-ownership («δικο σου θεμα»)
   try {
     const { data: rp } = await svc()
       .from("analysis_cache")
@@ -173,8 +174,12 @@ async function handle(reqDistrict: string | null, force: boolean) {
         .map((p: any) => String(p.title || "").toLowerCase())
         .filter(Boolean)
         .slice(0, 4);
-      // βαλε τα τοπικα προβληματα ΠΡΩΤΑ (πιο σχετικα), μετα τους πυλωνες
       themes = Array.from(new Set([...extra, ...BASE_THEMES])).slice(0, 6);
+      // λεξεις-κλειδια απο τα διαχρονικα προβληματα, για να δουμε ποιο θεμα «ανηκει» στον τοπο
+      coreProblemWords = extra
+        .join(" ")
+        .split(/[\s\/,-]+/)
+        .filter((w: string) => w.length >= 4);
     }
   } catch { /* αγνοειται */ }
 
@@ -201,7 +206,20 @@ async function handle(reqDistrict: string | null, force: boolean) {
     })
   );
   results.sort((a, b) => b.count - a.count);
-  const topics = results.filter((r) => r.count > 0);
+  const filtered = results.filter((r) => r.count > 0);
+
+  // ΕΝΤΑΣΗ (agenda-setting: ο ΟΓΚΟΣ οριζει την προτεραιοτητα — McCombs & Shaw)
+  //  + «ΔΙΚΟ ΣΟΥ ΘΕΜΑ» (issue ownership — Budge): ταιριαζει με τα διαχρονικα προβληματα του τοπου;
+  const maxCount = filtered.length ? filtered[0].count : 0;
+  const topics = filtered.map((r) => {
+    let heat: "hot" | "rising" | "steady";
+    if (r.count >= 4 || (maxCount >= 3 && r.count === maxCount)) heat = "hot";
+    else if (r.count >= 2) heat = "rising";
+    else heat = "steady";
+    const lbl = r.label.toLowerCase();
+    const mine = coreProblemWords.some((w) => lbl.includes(w) || w.includes(lbl.split(" ")[0]));
+    return { ...r, heat, mine };
+  });
 
   const out = { topics, term, built_at: new Date().toISOString() };
 
