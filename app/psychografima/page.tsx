@@ -208,6 +208,14 @@ export default function ProfileQuiz() {
             </button>
           </div>
           <div className="mt-6 text-[11px] text-zinc-500">Noraya PS · Το προφίλ σου αποθηκεύεται με ασφάλεια στον λογαριασμό σου και γίνεται πιο προσωποποιημένο όσο το χρησιμοποιείς.</div>
+
+          <button
+            type="button"
+            onClick={() => router.push("/onboarding")}
+            className="mt-8 text-[12px] text-zinc-400 underline underline-offset-4 transition hover:text-zinc-200"
+          >
+            ← Θέλω να ελέγξω/διορθώσω τα στοιχεία του προφίλ μου πρώτα
+          </button>
         </div>
       </Shell>
     );
