@@ -78,7 +78,7 @@ export default function ProfileQuiz() {
       const raw = localStorage.getItem(STORE_KEY);
       if (raw) {
         const s = JSON.parse(raw);
-        if (s.mode) setMode(s.mode);
+        // Ο χρηστης διαλεγει ΠΑΝΤΑ ρητα μικρο/μεγαλο — δεν επαναφερουμε αυτοματα το mode.
         if (s.answers) setAnswers(s.answers);
         if (Array.isArray(s.ranked)) setRanked(s.ranked);
         if (typeof s.step === "number") setStep(s.step);
