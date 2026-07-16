@@ -11,7 +11,7 @@ export const maxDuration = 60;
 // δημογραφικο, υποδομες, τοπικες ευαισθησιες. Ο βουλευτης ΔΕΝ κανει τιποτα —
 // μονο διαλεγει περιφερεια στο onboarding.
 //
-// ΟΙΚΟΝΟΜΙΑ: το προφιλ φτιαχνεται 1 φορα/περιφερεια (με web_search σε επισημες
+// ΟΙΚΟΝΟΜΙΑ: το προφιλ φτιαχνεται 1 φορα/περιφερεια (απο τη γνωση του AI για
 // πηγες) και αποθηκευεται στο analysis_cache. Ολοι οι επομενοι βουλευτες ιδιας
 // περιφερειας το παιρνουν ΔΩΡΕΑΝ. ~59 κλησεις συνολικα, ποτε ξανα.
 // ============================================================
@@ -53,7 +53,7 @@ function parseJsonLoose(raw: string): any | null {
 // ============================================================
 // GET/POST ?district=Σέρρες  ή  ?code=serron
 //  - Αν υπαρχει cached -> επιστρεφει αμεσα (δωρεαν)
-//  - Αλλιως -> το χτιζει (με web_search), το κανει cache, επιστρεφει
+//  - Αλλιως -> το χτιζει (γνωση AI), το κανει cache, επιστρεφει
 //  - &force=1 -> ξαναχτιζει (για update)
 // ============================================================
 async function handle(district: string, force: boolean) {
@@ -76,18 +76,18 @@ async function handle(district: string, force: boolean) {
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
   if (!anthropicKey) return jsonOut({ ok: false, error: "no_api_key" }, 500);
 
-  // 2) χτισιμο με web_search σε επισημες + εγκυρες πηγες
+  // 2) χτισιμο απο τη γνωση του AI (γρηγορο, εντος 60s)
   const system =
     `Εισαι ερευνητικος αναλυτης του Noraya PS. Φτιαχνεις το «Προφιλ Περιφερειας» για Ελληνα ` +
     `βουλευτη/υποψηφιο — μια βαθια, στοχευμενη γνωση του τοπου του ωστε να μιλαει σαν ντοπιος ` +
-    `που ξερει καθε γωνια. Χρησιμοποιεις web_search σε επισημες/εγκυρες πηγες.\n\n` +
+    `που ξερει καθε γωνια. Βασιζεσαι στη βαθια γνωση σου για τους ελληνικους νομους/περιφερειες.\n\n` +
     `ΚΑΝΟΝΑΣ ΑΞΙΟΠΙΣΤΙΑΣ (χαλαρος αλλα εντιμος): τα νουμερα αρκει να ειναι ΠΕΡΙΠΟΥ σωστα και ` +
     `προσφατα. Οπου εχεις νουμερο, βαλε (περιπου) και συντομη πηγη. Οπου ΔΕΝ ξερεις, μη μαντευεις ` +
     `νουμερο — περιεγραψε ποιοτικα. ΠΟΤΕ εφευρεση γεγονοτων. Ελληνικα.`;
 
   const user =
     `ΠΕΡΙΦΕΡΕΙΑ/ΝΟΜΟΣ: ${district}\n\n` +
-    `Ψαξε και συνθεσε το προφιλ αυτης της εκλογικης περιφερειας. Δωσε ΜΟΝΟ εγκυρο JSON ` +
+    `Συνθεσε το προφιλ αυτης της εκλογικης περιφερειας απο τη γνωση σου. Δωσε ΜΟΝΟ εγκυρο JSON ` +
     `(χωρις σχολια //, χωρις code fences, strings σε μια γραμμη):\n` +
     `{\n` +
     ` "snapshot": "3-4 προτασεις: τι ΕΙΝΑΙ αυτος ο τοπος (χαρακτηρας, οικονομια, ταυτοτητα).",\n` +
@@ -107,33 +107,13 @@ async function handle(district: string, force: boolean) {
     max_tokens: 2200,
     system: [{ type: "text", text: system, cache_control: { type: "ephemeral" } }],
     messages: [{ role: "user", content: user }],
-    tools: [
-      {
-        type: "web_search_20250305",
-        name: "web_search",
-        max_uses: 2,
-        allowed_domains: [
-          // επισημα
-          "statistics.gr", "ec.europa.eu", "europa.eu", "eurostat.ec.europa.eu",
-          "bankofgreece.gr", "ypes.gr", "minfin.gr", "oecd.org",
-          // εγκυρα εθνικα ΜΜΕ
-          "amna.gr", "ertnews.gr", "kathimerini.gr", "tovima.gr", "tanea.gr",
-          "naftemporiki.gr", "protothema.gr", "in.gr", "news247.gr",
-          "iefimerida.gr", "newsit.gr", "efsyn.gr",
-          // τοπικος τυπος / aggregators
-          "freelist.gr", "greek-sites.gr", "imedd.org",
-        ],
-      },
-    ],
   };
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 45000);
+  const timeout = setTimeout(() => controller.abort(), 50000);
 
-  const callAnthropic = async (withTools: boolean) => {
-    const p = { ...payload };
-    if (!withTools) delete p.tools;
-    return fetch("https://api.anthropic.com/v1/messages", {
+  try {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       signal: controller.signal,
       headers: {
@@ -141,30 +121,8 @@ async function handle(district: string, force: boolean) {
         "x-api-key": anthropicKey,
         "anthropic-version": "2023-06-01",
       },
-      body: JSON.stringify(p),
+      body: JSON.stringify(payload),
     });
-  };
-
-  try {
-    let response: Response;
-    try {
-      response = await callAnthropic(true);
-      // fail-safe: αν σκασει με tools (rate/error), ξαναδοκιμασε χωρις
-      if (!response.ok) response = await callAnthropic(false);
-    } catch (e) {
-      // Αν το web_search αργησε/κοπηκε -> γρηγορη προσπαθεια ΧΩΡΙΣ tools (γνωση AI).
-      clearTimeout(timeout);
-      const c2 = new AbortController();
-      const t2 = setTimeout(() => c2.abort(), 30000);
-      const p2 = { ...payload }; delete p2.tools;
-      try {
-        response = await fetch("https://api.anthropic.com/v1/messages", {
-          method: "POST", signal: c2.signal,
-          headers: { "Content-Type": "application/json", "x-api-key": anthropicKey, "anthropic-version": "2023-06-01" },
-          body: JSON.stringify(p2),
-        });
-      } finally { clearTimeout(t2); }
-    }
     clearTimeout(timeout);
 
     if (!response.ok) {
@@ -194,7 +152,6 @@ async function handle(district: string, force: boolean) {
       built_at: new Date().toISOString(),
     };
 
-    // 3) cache save (μονιμο — force για update)
     try {
       await svc().from("analysis_cache").upsert({ key, value: profile }, { onConflict: "key" });
     } catch { /* αγνοειται */ }
