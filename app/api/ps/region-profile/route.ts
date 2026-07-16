@@ -72,7 +72,16 @@ function parseJsonLoose(raw: string): any | null {
 //  - &force=1 -> ξαναχτιζει (για update)
 // ============================================================
 async function handle(district: string, force: boolean) {
-  const key = `region_profile_v1__${district.trim().toLowerCase().replace(/\s+/g, "_")}`;
+  // Κανονικοποιηση: decode τυχον URL-encoding + πεζα + χωρις τονους/διπλα κενα.
+  // Ωστε "Σέρρες", "%CE%A3...", " Σέρρες " να δινουν ΤΟ ΙΔΙΟ key -> σωστο caching.
+  let norm = district;
+  try { norm = decodeURIComponent(district); } catch { norm = district; }
+  norm = norm
+    .trim()
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // αφαιρεση τονων
+    .replace(/\s+/g, "_");
+  const key = `region_profile_v1__${norm}`;
 
   // 1) cache lookup (πινακας analysis_cache: analysis_kind + input_hash -> result)
   if (!force) {
