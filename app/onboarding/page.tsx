@@ -11,7 +11,8 @@ import {
   publicActors,
   socialGroups,
   themes,
-  institutions
+  institutions,
+  themesForRole,
 } from "@/lib/noraya/taxonomy";
 import { ELECTORAL_DISTRICTS } from "@/lib/noraya/electoral-districts";
 
@@ -653,16 +654,23 @@ export default function OnboardingPage() {
           {currentStep.id === "themes" && (
             <section>
               <h2 className="text-2xl font-semibold">
-                Τι πρέπει να παρακολουθεί ο Noraya;
+                {orgType === "Υποψήφιος Βουλευτής"
+                  ? "Τι νοιάζει τους ψηφοφόρους σου;"
+                  : orgType === "Γραφείο Βουλευτή"
+                  ? "Σε τι εστιάζεις ως βουλευτής;"
+                  : "Τι πρέπει να παρακολουθεί ο Noraya;"}
               </h2>
 
               <p className="mt-2 text-sm leading-6 text-zinc-400">
-                Οι θεματικές μπορούν να έρθουν αυτόματα από το πολιτικό προφίλ
-                ή να διορθωθούν χειροκίνητα.
+                {orgType === "Υποψήφιος Βουλευτής"
+                  ? "Διάλεξε τα τοπικά ζητήματα της περιφέρειάς σου και τα θέματα που θα σε κάνουν να ξεχωρίσεις. Ο Noraya PS θα χτίσει την ατζέντα σου γύρω από αυτά."
+                  : orgType === "Γραφείο Βουλευτή"
+                  ? "Τοπικά της περιφέρειάς σου + 2-3 εθνικά θέματα που θέλεις να «σημαδέψεις» ως δικά σου. Ο Noraya PS θα σου προτείνει και κοινοβουλευτικές δράσεις."
+                  : "Οι θεματικές μπορούν να έρθουν αυτόματα από το πολιτικό προφίλ ή να διορθωθούν χειροκίνητα."}
               </p>
 
               <div className="mt-6 flex flex-wrap gap-2">
-                {unique([...themes, ...selectedThemes]).map((theme) => (
+                {unique([...themesForRole(orgType), ...selectedThemes]).map((theme) => (
                   <Chip
                     key={theme}
                     value={theme}
