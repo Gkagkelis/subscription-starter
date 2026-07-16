@@ -147,7 +147,9 @@ export default function ProfileQuiz() {
         setRedTeam(Array.isArray(j.redTeam) ? j.redTeam : []);
         if (!j.narrative) setNarrError("Δεν βγηκε αναλυση — δοκιμασε ξανα.");
       } else {
-        setNarrError("Δεν βγηκε αναλυση — δοκιμασε ξανα.");
+        // δειξε τον πραγματικο λογο (parse/api/no_profile) για ευκολοτερο debug
+        const reason = j?.error ? ` (${String(j.error).slice(0, 60)})` : "";
+        setNarrError("Δεν βγηκε αναλυση — δοκιμασε ξανα." + reason);
       }
     } catch (e: any) {
       setNarrError(e?.name === "AbortError" ? "Αργησε — δοκιμασε ξανα." : "Σφαλμα — δοκιμασε ξανα.");
