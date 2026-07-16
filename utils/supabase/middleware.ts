@@ -85,15 +85,29 @@ export const updateSession = async (request: NextRequest) => {
       user && gatedRoutes.some((r) => path === r || path.startsWith(`${r}/`));
     if (needsGateCheck) {
       try {
-        const { data: prof } = await supabase
-          .from('psychometric_profiles')
-          .select('id')
+        // Το ψυχογραφημα αφορα ΜΟΝΟ βουλευτες/υποψηφιους — ΟΧΙ το κομματικο επιτελειο.
+        // Ελεγχουμε τον τυπο χρηστη απο organizations.org_type.
+        const { data: orgRow } = await supabase
+          .from('organizations')
+          .select('org_type')
           .eq('user_id', user.id)
-          .limit(1);
-        const hasPsycho = Array.isArray(prof) && prof.length > 0;
-        if (!hasPsycho) {
-          return NextResponse.redirect(new URL('/psychografima', request.url));
+          .limit(1)
+          .maybeSingle();
+        const orgType = String((orgRow as any)?.org_type || '').toLowerCase();
+        const isMp = orgType.includes('βουλευτ') || orgType.includes('υποψηφ') || orgType.includes('ευρωβουλευτ');
+
+        if (isMp) {
+          const { data: prof } = await supabase
+            .from('psychometric_profiles')
+            .select('id')
+            .eq('user_id', user.id)
+            .limit(1);
+          const hasPsycho = Array.isArray(prof) && prof.length > 0;
+          if (!hasPsycho) {
+            return NextResponse.redirect(new URL('/psychografima', request.url));
+          }
         }
+        // Επιτελειο κομματος -> κατευθειαν στο μενου, χωρις ψυχογραφημα.
       } catch {
         // fail-open: αν ο ελεγχος αποτυχει, ΜΗΝ μπλοκαρεις την προσβαση
       }
