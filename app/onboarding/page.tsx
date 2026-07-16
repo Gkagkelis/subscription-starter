@@ -101,12 +101,12 @@ export default function OnboardingPage() {
   const router = useRouter();
 
   const [stepIndex, setStepIndex] = useState(0);
-  const isPS = orgType === "Υποψήφιος Βουλευτής" || orgType === "Γραφείο Βουλευτή";
-  const steps = isPS ? allSteps.filter((st) => !PS_SKIP.includes(st.id)) : allSteps;
   const [partyProfiles, setPartyProfiles] = useState<PartyProfile[]>([]);
   const [loadingParties, setLoadingParties] = useState(false);
 
   const [orgType, setOrgType] = useState<IdentityType>("Πολιτικό κόμμα");
+  const isPS = orgType === "Υποψήφιος Βουλευτής" || orgType === "Γραφείο Βουλευτή";
+  const steps = isPS ? allSteps.filter((st) => !PS_SKIP.includes(st.id)) : allSteps;
   const [roleLocked, setRoleLocked] = useState(false);
   const [selectedPartyKey, setSelectedPartyKey] = useState("");
 
