@@ -230,10 +230,18 @@ export default function OnboardingPage() {
         if (!r.ok) return;
         const prof = await r.json();
         const existing = String(prof?.org_type || "").trim();
-        if (existing === "Πολιτικό κόμμα" || existing === "Γραφείο Βουλευτή" || existing === "Ευρωβουλευτής") {
+        if (existing === "Πολιτικό κόμμα" || existing === "Υποψήφιος Βουλευτής" || existing === "Γραφείο Βουλευτή" || existing === "Ευρωβουλευτής") {
           setOrgType(existing as IdentityType);
           setRoleLocked(true);
         }
+        // ΕΠΑΝΑΦΟΡΑ ΣΤΟΙΧΕΙΩΝ: αν επιστρεφεις στο onboarding, βρισκεις οτι ειχες βαλει
+        // (κομμα, ονομα, περιφερεια, φαση) — δεν ξεκινας απο μηδεν.
+        if (prof?.party_key) setSelectedPartyKey(prof.party_key);
+        if (prof?.representative_name) setRepresentativeName(prof.representative_name);
+        if (prof?.district) setDistrict(prof.district);
+        if (prof?.mp_status) setMpStatus(prof.mp_status);
+        if (prof?.phase) setPhase(prof.phase);
+        if (Array.isArray(prof?.themes) && prof.themes.length) setSelectedThemes(prof.themes);
       } catch {
         /* αγνοειται */
       }
