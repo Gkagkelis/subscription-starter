@@ -374,7 +374,7 @@ export default function ProfileQuiz() {
           <div className="mt-8 flex flex-col items-center gap-3 border-t border-white/[0.06] pt-6">
             <button
               type="button"
-              onClick={() => router.push("/strategy-room")}
+              onClick={() => router.push("/ps")}
               className="rounded-2xl px-8 py-3.5 text-[14px] font-semibold text-slate-950 transition"
               style={{ background: CYAN }}
             >
