@@ -26,6 +26,7 @@ type StepId =
 
 type IdentityType =
   | "Πολιτικό κόμμα"
+  | "Υποψήφιος Βουλευτής"
   | "Γραφείο Βουλευτή"
   | "Ευρωβουλευτής"
   | "Δημοτική Παράταξη";
@@ -50,6 +51,7 @@ type PartyProfile = {
 
 const identityTypes: IdentityType[] = [
   "Πολιτικό κόμμα",
+  "Υποψήφιος Βουλευτής",
   "Γραφείο Βουλευτή",
   "Ευρωβουλευτής",
   "Δημοτική Παράταξη"
@@ -280,7 +282,7 @@ export default function OnboardingPage() {
       return selectedParty?.party_name || "Πολιτικό κόμμα";
     }
 
-    if (orgType === "Γραφείο Βουλευτή") {
+    if (orgType === "Γραφείο Βουλευτή" || orgType === "Υποψήφιος Βουλευτής") {
       return [
         representativeName.trim() || "Γραφείο Βουλευτή",
         selectedParty?.short_name || "",
@@ -335,6 +337,7 @@ export default function OnboardingPage() {
 
     if (
       (orgType === "Πολιτικό κόμμα" ||
+        orgType === "Υποψήφιος Βουλευτής" ||
         orgType === "Γραφείο Βουλευτή" ||
         orgType === "Ευρωβουλευτής") &&
       !selectedPartyKey
@@ -352,8 +355,17 @@ export default function OnboardingPage() {
         partyKey: selectedPartyKey || null,
         representativeName: representativeName.trim(),
         district: district.trim(),
-        mpStatus: orgType === "Γραφείο Βουλευτή" ? mpStatus : null,
-        phase: orgType === "Γραφείο Βουλευτή" ? phase : null,
+        mpStatus:
+          orgType === "Γραφείο Βουλευτή" || orgType === "Υποψήφιος Βουλευτής"
+            ? mpStatus
+            : null,
+        // ΦΑΣΗ ΒΕΝΤΟΥΖΑΣ: campaign (υποψηφιος) -> term (βουλευτης, μετα το «εκλεχτηκα»)
+        phase:
+          orgType === "Υποψήφιος Βουλευτής"
+            ? "campaign"
+            : orgType === "Γραφείο Βουλευτή"
+            ? "term"
+            : null,
         euroRepresentativeName: euroRepresentativeName.trim(),
         municipalFactionName: municipalFactionName.trim(),
         municipality: municipality.trim(),
@@ -478,7 +490,7 @@ export default function OnboardingPage() {
                 </RolePanel>
               )}
 
-              {orgType === "Γραφείο Βουλευτή" && (
+              {(orgType === "Γραφείο Βουλευτή" || orgType === "Υποψήφιος Βουλευτής") && (
                 <RolePanel
                   title="Στοιχεία γραφείου βουλευτή"
                   description="Επιλέξτε κόμμα, περιφέρεια και προαιρετικά όνομα. Έτσι ο Noraya θα συνδυάζει κομματική γραμμή και τοπικό πολιτικό πλαίσιο."
@@ -1006,7 +1018,8 @@ function IdentityCard({
 }) {
   const descriptions: Record<IdentityType, string> = {
     "Πολιτικό κόμμα": "Κεντρική κομματική στρατηγική και δημόσια γραμμή.",
-    "Γραφείο Βουλευτή": "Κομματική γραμμή, περιφέρεια και προσωπικό προφίλ.",
+    "Υποψήφιος Βουλευτής": "Noraya PS — καμπάνια: κέρδισε την περιφέρειά σου, ξεχώρισε.",
+    "Γραφείο Βουλευτή": "Noraya PS — θητεία: καθημερινό εργαλείο, κοινοβουλευτική δράση.",
     "Ευρωβουλευτής": "Κομματικό πλαίσιο και ευρωπαϊκή πολιτική ατζέντα.",
     "Δημοτική Παράταξη":
       "Δήμος, τοπική στρατηγική και αυτοδιοικητικά ζητήματα."
