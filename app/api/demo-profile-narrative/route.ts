@@ -65,15 +65,11 @@ async function callClaude(system: string, user: string, maxTokens = 2000): Promi
       "x-api-key": process.env.ANTHROPIC_API_KEY || "",
       "anthropic-version": "2023-06-01",
     },
-    // Prefill "{" ωστε το μοντελο να γυρναει ΚΑΘΑΡΟ JSON (χωρις προλογο/markdown).
     body: JSON.stringify({
       model: MODEL,
       max_tokens: maxTokens,
       system,
-      messages: [
-        { role: "user", content: user },
-        { role: "assistant", content: "{" },
-      ],
+      messages: [{ role: "user", content: user }],
     }),
   });
   if (!resp.ok) {
@@ -81,9 +77,7 @@ async function callClaude(system: string, user: string, maxTokens = 2000): Promi
     throw new Error("Claude API " + resp.status + " " + errText.slice(0, 200));
   }
   const data = await resp.json();
-  const out = (data?.content || []).filter((b: any) => b.type === "text").map((b: any) => b.text).join("").trim();
-  // Επειδη καναμε prefill "{", το επιστρεφομενο κειμενο ξεκιναει ΜΕΤΑ το "{".
-  return out.startsWith("{") ? out : "{" + out;
+  return (data?.content || []).filter((b: any) => b.type === "text").map((b: any) => b.text).join("").trim();
 }
 
 function parseJsonLoose(raw: string): any | null {
