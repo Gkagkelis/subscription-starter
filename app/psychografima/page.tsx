@@ -13,7 +13,7 @@ import {
 import { PARTY_POSITIONS, AVERAGE_VOTER, euclidean, type PartyPos } from "../../lib/noraya/party-positions";
 
 // ============================================================
-// NORAYA — Ερωτηματολογιο Προφιλ Βουλευτη/Υποψηφιου (DEMO, ασυνδετο)
+// NORAYA PS — Ερωτηματολογιο Προφιλ Βουλευτη/Υποψηφιου (συνδεδεμενο με λογαριασμο)
 // Route: /demo/profil-voulefti
 // Χρησιμοποιει τη μηχανη scoring (lib/noraya/psychometrics.ts).
 // ============================================================
@@ -182,7 +182,7 @@ export default function ProfileQuiz() {
       <Shell>
         <div className="mx-auto max-w-2xl pt-16 text-center">
           <div className="text-[11px] tracking-[0.2em]" style={{ color: CYAN_L }}>
-            NORAYA · ΠΡΟΦΙΛ ΒΟΥΛΕΥΤΗ / ΥΠΟΨΗΦΙΟΥ
+            NORAYA PS · ΤΟ ΠΟΛΙΤΙΚΟ ΣΟΥ ΠΡΟΦΙΛ
           </div>
           <h1 className="mt-3 text-3xl font-bold text-zinc-50">Ας φτιαξουμε το προφιλ σου</h1>
           <p className="mx-auto mt-3 max-w-xl text-[14px] leading-relaxed text-zinc-400">
@@ -207,7 +207,7 @@ export default function ProfileQuiz() {
               <div className="mt-3 text-[12px] text-zinc-400">Πληρες προφιλ σε ολα τα layers, με μεγιστη ακριβεια. Επισης μαθαινει και προσωποποιειται.</div>
             </button>
           </div>
-          <div className="mt-6 text-[11px] text-zinc-600">DEMO · ασυνδετη σελιδα · οι απαντησεις μενουν τοπικα στον browser σου</div>
+          <div className="mt-6 text-[11px] text-zinc-500">Noraya PS · Το προφίλ σου αποθηκεύεται με ασφάλεια στον λογαριασμό σου και γίνεται πιο προσωποποιημένο όσο το χρησιμοποιείς.</div>
         </div>
       </Shell>
     );
