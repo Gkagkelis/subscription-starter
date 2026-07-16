@@ -97,6 +97,7 @@ export default function OnboardingPage() {
   const [loadingParties, setLoadingParties] = useState(false);
 
   const [orgType, setOrgType] = useState<IdentityType>("Πολιτικό κόμμα");
+  const [roleLocked, setRoleLocked] = useState(false);
   const [selectedPartyKey, setSelectedPartyKey] = useState("");
 
   const [representativeName, setRepresentativeName] = useState("");
@@ -210,9 +211,28 @@ export default function OnboardingPage() {
     }
 
     loadPartyProfiles();
+
+    // ΚΛΕΙΔΩΜΑ ΡΟΛΟΥ: αν ο χρηστης εχει ΗΔΗ ρολο (org_type), τον κλειδωνουμε -
+    // ενας λογαριασμος = ενας ρολος (κομμα Ή βουλευτης), αμεταβλητος.
+    async function lockExistingRole() {
+      try {
+        const r = await fetch("/api/onboarding", { cache: "no-store" });
+        if (!r.ok) return;
+        const prof = await r.json();
+        const existing = String(prof?.org_type || "").trim();
+        if (existing === "Πολιτικό κόμμα" || existing === "Γραφείο Βουλευτή" || existing === "Ευρωβουλευτής") {
+          setOrgType(existing as IdentityType);
+          setRoleLocked(true);
+        }
+      } catch {
+        /* αγνοειται */
+      }
+    }
+    lockExistingRole();
   }, []);
 
   function changeIdentity(type: IdentityType) {
+    if (roleLocked) return; // ο ρολος εχει κλειδωσει - δεν αλλαζει
     setOrgType(type);
     setSelectedPartyKey("");
     setRepresentativeName("");
@@ -420,6 +440,13 @@ export default function OnboardingPage() {
                 μόνο τα σχετικά πεδία.
               </p>
 
+              {roleLocked ? (
+                <div className="mt-4 rounded-2xl border border-cyan-300/20 bg-cyan-300/[0.06] px-4 py-3 text-[13px] text-cyan-100">
+                  Ο ρόλος σας είναι <b>{orgType}</b> και έχει κλειδώσει για αυτόν τον
+                  λογαριασμό. Κάθε λογαριασμός αντιστοιχεί σε έναν ρόλο. Για διαφορετικό
+                  ρόλο, χρειάζεται ξεχωριστός λογαριασμός.
+                </div>
+              ) : null}
               <div className="mt-7 grid gap-3 md:grid-cols-4">
                 {identityTypes.map((type) => (
                   <IdentityCard
@@ -427,6 +454,7 @@ export default function OnboardingPage() {
                     title={type}
                     selected={orgType === type}
                     onClick={() => changeIdentity(type)}
+                    disabled={roleLocked && orgType !== type}
                   />
                 ))}
               </div>
@@ -968,11 +996,13 @@ function Header({
 function IdentityCard({
   title,
   selected,
-  onClick
+  onClick,
+  disabled = false,
 }: {
   title: IdentityType;
   selected: boolean;
   onClick: () => void;
+  disabled?: boolean;
 }) {
   const descriptions: Record<IdentityType, string> = {
     "Πολιτικό κόμμα": "Κεντρική κομματική στρατηγική και δημόσια γραμμή.",
@@ -984,8 +1014,10 @@ function IdentityCard({
 
   return (
     <button
+      style={disabled ? { opacity: 0.4, cursor: "not-allowed" } : undefined}
       type="button"
       onClick={onClick}
+      disabled={disabled}
       className={`rounded-3xl border p-4 text-left transition ${
         selected
           ? "border-cyan-300/50 bg-cyan-300/15 text-cyan-50"
