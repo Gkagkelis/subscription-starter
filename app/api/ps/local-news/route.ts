@@ -166,8 +166,13 @@ async function handle(reqDistrict: string | null, force: boolean, providedSearch
         .maybeSingle();
       if (cached?.result) {
         const ageMin = (Date.now() - new Date((cached as any).created_at).getTime()) / 60000;
-        if (ageMin < 60) {
-          return jsonOut({ ok: true, cached: true, district, ...(cached.result as any) });
+        const res: any = cached.result;
+        // Δεξου cache ΜΟΝΟ αν ειναι νεο format (topics με heat) & προσφατο. Αλλιως ξαναχτισε.
+        const isNewFormat =
+          Array.isArray(res?.topics) &&
+          (res.topics.length === 0 || typeof res.topics[0]?.heat === "string");
+        if (ageMin < 60 && isNewFormat) {
+          return jsonOut({ ok: true, cached: true, district, ...res });
         }
       }
     } catch { /* αγνοειται */ }
