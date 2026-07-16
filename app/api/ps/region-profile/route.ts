@@ -74,16 +74,17 @@ function parseJsonLoose(raw: string): any | null {
 async function handle(district: string, force: boolean) {
   const key = `region_profile_v1__${district.trim().toLowerCase().replace(/\s+/g, "_")}`;
 
-  // 1) cache lookup
+  // 1) cache lookup (πινακας analysis_cache: analysis_kind + input_hash -> result)
   if (!force) {
     try {
       const { data: cached } = await svc()
         .from("analysis_cache")
-        .select("value")
-        .eq("key", key)
+        .select("result")
+        .eq("analysis_kind", "region_profile_v1")
+        .eq("input_hash", key)
         .maybeSingle();
-      if (cached?.value) {
-        return jsonOut({ ok: true, cached: true, district, profile: cached.value });
+      if (cached?.result) {
+        return jsonOut({ ok: true, cached: true, district, profile: cached.result });
       }
     } catch { /* αγνοειται */ }
   }
@@ -109,13 +110,14 @@ async function handle(district: string, force: boolean) {
     ` "coreProblems": [{"title":"προβλημα 2-4 λεξεις", "detail":"μια συντομη προταση", "severity":"υψηλη|μεση|χαμηλη"}],\n` +
     ` "demographics": "μια προταση: πληθυσμος περιπου + ταση.",\n` +
     ` "sensitivities": ["2-3 τοπικες ευαισθησιες συντομες"],\n` +
-    ` "opportunities": ["2-3 ατου συντομα"]\n` +
+    ` "opportunities": ["2-3 ατου συντομα"],\n` +
+    ` "electoral": {"lean":"πως ψηφιζει παραδοσιακα ο νομος (π.χ. ΝΔ-κρατος, ΠΑΣΟΚ-παραδοση, αριστερος, αμφιρροπος)", "note":"1-2 προτασεις: εκλογικη συμπεριφορα & τι σημαινει για υποψηφιο εδω"}\n` +
     `}\n` +
     `coreProblems: ΑΚΡΙΒΩΣ 5 (οικονομια, δημογραφικο, υποδομες, υγεια/παιδεια, τοπικο). ΟΛΑ συντομα.`;
 
   const payload: any = {
     model: MODEL,
-    max_tokens: 1600,
+    max_tokens: 1900,
     system: [{ type: "text", text: system, cache_control: { type: "ephemeral" } }],
     messages: [{ role: "user", content: user }],
   };
@@ -159,12 +161,16 @@ async function handle(district: string, force: boolean) {
       demographics: String(parsed.demographics || ""),
       sensitivities: Array.isArray(parsed.sensitivities) ? parsed.sensitivities.slice(0, 4) : [],
       opportunities: Array.isArray(parsed.opportunities) ? parsed.opportunities.slice(0, 3) : [],
+      electoral: parsed.electoral && typeof parsed.electoral === "object" ? parsed.electoral : null,
       sources: Array.isArray(parsed.sources) ? parsed.sources.slice(0, 8) : [],
       built_at: new Date().toISOString(),
     };
 
     try {
-      await svc().from("analysis_cache").upsert({ key, value: profile }, { onConflict: "key" });
+      await svc().from("analysis_cache").upsert(
+        { analysis_kind: "region_profile_v1", input_hash: key, result: profile, model_used: MODEL },
+        { onConflict: "analysis_kind,input_hash" }
+      );
     } catch { /* αγνοειται */ }
 
     return jsonOut({ ok: true, cached: false, district, profile });
