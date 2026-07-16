@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { createClient as createServerClient } from "@/utils/supabase/server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -16,12 +17,41 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
     const mode = body?.mode === "full" ? "full" : "short";
+
+    // Ποιος βουλευτής ειναι συνδεδεμενος; (null = ανωνυμο demo, ως ειχε)
+    let userId: string | null = null;
+    try {
+      const supa = createServerClient();
+      const { data: { user } } = await supa.auth.getUser();
+      userId = user?.id ?? null;
+    } catch {
+      userId = null;
+    }
+
+    // ΚΛΕΙΔΩΜΑ «μια φορα»: αν ο συνδεδεμενος χρηστης εχει ΗΔΗ ψυχογραφημα, δεν ξαναγραφουμε.
+    if (userId) {
+      const { data: existing } = await svc()
+        .from("psychometric_profiles")
+        .select("id")
+        .eq("user_id", userId)
+        .limit(1);
+      if (Array.isArray(existing) && existing.length > 0) {
+        return NextResponse.json({
+          ok: true,
+          id: existing[0].id,
+          already_completed: true,
+          message: "Το ψυχογράφημα έχει ήδη ολοκληρωθεί.",
+        });
+      }
+    }
+
     const row = {
       mode,
       label: typeof body?.label === "string" ? body.label.slice(0, 120) : null,
       answers: body?.answers ?? null,
       scores: body?.scores ?? null,
       issue_ranking: body?.issueRanking ?? null,
+      user_id: userId,
     };
     const { data, error } = await svc().from("psychometric_profiles").insert(row).select("id").limit(1);
     if (error) return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
