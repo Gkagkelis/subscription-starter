@@ -33,6 +33,21 @@ function jsonOut(p: unknown, s = 200) {
 function parseJsonLoose(raw: string): any | null {
   let s = (raw || "").trim().replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim();
   try { return JSON.parse(s); } catch {}
+  // Αν το JSON κοπηκε (δεν εχει τελικο }), προσπαθησε να «μπαλωσεις» τα ανοιχτα strings/braces
+  const firstBrace = s.indexOf("{");
+  if (firstBrace >= 0 && s.lastIndexOf("}") < firstBrace) {
+    let patch = s.slice(firstBrace);
+    // κλεισε τυχον ανοιχτο string
+    const quotes = (patch.match(/(?<!\\)"/g) || []).length;
+    if (quotes % 2 === 1) patch += '"';
+    // κλεισε ανοιχτα arrays/objects
+    const openCurly = (patch.match(/{/g) || []).length - (patch.match(/}/g) || []).length;
+    const openSq = (patch.match(/\[/g) || []).length - (patch.match(/\]/g) || []).length;
+    patch = patch.replace(/,\s*$/, "");
+    for (let i = 0; i < openSq; i++) patch += "]";
+    for (let i = 0; i < openCurly; i++) patch += "}";
+    try { return JSON.parse(patch); } catch {}
+  }
   const first = s.indexOf("{");
   const last = s.lastIndexOf("}");
   if (first >= 0 && last > first) {
@@ -90,10 +105,10 @@ async function handle(district: string, force: boolean) {
     `Συνθεσε το προφιλ αυτης της εκλογικης περιφερειας απο τη γνωση σου. Δωσε ΜΟΝΟ εγκυρο JSON ` +
     `(χωρις σχολια //, χωρις code fences, strings σε μια γραμμη):\n` +
     `{\n` +
-    ` "snapshot": "3-4 προτασεις: τι ΕΙΝΑΙ αυτος ο τοπος (χαρακτηρας, οικονομια, ταυτοτητα).",\n` +
+    ` "snapshot": "2-3 συντομες προτασεις: τι ΕΙΝΑΙ αυτος ο τοπος.",\n` +
     ` "economy": ["3-5 κυριοι οικονομικοι κλαδοι/πυλωνες (π.χ. αγροδιατροφη-καπνος, τουρισμος, βιομηχανια)"],\n` +
     ` "coreProblems": [\n` +
-    `   {"title":"διαχρονικο προβλημα", "detail":"γιατι ποναει τον τοπο, ποιους αφορα", "severity":"υψηλη|μεση|χαμηλη"}\n` +
+    `   {"title":"διαχρονικο προβλημα (συντομο)", "detail":"1 προταση: γιατι ποναει τον τοπο", "severity":"υψηλη|μεση|χαμηλη"}\n` +
     `   // 4-6 βασικα προβληματα: οικονομια/ανεργια, δημογραφικο/φυγη νεων, υποδομες, υγεια, παιδεια, ειδικα τοπικα\n` +
     ` ],\n` +
     ` "demographics": "συντομη εικονα: πληθυσμος (περιπου), ταση (αυξηση/μειωση), ηλικιακη/κοινωνικη συνθεση.",\n` +
@@ -104,7 +119,7 @@ async function handle(district: string, force: boolean) {
 
   const payload: any = {
     model: MODEL,
-    max_tokens: 2200,
+    max_tokens: 3200,
     system: [{ type: "text", text: system, cache_control: { type: "ephemeral" } }],
     messages: [{ role: "user", content: user }],
   };
