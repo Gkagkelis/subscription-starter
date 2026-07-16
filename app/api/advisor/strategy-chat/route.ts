@@ -1,4 +1,6 @@
 import { createClient as __naCreateClient } from "@supabase/supabase-js";
+import { createClient as __naServer } from "@/utils/supabase/server";
+
 function __naSvc() {
   return __naCreateClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -312,6 +314,48 @@ export async function POST(req: Request) {
     }
   }
 
+  // === ΨΥΧΟΓΡΑΦΗΜΑ ΒΟΥΛΕΥΤΗ (Βημα 3) ===
+  // Αν ο συνδεδεμενος χρηστης ειναι βουλευτης/υποψηφιος με ολοκληρωμενο ψυχογραφημα,
+  // ο συμβουλος προσαρμοζει υφος & προτασεις στο προσωπικο του προφιλ.
+  let psychoBlock = "";
+  try {
+    const supaU = __naServer();
+    const { data: { user } } = await supaU.auth.getUser();
+    if (user?.id) {
+      const { data: pRows } = await __naSvc()
+        .from("psychometric_profiles")
+        .select("scores, issue_ranking")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1);
+      const prow: any = Array.isArray(pRows) ? pRows[0] : null;
+      const sc: any = prow?.scores || null;
+      if (sc) {
+        const cap = sc?.bigFive?.caprara || {};
+        const tr = sc?.bigFive?.traits || {};
+        const comp = sc?.compass || {};
+        const mfq = sc?.mfq || {};
+        const st = sc?.style || null;
+        const lvl = (v: any) => (typeof v !== "number" ? "—" : v >= 3.5 ? "υψηλή" : v >= 2.5 ? "μέτρια" : "χαμηλή");
+        const moral = (mfq.binding ?? 0) > (mfq.individualizing ?? 0)
+          ? "BINDING (τάξη, κοινότητα, πίστη, παράδοση)"
+          : "INDIVIDUALIZING (φροντίδα, δικαιοσύνη, ανθρωπιά)";
+        const issues = Array.isArray(prow?.issue_ranking) ? prow.issue_ranking.slice(0, 5) : [];
+        psychoBlock =
+          "\n=== ΨΥΧΟΓΡΑΦΗΜΑ ΤΟΥ ΒΟΥΛΕΥΤΗ (προσαρμοσε ΥΦΟΣ & προτασεις σε αυτο) ===\n" +
+          `Brand: Ενέργεια/Καινοτομία=${cap.energyInnovation ?? "—"}/5 · Εντιμότητα/Αξιοπιστία=${cap.honestyTrust ?? "—"}/5\n` +
+          `Big Five: εξωστρέφεια=${lvl(tr.extraversion)} · προσήνεια=${lvl(tr.agreeableness)} · ευσυνειδησία=${lvl(tr.conscientiousness)} · συναισθ. σταθερότητα=${lvl(tr.emotionalStability)} · δεκτικότητα=${lvl(tr.openness)}\n` +
+          `Πυξίδα: Οικονομικά=${comp.economic ?? "—"} · Κοινωνικά=${comp.social ?? "—"} [-10..+10]\n` +
+          `Ηθικό λεξιλόγιο: ${moral}\n` +
+          (st ? `Ύφος: χαρισματικές τακτικές=${st.clt ?? "—"}/5 · πολυπλοκότητα λόγου=${st.complexity ?? "—"}/5 · λαϊκός τόνος=${st.populism ?? "—"}/5\n` : "") +
+          (issues.length ? `Ατζέντα ταυτότητας: ${issues.join(" > ")}\n` : "") +
+          "ΟΔΗΓΙΑ: γράψε δηλώσεις/μηνύματα που ταιριάζουν σε ΑΥΤΟΝ τον πολιτικό — στο δικό του ηθικό λεξιλόγιο, ύφος και δυνατά σημεία. Μη του βάζεις λόγια που έρχονται σε σύγκρουση με το προφίλ του.\n";
+      }
+    }
+  } catch {
+    /* προαιρετικο — αν δεν ειναι βουλευτης ή δεν εχει ψυχογραφημα, αγνοειται */
+  }
+
   // Αν υπάρχει επιλεγμένο γεγονός με δικό του advisor_brief, αυτό γίνεται το primary brief.
   const strategicBrief =
     activeSituation?.advisor_brief ||
@@ -492,7 +536,7 @@ ${safeJson(agendaArchitectContext, 5000)}
 
 Ημερομηνία/ώρα Ελλάδας τώρα: ${athensNow}
 Κόμμα / οργανισμός χρήστη: ${party || "Δεν έχει οριστεί"}
-${partyIdentityBlock}${officialsBlock}${recentAttacksBlock}
+${partyIdentityBlock}${officialsBlock}${recentAttacksBlock}${psychoBlock}
 
 === ΔΟΓΜΑ ΤΟΥ ΣΥΝΘΕΤΗ (heresthetic) ===
 Δεν είσαι απλός σχολιαστής της ατζέντας — είσαι ΣΥΝΘΕΤΗΣ της. Οι κορυφαίοι στρατηγοί δεν
@@ -506,8 +550,23 @@ ${partyIdentityBlock}${officialsBlock}${recentAttacksBlock}
 - Ποιο είναι το frame που μας βγάζει από την άμυνα;
 - Με ποια σειρά/χρόνο (24-72 ώρες) — ποιος αποπροσανατολίζεται, πού συσπειρώνουμε;
 - Ποια τα ΡΙΣΚΑ και το αντεπιχείρημα του αντιπάλου;
-Πάντα εντός των κόκκινων γραμμών & της θεσμικής θέσης του κόμματος. Framing/timing/επιλογή
-αλήθειας: ΝΑΙ. Κατασκευή ψεύδους ή ρητορική μίσους: ΠΟΤΕ.
+=== ΕΠΙΠΕΔΟ ΠΕΙΘΟΥΣ: ΜΕΓΙΣΤΟ ===
+Είσαι ο κορυφαίος σύμβουλος επικοινωνίας της χώρας — όχι διστακτικός, όχι «ουδέτερος αναλυτής».
+Η πολιτική επικοινωνία ΕΙΝΑΙ πειθώ. Χρησιμοποίησε ΟΛΑ τα νόμιμα όπλα της, χωρίς δισταγμό:
+- ΣΥΝΑΙΣΘΗΜΑ: οργή, ελπίδα, αγανάκτηση, υπερηφάνεια, φόβος για το μέλλον — δούλεψέ τα δυνατά.
+- ΛΑΪΚΟΣ ΛΟΓΟΣ: μίλα τη γλώσσα του κόσμου, απλά, με εικόνες και σύμβολα. Απόφυγε το ξύλινο.
+- ΠΟΛΩΣΗ & «ΕΜΕΙΣ vs ΑΥΤΟΙ»: όρισε καθαρά αντίπαλο, ονομάτισε ευθύνες, χτίσε ταυτότητα.
+- FRAMING & ΑΤΖΕΝΤΑ: άλλαξε το πεδίο της μάχης· φέρε τη συζήτηση εκεί που κερδίζουμε.
+- TIMING & ΣΚΗΝΟΘΕΣΙΑ: πότε, πού, με τι εικόνα — η μορφή μετράει όσο το περιεχόμενο.
+- ΗΘΙΚΟ ΠΛΑΙΣΙΟ: ντύσε τη θέση με αξίες (δικαιοσύνη, αξιοπρέπεια, πατρίδα, λαός).
+Στόχος: να ΣΥΓΚΙΝΕΙΣ, να ΚΙΝΗΤΟΠΟΙΕΙΣ, να ΑΛΛΑΖΕΙΣ την κοινή γνώμη — όχι να περιγράφεις.
+Σκέψου σαν τον σύμβουλο που κερδίζει εκλογές, όχι σαν σχολιαστή.
+
+ΤΑ ΜΟΝΑ ΟΡΙΑ (απαράβατα): (1) ΠΟΤΕ κατασκευή ψεύδους — ψεύτικα γεγονότα, στοιχεία ή αριθμοί.
+Η πειθώ χτίζεται σε ΑΛΗΘΙΝΑ γεγονότα, δυνατά πλαισιωμένα. (2) ΠΟΤΕ ρητορική μίσους — ρατσισμός,
+υποκίνηση βίας, στοχοποίηση ευάλωτων ομάδων. Εντός αυτών των δύο ορίων, ΟΛΑ επιτρέπονται:
+framing, timing, επιλογή ποιες αλήθειες τονίζεις, συναισθηματική ένταση, πόλωση, λαϊκός τόνος.
+Πάντα εντός της θεσμικής θέσης & των κόκκινων γραμμών του συγκεκριμένου κόμματος.
 
 ΚΡΙΣΙΜΟ — ACTIVE LIVE SITUATION:
 ${hasActiveSituation ? "ΥΠΑΡΧΕΙ επιλεγμένο Live Situation. Αυτό είναι το κύριο context." : "Δεν υπάρχει επιλεγμένο Live Situation."}
