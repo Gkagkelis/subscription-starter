@@ -36,24 +36,45 @@ function decode(s: string): string {
     .trim();
 }
 
-async function googleNews(q: string): Promise<string[]> {
+type NewsItem = { title: string; ageDays: number };
+
+async function googleNews(q: string, relevanceTerms: string[]): Promise<NewsItem[]> {
   try {
-    const url = `https://news.google.com/rss/search?q=${encodeURIComponent(q)}&hl=el&gl=GR&ceid=GR:el`;
+    // «when:14d» -> ο Google News επιστρεφει ΜΟΝΟ τελευταιες 14 μερες
+    const url = `https://news.google.com/rss/search?q=${encodeURIComponent(q + " when:14d")}&hl=el&gl=GR&ceid=GR:el`;
     const r = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" }, cache: "no-store" });
     if (!r.ok) return [];
     const xml = await r.text();
-    const items = xml.split("<item>").slice(1, 7);
-    const titles: string[] = [];
+    const items = xml.split("<item>").slice(1, 12);
+    const out: NewsItem[] = [];
+    const now = Date.now();
     for (const it of items) {
-      const m = it.match(/<title>([\s\S]*?)<\/title>/);
-      if (m) {
-        let t = decode(m[1]);
-        const dash = t.lastIndexOf(" - ");
-        if (dash > 20) t = t.slice(0, dash);
-        if (t) titles.push(t);
+      const tm = it.match(/<title>([\s\S]*?)<\/title>/);
+      if (!tm) continue;
+      let t = decode(tm[1]);
+      const dash = t.lastIndexOf(" - ");
+      if (dash > 20) t = t.slice(0, dash);
+      if (!t) continue;
+
+      // ΦΙΛΤΡΟ ΣΧΕΤΙΚΟΤΗΤΑΣ: ο τιτλος πρεπει να αναφερει την περιφερεια ή σχετικο ορο
+      const low = t.toLowerCase();
+      const relevant = relevanceTerms.some((rt) => low.includes(rt.toLowerCase()));
+      if (!relevant) continue;
+
+      // ΦΙΛΤΡΟ ΧΡΟΝΟΥ: κρατα ηλικια σε μερες απο το pubDate
+      let ageDays = 0;
+      const pm = it.match(/<pubDate>([\s\S]*?)<\/pubDate>/);
+      if (pm) {
+        const d = new Date(pm[1]).getTime();
+        if (!isNaN(d)) ageDays = Math.floor((now - d) / 86400000);
       }
+      if (ageDays > 20) continue; // ασφαλεια: οχι παλια
+
+      out.push({ title: t, ageDays });
     }
-    return titles;
+    // ταξινομηση: νεοτερα πρωτα
+    out.sort((a, b) => a.ageDays - b.ageDays);
+    return out;
   } catch {
     return [];
   }
@@ -157,15 +178,25 @@ async function handle(reqDistrict: string | null, force: boolean) {
     }
   } catch { /* αγνοειται */ }
 
-  // Google News ανα θεμα (παραλληλα)
+  // Οροι σχετικοτητας: ο τιτλος της ειδησης ΠΡΕΠΕΙ να αναφερει τον τοπο.
+  // Παιρνω τη ριζα της περιφερειας (π.χ. «Σέρρες»/«Σερρών» -> «σερρ») + τον ορο αναζητησης.
+  const rootOf = (x: string) => x.toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[εαοηωυι]+ς?$/, "") // κοψε φωνηεντικη καταληξη -> σταθερη ριζα
+    .slice(0, 6);
+  const districtRoot = rootOf(district);
+  const termRoot = rootOf(term.split(/\s+/)[0]);
+  const relevanceTerms = Array.from(new Set([districtRoot, termRoot].filter((x) => x.length >= 3)));
+
+  // Google News ανα θεμα (παραλληλα) — ΜΟΝΟ σχετικες + προσφατες
   const results = await Promise.all(
     themes.map(async (theme) => {
       const q = `${term} ${theme}`;
-      const headlines = await googleNews(q);
+      const items = await googleNews(q, relevanceTerms);
       return {
         label: theme.charAt(0).toUpperCase() + theme.slice(1),
-        count: headlines.length,
-        headlines: headlines.slice(0, 3),
+        count: items.length,
+        headlines: items.slice(0, 3).map((it) => it.title),
       };
     })
   );
