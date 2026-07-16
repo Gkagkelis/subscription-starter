@@ -94,7 +94,12 @@ export const updateSession = async (request: NextRequest) => {
           .limit(1)
           .maybeSingle();
         const orgType = String((orgRow as any)?.org_type || '').toLowerCase();
-        const isMp = orgType.includes('βουλευτ') || orgType.includes('υποψηφ') || orgType.includes('ευρωβουλευτ');
+        // Noraya PS: υποψηφιοι + βουλευτες + ευρωβουλευτες περνουν απο ψυχογραφημα.
+        // (Το 'βουλευτ' πιανει και «Υποψήφιος Βουλευτής» και «Γραφείο Βουλευτή».)
+        const isMp =
+          orgType.includes('βουλευτ') ||
+          orgType.includes('υποψηφ') ||
+          orgType.includes('ευρωβουλευτ');
 
         if (isMp) {
           const { data: prof } = await supabase
