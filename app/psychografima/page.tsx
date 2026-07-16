@@ -132,7 +132,7 @@ export default function ProfileQuiz() {
     setNarrLoading(true);
     setNarrError("");
     const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 45000);
+    const t = setTimeout(() => ctrl.abort(), 62000); // ευθυγραμμιση με server maxDuration=60
     try {
       const r = await fetch("/api/demo-profile-narrative", {
         method: "POST",
@@ -366,6 +366,21 @@ export default function ProfileQuiz() {
                 )}
               </div>
             )}
+          </div>
+
+          {/* ΟΛΟΚΛΗΡΩΣΗ -> ΜΕΝΟΥ: το προφιλ εχει αποθηκευτει, παμε στο dashboard */}
+          <div className="mt-8 flex flex-col items-center gap-3 border-t border-white/[0.06] pt-6">
+            <button
+              type="button"
+              onClick={() => router.push("/strategy-room")}
+              className="rounded-2xl px-8 py-3.5 text-[14px] font-semibold text-slate-950 transition"
+              style={{ background: CYAN }}
+            >
+              Πάμε στο Noraya PS →
+            </button>
+            <div className="text-[11px] text-zinc-500">
+              Το προφίλ σου αποθηκεύτηκε. Μπορείς να το ξαναδείς όποτε θέλεις.
+            </div>
           </div>
         </div>
       </Shell>
