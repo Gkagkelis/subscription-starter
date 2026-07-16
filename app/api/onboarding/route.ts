@@ -226,6 +226,23 @@ export async function POST(req: Request) {
 
   const { role_type, ...row } = profile;
 
+  // ΚΛΕΙΔΩΜΑ ΡΟΛΟΥ (backend): αν ο χρηστης εχει ΗΔΗ org_type, ΔΕΝ επιτρεπεται αλλαγη ρολου.
+  // Ενας λογαριασμος = ενας ρολος. Προστασια ακομα κι αν παρακαμφθει το frontend.
+  try {
+    const { data: existingOrg } = await supabase
+      .from("organizations")
+      .select("org_type")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    const lockedType = String((existingOrg as any)?.org_type || "").trim();
+    if (lockedType && (row as any).org_type && (row as any).org_type !== lockedType) {
+      (row as any).org_type = lockedType;
+      (row as any).org_name = (row as any).org_name; // ονομα μπορει να αλλαξει, ρολος οχι
+    }
+  } catch {
+    /* αν αποτυχει ο ελεγχος, συνεχιζουμε κανονικα */
+  }
+
   const { data: existing } = await supabase
     .from("organizations")
     .select("id")
