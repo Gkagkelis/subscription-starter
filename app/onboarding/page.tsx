@@ -58,7 +58,7 @@ const identityTypes: IdentityType[] = [
   "Δημοτική Παράταξη"
 ];
 
-const steps: Array<{ id: StepId; title: string }> = [
+const allSteps: Array<{ id: StepId; title: string }> = [
   { id: "identity", title: "Ποιος είστε" },
   { id: "context", title: "Πλαίσιο" },
   { id: "themes", title: "Θεματικές" },
@@ -67,6 +67,11 @@ const steps: Array<{ id: StepId; title: string }> = [
   { id: "positions", title: "Θέσεις" },
   { id: "review", title: "Επιβεβαίωση" }
 ];
+
+// NORAYA PS: βουλευτης/υποψηφιος -> πιο συντομο onboarding.
+// Τα βηματα Ζητηματα/Κοινα/Θεσεις ΠΑΡΑΛΕΙΠΟΝΤΑΙ — κληρονομουνται αυτοματα απο το κομμα
+// (βλ. buildProfile: issues/stakeholders/positions -> partySnapshot).
+const PS_SKIP: StepId[] = ["issues", "stakeholders", "positions"];
 
 function unique(values: string[]) {
   return Array.from(new Set(values.filter(Boolean)));
@@ -96,6 +101,8 @@ export default function OnboardingPage() {
   const router = useRouter();
 
   const [stepIndex, setStepIndex] = useState(0);
+  const isPS = orgType === "Υποψήφιος Βουλευτής" || orgType === "Γραφείο Βουλευτή";
+  const steps = isPS ? allSteps.filter((st) => !PS_SKIP.includes(st.id)) : allSteps;
   const [partyProfiles, setPartyProfiles] = useState<PartyProfile[]>([]);
   const [loadingParties, setLoadingParties] = useState(false);
 
@@ -163,7 +170,7 @@ export default function OnboardingPage() {
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
 
-  const currentStep = steps[stepIndex];
+  const currentStep = steps[Math.min(stepIndex, steps.length - 1)];
 
   const selectedParty = partyProfiles.find(
     (profile) => profile.party_key === selectedPartyKey
