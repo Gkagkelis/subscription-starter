@@ -494,6 +494,7 @@ export default function OnboardingPage() {
                     selectedParty={selectedParty}
                     loading={loadingParties}
                     onChange={applyPartyProfile}
+                    isPS={isPS}
                   />
                 </RolePanel>
               )}
@@ -509,6 +510,7 @@ export default function OnboardingPage() {
                     selectedParty={selectedParty}
                     loading={loadingParties}
                     onChange={applyPartyProfile}
+                    isPS={isPS}
                   />
 
                   <div className="mt-5 grid gap-4 md:grid-cols-2">
@@ -599,6 +601,7 @@ export default function OnboardingPage() {
                     selectedParty={selectedParty}
                     loading={loadingParties}
                     onChange={applyPartyProfile}
+                    isPS={isPS}
                   />
 
                   <div className="mt-5">
@@ -651,7 +654,8 @@ export default function OnboardingPage() {
                       selectedParty={selectedParty}
                       loading={loadingParties}
                       onChange={applyPartyProfile}
-                    />
+                      isPS={isPS}
+                  />
                   </div>
                 </RolePanel>
               )}
@@ -1084,13 +1088,15 @@ function PartySelector({
   selectedPartyKey,
   selectedParty,
   loading,
-  onChange
+  onChange,
+  isPS = false,
 }: {
   profiles: PartyProfile[];
   selectedPartyKey: string;
   selectedParty?: PartyProfile;
   loading: boolean;
   onChange: (partyKey: string) => void;
+  isPS?: boolean;
 }) {
   return (
     <div>
