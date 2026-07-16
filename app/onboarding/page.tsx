@@ -1113,16 +1113,17 @@ function PartySelector({
       {selectedParty && (
         <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-4">
           <div className="text-xs uppercase tracking-[0.2em] text-zinc-500">
-            Τι ξέρει ήδη ο Noraya
+            Ξεκινάς με πλεονέκτημα
           </div>
 
           <p className="mt-2 text-sm leading-6 text-zinc-300">
             {selectedParty.strategic_positioning}
           </p>
 
-          <p className="mt-3 text-xs leading-5 text-cyan-100">
-            Ο Noraya γέμισε αυτόματα βασικές θέσεις, κοινά, τόνο και κόκκινες
-            γραμμές. Μπορείτε να τα διορθώσετε στα επόμενα βήματα.
+          <p className="mt-3 text-[13px] leading-6 text-cyan-100">
+            {isPS
+              ? `Ωραία — ξέρω ήδη τη γραμμή, τις αξίες και το ύφος του κόμματός σου. Δεν χρειάζεται να μου τα εξηγήσεις από την αρχή· χτίζω πάνω σε αυτά και μένει να μάθω εσένα.`
+              : `Ωραία — έχω ήδη μελετήσει τις βασικές θέσεις, τα κοινά, τον τόνο και τις κόκκινες γραμμές. Στα επόμενα βήματα απλώς επιβεβαιώνεις ή αλλάζεις ό,τι θέλεις.`}
           </p>
         </div>
       )}
