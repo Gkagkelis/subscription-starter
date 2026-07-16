@@ -81,10 +81,27 @@ async function callClaude(system: string, user: string, maxTokens = 2000): Promi
 }
 
 function parseJsonLoose(raw: string): any | null {
-  const s = (raw || "").trim().replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim();
+  let s = (raw || "").trim();
+  // 1) αφαιρεσε markdown fences
+  s = s.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim();
+  // 2) καθαρη δοκιμη
   try { return JSON.parse(s); } catch {}
-  const m = s.match(/\{[\s\S]*\}/);
-  if (m) { try { return JSON.parse(m[0]); } catch {} }
+  // 3) βρες το ΠΡΩΤΟ { μεχρι το ΤΕΛΕΥΤΑΙΟ } (greedy)
+  const first = s.indexOf("{");
+  const last = s.lastIndexOf("}");
+  if (first >= 0 && last > first) {
+    let cand = s.slice(first, last + 1);
+    try { return JSON.parse(cand); } catch {}
+    // 4) διορθωσε συνηθη σφαλματα: control chars, trailing commas, "smart" εισαγωγικα
+    try {
+      cand = cand
+        .replace(/[\u0000-\u001F]+/g, " ")        // control chars μεσα σε strings
+        .replace(/,\s*([}\]])/g, "$1")             // trailing commas
+        .replace(/[\u201C\u201D]/g, '"')          // curly double quotes
+        .replace(/[\u2018\u2019]/g, "'");         // curly single quotes
+      return JSON.parse(cand);
+    } catch {}
+  }
   return null;
 }
 
@@ -108,14 +125,18 @@ ${summary}
 {
  "narrative": "150-200 λεξεις: ποιος ειναι πολιτικα αυτος ο ανθρωπος, το brand του (πως τον βλεπει το κοινο βασει Caprara), τα δυνατα του σημεια και το κρυφο ρισκο. Συγκεκριμενα, οχι γενικοτητες.",
  "messageFit": [
-   {"issue":"<ενα απο τα top θεματα>", "frame":"πως ΠΡΕΠΕΙ να το πλαισιωνει βασει του κυριαρχου ηθικου του λεξιλογιου (individualizing vs binding)", "avoid":"ποιο πλαισιο να ΑΠΟΦΕΥΓΕΙ γιατι δεν του ταιριαζει"}
-   // 3-4 θεματα
+   {"issue":"<ενα απο τα top θεματα>", "frame":"πως ΠΡΕΠΕΙ να το πλαισιωνει βασει του κυριαρχου ηθικου του λεξιλογιου", "avoid":"ποιο πλαισιο να ΑΠΟΦΕΥΓΕΙ"}
  ],
  "redTeam": [
-   {"vulnerability":"η πιο ευαλωτη πλευρα του προφιλ (π.χ. ακραια θεση πυξιδας, αντιφαση αξιων, ρισκο υφους)", "attack":"πως θα του επιτεθει αντιπαλος (<20 λεξεις, αυτολεξει)", "response":"ετοιμη απαντηση (<25 λεξεις)"}
-   // ΑΚΡΙΒΩΣ 3
+   {"vulnerability":"η πιο ευαλωτη πλευρα του προφιλ", "attack":"πως θα του επιτεθει αντιπαλος (<20 λεξεις)", "response":"ετοιμη απαντηση (<25 λεξεις)"}
  ]
-}`;
+}
+
+ΑΥΣΤΗΡΟΙ ΚΑΝΟΝΕΣ ΕΞΟΔΟΥ:
+- Επεστρεψε ΜΟΝΟ το JSON object. ΤΙΠΟΤΑ αλλο πριν ή μετα (ουτε προλογο, ουτε code fences).
+- ΑΠΑΓΟΡΕΥΟΝΤΑΙ σχολια (//) μεσα στο JSON.
+- Στο messageFit βαλε 3-4 στοιχεια. Στο redTeam ΑΚΡΙΒΩΣ 3.
+- ΟΛΑ τα strings σε μια γραμμη, χωρις αλλαγες γραμμης μεσα τους.`;
 
     const text = await callClaude(system, user, 2000);
     const parsed = parseJsonLoose(text);
