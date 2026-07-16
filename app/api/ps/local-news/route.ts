@@ -90,28 +90,45 @@ const BASE_THEMES = [
   "ασφάλεια εγκληματικότητα",
 ];
 
-// Κανονικοποιηση περιφερειας -> ορος αναζητησης (καθαρος, χωρις «Α΄/Β1΄» κωδικους)
-function districtSearchTerm(district: string): string {
-  let d = district.trim();
-  // «Β1΄ Βόρειου Τομέα Αθηνών» -> «Βόρεια Αθήνα» κ.λπ. (απλες αντιστοιχισεις)
-  const map: [RegExp, string][] = [
-    [/Α΄?\s*Αθην/i, "Αθήνα κέντρο"],
-    [/Β1΄?.*Βόρει.*Αθην/i, "Βόρεια προάστια Αθήνας"],
-    [/Β2΄?.*Δυτικ.*Αθην/i, "Δυτική Αθήνα"],
-    [/Β3΄?.*Νότι.*Αθην/i, "Νότια προάστια Αθήνας"],
-    [/Α΄?\s*Πειραι/i, "Πειραιάς"],
-    [/Β΄?\s*Πειραι/i, "Πειραιάς δυτική Αττική"],
-    [/Α΄?\s*Θεσσαλον/i, "Θεσσαλονίκη κέντρο"],
-    [/Β΄?\s*Θεσσαλον/i, "Θεσσαλονίκη"],
-  ];
-  for (const [re, val] of map) if (re.test(d)) return val;
-  // νομοι: «Σερρών» -> «Σέρρες» (αφαιρεση γενικης καταληξης απλα)
-  d = d.replace(/ών$/, "ες").replace(/ίας$/, "ία").replace(/^Ν\.?\s*/, "");
-  return d;
+// Ορος αναζητησης ανα περιφερεια. Για τις μεγαλες πολεις (Αθηνα/Πειραιας) βαζουμε
+// ΠΡΑΓΜΑΤΙΚΕΣ πολεις-κλειδια (ετσι το Google News φερνει σχετικα & το φιλτρο πιανει τιτλους).
+// Για τους νομους: ερχεται ηδη σωστο 'search' απο τον caller (electoral-districts.ts).
+const DISTRICT_OVERRIDES: [RegExp, string][] = [
+  [/Β1.*Βόρει.*Αθην/i, "Κηφισιά Μαρούσι Χαλάνδρι Πεντέλη Ψυχικό Φιλοθέη"],
+  [/Β2.*Δυτικ.*Αθην/i, "Περιστέρι Ίλιον Πετρούπολη Αιγάλεω Χαϊδάρι"],
+  [/Β3.*Νότι.*Αθην/i, "Γλυφάδα Καλλιθέα Άλιμος Νέα Σμύρνη Παλαιό Φάληρο"],
+  [/Α.*Αθην/i, "Αθήνα κέντρο Εξάρχεια Κυψέλη Παγκράτι"],
+  [/Β.*Πειραι/i, "Νίκαια Κορυδαλλός Σαλαμίνα Αίγινα Κερατσίνι"],
+  [/Α.*Πειραι/i, "Πειραιάς λιμάνι"],
+  [/Α.*Θεσσαλον/i, "Θεσσαλονίκη κέντρο"],
+  [/Β.*Θεσσαλον/i, "Θεσσαλονίκη Καλαμαριά Εύοσμος Σταυρούπολη"],
+];
+
+function districtSearchTerm(district: string, providedSearch?: string): string {
+  for (const [re, val] of DISTRICT_OVERRIDES) if (re.test(district)) return val;
+  // αν ο caller εδωσε ετοιμο search (απο electoral-districts), χρησιμοποιησε το
+  if (providedSearch && providedSearch.trim()) return providedSearch.trim();
+  // fallback: το ονομα με μετατροπη γενικης -> ονομαστικη
+  return district.replace(/ών$/, "ες").replace(/ίας$/, "ία").replace(/^Ν\.?\s*/, "").trim();
+}
+
+// Ριζες-φιλτρο: απο ΟΛΕΣ τις λεξεις-πολεις του ορου (>=4 γρ), με κομμενες καταληξεις.
+// Αγνοει γενικες λεξεις (κεντρο, προαστια, περιφερεια, λιμανι, νησια...).
+const STOP_WORDS = ["κεντρο", "κεντ", "προαστ", "περιφε", "λιμαν", "νησια", "δυτικ", "ανατολ", "βορει", "νοτι", "αττικ"];
+function relevanceRoots(term: string): string[] {
+  const strip = (x: string) => x.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const out: string[] = [];
+  for (const w of strip(term).split(/\s+/)) {
+    if (w.length < 4) continue;
+    if (STOP_WORDS.some((sw) => w.startsWith(sw))) continue;
+    const r = w.replace(/(ες|ων|ης|ας|ου|ια|α|ο|η|ι|ς)$/, "");
+    if (r.length >= 4) out.push(r.slice(0, 6));
+  }
+  return Array.from(new Set(out));
 }
 
 // GET/POST ?district=Σέρρες  (αν λειπει, το παιρνει απο τον συνδεδεμενο)
-async function handle(reqDistrict: string | null, force: boolean) {
+async function handle(reqDistrict: string | null, force: boolean, providedSearch?: string) {
   let district = (reqDistrict || "").trim();
 
   // αν δεν δοθηκε, φερε την περιφερεια του συνδεδεμενου
@@ -156,7 +173,7 @@ async function handle(reqDistrict: string | null, force: boolean) {
     } catch { /* αγνοειται */ }
   }
 
-  const term = districtSearchTerm(district);
+  const term = districtSearchTerm(district, providedSearch);
 
   // Θεματα: απο το Προφιλ Περιφερειας (coreProblems titles) + σταθεροι πυλωνες
   let themes: string[] = [...BASE_THEMES];
@@ -185,13 +202,7 @@ async function handle(reqDistrict: string | null, force: boolean) {
 
   // Οροι σχετικοτητας: ο τιτλος της ειδησης ΠΡΕΠΕΙ να αναφερει τον τοπο.
   // Παιρνω τη ριζα της περιφερειας (π.χ. «Σέρρες»/«Σερρών» -> «σερρ») + τον ορο αναζητησης.
-  const rootOf = (x: string) => x.toLowerCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    .replace(/[εαοηωυι]+ς?$/, "") // κοψε φωνηεντικη καταληξη -> σταθερη ριζα
-    .slice(0, 6);
-  const districtRoot = rootOf(district);
-  const termRoot = rootOf(term.split(/\s+/)[0]);
-  const relevanceTerms = Array.from(new Set([districtRoot, termRoot].filter((x) => x.length >= 3)));
+  const relevanceTerms = relevanceRoots(term);
 
   // Google News ανα θεμα (παραλληλα) — ΜΟΝΟ σχετικες + προσφατες
   const results = await Promise.all(
@@ -237,13 +248,15 @@ async function handle(reqDistrict: string | null, force: boolean) {
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const district = url.searchParams.get("district");
+  const search = url.searchParams.get("search") || undefined;
   const force = url.searchParams.get("force") === "1";
-  return handle(district, force);
+  return handle(district, force, search);
 }
 
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}));
   const district = body?.district ? String(body.district) : null;
+  const search = body?.search ? String(body.search) : undefined;
   const force = body?.force === true || body?.force === 1;
-  return handle(district, force);
+  return handle(district, force, search);
 }
