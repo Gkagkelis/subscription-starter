@@ -425,6 +425,13 @@ export default function OnboardingPage() {
 
       <form
         onSubmit={submit}
+        onKeyDown={(e) => {
+          // Μπλοκαρε το Enter να κανει submit τη φορμα κατα λαθος —
+          // η αποθηκευση γινεται ΜΟΝΟ με ρητο πατημα του κουμπιου.
+          if (e.key === "Enter" && (e.target as HTMLElement).tagName !== "TEXTAREA") {
+            e.preventDefault();
+          }
+        }}
         className="relative mx-auto max-w-6xl rounded-3xl border border-white/10 bg-white/[0.04] p-5 shadow-2xl shadow-cyan-950/20 backdrop-blur md:p-8"
       >
         <Header stepIndex={stepIndex} totalSteps={steps.length} />
