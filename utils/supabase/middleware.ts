@@ -75,7 +75,29 @@ export const updateSession = async (request: NextRequest) => {
       return NextResponse.redirect(new URL('/strategy-room', request.url));
     }
 
-    const publicNorayaRoutes = ['/onboarding'];
+    const publicNorayaRoutes = ['/onboarding', '/psychografima'];
+
+    // === ΔΡΟΜΟΛΟΓΗΣΗ ΒΟΥΛΕΥΤΗ: onboarding -> ψυχογραφημα -> μενου ===
+    // Αν ο συνδεδεμενος χρηστης εχει κομμα αλλα ΔΕΝ εχει ψυχογραφημα, τον στελνουμε
+    // στο ψυχογραφημα (μια φορα). Ελεγχος μονο στις «βαριες» σελιδες του εργαλειου.
+    const gatedRoutes = ['/strategy-room', '/agenda'];
+    const needsGateCheck =
+      user && gatedRoutes.some((r) => path === r || path.startsWith(`${r}/`));
+    if (needsGateCheck) {
+      try {
+        const { data: prof } = await supabase
+          .from('psychometric_profiles')
+          .select('id')
+          .eq('user_id', user.id)
+          .limit(1);
+        const hasPsycho = Array.isArray(prof) && prof.length > 0;
+        if (!hasPsycho) {
+          return NextResponse.redirect(new URL('/psychografima', request.url));
+        }
+      } catch {
+        // fail-open: αν ο ελεγχος αποτυχει, ΜΗΝ μπλοκαρεις την προσβαση
+      }
+    }
 
     if (publicNorayaRoutes.some((route) => path === route || path.startsWith(`${route}/`))) {
       return response;
@@ -83,6 +105,7 @@ export const updateSession = async (request: NextRequest) => {
 
     const protectedRoutes = [
       '/strategy-room',
+      '/psychografima',
       '/dashboard',
       '/dashboard/profile',
       '/dashboard/data',
