@@ -371,7 +371,8 @@ export default function OnboardingPage() {
       }
 
       window.localStorage.setItem("noraya_org_profile", JSON.stringify(profile));
-      router.push("/strategy-room");
+      // Μετα το onboarding -> ψυχογραφημα (μια φορα). Το middleware το επιβαλλει ουτως ή αλλως.
+      router.push("/psychografima");
     } catch {
       setSaveError("Σφάλμα σύνδεσης. Δοκιμάστε ξανά.");
       setSaving(false);
