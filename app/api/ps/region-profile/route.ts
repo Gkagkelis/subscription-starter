@@ -104,14 +104,14 @@ async function handle(district: string, force: boolean) {
 
   const payload: any = {
     model: MODEL,
-    max_tokens: 2600,
+    max_tokens: 2200,
     system: [{ type: "text", text: system, cache_control: { type: "ephemeral" } }],
     messages: [{ role: "user", content: user }],
     tools: [
       {
         type: "web_search_20250305",
         name: "web_search",
-        max_uses: 3,
+        max_uses: 2,
         allowed_domains: [
           // επισημα
           "statistics.gr", "ec.europa.eu", "europa.eu", "eurostat.ec.europa.eu",
@@ -128,7 +128,7 @@ async function handle(district: string, force: boolean) {
   };
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 55000);
+  const timeout = setTimeout(() => controller.abort(), 45000);
 
   const callAnthropic = async (withTools: boolean) => {
     const p = { ...payload };
@@ -146,9 +146,25 @@ async function handle(district: string, force: boolean) {
   };
 
   try {
-    let response = await callAnthropic(true);
-    // fail-safe: αν σκασει με tools, ξαναδοκιμασε χωρις (γνωση AI μονο)
-    if (!response.ok) response = await callAnthropic(false);
+    let response: Response;
+    try {
+      response = await callAnthropic(true);
+      // fail-safe: αν σκασει με tools (rate/error), ξαναδοκιμασε χωρις
+      if (!response.ok) response = await callAnthropic(false);
+    } catch (e) {
+      // Αν το web_search αργησε/κοπηκε -> γρηγορη προσπαθεια ΧΩΡΙΣ tools (γνωση AI).
+      clearTimeout(timeout);
+      const c2 = new AbortController();
+      const t2 = setTimeout(() => c2.abort(), 30000);
+      const p2 = { ...payload }; delete p2.tools;
+      try {
+        response = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST", signal: c2.signal,
+          headers: { "Content-Type": "application/json", "x-api-key": anthropicKey, "anthropic-version": "2023-06-01" },
+          body: JSON.stringify(p2),
+        });
+      } finally { clearTimeout(t2); }
+    }
     clearTimeout(timeout);
 
     if (!response.ok) {
