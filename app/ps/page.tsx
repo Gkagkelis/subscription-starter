@@ -97,7 +97,7 @@ export default function PsCockpit() {
         setAgendaLoading(false);
       }
     })();
-  }, []);
+  }, [meLoading, me?.party]);
 
   // Τοπικη ατζεντα (δυναμικη — φιλτραρισμενη ανα περιφερεια)
   useEffect(() => {
@@ -117,7 +117,7 @@ export default function PsCockpit() {
         setLocalLoading(false);
       }
     })();
-  }, []);
+  }, [meLoading, me?.district]);
 
   // AI ημερησια αναγνωση (αφου ερθουν εθνικα + τοπικα)
   useEffect(() => {
