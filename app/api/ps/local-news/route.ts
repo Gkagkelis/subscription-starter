@@ -219,8 +219,21 @@ function districtSearchTerm(district: string, providedSearch?: string): string {
   for (const [re, val] of DISTRICT_OVERRIDES) if (re.test(district)) return val;
   // αν ο caller εδωσε ετοιμο search (απο electoral-districts), χρησιμοποιησε το
   if (providedSearch && providedSearch.trim()) return providedSearch.trim();
+  // ειδικες περιπτωσεις: νομος -> πρωτευουσα/πολη που ψαχνει ο κοσμος
+  const SPECIAL: Record<string, string> = {
+    "Αχαΐας": "Πάτρα", "Αχαΐα": "Πάτρα", "Ημαθίας": "Βέροια Νάουσα",
+    "Βοιωτίας": "Λιβαδειά Θήβα", "Ευβοίας": "Χαλκίδα", "Φθιώτιδας": "Λαμία",
+    "Μαγνησίας": "Βόλος", "Κορινθίας": "Κόρινθος", "Αργολίδας": "Ναύπλιο Άργος",
+    "Μεσσηνίας": "Καλαμάτα", "Ηλείας": "Πύργος", "Πιερίας": "Κατερίνη",
+    "Πέλλας": "Έδεσσα Γιαννιτσά", "Κιλκίς": "Κιλκίς", "Δωδεκανήσου": "Ρόδος",
+    "Κυκλάδων": "Σύρος Μύκονος", "Λασιθίου": "Άγιος Νικόλαος", "Ρεθύμνης": "Ρέθυμνο",
+    "Λακωνίας": "Σπάρτη", "Αρκαδίας": "Τρίπολη", "Ευρυτανίας": "Καρπενήσι",
+    "Θεσπρωτίας": "Ηγουμενίτσα", "Φωκίδας": "Άμφισσα", "Χαλκιδικής": "Πολύγυρος",
+  };
+  const dtrim = district.replace(/^Ν\.?\s*/, "").trim();
+  if (SPECIAL[dtrim]) return SPECIAL[dtrim];
   // fallback: το ονομα με μετατροπη γενικης -> ονομαστικη
-  return district.replace(/ών$/, "ες").replace(/ίας$/, "ία").replace(/^Ν\.?\s*/, "").trim();
+  return dtrim.replace(/ών$/, "ες").replace(/ίας$/, "ία").trim();
 }
 
 // Ριζες-φιλτρο: απο ΟΛΕΣ τις λεξεις-πολεις του ορου (>=4 γρ), με κομμενες καταληξεις.
@@ -322,7 +335,16 @@ async function handle(reqDistrict: string | null, force: boolean, providedSearch
 
   // === ΠΗΓΗ 1α: FREELIST (πλουσια τοπικη ροη ολου του νομου, μια κληση) ===
   // ΠΛΑΤΥ query: ολος ο νομος (σκετο ονομα + «νομος X»). Φερνει δεκαδες ειδησεις. (freelist μπλοκαρει τον Vercel)
-  const broadTerms = Array.from(new Set([term, `νομός ${term}`, `${term} δήμος`]));
+  // ΠΛΑΤΥ query. Αν το term ειναι πολλες πολεις (π.χ. Αθηνα-τομεις: «Κηφισιά Μαρούσι...»),
+  // ψαξε ΚΑΘΕ πολη ξεχωριστα (το Google News θελει ΟΛΕΣ τις λεξεις αλλιως). Αλλιως ενα ονομα + «νομος X».
+  const termWords = term.split(/\s+/).filter((w) => w.length >= 4);
+  let broadTerms: string[];
+  if (termWords.length >= 3) {
+    // πολλες πολεις -> καθε μια ξεχωριστα (μεχρι 6)
+    broadTerms = termWords.slice(0, 6);
+  } else {
+    broadTerms = Array.from(new Set([term, `νομός ${term}`, `${term} δήμος`]));
+  }
   const freelistItems = await googleNewsBroad(broadTerms, relevanceTerms);
 
   // Λεξεις-κλειδια ανα θεμα, για να καταταξουμε τα freelist items.
@@ -464,7 +486,7 @@ async function handle(reqDistrict: string | null, force: boolean, providedSearch
     });
   }
 
-  const out = { topics, term, built_at: new Date().toISOString() };
+  const out = { topics, term, broad_count: freelistItems.length, built_at: new Date().toISOString() };
 
   // cache save
   try {
