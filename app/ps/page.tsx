@@ -77,19 +77,24 @@ export default function PsCockpit() {
     if (meLoading) return;
     (async () => {
       try {
-        const pk = me?.party || "";
-        const r = await fetch(`/api/agenda/timeline?token=dev${pk ? "&party=" + encodeURIComponent(pk) : ""}`, { cache: "no-store" });
+        // ΕΘΝΙΚΗ ΑΤΖΕΝΤΑ: απο το ζωντανο ραντάρ (agenda-probe) — γεματο, σκοραρισμενο
+        const r = await fetch(`/api/situation-engine/agenda-probe?token=dev&hours=48&view=brief`, { cache: "no-store" });
         const j = await r.json();
-        const raw = Array.isArray(j?.topics) ? j.topics : [];
-        const mapped: Topic[] = raw
-          .map((t: any) => ({
-            topic: String(t.topic || t.name || "—"),
-            score: Math.round(Number(t.agenda_score ?? t.score ?? 0)) || 0,
-            change: Math.round(Number(t.change_pct ?? t.change ?? 0)) || 0,
-          }))
-          .filter((t: Topic) => t.topic && t.topic !== "—")
-          .sort((a: Topic, b: Topic) => b.score - a.score)
-          .slice(0, 8);
+        const clusters = Array.isArray(j?.agenda_clusters) ? j.agenda_clusters : [];
+        const seen = new Set<string>();
+        const mapped: Topic[] = [];
+        for (const c of clusters) {
+          const parent = String(c?.parent_topic || c?.topic || "—").trim();
+          if (!parent || parent === "—" || seen.has(parent)) continue;
+          seen.add(parent);
+          mapped.push({
+            topic: parent,
+            score: Math.round(Number(c?.score ?? 0)) || 0,
+            change: Math.round(Number(c?.real_trend_score ?? 0)) || 0,
+          });
+          if (mapped.length >= 8) break;
+        }
+        mapped.sort((a, b) => b.score - a.score);
         setTopics(mapped);
       } catch {
         setTopics([]);
