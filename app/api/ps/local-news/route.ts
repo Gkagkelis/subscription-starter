@@ -80,6 +80,42 @@ async function googleNews(q: string, relevanceTerms: string[]): Promise<NewsItem
   }
 }
 
+// ΠΛΑΤΥ Google News: ολος ο νομος, δεκαδες ειδησεις (αντικαθιστα το freelist που μπλοκαρει τον Vercel)
+async function googleNewsBroad(terms: string[], relevanceTerms: string[]): Promise<NewsItem[]> {
+  const out: NewsItem[] = [];
+  const seen = new Set<string>();
+  const now = Date.now();
+  for (const term of terms) {
+    try {
+      const url = `https://news.google.com/rss/search?q=${encodeURIComponent(term + " when:21d")}&hl=el&gl=GR&ceid=GR:el`;
+      const r = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" }, cache: "no-store" });
+      if (!r.ok) continue;
+      const xml = await r.text();
+      const items = xml.split("<item>").slice(1, 60);
+      for (const it of items) {
+        const tm = it.match(/<title>([\s\S]*?)<\/title>/);
+        if (!tm) continue;
+        let t = decode(tm[1]);
+        const dash = t.lastIndexOf(" - ");
+        if (dash > 20) t = t.slice(0, dash);
+        if (!t || t.length < 12) continue;
+        const low = t.toLowerCase();
+        if (!relevanceTerms.some((rt) => low.includes(rt.toLowerCase()))) continue;
+        let ageDays = 0;
+        const pm = it.match(/<pubDate>([\s\S]*?)<\/pubDate>/);
+        if (pm) { const d = new Date(pm[1]).getTime(); if (!isNaN(d)) ageDays = Math.floor((now - d) / 86400000); }
+        if (ageDays > 25) continue;
+        const key = t.toLowerCase().slice(0, 40);
+        if (seen.has(key)) continue;
+        seen.add(key);
+        out.push({ title: t, ageDays });
+      }
+    } catch {}
+  }
+  out.sort((a, b) => a.ageDays - b.ageDays);
+  return out;
+}
+
 // Σταθεροι πυλωνες που αφορουν ΚΑΘΕ περιφερεια (Ελλαδα)
 const BASE_THEMES = [
   "ακρίβεια κόστος ζωής",
@@ -148,27 +184,16 @@ async function freelistNews(district: string, maxDays = 30): Promise<NewsItem[]>
   if (!pid) return [];
   try {
     const resp = await fetch(`https://news.freelist.gr/?prefectureId=${pid}`, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml",
-        "Accept-Language": "el-GR,el;q=0.9",
-      },
-      signal: AbortSignal.timeout(20000),
-      cache: "no-store",
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; NorayaBot/1.0)" },
+      signal: AbortSignal.timeout(12000),
     });
     if (!resp.ok) return [];
     const html = await resp.text();
     const items: NewsItem[] = [];
-    // Πιασε τιτλους ειδησεων: «### [τιτλος](url)» (τα headings του freelist)
-    const re = /###\s*\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g;
+    const re = /###\s*\[([^\]]+)\]\(([^)]+)\)/g;
     const raw: { title: string; idx: number }[] = [];
     let m: RegExpExecArray | null;
-    while ((m = re.exec(html)) !== null) {
-      const t = m[1].trim();
-      // αγνοησε πλοηγηση/κατηγοριες (μικρα, χωρις τοπικοτητα)
-      if (t.length < 15) continue;
-      raw.push({ title: t, idx: m.index });
-    }
+    while ((m = re.exec(html)) !== null) raw.push({ title: m[1], idx: m.index });
     const now = Date.now();
     const seen = new Set<string>();
     for (let i = 0; i < raw.length; i++) {
@@ -296,7 +321,9 @@ async function handle(reqDistrict: string | null, force: boolean, providedSearch
   const relevanceTerms = relevanceRoots(term);
 
   // === ΠΗΓΗ 1α: FREELIST (πλουσια τοπικη ροη ολου του νομου, μια κληση) ===
-  const freelistItems = await freelistNews(district, 45);
+  // ΠΛΑΤΥ query: ολος ο νομος (σκετο ονομα + «νομος X»). Φερνει δεκαδες ειδησεις. (freelist μπλοκαρει τον Vercel)
+  const broadTerms = Array.from(new Set([term, `νομός ${term}`, `${term} δήμος`]));
+  const freelistItems = await googleNewsBroad(broadTerms, relevanceTerms);
 
   // Λεξεις-κλειδια ανα θεμα, για να καταταξουμε τα freelist items.
   const THEME_KEYWORDS: Record<string, string[]> = {
@@ -437,7 +464,7 @@ async function handle(reqDistrict: string | null, force: boolean, providedSearch
     });
   }
 
-  const out = { topics, term, freelist_count: freelistItems.length, built_at: new Date().toISOString() };
+  const out = { topics, term, built_at: new Date().toISOString() };
 
   // cache save
   try {
