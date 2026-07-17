@@ -148,16 +148,27 @@ async function freelistNews(district: string, maxDays = 30): Promise<NewsItem[]>
   if (!pid) return [];
   try {
     const resp = await fetch(`https://news.freelist.gr/?prefectureId=${pid}`, {
-      headers: { "User-Agent": "Mozilla/5.0 (compatible; NorayaBot/1.0)" },
-      signal: AbortSignal.timeout(12000),
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml",
+        "Accept-Language": "el-GR,el;q=0.9",
+      },
+      signal: AbortSignal.timeout(20000),
+      cache: "no-store",
     });
     if (!resp.ok) return [];
     const html = await resp.text();
     const items: NewsItem[] = [];
-    const re = /###\s*\[([^\]]+)\]\(([^)]+)\)/g;
+    // Πιασε τιτλους ειδησεων: «### [τιτλος](url)» (τα headings του freelist)
+    const re = /###\s*\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g;
     const raw: { title: string; idx: number }[] = [];
     let m: RegExpExecArray | null;
-    while ((m = re.exec(html)) !== null) raw.push({ title: m[1], idx: m.index });
+    while ((m = re.exec(html)) !== null) {
+      const t = m[1].trim();
+      // αγνοησε πλοηγηση/κατηγοριες (μικρα, χωρις τοπικοτητα)
+      if (t.length < 15) continue;
+      raw.push({ title: t, idx: m.index });
+    }
     const now = Date.now();
     const seen = new Set<string>();
     for (let i = 0; i < raw.length; i++) {
@@ -285,7 +296,7 @@ async function handle(reqDistrict: string | null, force: boolean, providedSearch
   const relevanceTerms = relevanceRoots(term);
 
   // === ΠΗΓΗ 1α: FREELIST (πλουσια τοπικη ροη ολου του νομου, μια κληση) ===
-  const freelistItems = await freelistNews(district, 30);
+  const freelistItems = await freelistNews(district, 45);
 
   // Λεξεις-κλειδια ανα θεμα, για να καταταξουμε τα freelist items.
   const THEME_KEYWORDS: Record<string, string[]> = {
@@ -426,7 +437,7 @@ async function handle(reqDistrict: string | null, force: boolean, providedSearch
     });
   }
 
-  const out = { topics, term, built_at: new Date().toISOString() };
+  const out = { topics, term, freelist_count: freelistItems.length, built_at: new Date().toISOString() };
 
   // cache save
   try {
