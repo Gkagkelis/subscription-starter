@@ -104,6 +104,81 @@ const DISTRICT_OVERRIDES: [RegExp, string][] = [
   [/Β.*Θεσσαλον/i, "Θεσσαλονίκη Καλαμαριά Εύοσμος Σταυρούπολη"],
 ];
 
+// ============ FREELIST: πλουσια τοπικη ροη ανα νομο (ΟΛΗ η Ελλαδα) ============
+const FREELIST_PREFECTURE: Record<string, number> = {
+  "Α΄ Αθηνών": 5, "Β1΄ Βόρειου Τομέα Αθηνών": 5, "Β2΄ Δυτικού Τομέα Αθηνών": 55,
+  "Β3΄ Νότιου Τομέα Αθηνών": 5, "Α΄ Πειραιώς": 53, "Β΄ Πειραιώς": 53,
+  "Περιφέρεια Αττικής (Υπόλοιπο)": 54, "Α΄ Θεσσαλονίκης": 19, "Β΄ Θεσσαλονίκης": 19,
+  "Αιτωλοακαρνανίας": 1, "Αργολίδας": 2, "Αρκαδίας": 3, "Άρτας": 4, "Αχαΐας": 6,
+  "Βοιωτίας": 7, "Γρεβενών": 8, "Δράμας": 9, "Δωδεκανήσου": 10, "Έβρου": 11,
+  "Εύβοιας": 12, "Ευρυτανίας": 13, "Ζακύνθου": 14, "Ηλείας": 15, "Ημαθίας": 16,
+  "Ηρακλείου": 17, "Θεσπρωτίας": 18, "Ιωαννίνων": 20, "Καβάλας": 21, "Καρδίτσας": 22,
+  "Καστοριάς": 23, "Κέρκυρας": 24, "Κεφαλληνίας": 25, "Κιλκίς": 26, "Κοζάνης": 27,
+  "Κορινθίας": 28, "Κυκλάδων": 29, "Λακωνίας": 30, "Λάρισας": 31, "Λασιθίου": 32,
+  "Λέσβου": 33, "Λευκάδας": 34, "Μαγνησίας": 35, "Μεσσηνίας": 36, "Ξάνθης": 37,
+  "Πέλλας": 38, "Πιερίας": 39, "Πρέβεζας": 40, "Ρεθύμνης": 41, "Ροδόπης": 42,
+  "Σάμου": 43, "Σερρών": 44, "Τρικάλων": 45, "Φθιώτιδας": 46, "Φλώρινας": 47,
+  "Φωκίδας": 48, "Χαλκιδικής": 49, "Χανίων": 50, "Χίου": 51,
+};
+function prefectureIdFor(district: string): number | null {
+  if (!district) return null;
+  const d = district.trim();
+  if (FREELIST_PREFECTURE[d] != null) return FREELIST_PREFECTURE[d];
+  const norm = (x: string) => x.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/^ν\.?\s*/, "").trim();
+  const dn = norm(d);
+  for (const [k, v] of Object.entries(FREELIST_PREFECTURE)) if (norm(k) === dn) return v;
+  return null;
+}
+function cleanFreelistTitle(t: string): string {
+  const parts = t.split(/\s+[-–]\s+/);
+  if (parts.length > 1) {
+    const last = parts[parts.length - 1];
+    if (last.length <= 25 && !/\d{4}/.test(last)) parts.pop();
+  }
+  return parts.join(" - ").replace(/&#8211;/g, "–").replace(/&amp;/g, "&").replace(/&quot;/g, '"').trim();
+}
+function parseFreelistDate(s: string): Date | null {
+  const months: Record<string, number> = { January:0,February:1,March:2,April:3,May:4,June:5,July:6,August:7,September:8,October:9,November:10,December:11 };
+  const m = s.match(/(\d{1,2})\s+(\w+)\s+(\d{4})/);
+  if (!m) return null;
+  return new Date(Number(m[3]), months[m[2]] ?? 0, Number(m[1]));
+}
+async function freelistNews(district: string, maxDays = 30): Promise<NewsItem[]> {
+  const pid = prefectureIdFor(district);
+  if (!pid) return [];
+  try {
+    const resp = await fetch(`https://news.freelist.gr/?prefectureId=${pid}`, {
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; NorayaBot/1.0)" },
+      signal: AbortSignal.timeout(12000),
+    });
+    if (!resp.ok) return [];
+    const html = await resp.text();
+    const items: NewsItem[] = [];
+    const re = /###\s*\[([^\]]+)\]\(([^)]+)\)/g;
+    const raw: { title: string; idx: number }[] = [];
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(html)) !== null) raw.push({ title: m[1], idx: m.index });
+    const now = Date.now();
+    const seen = new Set<string>();
+    for (let i = 0; i < raw.length; i++) {
+      const start = raw[i].idx;
+      const end = i + 1 < raw.length ? raw[i + 1].idx : html.length;
+      const chunk = html.slice(start, end);
+      const dm = chunk.match(/📅\s*(\d{1,2}\s+\w+\s+\d{4})/);
+      const dt = dm ? parseFreelistDate(dm[1]) : null;
+      const ageDays = dt ? Math.floor((now - dt.getTime()) / 86400000) : 0;
+      if (ageDays > maxDays) continue; // πολυ παλιο
+      const title = cleanFreelistTitle(raw[i].title);
+      if (!title || title.length < 12) continue;
+      const key = title.toLowerCase().slice(0, 40);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      items.push({ title, ageDays });
+    }
+    return items;
+  } catch { return []; }
+}
+
 function districtSearchTerm(district: string, providedSearch?: string): string {
   for (const [re, val] of DISTRICT_OVERRIDES) if (re.test(district)) return val;
   // αν ο caller εδωσε ετοιμο search (απο electoral-districts), χρησιμοποιησε το
@@ -209,18 +284,87 @@ async function handle(reqDistrict: string | null, force: boolean, providedSearch
   // Παιρνω τη ριζα της περιφερειας (π.χ. «Σέρρες»/«Σερρών» -> «σερρ») + τον ορο αναζητησης.
   const relevanceTerms = relevanceRoots(term);
 
-  // Google News ανα θεμα (παραλληλα) — ΜΟΝΟ σχετικες + προσφατες
-  const results = await Promise.all(
+  // === ΠΗΓΗ 1α: FREELIST (πλουσια τοπικη ροη ολου του νομου, μια κληση) ===
+  const freelistItems = await freelistNews(district, 30);
+
+  // Λεξεις-κλειδια ανα θεμα, για να καταταξουμε τα freelist items.
+  const THEME_KEYWORDS: Record<string, string[]> = {
+    "πολιτικ": ["πασοκ", "συριζα", "νεα δημοκρατ", " νδ ", "κκε", "βουλευτ", "υπουργ", "εκλογ", "κομμα", "δημαρχ", "περιφερειαρχ", "αντιπεριφερει", "δημοτικο συμβουλ"],
+    "εργασ": ["ανεργ", "απεργ", "μισθ", "εργαζομ", "δυπα", "προσληψ", "συνδικ", "εργατ", "απολυσ"],
+    "ακριβ": ["ακριβ", "τιμ", "κοστ", "πληθωρ", "λογαριασμ", "ρευμα", "καυσιμ", "βενζιν"],
+    "στεγασ": ["στεγ", "ενοικ", "κατοικ", "σπιτ", "ακιν"],
+    "υγει": ["υγει", "νοσοκομ", "γιατρ", "ασθεν", " εδε", "μεθ", "ιατρ", "τραυματ", "τροχαι", "νεκρ", "θανατ", "διασωλ"],
+    "παιδει": ["παιδει", "σχολ", "πανεπιστημ", "φοιτητ", "εκπαιδευ", "μαθητ", "εξετασ", "διπαε", "επαλ", "μουσικο σχολ"],
+    "αγροτ": ["αγροτ", "καλλιεργ", "χαλαζ", "κτηνοτροφ", "φραγμα", "αρδευ", "κερκιν", "ελαιολαδ", "παραγωγ"],
+    "ασφαλ": ["εγκλημ", "αστυνομ", "συλληψ", "κλοπ", "ληστ", "δολοφον", "δικη", "φωτια", "πυρκαγ", "112", "σπειρ", "εξαρθρωθ", "ξυλοδαρμ"],
+    "υποδομ": ["υποδομ", "γεφυρ", "τρεν", "μετρο", "αεροδρομ", "συγκοινων", "οδικ", "αμαξοστοιχ", "hellenic train"],
+    "μεταναστ": ["μεταναστ", "προσφυγ", "δομη σιντικ", "συνορ"],
+    "δημογραφ": ["δημογραφ", "γεννησ", "υπογεννητ", "πληθυσμ"],
+  };
+  const stripK = (x: string) => x.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  function classifyTheme(title: string): string | null {
+    const low = stripK(title);
+    let best: string | null = null, bestHits = 0;
+    for (const [theme, kws] of Object.entries(THEME_KEYWORDS)) {
+      const hits = kws.filter((k) => low.includes(k)).length;
+      if (hits > bestHits) { bestHits = hits; best = theme; }
+    }
+    return bestHits > 0 ? best : null;
+  }
+  // ομαδοποιησε freelist items ανα θεμα
+  const freelistByTheme = new Map<string, string[]>();
+  for (const it of freelistItems) {
+    const th = classifyTheme(it.title);
+    if (!th) continue;
+    const arr = freelistByTheme.get(th) || [];
+    arr.push(it.title);
+    freelistByTheme.set(th, arr);
+  }
+
+  // ονοματα εμφανισης ανα θεμα-κλειδι
+  const THEME_LABELS: Record<string, string> = {
+    "πολιτικ": "Πολιτικά τοπικά",
+    "εργασ": "Εργασία & ανεργία", "ακριβ": "Ακρίβεια / κόστος ζωής", "στεγασ": "Στέγαση",
+    "υγει": "Υγεία & περιστατικά", "παιδει": "Παιδεία", "αγροτ": "Αγροτικά",
+    "ασφαλ": "Ασφάλεια & δικαιοσύνη", "υποδομ": "Υποδομές & έργα", "μεταναστ": "Μεταναστευτικό",
+    "περιβαλλ": "Περιβάλλον", "δημογραφ": "Δημογραφικό",
+  };
+
+  // === ΠΗΓΗ 1β: Google News ανα θεμα (συμπληρωμα) ===
+  const gnResults = await Promise.all(
     themes.map(async (theme) => {
       const q = `${term} ${theme}`;
       const items = await googleNews(q, relevanceTerms);
-      return {
-        label: theme.charAt(0).toUpperCase() + theme.slice(1),
-        count: items.length,
-        headlines: items.slice(0, 3).map((it) => it.title),
-      };
+      return { theme, titles: items.map((it) => it.title) };
     })
   );
+
+  // ΕΝΩΣΗ: για καθε θεμα-κλειδι, freelist (κυρια) + google news (αν ταιριαζει)
+  const themeKeys = Object.keys(THEME_LABELS);
+  const results = themeKeys.map((tk) => {
+    const flTitles = freelistByTheme.get(tk) || [];
+    // ταιριαξε google news θεματα σε αυτο το κλειδι
+    const gnTitles: string[] = [];
+    for (const g of gnResults) {
+      if (stripK(g.theme).includes(tk) || tk.includes(stripK(g.theme).slice(0, 5))) {
+        gnTitles.push(...g.titles);
+      }
+    }
+    // ενωσε, χωρις διπλα
+    const seen = new Set<string>();
+    const merged: string[] = [];
+    for (const t of [...flTitles, ...gnTitles]) {
+      const k = t.toLowerCase().slice(0, 35);
+      if (seen.has(k)) continue;
+      seen.add(k);
+      merged.push(t);
+    }
+    return {
+      label: THEME_LABELS[tk],
+      count: merged.length,
+      headlines: merged.slice(0, 4),
+    };
+  });
   // === ΠΗΓΗ 2: ΡΑΝΤΑΡ ΚΟΜΜΑΤΟΣ (v_political_events_live) — τα «καυτα» που αφορουν τον τοπο ===
   // Το ραντάρ τρεχει ηδη συνεχεια & σκοραρει events. Φιλτραρουμε οσα ο τιτλος αναφερει την περιφερεια.
   type RadarHit = { title: string; topic: string; score: number };
