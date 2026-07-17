@@ -171,7 +171,7 @@ async function handle(reqDistrict: string | null, force: boolean, providedSearch
         const isNewFormat =
           Array.isArray(res?.topics) &&
           (res.topics.length === 0 || typeof res.topics[0]?.heat === "string");
-        if (ageMin < 60 && isNewFormat) {
+        if (ageMin < 360 && isNewFormat) {
           return jsonOut({ ok: true, cached: true, district, ...res });
         }
       }
