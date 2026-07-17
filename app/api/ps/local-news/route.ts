@@ -221,12 +221,38 @@ async function handle(reqDistrict: string | null, force: boolean, providedSearch
       };
     })
   );
+  // === ΠΗΓΗ 2: ΡΑΝΤΑΡ ΚΟΜΜΑΤΟΣ (v_political_events_live) — τα «καυτα» που αφορουν τον τοπο ===
+  // Το ραντάρ τρεχει ηδη συνεχεια & σκοραρει events. Φιλτραρουμε οσα ο τιτλος αναφερει την περιφερεια.
+  type RadarHit = { title: string; topic: string; score: number };
+  let radarHits: RadarHit[] = [];
+  try {
+    const since = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(); // τελευταιες 3 μερες (φρεσκα)
+    const { data: evRows } = await svc()
+      .from("v_political_events_live")
+      .select("topic,title,event_score,article_count,last_article_at")
+      .gte("last_article_at", since)
+      .order("event_score", { ascending: false })
+      .limit(400);
+    const stripT = (x: string) => x.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    for (const ev of (Array.isArray(evRows) ? evRows : []) as any[]) {
+      const title = String(ev?.title || "").trim();
+      if (!title) continue;
+      const low = stripT(title);
+      // ΙΔΙΟ φιλτρο σχετικοτητας: ο τιτλος πρεπει να αναφερει τον τοπο
+      if (!relevanceTerms.some((rt) => low.includes(rt))) continue;
+      radarHits.push({ title, topic: String(ev?.topic || "").trim(), score: Number(ev?.event_score) || 0 });
+    }
+    // κρατα τα κορυφαια (σκορ) — max 8
+    radarHits = radarHits.slice(0, 8);
+  } catch { /* το ραντάρ ειναι προαιρετικο — αν αποτυχει, συνεχιζουμε με Google News */ }
+
   results.sort((a, b) => b.count - a.count);
   const filtered = results.filter((r) => r.count > 0);
 
   // ΕΝΤΑΣΗ (agenda-setting: ο ΟΓΚΟΣ οριζει την προτεραιοτητα — McCombs & Shaw)
   //  + «ΔΙΚΟ ΣΟΥ ΘΕΜΑ» (issue ownership — Budge): ταιριαζει με τα διαχρονικα προβληματα του τοπου;
   const maxCount = filtered.length ? filtered[0].count : 0;
+  const stripL = (x: string) => x.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   const topics = filtered.map((r) => {
     let heat: "hot" | "rising" | "steady";
     if (r.count >= 4 || (maxCount >= 3 && r.count === maxCount)) heat = "hot";
@@ -234,8 +260,27 @@ async function handle(reqDistrict: string | null, force: boolean, providedSearch
     else heat = "steady";
     const lbl = r.label.toLowerCase();
     const mine = coreProblemWords.some((w) => lbl.includes(w) || w.includes(lbl.split(" ")[0]));
-    return { ...r, heat, mine };
+    // Ραντάρ: ταιριαζει καποιο καυτο event σε αυτο το θεμα;
+    const lblN = stripL(r.label);
+    const matched = radarHits.filter((h) => stripL(h.topic) && (lblN.includes(stripL(h.topic).split(" ")[0]) || stripL(h.topic).includes(lblN.split(" ")[0])));
+    const radar = matched.length > 0;
+    // αν το ραντάρ το πιανει -> ενταση «hot» (ειναι φρεσκο & σοβαρο)
+    return { ...r, heat: radar ? "hot" as const : heat, mine, radar };
   });
+
+  // Ραντάρ events που ΔΕΝ ταιριαξαν σε καμια θεματικη -> ξεχωριστο «🎯 Καυτο τωρα»
+  const usedTitles = new Set(topics.flatMap((t) => t.headlines.map((h) => stripL(h))));
+  const orphanRadar = radarHits.filter((h) => !Array.from(usedTitles).some((u) => u.includes(stripL(h.title).slice(0, 20))));
+  if (orphanRadar.length > 0) {
+    topics.unshift({
+      label: "🎯 Καυτό τώρα",
+      count: orphanRadar.length,
+      headlines: orphanRadar.slice(0, 3).map((h) => h.title),
+      heat: "hot" as const,
+      mine: true,
+      radar: true,
+    });
+  }
 
   const out = { topics, term, built_at: new Date().toISOString() };
 
