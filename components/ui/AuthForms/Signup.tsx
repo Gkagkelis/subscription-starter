@@ -12,11 +12,14 @@ interface SignUpProps {
   redirectMethod: string;
 }
 
-export default function SignUp({ allowEmail, redirectMethod }: SignUpProps) {
+export default function SignUp({
+  allowEmail,
+  redirectMethod
+}: SignUpProps) {
   const router = redirectMethod === 'client' ? useRouter() : null;
   const searchParams = useSearchParams();
 
-  // ✅ Αν δεν υπάρχει next, πήγαινε στο onboarding
+  // Αν δεν υπάρχει next, πήγαινε στο onboarding
   const next = searchParams.get('next') || '/onboarding';
   const nextEncoded = encodeURIComponent(next);
 
@@ -24,15 +27,38 @@ export default function SignUp({ allowEmail, redirectMethod }: SignUpProps) {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     setIsSubmitting(true);
+
+    // Πάρε email και role ΠΡΙΝ το handleRequest
+    // γιατί μετά μπορεί να γίνει redirect
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get('email') as string;
+    const role = searchParams.get('role') || '';
+
     await handleRequest(e, signUp, router);
+
+    // Στείλε welcome email μετά την εγγραφή
+    if (email) {
+      fetch('/api/welcome-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email,
+          name: '',
+          role
+        })
+      }).catch(() => {});
+    }
+
     setIsSubmitting(false);
   };
 
   return (
-    <div className="my-8">
-      <form noValidate className="mb-4" onSubmit={handleSubmit}>
-        {/* ✅ αυτό είναι το κρίσιμο: περνάει redirect στο server action */}
-        <input type="hidden" name="redirectTo" value={next} />
+    <div>
+      <form onSubmit={handleSubmit}>
+        {/* Περνάει redirect στο server action */}
+        <input type="hidden" name="redirect" value={next} />
 
         <div className="grid gap-2">
           <div className="grid gap-1">
