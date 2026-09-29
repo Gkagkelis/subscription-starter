@@ -56,7 +56,7 @@ Vercel → Project → **Settings → Environment Variables**. Βάλ' τες π
 | `STRIPE_SECRET_KEY` | Από Stripe → Developers → API keys (ξεκίνα με το test key `sk_test_...`). |
 | `STRIPE_WEBHOOK_SECRET` | Stripe → Developers → Webhooks → Add endpoint: `https://<το-site-σου>/api/webhooks`, event **`checkout.session.completed`** → αντέγραψε το «Signing secret» (`whsec_...`). |
 
-Χωρίς Stripe, το κουμπί «Πλήρες ξεκλείδωμα» στέλνει **email σε σένα** ως αίτημα και το ενεργοποιείς χειροκίνητα από το `/admin/pilot`.
+Η πληρωμή με κάρτα ενεργοποιείται **μόνο** όταν βάλεις και `NORAYA_DAY_PASS_STRIPE` = `on`. Μέχρι τότε (ή χωρίς Stripe), το κουμπί «Πλήρες ξεκλείδωμα» στέλνει **email σε σένα** ως αίτημα και το ενεργοποιείς χειροκίνητα από το `/admin/pilot`.
 
 **Για τα email ειδοποιήσεων:** `RESEND_API_KEY` (υπάρχει ήδη για το welcome email). Προαιρετικά `NORAYA_ALERT_EMAIL` (αλλιώς πάει στο πρώτο email του `NORAYA_ADMIN_EMAILS`). Με τον δοκιμαστικό αποστολέα του Resend, τα email φτάνουν μόνο στο email του λογαριασμού Resend.
 

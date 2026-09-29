@@ -20,8 +20,11 @@ export async function POST() {
     return NextResponse.json({ ok: true, already: true, message: "Το ξεκλείδωμα για σήμερα είναι ήδη ενεργό." });
   }
 
+  // Η πληρωμή με κάρτα ενεργοποιείται ρητά (NORAYA_DAY_PASS_STRIPE=on), ώστε να μη
+  // χρησιμοποιηθεί κατά λάθος ένα παλιό/δοκιμαστικό κλειδί Stripe του template.
   const stripeKey = process.env.STRIPE_SECRET_KEY_LIVE || process.env.STRIPE_SECRET_KEY;
-  if (!stripeKey) {
+  const stripeOn = ["on", "true", "1", "yes"].includes((process.env.NORAYA_DAY_PASS_STRIPE || "").trim().toLowerCase());
+  if (!stripeKey || !stripeOn) {
     await sendAlert(
       `daypass-request:${caller.scope}:${day}`,
       `Noraya: αίτημα ξεκλειδώματος ημέρας (${caller.scope})`,
