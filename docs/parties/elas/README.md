@@ -11,7 +11,9 @@
 | 04_ethniko_sxedio_anasygkrotisis_DETH_2026-09-02.txt | Οικονομικό πρόγραμμα, Θεσσαλονίκη |
 | 05_donations_diafaneia_2026-09-18.txt | Πλατφόρμα δωρεών |
 | 06_kostologisi_dnews_2026-09-04.txt | Κοστολόγηση και απάντηση στην κυβέρνηση |
-| build_profile_sql.py / key_officials.json | Παράγουν το `elas_profile_update_2026-09-29.sql` |
+| 07_asktsipras_2026-07-17.txt | #AskTsipras: 15 ερωτήσεις μελών και απαντήσεις του Προέδρου |
+| 08_metanasteftiko_tomeis_2026-08-30.txt | Τομείς Μεταναστευτικής Πολιτικής και Προστασίας του Πολίτη |
+| build_profile_sql.py / addendum.py / key_officials.json | Παράγουν το `elas_profile_update_2026-09-29.sql` (πλήρες προφίλ) |
 
 Το προηγούμενο προφίλ και οι οργανισμοί πριν την αλλαγή έχουν κρατηθεί στον πίνακα
 `noraya_backups` (kind = `political_party_profiles` / `organizations`).

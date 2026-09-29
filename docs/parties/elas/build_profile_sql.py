@@ -255,6 +255,15 @@ sources = [
 ]
 
 
+from addendum import SECTION_ST, MIGRATION_LENS, NEW_POSITIONS, NEW_RED_LINES, COMPETITOR_ADD, NEW_SOURCES
+advisor_instructions = advisor_instructions.replace("\n\nΚΑΝΟΝΑΣ: ", "\n\n" + SECTION_ST + "\n\nΚΑΝΟΝΑΣ: ", 1)
+issue_lens["issue_lens"]["μεταναστευση"] = MIGRATION_LENS
+known_positions = known_positions + NEW_POSITIONS
+red_lines = red_lines + NEW_RED_LINES
+competitor_frame = competitor_frame + COMPETITOR_ADD
+sources = sources + NEW_SOURCES
+
+
 def lit(s):
     assert "$elas$" not in s
     return "$elas$" + s + "$elas$"
