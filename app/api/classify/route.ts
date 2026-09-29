@@ -72,6 +72,7 @@ export async function GET(req: Request) {
     .from("articles")
     .select("id, title, description, category, source_name, published_at")
     .is("classified_at", null)
+    .or("classification_status.is.null,classification_status.in.(pending,retry1)")
     .order("published_at", { ascending: false, nullsFirst: false })
     .limit(limit);
 

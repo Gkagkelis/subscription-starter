@@ -31,6 +31,10 @@ const classifierModel =
 
 const ROUTE = "/api/classify-bulk";
 
+// Άρθρα που περιμένουν ταξινόμηση. Εκτός μένουν όσα απέτυχαν δύο φορές ("failed")
+// και όσα παραλείφθηκαν επίτηδες ("skipped_backlog", π.χ. παλιά ουρά μετά από διακοπή).
+const PENDING_FILTER = "classification_status.is.null,classification_status.in.(pending,retry1)";
+
 // Pilot — ΠΡΟΦΙΛΤΡΟ: άρθρα που η RSS κατηγορία τους είναι ΞΕΚΑΘΑΡΑ εκτός πεδίου
 // (ζώδια, lifestyle/celebrities, συνταγές, μόδα/ομορφιά, ψυχαγωγία) τα σημειώνουμε
 // noise ΧΩΡΙΣ κλήση AI. Είναι ακριβώς οι κατηγορίες που ο classifier χαρακτηρίζει
@@ -86,7 +90,7 @@ async function classifyBatch(limit: number, excludeIds: string[]): Promise<{ don
     .select("id, title, description, category, source_name, published_at, classification_status")
     .is("classified_at", null)
     .gte("published_at", freshCutoff)
-    .or("classification_status.is.null,classification_status.neq.failed");
+    .or(PENDING_FILTER);
   if (excludeIds.length > 0) {
     query = query.not("id", "in", "(" + excludeIds.join(",") + ")");
   }
@@ -327,7 +331,7 @@ export async function GET(req: Request) {
     .select("id", { count: "exact", head: true })
     .is("classified_at", null)
     .gte("published_at", freshCutoff2)
-    .or("classification_status.is.null,classification_status.neq.failed");
+    .or(PENDING_FILTER);
 
   return NextResponse.json({
     success: true,
