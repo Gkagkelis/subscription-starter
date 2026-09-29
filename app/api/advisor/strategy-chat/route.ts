@@ -248,15 +248,17 @@ export async function POST(req: Request) {
     80,
   );
   let partyIdentityBlock = "";
+  let profileOfficials: any[] = [];
   if (partyKey) {
     try {
       const { data: __profRows } = await __naSvc()
         .from("political_party_profiles")
-        .select("strategic_positioning, advisor_instructions, issue_lens, known_positions, red_lines")
+        .select("strategic_positioning, advisor_instructions, issue_lens, known_positions, red_lines, key_officials")
         .eq("party_key", partyKey)
         .limit(1);
       const prof: any = Array.isArray(__profRows) ? __profRows[0] : null;
       if (prof) {
+        if (Array.isArray(prof.key_officials)) profileOfficials = prof.key_officials;
         const pos = (prof.strategic_positioning || "").toString().trim();
         const adv = (prof.advisor_instructions || "").toString().trim();
         const lens = prof.issue_lens ? JSON.stringify(prof.issue_lens) : "";
@@ -290,7 +292,8 @@ export async function POST(req: Request) {
         .limit(1)
         .maybeSingle();
       const snap: any = orgRow?.party_profile_snapshot || null;
-      const officials: any[] = Array.isArray(snap?.key_officials) ? snap.key_officials : [];
+      const officials: any[] =
+        Array.isArray(snap?.key_officials) && snap.key_officials.length ? snap.key_officials : profileOfficials;
       if (officials.length) {
         officialsBlock =
           "\n=== ΒΑΣΙΚΑ ΣΤΕΛΕΧΗ ===\n" +
