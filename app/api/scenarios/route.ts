@@ -3,6 +3,7 @@ import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { buildNorayaStrategicSystemPrompt } from "@/lib/noraya/strategic-reasoning";
 import { getMemoryBlock, getAudienceMemoryBlock } from "@/lib/noraya/political-memory";
 import { fetchPollsSnapshot, formatPollsForPrompt } from "@/lib/noraya/live-polls";
+import { pilotAllow, pilotAuthRequest, pilotRecord } from "@/lib/noraya/pilot";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -158,7 +159,7 @@ function buildSystem(partyProfile: any, partyKey: string) {
 ${JSON.stringify(partyProfile)}`;
 }
 
-async function callAnthropic(system: string, user: string | any[]): Promise<{ text: string | null; status: number | null; error: string | null }> {
+async function callAnthropic(system: string, user: string | any[]): Promise<{ text: string | null; status: number | null; error: string | null; usage?: any }> {
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) return { text: null, status: null, error: "MISSING ANTHROPIC_API_KEY" };
   let res: Response;
@@ -195,16 +196,16 @@ async function callAnthropic(system: string, user: string | any[]): Promise<{ te
     .filter((b: any) => b?.type === "text")
     .map((b: any) => b.text)
     .join("\n");
-  return { text: text || null, status: res.status, error: text ? null : "EMPTY_AI_TEXT" };
+  return { text: text || null, status: res.status, error: text ? null : "EMPTY_AI_TEXT", usage: data?.usage };
 }
 
 async function handle(request: Request) {
   try {
     const url = new URL(request.url);
-    const token = url.searchParams.get("token");
-    if (token !== process.env.CRON_SECRET && token !== "dev") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    // Pilot: σύνδεση + κωδικός πρόσκλησης (αντί του παλιού token=dev).
+    const auth = await pilotAuthRequest(request, "/api/scenarios", "scenario");
+    if (auth.response) return auth.response;
+    const caller = auth.caller;
     const eventId = url.searchParams.get("event_id");
     const partyKey = url.searchParams.get("party") || "elas";
     const standalone = url.searchParams.get("standalone") === "1";
@@ -372,8 +373,13 @@ async function handle(request: Request) {
       ];
     }
 
+    // Pilot: ημερήσιο όριο «Σενάρια» (μετά τον έλεγχο cache — τα έτοιμα δεν χρεώνονται).
+    const limited = await pilotAllow(caller);
+    if (limited) return limited;
+
     const ai = await callAnthropic(system, aiUser);
     const parsed = ai.text ? parseAiJson(ai.text) : null;
+    if (ai.usage) await pilotRecord(caller, ANALYSIS_MODEL, ai.usage, { counted: Boolean(parsed?.foresight && parsed?.moves) });
 
     if (!parsed || !parsed.foresight || !parsed.moves) {
       return NextResponse.json(

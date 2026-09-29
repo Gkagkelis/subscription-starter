@@ -1,5 +1,6 @@
 import { createClient as __naCreateClient } from "@supabase/supabase-js";
 import { createClient as __naServer } from "@/utils/supabase/server";
+import { isCronOrAdmin, pilotAllow, pilotAuth, pilotRecord } from "@/lib/noraya/pilot";
 
 function __naSvc() {
   return __naCreateClient(
@@ -172,7 +173,11 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
 
   // DEBUG: τεστ web_search — δείχνει αν δουλεύει η αναζήτηση & την πραγματική αιτία αποτυχίας
+  // (μόνο για admin / cron — καλεί το AI και κοστίζει)
   if (url.searchParams.get("debug_search") === "1") {
+    if (!(await isCronOrAdmin(req))) {
+      return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    }
     const key = process.env.ANTHROPIC_API_KEY;
     if (!key) return NextResponse.json({ ok: false, reason: "NO_API_KEY" });
     const useWhitelist = url.searchParams.get("nowhitelist") !== "1";
@@ -224,6 +229,13 @@ export async function POST(req: Request) {
   } catch {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
   }
+
+  // Pilot: σύνδεση + κωδικός πρόσκλησης + ημερήσιο όριο «Σύμβουλος / Chat».
+  const auth = await pilotAuth("/api/advisor/strategy-chat", "chat");
+  if (auth.response) return auth.response;
+  const caller = auth.caller;
+  const limited = await pilotAllow(caller);
+  if (limited) return limited;
 
   const question = cleanText(body.question, 2500);
   const conversationId = body.conversation_id || null;
@@ -746,6 +758,7 @@ ${question}`
     let webSearchFailed = false;
 
     // Αν απέτυχε ΚΑΙ είχαμε tools (web_search), ξαναπροσπάθησε ΧΩΡΙΣ αναζήτηση — να μη σκάει ποτέ
+    // (μια αποτυχημένη κλήση HTTP δεν χρεώνεται από την Anthropic)
     if (!response.ok && payload.tools) {
       webSearchFailed = true;
       response = await callAnthropic(false);
@@ -767,6 +780,7 @@ ${question}`
     }
 
     const ai = await response.json();
+    await pilotRecord(caller, payload.model, ai?.usage);
     const { answer, sources } = extractAnswerAndSources(ai);
 
     return NextResponse.json({

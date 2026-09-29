@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { isCronOrAdmin } from "@/lib/noraya/pilot";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -78,7 +79,7 @@ function momentumFromInterest(interestOverTime: any[], hasRising: boolean) {
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
-  if (url.searchParams.get("token") !== "dev") {
+  if (!(await isCronOrAdmin(request))) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
   const apifyToken = process.env.APIFY_API_TOKEN;

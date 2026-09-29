@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { pilotAllow, pilotAuth, pilotRecord, type PilotCaller } from "@/lib/noraya/pilot";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -127,7 +128,7 @@ function parseAiJson(raw: string): any | null {
   return parsed || null;
 }
 
-async function callClaude(prompt: string): Promise<string> {
+async function callClaude(prompt: string, caller?: PilotCaller): Promise<string> {
   const resp = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
@@ -143,6 +144,7 @@ async function callClaude(prompt: string): Promise<string> {
   });
   if (!resp.ok) throw new Error("Claude API error " + resp.status);
   const data = await resp.json();
+  if (caller) await pilotRecord(caller, MODEL, data?.usage);
   return (data?.content || [])
     .filter((b: any) => b.type === "text")
     .map((b: any) => b.text)
@@ -164,6 +166,10 @@ function cleanStr(v: unknown, fallback = ""): string {
 
 export async function POST(req: NextRequest) {
   try {
+    // Pilot: σύνδεση + κωδικός. Αυτόματη ανάλυση -> «Αυτόματες αναλύσεις».
+    const auth = await pilotAuth("/api/situation-engine/strategic-play", "auto");
+    if (auth.response) return auth.response;
+    const caller = auth.caller;
     const body = await req.json();
     const {
       micro_agenda_id,
@@ -300,7 +306,11 @@ RED TEAM (ΚΟΡΥΦΑΙΑΣ ΣΗΜΑΣΙΑΣ — ΟΧΙ GENERIC):
 }
 Η A είναι η προτεινόμενη (υψηλότερο success), η C προς αποφυγή (χαμηλότερο success).`;
 
-    const rawText = await callClaude(prompt);
+    // Pilot: ημερήσιο όριο (μετά την cache — τα αποθηκευμένα δεν χρεώνονται).
+    const limited = await pilotAllow(caller);
+    if (limited) return limited;
+
+    const rawText = await callClaude(prompt, caller);
     const parsed = parseAiJson(rawText);
 
     if (!parsed || !parsed.options || !parsed.options.A) {

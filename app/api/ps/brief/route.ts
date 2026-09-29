@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient as naServer } from "@/utils/supabase/server";
 import { createClient as naAdmin } from "@supabase/supabase-js";
+import { pilotAllow, pilotAuth, pilotRecord, type PilotCaller } from "@/lib/noraya/pilot";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -156,7 +157,7 @@ async function loadPsContext(): Promise<{
   return { block, phase, party, district, name };
 }
 
-async function callClaude(system: any[], user: string, maxTokens = 2200): Promise<string> {
+async function callClaude(system: any[], user: string, maxTokens = 2200, caller?: PilotCaller): Promise<string> {
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) throw new Error("no_api_key");
   const resp = await fetch("https://api.anthropic.com/v1/messages", {
@@ -178,6 +179,7 @@ async function callClaude(system: any[], user: string, maxTokens = 2200): Promis
     throw new Error("Claude API " + resp.status + " " + t.slice(0, 200));
   }
   const data = await resp.json();
+  if (caller) await pilotRecord(caller, MODEL, data?.usage);
   return (data?.content || [])
     .filter((b: any) => b.type === "text")
     .map((b: any) => b.text)
@@ -213,6 +215,12 @@ function parseJsonLoose(raw: string): any | null {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
+    // Pilot: σύνδεση/κωδικός + ημερήσιο όριο.
+    const auth = await pilotAuth("/api/ps/brief", "auto");
+    if (auth.response) return auth.response;
+    const caller = auth.caller;
+    const limited = await pilotAllow(caller);
+    if (limited) return limited;
     const stage = body?.stage === "post" ? "post" : "analysis";
     const eventTitle = String(body?.eventTitle || "").slice(0, 300);
     const eventSummary = String(body?.eventSummary || "").slice(0, 1200);
@@ -273,7 +281,7 @@ export async function POST(req: NextRequest) {
         `}\n` +
         `ΚΑΝΟΝΕΣ: 2-3 moves. Τουλαχιστον ΕΝΑ move να σε ΔΙΑΦΟΡΟΠΟΙΕΙ (ξεχωριζεις, ακομα κι απο συνυποψηφιους του κομματος σου) και ΕΝΑ ΕΝΩΤΙΚΟ (παιζεις ομαδικα με το κομμα). Strings σε μια γραμμη.`;
 
-      const text = await callClaude(system, user, 1800);
+      const text = await callClaude(system, user, 1800, caller);
       const parsed = parseJsonLoose(text);
       if (!parsed) return jsonOut({ ok: false, error: "parse", raw: text.slice(0, 300) });
 
@@ -326,7 +334,7 @@ export async function POST(req: NextRequest) {
       `${instr}\n\n` +
       `Στο ΥΦΟΣ ΣΟΥ (βασει ψυχογραφηματος), εντος κομματικης γραμμης, ΣΥΝΔΕΔΕΜΕΝΟ με τα τοπικα προβληματα της περιφερειας σου. Ελληνικα. Επεστρεψε ΜΟΝΟ το κειμενο, χωρις εισαγωγη/επεξηγηση.`;
 
-    const text = await callClaude(system, user, 1400);
+    const text = await callClaude(system, user, 1400, caller);
     return jsonOut({ ok: true, channel, text });
   } catch (err) {
     return jsonOut({ ok: false, error: String(err) }, 500);

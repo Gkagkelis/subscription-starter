@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { isCronRequest } from "@/lib/noraya/pilot";
 
 /* ---------------------------------------------------------------------------
  * app/api/situations/[id]/route.ts        (ΒΗΜΑ 2)
@@ -16,8 +17,7 @@ const supabase = createClient(
 );
 
 function authorized(req: Request): boolean {
-  const token = new URL(req.url).searchParams.get("token");
-  return token === process.env.CRON_SECRET || token === "dev";
+  return isCronRequest(req);
 }
 
 // Whitelist: μόνο αυτά επιτρέπεται να αλλάξουν μέσω API.

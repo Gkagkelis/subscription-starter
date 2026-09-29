@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { isCronOrAdmin } from "@/lib/noraya/pilot";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -78,11 +79,12 @@ export async function GET(req: Request) {
   const searchParams = url.searchParams;
   const token = searchParams.get("token");
 
-  if (token !== process.env.CRON_SECRET && token !== "dev") {
+  if (!(await isCronOrAdmin(req))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const encodedToken = encodeURIComponent(token || "");
+  // Εσωτερικές κλήσεις: με το πραγματικό CRON_SECRET (όταν υπάρχει), όχι με ό,τι ήρθε.
+  const encodedToken = encodeURIComponent(process.env.CRON_SECRET || token || "");
   const origin = url.origin;
 
   // Stable defaults:

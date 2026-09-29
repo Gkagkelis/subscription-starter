@@ -58,6 +58,11 @@ const identityTypes: IdentityType[] = [
   "Δημοτική Παράταξη"
 ];
 
+// PILOT: για νέους λογαριασμούς διαθέσιμο μόνο το «Πολιτικό κόμμα».
+// Οι υπόλοιποι ρόλοι φαίνονται γκρίζοι με «Σύντομα». (Οι υπάρχοντες λογαριασμοί
+// με κλειδωμένο ρόλο συνεχίζουν κανονικά.)
+const AVAILABLE_IDENTITIES: IdentityType[] = ["Πολιτικό κόμμα"];
+
 const allSteps: Array<{ id: StepId; title: string }> = [
   { id: "identity", title: "Ποιος είστε" },
   { id: "context", title: "Πλαίσιο" },
@@ -109,6 +114,8 @@ export default function OnboardingPage() {
   const steps = isPS ? allSteps.filter((st) => !PS_SKIP.includes(st.id)) : allSteps;
   const [roleLocked, setRoleLocked] = useState(false);
   const [selectedPartyKey, setSelectedPartyKey] = useState("");
+  // PILOT: κόμμα που ορίζει ο κωδικός πρόσκλησης (προεπιλογή στο onboarding).
+  const [invitePartyKey, setInvitePartyKey] = useState("");
 
   const [representativeName, setRepresentativeName] = useState("");
   const [district, setDistrict] = useState("");
@@ -230,7 +237,7 @@ export default function OnboardingPage() {
         if (!r.ok) return;
         const prof = await r.json();
         const existing = String(prof?.org_type || "").trim();
-        if (existing === "Πολιτικό κόμμα" || existing === "Υποψήφιος Βουλευτής" || existing === "Γραφείο Βουλευτή" || existing === "Ευρωβουλευτής") {
+        if (existing === "Πολιτικό κόμμα" || existing === "Υποψήφιος Βουλευτής" || existing === "Γραφείο Βουλευτή" || existing === "Ευρωβουλευτής" || existing === "Δημοτική Παράταξη") {
           setOrgType(existing as IdentityType);
           setRoleLocked(true);
         }
@@ -247,7 +254,34 @@ export default function OnboardingPage() {
       }
     }
     lockExistingRole();
+
+    async function loadInviteParty() {
+      try {
+        // Αν ο χρήστης γράφτηκε με κωδικό, τον συνδέουμε τώρα με τον λογαριασμό
+        // του πελάτη (κοινά όρια). Χωρίς κωδικό δεν γίνεται τίποτα.
+        await fetch("/api/invite/redeem", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: "{}"
+        }).catch(() => null);
+        const r = await fetch("/api/invite/status", { cache: "no-store" });
+        if (!r.ok) return;
+        const d = await r.json();
+        if (d?.party_key) setInvitePartyKey(String(d.party_key));
+      } catch {
+        /* αγνοειται */
+      }
+    }
+    loadInviteParty();
   }, []);
+
+  useEffect(() => {
+    if (!invitePartyKey || roleLocked || selectedPartyKey) return;
+    if (orgType !== "Πολιτικό κόμμα") return;
+    if (!partyProfiles.some((p) => p.party_key === invitePartyKey)) return;
+    applyPartyProfile(invitePartyKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [invitePartyKey, partyProfiles, roleLocked]);
 
   function changeIdentity(type: IdentityType) {
     if (roleLocked) return; // ο ρολος εχει κλειδωσει - δεν αλλαζει
@@ -419,8 +453,9 @@ export default function OnboardingPage() {
       }
 
       window.localStorage.setItem("noraya_org_profile", JSON.stringify(profile));
-      // Μετα το onboarding -> ψυχογραφημα (μια φορα). Το middleware το επιβαλλει ουτως ή αλλως.
-      router.push("/psychografima");
+      // Μετα το onboarding: το κομμα πηγαινει κατευθειαν στο Strategy Room (ΧΩΡΙΣ ψυχογραφημα).
+      // Βουλευτες/υποψηφιοι -> ψυχογραφημα (μια φορα). Το middleware το επιβαλλει ουτως ή αλλως.
+      router.push(orgType === "Πολιτικό κόμμα" ? "/strategy-room" : "/psychografima");
     } catch {
       setSaveError("Σφάλμα σύνδεσης. Δοκιμάστε ξανά.");
       setSaving(false);
@@ -489,7 +524,8 @@ export default function OnboardingPage() {
                     title={type}
                     selected={orgType === type}
                     onClick={() => changeIdentity(type)}
-                    disabled={roleLocked && orgType !== type}
+                    disabled={roleLocked ? orgType !== type : !AVAILABLE_IDENTITIES.includes(type)}
+                    soon={!roleLocked && !AVAILABLE_IDENTITIES.includes(type)}
                   />
                 ))}
               </div>
@@ -1044,11 +1080,13 @@ function IdentityCard({
   selected,
   onClick,
   disabled = false,
+  soon = false,
 }: {
   title: IdentityType;
   selected: boolean;
   onClick: () => void;
   disabled?: boolean;
+  soon?: boolean;
 }) {
   const descriptions: Record<IdentityType, string> = {
     "Πολιτικό κόμμα": "Κεντρική κομματική στρατηγική και δημόσια γραμμή.",
@@ -1071,7 +1109,14 @@ function IdentityCard({
           : "border-white/10 bg-black/20 text-zinc-300 hover:border-white/20"
       }`}
     >
-      <div className="text-sm font-semibold">{title}</div>
+      <div className="flex items-center justify-between gap-2">
+        <div className="text-sm font-semibold">{title}</div>
+        {soon ? (
+          <span className="rounded-full border border-white/15 px-2 py-0.5 text-[10px] text-zinc-400">
+            Σύντομα
+          </span>
+        ) : null}
+      </div>
 
       <div className="mt-2 text-xs leading-5 text-zinc-400">
         {descriptions[title]}

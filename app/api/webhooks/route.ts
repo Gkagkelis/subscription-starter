@@ -7,6 +7,31 @@ import {
   deleteProductRecord,
   deletePriceRecord
 } from '@/utils/supabase/admin';
+import { pilotDb, sendAlert } from '@/lib/noraya/pilot';
+
+async function recordNorayaDayPass(session: Stripe.Checkout.Session) {
+  if (session.payment_status !== 'paid') return;
+  const md = session.metadata || {};
+  const amountEur = (session.amount_total ?? 0) / 100;
+  const { error } = await pilotDb().from('noraya_day_passes').insert({
+    scope: md.scope,
+    day: md.day,
+    user_id: md.user_id || null,
+    amount_eur: amountEur,
+    source: 'stripe',
+    stripe_session_id: session.id
+  });
+  // 23505 = το ίδιο webhook ήρθε δεύτερη φορά· έχει ήδη καταγραφεί.
+  if (error && String(error.code) !== '23505') throw new Error(error.message);
+  if (!error) {
+    await sendAlert(
+      `daypass-paid:${session.id}`,
+      `Noraya: πληρωμή ξεκλειδώματος +€${amountEur}`,
+      `<p>Ο λογαριασμός <b>${md.scope}</b> πλήρωσε €${amountEur} για πλήρες ξεκλείδωμα στις ${md.day}.</p>
+       <p>Αν χρειάζεται, φόρτωσε υπόλοιπο στο Anthropic. Έσοδα/κόστος: σελίδα /admin/pilot.</p>`
+    );
+  }
+}
 
 const relevantEvents = new Set([
   'product.created',
@@ -73,6 +98,12 @@ export async function POST(req: Request) {
               checkoutSession.customer as string,
               true
             );
+          } else if (
+            checkoutSession.mode === 'payment' &&
+            checkoutSession.metadata?.kind === 'noraya_day_pass'
+          ) {
+            // Noraya: πληρωμή «Πλήρες ξεκλείδωμα ημέρας».
+            await recordNorayaDayPass(checkoutSession);
           }
           break;
         default:

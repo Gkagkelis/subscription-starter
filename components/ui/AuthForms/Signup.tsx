@@ -3,8 +3,7 @@
 import Button from '@/components/ui/Button';
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { signUp } from '@/utils/auth-helpers/server';
-import { handleRequest } from '@/utils/auth-helpers/client';
+import { redirectToPath, signUp } from '@/utils/auth-helpers/server';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 interface SignUpProps {
@@ -24,17 +23,50 @@ export default function SignUp({
   const nextEncoded = encodeURIComponent(next);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [inviteError, setInviteError] = useState<string | null>(null);
+  const [inviteCode, setInviteCode] = useState(searchParams.get('invite') || '');
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    // Κρατάμε τη φόρμα τώρα (μετά από await το e.currentTarget μηδενίζεται).
+    const form = e.currentTarget;
+    setInviteError(null);
     setIsSubmitting(true);
 
-    // Πάρε email και role ΠΡΙΝ το handleRequest
+    // Πάρε email και role ΠΡΙΝ την εγγραφή
     // γιατί μετά μπορεί να γίνει redirect
-    const formData = new FormData(e.currentTarget);
+    const formData = new FormData(form);
     const email = formData.get('email') as string;
     const role = searchParams.get('role') || '';
 
-    await handleRequest(e, signUp, router);
+    // PILOT: η εγγραφή γίνεται μόνο με έγκυρο κωδικό πρόσκλησης. Ο έλεγχος
+    // κρατά τον κωδικό σε cookie ώστε να εξαργυρωθεί με την πρώτη σύνδεση.
+    // Ο server αποφασίζει αν ο κωδικός απαιτείται (NORAYA_INVITE_REQUIRED).
+    const code = inviteCode.trim().toUpperCase();
+    try {
+      const r = await fetch('/api/invite/check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code })
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok || !d?.ok) {
+        setInviteError(d?.error || 'Ο κωδικός δεν είναι έγκυρος.');
+        setIsSubmitting(false);
+        return;
+      }
+    } catch {
+      setInviteError('Σφάλμα σύνδεσης. Δοκιμάστε ξανά.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    const redirectUrl = await signUp(formData);
+    if (router) {
+      router.push(redirectUrl);
+    } else {
+      await redirectToPath(redirectUrl);
+    }
 
     // Στείλε welcome email μετά την εγγραφή
     if (email) {
@@ -73,6 +105,22 @@ export default function SignUp({
               autoCorrect="off"
               className="w-full p-3 rounded-md bg-zinc-800"
             />
+
+            <label htmlFor="invite">Κωδικός πρόσκλησης</label>
+            <input
+              id="invite"
+              placeholder="π.χ. ABCD-2026"
+              type="text"
+              name="invite"
+              autoCapitalize="characters"
+              autoComplete="off"
+              value={inviteCode}
+              onChange={(ev) => setInviteCode(ev.target.value)}
+              className="w-full p-3 rounded-md bg-zinc-800 tracking-widest"
+            />
+            {inviteError ? (
+              <p className="text-sm text-amber-300">{inviteError}</p>
+            ) : null}
 
             <label htmlFor="password">Password</label>
             <input

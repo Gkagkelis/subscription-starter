@@ -2,6 +2,7 @@ import { createClient } from "@/utils/supabase/server";
 import { openai } from "@ai-sdk/openai";
 import { embed } from "ai";
 import { NextResponse } from "next/server";
+import { pilotAuth } from "@/lib/noraya/pilot";
 
 const KNOWLEDGE_SOURCES = [
   {
@@ -32,6 +33,9 @@ function splitIntoChunks(text: string, chunkSize: number = 1000): string[] {
 }
 
 export async function POST(req: Request) {
+  // Pilot: παλιά λειτουργία Axiprova (OpenAI) — μόνο για admin.
+  const pilotGate = await pilotAuth("/api/knowledge/ingest", "auto", { adminOnly: true });
+  if (pilotGate.response) return pilotGate.response;
   try {
     const supabase = createClient();
     const { content, title, source, category } = await req.json();

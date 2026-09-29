@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { pilotAllow, pilotAuth, pilotRecord, type PilotCaller } from "@/lib/noraya/pilot";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -57,7 +58,7 @@ function summarize(profile: any, issues: string[]): string {
   return lines.join("\n");
 }
 
-async function callClaude(system: string, user: string, maxTokens = 2000): Promise<string> {
+async function callClaude(system: string, user: string, maxTokens = 2000, caller?: PilotCaller): Promise<string> {
   const resp = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
@@ -77,6 +78,7 @@ async function callClaude(system: string, user: string, maxTokens = 2000): Promi
     throw new Error("Claude API " + resp.status + " " + errText.slice(0, 200));
   }
   const data = await resp.json();
+  if (caller) await pilotRecord(caller, MODEL, data?.usage);
   return (data?.content || []).filter((b: any) => b.type === "text").map((b: any) => b.text).join("").trim();
 }
 
@@ -108,6 +110,12 @@ function parseJsonLoose(raw: string): any | null {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
+    // Pilot: σύνδεση/κωδικός (οι σελίδες demo επιτρέπονται χωρίς σύνδεση, με κοινό όριο) + ημερήσιο όριο.
+    const auth = await pilotAuth("/api/demo-profile-narrative", "auto", { allowAnon: true });
+    if (auth.response) return auth.response;
+    const caller = auth.caller;
+    const limited = await pilotAllow(caller);
+    if (limited) return limited;
     const profile = body?.profile;
     if (!profile) return json({ ok: false, error: "no_profile" }, 400);
     const issues: string[] = Array.isArray(body?.issues) ? body.issues : [];
@@ -142,7 +150,7 @@ ${summary}
 - Στο messageFit βαλε 3-4 στοιχεια. Στο redTeam ΑΚΡΙΒΩΣ 3.
 - ΟΛΑ τα strings σε μια γραμμη, χωρις αλλαγες γραμμης μεσα τους.`;
 
-    const text = await callClaude(system, user, 2000);
+    const text = await callClaude(system, user, 2000, caller);
     const parsed = parseJsonLoose(text);
     if (!parsed) return json({ ok: false, error: "parse", raw: text });
     return json({

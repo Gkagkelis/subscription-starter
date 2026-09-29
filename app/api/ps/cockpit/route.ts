@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient as naServer } from "@/utils/supabase/server";
 import { createClient as naAdmin } from "@supabase/supabase-js";
+import { pilotAllow, pilotAuth, pilotRecord, type PilotCaller } from "@/lib/noraya/pilot";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -132,7 +133,7 @@ async function loadCtx(): Promise<Ctx> {
   return { candidate: lines.filter(Boolean).join("\n"), name, party, district, phase };
 }
 
-async function callClaude(system: string, user: string, maxTokens = 1200): Promise<string> {
+async function callClaude(system: string, user: string, maxTokens = 1200, caller?: PilotCaller): Promise<string> {
   const resp = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
@@ -149,6 +150,7 @@ async function callClaude(system: string, user: string, maxTokens = 1200): Promi
   });
   if (!resp.ok) throw new Error("Claude API " + resp.status);
   const data = await resp.json();
+  if (caller) await pilotRecord(caller, MODEL, data?.usage);
   return (data?.content || []).filter((b: any) => b.type === "text").map((b: any) => b.text).join("").trim();
 }
 
@@ -168,6 +170,12 @@ function localToText(local: any[]): string {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
+    // Pilot: σύνδεση/κωδικός + ημερήσιο όριο.
+    const auth = await pilotAuth("/api/ps/cockpit", "auto");
+    if (auth.response) return auth.response;
+    const caller = auth.caller;
+    const limited = await pilotAllow(caller);
+    if (limited) return limited;
     const mode = String(body?.mode || "daily");
     const ctx = await loadCtx();
     const C = ctx.candidate;
@@ -184,14 +192,14 @@ export async function POST(req: NextRequest) {
       const histText = history.map((h) => (h.role === "user" ? "Χρηστης: " : "Noraya: ") + String(h.content || "").slice(0, 600)).join("\n");
       const system = `Εισαι ο Noraya, AI συμβουλος εκλογικης εκστρατειας.\n\n${C}\n\nΣημερα «καινε»: ${themesText}.${localText ? "\n\nΤΟΠΙΚΑ:\n" + localText : ""}`;
       const user = `${histText ? "Ιστορικο:\n" + histText + "\n\n" : ""}Ερωτηση: ${question}\n\nΑπαντησε συντομα, αποφασιστικα, με συγκεκριμενες κινησεις καμπανιας για ${D}. Χωρις markdown.`;
-      const text = await callClaude(system, user, 900);
+      const text = await callClaude(system, user, 900, caller);
       return json({ ok: true, text });
     }
 
     if (mode === "week") {
       const system = `Εισαι ο Noraya, AI συμβουλος εκλογικης εκστρατειας.\n\n${C}`;
       const user = `Με βαση ο,τι «καιει» σημερα (${themesText})${localText ? " και τα τοπικα:\n" + localText : ""}, δωσε ΣΧΕΔΙΟ ΕΒΔΟΜΑΔΑΣ.\nΕπεστρεψε ΜΟΝΟ εγκυρο JSON:\n{"days":[{"day":"Δευτερα","move":"συγκεκριμενη κινηση καμπανιας στην ${D}","why":"γιατι κερδιζει σταυρους"}, ... 5-6 μερες]}`;
-      const text = await callClaude(system, user, 1500);
+      const text = await callClaude(system, user, 1500, caller);
       let days = parseJsonLoose(text)?.days;
       if (!Array.isArray(days) || days.length === 0) {
         days = [];
@@ -205,7 +213,7 @@ export async function POST(req: NextRequest) {
     if (mode === "redteam") {
       const system = `Εισαι ο Noraya, AI συμβουλος εκλογικης εκστρατειας.\n\n${C}`;
       const user = `Με βαση τα τοπικα:\n${localText || "(εθνικα: " + themesText + ")"}\nΔωσε 3 ΣΥΓΚΕΚΡΙΜΕΝΕΣ επιθεσεις που θα δεχτει στην ${D}.\nΟ 1ος επιτιθεμενος = ΣΥΝΥΠΟΨΗΦΙΟΣ ${P} (ανταγωνισμος για σταυρους). Ο 2ος & 3ος = υποψηφιοι αλλων κομματων.\nΚαθε επιθεση αυτολεξει (<20 λεξεις) + ετοιμη απαντηση στη φωνη ${P} (<20 λεξεις). Οχι μισος.\nΕπεστρεψε ΜΟΝΟ JSON: {"red_team":[{"attacker":"...","attack":"...","response":"...","risk_level":"high|medium|low"}, x3]}`;
-      const text = await callClaude(system, user, 900);
+      const text = await callClaude(system, user, 900, caller);
       const parsed = parseJsonLoose(text);
       return json({ ok: true, red_team: Array.isArray(parsed?.red_team) ? parsed.red_team.slice(0, 3) : [] });
     }
@@ -220,14 +228,14 @@ export async function POST(req: NextRequest) {
         kind === "post"
           ? `Γραψε ενα SOCIAL POST (40-70 λεξεις) για το τοπικο θεμα «${topic}» στην ${D}, με βαση: ${heads || "—"}. Ζωντανο, τοπικο, στη γραμμη ${P}, με μια συγκεκριμενη θεση/λυση, + 2-3 hashtags. Χωρις μισος, χωρις markdown (μονο τα hashtags).`
           : `Γραψε συντομη ΔΗΛΩΣΗ (60-90 λεξεις) για το τοπικο θεμα «${topic}» στην ${D}, με βαση: ${heads || "—"}. Στη γραμμη/υφος ${P}, τοπικα συγκεκριμενη, με μια προταση-λυση. Σοβαρος τονος. Χωρις markdown.`;
-      const text = await callClaude(system, user, 500);
+      const text = await callClaude(system, user, 500, caller);
       return json({ ok: true, text });
     }
 
     // daily (default)
     const system = `Εισαι ο Noraya, AI συμβουλος εκλογικης εκστρατειας.\n\n${C}`;
     const user = `Εθνικη ατζεντα σημερα: ${themesText}.\n${localText ? `ΠΡΑΓΜΑΤΙΚΑ ΤΟΠΙΚΑ ΠΡΩΤΟΣΕΛΙΔΑ (${D}) — χρησιμοποιησε τα:\n` + localText + "\n" : ""}\nΓραψε τη ΣΗΜΕΡΙΝΗ ΑΝΑΓΝΩΣΗ για ${ctx.name || "τον υποψηφιο"} στην ${D}: ποιο ΤΟΠΙΚΟ θεμα ειναι η μεγαλυτερη ΕΥΚΑΙΡΙΑ, ποια η παγιδα, ποια η πρωτη κινηση καμπανιας. Ανεφερε συγκεκριμενα τοπικα στοιχεια. ΑΚΡΙΒΩΣ 4-5 προτασεις, πυκνα — ΟΛΟΚΛΗΡΩΣΕ τη σκεψη. Χωρις markdown.`;
-    const text = await callClaude(system, user, 1100);
+    const text = await callClaude(system, user, 1100, caller);
     return json({ ok: true, text });
   } catch (err) {
     return json({ ok: false, error: String(err) }, 500);

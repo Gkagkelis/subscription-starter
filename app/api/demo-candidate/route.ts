@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { pilotAllow, pilotAuth, pilotRecord, type PilotCaller } from "@/lib/noraya/pilot";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -94,7 +95,7 @@ async function fetchLocal() {
   return results;
 }
 
-async function callClaude(system: string, user: string, maxTokens = 1200): Promise<string> {
+async function callClaude(system: string, user: string, maxTokens = 1200, caller?: PilotCaller): Promise<string> {
   const resp = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
@@ -111,6 +112,7 @@ async function callClaude(system: string, user: string, maxTokens = 1200): Promi
   });
   if (!resp.ok) throw new Error("Claude API " + resp.status);
   const data = await resp.json();
+  if (caller) await pilotRecord(caller, MODEL, data?.usage);
   return (data?.content || [])
     .filter((b: any) => b.type === "text")
     .map((b: any) => b.text)
@@ -151,6 +153,12 @@ export async function POST(req: NextRequest) {
       const local = await fetchLocal();
       return json({ ok: true, local });
     }
+    // Pilot: σύνδεση/κωδικός (οι σελίδες demo επιτρέπονται χωρίς σύνδεση, με κοινό όριο) + ημερήσιο όριο.
+    const auth = await pilotAuth("/api/demo-candidate", "auto", { allowAnon: true });
+    if (auth.response) return auth.response;
+    const caller = auth.caller;
+    const limited = await pilotAllow(caller);
+    if (limited) return limited;
 
     if (mode === "chat") {
       const question = String(body?.question || "").slice(0, 2000);
@@ -163,7 +171,7 @@ export async function POST(req: NextRequest) {
         .join("\n");
       const system = `Εισαι ο Noraya, AI συμβουλος εκλογικης εκστρατειας.\n\n${CANDIDATE}\n\nΣημερα «καινε»: ${themesText}.${localText ? "\n\nΤΟΠΙΚΑ ΠΡΩΤΟΣΕΛΙΔΑ (Θεσσαλονικη):\n" + localText : ""}`;
       const user = `${histText ? "Ιστορικο:\n" + histText + "\n\n" : ""}Ερωτηση υποψηφιου: ${question}\n\nΑπαντησε συντομα, αποφασιστικα, με συγκεκριμενες κινησεις καμπανιας για τη Β' Θεσσαλονικης. Χωρις markdown.`;
-      const text = await callClaude(system, user, 900);
+      const text = await callClaude(system, user, 900, caller);
       return json({ ok: true, text });
     }
 
@@ -172,7 +180,7 @@ export async function POST(req: NextRequest) {
       const user = `Με βαση ο,τι «καιει» σημερα (${themesText})${localText ? " και τα τοπικα:\n" + localText : ""}, δωσε ΣΧΕΔΙΟ ΕΒΔΟΜΑΔΑΣ.
 Επεστρεψε ΜΟΝΟ εγκυρο JSON:
 {"days":[{"day":"Δευτερα","move":"συγκεκριμενη κινηση καμπανιας στη Β' Θεσσαλονικης","why":"γιατι κερδιζει σταυρους"}, ... 5-6 μερες]}`;
-      const text = await callClaude(system, user, 1500);
+      const text = await callClaude(system, user, 1500, caller);
       let days = parseJsonLoose(text)?.days;
       if (!Array.isArray(days) || days.length === 0) {
         // Σωσε ο,τι μερες προλαβε ακομα κι αν κοπηκε το JSON
@@ -192,7 +200,7 @@ export async function POST(req: NextRequest) {
 Ο 1ος επιτιθεμενος = ΣΥΝΥΠΟΨΗΦΙΟΣ ΠΑΣΟΚ (ιδια λιστα, ανταγωνισμος για σταυρους). Ο 2ος = υποψηφιος ΝΔ. Ο 3ος = υποψηφιος ΣΥΡΙΖΑ η ΕΛΑΣ.
 Καθε επιθεση αυτολεξει (<20 λεξεις) και ετοιμη απαντηση στη φωνη ΠΑΣΟΚ (<20 λεξεις). Οχι μισος.
 Επεστρεψε ΜΟΝΟ JSON: {"red_team":[{"attacker":"...","attack":"...","response":"...","risk_level":"high|medium|low"}, x3]}`;
-      const text = await callClaude(system, user, 900);
+      const text = await callClaude(system, user, 900, caller);
       const parsed = parseJsonLoose(text);
       return json({ ok: true, red_team: Array.isArray(parsed?.red_team) ? parsed.red_team.slice(0, 3) : [] });
     }
@@ -207,7 +215,7 @@ export async function POST(req: NextRequest) {
         kind === "post"
           ? `Γραψε ενα SOCIAL POST (40-70 λεξεις) του υποψηφιου για το τοπικο θεμα «${topic}» στη Θεσσαλονικη, με βαση: ${heads || "—"}. Ζωντανο, τοπικο, στη γραμμη ΠΑΣΟΚ, με μια συγκεκριμενη θεση/λυση, και 2-3 hashtags στο τελος. Χωρις μισος, χωρις markdown (μονο τα hashtags).`
           : `Γραψε συντομη ΔΗΛΩΣΗ (60-90 λεξεις) του υποψηφιου για το τοπικο θεμα «${topic}» στη Θεσσαλονικη, με βαση: ${heads || "—"}. Στη γραμμη/υφος ΠΑΣΟΚ, τοπικα συγκεκριμενη, με μια προταση-λυση. Σοβαρος, αξιοπιστος τονος. Χωρις markdown.`;
-      const text = await callClaude(system, user, 500);
+      const text = await callClaude(system, user, 500, caller);
       return json({ ok: true, text });
     }
 
@@ -218,7 +226,7 @@ export async function POST(req: NextRequest) {
     const user = `Εθνικη ατζεντα σημερα: ${themesText}.
 ${effLocal ? "ΠΡΑΓΜΑΤΙΚΑ ΤΟΠΙΚΑ ΠΡΩΤΟΣΕΛΙΔΑ (Θεσσαλονικη) — χρησιμοποιησε τα:\n" + effLocal + "\n" : ""}
 Γραψε τη ΣΗΜΕΡΙΝΗ ΑΝΑΓΝΩΣΗ για τον υποψηφιο ΠΑΣΟΚ στη Β' Θεσσαλονικης: ποιο ΤΟΠΙΚΟ θεμα ειναι η μεγαλυτερη ΕΥΚΑΙΡΙΑ, ποια η παγιδα, ποια η πρωτη κινηση καμπανιας. Ανεφερε συγκεκριμενα τοπικα στοιχεια. ΑΚΡΙΒΩΣ 4-5 προτασεις, πυκνα — ΟΛΟΚΛΗΡΩΣΕ τη σκεψη, μη σταματας στη μεση. Χωρις markdown.`;
-    const text = await callClaude(system, user, 1100);
+    const text = await callClaude(system, user, 1100, caller);
     return json({ ok: true, text, local: local || undefined });
   } catch (err) {
     return json({ ok: false, error: String(err) }, 500);

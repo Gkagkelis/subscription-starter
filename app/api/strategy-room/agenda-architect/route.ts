@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { pilotAllow, pilotAuth, pilotRecord } from "@/lib/noraya/pilot";
 
 function svcClient() {
   return createClient(
@@ -148,6 +149,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: "Invalid JSON body." }, { status: 400 });
   }
 
+  // Pilot: σύνδεση + κωδικός + ημερήσιο όριο «Agenda architect».
+  const auth = await pilotAuth("/api/strategy-room/agenda-architect", "architect");
+  if (auth.response) return auth.response;
+  const caller = auth.caller;
+  const limited = await pilotAllow(caller);
+  if (limited) return limited;
+
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
   if (!anthropicKey) {
     return NextResponse.json(
@@ -293,6 +301,7 @@ trap: [μία πρόταση]
     }
 
     const ai = await response.json();
+    await pilotRecord(caller, process.env.ANTHROPIC_MODEL || "claude-sonnet-4-6", ai?.usage);
     const text = extractText(ai);
     const displayText = cleanDisplayText(text);
     const context = extractBetween(text, "<context>", "</context>");

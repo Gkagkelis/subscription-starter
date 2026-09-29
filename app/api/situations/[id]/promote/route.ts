@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { isCronOrAdmin } from "@/lib/noraya/pilot";
 
 /* ---------------------------------------------------------------------------
  * app/api/situations/[id]/promote/route.ts        (ΒΗΜΑ 2)
@@ -21,7 +22,7 @@ const ALLOWED = new Set(["candidate", "active", "monitoring", "resolved"]);
 
 export async function POST(req: Request, { params }: { params: { id: string } }) {
   const token = new URL(req.url).searchParams.get("token");
-  if (token !== process.env.CRON_SECRET && token !== "dev") {
+  if (!(await isCronOrAdmin(req))) {
     return NextResponse.json({ ok: false, message: "Μη εξουσιοδοτημένο αίτημα." }, { status: 401 });
   }
 

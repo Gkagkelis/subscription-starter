@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
+import { pilotAllow, pilotAuthRequest, pilotRecord } from "@/lib/noraya/pilot";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -73,10 +74,12 @@ async function fetchAgendaProbeScores(request: Request, token: string): Promise<
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const token = searchParams.get("token");
-  if (token !== process.env.CRON_SECRET && token !== "dev") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  // Pilot: συνδεδεμένοι χρήστες ή σελίδα demo (χωρίς σύνδεση, με κοινό ημερήσιο όριο).
+  const auth = await pilotAuthRequest(request, "/api/agenda/timeline", "auto", { allowAnon: true });
+  if (auth.response) return auth.response;
+  const caller = auth.caller;
+  // Εσωτερική κλήση στο agenda-probe: με το πραγματικό CRON_SECRET όταν υπάρχει.
+  const token = process.env.CRON_SECRET || searchParams.get("token") || "dev";
   const party = (searchParams.get("party") || "elas").trim();
   const days = Math.min(60, Math.max(7, Number(searchParams.get("days") || 30)));
 
@@ -220,7 +223,9 @@ export async function GET(request: Request) {
 
   // ── Στοχευμένη ανάγνωση ανά κόμμα (1 φθηνή κλήση Haiku, batched, guarded) ──
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
-  if (anthropicKey && topics.length > 0) {
+  // Pilot: αν έχει εξαντληθεί το ημερήσιο όριο, δείχνουμε τις τάσεις χωρίς τη στόχευση AI.
+  const aiAllowed = !(await pilotAllow(caller));
+  if (anthropicKey && topics.length > 0 && aiAllowed) {
     try {
       const list = topics
         .slice(0, 12)
@@ -251,6 +256,9 @@ export async function GET(request: Request) {
       });
       if (resp.ok) {
         const j = await resp.json();
+        // Φθηνή κλήση (Haiku) σε κάθε άνοιγμα της σελίδας: για συνδεδεμένους χρήστες
+        // καταγράφεται το κόστος χωρίς να «τρώει» το ημερήσιο όριο.
+        await pilotRecord(caller, "claude-haiku-4-5-20251001", j?.usage, { counted: caller.scope === "anon" });
         const raw = Array.isArray(j?.content)
           ? j.content.filter((b: any) => b?.type === "text").map((b: any) => b.text).join("")
           : "";

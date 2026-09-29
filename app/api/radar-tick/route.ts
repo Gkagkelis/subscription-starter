@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isCronOrAdmin } from "@/lib/noraya/pilot";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -70,12 +71,7 @@ export async function GET(req: Request) {
   const token = url.searchParams.get("token");
   const userAgent = req.headers.get("user-agent") || "";
 
-  const isManualDev = token === "dev";
-  const hasCronSecret = Boolean(process.env.CRON_SECRET);
-  const isTokenAuthorized = hasCronSecret && token === process.env.CRON_SECRET;
-  const isVercelCron = userAgent.includes("vercel-cron/1.0");
-
-  if (!isManualDev && !isTokenAuthorized && !isVercelCron) {
+  if (!(await isCronOrAdmin(req))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

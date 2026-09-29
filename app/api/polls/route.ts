@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { isCronRequest } from "@/lib/noraya/pilot";
 
 /* ---------------------------------------------------------------------------
  * app/api/polls/route.ts        (ΒΗΜΑ 5)
@@ -24,8 +25,7 @@ const STATUSES = new Set(["loaded", "parsed", "needs_review", "verified", "archi
 const RELIABILITY = new Set(["unverified", "low", "medium", "high"]);
 
 function authorized(req: Request): boolean {
-  const token = new URL(req.url).searchParams.get("token");
-  return token === process.env.CRON_SECRET || token === "dev";
+  return isCronRequest(req);
 }
 
 export async function GET(req: Request) {

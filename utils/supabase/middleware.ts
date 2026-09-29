@@ -61,6 +61,38 @@ export const createClient = (request: NextRequest) => {
   return { supabase, response };
 };
 
+// PILOT: χρειάζεται ο χρήστης κωδικό πρόσκλησης; (fail-open: σε οποιοδήποτε σφάλμα, όχι)
+async function needsInvite(user: { id: string; email?: string | null; created_at?: string }) {
+  try {
+    // Ίδια σημασιολογία με το pilotConfig.inviteRequired(): κενό = ναι.
+    const flag = (process.env.NORAYA_INVITE_REQUIRED || '').trim().toLowerCase();
+    if (flag && !['1', 'true', 'on', 'yes'].includes(flag)) return false;
+
+    const admins = (process.env.NORAYA_ADMIN_EMAILS || '')
+      .split(',')
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean);
+    if (user.email && admins.includes(user.email.toLowerCase())) return false;
+
+    const cutoff = new Date(process.env.NORAYA_INVITE_CUTOFF || '2026-09-29T20:00:00Z').getTime();
+    const created = user.created_at ? new Date(user.created_at).getTime() : NaN;
+    if (Number.isFinite(created) && Number.isFinite(cutoff) && created < cutoff) return false;
+
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!url || !key) return false;
+    const r = await fetch(
+      `${url}/rest/v1/noraya_access?select=user_id&user_id=eq.${encodeURIComponent(user.id)}&limit=1`,
+      { headers: { apikey: key, Authorization: `Bearer ${key}` }, cache: 'no-store' }
+    );
+    if (!r.ok) return false; // π.χ. ο πίνακας δεν έχει δημιουργηθεί ακόμα
+    const rows = await r.json();
+    return !(Array.isArray(rows) && rows.length > 0);
+  } catch {
+    return false;
+  }
+}
+
 export const updateSession = async (request: NextRequest) => {
   try {
     const { supabase, response } = createClient(request);
@@ -73,6 +105,29 @@ export const updateSession = async (request: NextRequest) => {
 
     if (user && path === '/') {
       return NextResponse.redirect(new URL('/strategy-room', request.url));
+    }
+
+    // === PILOT: πρόσβαση μόνο με κωδικό πρόσκλησης ===
+    // Νέος λογαριασμός χωρίς εξαργυρωμένο κωδικό -> σελίδα /invite.
+    // Οι λογαριασμοί που υπήρχαν πριν (NORAYA_INVITE_CUTOFF) και οι admin περνούν κανονικά.
+    const inviteGatedRoutes = [
+      '/strategy-room',
+      '/agenda',
+      '/onboarding',
+      '/psychografima',
+      '/scenarios',
+      '/attacks',
+      '/people',
+      '/situations',
+      '/archive',
+      '/dashboard'
+    ];
+    if (
+      user &&
+      inviteGatedRoutes.some((r) => path === r || path.startsWith(`${r}/`)) &&
+      (await needsInvite(user))
+    ) {
+      return NextResponse.redirect(new URL('/invite', request.url));
     }
 
     const publicNorayaRoutes = ['/onboarding', '/psychografima'];
@@ -124,6 +179,13 @@ export const updateSession = async (request: NextRequest) => {
 
     const protectedRoutes = [
       '/strategy-room',
+      '/agenda',
+      '/scenarios',
+      '/attacks',
+      '/people',
+      '/situations',
+      '/archive',
+      '/admin',
       '/psychografima',
       '/dashboard',
       '/dashboard/profile',

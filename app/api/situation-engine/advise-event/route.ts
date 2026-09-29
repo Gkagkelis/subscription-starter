@@ -6,6 +6,16 @@ import {
   buildNorayaStrategicSystemPrompt,
   buildNorayaStrategicJsonInstruction,
 } from "@/lib/noraya/strategic-reasoning";
+import {
+  cronBudgetOk,
+  cronHourAllowed,
+  isCronRequest,
+  logPilotError,
+  pilotAllow,
+  pilotAuth,
+  pilotRecord,
+  recordCronCall,
+} from "@/lib/noraya/pilot";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -22,6 +32,12 @@ export const maxDuration = 300;
 
 const ANALYSIS_MODEL = "claude-sonnet-4-6";
 const MAX_EVENTS_PER_RUN = 8;
+// Pilot: πόσα γεγονότα ανά αυτόματη εκτέλεση (προεπιλογή 4· προεκλογικά 8).
+const CRON_EVENTS_PER_RUN = Math.max(
+  1,
+  Math.min(MAX_EVENTS_PER_RUN, Number(process.env.NORAYA_ADVISE_MAX_PER_RUN) || 4)
+);
+const ROUTE = "/api/situation-engine/advise-event";
 const BUDGET_MS = 220000;
 
 function svc() {
@@ -205,7 +221,7 @@ ${buildNorayaStrategicJsonInstruction()}`;
 async function callAnthropic(
   system: string,
   user: string
-): Promise<{ text: string | null; status: number | null; error: string | null }> {
+): Promise<{ text: string | null; status: number | null; error: string | null; usage?: any }> {
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) return { text: null, status: null, error: "MISSING ANTHROPIC_API_KEY" };
 
@@ -242,8 +258,15 @@ async function callAnthropic(
     .filter((b: any) => b?.type === "text")
     .map((b: any) => b.text)
     .join("\n");
-  return { text: text || null, status: res.status, error: text ? null : "EMPTY_AI_TEXT" };
+  return { text: text || null, status: res.status, error: text ? null : "EMPTY_AI_TEXT", usage: data?.usage };
 }
+
+type Metering = {
+  /** true = επιτρέπεται κλήση AI τώρα (π.χ. ημερήσιο όριο κόστους crons). */
+  beforeAi?: () => Promise<boolean>;
+  /** Καταγραφή κόστους μετά την κλήση. */
+  meter?: (usage: any) => Promise<void>;
+};
 
 async function processOneEvent(
   supabase: ReturnType<typeof svc>,
@@ -251,8 +274,9 @@ async function processOneEvent(
   eventId: string,
   partyKey: string,
   origin: string,
-  force = false
-): Promise<{ status: "ai" | "ai_down" | "skipped"; title?: string; ai_error?: string | null }> {
+  force = false,
+  metering: Metering = {}
+): Promise<{ status: "ai" | "ai_down" | "skipped" | "budget"; title?: string; ai_error?: string | null }> {
   const { data: ev, error } = await supabase
     .from("v_political_events_live")
     .select("*")
@@ -307,7 +331,11 @@ async function processOneEvent(
     ? `${buildEventContext(ev)}\n\n=== ΔΕΔΟΜΕΝΑ ΜΝΗΜΗΣ (στήριξε το brief· διαρθρωτικά/ιστορικά = ΟΧΙ σημερινά, δημοσκοπήσεις = τρέχουσες με ημερομηνία· μην εφευρίσκεις ποσοστά) ===\n${dataContext}`
     : buildEventContext(ev);
 
+  if (metering.beforeAi && !(await metering.beforeAi())) {
+    return { status: "budget", title: ev.title };
+  }
   const ai = await callAnthropic(system, eventContextFull);
+  if (ai.usage && metering.meter) await metering.meter(ai.usage);
   const parsed = ai.text ? parseAiJson(ai.text) : null;
 
   if (!(parsed && parsed.issue)) {
@@ -371,6 +399,33 @@ async function handle(request: Request) {
     const url = new URL(request.url);
     const requestedId = url.searchParams.get("event_id");
     const force = url.searchParams.get("force") === "1" || url.searchParams.get("force") === "true";
+
+    // Pilot: αυτόματη εκτέλεση (cron) ή χρήστης από το Strategy Room.
+    const fromCron = isCronRequest(request);
+    let metering: Metering;
+    if (fromCron) {
+      // Εκτός ωρών λειτουργίας των ακριβών crons: δεν κάνουμε τίποτα.
+      if (!force && !cronHourAllowed()) {
+        return NextResponse.json({ ok: true, mode: "off_hours", analyzed: 0 });
+      }
+      metering = {
+        beforeAi: () => cronBudgetOk(ROUTE),
+        meter: (usage) => recordCronCall(ROUTE, ANALYSIS_MODEL, usage),
+      };
+    } else {
+      const auth = await pilotAuth(ROUTE, "auto");
+      if (auth.response) return auth.response;
+      const caller = auth.caller;
+      // Ο χρήστης επιτρέπεται μόνο για ΕΝΑ συγκεκριμένο γεγονός (όπως το καλεί η σελίδα).
+      // Τα μαζικά τρεξίματα είναι μόνο για cron / admin.
+      if (!caller.isAdmin && !(requestedId && force)) {
+        return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+      }
+      const limited = await pilotAllow(caller);
+      if (limited) return limited;
+      metering = { meter: (usage) => pilotRecord(caller, ANALYSIS_MODEL, usage) };
+    }
+
     const partyKey = url.searchParams.get("party") || "elas";
     const partyProfile = await loadPartyProfile(supabase, partyKey);
     const system = buildPartySystem(buildSystem(), partyProfile, partyKey);
@@ -387,7 +442,8 @@ async function handle(request: Request) {
 
       for (const id of ids) {
         if (Date.now() - startedAt > BUDGET_MS) break;
-        const r = await processOneEvent(supabase, system, id, partyKey, url.origin, true);
+        const r = await processOneEvent(supabase, system, id, partyKey, url.origin, true, metering);
+        if (r.status === "budget") break;
         if (r.status === "ai_down") {
           aiError = r.ai_error || "ai_down";
           break;
@@ -405,7 +461,7 @@ async function handle(request: Request) {
     }
 
     if (requestedId) {
-      const r = await processOneEvent(supabase, system, requestedId, partyKey, url.origin);
+      const r = await processOneEvent(supabase, system, requestedId, partyKey, url.origin, false, metering);
       return NextResponse.json({ ok: true, mode: "single", analyzed: r.status === "ai" ? 1 : 0, ai_error: r.ai_error || null, processed: r });
     }
 
@@ -414,12 +470,14 @@ async function handle(request: Request) {
     let aiError: string | null = null;
     let count = 0;
 
-    while (count < MAX_EVENTS_PER_RUN && Date.now() - startedAt < BUDGET_MS) {
+    const perRun = fromCron ? CRON_EVENTS_PER_RUN : MAX_EVENTS_PER_RUN;
+    while (count < perRun && Date.now() - startedAt < BUDGET_MS) {
       const { data: nextId } = await supabase.rpc("pick_next_event_for_party_brief", { p_party_key: partyKey });
       const eventId = (nextId as string) || null;
       if (!eventId) break;
 
-      const r = await processOneEvent(supabase, system, eventId, partyKey, url.origin);
+      const r = await processOneEvent(supabase, system, eventId, partyKey, url.origin, false, metering);
+      if (r.status === "budget") break;
       if (r.status === "ai_down") {
         aiError = r.ai_error || "ai_down";
         break;
@@ -429,6 +487,7 @@ async function handle(request: Request) {
     }
 
     const { data: more } = await supabase.rpc("pick_next_event_for_party_brief", { p_party_key: partyKey });
+    if (aiError) await logPilotError(ROUTE, aiError, { mode: "batch", analyzed: done.length });
 
     return NextResponse.json({
       ok: true,

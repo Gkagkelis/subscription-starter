@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
+import { pilotAllow, pilotAuth, pilotRecord } from "@/lib/noraya/pilot";
 import { norayaMethodPrompt } from "@/lib/noraya/methodology";
 
 type AdvisorMode = "analysis" | "scenario" | "stance";
@@ -48,7 +49,8 @@ export async function POST(req: Request) {
 
   const body = await req.json();
 
-  const question = body.question?.trim();
+  // Όριο μεγέθους ερώτησης (μαζί με επικολλημένο κείμενο), για να μην ξεφεύγει το κόστος.
+  const question = body.question?.trim()?.slice(0, 20000);
   const mode = normalizeMode(body.mode || "analysis");
   const actionType = normalizeActionType(body.actionType || mode);
   const threadId = body.threadId || null;
@@ -57,6 +59,14 @@ export async function POST(req: Request) {
   if (!question) {
     return NextResponse.json({ error: "Χρειάζεται ερώτηση" }, { status: 400 });
   }
+
+  // Pilot: σύνδεση + κωδικός πρόσκλησης. Τα σενάρια (Opus) μετράνε στα «Σενάρια».
+  const auth = await pilotAuth("/api/ai-chat", mode === "scenario" ? "scenario" : "chat");
+  if (auth.response) return auth.response;
+  const caller = auth.caller;
+  // Έλεγχος ορίου ΠΡΙΝ αποθηκευτεί το μήνυμα, ώστε να μη μείνει ερώτηση χωρίς απάντηση.
+  const limited = await pilotAllow(caller);
+  if (limited) return limited;
 
   let verifiedThreadId: string | null = null;
   let previousMessagesContext = "";
@@ -84,15 +94,19 @@ export async function POST(req: Request) {
       .select("role, action_type, content, created_at")
       .eq("thread_id", verifiedThreadId)
       .eq("user_id", user.id)
-      .order("created_at", { ascending: true })
+      .order("created_at", { ascending: false })
       .limit(12);
 
+    // Τα 12 ΤΕΛΕΥΤΑΙΑ μηνύματα (όχι τα πρώτα), σε χρονολογική σειρά,
+    // με όριο μεγέθους ανά μήνυμα.
     previousMessagesContext = (previousMessages || [])
+      .slice()
+      .reverse()
       .map((message) => {
         const roleLabel =
           message.role === "assistant" ? "Noraya" : "Χρήστης";
 
-        return `${roleLabel} (${message.action_type || "custom"}): ${message.content}`;
+        return `${roleLabel} (${message.action_type || "custom"}): ${String(message.content || "").slice(0, 4000)}`;
       })
       .join("\n\n");
 
@@ -584,6 +598,7 @@ ${sharedRules}
     }
 
     const data = await response.json();
+    await pilotRecord(caller, model, data?.usage);
 
     const aiResponse =
       data.content

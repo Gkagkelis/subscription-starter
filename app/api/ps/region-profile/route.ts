@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient as naAdmin } from "@supabase/supabase-js";
+import { pilotAllow, pilotAuth, pilotRecord, type PilotCaller } from "@/lib/noraya/pilot";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -71,7 +72,7 @@ function parseJsonLoose(raw: string): any | null {
 //  - Αλλιως -> το χτιζει (γνωση AI), το κανει cache, επιστρεφει
 //  - &force=1 -> ξαναχτιζει (για update)
 // ============================================================
-async function handle(district: string, force: boolean) {
+async function handle(district: string, force: boolean, caller: PilotCaller) {
   // Κανονικοποιηση: decode τυχον URL-encoding + πεζα + χωρις τονους/διπλα κενα.
   // Ωστε "Σέρρες", "%CE%A3...", " Σέρρες " να δινουν ΤΟ ΙΔΙΟ key -> σωστο caching.
   let norm = district;
@@ -131,6 +132,10 @@ async function handle(district: string, force: boolean) {
     messages: [{ role: "user", content: user }],
   };
 
+  // Pilot: ημερήσιο όριο (μόνο όταν χρειάζεται νέα παραγωγή).
+  const limited = await pilotAllow(caller);
+  if (limited) return limited;
+
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 58000);
 
@@ -153,6 +158,7 @@ async function handle(district: string, force: boolean) {
     }
 
     const data = await response.json();
+    await pilotRecord(caller, MODEL, data?.usage);
     const text = (data?.content || [])
       .filter((b: any) => b.type === "text")
       .map((b: any) => b.text)
@@ -190,17 +196,21 @@ async function handle(district: string, force: boolean) {
 }
 
 export async function GET(req: NextRequest) {
+  const auth = await pilotAuth("/api/ps/region-profile", "auto");
+  if (auth.response) return auth.response;
   const url = new URL(req.url);
   const district = url.searchParams.get("district") || url.searchParams.get("code") || "";
   const force = url.searchParams.get("force") === "1";
   if (!district) return jsonOut({ ok: false, error: "no_district" }, 400);
-  return handle(district, force);
+  return handle(district, force, auth.caller);
 }
 
 export async function POST(req: NextRequest) {
+  const auth = await pilotAuth("/api/ps/region-profile", "auto");
+  if (auth.response) return auth.response;
   const body = await req.json().catch(() => ({}));
   const district = String(body?.district || body?.code || "");
   const force = body?.force === true || body?.force === 1;
   if (!district) return jsonOut({ ok: false, error: "no_district" }, 400);
-  return handle(district, force);
+  return handle(district, force, auth.caller);
 }

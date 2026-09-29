@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { checkCostGuard, guardMessage } from "@/lib/noraya/cost-guard";
 import { createClient } from "@supabase/supabase-js";
+import { cronBudgetOk, cronHourAllowed, isCronOrAdmin, recordCronCall } from "@/lib/noraya/pilot";
 
 /* ---------------------------------------------------------------------------
  * app/api/advisor/strategy-brief-precompute/route.ts
@@ -86,16 +87,18 @@ export async function GET(req: Request) {
   const token = new URL(req.url).searchParams.get("token");
   const ua = req.headers.get("user-agent") || "";
 
-  const authorized =
-    token === process.env.CRON_SECRET ||
-    token === "dev" ||
-    ua.includes("vercel-cron/1.0");
+  const authorized = await isCronOrAdmin(req);
 
   if (!authorized) {
     return NextResponse.json(
       { ok: false, message: "Μη εξουσιοδοτημένο." },
       { status: 401 }
     );
+  }
+
+  // Pilot: εκτός ωρών λειτουργίας των ακριβών crons, δεν ξαναγράφουμε (ισχύει το αποθηκευμένο).
+  if (new URL(req.url).searchParams.get("force") !== "1" && !cronHourAllowed()) {
+    return NextResponse.json({ ok: true, stored: false, skipped: "off_hours", elapsed_ms: Date.now() - t0 });
   }
 
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
@@ -229,6 +232,11 @@ export async function GET(req: Request) {
   let warning: string | null = null;
   const model = process.env.ANTHROPIC_MODEL || DEFAULT_MODEL;
 
+  // Pilot: ημερήσιο όριο κόστους των crons.
+  if (!(await cronBudgetOk("/api/advisor/strategy-brief-precompute"))) {
+    return NextResponse.json({ ok: true, stored: false, skipped: "cron_budget_reached", elapsed_ms: Date.now() - t0 });
+  }
+
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
 
@@ -254,6 +262,7 @@ export async function GET(req: Request) {
       warning = `provider_${res.status}: ${trimForLog(await res.text())}`;
     } else {
       const ai = await res.json();
+      await recordCronCall("/api/advisor/strategy-brief-precompute", model, ai?.usage);
       const txt = (ai.content || [])
         .filter((b: any) => b.type === "text")
         .map((b: any) => b.text)

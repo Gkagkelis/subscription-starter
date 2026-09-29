@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { checkCostGuard, guardMessage } from "@/lib/noraya/cost-guard";
+import { isCronOrAdmin } from "@/lib/noraya/pilot";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -52,7 +53,7 @@ ${nextUrl ? "" : '<div class="done">✅ Όλα φρέσκα. Κάνε refresh σ
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const token = url.searchParams.get("token");
-  if (token !== process.env.CRON_SECRET && token !== "dev") {
+  if (!(await isCronOrAdmin(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const origin = url.origin;
@@ -72,11 +73,13 @@ export async function GET(request: Request) {
     }
   }
   const round = Math.max(1, Number(url.searchParams.get("round")) || 1);
-  const base = `/api/recover?token=${encodeURIComponent(token!)}`;
+  const base = `/api/recover?token=${encodeURIComponent(token || "")}`;
+  // Εσωτερικές κλήσεις: με το πραγματικό CRON_SECRET (όταν υπάρχει).
+  const internalToken = encodeURIComponent(process.env.CRON_SECRET || "dev");
 
   // ΒΗΜΑ 1: Ειδησεις
   if (step === "ingest") {
-    const r = await hit(origin, "/api/ingest?token=dev");
+    const r = await hit(origin, `/api/ingest?token=${internalToken}`);
     const inserted = r?.summary?.totalInserted ?? "—";
     return page("Επαναφορά", [
       r.timeout
@@ -88,7 +91,7 @@ export async function GET(request: Request) {
 
   // ΒΗΜΑ 2: Ταξινομηση — μια παρτιδα ανα φορτωση, μεχρι remaining 0
   if (step === "classify") {
-    const c = await hit(origin, "/api/classify-bulk?token=dev");
+    const c = await hit(origin, `/api/classify-bulk?token=${internalToken}`);
     const remaining = typeof c?.remaining_unclassified === "number" ? c.remaining_unclassified : null;
     const didWork = (c?.total_classified ?? 0) > 0;
     const finished = remaining === 0 || (!didWork && !c.timeout && remaining === null);
@@ -106,7 +109,7 @@ export async function GET(request: Request) {
   }
 
   // ΒΗΜΑ 3: Γεγονοτα — ενα περασμα ανα φορτωση, μεχρι να μη μενει θεμα
-  const d = await hit(origin, "/api/situation-engine/detect-events");
+  const d = await hit(origin, `/api/situation-engine/detect-events?token=${internalToken}&anyhour=1`);
   const remainingTopic = d?.remaining_topic ?? null;
   const created = d?.events_created ?? "—";
   if ((remainingTopic || d.timeout) && round < 8) {
