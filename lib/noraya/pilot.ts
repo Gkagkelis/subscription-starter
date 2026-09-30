@@ -673,7 +673,13 @@ export async function logCronRun(
   try {
     const outcome =
       String(body?.mode || body?.skipped || body?.source || (httpStatus >= 400 ? "error" : "ok")).slice(0, 60);
-    const idle = ["off_hours", "budget_reached", "cache_unchanged"].includes(outcome);
+    // «Δουλειά» = παρήγαγε κάτι: γεγονότα, αναλύσεις ή νέο brief. Ένα τρέξιμο χωρίς
+    // αποτέλεσμα δεν μετράει, ώστε να μην καθυστερεί την επόμενη προσπάθεια.
+    const produced =
+      Number(body?.topics_processed ?? body?.analyzed ?? NaN) > 0 ||
+      body?.stored === true ||
+      body?.mode === "ran";
+    const idle = ["off_hours", "budget_reached", "cache_unchanged"].includes(outcome) || !produced;
     await pilotDb().from("noraya_cron_runs").insert({
       route,
       started_at: startedAt.toISOString(),
