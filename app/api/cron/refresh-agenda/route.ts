@@ -19,7 +19,7 @@ async function handle(request: Request): Promise<Response> {
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
   const t0 = Date.now();
-  const { data, error } = await pilotDb().rpc("refresh_agenda_topics_from_recent_articles");
+  const { data, error } = await pilotDb().rpc("noraya_refresh_agenda_topics_v2");
   if (error) {
     return NextResponse.json({ ok: false, mode: "error", error: error.message }, { status: 500 });
   }

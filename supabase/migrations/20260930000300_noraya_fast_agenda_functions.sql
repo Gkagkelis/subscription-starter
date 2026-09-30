@@ -1,0 +1,8 @@
+-- Εφαρμόστηκε ζωντανά μέσω MCP (migration "noraya_fast_agenda_functions").
+-- noraya_refresh_agenda_topics_v2(): ίδια λογική με refresh_agenda_topics_from_recent_articles,
+--   αλλά διαβάζει τα άρθρα της εβδομάδας μία φορά μέσω του ευρετηρίου published_at (~5s αντί ~28s).
+-- noraya_pick_next_topic_v2(): ίδια λογική με pick_next_topic_for_detection με φίλτρο
+--   a.published_at (ευρετήριο) αντί για coalesce(...) που σάρωνε όλο τον πίνακα (~1.5s).
+-- Οι παλιές συναρτήσεις μένουν ως έχουν. Ο πλήρης ορισμός βρίσκεται στη βάση:
+--   select pg_get_functiondef('public.noraya_refresh_agenda_topics_v2'::regproc);
+--   select pg_get_functiondef('public.noraya_pick_next_topic_v2'::regproc);
