@@ -26,6 +26,19 @@ function clampNumber(value: any, min = 0, max = 10): number | null {
   return Math.min(Math.max(n, min), max);
 }
 
+// Αριθμημένη λίστα θεμάτων: το μοντέλο απαντά με τον αριθμό (λίγα tokens) αντί για το όνομα.
+const TOPIC_MENU = TOPICS.map((t, i) => `${i + 1}. ${t}`).join("\n");
+const SENTIMENT_LABEL: Record<string, string> = { "-1": "αρνητικό", "0": "ουδέτερο", "1": "θετικό" };
+function topicFromAnswer(v: any): string | null {
+  const n = Number(v);
+  if (Number.isInteger(n) && n >= 1 && n <= TOPICS.length) return TOPICS[n - 1];
+  const name = String(v || "").trim();
+  return TOPICS.includes(name) ? name : null;
+}
+function flag(v: any): boolean {
+  return v === true || v === 1 || v === "1" || v === "true";
+}
+
 const classifierModel =
   process.env.ANTHROPIC_CLASSIFIER_MODEL || "claude-haiku-4-5-20251001";
 
@@ -58,7 +71,7 @@ function salvageObjects(text: string): any[] {
   while ((m = re.exec(text)) !== null) {
     try {
       const o = JSON.parse(m[0]);
-      if (o && typeof o === "object" && Number.isInteger(Number(o.index))) out.push(o);
+      if (o && typeof o === "object" && Number.isInteger(Number(o.i ?? o.index))) out.push(o);
     } catch {
       /* αυτό το αντικείμενο χάλασε — τα υπόλοιπα συνεχίζουν */
     }
@@ -158,8 +171,9 @@ Relevant αν αφορά: κόμματα, κυβέρνηση, αντιπολίτ
 
 Noise αν είναι καθαρά: αθλητικά χωρίς θεσμική προέκταση, lifestyle, celebrities, ψυχαγωγία, συνταγές, ζώδια, άσχετα διεθνή.
 
-Για κάθε άρθρο δώσε:
-- topic: ΕΝΑ από: ${TOPICS.join(", ")}
+Για κάθε άρθρο δώσε ΜΟΝΟ αυτά (σύντομα κλειδιά, για οικονομία):
+- t: ο ΑΡΙΘΜΟΣ του θέματος από τη λίστα:
+${TOPIC_MENU}
 
 ΚΑΝΟΝΑΣ ΤΟΥ ΠΥΡΗΝΑ (για άρθρα που αγγίζουν 2+ θέματα): διάλεξε το θέμα του ΠΥΡΗΝΑ
 του συμβάντος, όχι του πλαισίου/συνέπειας. Συγκεκριμένα:
@@ -172,21 +186,14 @@ Noise αν είναι καθαρά: αθλητικά χωρίς θεσμική �
 - Απεργίες/κινητοποιήσεις για μισθούς-συνθήκες → Εργασία. Για συντάξεις → Ασφαλιστικό / συντάξεις.
 - Τιμές/πληθωρισμός/ρεύμα-καύσιμα ως κόστος νοικοκυριού → Ακρίβεια / κόστος ζωής.
 ΣΥΝΕΠΕΙΑ: όλα τα άρθρα που περιγράφουν το ΙΔΙΟ συμβάν πρέπει να πάρουν το ΙΔΙΟ θέμα.
-- sentiment: "θετικό"/"αρνητικό"/"ουδέτερο"
-- relevance: 1-10
-- is_political: true/false
-- public_relevance: true/false
-- relevance_domain: σύντομη κατηγορία
-- situation_potential: 1-10
-- agenda_potential: 1-10
-- urgency: 1-10
-- affected_groups: array 1-5
-- why_it_matters: μία πρόταση
-- is_noise: true/false
-- noise_reason: reason ή null
+- s: συναίσθημα/τόνος του άρθρου: -1 αρνητικό, 0 ουδέτερο, 1 θετικό
+- r: πολιτική/δημόσια σημασία 1-10
+- p: 1 αν είναι πολιτικό, αλλιώς 0
+- pr: 1 αν έχει δημόσια σημασία (βλ. «Relevant» πιο πάνω), αλλιώς 0
+- n: 1 αν είναι θόρυβος (βλ. «Noise» πιο πάνω), αλλιώς 0
 
-ΑΠΑΝΤΗΣΕ ΜΟΝΟ ΣΕ JSON ARRAY, χωρίς markdown:
-[{"index":0,"topic":"...","sentiment":"...","relevance":N,"is_political":true,"public_relevance":true,"relevance_domain":"...","situation_potential":N,"agenda_potential":N,"urgency":N,"affected_groups":["..."],"why_it_matters":"...","is_noise":false,"noise_reason":null}]`;
+ΑΠΑΝΤΗΣΕ ΜΟΝΟ ΣΕ JSON ARRAY, ένα αντικείμενο ανά άρθρο, χωρίς markdown και χωρίς κενά:
+[{"i":0,"t":3,"s":-1,"r":7,"p":1,"pr":1,"n":0}]`;
 
   // Το μεταβλητο μερος (τα αρθρα του batch) παει στο user message —
   // ωστε το σταθερο (οδηγιες+θεματα+schema) να κασαρεται (prompt caching, -90% στις επαναληψεις).
@@ -202,7 +209,7 @@ ${articlesList}`;
     },
     body: JSON.stringify({
       model: classifierModel,
-      max_tokens: 10000,
+      max_tokens: 4000,
       system: [{ type: "text", text: prompt, cache_control: { type: "ephemeral" } }],
       messages: [{ role: "user", content: userPrompt }],
     }),
@@ -240,31 +247,31 @@ ${articlesList}`;
   const processedIds: string[] = allIds;
   const answered = new Set<number>();
   for (const c of classifications) {
-    const article = articles[c.index];
+    const idx = Number(c.i ?? c.index);
+    const article = articles[idx];
     if (!article) continue;
-    answered.add(Number(c.index));
-    const isNoise = c.is_noise === true;
-    const publicRelevance = c.public_relevance === true && !isNoise;
-    const isPolitical = c.is_political === true || publicRelevance;
+    const topic = topicFromAnswer(c.t ?? c.topic);
+    if (!topic) continue; // χωρίς έγκυρο θέμα: θα ξαναδοκιμαστεί (markFailed πιο κάτω)
+    answered.add(idx);
+    const isNoise = flag(c.n ?? c.is_noise);
+    const publicRelevance = flag(c.pr ?? c.public_relevance) && !isNoise;
+    const isPolitical = flag(c.p ?? c.is_political) || publicRelevance;
+    const sentiment = SENTIMENT_LABEL[String(c.s)] || (typeof c.sentiment === "string" ? c.sentiment : null);
 
     const { data: updRows, error: updateError } = await supabase
       .from("articles")
       .update({
-        topic: c.topic || null,
-        sentiment: c.sentiment || null,
-        relevance: clampNumber(c.relevance),
+        // Μόνο τα πεδία που διαβάζει η εφαρμογή (βαθμολόγηση, ανίχνευση γεγονότων, φίλτρα).
+        // Τα why_it_matters/affected_groups/urgency κ.λπ. δεν τα χρησιμοποιούσε τίποτα και
+        // ήταν ~80% του κόστους (απάντηση του μοντέλου).
+        topic,
+        sentiment,
+        relevance: clampNumber(c.r ?? c.relevance),
         is_political: isPolitical,
         public_relevance: publicRelevance,
-        relevance_domain: c.relevance_domain || null,
-        situation_potential: clampNumber(c.situation_potential),
-        agenda_potential: clampNumber(c.agenda_potential),
-        urgency: clampNumber(c.urgency),
-        affected_groups: Array.isArray(c.affected_groups) ? c.affected_groups.slice(0, 5) : [],
-        why_it_matters: c.why_it_matters || null,
         is_noise: isNoise,
-        noise_reason: c.noise_reason || null,
         classification_status: "classified",
-        classifier_version: "noraya_public_reality_radar_v2_compact",
+        classifier_version: "noraya_public_reality_radar_v3_lean",
         classified_at: new Date().toISOString(),
         model_used: classifierModel,
       })
