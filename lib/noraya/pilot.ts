@@ -659,8 +659,39 @@ export async function hoursSinceLastWork(route: string): Promise<number | null> 
  */
 export async function aiCronDue(route: string): Promise<boolean> {
   if (cronHourAllowed()) return true;
+  // Αν το τελευταίο τρέξιμο άφησε δουλειά στη μέση (π.χ. θεματικές που δεν πρόλαβε),
+  // το επόμενο ωριαίο τη συνεχίζει — το ημερήσιο όριο κόστους ισχύει κανονικά.
+  if (await lastRunLeftWork(route)) return true;
   const h = await hoursSinceLastWork(route);
   return h === null || h >= STALE_HOURS;
+}
+
+async function lastRunLeftWork(route: string): Promise<boolean> {
+  try {
+    const { data, error } = await pilotDb()
+      .from("noraya_cron_runs")
+      .select("did_work, detail")
+      .eq("route", route)
+      .eq("did_work", true)
+      .order("started_at", { ascending: false })
+      .limit(1);
+    if (error || !Array.isArray(data) || !data.length) return false;
+    const d = (data[0] as any).detail || {};
+    if (d.remaining_event) return true;
+    if (!d.remaining_topic) return false;
+    // Θεματική που ξαναγίνεται «διαθέσιμη» κάθε 30' δεν μετράει ως εκκρεμότητα: συνεχίζουμε μόνο
+    // αν η επόμενη θεματική δεν έχει αναλυθεί τις τελευταίες 6 ώρες (δηλ. ο κύκλος δεν τελείωσε).
+    const { data: t } = await pilotDb()
+      .from("agenda_topics")
+      .select("events_detected_at")
+      .is("organization_id", null)
+      .eq("name", String(d.remaining_topic))
+      .limit(1);
+    const at = Array.isArray(t) && t[0] ? (t[0] as any).events_detected_at : null;
+    return !at || Date.now() - new Date(String(at)).getTime() >= STALE_HOURS * 36e5;
+  } catch {
+    return false;
+  }
 }
 
 /** Γράφει ένα τρέξιμο. Ποτέ δεν σπάει τη ροή. */
