@@ -8,7 +8,8 @@ import {
 } from "@/lib/noraya/strategic-reasoning";
 import {
   cronBudgetOk,
-  cronHourAllowed,
+  aiCronDue,
+  withCronLog,
   isCronRequest,
   logPilotError,
   pilotAllow,
@@ -405,7 +406,7 @@ async function handle(request: Request) {
     let metering: Metering;
     if (fromCron) {
       // Εκτός ωρών λειτουργίας των ακριβών crons: δεν κάνουμε τίποτα.
-      if (!force && !cronHourAllowed()) {
+      if (!force && !(await aiCronDue(ROUTE))) {
         return NextResponse.json({ ok: true, mode: "off_hours", analyzed: 0 });
       }
       metering = {
@@ -503,9 +504,10 @@ async function handle(request: Request) {
 }
 
 export async function GET(request: Request) {
-  return handle(request);
+  // Καταγράφονται μόνο τα αυτόματα τρεξίματα (όχι τα κλικ χρηστών).
+  return isCronRequest(request) ? withCronLog(ROUTE, () => handle(request)) : handle(request);
 }
 
 export async function POST(request: Request) {
-  return handle(request);
+  return isCronRequest(request) ? withCronLog(ROUTE, () => handle(request)) : handle(request);
 }

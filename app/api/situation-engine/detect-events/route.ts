@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { checkCostGuard, guardMessage } from "@/lib/noraya/cost-guard";
-import { cronBudgetOk, cronHourAllowed, isCronOrAdmin, logPilotError, recordCronCall } from "@/lib/noraya/pilot";
+import { aiCronDue, cronBudgetOk, isCronOrAdmin, logPilotError, recordCronCall, withCronLog } from "@/lib/noraya/pilot";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 
 export const runtime = "nodejs";
@@ -374,7 +374,7 @@ async function handle(request: Request) {
     }
     // Pilot: εκτός ωρών λειτουργίας των ακριβών crons, το αυτόματο τρέξιμο παραλείπεται
     // (?anyhour=1 για χειροκίνητη επαναφορά).
-    if (!requestedTopic && url.searchParams.get("anyhour") !== "1" && !cronHourAllowed()) {
+    if (!requestedTopic && url.searchParams.get("anyhour") !== "1" && !(await aiCronDue(ROUTE))) {
       return NextResponse.json({ ok: true, mode: "off_hours", topics_processed: 0, remaining_topic: null });
     }
 
@@ -465,9 +465,9 @@ async function handle(request: Request) {
 }
 
 export async function GET(request: Request) {
-  return handle(request);
+  return withCronLog(ROUTE, () => handle(request));
 }
 
 export async function POST(request: Request) {
-  return handle(request);
+  return withCronLog(ROUTE, () => handle(request));
 }
