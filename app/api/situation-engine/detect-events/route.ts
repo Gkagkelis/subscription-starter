@@ -415,9 +415,16 @@ async function handle(request: Request) {
     const BUDGET_MS = 230000;
 
     const results: TopicResult[] = [];
+    const pickErrors: string[] = [];
 
     while (Date.now() - startedAt < BUDGET_MS) {
-      const { data: next } = await supabase.rpc("pick_next_topic_for_detection");
+      // Γρήγορη εκδοχή του pick_next_topic_for_detection (η παλιά έπεφτε σε statement timeout
+      // και ο βρόχος σταματούσε σιωπηλά χωρίς να επεξεργαστεί καμία θεματική).
+      const { data: next, error: pickError } = await supabase.rpc("noraya_pick_next_topic_v2");
+      if (pickError) {
+        pickErrors.push(pickError.message);
+        break;
+      }
 
       const topic = (next as string) || null;
 
@@ -433,7 +440,7 @@ async function handle(request: Request) {
       results.push(r);
     }
 
-    const { data: more } = await supabase.rpc("pick_next_topic_for_detection");
+    const { data: more } = await supabase.rpc("noraya_pick_next_topic_v2");
 
     const aiFailures = results
       .filter((r) => r.ai_error)
@@ -451,6 +458,7 @@ async function handle(request: Request) {
       remaining_topic: (more as string) || null,
       ai_failures: aiFailures,
       ai_ok: aiFailures.length === 0,
+      pick_errors: pickErrors,
       detail: results,
     });
   } catch (e: any) {
