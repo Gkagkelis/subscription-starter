@@ -72,6 +72,66 @@ const CONFIG = {
 };
 
 
+// ============================================================
+// ΣΤΡΩΣΗ ΣΥΝΑΦΕΙΑΣ ΜΕ ΤΟ ΚΟΜΜΑ-ΠΕΛΑΤΗ (Relevance Layer, βλ. lib/noraya/methodology.ts)
+// Πόσο αγγίζει ένα θέμα τις βασικές θεματικές και τις θέσεις του κόμματος (0–100).
+// Μπαίνει στην κατάταξη με βάρος PARTY_RELEVANCE_WEIGHT. Χωρίς προφίλ: η φόρμουλα μένει ίδια.
+// ============================================================
+const PARTY_RELEVANCE_WEIGHT = 0.12;
+
+const RELEVANCE_STOP_STEMS = new Set([
+  "κυβερ", "ελλαδ", "ελλην", "δημοσ", "πολιτ", "μετρα", "σχεδι", "προγρ", "υπουρ", "χωρις", "μεσα",
+  "μεταξ", "επειδ", "οποιο", "αυτου", "αυτης", "αυτων", "ολους", "ολων", "πολυ", "εκατο", "δισεκ",
+  "τετρα", "χρονι", "ετους", "νεους", "νεες", "πρωτο", "αλλαγ", "στηρι", "μεγαλ", "εθνικ",
+]);
+
+function relevanceStems(text: unknown): Set<string> {
+  const out = new Set<string>();
+  const norm = String(text || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/ς/g, "σ");
+  for (const w of norm.split(/[^a-zα-ω0-9]+/)) {
+    if (w.length < 5) continue;
+    const stem = w.slice(0, 5);
+    if (!RELEVANCE_STOP_STEMS.has(stem)) out.add(stem);
+  }
+  return out;
+}
+
+type PartyRelevanceIndex = { themeStems: Set<string>; positionStems: Set<string> } | null;
+const partyRelevanceCache = new WeakMap<object, PartyRelevanceIndex>();
+
+function partyRelevanceIndex(profile: PoliticalPartyProfile | null): PartyRelevanceIndex {
+  if (!profile) return null;
+  const cached = partyRelevanceCache.get(profile as object);
+  if (cached !== undefined) return cached;
+  const list = (v: unknown) => (Array.isArray(v) ? v.map((x) => String(x || "")) : []);
+  const themeStems = relevanceStems(list((profile as any).core_themes).join(" "));
+  const positionStems = relevanceStems(
+    [...list((profile as any).known_positions), ...list((profile as any).core_audiences)].join(" ")
+  );
+  const index = themeStems.size || positionStems.size ? { themeStems, positionStems } : null;
+  partyRelevanceCache.set(profile as object, index);
+  return index;
+}
+
+function partyRelevanceScore(
+  profile: PoliticalPartyProfile | null,
+  topicText: string,
+  eventText: string
+): { score: number; theme_match: boolean; matched_terms: string[] } | null {
+  const index = partyRelevanceIndex(profile);
+  if (!index) return null;
+  const topicStems = relevanceStems(topicText);
+  const themeMatch = Array.from(topicStems).some((stem) => index.themeStems.has(stem));
+  const eventStems = relevanceStems(`${topicText} ${eventText}`);
+  const matched = Array.from(eventStems).filter((stem) => index.positionStems.has(stem) || index.themeStems.has(stem));
+  const score = Math.min(100, (themeMatch ? 60 : 25) + Math.min(40, matched.length * 6));
+  return { score, theme_match: themeMatch, matched_terms: matched.slice(0, 12) };
+}
+
 function sanitizePartyProfile(profile: PoliticalPartyProfile | null): PoliticalPartyProfile | null {
   if (!profile || typeof profile !== "object") return null;
   if (
@@ -1277,7 +1337,14 @@ function buildAgendaItem(
   // ΕΝΑ σκορ για όλα τα γεγονότα, με βάση τα πραγματικά σήματα (εξώφυλλα + κάλυψη +
   // αναζητήσεις). Τα ευαίσθητα ΔΕΝ έχουν πλέον ξεχωριστή, υποβαθμισμένη φόρμουλα:
   // αν παίζουν στα πρωτοσέλιδα, παίρνουν το ίδιο frontpage bonus με όλα τα άλλα.
-  const rawScore = standardRawScore;
+  const partyRelevance = partyRelevanceScore(
+    partyProfile,
+    `${group.parentTopic || ""} ${group.classification.micro_agenda || ""}`,
+    sortedEvents.map((event) => `${event?.title || ""} ${event?.summary || ""}`).join(" ").slice(0, 4000)
+  );
+  const rawScore = partyRelevance
+    ? clampScore((1 - PARTY_RELEVANCE_WEIGHT) * standardRawScore + PARTY_RELEVANCE_WEIGHT * partyRelevance.score)
+    : standardRawScore;
   let finalScore = type === "monitoring_event" ? Math.min(rawScore, CONFIG.monitoringCap) : rawScore;
   // ΑΡΧΗ: η κατάταξη ορίζεται από τα ΠΡΑΓΜΑΤΙΚΑ σήματα (εξώφυλλα, κάλυψη, αναζητήσεις).
   // ΔΕΝ επιβάλλουμε τεχνητό κόφτη σε βίαια/ευαίσθητα γεγονότα: αν κάτι παίζει στα
@@ -1358,6 +1425,11 @@ function buildAgendaItem(
       documentation: doc,
       cluster_breadth_bonus: breadthBonus,
       parent_only_signal: parentOnlySignal,
+      score_before_party_relevance: standardRawScore,
+      party_relevance: partyRelevance ? partyRelevance.score : null,
+      party_relevance_theme_match: partyRelevance ? partyRelevance.theme_match : null,
+      party_relevance_terms: partyRelevance ? partyRelevance.matched_terms : [],
+      party_relevance_weight: partyRelevance ? PARTY_RELEVANCE_WEIGHT : 0,
       formula: sensitivity.ranking_policy === "do_not_optimize_for_engagement"
         ? "sensitive capped: event + coverage + freshness + documentation"
         : "v5.7: 36% event + 14% agenda + 16% calibrated coverage + 12% micro-agenda-preferred trends + 12% frontpage editorial prominence with parent-fallback cap + 7% freshness + 3% documentation + breadth bonus, enriched with party-profile narrative intelligence and premium research context",
