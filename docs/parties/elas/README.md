@@ -13,10 +13,13 @@
 | 06_kostologisi_dnews_2026-09-04.txt | Κοστολόγηση και απάντηση στην κυβέρνηση |
 | 07_asktsipras_2026-07-17.txt | #AskTsipras: 15 ερωτήσεις μελών και απαντήσεις του Προέδρου |
 | 08_metanasteftiko_tomeis_2026-08-30.txt | Τομείς Μεταναστευτικής Πολιτικής και Προστασίας του Πολίτη |
-| build_profile_sql.py / addendum.py / key_officials.json | Παράγουν το `elas_profile_update_2026-09-29.sql` (πλήρες προφίλ) |
+| 09_5plus1_paideia_2026-07-20.txt | «5+1 παρεμβάσεις για την Παιδεία» (20/7/2026) |
+| anakoinoseis/ | Και οι 231 ανακοινώσεις/συνεντεύξεις/ομιλίες του myelas.gr (Μάιος–Σεπτέμβριος 2026) |
+| synopseis/ | Συνόψεις θέσεων ανά παρτίδα (βάση της ενότητας Θ του προφίλ) |
+| build_profile_sql.py / addendum*.py / key_officials.json | Παράγουν το `elas_profile_update_2026-09-29.sql` (πλήρες προφίλ) |
 
 Το προηγούμενο προφίλ και οι οργανισμοί πριν την αλλαγή έχουν κρατηθεί στον πίνακα
-`noraya_backups` (kind = `political_party_profiles` / `organizations`).
+`noraya_backups` (kind = `political_party_profiles` / `organizations`), μία εγγραφή πριν από κάθε ενημέρωση. Για επαναφορά σε συγκεκριμένη έκδοση άλλαξε το `order by id limit 1` στο id της εγγραφής που θέλεις.
 Επαναφορά του παλιού προφίλ, αν χρειαστεί:
 
 ```sql
