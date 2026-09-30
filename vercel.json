@@ -3,7 +3,7 @@
   "crons": [
     {
       "path": "/api/ingest?token=dev",
-      "schedule": "0 * * * *"
+      "schedule": "*/10 * * * *"
     },
     {
       "path": "/api/classify-bulk?token=dev",

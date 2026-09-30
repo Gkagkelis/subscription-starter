@@ -21,6 +21,9 @@ export const maxDuration = 300;
 const FILTER_MODEL = process.env.ANTHROPIC_FILTER_MODEL || "claude-haiku-4-5";
 const FALLBACK_MODEL = "claude-sonnet-4-6";
 const ROUTE = "/api/situation-engine/detect-events";
+// Κάθε ώρα από τις 06:00 ως τη 01:00 ώρα Ελλάδας (UTC 3–22): τα νέα γεγονότα εμφανίζονται μέσα
+// σε μία ώρα. Αναλύονται μόνο θεματικές με νέα άρθρα (βλ. noraya_pick_next_topic_v2).
+const DETECT_HOURS_UTC = "3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22";
 
 type ArticleRow = {
   id: string;
@@ -245,7 +248,7 @@ async function callAnthropic(
     }
 
     const data = await res.json();
-    await recordCronCall(ROUTE, usedModel, data?.usage);
+    await recordCronCall(ROUTE, usedModel, data?.usage, "detect");
     const text = (data?.content || [])
       .filter((b: any) => b?.type === "text")
       .map((b: any) => b.text)
@@ -400,7 +403,7 @@ async function handle(request: Request) {
     }
     // Pilot: εκτός ωρών λειτουργίας των ακριβών crons, το αυτόματο τρέξιμο παραλείπεται
     // (?anyhour=1 για χειροκίνητη επαναφορά).
-    if (!requestedTopic && url.searchParams.get("anyhour") !== "1" && !(await aiCronDue(ROUTE))) {
+    if (!requestedTopic && url.searchParams.get("anyhour") !== "1" && !(await aiCronDue(ROUTE, "NORAYA_DETECT_HOURS_UTC", DETECT_HOURS_UTC))) {
       return NextResponse.json({ ok: true, mode: "off_hours", topics_processed: 0, remaining_topic: null });
     }
 
@@ -415,7 +418,7 @@ async function handle(request: Request) {
 
     const themes = await loadActiveThemes(supabase);
 
-    if (!(await cronBudgetOk(ROUTE))) {
+    if (!(await cronBudgetOk(ROUTE, "detect"))) {
       return NextResponse.json({ ok: true, mode: "budget_reached", topics_processed: 0, remaining_topic: null });
     }
 
@@ -455,7 +458,7 @@ async function handle(request: Request) {
       const topic = (next as string) || null;
 
       if (!topic) break;
-      if (!(await cronBudgetOk(ROUTE))) break;
+      if (!(await cronBudgetOk(ROUTE, "detect"))) break;
 
       const r = await processTopic(supabase, topic, themes);
 

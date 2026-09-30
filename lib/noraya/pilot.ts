@@ -49,6 +49,9 @@ export const pilotConfig = {
   // ποτέ τη φθηνή (και απαραίτητη) ταξινόμηση ειδήσεων.
   cronDailyUsd: () => envNum("NORAYA_CRON_DAILY_USD", 3),
   classifyDailyUsd: () => envNum("NORAYA_CLASSIFY_DAILY_USD", 3),
+  // Ανίχνευση γεγονότων (φθηνό μοντέλο, κάθε ώρα): δικό της όριο, ώστε να μην «τρώει»
+  // το όριο των αναλύσεων για το κόμμα (advise/brief).
+  detectDailyUsd: () => envNum("NORAYA_DETECT_DAILY_USD", 3),
   demoDailyUsd: () => envNum("NORAYA_DEMO_DAILY_USD", 3),
   adminEmails: () =>
     (process.env.NORAYA_ADMIN_EMAILS || "")
@@ -657,8 +660,8 @@ export async function hoursSinceLastWork(route: string): Promise<number | null> 
  * ή αν έχουν περάσει ≥6 ώρες από το τελευταίο πραγματικό τρέξιμο — ώστε η ατζέντα να
  * μη μένει ποτέ πίσω αν χαθεί ένα προγραμματισμένο τρέξιμο.
  */
-export async function aiCronDue(route: string): Promise<boolean> {
-  if (cronHourAllowed()) return true;
+export async function aiCronDue(route: string, hoursEnv = "NORAYA_AI_CRON_HOURS_UTC", hoursFallback = "4,10,16"): Promise<boolean> {
+  if (cronHourAllowed(hoursEnv, hoursFallback)) return true;
   // Αν το τελευταίο τρέξιμο άφησε δουλειά στη μέση (π.χ. θεματικές που δεν πρόλαβε),
   // το επόμενο ωριαίο τη συνεχίζει — το ημερήσιο όριο κόστους ισχύει κανονικά.
   if (await lastRunLeftWork(route)) return true;
@@ -745,7 +748,7 @@ export async function withCronLog(route: string, run: () => Promise<Response>): 
 }
 
 /** Πόσα $ έχουν ξοδέψει σήμερα τα crons. null αν η βάση δεν απαντά. */
-export type CronBucket = "cron" | "classify";
+export type CronBucket = "cron" | "classify" | "detect";
 
 export async function cronSpentToday(bucket: CronBucket = "cron"): Promise<number | null> {
   try {
@@ -771,10 +774,16 @@ export async function cronSpentToday(bucket: CronBucket = "cron"): Promise<numbe
 export async function cronBudgetOk(route: string, bucket: CronBucket = "cron") {
   const spent = await cronSpentToday(bucket);
   if (spent === null) return true; // fail-open
-  const budget = bucket === "classify" ? pilotConfig.classifyDailyUsd() : pilotConfig.cronDailyUsd();
+  const budget =
+    bucket === "classify"
+      ? pilotConfig.classifyDailyUsd()
+      : bucket === "detect"
+        ? pilotConfig.detectDailyUsd()
+        : pilotConfig.cronDailyUsd();
   if (spent < budget) return true;
   const day = athensDay();
-  const envName = bucket === "classify" ? "NORAYA_CLASSIFY_DAILY_USD" : "NORAYA_CRON_DAILY_USD";
+  const envName =
+    bucket === "classify" ? "NORAYA_CLASSIFY_DAILY_USD" : bucket === "detect" ? "NORAYA_DETECT_DAILY_USD" : "NORAYA_CRON_DAILY_USD";
   await sendAlert(
     `cron-budget:${bucket}:${day}`,
     `Noraya: ${bucket === "classify" ? "η ταξινόμηση ειδήσεων" : "τα crons ανάλυσης"} έφτασαν το ημερήσιο όριο ($${budget})`,

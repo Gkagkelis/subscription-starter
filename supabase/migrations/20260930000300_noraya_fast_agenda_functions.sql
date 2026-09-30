@@ -6,3 +6,6 @@
 -- Οι παλιές συναρτήσεις μένουν ως έχουν. Ο πλήρης ορισμός βρίσκεται στη βάση:
 --   select pg_get_functiondef('public.noraya_refresh_agenda_topics_v2'::regproc);
 --   select pg_get_functiondef('public.noraya_pick_next_topic_v2'::regproc);
+
+-- 2026-09-30 (migration "noraya_pick_next_topic_v2_new_articles_only"): η v2 ξαναδιαλέγει μια
+-- θεματική μόνο όταν έχει ≥3 νέα άρθρα από την τελευταία ανάλυση, και αγνοεί Αθλητισμό/θόρυβο.
