@@ -108,6 +108,7 @@ export default function OnboardingPage() {
   const [stepIndex, setStepIndex] = useState(0);
   const [partyProfiles, setPartyProfiles] = useState<PartyProfile[]>([]);
   const [loadingParties, setLoadingParties] = useState(false);
+  const [partiesLoaded, setPartiesLoaded] = useState(false);
 
   const [orgType, setOrgType] = useState<IdentityType>("Πολιτικό κόμμα");
   const isPS = orgType === "Υποψήφιος Βουλευτής" || orgType === "Γραφείο Βουλευτή";
@@ -116,6 +117,10 @@ export default function OnboardingPage() {
   const [selectedPartyKey, setSelectedPartyKey] = useState("");
   // PILOT: κόμμα που ορίζει ο κωδικός πρόσκλησης (προεπιλογή στο onboarding).
   const [invitePartyKey, setInvitePartyKey] = useState("");
+  // Έχει απαντήσει το /api/invite/status; (μέχρι τότε δεν δείχνουμε ούτε βήματα ούτε υποδοχή)
+  const [inviteChecked, setInviteChecked] = useState(false);
+  // Το κόμμα του οποίου το πλήρες προφίλ έχει φορτωθεί στη φόρμα.
+  const [appliedPartyKey, setAppliedPartyKey] = useState("");
 
   const [representativeName, setRepresentativeName] = useState("");
   const [district, setDistrict] = useState("");
@@ -224,6 +229,7 @@ export default function OnboardingPage() {
         );
       } finally {
         setLoadingParties(false);
+        setPartiesLoaded(true);
       }
     }
 
@@ -270,18 +276,30 @@ export default function OnboardingPage() {
         if (d?.party_key) setInvitePartyKey(String(d.party_key));
       } catch {
         /* αγνοειται */
+      } finally {
+        setInviteChecked(true);
       }
     }
     loadInviteParty();
   }, []);
 
+  // Πελάτης με κωδικό κόμματος: δεν περνά από τα 7 βήματα. Φορτώνουμε ολόκληρο το
+  // προφίλ του κόμματος (όλες οι θέσεις, θεματικές, κοινά, κόκκινες γραμμές, ύφος)
+  // και του δείχνουμε μόνο μια οθόνη υποδοχής.
+  const quickMode =
+    !!invitePartyKey &&
+    orgType === "Πολιτικό κόμμα" &&
+    // αν για οποιονδήποτε λόγο δεν βρεθεί το προφίλ του κόμματος, πίσω στα κανονικά βήματα
+    (!partiesLoaded || partyProfiles.some((p) => p.party_key === invitePartyKey)) &&
+    (!selectedPartyKey || selectedPartyKey === invitePartyKey);
+  const quickReady = quickMode && appliedPartyKey === invitePartyKey;
+
   useEffect(() => {
-    if (!invitePartyKey || roleLocked || selectedPartyKey) return;
-    if (orgType !== "Πολιτικό κόμμα") return;
+    if (!quickMode || appliedPartyKey === invitePartyKey) return;
     if (!partyProfiles.some((p) => p.party_key === invitePartyKey)) return;
-    applyPartyProfile(invitePartyKey);
+    applyPartyProfile(invitePartyKey, { partyOnly: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [invitePartyKey, partyProfiles, roleLocked]);
+  }, [quickMode, invitePartyKey, partyProfiles, appliedPartyKey]);
 
   function changeIdentity(type: IdentityType) {
     if (roleLocked) return; // ο ρολος εχει κλειδωσει - δεν αλλαζει
@@ -295,7 +313,7 @@ export default function OnboardingPage() {
     setRegion("");
   }
 
-  function applyPartyProfile(partyKey: string) {
+  function applyPartyProfile(partyKey: string, opts: { partyOnly?: boolean } = {}) {
     setSelectedPartyKey(partyKey);
 
     const profile = partyProfiles.find((item) => item.party_key === partyKey);
@@ -305,6 +323,14 @@ export default function OnboardingPage() {
     setSelectedThemes(unique(asTextList(profile.core_themes)));
     setSelectedIssues(unique(asTextList(profile.known_positions)));
     setSelectedSocialGroups(unique(asTextList(profile.core_audiences)));
+    if (opts.partyOnly) {
+      // Χωρίς τις γενικές προεπιλογές της φόρμας: μόνο ό,τι ορίζει το ίδιο το κόμμα.
+      setSelectedEvents([]);
+      setSelectedAgeGroups([]);
+      setSelectedProfessionalGroups([]);
+      setSelectedInstitutions([]);
+      setSelectedPublicActors([]);
+    }
 
     setMission(
       [
@@ -325,6 +351,7 @@ export default function OnboardingPage() {
         .filter(Boolean)
         .join("\n\n")
     );
+    setAppliedPartyKey(partyKey);
   }
 
   function buildOrganizationName() {
@@ -463,6 +490,18 @@ export default function OnboardingPage() {
       setSaveError("Σφάλμα σύνδεσης. Δοκιμάστε ξανά.");
       setSaving(false);
     }
+  }
+
+  if (!inviteChecked || quickMode) {
+    return (
+      <WelcomeScreen
+        loading={!inviteChecked || !quickReady}
+        party={partyProfiles.find((p) => p.party_key === invitePartyKey)}
+        saving={saving}
+        saveError={saveError}
+        onSubmit={submit}
+      />
+    );
   }
 
   return (
@@ -1038,6 +1077,88 @@ export default function OnboardingPage() {
             )}
           </div>
         </div>
+      </form>
+    </div>
+  );
+}
+
+function WelcomeScreen({
+  loading,
+  party,
+  saving,
+  saveError,
+  onSubmit
+}: {
+  loading: boolean;
+  party?: PartyProfile;
+  saving: boolean;
+  saveError: string;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+}) {
+  const positions = asTextList(party?.known_positions).length;
+  const themeCount = asTextList(party?.core_themes).length;
+  const officials = Array.isArray((party as { key_officials?: unknown } | undefined)?.key_officials)
+    ? ((party as { key_officials?: unknown[] }).key_officials as unknown[]).length
+    : 0;
+  const redLineCount = asTextList(party?.red_lines).length;
+  const name = party?.party_name || "";
+
+  const items = [
+    "Πρόγραμμα, κοστολόγηση και δημόσιες τοποθετήσεις",
+    positions ? `${positions} θέσεις του κόμματος` : "Οι θέσεις του κόμματος",
+    themeCount ? `${themeCount} θεματικές παρακολούθησης` : "Οι θεματικές παρακολούθησης",
+    officials ? `${officials} στελέχη και αρμοδιότητες` : "Στελέχη και αρμοδιότητες",
+    redLineCount ? `${redLineCount} κόκκινες γραμμές του κόμματος` : "Κόκκινες γραμμές του κόμματος"
+  ];
+
+  return (
+    <div className="min-h-screen bg-[#020617] px-5 py-8 text-white">
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_15%_10%,rgba(34,211,238,0.18),transparent_30%),radial-gradient(circle_at_80%_20%,rgba(16,185,129,0.12),transparent_28%)]" />
+
+      <form
+        onSubmit={onSubmit}
+        className="relative mx-auto mt-[8vh] max-w-xl rounded-3xl border border-white/10 bg-white/[0.04] p-6 shadow-2xl shadow-cyan-950/20 backdrop-blur md:p-9"
+      >
+        <div className="text-xs uppercase tracking-[0.25em] text-cyan-300">NORAYA</div>
+        <div className="mt-1 text-xs text-zinc-500">Political Intelligence Platform</div>
+
+        {loading ? (
+          <div className="py-16 text-center text-sm text-zinc-400">Προετοιμασία του λογαριασμού σας…</div>
+        ) : (
+          <>
+            <h1 className="mt-6 text-3xl font-semibold tracking-tight">Καλώς ήρθατε</h1>
+            {name && <p className="mt-2 text-lg text-cyan-100">{name}</p>}
+
+            <p className="mt-5 text-sm leading-6 text-zinc-400">
+              Ο λογαριασμός σας είναι έτοιμος. Ο Noraya έχει ήδη φορτώσει:
+            </p>
+
+            <ul className="mt-4 space-y-3">
+              {items.map((item) => (
+                <li key={item} className="flex items-start gap-3 text-[15px] text-zinc-200">
+                  <span className="mt-0.5 flex h-5 w-5 flex-none items-center justify-center rounded-full bg-emerald-400/15 text-xs text-emerald-300">
+                    ✓
+                  </span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+
+            {saveError && (
+              <div className="mt-6 rounded-2xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm text-red-100">
+                {saveError}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={saving}
+              className="mt-8 w-full rounded-2xl bg-cyan-300 px-5 py-4 text-base font-semibold text-slate-950 transition hover:bg-cyan-200 disabled:opacity-60"
+            >
+              {saving ? "Άνοιγμα…" : "Είσοδος στο Strategy Room →"}
+            </button>
+          </>
+        )}
       </form>
     </div>
   );
