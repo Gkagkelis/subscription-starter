@@ -43,6 +43,9 @@ type TopicResult = {
   events: number;
   ai_error?: string | null;
   articles_seen?: number;
+  proposed?: number;
+  dropped?: Record<string, number>;
+  rpc_error?: string | null;
 };
 
 function svc() {
@@ -169,7 +172,9 @@ type ExistingEvent = { event_key: string; title: string; topic: string };
 
 function buildUserPrompt(topic: string, articles: ArticleRow[], existing: ExistingEvent[] = []) {
   const lines = articles
-    .map((a) => `- [id:${a.id}] (${a.source_name || "—"}) ${a.title}`)
+    // Σύντομος αριθμός (A1, A2…) αντί για UUID: το μοντέλο τον αντιγράφει χωρίς λάθη
+    // (με 60 UUID έχανε/αλλοίωνε id και τα γεγονότα απορρίπτονταν σιωπηλά) και κοστίζει λιγότερο.
+    .map((a, i) => `- [A${i + 1}] (${a.source_name || "—"}) ${a.title}`)
     .join("\n");
 
   const existingBlock = existing.length
@@ -188,7 +193,7 @@ ${existingBlock}
 ${lines}
 
 Επίστρεψε ΜΟΝΟ έγκυρο JSON, χωρίς markdown, χωρίς \`\`\`:
-{ "events": [ { "existing_ref": "K1-ή-null", "title": "...", "summary": "...", "matched_theme": "...", "article_ids": ["id1"] } ] }
+{ "events": [ { "existing_ref": "K1-ή-null", "title": "...", "summary": "...", "matched_theme": "...", "article_ids": ["A1", "A4"] } ] }
 
 Αν ΚΑΝΕΝΑ άρθρο δεν είναι πολιτικά σημαντικό: { "events": [] }`;
 }
@@ -323,16 +328,28 @@ async function processTopic(
   if (!parsed) return { topic, events: 0, ai_error: "ai_returned_unparseable_json", articles_seen: list.length };
 
   let count = 0;
+  const dropped = { no_articles: 0, no_title: 0, sensitive: 0, rpc_error: 0 };
+  let lastRpcError: string | null = null;
+  // A1 → id του 1ου άρθρου κ.λπ. Δεχόμαστε και σκέτο αριθμό ή (παλιό σχήμα) ολόκληρο id.
+  const toId = (ref: unknown): string | null => {
+    const r = String(ref || "").trim();
+    const m = /^A?(\d+)$/i.exec(r);
+    if (m) {
+      const a = list[Number(m[1]) - 1];
+      return a ? a.id : null;
+    }
+    return validIds.has(r) ? r : null;
+  };
 
   for (const ev of parsed.events) {
-    const ids = (ev.article_ids || []).filter((id) => validIds.has(id));
+    const ids = Array.from(new Set((ev.article_ids || []).map(toId).filter((id): id is string => !!id)));
 
-    if (ids.length === 0) continue;
+    if (ids.length === 0) { dropped.no_articles++; continue; }
 
     const title = (ev.title || "").trim();
 
-    if (!title) continue;
-    if (isSensitiveEvent(title)) continue; // μη-πολιτικα/ευαισθητα: εξαιρουνται
+    if (!title) { dropped.no_title++; continue; }
+    if (isSensitiveEvent(title)) { dropped.sensitive++; continue; } // μη-πολιτικα/ευαισθητα: εξαιρουνται
 
     // Συγχωνευση σε υπαρχον γεγονος: ιδιο event_key/τιτλος/θεμα ωστε το upsert
     // να ΠΡΟΣΘΕΣΕΙ τα αρθρα στο υπαρχον αντι να δημιουργησει παραλλαγη.
@@ -356,9 +373,18 @@ async function processTopic(
     });
 
     if (!rpcErr) count += 1;
+    else { dropped.rpc_error++; lastRpcError = rpcErr.message; }
   }
 
-  return { topic, events: count, ai_error: null, articles_seen: list.length };
+  return {
+    topic,
+    events: count,
+    ai_error: null,
+    articles_seen: list.length,
+    proposed: parsed.events.length,
+    dropped,
+    rpc_error: lastRpcError,
+  };
 }
 
 async function handle(request: Request) {
