@@ -23,7 +23,8 @@ export default function InvitePage() {
         if (cancelled) return;
         setLoggedIn(Boolean(d?.logged_in));
         if (d?.logged_in && d?.has_access) {
-          router.replace("/onboarding");
+          // Πλήρης φόρτωση ώστε να μη χρησιμοποιηθεί παλιά (cached) ανακατεύθυνση του router.
+          window.location.replace(d?.onboarded ? "/strategy-room" : "/onboarding");
           return;
         }
         if (d?.logged_in) {
@@ -33,7 +34,7 @@ export default function InvitePage() {
             headers: { "Content-Type": "application/json" },
             body: "{}"
           });
-          if (!cancelled && rr.ok) router.replace("/onboarding");
+          if (!cancelled && rr.ok) window.location.replace("/onboarding");
         }
       } catch {
         if (!cancelled) setLoggedIn(false);
@@ -65,11 +66,11 @@ export default function InvitePage() {
         setError(d?.error || "Ο κωδικός δεν είναι έγκυρος.");
         return;
       }
-      router.push(
-        loggedIn
-          ? "/onboarding"
-          : `/signin/signup?role=political_party&next=/onboarding&invite=${encodeURIComponent(clean)}`
-      );
+      if (loggedIn) {
+        window.location.assign("/onboarding");
+      } else {
+        router.push(`/signin/signup?role=political_party&next=/onboarding&invite=${encodeURIComponent(clean)}`);
+      }
     } finally {
       setBusy(false);
     }
