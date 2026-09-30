@@ -411,7 +411,8 @@ async function handle(request: Request) {
     }
 
     const startedAt = Date.now();
-    const BUDGET_MS = 120000;
+    // Ο χρόνος φτάνει για να περάσουν όλες οι θεματικές σε ένα τρέξιμο (maxDuration 300s).
+    const BUDGET_MS = 230000;
 
     const results: TopicResult[] = [];
 

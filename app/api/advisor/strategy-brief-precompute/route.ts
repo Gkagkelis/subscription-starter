@@ -113,7 +113,7 @@ export async function GET(req: Request) {
     .from("v_advisor_agenda_briefs_recent")
     .select("topic, article_count, source_count, agenda_score, political_risk_level, documentation_level")
     .order("agenda_score", { ascending: false })
-    .limit(6);
+    .limit(40);
 
   if (agendaError) {
     return NextResponse.json(
@@ -128,8 +128,23 @@ export async function GET(req: Request) {
     );
   }
 
+  // Μόνο θέματα που τα γράφουν πραγματικά τα μέσα (≥3 άρθρα από ≥2 πηγές) και όχι αθλητικά.
+  // Χωρίς αυτό, θέματα με ένα άρθρο από μία πηγή (π.χ. «Πολιτικά σχόλια») έπαιρναν τις
+  // «Προτεραιότητες σήμερα» μπροστά από θέματα με δεκάδες άρθρα.
+  const isSolid = (r: any) =>
+    r.topic &&
+    r.topic !== "Μη ταξινομημένο" &&
+    r.topic !== "Αθλητισμός" &&
+    Number(r.article_count || 0) >= 3 &&
+    Number(r.source_count || 0) >= 2;
   const signals = ((agendaData || []) as any[])
-    .filter((r) => r.topic && r.topic !== "Μη ταξινομημένο")
+    .filter(isSolid)
+    .sort(
+      (a, b) =>
+        (Number(b.agenda_score) || 0) - (Number(a.agenda_score) || 0) ||
+        (Number(b.source_count) || 0) - (Number(a.source_count) || 0) ||
+        (Number(b.article_count) || 0) - (Number(a.article_count) || 0)
+    )
     .slice(0, 3);
 
   // ΕΞΟΙΚΟΝΟΜΗΣΗ: υπογραφη εισοδου. Αν η ατζεντα ΔΕΝ αλλαξε απο το τελευταιο brief,
@@ -173,9 +188,13 @@ export async function GET(req: Request) {
     });
   }
 
+  // Pilot (ΕΛΑΣ): το κοινό brief γράφεται με το προφίλ του κόμματος-πελάτη, όχι με όποιον
+  // οργανισμό τύχει πρώτος στον πίνακα.
   const { data: orgData, error: orgError } = await supabase
     .from("organizations")
     .select("org_name, org_type, tone, red_lines")
+    .eq("party_key", "elas")
+    .order("updated_at", { ascending: false })
     .limit(1)
     .maybeSingle();
 
