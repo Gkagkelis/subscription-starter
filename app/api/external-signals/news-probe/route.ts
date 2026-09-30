@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isCronOrAdmin } from "@/lib/noraya/pilot";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -24,7 +25,7 @@ function pick(block: string, tag: string): string {
 // Σκοπός: να δούμε αν η Google απαντά από την IP της Vercel (πλήθος άρθρων + ποικιλία πηγών).
 export async function GET(request: Request) {
   const url = new URL(request.url);
-  if (url.searchParams.get("token") !== "dev") {
+  if (!(await isCronOrAdmin(request))) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 

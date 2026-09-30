@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { createClient as createAuthClient } from "@/utils/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { getMemoryBlock } from "@/lib/noraya/political-memory";
+import { pilotAllow, pilotAuth, pilotRecord } from "@/lib/noraya/pilot";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -232,6 +233,11 @@ export async function GET(req: Request) {
       { status: 500 }
     );
   }
+
+  // Pilot: μόνο για συνδεδεμένους (καλεί AI).
+  const pilotAuthRes = await pilotAuth("/api/advisor/agenda-brief", "auto");
+  if (pilotAuthRes.response) return pilotAuthRes.response;
+  const pilotCaller = pilotAuthRes.caller;
 
   const authClient = createAuthClient();
   const serviceClient = createServiceClient(supabaseUrl, serviceRoleKey);
@@ -490,6 +496,9 @@ ${processingStatus}
     });
   }
 
+  const pilotLimited = await pilotAllow(pilotCaller);
+  if (pilotLimited) return pilotLimited;
+
   try {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -519,6 +528,7 @@ ${processingStatus}
     }
 
     const ai = await response.json();
+    await pilotRecord(pilotCaller, "claude-sonnet-4-6", ai?.usage);
 
     const rawText =
       ai.content

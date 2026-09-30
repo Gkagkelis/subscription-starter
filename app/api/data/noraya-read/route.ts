@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { pilotAllow, pilotAuth, pilotRecord, type PilotCaller } from "@/lib/noraya/pilot";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -103,7 +104,7 @@ function parseAiJson(raw: string): any | null {
 }
 
 // Καλεί τον Claude. useWeb=true -> ενεργοποιεί το εργαλείο web search (server-side).
-async function callClaude(prompt: string, useWeb = false): Promise<string> {
+async function callClaude(prompt: string, useWeb = false, caller?: PilotCaller, counted = true): Promise<string> {
   const bodyObj: any = {
     model: MODEL,
     max_tokens: useWeb ? 5000 : 1800,
@@ -123,6 +124,7 @@ async function callClaude(prompt: string, useWeb = false): Promise<string> {
   });
   if (!resp.ok) throw new Error("Claude API error " + resp.status);
   const data = await resp.json();
+  if (caller) await pilotRecord(caller, MODEL, data?.usage, { counted });
   return (data?.content || []).filter((b: any) => b.type === "text").map((b: any) => b.text).join("").trim();
 }
 
@@ -210,20 +212,32 @@ export async function POST(req: NextRequest) {
     const supabase = svc();
     const key = cacheKey(topicKey, topicLabel);
 
+    // Pilot: σύνδεση + κωδικός (πριν από οτιδήποτε).
+    const auth = await pilotAuth("/api/data/noraya-read", "data");
+    if (auth.response) return auth.response;
+    const caller = auth.caller;
+
     const cached = await readCache(supabase, key);
     if (cached) return json({ ok: true, analysis: cached, source: "cache" });
 
+    // Pilot: ημερήσιο όριο «Ανάγνωση δεδομένων» (τα αποθηκευμένα δεν χρεώνονται).
+    const limited = await pilotAllow(caller);
+    if (limited) return limited;
+
     let analysis: any;
+    let webCallRecorded = false;
     try {
       // 1) Με ζωντανή αναζήτηση
-      const raw = await callClaude(buildPrompt(d, topicLabel, kind, eventTitle, partyName), true);
+      const raw = await callClaude(buildPrompt(d, topicLabel, kind, eventTitle, partyName), true, caller);
+      webCallRecorded = true;
       const parsed = parseAiJson(raw);
       if (parsed && parsed.headline) analysis = parsed;
       else throw new Error("web_parse_failed");
     } catch (errWeb: any) {
       try {
         // 2) Fallback: κανονική ανάλυση χωρίς αναζήτηση (δεν σπάει τίποτα)
-        const raw = await callClaude(buildPrompt(d, topicLabel, kind, eventTitle, partyName), false);
+        // Μετράει στο όριο μόνο αν η κλήση με αναζήτηση δεν μετρήθηκε ήδη.
+        const raw = await callClaude(buildPrompt(d, topicLabel, kind, eventTitle, partyName), false, caller, !webCallRecorded);
         const parsed = parseAiJson(raw);
         analysis = parsed && parsed.headline
           ? parsed

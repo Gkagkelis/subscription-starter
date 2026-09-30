@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import crypto from "crypto";
+import { isCronOrAdmin } from "@/lib/noraya/pilot";
 
 /* ---------------------------------------------------------------------------
  * app/api/brain/analyze/route.ts   (ΒΗΜΑ 4 — DEBUG-ENABLED έκδοση)
@@ -85,7 +86,7 @@ export async function POST(req: Request) {
   const started = Date.now();
   const token = new URL(req.url).searchParams.get("token");
   const isDev = token === "dev";
-  if (token !== process.env.CRON_SECRET && token !== "dev") {
+  if (!(await isCronOrAdmin(req))) {
     return NextResponse.json({ ok: false, message: "Μη εξουσιοδοτημένο αίτημα." }, { status: 401 });
   }
 

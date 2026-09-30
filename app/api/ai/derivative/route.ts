@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { pilotAuth } from "@/lib/noraya/pilot";
 
 function detectLang(text: string): "el" | "en" {
   return /[\u0370-\u03FF\u1F00-\u1FFF]/.test(text) ? "el" : "en";
@@ -175,6 +176,9 @@ function getFormatInstructions(format: string, lang: "el" | "en") {
 }
 
 export async function POST(req: Request) {
+  // Pilot: παλιά λειτουργία Axiprova (OpenAI) — μόνο για admin.
+  const pilotGate = await pilotAuth("/api/ai/derivative", "auto", { adminOnly: true });
+  if (pilotGate.response) return pilotGate.response;
   try {
     const body = await req.json();
     const { dna, format, tone = "neutral" } = body as { dna: string; format: string; tone?: string };

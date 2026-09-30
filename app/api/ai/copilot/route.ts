@@ -4,6 +4,7 @@ import { openai } from "@ai-sdk/openai";
 import { generateObject, embed } from "ai";
 import { z } from "zod";
 import { createClient } from "@/utils/supabase/server";
+import { pilotAuth } from "@/lib/noraya/pilot";
 
 export const runtime = "nodejs" as const;
 export const dynamic = "force-dynamic" as const;
@@ -469,6 +470,9 @@ function ensureModeContextChips(
 }
 
 export async function POST(req: Request) {
+  // Pilot: παλιά λειτουργία Axiprova (OpenAI) — μόνο για admin.
+  const pilotGate = await pilotAuth("/api/ai/copilot", "auto", { adminOnly: true });
+  if (pilotGate.response) return pilotGate.response;
   try {
     const supabase = createClient();
     const {

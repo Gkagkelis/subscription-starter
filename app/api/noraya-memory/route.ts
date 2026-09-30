@@ -6,6 +6,7 @@ import {
   loadLeaderTraits,
   PARTY_DISAMBIGUATION,
 } from "@/lib/noraya/political-memory";
+import { isCronOrAdmin } from "@/lib/noraya/pilot";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -20,7 +21,7 @@ function originFrom(request: Request): string {
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const token = url.searchParams.get("token");
-  if (token !== process.env.CRON_SECRET && token !== "dev") {
+  if (!(await isCronOrAdmin(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

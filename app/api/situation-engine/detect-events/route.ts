@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { checkCostGuard, guardMessage } from "@/lib/noraya/cost-guard";
+import { cronBudgetOk, cronHourAllowed, isCronOrAdmin, logPilotError, recordCronCall } from "@/lib/noraya/pilot";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 
 export const runtime = "nodejs";
@@ -19,6 +20,7 @@ export const maxDuration = 300;
 
 const FILTER_MODEL = process.env.ANTHROPIC_FILTER_MODEL || "claude-haiku-4-5";
 const FALLBACK_MODEL = "claude-sonnet-4-6";
+const ROUTE = "/api/situation-engine/detect-events";
 
 type ArticleRow = {
   id: string;
@@ -238,6 +240,7 @@ async function callAnthropic(
     }
 
     const data = await res.json();
+    await recordCronCall(ROUTE, usedModel, data?.usage);
     const text = (data?.content || [])
       .filter((b: any) => b?.type === "text")
       .map((b: any) => b.text)
@@ -365,6 +368,16 @@ async function handle(request: Request) {
     const url = new URL(request.url);
     const requestedTopic = url.searchParams.get("topic");
 
+    // Pilot: μόνο cron ή admin (καλεί AI σε κάθε θέμα).
+    if (!(await isCronOrAdmin(request))) {
+      return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    }
+    // Pilot: εκτός ωρών λειτουργίας των ακριβών crons, το αυτόματο τρέξιμο παραλείπεται
+    // (?anyhour=1 για χειροκίνητη επαναφορά).
+    if (!requestedTopic && url.searchParams.get("anyhour") !== "1" && !cronHourAllowed()) {
+      return NextResponse.json({ ok: true, mode: "off_hours", topics_processed: 0, remaining_topic: null });
+    }
+
     // ΦΡΕΝΟ ΚΟΣΤΟΥΣ: καθε χειροκινητη κληση διαβαζει ~60 αρθρα με AI.
     // Επιτρεπεται 1 φορα / 15 λεπτα ανα θεμα. Τα crons (χωρις ?topic=) δεν επηρεαζονται.
     if (requestedTopic && url.searchParams.get("force") !== "1") {
@@ -375,6 +388,10 @@ async function handle(request: Request) {
     }
 
     const themes = await loadActiveThemes(supabase);
+
+    if (!(await cronBudgetOk(ROUTE))) {
+      return NextResponse.json({ ok: true, mode: "budget_reached", topics_processed: 0, remaining_topic: null });
+    }
 
     if (requestedTopic) {
       const r = await processTopic(supabase, requestedTopic, themes);
@@ -404,6 +421,7 @@ async function handle(request: Request) {
       const topic = (next as string) || null;
 
       if (!topic) break;
+      if (!(await cronBudgetOk(ROUTE))) break;
 
       const r = await processTopic(supabase, topic, themes);
 
@@ -419,6 +437,9 @@ async function handle(request: Request) {
     const aiFailures = results
       .filter((r) => r.ai_error)
       .map((r) => ({ topic: r.topic, error: r.ai_error }));
+    if (aiFailures.length) {
+      await logPilotError(ROUTE, `${aiFailures.length} θέματα απέτυχαν: ${String(aiFailures[0].error).slice(0, 300)}`, aiFailures);
+    }
 
     return NextResponse.json({
       ok: true,

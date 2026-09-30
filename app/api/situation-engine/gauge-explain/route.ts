@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { pilotAllow, pilotAuth, pilotRecord, type PilotCaller } from "@/lib/noraya/pilot";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -67,7 +68,7 @@ async function writeCache(supabase: ReturnType<typeof svc>, key: string, body: a
   }
 }
 
-async function callClaude(prompt: string): Promise<string> {
+async function callClaude(prompt: string, caller?: PilotCaller): Promise<string> {
   const resp = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
@@ -83,6 +84,7 @@ async function callClaude(prompt: string): Promise<string> {
   });
   if (!resp.ok) throw new Error("Claude API error " + resp.status);
   const data = await resp.json();
+  if (caller) await pilotRecord(caller, MODEL, data?.usage);
   return (data?.content || [])
     .filter((b: any) => b.type === "text")
     .map((b: any) => b.text)
@@ -92,6 +94,10 @@ async function callClaude(prompt: string): Promise<string> {
 
 export async function POST(req: NextRequest) {
   try {
+    // Pilot: σύνδεση + κωδικός. Αυτόματη ανάλυση -> «Αυτόματες αναλύσεις».
+    const auth = await pilotAuth("/api/situation-engine/gauge-explain", "auto");
+    if (auth.response) return auth.response;
+    const caller = auth.caller;
     const b = await req.json().catch(() => ({}));
     const metricLabel = String(b?.metric_label || "μετρική");
     const metricValue = Number(b?.metric_value) || 0;
@@ -117,9 +123,13 @@ ${ctx ? "ΟΛΕΣ ΟΙ ΜΕΤΡΙΚΕΣ (συμφραζόμενα): " + ctx : ""
 
 Γράψε 2-3 προτάσεις: τι μετράει αυτή η μετρική, τι σημαίνει η τιμή ${metricValue} εδώ (υψηλή/μεσαία/χαμηλή και γιατί), και τι δείχνει για τη δυναμική του γεγονότος. Ελληνικά, πυκνά, χωρίς markdown. Επέστρεψε ΜΟΝΟ το κείμενο της εξήγησης, τίποτα άλλο.`;
 
+    // Pilot: ημερήσιο όριο (μετά την cache — τα αποθηκευμένα δεν χρεώνονται).
+    const limited = await pilotAllow(caller);
+    if (limited) return limited;
+
     let explanation = "";
     try {
-      explanation = (await callClaude(prompt)).replace(/^```.*$/gm, "").trim();
+      explanation = (await callClaude(prompt, caller)).replace(/^```.*$/gm, "").trim();
     } catch {
       explanation = "";
     }

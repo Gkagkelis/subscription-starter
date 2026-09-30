@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { buildNorayaStrategicSystemPrompt } from "@/lib/noraya/strategic-reasoning";
+import { pilotAllow, pilotAuthRequest, pilotRecord, type PilotCaller } from "@/lib/noraya/pilot";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -405,7 +406,7 @@ ${lines || "—"}
 }`;
 }
 
-async function callAnthropic(system: string, user: string): Promise<string | null> {
+async function callAnthropic(system: string, user: string, caller?: PilotCaller): Promise<string | null> {
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) return null;
   try {
@@ -416,6 +417,7 @@ async function callAnthropic(system: string, user: string): Promise<string | nul
     });
     if (!res.ok) return null;
     const data = await res.json();
+    if (caller) await pilotRecord(caller, ANALYSIS_MODEL, data?.usage);
     return (data?.content || []).filter((b: any) => b?.type === "text").map((b: any) => b.text).join("\n") || null;
   } catch {
     return null;
@@ -479,8 +481,14 @@ async function storePulse(supabase: ReturnType<typeof svc>, eventId: string, par
 async function handle(request: Request) {
   try {
     const url = new URL(request.url);
-    const token = url.searchParams.get("token");
-    if (token !== process.env.CRON_SECRET && token !== "dev") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // Pilot: σύνδεση + κωδικός (αντί του παλιού token=dev). Η σκέτη ροή σχολίων
+    // (feed_only, χωρίς AI) μετράει στις «Αυτόματες αναλύσεις», η ανάλυση στις «Φωνές».
+    const isFeedOnly = url.searchParams.get("feed_only") === "1";
+    const auth = await pilotAuthRequest(request, "/api/voices", isFeedOnly ? "auto" : "voices");
+    if (auth.response) return auth.response;
+    const caller = auth.caller;
+    const isDebug = url.searchParams.get("debug_store") === "1" || url.searchParams.get("debug") === "1";
+    if (isDebug && !caller.isAdmin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     // ---- ΔΩΡΕΑΝ DEBUG: γράφει & ξαναδιαβάζει voices_pulse (χωρίς AI/scraping) ----
     if (url.searchParams.get("debug_store") === "1") {
@@ -522,6 +530,11 @@ async function handle(request: Request) {
       if (cachedVoices) return NextResponse.json({ ...cachedVoices, source: "cache" });
     }
 
+    // Pilot: ημερήσιο όριο (μετά την cache — το αποθηκευμένο δεν χρεώνεται).
+    // Μπαίνει ΠΡΙΝ το scraping, γιατί και το Apify/YouTube κοστίζουν.
+    const limited = await pilotAllow(caller);
+    if (limited) return limited;
+
     // Λέξεις-κλειδιά (κύρια ονόματα), ΟΧΙ όλος ο τίτλος — αλλιώς 0 αποτελέσματα.
     const headline = (extra || topic).trim();
     const narrowQuery = (coreTerms(headline, 4) || headline).slice(0, 80);
@@ -556,12 +569,13 @@ async function handle(request: Request) {
 
     // feed_only: μόνο νέες φωνές, χωρίς AI (φθηνό refresh)
     if (url.searchParams.get("feed_only") === "1") {
+      await pilotRecord(caller, "apify+youtube", null);
       return NextResponse.json({ success: true, topic, counts, feed });
     }
 
     const supabase = svc();
     const partyProfile = await loadPartyProfile(supabase, partyKey);
-    const ai = await callAnthropic(buildSystem(partyProfile, partyKey), buildUser(topic || extra, comments));
+    const ai = await callAnthropic(buildSystem(partyProfile, partyKey), buildUser(topic || extra, comments), caller);
     const parsed = ai ? parseAiJson(ai) : null;
     if (!parsed || !parsed.themes) return NextResponse.json({ error: "ai_unavailable", counts }, { status: 502 });
 

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { cronBudgetOk, isCronOrAdmin, logPilotError, recordCronCall } from "@/lib/noraya/pilot";
 
 export const maxDuration = 300;
 export const dynamic = "force-dynamic";
@@ -28,14 +29,68 @@ function clampNumber(value: any, min = 0, max = 10): number | null {
 const classifierModel =
   process.env.ANTHROPIC_CLASSIFIER_MODEL || "claude-haiku-4-5-20251001";
 
+const ROUTE = "/api/classify-bulk";
+
+// Άρθρα που περιμένουν ταξινόμηση. Εκτός μένουν όσα απέτυχαν δύο φορές ("failed")
+// και όσα παραλείφθηκαν επίτηδες ("skipped_backlog", π.χ. παλιά ουρά μετά από διακοπή).
+const PENDING_FILTER = "classification_status.is.null,classification_status.in.(pending,retry1)";
+
+// Pilot — ΠΡΟΦΙΛΤΡΟ: άρθρα που η RSS κατηγορία τους είναι ΞΕΚΑΘΑΡΑ εκτός πεδίου
+// (ζώδια, lifestyle/celebrities, συνταγές, μόδα/ομορφιά, ψυχαγωγία) τα σημειώνουμε
+// noise ΧΩΡΙΣ κλήση AI. Είναι ακριβώς οι κατηγορίες που ο classifier χαρακτηρίζει
+// ήδη «Noise» (βλ. prompt), άρα το αποτέλεσμα είναι το ίδιο — χωρίς κόστος.
+// Κοιτάμε ΜΟΝΟ την κατηγορία της πηγής, όχι τον τίτλο. NORAYA_PREFILTER=off το απενεργοποιεί.
+const PREFILTER_CATEGORY =
+  /ζώδι|ζωδι|horoscop|αστρολογ|lifestyle|life style|celebrit|showbiz|gossip|κουτσομπολ|συνταγ|recipe|γαστρονομ|μαγειρ|ψυχαγωγ|entertainment|μόδα|fashion|beauty|ομορφι/i;
+
+function prefilterReason(a: any): string | null {
+  if ((process.env.NORAYA_PREFILTER || "on").toLowerCase() === "off") return null;
+  const cat = String(a?.category || "");
+  const m = cat.match(PREFILTER_CATEGORY);
+  return m ? "prefilter_category:" + m[0].toLowerCase() : null;
+}
+
+// Διαβάζει ένα-ένα τα αντικείμενα {...} μιας (χαλασμένης) λίστας JSON.
+function salvageObjects(text: string): any[] {
+  const out: any[] = [];
+  const re = /\{[^{}]*\}/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(text)) !== null) {
+    try {
+      const o = JSON.parse(m[0]);
+      if (o && typeof o === "object" && Number.isInteger(Number(o.index))) out.push(o);
+    } catch {
+      /* αυτό το αντικείμενο χάλασε — τα υπόλοιπα συνεχίζουν */
+    }
+  }
+  return out;
+}
+
+// Άρθρα που απέτυχαν στην ταξινόμηση: 1η αποτυχία -> "retry1", 2η -> "failed"
+// (δεν ξαναδοκιμάζονται). Χωρίς αυτό, ένα «δύσκολο» batch ξανατρέχει κάθε 2 λεπτά
+// για 72 ώρες και χρεώνεται κάθε φορά.
+async function markFailed(ids: string[], rows: any[]) {
+  if (!ids.length) return;
+  const byId = new Map<string, any>(rows.map((a: any) => [a.id, a]));
+  const toFailed = ids.filter((id) => byId.get(id)?.classification_status === "retry1");
+  const toRetry = ids.filter((id) => byId.get(id)?.classification_status !== "retry1");
+  if (toFailed.length) {
+    await supabase.from("articles").update({ classification_status: "failed" }).in("id", toFailed);
+  }
+  if (toRetry.length) {
+    await supabase.from("articles").update({ classification_status: "retry1" }).in("id", toRetry);
+  }
+}
+
 // Ταξινομεί ΕΝΑ batch. Επιστρέφει πόσα ταξινόμησε (0 = τέλος ή σφάλμα).
-async function classifyBatch(limit: number, excludeIds: string[]): Promise<{ done: number; total: number; error?: string; writeErrors?: number; lastWriteError?: string; processedIds: string[] }> {
+async function classifyBatch(limit: number, excludeIds: string[]): Promise<{ done: number; total: number; error?: string; writeErrors?: number; lastWriteError?: string; processedIds: string[]; budget?: boolean }> {
   const freshCutoff = new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString();
   let query = supabase
     .from("articles")
-    .select("id, title, description, category, source_name, published_at")
+    .select("id, title, description, category, source_name, published_at, classification_status")
     .is("classified_at", null)
-    .gte("published_at", freshCutoff);
+    .gte("published_at", freshCutoff)
+    .or(PENDING_FILTER);
   if (excludeIds.length > 0) {
     query = query.not("id", "in", "(" + excludeIds.join(",") + ")");
   }
@@ -45,6 +100,47 @@ async function classifyBatch(limit: number, excludeIds: string[]): Promise<{ don
 
   if (fetchError) return { done: 0, total: 0, error: fetchError.message, processedIds: [] };
   if (!articles || articles.length === 0) return { done: 0, total: 0, processedIds: [] };
+
+  // Προφίλτρο: καθαρά εκτός πεδίου -> noise χωρίς AI.
+  let prefiltered = 0;
+  const toClassify: any[] = [];
+  for (const a of articles as any[]) {
+    const reason = prefilterReason(a);
+    if (!reason) {
+      toClassify.push(a);
+      continue;
+    }
+    const { error: pfErr } = await supabase
+      .from("articles")
+      .update({
+        is_political: false,
+        public_relevance: false,
+        is_noise: true,
+        noise_reason: reason,
+        classification_status: "classified",
+        classifier_version: "noraya_prefilter_v1",
+        classified_at: new Date().toISOString(),
+        model_used: "prefilter",
+      })
+      .eq("id", a.id);
+    if (!pfErr) prefiltered++;
+  }
+  const allIds: string[] = (articles as any[]).map((a: any) => a.id);
+  if (toClassify.length === 0) {
+    return { done: prefiltered, total: articles.length, processedIds: allIds };
+  }
+  // Ημερήσιο όριο κόστους των crons: σταματάμε εδώ, συνεχίζουμε αύριο.
+  if (!(await cronBudgetOk(ROUTE, "classify"))) {
+    return { done: prefiltered, total: articles.length, error: "cron_budget_reached", processedIds: allIds, budget: true };
+  }
+  return classifyWithAi(toClassify, prefiltered, allIds);
+}
+
+async function classifyWithAi(
+  articles: any[],
+  prefiltered: number,
+  allIds: string[]
+): Promise<{ done: number; total: number; error?: string; writeErrors?: number; lastWriteError?: string; processedIds: string[]; budget?: boolean }> {
 
   const articlesList = articles
     .map(
@@ -114,10 +210,11 @@ ${articlesList}`;
 
   if (!response.ok) {
     const errText = await response.text();
-    return { done: 0, total: articles.length, error: "AI " + response.status + ": " + errText.slice(0, 200), processedIds: [] };
+    return { done: prefiltered, total: allIds.length, error: "AI " + response.status + ": " + errText.slice(0, 200), processedIds: [] };
   }
 
   const data = await response.json();
+  await recordCronCall(ROUTE, classifierModel, data?.usage, "classify");
   const text =
     data.content?.filter((c: any) => c.type === "text").map((c: any) => c.text).join("") || "[]";
 
@@ -126,17 +223,26 @@ ${articlesList}`;
     const cleaned = text.replace(/```json|```/g, "").trim();
     const jsonMatch = cleaned.match(/\[[\s\S]*\]/);
     classifications = JSON.parse(jsonMatch ? jsonMatch[0] : cleaned);
+    if (!Array.isArray(classifications)) throw new Error("not_array");
   } catch {
-    return { done: 0, total: articles.length, error: "parse_ai_json", processedIds: [] };
+    // Pilot: ένα χαλασμένο σημείο στο JSON δεν πρέπει να χάνει όλο το batch.
+    // Σώζουμε όσα αντικείμενα διαβάζονται ένα-ένα· μόνο τα υπόλοιπα σημειώνονται.
+    classifications = salvageObjects(text);
+    if (classifications.length === 0) {
+      await markFailed(articles.map((a: any) => a.id), articles);
+      return { done: prefiltered, total: allIds.length, error: "parse_ai_json", processedIds: allIds };
+    }
   }
 
-  let updated = 0;
+  let updated = prefiltered;
   let writeErrors = 0;
   let lastWriteError: string | undefined;
-  const processedIds: string[] = articles.map((a: any) => a.id);
+  const processedIds: string[] = allIds;
+  const answered = new Set<number>();
   for (const c of classifications) {
     const article = articles[c.index];
     if (!article) continue;
+    answered.add(Number(c.index));
     const isNoise = c.is_noise === true;
     const publicRelevance = c.public_relevance === true && !isNoise;
     const isPolitical = c.is_political === true || publicRelevance;
@@ -173,13 +279,17 @@ ${articlesList}`;
     }
   }
 
-  return { done: updated, total: articles.length, writeErrors, lastWriteError, processedIds };
+  // Άρθρα που το μοντέλο παρέλειψε: σημειώνονται για να μην ξανατρέχουν για πάντα.
+  const skipped = articles.filter((_: any, i: number) => !answered.has(i)).map((a: any) => a.id);
+  await markFailed(skipped, articles);
+
+  return { done: updated, total: allIds.length, writeErrors, lastWriteError, processedIds };
 }
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const token = searchParams.get("token");
-  if (token !== process.env.CRON_SECRET && token !== "dev") {
+  if (!(await isCronOrAdmin(req))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -198,7 +308,8 @@ export async function GET(req: Request) {
   while (batches < MAX_BATCHES && Date.now() - startedAt < BUDGET_MS) {
     const r = await classifyBatch(batchSize, seenIds);
     for (const pid of r.processedIds) seenIds.push(pid);
-    if (r.error) { lastError = r.error; if (r.done === 0) break; }
+    if (r.budget) { lastError = r.error; break; }
+    if (r.error) { lastError = r.error; if (r.done === 0 && r.processedIds.length === 0) break; }
     if (r.total === 0) break; // τέλος — δεν υπάρχουν άλλα άρθρα
     totalClassified += r.done;
     totalWriteErrors += r.writeErrors || 0;
@@ -208,13 +319,19 @@ export async function GET(req: Request) {
     await new Promise((resolve) => setTimeout(resolve, 200));
   }
 
+  // Pilot: καταγραφή λάθους AI (όχι το ημερήσιο όριο — αυτό έχει δικό του email).
+  if (lastError && lastError !== "cron_budget_reached") {
+    await logPilotError(ROUTE, lastError, { batches, totalClassified });
+  }
+
   // Πόσα έμειναν;
   const freshCutoff2 = new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString();
   const { count: remaining } = await supabase
     .from("articles")
     .select("id", { count: "exact", head: true })
     .is("classified_at", null)
-    .gte("published_at", freshCutoff2);
+    .gte("published_at", freshCutoff2)
+    .or(PENDING_FILTER);
 
   return NextResponse.json({
     success: true,

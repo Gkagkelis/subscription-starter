@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { zodTextFormat } from "openai/helpers/zod";
 import { AXIPROVA_CULTURAL_IMPACT_V01 } from "@/lib/axiprova/indicatorLibrary";
+import { pilotAuth } from "@/lib/noraya/pilot";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -169,6 +170,9 @@ function buildShortReportMarkdown(input: any, framework: any, assessment: any, l
 }
 
 export async function POST(req: Request) {
+  // Pilot: παλιά λειτουργία Axiprova (OpenAI) — μόνο για admin.
+  const pilotGate = await pilotAuth("/api/ai/impact-outline", "auto", { adminOnly: true });
+  if (pilotGate.response) return pilotGate.response;
   try {
     if (!process.env.OPENAI_API_KEY) {
       return NextResponse.json({ error: "Missing OPENAI_API_KEY" }, { status: 500 });

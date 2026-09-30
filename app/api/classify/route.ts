@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { cronBudgetOk, isCronOrAdmin, recordCronCall } from "@/lib/noraya/pilot";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -48,7 +49,7 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const token = searchParams.get("token");
 
-  if (token !== process.env.CRON_SECRET && token !== "dev") {
+  if (!(await isCronOrAdmin(req))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -71,6 +72,7 @@ export async function GET(req: Request) {
     .from("articles")
     .select("id, title, description, category, source_name, published_at")
     .is("classified_at", null)
+    .or("classification_status.is.null,classification_status.in.(pending,retry1)")
     .order("published_at", { ascending: false, nullsFirst: false })
     .limit(limit);
 
@@ -168,6 +170,11 @@ Noise αν είναι καθαρά:
 ${articlesList}`;
 
   try {
+    // Pilot: ημερήσιο όριο κόστους των crons.
+    if (!(await cronBudgetOk("/api/classify", "classify"))) {
+      return NextResponse.json({ success: true, classified: 0, skipped: "cron_budget_reached" });
+    }
+
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -196,6 +203,7 @@ ${articlesList}`;
     }
 
     const data = await response.json();
+    await recordCronCall("/api/classify", classifierModel, data?.usage, "classify");
 
     const text =
       data.content

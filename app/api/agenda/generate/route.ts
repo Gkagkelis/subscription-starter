@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { getMemoryBlock } from "@/lib/noraya/political-memory";
+import { isCronOrAdmin } from "@/lib/noraya/pilot";
 
 /* ---------------------------------------------------------------------------
  * app/api/agenda/generate/route.ts   (ΒΗΜΑ 6 — ROBUST + DEBUG έκδοση)
@@ -48,7 +49,7 @@ function extractJson(text: string): any | null {
 export async function POST(req: Request) {
   const token = new URL(req.url).searchParams.get("token");
   const isDev = token === "dev";
-  if (token !== process.env.CRON_SECRET && token !== "dev") {
+  if (!(await isCronOrAdmin(req))) {
     return NextResponse.json({ ok: false, message: "Μη εξουσιοδοτημένο αίτημα." }, { status: 401 });
   }
 

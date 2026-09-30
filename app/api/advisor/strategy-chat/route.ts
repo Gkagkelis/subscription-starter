@@ -1,5 +1,6 @@
 import { createClient as __naCreateClient } from "@supabase/supabase-js";
 import { createClient as __naServer } from "@/utils/supabase/server";
+import { isCronOrAdmin, pilotAllow, pilotAuth, pilotRecord } from "@/lib/noraya/pilot";
 
 function __naSvc() {
   return __naCreateClient(
@@ -172,7 +173,11 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
 
   // DEBUG: τεστ web_search — δείχνει αν δουλεύει η αναζήτηση & την πραγματική αιτία αποτυχίας
+  // (μόνο για admin / cron — καλεί το AI και κοστίζει)
   if (url.searchParams.get("debug_search") === "1") {
+    if (!(await isCronOrAdmin(req))) {
+      return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    }
     const key = process.env.ANTHROPIC_API_KEY;
     if (!key) return NextResponse.json({ ok: false, reason: "NO_API_KEY" });
     const useWhitelist = url.searchParams.get("nowhitelist") !== "1";
@@ -225,6 +230,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
   }
 
+  // Pilot: σύνδεση + κωδικός πρόσκλησης + ημερήσιο όριο «Σύμβουλος / Chat».
+  const auth = await pilotAuth("/api/advisor/strategy-chat", "chat");
+  if (auth.response) return auth.response;
+  const caller = auth.caller;
+  const limited = await pilotAllow(caller);
+  if (limited) return limited;
+
   const question = cleanText(body.question, 2500);
   const conversationId = body.conversation_id || null;
   const activeSituation = body.active_situation || null;
@@ -236,15 +248,17 @@ export async function POST(req: Request) {
     80,
   );
   let partyIdentityBlock = "";
+  let profileOfficials: any[] = [];
   if (partyKey) {
     try {
       const { data: __profRows } = await __naSvc()
         .from("political_party_profiles")
-        .select("strategic_positioning, advisor_instructions, issue_lens, known_positions, red_lines")
+        .select("strategic_positioning, advisor_instructions, issue_lens, known_positions, red_lines, key_officials")
         .eq("party_key", partyKey)
         .limit(1);
       const prof: any = Array.isArray(__profRows) ? __profRows[0] : null;
       if (prof) {
+        if (Array.isArray(prof.key_officials)) profileOfficials = prof.key_officials;
         const pos = (prof.strategic_positioning || "").toString().trim();
         const adv = (prof.advisor_instructions || "").toString().trim();
         const lens = prof.issue_lens ? JSON.stringify(prof.issue_lens) : "";
@@ -278,7 +292,8 @@ export async function POST(req: Request) {
         .limit(1)
         .maybeSingle();
       const snap: any = orgRow?.party_profile_snapshot || null;
-      const officials: any[] = Array.isArray(snap?.key_officials) ? snap.key_officials : [];
+      const officials: any[] =
+        Array.isArray(snap?.key_officials) && snap.key_officials.length ? snap.key_officials : profileOfficials;
       if (officials.length) {
         officialsBlock =
           "\n=== ΒΑΣΙΚΑ ΣΤΕΛΕΧΗ ===\n" +
@@ -746,6 +761,7 @@ ${question}`
     let webSearchFailed = false;
 
     // Αν απέτυχε ΚΑΙ είχαμε tools (web_search), ξαναπροσπάθησε ΧΩΡΙΣ αναζήτηση — να μη σκάει ποτέ
+    // (μια αποτυχημένη κλήση HTTP δεν χρεώνεται από την Anthropic)
     if (!response.ok && payload.tools) {
       webSearchFailed = true;
       response = await callAnthropic(false);
@@ -767,6 +783,7 @@ ${question}`
     }
 
     const ai = await response.json();
+    await pilotRecord(caller, payload.model, ai?.usage);
     const { answer, sources } = extractAnswerAndSources(ai);
 
     return NextResponse.json({

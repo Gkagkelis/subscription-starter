@@ -8,12 +8,13 @@ const options = [
     href: "/signin/signup?role=political_party",
     available: true
   },
+  // PILOT: προς το παρόν διαθέσιμο μόνο το «Πολιτικό Κόμμα» — τα υπόλοιπα «Σύντομα».
   {
     title: "Υποψήφιος Βουλευτής",
     description:
       "Προσωπική πολιτική intelligence και στρατηγική υποστήριξη για υποψηφίους.",
-    href: "/signin/signup?role=mp_candidate",
-    available: true
+    href: "#",
+    available: false
   },
   {
     title: "Γραφείο Βουλευτή",
@@ -26,6 +27,13 @@ const options = [
     title: "Ευρωβουλευτής",
     description:
       "Πολιτική intelligence με ευρωπαϊκό και εθνικό πλαίσιο.",
+    href: "#",
+    available: false
+  },
+  {
+    title: "Υποψήφιος Δήμαρχος / Περιφερειάρχης",
+    description:
+      "Στρατηγική υποστήριξη για αυτοδιοικητικές εκλογές και τοπικές καμπάνιες.",
     href: "#",
     available: false
   },
@@ -52,7 +60,7 @@ export default function ChooseRolePage() {
           </h1>
 
           <p className="text-zinc-500 max-w-xl mx-auto">
-            Επιλέξτε την κατηγορία που σας αντιπροσωπεύει.
+            Επιλέξτε την κατηγορία που σας αντιπροσωπεύει. Η εγγραφή γίνεται με κωδικό πρόσκλησης.
           </p>
         </div>
 

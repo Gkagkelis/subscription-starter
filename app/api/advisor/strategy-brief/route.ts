@@ -7,6 +7,7 @@ import {
   createFallbackStrategicBrief,
   type UserPoliticalProfile,
 } from "@/lib/noraya/strategic-reasoning";
+import { pilotAllow, pilotAuth, pilotRecord } from "@/lib/noraya/pilot";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -604,6 +605,23 @@ ${politicalEnvironmentStatus}
     });
   }
 
+  // Pilot: η νέα παραγωγή brief (όταν δεν υπάρχει έτοιμο) μετράει στις «Αυτόματες αναλύσεις».
+  // Αν δεν επιτρέπεται, δίνουμε το σταθερό fallback brief (χωρίς AI) αντί για λάθος.
+  const pilotAuthRes = await pilotAuth("/api/advisor/strategy-brief", "auto");
+  const pilotCaller = pilotAuthRes.caller;
+  const pilotLimited = pilotCaller ? await pilotAllow(pilotCaller) : null;
+  if (!pilotCaller || pilotLimited) {
+    return buildFallbackResponse({
+      profile,
+      topic: mainSignal.topic,
+      agendaUsed: signals,
+      processingStatus,
+      politicalEnvironment,
+      politicalEnvironmentStatus,
+      warning: "Pilot: νέα παραγωγή brief μη διαθέσιμη (σύνδεση ή ημερήσιο όριο). Returned fallback strategic brief.",
+    });
+  }
+
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 25000);
@@ -648,6 +666,7 @@ ${politicalEnvironmentStatus}
     }
 
     const ai = await response.json();
+    await pilotRecord(pilotCaller, "claude-sonnet-4-6", ai?.usage);
 
     const rawText =
       ai.content

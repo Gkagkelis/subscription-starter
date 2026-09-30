@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { isCronOrAdmin } from "@/lib/noraya/pilot";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -313,7 +314,7 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const token = searchParams.get("token");
 
-  if (token !== process.env.CRON_SECRET && token !== "dev") {
+  if (!(await isCronOrAdmin(req))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

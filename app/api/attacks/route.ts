@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { pilotAllow, pilotAuth, pilotRecord, type PilotCaller } from "@/lib/noraya/pilot";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -77,7 +78,13 @@ async function googleNews(query: string, windowHours: number): Promise<NewsItem[
   } catch { return []; }
 }
 
-async function callClaude(system: string, user: string, maxTokens = 1800): Promise<string> {
+async function callClaude(
+  system: string,
+  user: string,
+  maxTokens = 1800,
+  caller?: PilotCaller,
+  counted = true
+): Promise<string> {
   const resp = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: { "Content-Type": "application/json", "x-api-key": process.env.ANTHROPIC_API_KEY || "", "anthropic-version": "2023-06-01" },
@@ -85,6 +92,7 @@ async function callClaude(system: string, user: string, maxTokens = 1800): Promi
   });
   if (!resp.ok) throw new Error("Claude API " + resp.status);
   const data = await resp.json();
+  if (caller) await pilotRecord(caller, MODEL, data?.usage, { counted });
   return (data?.content || []).filter((b: any) => b.type === "text").map((b: any) => b.text).join("").trim();
 }
 // --- Result cache (μοτιβο analysis_cache, οπως strategic-image) ---
@@ -165,7 +173,7 @@ function parseJsonLoose(raw: string): any | null {
 }
 
 // ---------------- RESEARCH ----------------
-async function doResearch(partyKey: string, partyLabel: string, windowHours: number) {
+async function doResearch(partyKey: string, partyLabel: string, windowHours: number, caller?: PilotCaller) {
   let officials: { name: string; role: string }[] = [];
   try {
     const { data } = await svc().from("political_party_profiles").select("key_officials").eq("party_key", partyKey).limit(1);
@@ -227,7 +235,7 @@ ${refList}
 }
 Αν δεν υπαρχει καμια καθαρη επιθεση: {"orgAttacks":[],"personAttacks":[]}`;
 
-  const text = await callClaude(system, user, 1900);
+  const text = await callClaude(system, user, 1900, caller);
   const parsed = parseJsonLoose(text) || {};
 
   const attach = (a: any) => {
@@ -261,7 +269,7 @@ ${refList}
 }
 
 // ---------------- SCENARIO ----------------
-async function doScenario(partyKey: string, partyLabel: string, attack: any) {
+async function doScenario(partyKey: string, partyLabel: string, attack: any, caller?: PilotCaller) {
   let profile: any = { party: partyLabel };
   try {
     const { data } = await svc().from("political_party_profiles")
@@ -293,11 +301,11 @@ async function doScenario(partyKey: string, partyLabel: string, attack: any) {
 }
 Επιτρεπτα path: escalate | deescalate | pivot | stall. Επιτρεπτα move: act_now | wait | institutional | attack | silent. Επιτρεπτο risk: low | medium | high.`;
 
-  let parsed = parseJsonLoose(await callClaude(system, user, 2200));
+  let parsed = parseJsonLoose(await callClaude(system, user, 2200, caller));
   if (!parsed || (!parsed.foresight?.length && !parsed.moves?.length)) {
     // retry μια φορα, πιο αυστηρα
     const retryUser = user + "\n\nΠΡΟΣΟΧΗ: επεστρεψε ΜΟΝΟ το JSON, ΟΛΟΚΛΗΡΩΜΕΝΟ, χωρις κειμενο πριν/μετα.";
-    parsed = parseJsonLoose(await callClaude(system, retryUser, 2600));
+    parsed = parseJsonLoose(await callClaude(system, retryUser, 2600, caller, false));
   }
   return parsed;
 }
@@ -312,6 +320,12 @@ export async function POST(req: NextRequest) {
 
     const force = body?.force === true;
 
+    // Pilot: σύνδεση + κωδικός. Η αυτόματη έρευνα μετράει στις «Αυτόματες αναλύσεις»,
+    // το σενάριο απάντησης στις «Επιθέσεις».
+    const auth = await pilotAuth("/api/attacks", mode === "scenario" ? "attacks" : "auto");
+    if (auth.response) return auth.response;
+    const caller = auth.caller;
+
     if (mode === "scenario") {
       const atk = body?.attack || {};
       const scenKey = "attacks_scenario_v1__" + partyKey + "__" + strHash(String(atk?.claim || "") + "|" + String(atk?.url || ""));
@@ -319,7 +333,9 @@ export async function POST(req: NextRequest) {
         const cached = await readResultCache(scenKey, 24 * 60 * 60 * 1000);
         if (cached) return json({ ...cached, source: "cache" });
       }
-      const scenario = await doScenario(partyKey, partyLabel, atk);
+      const limited = await pilotAllow(caller);
+      if (limited) return limited;
+      const scenario = await doScenario(partyKey, partyLabel, atk, caller);
       if (!scenario) return json({ ok: false, error: "scenario_parse" });
       const payload = { ok: true, scenario };
       await writeResultCache(scenKey, payload);
@@ -332,7 +348,9 @@ export async function POST(req: NextRequest) {
       const cached = await readResultCache(resKey, 30 * 60 * 1000);
       if (cached) return json({ ...cached, source: "cache" });
     }
-    const res = await doResearch(partyKey, partyLabel, windowHours);
+    const limited = await pilotAllow(caller);
+    if (limited) return limited;
+    const res = await doResearch(partyKey, partyLabel, windowHours, caller);
     const payload = { ok: true, windowHours, ...res };
     if ((res.orgAttacks?.length || 0) + (res.personAttacks?.length || 0) > 0) await writeResultCache(resKey, payload);
     return json(payload);

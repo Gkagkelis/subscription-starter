@@ -317,6 +317,16 @@ function compactText(value: unknown): string {
   return String(value || "").replace(/\s+/g, " ").trim();
 }
 
+// Οι οδηγίες συμβούλου μπορεί να είναι πολύ μεγάλες (πλήρες φάκελο προγράμματος).
+// Στο research context (που μπαίνει σε ΚΑΘΕ θέμα της ατζέντας) κρατάμε μόνο την αρχή.
+const RESEARCH_ADVISOR_MAX = 2000;
+function capText(value: string, max = RESEARCH_ADVISOR_MAX): string {
+  if (value.length <= max) return value;
+  const cut = value.slice(0, max);
+  const space = cut.lastIndexOf(" ");
+  return `${space > max * 0.8 ? cut.slice(0, space) : cut}…`;
+}
+
 function normalizePartyKey(value?: string | null): string {
   return normalize(value || "").replace(/[^a-zα-ω0-9_]+/g, "_").replace(/^_+|_+$/g, "");
 }
@@ -338,7 +348,8 @@ function visibleProfile(profile?: PoliticalPartyProfile | null): PoliticalPartyP
     opportunity_frame: profile.opportunity_frame ?? null,
     risk_frame: profile.risk_frame ?? null,
     competitor_frame: profile.competitor_frame ?? null,
-    advisor_instructions: profile.advisor_instructions ?? null,
+    advisor_instructions:
+      profile.advisor_instructions != null ? capText(String(profile.advisor_instructions)) : null,
   };
 }
 
@@ -352,7 +363,7 @@ function buildPartyLensFromProfile(profile: PoliticalPartyProfile, fallbackParty
   const strategicPositioning = compactText(profile.strategic_positioning);
   const opportunity = compactText(profile.opportunity_frame);
   const risk = compactText(profile.risk_frame);
-  const advisor = compactText(profile.advisor_instructions);
+  const advisor = capText(compactText(profile.advisor_instructions));
   const competitor = compactText(profile.competitor_frame);
   const preferredLanguage = Array.from(new Set([...coreThemes, ...knownPositions]))
     .filter(Boolean)

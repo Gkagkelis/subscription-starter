@@ -8,6 +8,8 @@ export const revalidate = 0;
 type PartyProfile = Record<string, any>;
 
 function sanitizeProfile(profile: PartyProfile): PartyProfile {
+  // ΕΛΑΣ: το περιεχόμενο έρχεται ΜΟΝΟ από τη βάση (political_party_profiles).
+  // Εδώ κανονικοποιούμε μόνο το key/όνομα (και το παλιό λάθος "el_as"/"Σώματα Ασφαλείας").
   if (
     profile.party_key === "el_as" ||
     profile.party_key === "elas" ||
@@ -19,48 +21,6 @@ function sanitizeProfile(profile: PartyProfile): PartyProfile {
       party_name: "ΕΛΑΣ",
       short_name: "ΕΛΑΣ",
       profile_type: "political_party",
-      ideological_family: "κεντροαριστερά / προοδευτικός χώρος",
-      strategic_positioning:
-        "Πολιτικό κόμμα / project του Αλέξη Τσίπρα με στόχο την προοδευτική ανασύνθεση, την κυβερνητική εναλλακτική και την κοινωνική πλειοψηφία.",
-      default_tone: "προοδευτικός, θεσμικός, κυβερνητικός, ενωτικός",
-      core_themes: [
-        "Προοδευτική διακυβέρνηση",
-        "Θεσμοί",
-        "Κοινωνικό κράτος",
-        "Οικονομία",
-        "Ακρίβεια",
-        "Δικαιοσύνη",
-        "Δημοκρατική ανασύνθεση",
-      ],
-      core_audiences: [
-        "προοδευτικοί ψηφοφόροι",
-        "κεντροαριστερά",
-        "απογοητευμένοι ψηφοφόροι",
-        "μεσαία τάξη",
-        "νέοι",
-        "εργαζόμενοι",
-      ],
-      known_positions: [
-        "Προοδευτική ανασύνθεση",
-        "Κοινωνική δικαιοσύνη",
-        "Θεσμική αξιοπιστία",
-        "Πολιτική αλλαγή",
-        "Κυβερνητική εναλλακτική",
-      ],
-      red_lines: [
-        "Εικόνα επιστροφής στο παρελθόν",
-        "Προσωποκεντρικότητα χωρίς νέο σχέδιο",
-        "Ασάφεια κυβερνησιμότητας",
-        "Καταγγελτική γλώσσα χωρίς πρόταση",
-      ],
-      opportunity_frame:
-        "Να εμφανίζεται ως σοβαρή προοδευτική κυβερνητική εναλλακτική.",
-      risk_frame:
-        "Κίνδυνος να παρουσιαστεί ως ανακύκλωση παλιού πολιτικού κύκλου.",
-      competitor_frame:
-        "Οι αντίπαλοι θα το πλαισιώνουν ως επιστροφή Τσίπρα ή διάσπαση του προοδευτικού χώρου.",
-      advisor_instructions:
-        "Να δίνεις συμβουλές με θεσμικό, κυβερνητικό και ενωτικό τόνο. Κάθε μήνυμα πρέπει να δείχνει αλλαγή, αξιοπιστία και συγκεκριμένο σχέδιο.",
     };
   }
 
@@ -117,8 +77,12 @@ function sanitizeProfile(profile: PartyProfile): PartyProfile {
 function dedupeProfiles(profiles: PartyProfile[]): PartyProfile[] {
   const map = new Map<string, PartyProfile>();
 
-  for (const profile of profiles.map(sanitizeProfile)) {
-    map.set(profile.party_key, profile);
+  for (const original of profiles) {
+    const profile = sanitizeProfile(original);
+    // Η γνήσια εγγραφή (ίδιο party_key) υπερισχύει έναντι παλιών/λάθος εγγραφών.
+    if (!map.has(profile.party_key) || original.party_key === profile.party_key) {
+      map.set(profile.party_key, profile);
+    }
   }
 
   return Array.from(map.values()).sort((a, b) =>

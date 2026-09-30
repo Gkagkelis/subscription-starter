@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { pilotAllow, pilotAuth, pilotRecord, type PilotCaller } from "@/lib/noraya/pilot";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -91,7 +92,7 @@ function parseAiJson(raw: string): any | null {
   return parsed || null;
 }
 
-async function callClaude(prompt: string): Promise<string> {
+async function callClaude(prompt: string, caller?: PilotCaller): Promise<string> {
   const resp = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
@@ -107,6 +108,7 @@ async function callClaude(prompt: string): Promise<string> {
   });
   if (!resp.ok) throw new Error("Claude API error " + resp.status);
   const data = await resp.json();
+  if (caller) await pilotRecord(caller, MODEL, data?.usage);
   return (data?.content || [])
     .filter((b: any) => b.type === "text")
     .map((b: any) => b.text)
@@ -131,6 +133,13 @@ export async function POST(req: NextRequest) {
       return json({ ok: false, error: "missing_or_invalid_url" }, 400);
     }
 
+    // Pilot: σύνδεση + κωδικός + ημερήσιο όριο «Ανάλυση link».
+    const auth = await pilotAuth("/api/analyze-link", "analysis");
+    if (auth.response) return auth.response;
+    const caller = auth.caller;
+    const limited = await pilotAllow(caller);
+    if (limited) return limited;
+
     const article = await fetchArticle(url);
     if (!article) {
       return json({ ok: false, error: "could_not_read_article" }, 200);
@@ -154,7 +163,7 @@ ${article.text.slice(0, 4500)}
 
     let aiData: any = null;
     try {
-      const raw = await callClaude(prompt);
+      const raw = await callClaude(prompt, caller);
       aiData = parseAiJson(raw);
     } catch {
       aiData = null;

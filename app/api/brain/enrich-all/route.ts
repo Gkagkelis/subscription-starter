@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { isCronOrAdmin } from "@/lib/noraya/pilot";
 
 /* ---------------------------------------------------------------------------
  * app/api/brain/enrich-all/route.ts
@@ -112,7 +113,7 @@ async function analyzeOne(situation: any) {
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const token = url.searchParams.get("token");
-  if (token !== process.env.CRON_SECRET && token !== "dev") {
+  if (!(await isCronOrAdmin(req))) {
     return NextResponse.json({ ok: false, message: "Μη εξουσιοδοτημένο." }, { status: 401 });
   }
   if (!process.env.ANTHROPIC_API_KEY) {
