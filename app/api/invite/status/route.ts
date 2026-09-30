@@ -30,6 +30,19 @@ export async function GET() {
     /* fail-open */
   }
 
+  let onboarded = false;
+  try {
+    const { data: org } = await pilotDb()
+      .from("organizations")
+      .select("onboarding_completed")
+      .eq("user_id", user.id)
+      .limit(1)
+      .maybeSingle();
+    onboarded = Boolean((org as any)?.onboarding_completed);
+  } catch {
+    /* αγνοείται */
+  }
+
   const isAdmin = isAdminEmail(user.email);
   const grandfathered = isGrandfathered(user.created_at);
   return NextResponse.json({
@@ -37,6 +50,7 @@ export async function GET() {
     logged_in: true,
     is_admin: isAdmin,
     has_access: Boolean(access) || isAdmin || grandfathered,
+    onboarded,
     group_key: access?.group_key || null,
     org_type: invite?.org_type || null,
     party_key: invite?.party_key || null,

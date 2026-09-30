@@ -455,7 +455,10 @@ export default function OnboardingPage() {
       window.localStorage.setItem("noraya_org_profile", JSON.stringify(profile));
       // Μετα το onboarding: το κομμα πηγαινει κατευθειαν στο Strategy Room (ΧΩΡΙΣ ψυχογραφημα).
       // Βουλευτες/υποψηφιοι -> ψυχογραφημα (μια φορα). Το middleware το επιβαλλει ουτως ή αλλως.
-      router.push(orgType === "Πολιτικό κόμμα" ? "/strategy-room" : "/psychografima");
+      // Πλήρης φόρτωση (όχι router.push): ο client router μπορεί να έχει κρατήσει από prefetch
+      // μια παλιά ανακατεύθυνση του /strategy-room προς /invite (πριν εξαργυρωθεί ο κωδικός),
+      // που θα έστελνε τον χρήστη πίσω στην αρχή του onboarding.
+      window.location.assign(orgType === "Πολιτικό κόμμα" ? "/strategy-room" : "/psychografima");
     } catch {
       setSaveError("Σφάλμα σύνδεσης. Δοκιμάστε ξανά.");
       setSaving(false);
