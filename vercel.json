@@ -23,15 +23,15 @@
     },
     {
       "path": "/api/situation-engine/detect-events",
-      "schedule": "25 4,7,10,13,16,19 * * *"
+      "schedule": "25 * * * *"
     },
     {
       "path": "/api/situation-engine/advise-event",
-      "schedule": "45 4,7,10,13,16,19 * * *"
+      "schedule": "45 * * * *"
     },
     {
       "path": "/api/advisor/strategy-brief-precompute",
-      "schedule": "55 4,7,10,13,16,19 * * *"
+      "schedule": "55 * * * *"
     },
     {
       "path": "/api/radar-tick",
@@ -56,6 +56,10 @@
     {
       "path": "/api/trends/refresh?token=dev",
       "schedule": "0 4 * * *"
+    },
+    {
+      "path": "/api/cron/refresh-agenda",
+      "schedule": "20 * * * *"
     }
   ]
 }

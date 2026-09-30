@@ -629,6 +629,84 @@ export function cronHourAllowed(envName = "NORAYA_AI_CRON_HOURS_UTC", fallback =
   return now.getUTCMinutes() < 20 && hours.indexOf((h + 23) % 24) >= 0;
 }
 
+// ------------------------------------------------------------
+// Καταγραφή τρεξιμάτων των crons της ατζέντας (πίνακας noraya_cron_runs)
+// ------------------------------------------------------------
+
+const STALE_HOURS = 6;
+
+/** Ώρες από το τελευταίο τρέξιμο που έκανε πραγματική δουλειά. null = ποτέ / άγνωστο. */
+export async function hoursSinceLastWork(route: string): Promise<number | null> {
+  try {
+    const { data, error } = await pilotDb()
+      .from("noraya_cron_runs")
+      .select("started_at")
+      .eq("route", route)
+      .eq("did_work", true)
+      .order("started_at", { ascending: false })
+      .limit(1);
+    if (error || !Array.isArray(data) || !data.length) return null;
+    return (Date.now() - new Date(String((data[0] as any).started_at)).getTime()) / 36e5;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Να τρέξει τώρα ένα ακριβό cron; Ναι στις ώρες λειτουργίας (NORAYA_AI_CRON_HOURS_UTC)
+ * ή αν έχουν περάσει ≥6 ώρες από το τελευταίο πραγματικό τρέξιμο — ώστε η ατζέντα να
+ * μη μένει ποτέ πίσω αν χαθεί ένα προγραμματισμένο τρέξιμο.
+ */
+export async function aiCronDue(route: string): Promise<boolean> {
+  if (cronHourAllowed()) return true;
+  const h = await hoursSinceLastWork(route);
+  return h === null || h >= STALE_HOURS;
+}
+
+/** Γράφει ένα τρέξιμο. Ποτέ δεν σπάει τη ροή. */
+export async function logCronRun(
+  route: string,
+  startedAt: Date,
+  httpStatus: number,
+  body: any
+) {
+  try {
+    const outcome =
+      String(body?.mode || body?.skipped || body?.source || (httpStatus >= 400 ? "error" : "ok")).slice(0, 60);
+    const idle = ["off_hours", "budget_reached", "cache_unchanged"].includes(outcome);
+    await pilotDb().from("noraya_cron_runs").insert({
+      route,
+      started_at: startedAt.toISOString(),
+      finished_at: new Date().toISOString(),
+      http_status: httpStatus,
+      outcome,
+      did_work: httpStatus < 400 && !idle,
+      detail:
+        body && typeof body === "object"
+          ? JSON.stringify(body).length <= 20000
+            ? body
+            : { truncated: true, keys: Object.keys(body) }
+          : null,
+    });
+  } catch {
+    /* η καταγραφή δεν πρέπει ποτέ να χαλάσει το cron */
+  }
+}
+
+/** Τυλίγει ένα handler: καταγράφει status + σώμα απάντησης. */
+export async function withCronLog(route: string, run: () => Promise<Response>): Promise<Response> {
+  const startedAt = new Date();
+  const res = await run();
+  let body: any = null;
+  try {
+    body = await res.clone().json();
+  } catch {
+    body = null;
+  }
+  await logCronRun(route, startedAt, res.status, body);
+  return res;
+}
+
 /** Πόσα $ έχουν ξοδέψει σήμερα τα crons. null αν η βάση δεν απαντά. */
 export type CronBucket = "cron" | "classify";
 

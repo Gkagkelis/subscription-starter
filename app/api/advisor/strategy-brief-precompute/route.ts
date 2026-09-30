@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { checkCostGuard, guardMessage } from "@/lib/noraya/cost-guard";
 import { createClient } from "@supabase/supabase-js";
-import { cronBudgetOk, cronHourAllowed, isCronOrAdmin, recordCronCall } from "@/lib/noraya/pilot";
+import { aiCronDue, cronBudgetOk, isCronOrAdmin, recordCronCall, withCronLog } from "@/lib/noraya/pilot";
 
 /* ---------------------------------------------------------------------------
  * app/api/advisor/strategy-brief-precompute/route.ts
@@ -82,7 +82,13 @@ function trimForLog(value: unknown, max = 200) {
   return String(value || "").slice(0, max);
 }
 
+const PRECOMPUTE_ROUTE = "/api/advisor/strategy-brief-precompute";
+
 export async function GET(req: Request) {
+  return withCronLog(PRECOMPUTE_ROUTE, () => runPrecompute(req));
+}
+
+async function runPrecompute(req: Request): Promise<Response> {
   const t0 = Date.now();
   const token = new URL(req.url).searchParams.get("token");
   const ua = req.headers.get("user-agent") || "";
@@ -97,7 +103,7 @@ export async function GET(req: Request) {
   }
 
   // Pilot: εκτός ωρών λειτουργίας των ακριβών crons, δεν ξαναγράφουμε (ισχύει το αποθηκευμένο).
-  if (new URL(req.url).searchParams.get("force") !== "1" && !cronHourAllowed()) {
+  if (new URL(req.url).searchParams.get("force") !== "1" && !(await aiCronDue(PRECOMPUTE_ROUTE))) {
     return NextResponse.json({ ok: true, stored: false, skipped: "off_hours", elapsed_ms: Date.now() - t0 });
   }
 
