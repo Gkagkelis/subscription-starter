@@ -117,19 +117,35 @@ function partyRelevanceIndex(profile: PoliticalPartyProfile | null): PartyReleva
   return index;
 }
 
+// Για κόμμα της αντιπολίτευσης, ό,τι αφορά ευθύνη του κράτους ή της κυβέρνησης είναι ΠΑΝΤΑ
+// σχετικό, όποιο κι αν είναι το θέμα: αστυνομική βία, κίνδυνος από δημόσιο έργο (π.χ. μετρό
+// κάτω από πολυκατοικίες), ανεπάρκεια υπηρεσιών, σκάνδαλα, πολιτική θύελλα. Εκεί η συνάφεια
+// δεν πέφτει κάτω από STATE_ACCOUNTABILITY_FLOOR.
+const STATE_ACCOUNTABILITY_FLOOR = 75;
+const PUBLIC_RISK_RE =
+  /(κ[ιί]νδυν|επικ[ιί]νδυν|ρωγμ|καθ[ιί]ζησ|κατ[αά]ρρευσ|εκκ[εέ]νωσ|αστοχ|ανεπ[αά]ρκει|αμ[εέ]λει|συγκ[αά]λυψ|σκ[αά]νδαλ|δολοφον|θ[αά]νατ|νεκρ|πυροβολ|ξυλοδαρ|βι[αά]|τραυματ|καταγγελ)/i;
+const STATE_ACTOR_RE =
+  /(κρατ|κυβ[εέ]ρν|υπουργ|αστυνομ|αστυνομικ|ΕΛ\.?ΑΣ|ΜΑΤ\b|λιμενικ|πυροσβεστ|δημ[οό]σι|δ[ηή]μο|υποδομ|μετρ[οό]|αττικ[οό] μετρ|ΟΣΕ|σιδηροδρομ|νοσοκομε|ΕΣΥ|φυλακ|εποπτ|ελεγκτ|πρωθυπουργ|μητσοτ[αά]κ)/i;
+
+function stateAccountabilityRelevant(text: string): boolean {
+  return (PUBLIC_RISK_RE.test(text) && STATE_ACTOR_RE.test(text)) || stateAccountabilityBoost(text) > 0 || politicalCatalystBoost(text) > 0;
+}
+
 function partyRelevanceScore(
   profile: PoliticalPartyProfile | null,
   topicText: string,
   eventText: string
-): { score: number; theme_match: boolean; matched_terms: string[] } | null {
+): { score: number; theme_match: boolean; matched_terms: string[]; state_accountability: boolean } | null {
   const index = partyRelevanceIndex(profile);
   if (!index) return null;
   const topicStems = relevanceStems(topicText);
   const themeMatch = Array.from(topicStems).some((stem) => index.themeStems.has(stem));
   const eventStems = relevanceStems(`${topicText} ${eventText}`);
   const matched = Array.from(eventStems).filter((stem) => index.positionStems.has(stem) || index.themeStems.has(stem));
-  const score = Math.min(100, (themeMatch ? 60 : 25) + Math.min(40, matched.length * 6));
-  return { score, theme_match: themeMatch, matched_terms: matched.slice(0, 12) };
+  let score = Math.min(100, (themeMatch ? 60 : 25) + Math.min(40, matched.length * 6));
+  const accountability = stateAccountabilityRelevant(`${topicText} ${eventText}`);
+  if (accountability) score = Math.max(score, STATE_ACCOUNTABILITY_FLOOR);
+  return { score, theme_match: themeMatch, matched_terms: matched.slice(0, 12), state_accountability: accountability };
 }
 
 function sanitizePartyProfile(profile: PoliticalPartyProfile | null): PoliticalPartyProfile | null {
@@ -1429,6 +1445,7 @@ function buildAgendaItem(
       party_relevance: partyRelevance ? partyRelevance.score : null,
       party_relevance_theme_match: partyRelevance ? partyRelevance.theme_match : null,
       party_relevance_terms: partyRelevance ? partyRelevance.matched_terms : [],
+      party_relevance_state_accountability: partyRelevance ? partyRelevance.state_accountability : null,
       party_relevance_weight: partyRelevance ? PARTY_RELEVANCE_WEIGHT : 0,
       formula: sensitivity.ranking_policy === "do_not_optimize_for_engagement"
         ? "sensitive capped: event + coverage + freshness + documentation"
