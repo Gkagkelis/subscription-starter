@@ -386,12 +386,16 @@ export async function GET(req: Request) {
     refreshResult = data;
   }
 
+  // Μόνο γεγονότα με άρθρα της τελευταίας εβδομάδας. Τα παλιά μένουν στη βάση (μνήμη),
+  // αλλά δεν εμφανίζονται ως «σημερινή» ατζέντα — ούτε στοιβάζουν έξω τα φρέσκα από το top-60.
+  const WEEK_AGO_ISO = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
   const {
     data: eventRows,
     error: eventError,
   } = await supabase
     .from("v_political_events_live")
     .select("*", { count: "exact" })
+    .gte("last_article_at", WEEK_AGO_ISO)
     .order("event_score", { ascending: false })
     .limit(60);
 
@@ -470,7 +474,8 @@ export async function GET(req: Request) {
     const f = freshnessScore((r as any).last_article_at || (r as any).updated_at || (r as any).first_seen_at);
     return f >= FRESH_GATE;
   });
-  // Δίχτυ ασφαλείας: αν ΚΑΝΕΝΑ θέμα δεν είναι ≤48ώρου, δείχνουμε όλα (καλύτερα κάτι παρά κενή οθόνη).
+  // Δίχτυ ασφαλείας: αν ΚΑΝΕΝΑ θέμα δεν είναι ≤48ώρου, δείχνουμε όσα είναι ≤7 ημερών (το query
+  // έχει ήδη κόψει τα παλαιότερα) — ποτέ θέματα μηνών.
   const gatedPool = eligibleEventRows.length > 0 ? eligibleEventRows : allEventRows;
   // ΒΗΜΑ 2 — ΚΑΤΑΤΑΞΗ (ranking): ΚΑΘΑΡΑ κατά Agenda Score (σημαντικότητα). Η φρεσκάδα δεν αλλάζει τη σειρά.
   const safeEventRows = gatedPool
@@ -601,7 +606,13 @@ export async function GET(req: Request) {
     const t = newestArticleMs(s);
     return t > 0 && nowMs - t <= FRESH_MS;
   });
-  situations = (freshOnly.length > 0 ? freshOnly : rankedByArticle).slice(0, 25);
+  const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+  const weekOnly = rankedByArticle.filter((s) => {
+    const t = newestArticleMs(s);
+    return t > 0 && nowMs - t <= WEEK_MS;
+  });
+  // Ποτέ καταστάσεις μηνών ως «ζωντανή» ατζέντα: αν δεν υπάρχει τίποτα της εβδομάδας, κενή λίστα.
+  situations = (freshOnly.length > 0 ? freshOnly : weekOnly).slice(0, 25);
   totalCount = situations.length;
   // ──────────────────────────────────────────────────────────────────────
 
