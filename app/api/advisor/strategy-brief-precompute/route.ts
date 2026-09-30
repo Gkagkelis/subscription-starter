@@ -115,11 +115,9 @@ async function runPrecompute(req: Request): Promise<Response> {
     );
   }
 
-  const { data: agendaData, error: agendaError } = await supabase
-    .from("v_advisor_agenda_briefs_recent")
-    .select("topic, article_count, source_count, agenda_score, political_risk_level, documentation_level")
-    .order("agenda_score", { ascending: false })
-    .limit(40);
+  // Ελαφριά συνάρτηση (noraya_topic_signals, 48 ώρες): η προβολή v_advisor_agenda_briefs_recent
+  // έπεφτε σε statement timeout, γι' αυτό το brief είχε μείνει από τον Ιούλιο.
+  const { data: agendaData, error: agendaError } = await supabase.rpc("noraya_topic_signals", { p_hours: 48 });
 
   if (agendaError) {
     return NextResponse.json(
@@ -144,10 +142,25 @@ async function runPrecompute(req: Request): Promise<Response> {
     Number(r.article_count || 0) >= 3 &&
     Number(r.source_count || 0) >= 2;
   const signals = ((agendaData || []) as any[])
+    // ίδιοι κανόνες με την παλιά προβολή
+    .map((r) => {
+      const score = Number(r.agenda_score) || 0;
+      const sources = Number(r.source_count) || 0;
+      const articles = Number(r.article_count) || 0;
+      return {
+        ...r,
+        political_risk_level: score >= 70 ? "high" : score >= 45 ? "medium" : "low",
+        documentation_level:
+          sources >= 5 && articles >= 8 ? "strong" : sources >= 3 && articles >= 4 ? "medium" : "initial",
+      };
+    })
     .filter(isSolid)
+    // Πρώτο κριτήριο ο δείκτης (agenda_score) σε ζώνες των 5 μονάδων — οι μικρότερες διαφορές
+    // είναι θόρυβος (οι θεματικές κινούνται όλες γύρω στο 60) — και μέσα στη ζώνη προηγείται
+    // ό,τι γράφουν περισσότερα μέσα και περισσότερα άρθρα.
     .sort(
       (a, b) =>
-        (Number(b.agenda_score) || 0) - (Number(a.agenda_score) || 0) ||
+        Math.floor((Number(b.agenda_score) || 0) / 5) - Math.floor((Number(a.agenda_score) || 0) / 5) ||
         (Number(b.source_count) || 0) - (Number(a.source_count) || 0) ||
         (Number(b.article_count) || 0) - (Number(a.article_count) || 0)
     )
