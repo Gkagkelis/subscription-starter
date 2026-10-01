@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import SaveToArchiveButton from "../../components/SaveToArchiveButton";
 import EventNote from "../../components/EventNote";
 import AgendaLandscape from "../../components/AgendaLandscape";
+import { ADMIN_ONLY_TABS } from "../../components/TopNav";
+import { requestTopicOpen, usePilotTier } from "../../components/usePilotTier";
 import { themes as taxonomyThemes } from "../../lib/noraya/taxonomy";
 import type { MutableRefObject, ReactNode } from "react";
 import {
@@ -1654,6 +1656,24 @@ export default function StrategyRoomPage() {
   const [aiBusyIds, setAiBusyIds] = useState<Record<string, boolean>>({});
   const [activeProbeSelection, setActiveProbeSelection] =
     useState<AgendaProbeSelection | null>(null);
+  // Δωρεάν εκδοχή: κάθε νέο θέμα που ανοίγει για ανάλυση μετράει (έως 3/ημέρα)·
+  // ο Σύμβουλος μόνο με ξεκλείδωμα ημέρας· ανάλυση link μόνο admin.
+  const tier = usePilotTier();
+  function selectProbeEvent(selection: AgendaProbeSelection) {
+    const key = `p:${selection.clusterId}|${selection.eventId || ""}`;
+    void requestTopicOpen(tier, key).then((ok) => {
+      if (!ok) return;
+      setActiveProbeSelection(selection);
+      setActiveTab("strategic");
+    });
+  }
+  function selectSituation(id: string) {
+    void requestTopicOpen(tier, `s:${id}`).then((ok) => {
+      if (!ok) return;
+      setActiveSituationId(id);
+      setActiveTab("strategic");
+    });
+  }
   const [personalEvent, setPersonalEvent] = useState<any | null>(null);
   const [showLinkModal, setShowLinkModal] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
@@ -2247,6 +2267,8 @@ export default function StrategyRoomPage() {
   }
 
   useEffect(() => {
+    // Το άνοιγμα από την Ατζέντα (?topic=) αφορά μόνο admin· ο πελάτης ανοίγει θέματα με κλικ.
+    if (!tier.adminTools) return;
     if (!activeSituationId && liveSituations.length > 0) {
       // ΔΕΝ προεπιλέγουμε πλέον το πρώτο γεγονός: το cockpit ανοίγει «κλειστό»
       // (μόνο επισκόπηση), και η ανάλυση τρέχει ΜΟΝΟ όταν πατήσει ο χρήστης.
@@ -2270,7 +2292,7 @@ export default function StrategyRoomPage() {
         /* αγνοούμε */
       }
     }
-  }, [activeSituationId, liveSituations]);
+  }, [activeSituationId, liveSituations, tier.adminTools]);
 
   const activeSituation = useMemo(() => {
     if (!liveSituations.length) return null;
@@ -2766,14 +2788,8 @@ export default function StrategyRoomPage() {
           agendaMap={probeAgendaMap}
           activeSituationId={activeSituationId}
           activeProbeSelection={activeProbeSelection}
-          onSelectSituation={(id) => {
-            setActiveSituationId(id);
-            setActiveTab("strategic");
-          }}
-          onSelectProbeEvent={(selection) => {
-            setActiveProbeSelection(selection);
-            setActiveTab("strategic");
-          }}
+          onSelectSituation={selectSituation}
+          onSelectProbeEvent={selectProbeEvent}
           situationSource={probeAgendaMap.length ? "agenda-probe v4" : situationEngine?.source || "—"}
           situationCount={probeAgendaMap.length ? probeSituationCount : situationEngine?.count || liveSituations.length}
           situationWarning={situationWarning}
@@ -2788,14 +2804,15 @@ export default function StrategyRoomPage() {
               activeTitle={activeTitle}
               immediateRecommendation={daily.immediate_recommendation}
               avoidToday={daily.avoid_today}
-              onSelectProbeEvent={(selection) => {
-                setActiveProbeSelection(selection);
-                setActiveTab("strategic");
-              }}
-              onOpenLink={() => {
-                setLinkError("");
-                setShowLinkModal(true);
-              }}
+              onSelectProbeEvent={selectProbeEvent}
+              onOpenLink={
+                tier.adminTools
+                  ? () => {
+                      setLinkError("");
+                      setShowLinkModal(true);
+                    }
+                  : undefined
+              }
             />
 
             {personalEvent ? (
@@ -2874,10 +2891,7 @@ export default function StrategyRoomPage() {
               selectedAgendaOverview={selectedAgendaOverview}
               activeOverviewTopic={activeOverviewTopic}
               onSelectOverviewTopic={setActiveOverviewTopic}
-              onSelectProbeEvent={(selection) => {
-                setActiveProbeSelection(selection);
-                setActiveTab("strategic");
-              }}
+              onSelectProbeEvent={selectProbeEvent}
               selectedPartyImplication={selectedPartyImplication}
               probeView={activeProbeView}
               probeEvidenceArticles={activeProbeEvidenceArticles}
@@ -2907,24 +2921,26 @@ ${formatLine}
             />
             )}
 
-            <AdvisorDock
-              partyName={partyName}
-              activeTitle={activeTitle}
-              chatQuestion={chatQuestion}
-              setChatQuestion={setChatQuestion}
-              chatMessages={chatMessages}
-              chatLoading={chatLoading}
-              chatError={chatError}
-              conversationId={conversationId}
-              conversations={advisorConversations}
-              onSelectConversation={openAdvisorConversation}
-              onRenameConversation={renameAdvisorConversation}
-              onDeleteConversation={deleteAdvisorConversation}
-              onAsk={askNorayaAdvisor}
-              onReset={startNewAdvisorConversation}
-              chatEndRef={chatEndRef}
-              chatScrollRef={chatScrollRef}
-            />
+            {tier.advisor ? (
+              <AdvisorDock
+                partyName={partyName}
+                activeTitle={activeTitle}
+                chatQuestion={chatQuestion}
+                setChatQuestion={setChatQuestion}
+                chatMessages={chatMessages}
+                chatLoading={chatLoading}
+                chatError={chatError}
+                conversationId={conversationId}
+                conversations={advisorConversations}
+                onSelectConversation={openAdvisorConversation}
+                onRenameConversation={renameAdvisorConversation}
+                onDeleteConversation={deleteAdvisorConversation}
+                onAsk={askNorayaAdvisor}
+                onReset={startNewAdvisorConversation}
+                chatEndRef={chatEndRef}
+                chatScrollRef={chatScrollRef}
+              />
+            ) : null}
           </div>
         </section>
 
@@ -3020,6 +3036,7 @@ function TopNavigation({
   source: string;
   situationSource: string;
 }) {
+  const tier = usePilotTier();
   return (
     <header className="flex h-16 items-center justify-between bg-[#060a14] px-4 text-zinc-100">
       <div className="flex min-w-0 items-center gap-4">
@@ -3044,6 +3061,18 @@ function TopNavigation({
                 ? "border border-cyan-300/25 bg-cyan-300/10 text-cyan-100"
                 : "text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-300"
             }`;
+            // Έκδοση πελάτη: οι υπόλοιπες καρτέλες φαίνονται γκρι (σαν demo).
+            if (!tier.adminTools && ADMIN_ONLY_TABS.includes(tab)) {
+              return (
+                <span
+                  key={tab}
+                  className="cursor-not-allowed rounded-2xl px-3 py-2 text-xs text-zinc-700"
+                  title="Σύντομα διαθέσιμο"
+                >
+                  {tab}
+                </span>
+              );
+            }
             if (tab === "Ατζέντα") {
               return (
                 <a key={tab} href="/agenda" className={cls}>
@@ -3166,6 +3195,7 @@ function LeftSidebar({
   situationWarning: string;
   politicalEnvironment: PoliticalEnvironment | null;
 }) {
+  const tier = usePilotTier();
   const polls = recentPolls(politicalEnvironment);
   const [expandedTheme, setExpandedTheme] = useState<string | null>(null);
   const [expandedMicro, setExpandedMicro] = useState<string | null>(null);
@@ -3349,7 +3379,7 @@ function LeftSidebar({
         <SidebarPanel
           title="Χάρτης ατζέντας"
           info
-          action="Δες όλη την ατζέντα"
+          action={tier.adminTools ? "Δες όλη την ατζέντα" : undefined}
           onAction={() => {
             window.location.href = "/agenda";
           }}
@@ -3659,14 +3689,16 @@ function PriorityStrip({
             Τρία πράγματα που πρέπει να βλέπει το επιτελείο με την πρώτη ματιά.
           </div>
         </div>
-        <button
-          type="button"
-          onClick={onOpenLink}
-          className="flex items-center gap-2 rounded-2xl border border-cyan-300/25 bg-cyan-300/10 px-3 py-2 text-xs text-cyan-100 transition hover:bg-cyan-300/20"
-        >
-          <IconPlus className="h-4 w-4" />
-          Καταγραφή νέου συμβάντος
-        </button>
+        {onOpenLink ? (
+          <button
+            type="button"
+            onClick={onOpenLink}
+            className="flex items-center gap-2 rounded-2xl border border-cyan-300/25 bg-cyan-300/10 px-3 py-2 text-xs text-cyan-100 transition hover:bg-cyan-300/20"
+          >
+            <IconPlus className="h-4 w-4" />
+            Καταγραφή νέου συμβάντος
+          </button>
+        ) : null}
       </div>
 
       <div className="grid gap-3 xl:grid-cols-3">

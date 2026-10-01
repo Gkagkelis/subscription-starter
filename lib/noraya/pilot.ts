@@ -37,14 +37,19 @@ export const pilotConfig = {
   // Λογαριασμοί που δημιουργήθηκαν ΠΡΙΝ από αυτή την ημερομηνία δεν χρειάζονται
   // κωδικό (για να μη χάσει κανείς υπάρχων χρήστης την πρόσβαση).
   inviteCutoff: () => process.env.NORAYA_INVITE_CUTOFF || "2026-09-29T20:00:00Z",
-  dailyLimit: () => envNum("NORAYA_DAILY_LIMIT", 3),
-  passCap: () => envNum("NORAYA_PASS_CAP", 10),
-  autoDailyLimit: () => envNum("NORAYA_AUTO_DAILY_LIMIT", 60),
-  autoPassCap: () => envNum("NORAYA_AUTO_PASS_CAP", 120),
-  scopeDailyUsdCap: () => envNum("NORAYA_SCOPE_DAILY_USD_CAP", 15),
-  passDailyUsdCap: () => envNum("NORAYA_PASS_DAILY_USD_CAP", 25),
   demoDailyCalls: () => envNum("NORAYA_DEMO_DAILY_CALLS", 40),
   dayPassEur: () => envNum("NORAYA_DAY_PASS_EUR", 40),
+  // Δωρεάν εκδοχή (ανά πελάτη, ανά ημέρα): αναλύσεις θεμάτων, σενάρια, επιθέσεις.
+  freeTopics: () => envNum("NORAYA_FREE_TOPICS", 3),
+  freeScenarios: () => envNum("NORAYA_FREE_SCENARIOS", 3),
+  freeAttacks: () => envNum("NORAYA_FREE_ATTACKS", 1),
+  // Κρυφά όρια ασφαλείας της δωρεάν εκδοχής: κλήσεις AI πίσω από τα θέματα
+  // (κάθε θέμα = έως 3 κλήσεις) και συνολικό κόστος της ημέρας.
+  freeAutoCalls: () => envNum("NORAYA_FREE_AUTO_CALLS", 20),
+  freeUsdCap: () => envNum("NORAYA_FREE_USD_CAP", 6),
+  // Με το ξεκλείδωμα ημέρας όλα είναι απεριόριστα· μένει μόνο ένα όριο ασφαλείας
+  // κόστους περίπου ίσο με όσα πλήρωσε ο πελάτης (€40 ≈ $45).
+  passSafetyUsd: () => envNum("NORAYA_PASS_SAFETY_USD", 45),
   // Δύο ξεχωριστά όρια για τα crons, ώστε οι ακριβές συμβουλές να μη σταματούν
   // ποτέ τη φθηνή (και απαραίτητη) ταξινόμηση ειδήσεων.
   cronDailyUsd: () => envNum("NORAYA_CRON_DAILY_USD", 3),
@@ -69,6 +74,7 @@ export const INVITE_COOKIE = "noraya_invite";
 // ------------------------------------------------------------
 
 export type PilotCategory =
+  | "topic"
   | "scenario"
   | "chat"
   | "attacks"
@@ -79,6 +85,7 @@ export type PilotCategory =
   | "auto";
 
 export const CATEGORY_LABELS: Record<PilotCategory, string> = {
+  topic: "Αναλύσεις θεμάτων",
   scenario: "Σενάρια",
   chat: "Σύμβουλος / Chat",
   attacks: "Επιθέσεις",
@@ -90,15 +97,15 @@ export const CATEGORY_LABELS: Record<PilotCategory, string> = {
 };
 
 // Οι κατηγορίες που βλέπει ο χρήστης με μετρητή "x/3".
-export const VISIBLE_CATEGORIES: PilotCategory[] = [
-  "scenario",
-  "chat",
-  "attacks",
-  "analysis",
-  "voices",
-  "architect",
-  "data"
-];
+export const VISIBLE_CATEGORIES: PilotCategory[] = ["topic", "scenario", "attacks"];
+
+// Τι περιλαμβάνει κάθε εκδοχή:
+// - Δωρεάν: αναλύσεις θεμάτων στο «Σήμερα», σενάρια, επιθέσεις (με ημερήσιο όριο).
+// - Ξεκλείδωμα ημέρας (€40): τα ίδια απεριόριστα + ο Σύμβουλος (chat).
+// - Ανάλυση link, Agenda architect, Φωνές, Ανάγνωση δεδομένων: μόνο admin.
+export const PASS_ONLY_CATEGORIES: PilotCategory[] = ["chat"];
+export const ADMIN_ONLY_CATEGORIES: PilotCategory[] = ["analysis", "architect", "voices", "data"];
+export const UNLIMITED = 100000;
 
 // ------------------------------------------------------------
 // Βοηθητικά
@@ -274,6 +281,12 @@ export async function pilotAuth(
     return { response: json(403, { error: "Η λειτουργία δεν είναι διαθέσιμη σε αυτόν τον λογαριασμό." }) };
   }
 
+  // Λειτουργίες μόνο για admin (ανάλυση link, agenda architect, φωνές, δεδομένα):
+  // δεν είναι μέρος της έκδοσης πελάτη, ούτε με το ξεκλείδωμα ημέρας.
+  if (!isAdmin && pilotConfig.limitsEnabled() && ADMIN_ONLY_CATEGORIES.includes(category)) {
+    return { response: json(403, { error: "Η λειτουργία δεν είναι διαθέσιμη σε αυτή την έκδοση.", category }) };
+  }
+
   const { scope, hasAccess } = await resolveScope(user.id);
 
   if (!isAdmin && !hasAccess && !isGrandfathered(user.created_at)) {
@@ -312,8 +325,51 @@ export async function hasDayPass(scope: string, day = athensDay()) {
 }
 
 export function categoryLimit(category: PilotCategory, pass: boolean) {
-  if (category === "auto") return pass ? pilotConfig.autoPassCap() : pilotConfig.autoDailyLimit();
-  return pass ? pilotConfig.passCap() : pilotConfig.dailyLimit();
+  // Με το ξεκλείδωμα: χωρίς όριο πλήθους (μόνο το όριο ασφαλείας κόστους).
+  if (pass) return ADMIN_ONLY_CATEGORIES.includes(category) ? 0 : UNLIMITED;
+  switch (category) {
+    case "topic":
+      return pilotConfig.freeTopics();
+    case "scenario":
+      return pilotConfig.freeScenarios();
+    case "attacks":
+      return pilotConfig.freeAttacks();
+    case "auto":
+      return pilotConfig.freeAutoCalls();
+    default:
+      // Σύμβουλος (μόνο με ξεκλείδωμα) και λειτουργίες μόνο για admin.
+      return 0;
+  }
+}
+
+export function dailyUsdCap(pass: boolean) {
+  return pass ? pilotConfig.passSafetyUsd() : pilotConfig.freeUsdCap();
+}
+
+const COUNT_PHRASES: Partial<Record<PilotCategory, [string, (n: number) => string]>> = {
+  topic: ["την 1 ανάλυση θέματος", (n) => `τις ${n} αναλύσεις θεμάτων`],
+  scenario: ["το 1 σενάριο", (n) => `τα ${n} σενάρια`],
+  attacks: ["την 1 ανάλυση επίθεσης", (n) => `τις ${n} αναλύσεις επιθέσεων`]
+};
+
+function passOfferText(eur: number) {
+  return `Με το Πλήρες ξεκλείδωμα ημέρας (€${eur}) έχετε σήμερα απεριόριστες αναλύσεις θεμάτων, σενάρια και επιθέσεις, καθώς και τον Σύμβουλο (chat).`;
+}
+
+/** Το μήνυμα που βλέπει ο πελάτης όταν μια λειτουργία δεν επιτρέπεται άλλο σήμερα. */
+export function limitMessage(category: PilotCategory, pass: boolean, limit: number, overCost: boolean) {
+  const eur = pilotConfig.dayPassEur();
+  if (pass) return "Φτάσατε το ανώτατο όριο χρήσης για σήμερα. Για επιπλέον χρήση επικοινωνήστε μαζί μας.";
+  if (ADMIN_ONLY_CATEGORIES.includes(category)) return "Η λειτουργία δεν είναι διαθέσιμη σε αυτή την έκδοση.";
+  if (category === "chat") {
+    return `Ο Σύμβουλος (chat) είναι διαθέσιμος με το Πλήρες ξεκλείδωμα ημέρας (€${eur}). Με αυτό έχετε σήμερα και απεριόριστες αναλύσεις θεμάτων, σενάρια και επιθέσεις.`;
+  }
+  const phrase = COUNT_PHRASES[category];
+  if (phrase && !overCost) {
+    const what = limit === 1 ? phrase[0] : phrase[1](limit);
+    return `Ολοκληρώσατε ${what} της ημέρας. Τα όρια ανανεώνονται αύριο στις 00:00. ${passOfferText(eur)}`;
+  }
+  return `Φτάσατε το ημερήσιο όριο χρήσης της δωρεάν έκδοσης. Τα όρια ανανεώνονται αύριο στις 00:00. ${passOfferText(eur)}`;
 }
 
 export type ScopeUsage = {
@@ -344,6 +400,8 @@ export async function getScopeUsage(scope: string, day = athensDay()): Promise<S
       const staleReservation = row.model === "reserved" && new Date(row.created_at).getTime() < staleBefore;
       if (row.counted && !staleReservation) byCategory[row.category] = (byCategory[row.category] || 0) + 1;
     }
+    const topics = await topicOpensCount(scope, day);
+    if (topics !== null) byCategory.topic = topics;
     const pass = await hasDayPass(scope, day);
     return { day, pass, costUsd, byCategory };
   } catch (e) {
@@ -377,7 +435,7 @@ export async function pilotAllow(caller: PilotCaller): Promise<NextResponse | nu
 
   const pass = await hasDayPass(caller.scope, day);
   const limit = categoryLimit(caller.category, pass);
-  const usdCap = pass ? pilotConfig.passDailyUsdCap() : pilotConfig.scopeDailyUsdCap();
+  const usdCap = dailyUsdCap(pass);
 
   const r = await reserve(caller, day, caller.category, limit, usdCap, "user");
   if (r === "ok") return null;
@@ -398,16 +456,7 @@ export async function pilotAllow(caller: PilotCaller): Promise<NextResponse | nu
   const label = CATEGORY_LABELS[caller.category];
   const eur = pilotConfig.dayPassEur();
   const overCost = usage.costUsd >= usdCap;
-  let error: string;
-  if (pass) {
-    error = overCost
-      ? "Φτάσατε το ανώτατο όριο χρήσης για σήμερα. Για επιπλέον χρήση επικοινωνήστε μαζί μας."
-      : `Φτάσατε το ανώτατο όριο για «${label}» σήμερα (${used}/${limit}). Για επιπλέον χρήση επικοινωνήστε μαζί μας.`;
-  } else if (caller.category === "auto" || overCost) {
-    error = `Φτάσατε το ημερήσιο όριο χρήσης. Τα όρια ανανεώνονται αύριο στις 00:00. Για απεριόριστη χρήση όλων των λειτουργιών σήμερα: Πλήρες ξεκλείδωμα ημέρας — €${eur}.`;
-  } else {
-    error = `Ολοκληρώσατε τα ${limit} «${label}» της ημέρας. Οι υπόλοιπες λειτουργίες παραμένουν διαθέσιμες. Τα όρια ανανεώνονται αύριο στις 00:00. Για απεριόριστη χρήση όλων των λειτουργιών σήμερα: Πλήρες ξεκλείδωμα ημέρας — €${eur} (κάλυψη κόστους επεξεργασίας με προηγμένα μοντέλα AI).`;
-  }
+  const error = limitMessage(caller.category, pass, limit, overCost);
 
   if (pass) {
     await sendAlert(
@@ -429,6 +478,68 @@ export async function pilotAllow(caller: PilotCaller): Promise<NextResponse | nu
     day_pass: pass,
     day_pass_available: !pass,
     day_pass_eur: eur
+  });
+}
+
+// ------------------------------------------------------------
+// Αναλύσεις θεμάτων στο «Σήμερα»: μετράμε ΘΕΜΑΤΑ (όχι κλήσεις AI).
+// Το ίδιο θέμα την ίδια μέρα ξανανοίγει χωρίς να ξαναμετρήσει.
+// ------------------------------------------------------------
+
+async function topicOpensCount(scope: string, day: string): Promise<number | null> {
+  try {
+    const { count, error } = await pilotDb()
+      .from("noraya_topic_opens")
+      .select("id", { count: "exact", head: true })
+      .eq("scope", scope)
+      .eq("day", day);
+    if (error) {
+      if (!isMissingTable(error)) console.error("[pilot] topic opens read failed", error);
+      return null;
+    }
+    return count || 0;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Ο πελάτης ανοίγει ένα θέμα για ανάλυση. Επιστρέφει null αν επιτρέπεται,
+ * αλλιώς απάντηση 429 με το μήνυμα για το ξεκλείδωμα ημέρας.
+ */
+export async function pilotOpenTopic(caller: PilotCaller, topicKey: string): Promise<NextResponse | null> {
+  if (!pilotConfig.limitsEnabled() || caller.isAdmin || caller.scope === "anon") return null;
+  const day = athensDay();
+  const pass = await hasDayPass(caller.scope, day);
+  const limit = categoryLimit("topic", pass);
+  try {
+    const { data, error } = await pilotDb().rpc("noraya_open_topic", {
+      p_scope: caller.scope,
+      p_day: day,
+      p_key: topicKey.slice(0, 300),
+      p_limit: limit,
+      p_user: caller.userId
+    });
+    if (error) {
+      // Fail-open: αν λείπει το SQL, δεν μπλοκάρουμε τον πελάτη (υπάρχει το όριο κόστους).
+      if (!isMissingTable(error) && String(error.code) !== "PGRST202") console.error("[pilot] open topic failed", error);
+      return null;
+    }
+    if (data !== null && data !== undefined) return null;
+  } catch (e) {
+    console.error("[pilot] pilotOpenTopic", e);
+    return null;
+  }
+  return json(429, {
+    error: limitMessage("topic", pass, limit, false),
+    limit_reached: true,
+    category: "topic",
+    category_label: CATEGORY_LABELS.topic,
+    used: limit,
+    limit,
+    day_pass: pass,
+    day_pass_available: !pass,
+    day_pass_eur: pilotConfig.dayPassEur()
   });
 }
 
@@ -626,7 +737,8 @@ export async function requireMember(
     }
     return json(401, { error: "Απαιτείται σύνδεση για αυτή τη λειτουργία.", login_required: true });
   }
-  const auth = await pilotAuth(route, "data", { adminOnly: opts.adminOnly });
+  // Μόνο έλεγχος πρόσβασης (όχι όριο): κατηγορία "auto", όχι μια από τις admin-only.
+  const auth = await pilotAuth(route, "auto", { adminOnly: opts.adminOnly });
   return auth.response || null;
 }
 

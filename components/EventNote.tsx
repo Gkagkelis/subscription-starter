@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import type { ComponentProps } from "react";
+import { usePilotTier } from "./usePilotTier";
 
 /**
  * «Γρήγορη καταγραφή» — αληθινή σημείωση, δεμένη στο ανοιχτό γεγονός.
@@ -11,7 +13,7 @@ import { useState } from "react";
 
 type Phase = "idle" | "saving" | "done" | "error";
 
-export default function EventNote({
+function EventNoteInner({
   eventId = null,
   eventTitle = null,
 }: {
@@ -105,4 +107,11 @@ export default function EventNote({
       </div>
     </div>
   );
+}
+
+// Το Αρχείο είναι μόνο για admin στην έκδοση πελάτη.
+export default function EventNote(props: ComponentProps<typeof EventNoteInner>) {
+  const tier = usePilotTier();
+  if (!tier.adminTools) return null;
+  return <EventNoteInner {...props} />;
 }

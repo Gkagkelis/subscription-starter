@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import type { ComponentProps } from "react";
+import { usePilotTier } from "./usePilotTier";
 
 /**
  * Κουμπί «Αποθήκευση στο Αρχείο».
@@ -12,7 +14,7 @@ import { useState } from "react";
 type Kind = "note" | "analysis" | "scenario";
 type Phase = "idle" | "editing" | "saving" | "done" | "error";
 
-export default function SaveToArchiveButton({
+function SaveToArchiveButtonInner({
   kind,
   content,
   defaultTitle = "",
@@ -155,4 +157,11 @@ export default function SaveToArchiveButton({
       {label}
     </button>
   );
+}
+
+// Το Αρχείο είναι μόνο για admin στην έκδοση πελάτη.
+export default function SaveToArchiveButton(props: ComponentProps<typeof SaveToArchiveButtonInner>) {
+  const tier = usePilotTier();
+  if (!tier.adminTools) return null;
+  return <SaveToArchiveButtonInner {...props} />;
 }
