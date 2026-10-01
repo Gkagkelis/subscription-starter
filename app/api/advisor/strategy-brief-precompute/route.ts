@@ -103,7 +103,7 @@ async function runPrecompute(req: Request): Promise<Response> {
   }
 
   // Pilot: εκτός ωρών λειτουργίας των ακριβών crons, δεν ξαναγράφουμε (ισχύει το αποθηκευμένο).
-  if (new URL(req.url).searchParams.get("force") !== "1" && !(await aiCronDue(PRECOMPUTE_ROUTE))) {
+  if (new URL(req.url).searchParams.get("force") !== "1" && !(await aiCronDue(PRECOMPUTE_ROUTE, "NORAYA_BRIEF_HOURS_UTC", "4,7,10,13,16,19"))) {
     return NextResponse.json({ ok: true, stored: false, skipped: "off_hours", elapsed_ms: Date.now() - t0 });
   }
 

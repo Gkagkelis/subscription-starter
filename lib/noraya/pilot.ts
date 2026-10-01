@@ -680,7 +680,8 @@ async function lastRunLeftWork(route: string): Promise<boolean> {
       .limit(1);
     if (error || !Array.isArray(data) || !data.length) return false;
     const d = (data[0] as any).detail || {};
-    if (d.remaining_event) return true;
+    // Μόνο η ανίχνευση γεγονότων συνεχίζει ωριαία (φθηνό μοντέλο). Οι αναλύσεις ανά κόμμα
+    // (ακριβό μοντέλο) μένουν στο ωράριό τους — τα υπόλοιπα γεγονότα αναλύονται όταν τα πατήσει ο χρήστης.
     if (!d.remaining_topic) return false;
     // Θεματική που ξαναγίνεται «διαθέσιμη» κάθε 30' δεν μετράει ως εκκρεμότητα: συνεχίζουμε μόνο
     // αν η επόμενη θεματική δεν έχει αναλυθεί τις τελευταίες 6 ώρες (δηλ. ο κύκλος δεν τελείωσε).
