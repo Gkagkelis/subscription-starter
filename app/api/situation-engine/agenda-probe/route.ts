@@ -1351,12 +1351,18 @@ function buildAgendaItem(
   if (hasClusterEvidence) type = "agenda_cluster";
   else if (highSeverity) type = "high_severity_single_event";
 
+  // Όταν ΛΕΙΠΟΥΝ δεδομένα για ένα σήμα (καμία αντιστοίχιση πρωτοσέλιδου / τάσεων αναζήτησης),
+  // το βάρος του περνά στην κάλυψη από τα μέσα αντί να μετρά ως «μηδέν». Αλλιώς ένα θέμα με
+  // 128 άρθρα από 11 μέσα έπεφτε 16ο επειδή εκείνη τη μέρα είχαν μαζευτεί λίγα πρωτοσέλιδα.
+  const frontpageWeight = matchedEditorialProminence ? 0.12 : 0;
+  const trendWeight = trend ? 0.12 : 0;
+  const coverageWeight = 0.16 + (0.12 - frontpageWeight) + (0.12 - trendWeight);
   const standardRawScore = clampScore(
     0.36 * topEventScore +
       0.14 * agendaSignalScore +
-      0.16 * coverageScore +
-      0.12 * trendScore +
-      0.12 * frontpageProminenceScore +
+      coverageWeight * coverageScore +
+      trendWeight * trendScore +
+      frontpageWeight * frontpageProminenceScore +
       0.07 * freshness +
       0.03 * doc +
       breadthBonus
@@ -1454,6 +1460,7 @@ function buildAgendaItem(
       documentation: doc,
       cluster_breadth_bonus: breadthBonus,
       parent_only_signal: parentOnlySignal,
+      weights_used: { coverage: coverageWeight, trends: trendWeight, frontpage: frontpageWeight },
       score_before_party_relevance: standardRawScore,
       party_relevance: partyRelevance ? partyRelevance.score : null,
       party_relevance_theme_match: partyRelevance ? partyRelevance.theme_match : null,
