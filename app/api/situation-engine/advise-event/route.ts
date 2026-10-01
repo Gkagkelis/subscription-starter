@@ -73,35 +73,51 @@ function parseAiJson(raw: string): any | null {
     if (match) parsed = tryParse(match[0]);
   }
 
-  // Σωσίβιο: αν το JSON κόπηκε (truncated), κλείσε ό,τι έμεινε ανοιχτό
-  // ώστε να σωθούν τα πρώτα (και σημαντικότερα) τμήματα της ανάλυσης.
-  if (!parsed) {
-    const start = s.indexOf("{");
-    if (start >= 0) {
-      let body = s.slice(start);
-      let depthCurly = 0;
-      let depthSquare = 0;
-      let inStr = false;
-      let esc = false;
-      for (const ch of body) {
-        if (esc) { esc = false; continue; }
-        if (ch === "\\") { esc = true; continue; }
-        if (ch === '"') { inStr = !inStr; continue; }
-        if (inStr) continue;
-        if (ch === "{") depthCurly++;
-        else if (ch === "}") depthCurly--;
-        else if (ch === "[") depthSquare++;
-        else if (ch === "]") depthSquare--;
-      }
-      if (inStr) body += '"';
-      body = body.replace(/,\s*$/, "");
-      while (depthSquare-- > 0) body += "]";
-      while (depthCurly-- > 0) body += "}";
-      parsed = tryParse(body);
-    }
-  }
+  // Σωσίβιο: αν το JSON κόπηκε (truncated), κόψε στο τελευταίο ΟΛΟΚΛΗΡΩΜΕΝΟ στοιχείο
+  // και κλείσε τις ανοιχτές αγκύλες με τη σωστή σειρά — σώζονται τα πρώτα (και
+  // σημαντικότερα) τμήματα της ανάλυσης αντί να χάνεται όλη.
+  if (!parsed) parsed = salvageTruncatedJson(s);
 
   return parsed || null;
+}
+
+function salvageTruncatedJson(raw: string): any | null {
+  const start = raw.indexOf("{");
+  if (start < 0) return null;
+  const body = raw.slice(start);
+  const stack: string[] = [];
+  let inStr = false;
+  let esc = false;
+  let lastCut = -1;
+  let lastStack: string[] = [];
+  for (let i = 0; i < body.length; i++) {
+    const ch = body[i];
+    if (inStr) {
+      if (esc) esc = false;
+      else if (ch === "\\") esc = true;
+      else if (ch === '"') inStr = false;
+      continue;
+    }
+    if (ch === '"') inStr = true;
+    else if (ch === "{" || ch === "[") stack.push(ch === "{" ? "}" : "]");
+    else if (ch === "}" || ch === "]") {
+      stack.pop();
+      // μετά από κλείσιμο, το περιέχον είναι σε έγκυρη κατάσταση
+      lastCut = i + 1;
+      lastStack = stack.slice();
+      if (!stack.length) break;
+    } else if (ch === ",") {
+      lastCut = i; // κόψε ΠΡΙΝ το κόμμα: ό,τι προηγήθηκε είναι πλήρες
+      lastStack = stack.slice();
+    }
+  }
+  if (lastCut < 0) return null;
+  const candidate = body.slice(0, lastCut) + lastStack.slice().reverse().join("");
+  try {
+    return JSON.parse(candidate);
+  } catch {
+    return null;
+  }
 }
 
 function articleScore(value: unknown) {
@@ -222,7 +238,10 @@ function buildSystem() {
 - ποια φράση λέμε δημόσια
 - ποια κίνηση κάνουμε εσωτερικά
 
-${buildNorayaStrategicJsonInstruction()}`;
+${buildNorayaStrategicJsonInstruction()}
+
+ΜΗΚΟΣ: Συμπλήρωσε ΟΛΑ τα πεδία, αλλά με πυκνές, σύντομες προτάσεις (1–2 προτάσεις ανά πεδίο,
+όχι παράγραφοι). Ολόκληρο το JSON να μένει κάτω από ~5.000 λέξεις, ώστε να ολοκληρώνεται πάντα.`;
 }
 
 async function callAnthropic(
@@ -243,7 +262,8 @@ async function callAnthropic(
       },
       body: JSON.stringify({
         model: ANALYSIS_MODEL,
-        max_tokens: 8000,
+        // ~8k tokens έκοβε την ανάλυση στη μέση (χανόταν ολόκληρη). Περιθώριο + οδηγία συντομίας.
+        max_tokens: 12000,
         system: [{ type: "text", text: system, cache_control: { type: "ephemeral" } }],
         messages: [{ role: "user", content: user }],
       }),
