@@ -122,19 +122,31 @@ function partyRelevanceIndex(profile: PoliticalPartyProfile | null): PartyReleva
 // κάτω από πολυκατοικίες), ανεπάρκεια υπηρεσιών, σκάνδαλα, πολιτική θύελλα. Εκεί η συνάφεια
 // δεν πέφτει κάτω από STATE_ACCOUNTABILITY_FLOOR.
 const STATE_ACCOUNTABILITY_FLOOR = 75;
-const PUBLIC_RISK_RE =
-  /(κ[ιί]νδυν|επικ[ιί]νδυν|ρωγμ|καθ[ιί]ζησ|κατ[αά]ρρευσ|εκκ[εέ]νωσ|αστοχ|ανεπ[αά]ρκει|αμ[εέ]λει|συγκ[αά]λυψ|σκ[αά]νδαλ|δολοφον|θ[αά]νατ|νεκρ|πυροβολ|ξυλοδαρ|βι[αά]|τραυματ|καταγγελ)/i;
-const STATE_ACTOR_RE =
-  /(κρατ|κυβ[εέ]ρν|υπουργ|αστυνομ|αστυνομικ|ΕΛ\.?ΑΣ|ΜΑΤ\b|λιμενικ|πυροσβεστ|δημ[οό]σι|δ[ηή]μο|υποδομ|μετρ[οό]|αττικ[οό] μετρ|ΟΣΕ|σιδηροδρομ|νοσοκομε|ΕΣΥ|φυλακ|εποπτ|ελεγκτ|πρωθυπουργ|μητσοτ[αά]κ)/i;
+// Σημ.: το \\b της JavaScript δεν αναγνωρίζει ελληνικά γράμματα — γι' αυτό τα όρια λέξης
+// γράφονται ρητά με (?<![…]) / (?![…]).
+const GR = "α-ωάέήίόύώϊϋΐΰa-zΑ-ΩΆΈΉΊΌΎΏA-Z";
+const PUBLIC_RISK_RE = new RegExp(
+  `(κ[ιί]νδυν|επικ[ιί]νδυν|ρωγμ|καθ[ιί]ζησ|κατ[αά]ρρευσ|εκκ[εέ]νωσ|αστοχ|ανεπ[αά]ρκει|αμ[εέ]λει|συγκ[αά]λυψ|σκ[αά]νδαλ|δολοφον|θ[αά]νατ|νεκρ|πυροβολ|ξυλοδαρ|τραυματ|β[ιί]αι|καταστολ|(?<![${GR}])β[ιί]α(ς)?(?![${GR}]))`,
+  "i"
+);
+const STATE_ACTOR_RE = new RegExp(
+  `(κρατικ|κυβ[εέ]ρνησ|υπουργε[ιί]|υπουργ[οό]ς|αστυνομ|ΕΛ\\.ΑΣ|λιμενικ|πυροσβεστ|δ[ηή]μαρχ|σιδηροδρομ|νοσοκομε|ΕΚΑΒ|φυλακ|εποπτικ|πρωθυπουργ|μητσοτ[αά]κ|(?<![${GR}])(ΜΑΤ|ΟΣΕ|ΕΣΥ|μετρ[οό])(?![${GR}]))`,
+  "i"
+);
 
-function stateAccountabilityRelevant(text: string): boolean {
-  return (PUBLIC_RISK_RE.test(text) && STATE_ACTOR_RE.test(text)) || stateAccountabilityBoost(text) > 0 || politicalCatalystBoost(text) > 0;
+// Ελέγχεται ΚΑΘΕ γεγονός χωριστά (όχι το ενωμένο κείμενο όλων), ώστε μια λέξη κινδύνου
+// από ένα άρθρο και μια αναφορά στην κυβέρνηση από άλλο να μη «φτιάχνουν» ευθύνη.
+function stateAccountabilityRelevant(titles: string[]): boolean {
+  return titles.some(
+    (t) => (PUBLIC_RISK_RE.test(t) && STATE_ACTOR_RE.test(t)) || stateAccountabilityBoost(t) > 0
+  );
 }
 
 function partyRelevanceScore(
   profile: PoliticalPartyProfile | null,
   topicText: string,
-  eventText: string
+  eventText: string,
+  eventTitles: string[] = []
 ): { score: number; theme_match: boolean; matched_terms: string[]; state_accountability: boolean } | null {
   const index = partyRelevanceIndex(profile);
   if (!index) return null;
@@ -143,7 +155,7 @@ function partyRelevanceScore(
   const eventStems = relevanceStems(`${topicText} ${eventText}`);
   const matched = Array.from(eventStems).filter((stem) => index.positionStems.has(stem) || index.themeStems.has(stem));
   let score = Math.min(100, (themeMatch ? 60 : 25) + Math.min(40, matched.length * 6));
-  const accountability = stateAccountabilityRelevant(`${topicText} ${eventText}`);
+  const accountability = stateAccountabilityRelevant(eventTitles);
   if (accountability) score = Math.max(score, STATE_ACCOUNTABILITY_FLOOR);
   return { score, theme_match: themeMatch, matched_terms: matched.slice(0, 12), state_accountability: accountability };
 }
@@ -1356,7 +1368,8 @@ function buildAgendaItem(
   const partyRelevance = partyRelevanceScore(
     partyProfile,
     `${group.parentTopic || ""} ${group.classification.micro_agenda || ""}`,
-    sortedEvents.map((event) => `${event?.title || ""} ${event?.summary || ""}`).join(" ").slice(0, 4000)
+    sortedEvents.map((event) => `${event?.title || ""} ${event?.summary || ""}`).join(" ").slice(0, 4000),
+    sortedEvents.map((event) => `${event?.title || ""}. ${event?.summary || ""}`)
   );
   const rawScore = partyRelevance
     ? clampScore((1 - PARTY_RELEVANCE_WEIGHT) * standardRawScore + PARTY_RELEVANCE_WEIGHT * partyRelevance.score)
