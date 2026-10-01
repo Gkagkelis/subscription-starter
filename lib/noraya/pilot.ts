@@ -737,7 +737,8 @@ export async function requireMember(
     }
     return json(401, { error: "Απαιτείται σύνδεση για αυτή τη λειτουργία.", login_required: true });
   }
-  const auth = await pilotAuth(route, "data", { adminOnly: opts.adminOnly });
+  // Μόνο έλεγχος πρόσβασης (όχι όριο): κατηγορία "auto", όχι μια από τις admin-only.
+  const auth = await pilotAuth(route, "auto", { adminOnly: opts.adminOnly });
   return auth.response || null;
 }
 
