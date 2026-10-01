@@ -39,7 +39,7 @@
     },
     {
       "path": "/api/cron/fetch-topic-trends?token=dev&limit=20",
-      "schedule": "45 */6 * * *"
+      "schedule": "45 */3 * * *"
     },
     {
       "path": "/api/external-signals/trends-coverage?token=dev&mode=start",

@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireMember } from "@/lib/noraya/pilot";
 
 export async function POST(req: NextRequest) {
+  const gate = await requireMember(req, "/api/search");
+  if (gate) return gate;
   try {
     const { query } = await req.json();
 

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { requireMember } from "@/lib/noraya/pilot";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -17,6 +18,8 @@ const supabase = createClient(
  *   ?risk=high
  */
 export async function GET(req: Request) {
+  const gate = await requireMember(req, "/api/agenda");
+  if (gate) return gate;
   const { searchParams } = new URL(req.url);
 
   const limit = Math.min(parseInt(searchParams.get("limit") || "10", 10), 50);

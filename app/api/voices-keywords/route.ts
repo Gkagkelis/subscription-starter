@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
+import { requireMember } from "@/lib/noraya/pilot";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -113,8 +114,12 @@ async function handle(request: Request) {
 }
 
 export async function GET(request: Request) {
+  const gate = await requireMember(request, "/api/voices-keywords");
+  if (gate) return gate;
   return handle(request);
 }
 export async function POST(request: Request) {
+  const gate = await requireMember(request, "/api/voices-keywords");
+  if (gate) return gate;
   return handle(request);
 }

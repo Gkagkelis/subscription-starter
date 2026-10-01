@@ -1,5 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
+import { requireMember } from "@/lib/noraya/pilot";
 
 /**
  * GET /api/articles
@@ -10,6 +11,8 @@ import { NextResponse } from "next/server";
  *   ?search=ακρίβεια
  */
 export async function GET(req: Request) {
+  const gate = await requireMember(req, "/api/articles");
+  if (gate) return gate;
   const supabase = createClient();
   const { searchParams } = new URL(req.url);
 

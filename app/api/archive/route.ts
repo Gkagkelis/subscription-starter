@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
+import { requireMember } from "@/lib/noraya/pilot";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -19,6 +20,8 @@ function json(payload: unknown, status = 200) {
 
 // GET /api/archive?party=elas -> λίστα
 export async function GET(req: NextRequest) {
+  const gate = await requireMember(req, "/api/archive");
+  if (gate) return gate;
   try {
     const party = (new URL(req.url).searchParams.get("party") || "elas").trim();
     const sb = svc();
@@ -37,6 +40,8 @@ export async function GET(req: NextRequest) {
 
 // POST /api/archive {party,title,kind,content,event_id,event_title} -> αποθήκευση
 export async function POST(req: NextRequest) {
+  const gate = await requireMember(req, "/api/archive");
+  if (gate) return gate;
   try {
     const b = await req.json().catch(() => ({}));
     const title = String(b?.title || "").trim();
@@ -60,6 +65,8 @@ export async function POST(req: NextRequest) {
 
 // PATCH /api/archive {id,title} -> μετονομασία
 export async function PATCH(req: NextRequest) {
+  const gate = await requireMember(req, "/api/archive");
+  if (gate) return gate;
   try {
     const b = await req.json().catch(() => ({}));
     const id = String(b?.id || "");
@@ -79,6 +86,8 @@ export async function PATCH(req: NextRequest) {
 
 // DELETE /api/archive?id=... -> διαγραφή
 export async function DELETE(req: NextRequest) {
+  const gate = await requireMember(req, "/api/archive");
+  if (gate) return gate;
   try {
     const id = (new URL(req.url).searchParams.get("id") || "").trim();
     if (!id) return json({ ok: false, error: "missing_id" }, 400);

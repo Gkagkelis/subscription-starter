@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
+import { requireMember } from "@/lib/noraya/pilot";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 // ΔΙΑΓΝΩΣΤΙΚΟ v2: δείχνει το ΠΡΑΓΜΑΤΙΚΟ data array (γραμμές) του Flourish.
-export async function GET() {
+export async function GET(req: Request) {
+  const gate = await requireMember(req, "/api/polls/dimoskopiseis-debug", { adminOnly: true });
+  if (gate) return gate;
   const out: any = { ok: true, steps: {} };
   const UA = { "User-Agent": "Mozilla/5.0 (compatible; NorayaBot/1.0)" };
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import rawIndex from "@/lib/noraya/noraya_data_index.json";
+import { requireMember } from "@/lib/noraya/pilot";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -187,6 +188,8 @@ function buildNote(topicLabel: string, overallRecent: number | null, occRows: Ou
 }
 
 export async function POST(req: NextRequest) {
+  const gate = await requireMember(req, "/api/data/match");
+  if (gate) return gate;
   try {
     const body = await req.json().catch(() => ({}));
     const theme: string = body?.theme || "";

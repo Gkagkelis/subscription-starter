@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { eventSalienceScore, isNoiseTitle, politicalCatalystBoost, stateAccountabilityBoost } from "@/lib/noraya/noise-filters";
 import { buildAgendaResearchContext, RESEARCH_CONTEXT_VERSION, type PoliticalPartyProfile } from "../../../../lib/noraya/research-context";
+import { requireMember } from "@/lib/noraya/pilot";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -158,6 +159,18 @@ function partyRelevanceScore(
   const accountability = stateAccountabilityRelevant(eventTitles);
   if (accountability) score = Math.max(score, STATE_ACCOUNTABILITY_FLOOR);
   return { score, theme_match: themeMatch, matched_terms: matched.slice(0, 12), state_accountability: accountability };
+}
+
+// Προτίμηση στο σήμα 24 ωρών (Google Trends «now 1-d») όπου υπάρχει· αλλιώς το εβδομαδιαίο.
+function preferDailyTrends<T extends { topic?: any; timeframe?: any }>(rows: T[]): T[] {
+  const byTopic = new Map<string, T>();
+  for (const row of rows) {
+    const key = String(row?.topic || "").trim();
+    if (!key) continue;
+    const prev = byTopic.get(key);
+    if (!prev || (row?.timeframe === "now 1-d" && prev?.timeframe !== "now 1-d")) byTopic.set(key, row);
+  }
+  return Array.from(byTopic.values());
 }
 
 function sanitizePartyProfile(profile: PoliticalPartyProfile | null): PoliticalPartyProfile | null {
@@ -1275,7 +1288,8 @@ function buildAgendaItem(
   editorialProminenceRows: any[],
   debug: boolean,
   partyKey: string | null = null,
-  partyProfile: PoliticalPartyProfile | null = null
+  partyProfile: PoliticalPartyProfile | null = null,
+  frontpageHeadlines: any[] = []
 ) {
   // Ιεράρχηση γεγονότων ΜΕΣΑ στο cluster: όχι μόνο event_score (που δίνει άδικα
   // 71 σε μονό άρθρο), αλλά συνδυασμός με ΠΡΑΓΜΑΤΙΚΗ κάλυψη (άρθρα + πηγές) και
@@ -1296,13 +1310,49 @@ function buildAgendaItem(
   const trend = trendForAgenda(topicCandidates, trends, group.classification.micro_agenda, group.parentTopic);
   const matchedAgendaTopic = agendaTopicForAgenda(topicCandidates, agendaTopics);
   const matchedAdvisorBrief = advisorBriefForAgenda(topicCandidates, advisorBriefs);
-  const matchedEditorialProminence = editorialProminenceForAgenda(
+  let matchedEditorialProminence = editorialProminenceForAgenda(
     topicCandidates,
     editorialProminenceRows,
     group.classification.micro_agenda_id,
     group.classification.micro_agenda,
     group.parentTopic
   );
+  // Αντιστοίχιση πρωτοσέλιδων με το ΚΕΙΜΕΝΟ των γεγονότων: πολλά πρωτοσέλιδα δεν πιάνονται από
+  // τους κανόνες κατηγοριών (ή μόνο σε επίπεδο γενικής θεματικής). Αν ένας τίτλος πρωτοσέλιδου
+  // μοιράζεται ≥2 ουσιαστικές λέξεις-ρίζες με τα γεγονότα του θέματος, μετρά ως πρωτοσέλιδο του θέματος.
+  if (
+    frontpageHeadlines.length &&
+    (!matchedEditorialProminence ||
+      isParentOnlyRealSignal(matchedEditorialProminence?.topic, group.classification.micro_agenda, group.parentTopic))
+  ) {
+    const eventStems = relevanceStems(
+      group.events.map((e: any) => `${e?.title || ""} ${e?.summary || ""}`).join(" ")
+    );
+    const hits = frontpageHeadlines
+      .map((h: any) => {
+        const shared = Array.from(relevanceStems(h?.article_title || "")).filter((st) => eventStems.has(st));
+        return { h, shared };
+      })
+      .filter((x) => x.shared.length >= 2);
+    if (hits.length) {
+      const best = Math.max(...hits.map((x) => toNumber(x.h?.prominence_score, 0)));
+      const sources = new Set(hits.map((x) => String(x.h?.source_name || "")));
+      matchedEditorialProminence = {
+        topic: group.classification.micro_agenda,
+        parent_topic: group.parentTopic,
+        editorial_prominence_score: Math.min(100, best + Math.min(10, (sources.size - 1) * 4)),
+        source_count: sources.size,
+        signal_count: hits.length,
+        match_mode: "headline_text",
+        top_items: hits.slice(0, 5).map((x) => ({
+          title: x.h?.article_title,
+          source: x.h?.source_name,
+          prominence_score: x.h?.prominence_score,
+          shared_terms: x.shared.slice(0, 6),
+        })),
+      };
+    }
+  }
   const sensitivity = classifySensitivity(group.events, group.classification.micro_agenda);
   const uiPolicy = sensitivityUiPolicy(sensitivity);
   const eventClassifications = new Map<any, ClassificationResult>();
@@ -1523,10 +1573,10 @@ function buildAgendaItem(
   };
 }
 
-function buildLiveAgenda(events: any[], trends: any[], agendaTopics: any[], advisorBriefs: any[], editorialProminenceRows: any[], debug: boolean, partyKey: string | null = null, partyProfile: PoliticalPartyProfile | null = null) {
+function buildLiveAgenda(events: any[], trends: any[], agendaTopics: any[], advisorBriefs: any[], editorialProminenceRows: any[], debug: boolean, partyKey: string | null = null, partyProfile: PoliticalPartyProfile | null = null, frontpageHeadlines: any[] = []) {
   const filteredEvents = events.filter((event) => !isSportsNoiseEvent(event));
   const sportsNoiseEventsFiltered = events.length - filteredEvents.length;
-  const items = groupEvents(filteredEvents).map((group) => buildAgendaItem(group, trends, agendaTopics, advisorBriefs, editorialProminenceRows, debug, partyKey, partyProfile));
+  const items = groupEvents(filteredEvents).map((group) => buildAgendaItem(group, trends, agendaTopics, advisorBriefs, editorialProminenceRows, debug, partyKey, partyProfile, frontpageHeadlines));
   const agendaClusters = items
     .filter((item) => item.type !== "monitoring_event")
     .sort((a, b) => b.score - a.score || b.top_event_score - a.top_event_score || b.event_count - a.event_count);
@@ -1560,7 +1610,17 @@ function authorize(token: string | null) {
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const auth = authorize(searchParams.get("token"));
+  let auth = authorize(searchParams.get("token"));
+  // Στην παραγωγή το «token=dev» μόνο του δεν αρκεί: χρειάζεται συνδεδεμένος χρήστης με πρόσβαση.
+  if (auth.mode === "dev_token_allowed" && process.env.VERCEL_ENV === "production") {
+    const gate = await requireMember(req, "/api/situation-engine/agenda-probe");
+    if (gate) return gate;
+  }
+  if (!auth.ok) {
+    const gate = await requireMember(req, "/api/situation-engine/agenda-probe");
+    if (gate) return gate;
+    auth = { ok: true, mode: "member_session" } as any;
+  }
 
   if (!auth.ok) {
     return NextResponse.json(
@@ -1587,9 +1647,9 @@ export async function GET(req: Request) {
 
   const trendsQuery = supabase
     .from("topic_trend_signals")
-    .select("topic,search_interest_score,search_interest_status,queries,fetched_at")
+    .select("topic,search_interest_score,search_interest_status,queries,fetched_at,timeframe")
     .eq("region", "GR")
-    .eq("timeframe", "now 7-d");
+    .in("timeframe", ["now 1-d", "now 7-d"]);
 
   const agendaTopicsQuery = supabase
     .from("agenda_topics")
@@ -1615,12 +1675,20 @@ export async function GET(req: Request) {
     .order("last_seen_at", { ascending: false, nullsFirst: false })
     .limit(31);
 
+  // Τίτλοι πρωτοσέλιδων των τελευταίων ~30 ωρών (για αντιστοίχιση με το κείμενο των γεγονότων).
+  const frontpageHeadlinesQuery = supabase
+    .from("editorial_prominence_signals")
+    .select("article_title,prominence_score,source_name,observed_at")
+    .gte("observed_at", new Date(Date.now() - 30 * 60 * 60 * 1000).toISOString())
+    .order("observed_at", { ascending: false })
+    .limit(150);
+
   const partyProfilesQuery = supabase
     .from("political_party_profiles")
     .select("*")
     .limit(250);
 
-  const [eventsResult, trendsResult, agendaTopicsResult, advisorBriefsResult, editorialProminenceResult, legacyResult, partyProfilesResult] = await Promise.all([
+  const [eventsResult, trendsResult, agendaTopicsResult, advisorBriefsResult, editorialProminenceResult, legacyResult, partyProfilesResult, frontpageHeadlinesResult] = await Promise.all([
     eventsQuery,
     trendsQuery,
     agendaTopicsQuery,
@@ -1628,7 +1696,16 @@ export async function GET(req: Request) {
     editorialProminenceQuery,
     legacyQuery,
     partyProfilesQuery,
+    frontpageHeadlinesQuery,
   ]);
+  // ένας τίτλος ανά εφημερίδα+τίτλο (το cron τον ξαναγράφει κάθε 2 ώρες)
+  const frontpageHeadlines = Array.from(
+    new Map(
+      (Array.isArray(frontpageHeadlinesResult?.data) ? (frontpageHeadlinesResult.data as any[]) : [])
+        .filter((h) => h?.article_title)
+        .map((h) => [`${h.source_name}|${h.article_title}`, h] as [string, any])
+    ).values()
+  );
 
   if (eventsResult.error) {
     return NextResponse.json(
@@ -1651,7 +1728,7 @@ export async function GET(req: Request) {
       quality_score: Number(ev?.event_score || 0),
       event_score: eventSalienceScore(ev) + politicalCatalystBoost(ev?.title) + stateAccountabilityBoost(ev?.title),
     }));
-  const trends = Array.isArray(trendsResult.data) ? trendsResult.data : [];
+  const trends = preferDailyTrends(Array.isArray(trendsResult.data) ? (trendsResult.data as any[]) : []);
   const agendaTopics = Array.isArray(agendaTopicsResult.data) ? agendaTopicsResult.data : [];
   const advisorBriefs = Array.isArray(advisorBriefsResult.data) ? advisorBriefsResult.data : [];
   const editorialProminenceRows = Array.isArray(editorialProminenceResult.data) ? editorialProminenceResult.data : [];
@@ -1667,7 +1744,7 @@ export async function GET(req: Request) {
   const legacyHoursOld = newestLegacySeenAt ? hoursOld(newestLegacySeenAt) : null;
   const partyKey = searchParams.get("party") || null;
   const partyProfile = selectPartyProfile(partyKey, partyProfiles);
-  const result = buildLiveAgenda(events, trends, agendaTopics, advisorBriefs, editorialProminenceRows, debug, partyKey, partyProfile);
+  const result = buildLiveAgenda(events, trends, agendaTopics, advisorBriefs, editorialProminenceRows, debug, partyKey, partyProfile, frontpageHeadlines);
 
   const diagnostics = {
     read_only: true,
