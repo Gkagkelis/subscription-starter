@@ -2822,7 +2822,7 @@ export default function StrategyRoomPage() {
               <div className="mb-3 flex items-center gap-2 rounded-2xl border border-cyan-300/30 bg-cyan-300/[0.06] px-4 py-3 text-xs text-cyan-100">
                 <span className="h-2 w-2 animate-pulse rounded-full bg-cyan-300" />
                 Ο Noraya ετοιμάζει την ανάλυση αυτού του γεγονότος για το κόμμα σου
-                (περίπου 1–2 λεπτά — την πρώτη φορά· μετά ανοίγει αμέσως).
+                (περίπου 2–3 λεπτά την πρώτη φορά· μετά ανοίγει αμέσως).
               </div>
             ) : null}
 
