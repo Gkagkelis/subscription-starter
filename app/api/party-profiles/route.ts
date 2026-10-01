@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { requireMember } from "@/lib/noraya/pilot";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -101,7 +102,10 @@ function json(payload: unknown, status = 200) {
   });
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+  // Το προφίλ (με τις οδηγίες συμβούλου) είναι πνευματική ιδιοκτησία — μόνο για συνδεδεμένους.
+  const gate = await requireMember(req, "/api/party-profiles", { loginOnly: true });
+  if (gate) return gate;
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 

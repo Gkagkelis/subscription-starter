@@ -1,11 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient as createUserClient } from "@/utils/supabase/server";
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, name, role } = await req.json();
+    const { email: requestedEmail, name, role } = await req.json();
 
+    // Μόνο προς τον ΙΔΙΟ τον χρήστη που μόλις εγγράφηκε (όχι σε όποια διεύθυνση σταλεί) —
+    // αλλιώς το endpoint μπορούσε να στέλνει email σε τρίτους (spam με το όνομα Noraya).
+    let email: string | null = null;
+    try {
+      const { data } = await createUserClient().auth.getUser();
+      email = data?.user?.email || null;
+    } catch {
+      email = null;
+    }
     if (!email) {
-      return NextResponse.json({ ok: false, error: "No email" }, { status: 400 });
+      return NextResponse.json({ ok: false, error: "login_required" }, { status: 401 });
+    }
+    if (requestedEmail && String(requestedEmail).toLowerCase() !== email.toLowerCase()) {
+      return NextResponse.json({ ok: false, error: "email_mismatch" }, { status: 403 });
     }
 
     await fetch("https://api.resend.com/emails", {

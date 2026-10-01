@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { eventSalienceScore, isNoiseTitle, politicalCatalystBoost, stateAccountabilityBoost } from "@/lib/noraya/noise-filters";
 import { buildAgendaResearchContext, RESEARCH_CONTEXT_VERSION, type PoliticalPartyProfile } from "../../../../lib/noraya/research-context";
+import { requireMember } from "@/lib/noraya/pilot";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -1560,7 +1561,17 @@ function authorize(token: string | null) {
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const auth = authorize(searchParams.get("token"));
+  let auth = authorize(searchParams.get("token"));
+  // Στην παραγωγή το «token=dev» μόνο του δεν αρκεί: χρειάζεται συνδεδεμένος χρήστης με πρόσβαση.
+  if (auth.mode === "dev_token_allowed" && process.env.VERCEL_ENV === "production") {
+    const gate = await requireMember(req, "/api/situation-engine/agenda-probe");
+    if (gate) return gate;
+  }
+  if (!auth.ok) {
+    const gate = await requireMember(req, "/api/situation-engine/agenda-probe");
+    if (gate) return gate;
+    auth = { ok: true, mode: "member_session" } as any;
+  }
 
   if (!auth.ok) {
     return NextResponse.json(

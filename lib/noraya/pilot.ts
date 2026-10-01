@@ -605,6 +605,31 @@ export async function pilotAuthRequest(
   return pilotAuth(route, category, opts);
 }
 
+/**
+ * Φρουρός για routes που διαβάζουν/γράφουν δεδομένα του εργαλείου (ατζέντα, άρθρα, αρχείο κ.λπ.).
+ * Επιτρέπει: (α) εσωτερικές κλήσεις/crons με το πραγματικό CRON_SECRET, (β) συνδεδεμένο χρήστη
+ * με πρόσβαση (κωδικός πρόσκλησης ή admin). Με loginOnly αρκεί η σύνδεση (π.χ. οθόνη υποδοχής
+ * αμέσως μετά την εγγραφή). Επιστρέφει null αν επιτρέπεται, αλλιώς την απάντηση 401/403.
+ */
+export async function requireMember(
+  req: Request,
+  route: string,
+  opts: { loginOnly?: boolean; adminOnly?: boolean } = {}
+): Promise<NextResponse | null> {
+  if (isCronSecretRequest(req)) return null;
+  if (opts.loginOnly) {
+    try {
+      const { data } = await createUserClient().auth.getUser();
+      if (data?.user) return null;
+    } catch {
+      /* πέφτει στο 401 */
+    }
+    return json(401, { error: "Απαιτείται σύνδεση για αυτή τη λειτουργία.", login_required: true });
+  }
+  const auth = await pilotAuth(route, "data", { adminOnly: opts.adminOnly });
+  return auth.response || null;
+}
+
 /** Cron ή συνδεδεμένος admin. */
 export async function isCronOrAdmin(req: Request) {
   if (isCronRequest(req)) return true;

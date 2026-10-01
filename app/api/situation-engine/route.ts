@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { computeNorayaPriorityScore } from "@/lib/noraya-priority-score";
 import { eventSalienceScore, isSensitiveEvent, isForeignNoise, isCommercialNoise, isForeignPolitics, politicalCatalystBoost, stateAccountabilityBoost } from "@/lib/noraya/noise-filters";
+import { requireMember } from "@/lib/noraya/pilot";
 
 // Φιλτρο ευαισθητων/μη-πολιτικων περιστατικων (αστυνομικο δελτιο, ανηλικοι, τραγωδιες)
 // — ΔΕΝ εμφανιζονται ΠΟΤΕ ως πολιτικες προτεραιοτητες.
@@ -369,8 +370,11 @@ export async function GET(req: Request) {
   const token = searchParams.get("token");
   const refresh = searchParams.get("refresh");
 
-  if (token !== process.env.CRON_SECRET && token !== "dev") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // Εσωτερικές κλήσεις με το πραγματικό CRON_SECRET· αλλιώς μόνο συνδεδεμένος χρήστης με πρόσβαση
+  // (το «token=dev» της σελίδας δεν αρκεί πλέον μόνο του).
+  if (!(process.env.CRON_SECRET && token === process.env.CRON_SECRET)) {
+    const gate = await requireMember(req, "/api/situation-engine");
+    if (gate) return gate;
   }
 
   let refreshResult: unknown = null;

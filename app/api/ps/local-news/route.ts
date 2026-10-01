@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient as naServer } from "@/utils/supabase/server";
 import { createClient as naAdmin } from "@supabase/supabase-js";
+import { requireMember } from "@/lib/noraya/pilot";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -500,6 +501,8 @@ async function handle(reqDistrict: string | null, force: boolean, providedSearch
 }
 
 export async function GET(req: NextRequest) {
+  const gate = await requireMember(req, "/api/ps/local-news");
+  if (gate) return gate;
   const url = new URL(req.url);
   const district = url.searchParams.get("district");
   const search = url.searchParams.get("search") || undefined;
@@ -508,6 +511,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const gate = await requireMember(req, "/api/ps/local-news");
+  if (gate) return gate;
   const body = await req.json().catch(() => ({}));
   const district = body?.district ? String(body.district) : null;
   const search = body?.search ? String(body.search) : undefined;
