@@ -44,7 +44,9 @@ type ProbeCluster = {
 };
 
 const REGION = "GR";
-const TIMEFRAME = "now 7-d";
+// Ενδιαφέρον των τελευταίων 24 ωρών (όχι 7 ημερών): ένα θέμα που «σκάει» σήμερα πρέπει να
+// φαίνεται σήμερα. Οι εβδομαδιαίες τιμές (Wikipedia, παλιές εγγραφές) μένουν ως εφεδρεία.
+const TIMEFRAME = "now 1-d";
 const DEFAULT_LIMIT = 12;
 
 const supabase = createClient(

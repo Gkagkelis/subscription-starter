@@ -416,15 +416,18 @@ export async function GET(req: Request) {
 
   const { data: trendRows, error: trendError } = await supabase
     .from("topic_trend_signals")
-    .select("topic,search_interest_score,search_interest_status,queries,fetched_at")
+    .select("topic,search_interest_score,search_interest_status,queries,fetched_at,timeframe")
     .eq("region", "GR")
-    .eq("timeframe", "now 7-d");
+    .in("timeframe", ["now 1-d", "now 7-d"]);
 
+  // Προτίμηση στο σήμα 24 ωρών («now 1-d») όπου υπάρχει· αλλιώς το εβδομαδιαίο.
   const trendMap = new Map<string, TrendSignal>();
   if (!trendError && Array.isArray(trendRows)) {
-    for (const row of trendRows as TrendSignal[]) {
+    for (const row of trendRows as any[]) {
       const topic = String(row?.topic || "").trim();
-      if (topic) trendMap.set(topic, row);
+      if (!topic) continue;
+      const prev: any = trendMap.get(topic);
+      if (!prev || (row?.timeframe === "now 1-d" && prev?.timeframe !== "now 1-d")) trendMap.set(topic, row);
     }
   }
 
