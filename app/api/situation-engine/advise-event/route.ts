@@ -40,6 +40,12 @@ const CRON_EVENTS_PER_RUN = Math.max(
 );
 const ROUTE = "/api/situation-engine/advise-event";
 const BUDGET_MS = 220000;
+// Μια ανάλυση (Sonnet, ~8k tokens) κρατά ~3 λεπτά. Ένα αυτόματο τρέξιμο ΔΕΝ ξεκινά δεύτερη
+// μετά το πρώτο λεπτό: αλλιώς ξεπερνούσε το όριο των 300s, «σκοτωνόταν» χωρίς να σώσει
+// τη δεύτερη ανάλυση και χωρίς καταγραφή — πληρώναμε δύο, κρατούσαμε μία.
+const CRON_START_CUTOFF_MS = 60000;
+// 07, 10, 13, 16, 19, 22 ώρα Ελλάδας: τα σημαντικότερα γεγονότα έχουν έτοιμη ανάλυση για το κόμμα.
+const ADVISE_HOURS_UTC = "4,7,10,13,16,19";
 
 function svc() {
   return createServiceClient(
@@ -406,7 +412,7 @@ async function handle(request: Request) {
     let metering: Metering;
     if (fromCron) {
       // Εκτός ωρών λειτουργίας των ακριβών crons: δεν κάνουμε τίποτα.
-      if (!force && !(await aiCronDue(ROUTE))) {
+      if (!force && !(await aiCronDue(ROUTE, "NORAYA_ADVISE_HOURS_UTC", ADVISE_HOURS_UTC))) {
         return NextResponse.json({ ok: true, mode: "off_hours", analyzed: 0 });
       }
       metering = {
@@ -472,7 +478,10 @@ async function handle(request: Request) {
     let count = 0;
 
     const perRun = fromCron ? CRON_EVENTS_PER_RUN : MAX_EVENTS_PER_RUN;
-    while (count < perRun && Date.now() - startedAt < BUDGET_MS) {
+    while (
+      count < perRun &&
+      Date.now() - startedAt < (fromCron ? CRON_START_CUTOFF_MS : BUDGET_MS)
+    ) {
       const { data: nextId } = await supabase.rpc("pick_next_event_for_party_brief", { p_party_key: partyKey });
       const eventId = (nextId as string) || null;
       if (!eventId) break;
