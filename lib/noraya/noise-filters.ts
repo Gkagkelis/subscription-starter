@@ -86,3 +86,17 @@ export function stateAccountabilityBoost(title?: string | null): number {
   if (HARD_SENSITIVE_RE.test(t)) return 0; // παιδικα/σεξουαλικα: ποτε στην ατζεντα
   return HUMAN_COST_RE.test(t) && STATE_RESPONSIBILITY_RE.test(t) ? 14 : 0;
 }
+
+
+// 7) ΕΜΒΕΛΕΙΑ ΓΕΓΟΝΟΤΟΣ: το event_score της βάσης είναι ο ΜΕΣΟΣ ΟΡΟΣ ποιότητας των άρθρων —
+//    δεν ξεχωρίζει ένα θέμα με 110 άρθρα από 11 μέσα από ένα με 1 άρθρο από 1 μέσο (και τα δύο ~64).
+//    Η «εμβέλεια» το συνδυάζει με τον όγκο κάλυψης: 60% ποιότητα + 40% πόσα μέσα / άρθρα.
+export function eventVolumeScore(ev: any): number {
+  const sources = Math.max(0, Number(ev?.source_count) || 0);
+  const articles = Math.max(0, Number(ev?.article_count) || 0);
+  return Math.min(100, Math.round(sources * 9 + Math.min(articles, 40) * 1.2));
+}
+export function eventSalienceScore(ev: any): number {
+  const quality = Math.max(0, Math.min(100, Number(ev?.event_score) || 0));
+  return Math.round(0.6 * quality + 0.4 * eventVolumeScore(ev));
+}

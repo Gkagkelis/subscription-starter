@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { computeNorayaPriorityScore } from "@/lib/noraya-priority-score";
-import { isSensitiveEvent, isForeignNoise, isCommercialNoise, isForeignPolitics, politicalCatalystBoost, stateAccountabilityBoost } from "@/lib/noraya/noise-filters";
+import { eventSalienceScore, isSensitiveEvent, isForeignNoise, isCommercialNoise, isForeignPolitics, politicalCatalystBoost, stateAccountabilityBoost } from "@/lib/noraya/noise-filters";
 
 // Φιλτρο ευαισθητων/μη-πολιτικων περιστατικων (αστυνομικο δελτιο, ανηλικοι, τραγωδιες)
 // — ΔΕΝ εμφανιζονται ΠΟΤΕ ως πολιτικες προτεραιοτητες.
@@ -396,8 +396,8 @@ export async function GET(req: Request) {
     .from("v_political_events_live")
     .select("*", { count: "exact" })
     .gte("last_article_at", WEEK_AGO_ISO)
-    .order("event_score", { ascending: false })
-    .limit(60);
+    .order("last_article_at", { ascending: false })
+    .limit(200);
 
   const {
     data: agendaRows,
@@ -464,7 +464,13 @@ export async function GET(req: Request) {
     }
   }
 
-  const allEventRows = (!eventError && Array.isArray(eventRows) ? eventRows : []).filter(
+  // Κατάταξη με «εμβέλεια» (ποιότητα + πόσα μέσα/άρθρα), όχι μόνο με τη μέση ποιότητα της βάσης.
+  const scoredEventRows = (!eventError && Array.isArray(eventRows) ? eventRows : []).map((r: any) => ({
+    ...r,
+    quality_score: Number(r?.event_score || 0),
+    event_score: eventSalienceScore(r),
+  }));
+  const allEventRows = scoredEventRows.filter(
     (r: any) => !isSensitiveEvent((r as any)?.title) && !isForeignNoise((r as any)?.title) && !isCommercialNoise((r as any)?.title) && !isForeignPolitics((r as any)?.title),
   );
   // ΒΗΜΑ 1 — ΦΙΛΤΡΟ (gate): μόνο ΦΡΕΣΚΑ θέματα (≤48 ώρες, βάσει ημερομηνίας πιο πρόσφατου άρθρου).
