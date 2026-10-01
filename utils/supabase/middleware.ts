@@ -130,6 +130,22 @@ export const updateSession = async (request: NextRequest) => {
       return NextResponse.redirect(new URL('/invite', request.url));
     }
 
+    // === Έκδοση πελάτη: Ατζέντα, Καταστάσεις, Πρόσωπα, Αρχεία, Δεδομένα μόνο για admin ===
+    // (στο μενού φαίνονται γκρι· αν ανοιχτούν απευθείας, επιστροφή στο «Σήμερα»).
+    const adminOnlyPages = ['/agenda', '/situations', '/people', '/archive', '/dashboard/data'];
+    if (user && adminOnlyPages.some((r) => path === r || path.startsWith(`${r}/`))) {
+      const limitsFlag = (process.env.NORAYA_LIMITS_ENABLED || '').trim().toLowerCase();
+      const limitsOn = !limitsFlag || ['1', 'true', 'on', 'yes'].includes(limitsFlag);
+      const admins = (process.env.NORAYA_ADMIN_EMAILS || '')
+        .split(',')
+        .map((e) => e.trim().toLowerCase())
+        .filter(Boolean);
+      const isAdmin = Boolean(user.email && admins.includes(user.email.toLowerCase()));
+      if (limitsOn && !isAdmin) {
+        return NextResponse.redirect(new URL('/strategy-room', request.url));
+      }
+    }
+
     const publicNorayaRoutes = ['/onboarding', '/psychografima'];
 
     // === ΔΡΟΜΟΛΟΓΗΣΗ ΒΟΥΛΕΥΤΗ: onboarding -> ψυχογραφημα -> μενου ===

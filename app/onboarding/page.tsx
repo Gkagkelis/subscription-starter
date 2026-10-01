@@ -1038,7 +1038,7 @@ export default function OnboardingPage() {
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <button
             type="button"
-            onClick={() => router.push("/agenda")}
+            onClick={() => router.push("/strategy-room")}
             className="rounded-2xl border border-white/10 px-5 py-3 text-sm text-zinc-300 transition hover:border-white/20"
           >
             Παράλειψη

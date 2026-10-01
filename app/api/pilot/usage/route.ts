@@ -25,11 +25,18 @@ export async function GET() {
     used: usage?.byCategory[c] || 0,
     limit: categoryLimit(c, pass)
   }));
+  const enabled = pilotConfig.limitsEnabled() && !caller.isAdmin;
 
   return NextResponse.json({
     ok: true,
-    enabled: pilotConfig.limitsEnabled() && !caller.isAdmin,
+    enabled,
     is_admin: caller.isAdmin,
+    // Τι βλέπει ο πελάτης: ο Σύμβουλος μόνο με ξεκλείδωμα· οι υπόλοιπες καρτέλες
+    // (Ατζέντα, Καταστάσεις, Πρόσωπα, Αρχεία, Δεδομένα) και τα εργαλεία admin μόνο για admin.
+    features: {
+      advisor: !enabled || pass,
+      admin_tools: !enabled
+    },
     day: athensDay(),
     day_pass: pass,
     day_pass_eur: pilotConfig.dayPassEur(),

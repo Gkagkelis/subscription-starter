@@ -70,11 +70,14 @@ export default function PilotAdminPage() {
             <section className="rounded-xl border border-zinc-800 p-5">
               <h2 className="mb-3 text-lg text-white">Ρυθμίσεις (από το Vercel)</h2>
               <div className="grid gap-2 md:grid-cols-3">
-                <div>Όριο ανά κατηγορία / μέρα: <b>{data.config.daily_limit}</b></div>
-                <div>Με ξεκλείδωμα (όριο ασφαλείας): <b>{data.config.pass_cap}</b></div>
-                <div>Αυτόματες αναλύσεις / μέρα: <b>{data.config.auto_daily_limit}</b></div>
-                <div>Ανώτατο κόστος πελάτη / μέρα: <b>{usd(data.config.scope_daily_usd_cap)}</b></div>
-                <div>Ανώτατο με ξεκλείδωμα: <b>{usd(data.config.pass_daily_usd_cap)}</b></div>
+                <div>
+                  Δωρεάν / μέρα: <b>{data.config.free_topics}</b> αναλύσεις θεμάτων · <b>{data.config.free_scenarios}</b> σενάρια ·{" "}
+                  <b>{data.config.free_attacks}</b> επιθέσεις · Σύμβουλος: <b>όχι</b>
+                </div>
+                <div>Με ξεκλείδωμα: <b>απεριόριστα + Σύμβουλος</b></div>
+                <div>Κρυφό όριο κλήσεων AI (δωρεάν) / μέρα: <b>{data.config.free_auto_calls}</b></div>
+                <div>Ανώτατο κόστος δωρεάν πελάτη / μέρα: <b>{usd(data.config.free_usd_cap)}</b></div>
+                <div>Όριο ασφαλείας με ξεκλείδωμα: <b>{usd(data.config.pass_safety_usd)}</b></div>
                 <div>Τιμή ξεκλειδώματος: <b>{eur(data.config.day_pass_eur)}</b></div>
                 <div>Όριο crons ανάλυσης / μέρα: <b>{usd(data.config.cron_daily_usd)}</b></div>
                 <div>Όριο ταξινόμησης ειδήσεων / μέρα: <b>{usd(data.config.classify_daily_usd)}</b></div>

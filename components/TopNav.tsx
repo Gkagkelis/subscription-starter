@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { usePilotTier } from "./usePilotTier";
 
 /**
  * Κοινή μπάρα πλοήγησης (μόνο τα tabs).
@@ -26,8 +27,12 @@ const NAV_TABS: NavTab[] = [
   { label: "Δεδομένα", href: null },
 ];
 
+// Στην έκδοση πελάτη φαίνονται γκρι (σαν demo): ανοίγουν μόνο για admin.
+export const ADMIN_ONLY_TABS = ["Ατζέντα", "Καταστάσεις", "Πρόσωπα", "Αρχεία", "Δεδομένα"];
+
 export default function TopNav({ className = "" }: { className?: string }) {
   const pathname = usePathname() || "";
+  const tier = usePilotTier();
 
   const isActive = (href: string | null) => {
     if (!href) return false;
@@ -41,7 +46,7 @@ export default function TopNav({ className = "" }: { className?: string }) {
         const active = isActive(tab.href);
         const base = "rounded-2xl px-3 py-2 text-xs transition";
 
-        if (tab.href) {
+        if (tab.href && (tier.adminTools || !ADMIN_ONLY_TABS.includes(tab.label))) {
           return (
             <Link
               key={tab.label}

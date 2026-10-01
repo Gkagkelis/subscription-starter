@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { refreshPilotTier } from "./usePilotTier";
 
 // ============================================================
 // NORAYA — Pilot στο browser:
@@ -42,6 +43,7 @@ export default function PilotGuard() {
   const [notice, setNotice] = useState<Notice | null>(null);
   const [busy, setBusy] = useState(false);
   const refreshTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastPass = useRef<boolean | null>(null);
 
   const hidden = pathname === "/" || HIDDEN_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"));
 
@@ -52,7 +54,12 @@ export default function PilotGuard() {
         setUsage(null);
         return;
       }
-      setUsage(await r.json());
+      const d = await r.json();
+      setUsage(d);
+      // Μόλις ενεργοποιηθεί το ξεκλείδωμα, ανοίγουν αμέσως Σύμβουλος & απεριόριστα.
+      const pass = Boolean(d?.day_pass);
+      if (lastPass.current !== null && lastPass.current !== pass) refreshPilotTier();
+      lastPass.current = pass;
     } catch {
       /* αγνοείται */
     }
@@ -191,11 +198,17 @@ export default function PilotGuard() {
                 {usage!.categories.map((c) => (
                   <li key={c.key} className="flex items-center justify-between">
                     <span className="text-zinc-400">{c.label}</span>
-                    <span className={c.used >= c.limit ? "text-amber-300" : "text-zinc-200"}>
-                      {usage!.day_pass ? c.used : `${c.used}/${c.limit}`}
+                    <span className={!usage!.day_pass && c.used >= c.limit ? "text-amber-300" : "text-zinc-200"}>
+                      {usage!.day_pass ? "απεριόριστα" : `${c.used}/${c.limit}`}
                     </span>
                   </li>
                 ))}
+                <li className="flex items-center justify-between">
+                  <span className="text-zinc-400">Σύμβουλος (chat)</span>
+                  <span className={usage!.day_pass ? "text-zinc-200" : "text-zinc-500"}>
+                    {usage!.day_pass ? "ενεργός" : "με ξεκλείδωμα"}
+                  </span>
+                </li>
               </ul>
               <p className="mt-3 text-[11px] text-zinc-500">Τα όρια ανανεώνονται κάθε μέρα στις 00:00.</p>
               {!usage!.day_pass ? (
