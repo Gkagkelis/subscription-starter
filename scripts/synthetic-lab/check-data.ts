@@ -69,7 +69,13 @@ researchInRepo.length
   : ok('Κανένα αρχείο «μόνο για έρευνα» μέσα στο repo (μένουν στο .synthetic-lab-data/research)');
 for (const f of readdirSync(path.join(root, 'lib/synthetic-lab/data/official'))) {
   const j = JSON.parse(readFileSync(path.join(root, 'lib/synthetic-lab/data/official', f), 'utf8'));
-  /CC BY 4\.0/.test(j.license || '') ? ok(`Επίσημο αρχείο ${f}: ${j.license.split('(')[0].trim()}`) : bad(`Χωρίς ανοιχτή άδεια: official/${f}`);
+  // κάθε πηγή του αρχείου (και εμφωλευμένες, π.χ. ΕΚΤ + Eurostat) πρέπει να επιτρέπει αναδιανομή με αναφορά
+  const licenses = [j.license, ...Object.values(j).map((v: any) => v && typeof v === 'object' && !Array.isArray(v) ? v.license : undefined)].filter(
+    (x): x is string => typeof x === 'string'
+  );
+  licenses.length && licenses.every((l) => /CC BY 4\.0|ελεύθερη επαναχρησιμοποίηση με αναφορά/.test(l))
+    ? ok(`Επίσημο αρχείο ${f}: ${licenses.map((l) => l.split('(')[0].trim()).join(' + ')}`)
+    : bad(`Χωρίς ανοιχτή άδεια: official/${f}`);
 }
 
 if (failures) {

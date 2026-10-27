@@ -108,6 +108,22 @@ describe('official 2025 calibration (Eurostat)', () => {
     const old65 = marginals(loadPopulation(BASELINE_POPULATION_ID)!.personas).ageBand['65+'];
     expect(marginals(pop.personas).ageBand['65+']).toBeGreaterThan(old65);
   });
+
+  it('calibrates education by age and sex to the 2025 Labour Force Survey (ISCED 5-8)', () => {
+    const pop = loadPopulation(CALIBRATED_POPULATION_ID)!;
+    expect(pop.summary.updateStatus.message).toMatch(/εκπαίδευση/);
+    const share = (band: string, sex: string, lvl: string) => {
+      const cell = pop.personas.filter((p) => p.ageBand === band && p.gender === sex);
+      const tot = cell.reduce((s, p) => s + p.weight, 0);
+      return cell.filter((p) => p.education === lvl).reduce((s, p) => s + p.weight, 0) / tot;
+    };
+    // Eurostat edat_lfs_9901 2025: τριτοβάθμια 25-34 ≈ 43% (σύνολο φύλων)· γυναίκες > άνδρες
+    expect(share('25-34', 'female', 'tertiary')).toBeGreaterThan(0.4);
+    expect(share('25-34', 'female', 'tertiary')).toBeGreaterThan(share('25-34', 'male', 'tertiary'));
+    const adults = (ps: typeof pop.personas) => ps.filter((p) => !['0-4', '5-14'].includes(p.ageBand));
+    const before = marginals(adults(loadPopulation(BASELINE_POPULATION_ID)!.personas)).education.tertiary;
+    expect(marginals(adults(pop.personas)).education.tertiary).toBeGreaterThan(before + 2);
+  });
 });
 
 describe('raking (calibration)', () => {

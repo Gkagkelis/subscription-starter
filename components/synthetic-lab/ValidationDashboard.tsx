@@ -13,6 +13,14 @@ interface Freshness {
   label: string;
 }
 
+const SCHEME_LABEL: Record<string, string> = {
+  eurobarometer: 'Κοινή γνώμη — Eurobarometer (NORAYA)',
+  eurostat_ict: 'Καταναλωτική συμπεριφορά — Eurostat/ΕΛΣΤΑΤ ΤΠΕ',
+  eurostat_silc: 'Οικονομική δυσκολία — EU-SILC (ΕΛΣΤΑΤ/Eurostat)',
+  dianeosis: 'Κοινωνικές στάσεις — διαΝΕΟσις (μόνο για έρευνα)'
+};
+const schemeOf = (r: BacktestResult) => r.scheme || (r.metric.startsWith('ict_') ? 'eurostat_ict' : r.metric.startsWith('dn') ? 'dianeosis' : 'eurobarometer');
+
 const GROUP: Record<string, string> = {
   all: 'Σύνολο',
   male: 'Άνδρες',
@@ -22,12 +30,42 @@ const GROUP: Record<string, string> = {
   high_education: 'Ανώτατη μόρφωση'
 };
 
+const PART: Record<string, string> = {
+  below: 'κάτω από όριο φτώχειας',
+  above: 'πάνω από όριο φτώχειας',
+  M1: 'μόνος (άνδρας)',
+  F1: 'μόνη (γυναίκα)',
+  A1: 'ένας ενήλικας',
+  A1_DCH: 'μονογονεϊκό',
+  A2: 'ζευγάρι χωρίς παιδιά',
+  A2_DCH1: 'ζευγάρι, 1 παιδί',
+  A2_DCH2: 'ζευγάρι, 2 παιδιά',
+  A2_DCH_GE3: 'ζευγάρι, 3+ παιδιά',
+  A_GE3: '3+ ενήλικες',
+  A_GE3_DCH: '3+ ενήλικες με παιδιά',
+  GRCr101: 'Αττική',
+  GRCr102: 'Βόρειο Αιγαίο',
+  GRCr103: 'Νότιο Αιγαίο',
+  GRCr104: 'Κρήτη',
+  GRCr105: 'Αν. Μακεδονία & Θράκη',
+  GRCr106: 'Κεντρική Μακεδονία',
+  GRCr107: 'Δυτική Μακεδονία',
+  GRCr108: 'Ήπειρος',
+  GRCr109: 'Θεσσαλία',
+  GRCr110: 'Ιόνια Νησιά',
+  GRCr111: 'Δυτική Ελλάδα',
+  GRCr112: 'Στερεά Ελλάδα',
+  GRCr113: 'Πελοπόννησος'
+};
+const groupLabel = (g: string) => GROUP[g] || g.split('|').map((x) => GROUP[x] || PART[x] || x).join(' · ');
+
 export default function ValidationDashboard() {
   const { status } = usePopulations();
   const [suite, setSuite] = useState<ValidationSuite | null>(null);
   const [fresh, setFresh] = useState<Freshness[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [filter, setFilter] = useState('all');
   const [open, setOpen] = useState<string | null>(null);
 
   useEffect(() => {
@@ -69,7 +107,7 @@ export default function ValidationDashboard() {
       {error && <Banner tone="danger">{error}</Banner>}
       <Card className="space-y-3">
         <p className="text-sm text-stone-700">
-          Ο έλεγχος «εκπαιδεύει» το μοντέλο σε ένα κύμα Eurobarometer, προσομοιώνει 1.000 συνθετικούς ερωτώμενους και συγκρίνει τα αποτελέσματα με το{' '}
+          Ο έλεγχος «εκπαιδεύει» το μοντέλο σε ένα κύμα κάθε πηγής (Eurobarometer, Eurostat ΤΠΕ, EU-SILC και — σε ερευνητική λειτουργία — διαΝΕΟσις), προσομοιώνει 1.000 συνθετικούς ερωτώμενους και συγκρίνει τα αποτελέσματα με το{' '}
           <strong>επόμενο κύμα</strong>, το οποίο δεν χρησιμοποιήθηκε. Συγκρίνεται επίσης με δύο απλές μεθόδους αναφοράς (baselines).
         </p>
         <Help>
@@ -116,6 +154,46 @@ export default function ValidationDashboard() {
             {suite.summary.meanPersistenceMaePp ?? '—'} π.μ. του baseline. Η κάλυψη κάτω από 95% δείχνει ότι τα διαστήματα της προσομοίωσης είναι στενότερα από την
             πραγματική αβεβαιότητα (δεν περιλαμβάνουν τη μεταβολή της κοινής γνώμης μεταξύ κυμάτων).
           </Banner>
+          {suite.summary.byScheme && (
+            <Card className="overflow-x-auto p-0">
+              <table className="w-full min-w-[640px] text-sm">
+                <thead className="bg-stone-50 text-left text-stone-600">
+                  <tr>
+                    <th className="px-4 py-2">Πηγή</th>
+                    <th>Δείκτες</th>
+                    <th>MAE</th>
+                    <th>Χωρίς θόρυβο</th>
+                    <th>Επιμονή</th>
+                    <th>Καλύτερο από επιμονή</th>
+                    <th>Κάλυψη 95%</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.entries(suite.summary.byScheme).map(([k, s]) => (
+                    <tr key={k} className="border-t border-stone-100">
+                      <td className="px-4 py-2">{SCHEME_LABEL[k] || k}</td>
+                      <td>{s.metrics}</td>
+                      <td>{s.meanMaePp}</td>
+                      <td>{s.meanExpectedMaePp}</td>
+                      <td>{s.meanPersistenceMaePp ?? '—'}</td>
+                      <td>
+                        {s.beatsPersistence ?? '—'} / {s.metrics}
+                      </td>
+                      <td>{s.meanCoverage95}%</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </Card>
+          )}
+          <div className="flex flex-wrap items-center gap-2 text-sm">
+            <span className="text-stone-600">Εμφάνιση:</span>
+            {['all', ...Object.keys(suite.summary.byScheme || {})].map((k) => (
+              <Button key={k} variant={filter === k ? 'primary' : 'secondary'} onClick={() => setFilter(k)}>
+                {k === 'all' ? 'Όλοι' : (SCHEME_LABEL[k] || k).split(' — ')[0]}
+              </Button>
+            ))}
+          </div>
           <Card className="overflow-x-auto p-0">
             <table className="w-full min-w-[720px] text-sm">
               <thead className="bg-stone-50 text-left text-stone-600">
@@ -132,7 +210,7 @@ export default function ValidationDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {suite.results.map((r) => (
+                {suite.results.filter((r) => filter === 'all' || schemeOf(r) === filter).map((r) => (
                   <Row key={r.metric} r={r} open={open === r.metric} onToggle={() => setOpen(open === r.metric ? null : r.metric)} />
                 ))}
               </tbody>
@@ -203,7 +281,7 @@ function Row({ r, open, onToggle }: { r: BacktestResult; open: boolean; onToggle
                   <tbody>
                     {r.groups.map((g) => (
                       <tr key={g.dimension + g.group} className={g.lowSample ? 'text-stone-400' : ''}>
-                        <td>{GROUP[g.group] || g.group}</td>
+                        <td>{groupLabel(g.group)}</td>
                         <td>{g.observed}%</td>
                         <td>{g.observedN}</td>
                         <td>{g.simulated}%</td>

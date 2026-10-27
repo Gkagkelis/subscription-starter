@@ -19,6 +19,7 @@
 
 import priorsJson from './noraya-priors.generated.json';
 import ictJson from './official/eurostat-ict.json';
+import silcJson from './official/eurostat-silc.json';
 import type { GroupScheme, NorayaPriors, PriorCell, PriorMetric, PriorWave } from './noraya-build';
 import type { AgeBand, Persona } from '../types';
 import { researchDatasets, researchMetric, researchMetrics } from './research';
@@ -27,7 +28,26 @@ export const NORAYA_DATASET_ID = 'noraya-public-opinion';
 export const EUROSTAT_ICT_DATASET_ID = 'eurostat-isoc-ict';
 export const PRIORS = priorsJson as unknown as NorayaPriors;
 const ICT = ictJson as unknown as { metrics: PriorMetric[]; source: string; license: string };
-const ICT_METRICS: Record<string, PriorMetric> = Object.fromEntries((ICT.metrics || []).map((m) => [m.metric, m]));
+const SILC = silcJson as unknown as { metrics: PriorMetric[]; questions: OpenQuestion[]; source: string; license: string };
+/** Δείκτες επίσημων ανοιχτών πηγών (Eurostat ΤΠΕ, EU-SILC). */
+const ICT_METRICS: Record<string, PriorMetric> = Object.fromEntries([...(ICT.metrics || []), ...(SILC.metrics || [])].map((m) => [m.metric, m]));
+
+/** Ερώτηση ανοιχτής πηγής με κατανομή επιλογών (π.χ. EU-SILC «τα βγάζετε πέρα;»). */
+export interface OpenQuestion {
+  id: string;
+  text: string;
+  options: string[];
+  dkOptions: string[];
+  optionMetrics: Record<string, string>;
+  n: number;
+  datasetId?: string;
+}
+export function openQuestions(): OpenQuestion[] {
+  return (SILC.questions || []).map((q) => ({ ...q, datasetId: 'eurostat-silc' }));
+}
+export function silcMeta() {
+  return { source: SILC.source, license: SILC.license, count: (SILC.metrics || []).length };
+}
 
 /** Διαστάσεις (Eurobarometer/NORAYA) που υπάρχουν ΚΑΙ στον πληθυσμό ΚΑΙ στα priors. */
 export const LINKED_DIMENSIONS = ['age_group', 'gender', 'education_group'] as const;
@@ -38,6 +58,8 @@ export const SCHEME_DIMENSIONS: Record<GroupScheme, string[]> = {
   eurobarometer: ['age_group', 'gender', 'education_group'],
   // Eurostat ΤΠΕ: κοινή κατανομή ηλικίας × φύλου + μόρφωση (ISCED)
   eurostat_ict: ['age_gender', 'education_group'],
+  // EU-SILC: κοινή κατανομή τύπος νοικοκυριού × κίνδυνος φτώχειας
+  eurostat_silc: ['hh_pov'],
   // διαΝΕΟσις: ηλικία × φύλο, μόρφωση, περιφέρεια (μικροδεδομένα, υπολογισμένα τοπικά)
   dianeosis: ['age_gender', 'education_group', 'region']
 };
@@ -84,9 +106,43 @@ const EDU_TO_DN: Record<string, string | null> = {
   unknown: null
 };
 
+/**
+ * Τύπος νοικοκυριού GLOPOP-S -> κατηγορία EU-SILC (hhcomp). «Παιδιά» στο GLOPOP
+ * μπορεί να είναι και ενήλικα· ο αριθμός εξαρτώμενων παιδιών εκτιμάται από το μέγεθος.
+ * Κίνδυνος φτώχειας (κάτω από 60% του διάμεσου) ≈ χαμηλότερο εισοδηματικό πεμπτημόριο.
+ */
+export function silcHousehold(p: Persona): Record<string, number> | null {
+  if (p.ageBand === '0-4' || p.ageBand === '5-14') return null;
+  const size = p.householdSize;
+  switch (p.householdType) {
+    case 'single':
+      return { [p.gender === 'male' ? 'M1' : 'F1']: 1 };
+    case 'couple':
+      return { A2: 1 };
+    case 'couple_with_children':
+      return size === '3-4' ? { A2_DCH1: 0.5, A2_DCH2: 0.5 } : size === '2' || size === '1' ? { A2_DCH1: 1 } : { A2_DCH_GE3: 1 };
+    case 'single_parent':
+      return { A1_DCH: 1 };
+    case 'couple_with_relatives':
+    case 'other':
+      return { A_GE3: 1 };
+    case 'couple_with_children_and_relatives':
+    case 'single_parent_with_relatives':
+      return { A_GE3_DCH: 1 };
+    default:
+      return null;
+  }
+}
+
 /** Πιθανοτική συμμετοχή ενός προσώπου σε ομάδες ανά διάσταση, για το σχήμα της πηγής. */
 export function norayaMembership(p: Persona, scheme: GroupScheme = 'eurobarometer'): Record<string, Record<string, number>> | null {
   const edu = EDU_TO_EB[p.education];
+  if (scheme === 'eurostat_silc') {
+    const hh = silcHousehold(p);
+    if (!hh || p.incomeQuintile === null) return null;
+    const pov = p.incomeQuintile === 1 ? 'below' : 'above';
+    return { hh_pov: Object.fromEntries(Object.entries(hh).map(([k, f]) => [`${k}|${pov}`, f])) };
+  }
   if (scheme === 'dianeosis') {
     // Δείγμα 17+: η ζώνη GLOPOP 15-24 αντιστοιχίζεται στην ομάδα 17-24 της έρευνας.
     if (p.ageBand === '0-4' || p.ageBand === '5-14') return null;
@@ -166,9 +222,10 @@ export function metricDatasetId(metric: string): string {
 export function metricSourceLabel(metric: string): string {
   const scheme = metricScheme(metric);
   if (scheme === 'eurostat_ict') return 'Έρευνα ΤΠΕ ΕΛΣΤΑΤ/Eurostat';
+  if (scheme === 'eurostat_silc') return 'EU-SILC ΕΛΣΤΑΤ/Eurostat';
   if (scheme === 'dianeosis') {
     const ds = researchDatasets().find((d) => d.datasetId === getMetric(metric)?.datasetId);
-    return ds ? `διαΝΕΟσις «Τι πιστεύουν οι Έλληνες» (${ds.datasetId.slice(-4)}, μόνο για έρευνα)` : 'διαΝΕΟσις (μόνο για έρευνα)';
+    return ds ? 'διαΝΕΟσις «Τι πιστεύουν οι Έλληνες» (μόνο για έρευνα)' : 'διαΝΕΟσις (μόνο για έρευνα)';
   }
   return 'Eurobarometer (NORAYA)';
 }

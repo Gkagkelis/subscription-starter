@@ -7,6 +7,10 @@
 
 import popJson from './official/eurostat-population-2025.json';
 import ictJson from './official/eurostat-ict.json';
+import eduJson from './official/eurostat-education-2025.json';
+import { BCS } from './ec-bcs';
+import { CONSUMER_CONTEXT } from './consumer-context';
+import silcJson from './official/eurostat-silc.json';
 import { licenseMode, researchDatasets, researchQuestions } from './research';
 import type { DatasetMeta } from '../types';
 
@@ -38,6 +42,9 @@ function base(p: Partial<DatasetMeta> & Pick<DatasetMeta, 'id' | 'name' | 'organ
 export function officialDatasets(): DatasetMeta[] {
   const pop = popJson as any;
   const ict = ictJson as any;
+  const edu = eduJson as any;
+  const silc = silcJson as any;
+  const silcYears = Array.from(new Set((silc.metrics || []).flatMap((m: any) => m.waves.map((w: any) => w.year)))) as number[];
   const ictYears = Array.from(new Set((ict.metrics || []).flatMap((m: any) => m.waves.map((w: any) => w.year)))) as number[];
   return [
     base({
@@ -58,6 +65,105 @@ export function officialDatasets(): DatasetMeta[] {
       usage: 'used',
       usageNote: 'Βαθμονόμηση (raking) του πληθυσμού GLOPOP-S 2015 σε επίσημα σύνολα 2025.',
       storage: 'lib/synthetic-lab/data/official/eurostat-population-2025.json',
+      tier: 'open'
+    }),
+    base({
+      id: edu.datasetId,
+      name: `Μορφωτικό επίπεδο ανά ηλικία και φύλο ${edu.year} (Eurostat/ΕΛΣΤΑΤ, Έρευνα Εργατικού Δυναμικού)`,
+      organization: 'Eurostat (δεδομένα ΕΛΣΤΑΤ)',
+      sourceUrl: 'https://ec.europa.eu/eurostat/databrowser/view/edat_lfs_9901/default/table',
+      collectionYears: [edu.year, edu.year],
+      importedAt: edu.fetchedAt || null,
+      kind: 'calibration_targets',
+      recordCount: Object.keys(edu.cells || {}).length,
+      recordUnit: 'κελιά ηλικιακή ζώνη × φύλο × ISCED (0-2 / 3-4 / 5-8), άτομα 15-74 σε ιδιωτικά νοικοκυριά',
+      variables: [{ name: 'ηλικία × φύλο × ISCED 2011', description: 'Χιλιάδες άτομα' }],
+      weights: '—',
+      license: EUROSTAT_LICENSE,
+      licenseVerified: true,
+      commercialUse: 'allowed_with_attribution',
+      restrictions: ['Οι 75+ δεν καλύπτονται: για αυτούς χρησιμοποιείται η ίδια γενιά στο GLOPOP 2015 (τότε 65+).', 'Μέσα στο ISCED 0-2 η αναλογία δημοτικό/γυμνάσιο παραμένει του 2015.'],
+      usage: 'used',
+      usageNote: 'Βαθμονόμηση της μόρφωσης του πληθυσμού (ηλικία × φύλο × μόρφωση) και περιθώρια επαναστάθμισης της διαΝΕΟσις.',
+      storage: `lib/synthetic-lab/data/official/eurostat-education-${edu.year}.json`,
+      tier: 'open'
+    }),
+    base({
+      id: BCS.datasetId,
+      name: 'Έρευνα Καταναλωτών ΕΕ (DG ECFIN / ΙΟΒΕ) — οικονομικό κλίμα ανά εισόδημα, μόρφωση, ηλικία, φύλο',
+      organization: 'Ευρωπαϊκή Επιτροπή, DG ECFIN· στην Ελλάδα ΙΟΒΕ',
+      sourceUrl: BCS.url,
+      collectionYears: [Number(BCS.latestMonth.slice(0, 4)) - 2, Number(BCS.latestMonth.slice(0, 4))],
+      publicationDate: `μηνιαία· τελευταίος μήνας ${BCS.latestMonth}`,
+      importedAt: BCS.fetchedAt,
+      recordCount: BCS.indicators.length,
+      recordUnit: 'μηνιαίοι δείκτες (ισοζύγια −100..+100) × 14 ομάδες, τελευταίοι 36 μήνες',
+      variables: BCS.indicators.map((i) => ({ name: i.id, description: i.label })),
+      weights: 'Εποχικά διορθωμένα ισοζύγια της Επιτροπής.',
+      license: BCS.license,
+      licenseVerified: true,
+      commercialUse: 'allowed_with_attribution',
+      restrictions: ['Ισοζύγια (θετικές μείον αρνητικές απαντήσεις), ΟΧΙ ποσοστά: δεν μετατρέπονται σε πιθανότητες απάντησης.', 'Οι ομάδες αντιστοιχίζονται προσεγγιστικά (π.χ. πεμπτημόρια GLOPOP → τεταρτημόρια εισοδήματος).'],
+      usage: 'used',
+      usageNote: 'Πλαίσιο οικονομικού κλίματος σε καταναλωτικές μελέτες και σχετικές διαφορές ομάδων στην παραδοχή «Πρόθεση αγοράς ανάλογη με το οικονομικό κλίμα της ομάδας».',
+      storage: 'lib/synthetic-lab/data/official/ec-bcs-consumer-greece.json',
+      tier: 'open'
+    }),
+    base({
+      id: 'eurostat-silc',
+      name: 'EU-SILC — οικονομική δυσκολία νοικοκυριών (Eurostat/ΕΛΣΤΑΤ)',
+      organization: 'Eurostat (δεδομένα ΕΛΣΤΑΤ, Έρευνα Εισοδήματος και Συνθηκών Διαβίωσης)',
+      sourceUrl: 'https://ec.europa.eu/eurostat/databrowser/view/ilc_mdes04/default/table',
+      collectionYears: silcYears.length ? [Math.min(...silcYears), Math.max(...silcYears)] : null,
+      importedAt: silc.fetchedAt || null,
+      recordCount: (silc.metrics || []).length,
+      recordUnit: 'δείκτες (% ατόμων) ανά τύπο νοικοκυριού × κίνδυνο φτώχειας',
+      variables: (silc.metrics || []).map((m: any) => ({ name: m.metric, description: m.label })),
+      weights: 'Επίσημα σταθμισμένα ποσοστά· n ανά κελί δεν δημοσιεύεται.',
+      license: EUROSTAT_LICENSE,
+      licenseVerified: true,
+      commercialUse: 'allowed_with_attribution',
+      restrictions: ['Ο κίνδυνος φτώχειας (κάτω από 60% του διάμεσου εισοδήματος) αντιστοιχίζεται στο χαμηλότερο πεμπτημόριο GLOPOP.', 'Ο αριθμός εξαρτώμενων παιδιών εκτιμάται από το μέγεθος νοικοκυριού.'],
+      usage: 'used',
+      usageNote: 'Empirical priors (σχήμα eurostat_silc) για ερωτήσεις οικονομικής δυσκολίας και οφειλών· τράπεζα ερωτήσεων· backtests ανά έτος.',
+      validationStatus: 'partially_validated',
+      storage: 'lib/synthetic-lab/data/official/eurostat-silc.json',
+      tier: 'open'
+    }),
+    base({
+      id: CONSUMER_CONTEXT.datasetIds.ces,
+      name: 'ΕΚΤ — Consumer Expectations Survey (Ελλάδα): πληθωρισμός και δαπάνες νοικοκυριών',
+      organization: 'Ευρωπαϊκή Κεντρική Τράπεζα',
+      sourceUrl: CONSUMER_CONTEXT.ces.url,
+      collectionYears: [2024, 2026],
+      importedAt: CONSUMER_CONTEXT.fetchedAt,
+      recordCount: Object.keys(CONSUMER_CONTEXT.ces.indicators).length,
+      recordUnit: 'μηνιαίοι δείκτες (σταθμισμένες διάμεσοι), μόνο σύνολο Ελλάδας',
+      license: CONSUMER_CONTEXT.ces.license,
+      licenseVerified: false,
+      commercialUse: 'allowed_with_attribution',
+      restrictions: ['Συγκεντρωτικά: χωρίς ανάλυση ανά ομάδα για την Ελλάδα (τα μικροδεδομένα είναι μόνο για επιστημονική χρήση).'],
+      usage: 'used',
+      usageNote: 'Πλαίσιο (προσδοκίες πληθωρισμού/δαπανών) στις αναφορές καταναλωτικών μελετών.',
+      storage: 'lib/synthetic-lab/data/official/consumer-context.json',
+      tier: 'open'
+    }),
+    base({
+      id: CONSUMER_CONTEXT.datasetIds.hbs,
+      name: `Έρευνα Οικογενειακών Προϋπολογισμών ${CONSUMER_CONTEXT.hbs.year} — δομή δαπάνης ανά εισοδηματικό πεμπτημόριο (Eurostat/ΕΛΣΤΑΤ)`,
+      organization: 'Eurostat (δεδομένα ΕΛΣΤΑΤ)',
+      sourceUrl: 'https://ec.europa.eu/eurostat/databrowser/view/hbs_str_t223/default/table',
+      collectionYears: [CONSUMER_CONTEXT.hbs.year, CONSUMER_CONTEXT.hbs.year],
+      importedAt: CONSUMER_CONTEXT.fetchedAt,
+      recordCount: Object.keys(CONSUMER_CONTEXT.hbs.categories).length,
+      recordUnit: 'κατηγορίες COICOP × 5 πεμπτημόρια (‰ της δαπάνης)',
+      license: EUROSTAT_LICENSE,
+      licenseVerified: true,
+      commercialUse: 'allowed_with_attribution',
+      restrictions: ['Τελευταίο ευρωπαϊκό κύμα 2020· η ΕΛΣΤΑΤ δημοσιεύει νεότερη έρευνα (2024) σε δικούς της πίνακες.'],
+      usage: 'used',
+      usageNote: 'Πλαίσιο: μερίδιο δαπάνης για τη σχετική κατηγορία ανά εισόδημα, στις αναφορές καταναλωτικών μελετών.',
+      storage: 'lib/synthetic-lab/data/official/consumer-context.json',
       tier: 'open'
     }),
     base({
@@ -88,37 +194,42 @@ export function researchTierDatasets(): DatasetMeta[] {
   const loaded = researchDatasets();
   const dn = loaded.find((d) => d.datasetId.startsWith('dianeosis-tpe'));
   const mode = licenseMode();
+  const qs = dn ? researchQuestions().filter((q) => q.datasetId === dn.datasetId) : [];
+  const years = dn?.years || Array.from(new Set(qs.flatMap((q) => q.years || []))).sort();
+  const multi = qs.filter((q) => (q.years?.length || 0) >= 2).length;
   return [
     base({
-      id: dn?.datasetId || 'dianeosis-tpe-2024',
-      name: 'διαΝΕΟσις — «Τι πιστεύουν οι Έλληνες» (μικροδεδομένα, μη πολιτικές ερωτήσεις)',
-      organization: 'διαΝΕΟσις (έρευνα πεδίου Metron Analysis)',
+      id: dn?.datasetId || 'dianeosis-tpe',
+      name: 'διαΝΕΟσις — «Τι πιστεύουν οι Έλληνες» 2017–2024 (μικροδεδομένα, μη πολιτικές ερωτήσεις)',
+      organization: 'διαΝΕΟσις (έρευνα πεδίου Metron Analysis / MRB ανά κύμα)',
       sourceUrl: 'https://www.dianeosis.org/research/ti-pistevoun-oi-ellines/',
-      collectionYears: [2024, 2024],
+      collectionYears: years.length ? [Math.min(...years), Math.max(...years)] : [2017, 2024],
       importedAt: dn?.importedAt || null,
-      recordCount: dn ? researchQuestions().filter((q) => q.datasetId === dn.datasetId).length : null,
-      recordUnit: '~1.100 ερωτώμενοι ανά μέρος (3 μέρη)· ερωτήσεις με κατανομές επιλογών ανά ηλικία×φύλο, μόρφωση, περιφέρεια',
+      recordCount: dn ? qs.length : null,
+      recordUnit: `ερωτήσεις (${multi} σε ≥2 κύματα)· κύματα ${years.join(', ') || '2017–2024'}, ~1.000–2.500 ερωτώμενοι ανά μέρος`,
       variables: [
-        { name: 'Αξίες, θεσμοί, κλιματική αλλαγή, τεχνολογία/ΤΝ, οικονομία, κοινωνία', description: 'Ερωτήσεις κλειστού τύπου (2-12 επιλογές)' },
-        { name: 'Εξαιρούνται', description: 'Ψήφος, κόμματα, αυτοτοποθέτηση, αξιολόγηση πολιτικών προσώπων' }
+        { name: 'Αξίες, θεσμοί, κλιματική αλλαγή, τεχνολογία/ΤΝ, οικονομία, φορολογία, παιδεία, μετανάστευση, φύλο, θρησκεία', description: 'Ερωτήσεις κλειστού τύπου (2-12 επιλογές)' },
+        { name: 'Ομάδες', description: 'ηλικία×φύλο, μόρφωση, περιφέρεια (όπου το αρχείο έχει τις 13 περιφέρειες)' },
+        { name: 'Εξαιρούνται', description: 'Ψήφος, κόμματα, αυτοτοποθέτηση, αξιολόγηση πολιτικών/δημόσιων προσώπων' }
       ],
-      weights: 'Βάρος x1 της πηγής, επαναστάθμισμένο (raking) σε ηλικία×φύλο, μόρφωση, περιφέρεια του πληθυσμού 15+ (το δείγμα υπερ-αντιπροσωπεύει αποφοίτους ανώτατης).',
+      weights: 'Βάρος της πηγής ανά κύμα (x1, sta2, WEIGHT, sexage3weight), επαναστάθμισμένο (raking) σε ηλικία×φύλο, μόρφωση, περιφέρεια του πληθυσμού 15+ (τα δείγματα υπερ-αντιπροσωπεύουν αποφοίτους ανώτατης).',
       license: '© διαΝΕΟσις — χωρίς ανοιχτή άδεια δεδομένων· μη εμπορική ερευνητική χρήση με αναφορά πηγής',
       licenseVerified: false,
       commercialUse: 'not_allowed',
       restrictions: [
         'ΜΟΝΟ ΓΙΑ ΕΡΕΥΝΗΤΙΚΗ ΧΡΗΣΗ — για εμπορικό προϊόν απαιτείται γραπτή άδεια της διαΝΕΟσις.',
         'Δεν αναδιανέμεται: μένει στον ιδιωτικό φάκελο .synthetic-lab-data/research (εκτός repo).',
-        'Ένα κύμα (2024): δεν υπάρχει held-out κύμα για backtest.',
+        'Η σύνδεση ερωτήσεων μεταξύ κυμάτων είναι αυτόματη (ίδιες επιλογές + ομοιότητα κειμένου)· η διατύπωση μπορεί να διαφέρει ελαφρά.',
         mode === 'commercial' ? 'Απενεργοποιημένο: SYNTHETIC_LAB_LICENSE_MODE=commercial.' : ''
       ].filter(Boolean),
       usage: dn && mode === 'research' ? 'used' : 'not_connected',
       usageNote: dn
-        ? 'Τράπεζα ερωτήσεων με εμπειρική βάση (κοινωνικές στάσεις)· προτάσεις στον planner.'
+        ? 'Τράπεζα ερωτήσεων με εμπειρική βάση (κοινωνικές στάσεις)· προτάσεις στον planner· backtests σε held-out κύμα για ερωτήσεις που επαναλαμβάνονται.'
         : 'Δεν έχει εισαχθεί τοπικά.',
+      validationStatus: multi ? 'partially_validated' : 'not_validated',
       howToConnect:
-        'Κατέβασε τα αρχεία SPSS από τη σελίδα της έρευνας στο .synthetic-lab-data/raw/dianeosis/2024/, τρέξε `npx tsx scripts/synthetic-lab/export-population-margins.ts` και `python scripts/synthetic-lab/import_dianeosis.py --raw … --margins … --out .synthetic-lab-data/research/dianeosis-tpe-2024.json`.',
-      storage: '.synthetic-lab-data/research/dianeosis-tpe-2024.json (ιδιωτικό, gitignored)',
+        'Κατέβασε τα αρχεία SPSS κάθε κύματος από τη σελίδα της έρευνας στο .synthetic-lab-data/raw/dianeosis/<έτος>/ (αποσυμπιεσμένα στο unz/), τρέξε `npx tsx scripts/synthetic-lab/export-population-margins.ts` και `python scripts/synthetic-lab/import_dianeosis.py --raw .synthetic-lab-data/raw/dianeosis --margins … --out .synthetic-lab-data/research/dianeosis-tpe.json`.',
+      storage: '.synthetic-lab-data/research/dianeosis-tpe.json (ιδιωτικό, gitignored)',
       tier: 'research_only'
     })
   ];
@@ -188,19 +299,6 @@ export function catalogDatasets(): DatasetMeta[] {
       license: 'Μόνο επιστημονικοί σκοποί, όχι εμπορική χρήση',
       recordUnit: 'μικροδεδομένα, ~960 Έλληνες/μήνα',
       howToConnect: 'Αποδοχή όρων στη σελίδα της ECB → λήψη τριμηνιαίων αρχείων → .synthetic-lab-data/raw/ecb-ces/.'
-    }),
-    base({
-      id: 'ec-bcs-consumer',
-      name: 'Έρευνα καταναλωτών ΕΕ (DG ECFIN/ΙΟΒΕ) — εμπιστοσύνη ανά εισόδημα, μόρφωση, ηλικία, φύλο',
-      organization: 'Ευρωπαϊκή Επιτροπή, DG ECFIN· ΙΟΒΕ',
-      sourceUrl: 'https://economy-finance.ec.europa.eu/economic-forecast-and-surveys/business-and-consumer-surveys/download-business-and-consumer-survey-data/time-series_en',
-      collectionYears: [1985, 2026],
-      license: 'Ευρωπαϊκή Επιτροπή — επαναχρησιμοποίηση με αναφορά (Απόφαση 2011/833/ΕΕ)',
-      commercialUse: 'allowed_with_attribution',
-      recordUnit: 'μηνιαία ισοζύγια (balances) ανά ομάδα',
-      usageNote: 'Ανοιχτό, δεν έχει ακόμη συνδεθεί: τα ισοζύγια δεν είναι ποσοστά, χρειάζονται ξεχωριστό μοντέλο.',
-      howToConnect: 'Λήψη consumer_subsectors_nace2.zip (XLSX) από τη σελίδα time series.',
-      tier: 'open'
     }),
     cite({
       id: 'eett-unlimited-2023',

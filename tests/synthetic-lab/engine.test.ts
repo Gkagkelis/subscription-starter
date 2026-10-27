@@ -42,7 +42,7 @@ describe('planner', () => {
     expect(detectDomain('Μέτρο επιδότησης ενοικίου για νέους')).toBe('social_policy');
     const r = planStudy({ text: 'Μέτρο επιδότησης ενοικίου για νέους' });
     const linked = r.plan!.questions.filter((q) => q.evidenceLink).map((q) => q.evidenceLink!.metric);
-    expect(linked).toEqual(['issue_country_housing', 'trust_national_government']);
+    expect(linked).toEqual(['issue_country_housing', 'trust_national_government', 'silc_arrears_housing']);
   });
 });
 
@@ -84,7 +84,7 @@ describe('survey engine (demo)', () => {
     expect(a.seed).toBe(11);
     expect(a.engine.engineVersion).toMatch(/demo-rules/);
     expect(a.cost.usd).toBe(0);
-    expect(a.datasetsUsed).toEqual(['glopop-s-grc-2015', 'eurostat-demo_r_pjangroup-2025', 'noraya-public-opinion']);
+    expect(a.datasetsUsed).toEqual(['glopop-s-grc-2015', 'eurostat-demo_r_pjangroup-2025', 'eurostat-edat_lfs_9901-2025', 'noraya-public-opinion', 'eurostat-silc']);
     expect(a.stability!.runs).toBe(3);
     expect(a.populationSummary.updateStatus.targetYear).toBe(2025);
   });

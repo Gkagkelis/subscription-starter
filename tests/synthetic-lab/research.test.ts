@@ -12,6 +12,7 @@ import { bankQuestion, searchBank } from '@/lib/synthetic-lab/engine/question-ba
 import { runSurvey } from '@/lib/synthetic-lab/engine/survey';
 import { buildReport } from '@/lib/synthetic-lab/engine/report';
 import { QuestionSchema } from '@/lib/synthetic-lab/schemas';
+import { researchBacktestMetrics, runBacktest } from '@/lib/synthetic-lab/engine/validation';
 import { DEFAULT_POPULATION_ID, loadPopulation } from '@/lib/synthetic-lab/population/store';
 import type { StudyPlan } from '@/lib/synthetic-lab/types';
 
@@ -38,6 +39,22 @@ function fixture() {
       datasetId: 'dianeosis-tpe-fixture'
     };
   });
+  // Δεύτερη ερώτηση με ΔΥΟ κύματα (2024, 2026) για backtest σε held-out κύμα.
+  const wave = (year: number, yes: number) => {
+    const ag: Record<string, any> = {};
+    BANDS.forEach((b, i) => ['male', 'female'].forEach((g) => (ag[`${b}|${g}`] = cell(Math.min(0.95, yes + 0.05 * i)))));
+    return { key: `${year}-Q1`, year, quarter: 'Q1', groups: { all: { all: cell(yes + 0.12, 1000) }, age_gender: ag } };
+  };
+  const two = [0, 1].map((k) => ({
+    metric: `fx26_1_T2__${k + 1}`,
+    family: 'dianeosis_attitudes',
+    label: `Εμπιστοσύνη στη δικαιοσύνη — «${k ? 'Όχι' : 'Ναι'}»`,
+    semanticsNote: 'ΤΕΧΝΗΤΟ fixture για tests',
+    waves: k ? [wave(2024, 0.5), wave(2026, 0.48)] : [wave(2024, 0.38), wave(2026, 0.4)],
+    scheme: 'dianeosis',
+    datasetId: 'dianeosis-tpe-fixture'
+  }));
+  metrics.push(...(two as any));
   return {
     datasetId: 'dianeosis-tpe-fixture',
     tier: 'research_only',
@@ -52,6 +69,15 @@ function fixture() {
         dkOptions: ['ΔΓ/ΔΑ'],
         optionMetrics: Object.fromEntries(OPTIONS.map((o, k) => [o, `fx26_1_T1__${k + 1}`])),
         n: 1000
+      },
+      {
+        id: 'fx26_1_T2',
+        text: 'Εμπιστεύεστε τη δικαιοσύνη;',
+        options: ['Ναι', 'Όχι'],
+        dkOptions: [],
+        optionMetrics: { Ναι: 'fx26_1_T2__1', Όχι: 'fx26_1_T2__2' },
+        n: 1000,
+        years: [2024, 2026]
       }
     ],
     metrics
@@ -143,5 +169,19 @@ describe('research-tier data', () => {
     const s = r.plan!.questions.find((q) => q.id === 's1');
     expect(s?.evidenceLink?.optionMetrics).toBeTruthy();
     expect(r.plan!.warnings.join(' ')).toContain('ΜΟΝΟ ΓΙΑ ΕΡΕΥΝΗΤΙΚΗ ΧΡΗΣΗ');
+  });
+
+  it('backtests repeated research questions on a held-out wave, reported per source', () => {
+    const ms = researchBacktestMetrics();
+    expect(ms).toContain('fx26_1_T2__2'); // κύρια επιλογή = η συχνότερη («Όχι»)
+    expect(ms).not.toContain('fx26_1_T1__1'); // ένα κύμα: όχι backtest
+    const r = runBacktest({ metric: 'fx26_1_T2__2', populationId: DEFAULT_POPULATION_ID, n: 400, stabilityRuns: 1, save: false });
+    expect(r.scheme).toBe('dianeosis');
+    expect([r.trainWave, r.testWave]).toEqual(['2024-Q1', '2026-Q1']);
+    expect(r.sensitivity.map((s) => s.dimensions.length)).toEqual([3, 2, 1, 0]);
+    expect(r.groups.some((g) => g.dimension === 'age_gender')).toBe(true);
+    process.env.SYNTHETIC_LAB_LICENSE_MODE = 'commercial';
+    resetResearchCache();
+    expect(researchBacktestMetrics()).toEqual([]);
   });
 });

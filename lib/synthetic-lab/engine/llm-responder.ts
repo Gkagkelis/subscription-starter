@@ -17,6 +17,7 @@ import { describePersonaLong } from './persona-text';
 import type { PriorFit } from './prior-model';
 import { getMetric, metricSourceLabel } from '../data/noraya';
 import { optionProbabilities } from './evidence';
+import { bcsDeviation, bcsIndicator } from '../data/ec-bcs';
 
 export const LLM_PROMPT_VERSION = 'llm-respondent-1.0';
 
@@ -106,6 +107,8 @@ export async function llmRespond(opts: {
   budget: StudyBudget;
   signal: AbortSignal;
   seed: number;
+  /** Πρόσθεσε το οικονομικό κλίμα της ομάδας (Έρευνα Καταναλωτών ΕΕ/ΙΟΒΕ) στα στοιχεία. */
+  climate?: boolean;
 }): Promise<{ answers: SyntheticAnswer[]; usd: number }> {
   const { persona: p, questions } = opts;
   const rng = createRng(deriveSeed(opts.seed, p.id, 'order'));
@@ -128,6 +131,13 @@ export async function llmRespond(opts: {
       return `- ${m?.label || fit.metric}: σε άτομα με παρόμοια χαρακτηριστικά, εκτιμάται ότι περίπου ${(fit.p.get(p.id)! * 100).toFixed(0)}% απαντούν «${q.evidenceLink!.positiveOption}» (εκτίμηση από ${metricSourceLabel(fit.metric)} ${fit.waveKey}).`;
     });
 
+  const dev = opts.climate ? bcsDeviation(p, '9') : null;
+  if (dev !== null) {
+    const tot = bcsIndicator('9')?.groups.all?.all?.mean12m;
+    evidence.push(
+      `- Πρόθεση μεγάλων αγορών στους επόμενους 12 μήνες (Έρευνα Καταναλωτών ΕΕ/ΙΟΒΕ, ισοζύγιο): σε άτομα με παρόμοια χαρακτηριστικά εκτιμάται περίπου ${Math.round(dev) >= 0 ? '+' : ''}${Math.round(dev)} μονάδες σε σχέση με το σύνολο (${tot ?? '—'}).`
+    );
+  }
   const user = [
     `ΠΡΟΦΙΛ (από συνθετικό πληθυσμό GLOPOP-S, έτος αναφοράς ${p.dataVintage}): ${describePersonaLong(p)}.`,
     'Άγνωστα χαρακτηριστικά: απασχόληση/επάγγελμα — μην τα υποθέτεις ως γεγονός.',

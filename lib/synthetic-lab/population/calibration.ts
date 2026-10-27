@@ -25,12 +25,18 @@ export function baselineUpdateStatus(referenceYear: number): PopulationUpdateSta
 /** Χαρακτηριστικά προσώπων που επιτρέπεται να βαθμονομηθούν. */
 export const CALIBRATABLE_ATTRIBUTES = ['ageBand', 'gender', 'regionCode', 'education', 'settlement', 'householdSize'] as const;
 export type SimpleAttribute = (typeof CALIBRATABLE_ATTRIBUTES)[number];
-/** Απλό χαρακτηριστικό ή κοινή κατανομή δύο, π.χ. "regionCode|ageBand" (κατηγορίες "GRCr101|25-34"). */
-export type CalibratableAttribute = SimpleAttribute | `${SimpleAttribute}|${SimpleAttribute}`;
+/**
+ * Απλό χαρακτηριστικό ή κοινή κατανομή δύο/τριών, π.χ. "regionCode|ageBand"
+ * (κατηγορίες "GRCr101|25-34") ή "ageBand|gender|education".
+ */
+export type CalibratableAttribute =
+  | SimpleAttribute
+  | `${SimpleAttribute}|${SimpleAttribute}`
+  | `${SimpleAttribute}|${SimpleAttribute}|${SimpleAttribute}`;
 
 export function isCalibratableAttribute(a: string): a is CalibratableAttribute {
   const parts = a.split('|');
-  return parts.length <= 2 && parts.every((x) => (CALIBRATABLE_ATTRIBUTES as readonly string[]).includes(x));
+  return parts.length <= 3 && new Set(parts).size === parts.length && parts.every((x) => (CALIBRATABLE_ATTRIBUTES as readonly string[]).includes(x));
 }
 
 export interface MarginTarget {

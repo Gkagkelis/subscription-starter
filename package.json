@@ -24,7 +24,8 @@
     "lab:check-data": "tsx scripts/synthetic-lab/check-data.ts",
     "lab:build-priors": "tsx scripts/synthetic-lab/build-noraya-priors.ts",
     "lab:import-glopop": "tsx scripts/synthetic-lab/import-glopop.ts",
-    "lab:e2e": "node scripts/synthetic-lab/e2e.mjs"
+    "lab:e2e": "node scripts/synthetic-lab/e2e.mjs",
+    "lab:fetch-official": "tsx scripts/synthetic-lab/fetch-eurostat-population.ts && tsx scripts/synthetic-lab/fetch-eurostat-education.ts && tsx scripts/synthetic-lab/fetch-eurostat-consumer.ts && tsx scripts/synthetic-lab/fetch-eurostat-silc.ts && tsx scripts/synthetic-lab/fetch-consumer-context.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^0.0.66",

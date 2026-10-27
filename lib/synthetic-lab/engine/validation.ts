@@ -24,6 +24,8 @@ import { mae, mean, round, sd, seProportion, totalVariationDistance, wilson, eff
 import { listDocs, loadDoc, newId, saveDoc } from '../storage/file-store';
 import type { Persona, Question, StudyValidationSummary } from '../types';
 import { fitPriorModel, PRIOR_MODEL_VERSION } from './prior-model';
+import { licenseMode, researchQuestions } from '../data/research';
+import { bankQuestion } from './question-bank';
 
 export const VALIDATION_VERSION = 'backtest-1.0';
 export const NOT_VALIDATED =
@@ -50,6 +52,8 @@ export interface BacktestResult {
   modelVersion: string;
   metric: string;
   metricLabel: string;
+  /** Σχήμα πηγής (eurobarometer / eurostat_ict / dianeosis). */
+  scheme?: string;
   populationId: string;
   populationIsFixture: boolean;
   trainWave: string;
@@ -185,7 +189,19 @@ export function runBacktest(opts: {
 
   // Ευαισθησία σε ρυθμίσεις μοντέλου
   const settings: { setting: string; dims: LinkedDimension[] }[] =
-    scheme === 'eurostat_ict'
+    scheme === 'dianeosis'
+      ? [
+          { setting: 'Ηλικία×φύλο + μόρφωση + περιφέρεια (προεπιλογή)', dims: ['age_gender', 'education_group', 'region'] },
+          { setting: 'Ηλικία×φύλο + μόρφωση', dims: ['age_gender', 'education_group'] },
+          { setting: 'Μόνο ηλικία×φύλο', dims: ['age_gender'] },
+          { setting: 'Χωρίς δημογραφικά (μόνο σύνολο)', dims: [] }
+        ]
+      : scheme === 'eurostat_silc'
+      ? [
+          { setting: 'Τύπος νοικοκυριού × κίνδυνος φτώχειας (προεπιλογή)', dims: ['hh_pov'] },
+          { setting: 'Χωρίς δημογραφικά (μόνο σύνολο)', dims: [] }
+        ]
+      : scheme === 'eurostat_ict'
       ? [
           { setting: 'Ηλικία×φύλο + μόρφωση (προεπιλογή)', dims: ['age_gender', 'education_group'] },
           { setting: 'Μόνο ηλικία×φύλο', dims: ['age_gender'] },
@@ -224,8 +240,12 @@ export function runBacktest(opts: {
   if (pop.summary.isDevFixture) notes.unshift('ΠΡΟΣΟΧΗ: εκτελέστηκε σε ΤΕΧΝΗΤΟ fixture — τα αποτελέσματα δεν έχουν νόημα.');
   notes.push(
     `Το fit έγινε στο κύμα ${train.key} και συγκρίθηκε με το ${test.key}, το οποίο δεν χρησιμοποιήθηκε στο fit.`,
-    scheme === 'eurostat_ict'
+    scheme === 'eurostat_silc'
+      ? 'EU-SILC: η Eurostat δεν δημοσιεύει n ανά κελί (η «κάλυψη» λαμβάνει υπόψη μόνο τον θόρυβο της προσομοίωσης). Ο κίνδυνος φτώχειας αντιστοιχίζεται προσεγγιστικά στο χαμηλότερο εισοδηματικό πεμπτημόριο.'
+      : scheme === 'eurostat_ict'
       ? 'Η Eurostat δεν δημοσιεύει n ανά κελί: η «κάλυψη» λαμβάνει υπόψη μόνο τον θόρυβο της προσομοίωσης (υπερεκτιμά την αυστηρότητα). Πληθυσμός πηγής: 16-74 ετών.'
+      : scheme === 'dianeosis'
+      ? 'διαΝΕΟσις (μόνο για έρευνα): το n είναι ο πραγματικός αριθμός ερωτώμενων, αλλά μετά την επαναστάθμιση το αποτελεσματικό n είναι περίπου το μισό — η «κάλυψη» είναι αισιόδοξη. Τα κύματα απέχουν 2 έτη.'
       : 'Οι παρατηρημένες τιμές είναι συγκεντρωτικά ποσοστά με δικό τους δειγματοληπτικό σφάλμα· η «κάλυψη» συνυπολογίζει και τα δύο σφάλματα.',
     'Το backtest μετρά κυρίως τη χρονική μεταβολή μεταξύ κυμάτων και το σφάλμα του μοντέλου κύριων επιδράσεων — όχι την ικανότητα πρόβλεψης για νέα θέματα.'
   );
@@ -238,6 +258,7 @@ export function runBacktest(opts: {
     modelVersion: PRIOR_MODEL_VERSION,
     metric: opts.metric,
     metricLabel: getMetric(opts.metric)?.label || opts.metric,
+    scheme,
     populationId: opts.populationId,
     populationIsFixture: pop.summary.isDevFixture,
     trainWave: train.key,
@@ -265,32 +286,70 @@ export interface ValidationSuite {
   createdAt: string;
   populationId: string;
   results: BacktestResult[];
-  summary: { metrics: number; meanMaePp: number; meanExpectedMaePp: number; meanPersistenceMaePp: number | null; meanCoverage95: number };
+  summary: SuiteSummary & { byScheme?: Record<string, SuiteSummary> };
 }
 
-/** Μετρικές κατάλληλες για backtest (≥2 κύματα με σύνολο). */
+export interface SuiteSummary {
+  metrics: number;
+  meanMaePp: number;
+  meanExpectedMaePp: number;
+  meanPersistenceMaePp: number | null;
+  meanCoverage95: number;
+  /** Σε πόσους δείκτες το μοντέλο (χωρίς θόρυβο) είχε μικρότερο σφάλμα από την «επιμονή». */
+  beatsPersistence?: number;
+}
+
+function summarize(results: BacktestResult[]): SuiteSummary {
+  const pers = results.map((r) => r.persistenceMaePp).filter((x): x is number => x !== null);
+  return {
+    metrics: results.length,
+    meanMaePp: round(mean(results.map((r) => r.maePp)), 2),
+    meanExpectedMaePp: round(mean(results.map((r) => r.expectedMaePp)), 2),
+    meanPersistenceMaePp: pers.length ? round(mean(pers), 2) : null,
+    meanCoverage95: round(mean(results.map((r) => r.coverage95)), 1),
+    beatsPersistence: results.filter((r) => r.persistenceMaePp !== null && r.expectedMaePp < r.persistenceMaePp).length
+  };
+}
+
+/** Μετρικές ανοιχτών πηγών κατάλληλες για backtest (≥2 κύματα με σύνολο). */
 export function backtestableMetrics(): string[] {
   return listMetrics()
+    .filter((m) => (m.tier || 'open') === 'open')
     .filter((m) => m.waves.filter((w) => w.groups.all?.all).length >= 2)
     .filter((m) => m.waves[m.waves.length - 1].year >= 2020)
     .map((m) => m.metric);
 }
 
-export function runValidationSuite(opts: { populationId: string; n?: number; seed?: number }): ValidationSuite {
-  const results = backtestableMetrics().map((metric) => runBacktest({ metric, populationId: opts.populationId, n: opts.n, seed: opts.seed, save: false }));
-  const pers = results.map((r) => r.persistenceMaePp).filter((x): x is number => x !== null);
+/**
+ * Ερωτήσεις ερευνητικής βαθμίδας που επαναλαμβάνονται σε ≥2 κύματα (τελευταίο ≥2020):
+ * backtest στην κύρια (συχνότερη ουσιαστική) επιλογή κάθε ερώτησης.
+ */
+export function researchBacktestMetrics(): string[] {
+  if (licenseMode() !== 'research') return [];
+  const out = new Set<string>();
+  for (const q of researchQuestions()) {
+    if ((q.years?.length || 0) < 2 || Math.max(...(q.years || [0])) < 2020) continue;
+    const metric = bankQuestion(q.id, 'bt')?.evidenceLink?.metric;
+    if (metric && (getMetric(metric)?.waves.filter((w) => w.groups.all?.all).length || 0) >= 2) out.add(metric);
+  }
+  return Array.from(out);
+}
+
+export function runValidationSuite(opts: { populationId: string; n?: number; seed?: number; includeResearch?: boolean }): ValidationSuite {
+  const metrics = [...backtestableMetrics(), ...(opts.includeResearch === false ? [] : researchBacktestMetrics())];
+  const results = metrics.map((metric) =>
+    runBacktest({ metric, populationId: opts.populationId, n: opts.n, seed: opts.seed, save: false, stabilityRuns: 3 })
+  );
+  const byScheme: Record<string, SuiteSummary> = {};
+  for (const scheme of Array.from(new Set(results.map((r) => metricScheme(r.metric))))) {
+    byScheme[scheme] = summarize(results.filter((r) => metricScheme(r.metric) === scheme));
+  }
   const suite: ValidationSuite = {
     id: newId('suite'),
     createdAt: new Date().toISOString(),
     populationId: opts.populationId,
     results,
-    summary: {
-      metrics: results.length,
-      meanMaePp: round(mean(results.map((r) => r.maePp)), 2),
-      meanExpectedMaePp: round(mean(results.map((r) => r.expectedMaePp)), 2),
-      meanPersistenceMaePp: pers.length ? round(mean(pers), 2) : null,
-      meanCoverage95: round(mean(results.map((r) => r.coverage95)), 1)
-    }
+    summary: { ...summarize(results), byScheme }
   };
   saveDoc('validations', 'latest-suite', suite);
   return suite;

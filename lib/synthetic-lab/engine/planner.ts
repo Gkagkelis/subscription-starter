@@ -8,6 +8,7 @@ import type { AudienceFilter, Question, ResearchDomain, StudyKind, StudyPlan } f
 import { behaviourAssumption, defaultAssumptions } from './assumptions';
 import { getMetric } from '../data/noraya';
 import { checkText } from './guardrails';
+import { climateSummary } from '../data/ec-bcs';
 import { bankQuestion, suggestResearchQuestions } from './question-bank';
 
 export const PLANNER_VERSION = 'rules-1.0';
@@ -51,6 +52,18 @@ const CONSUMER_TOPICS: { metric: string; keys: string[] }[] = [
   { metric: 'ict_cosmetics_online', keys: ['καλλυντικ', 'ομορφι', 'περιποιησ'] },
   { metric: 'ict_buy_utilities_online', keys: ['ρευμα', 'ηλεκτρικ ενεργ', 'νερο', 'θερμανσ', 'φυσικο αεριο'] }
 ];
+
+/** Θέμα πολιτικής -> ερωτήσεις οικονομικής κατάστασης νοικοκυριού (EU-SILC, ανοιχτά δεδομένα). */
+const HOUSEHOLD_TOPICS: { keys: string[]; entries: string[] }[] = [
+  { keys: ['στεγ', 'ενοικ', 'κατοικι', 'στεγαστικ'], entries: ['silc_arrears_housing'] },
+  { keys: ['ρευμα', 'ενεργει', 'θερμανσ', 'λογαριασμ', 'φυσικο αεριο', 'πετρελαιο θερμ'], entries: ['silc_arrears_utilities', 'silc_cold_home'] },
+  { keys: ['επιδομ', 'φτωχ', 'ακριβει', 'πληθωρισμ', 'εισοδημ', 'μισθ', 'συνταξ', 'αγοραστικ', 'κοστοσ ζωησ', 'νοικοκυρι'], entries: ['silc_ends_meet', 'silc_unexpected_expense'] }
+];
+
+export function detectHouseholdEntries(text: string): string[] {
+  const t = norm(text);
+  return Array.from(new Set(HOUSEHOLD_TOPICS.filter((x) => x.keys.some((k) => t.includes(norm(k)))).flatMap((x) => x.entries))).slice(0, 2);
+}
 
 export function detectConsumerTopics(text: string): string[] {
   const t = norm(text);
@@ -215,6 +228,17 @@ export function planStudy(req: PlanRequest): PlanResult {
   const consumerTopics = domain === 'consumer' ? detectConsumerTopics(text) : [];
   const questions = domain === 'consumer' ? consumerQuestions(concept, price, consumerTopics) : policyQuestions(concept, topic);
   const warnings = [...guard.warnings];
+  // Οικονομική κατάσταση νοικοκυριού (EU-SILC) για σχετικά θέματα πολιτικής.
+  if (domain === 'social_policy') {
+    const household = detectHouseholdEntries(text)
+      .map((id, i) => bankQuestion(id, `h${i + 1}`))
+      .filter((q): q is Question => !!q);
+    if (household.length) {
+      const firstUnlinked = questions.findIndex((q) => !q.evidenceLink);
+      questions.splice(firstUnlinked < 0 ? questions.length : firstUnlinked, 0, ...household);
+      warnings.push('Οι ερωτήσεις h* για την οικονομική κατάσταση του νοικοκυριού βασίζονται στην EU-SILC (ΕΛΣΤΑΤ/Eurostat, ανοιχτά δεδομένα), ανά τύπο νοικοκυριού και κίνδυνο φτώχειας.');
+    }
+  }
   // Ερωτήσεις πραγματικών ερευνών με θεματική επικάλυψη (π.χ. διαΝΕΟσις), αν υπάρχουν τοπικά.
   const sourced = suggestResearchQuestions(text, 2)
     .map((rq, i) => bankQuestion(rq.id, `s${i + 1}`))
@@ -234,6 +258,7 @@ export function planStudy(req: PlanRequest): PlanResult {
         : 'Για το νέο προϊόν δεν υπάρχουν μετρημένες προτιμήσεις· μόνο η γενική συμπεριφορά online αγορών (b1) έχει εμπειρική βάση. Οι υπόλοιπες απαντήσεις βασίζονται σε δηλωμένες παραδοχές.'
     );
   }
+  if (domain === 'consumer') warnings.push(climateSummary());
   if (domain === 'social_policy' && !topic) warnings.push('Το θέμα δεν αντιστοιχίστηκε σε δείκτη Eurobarometer· μόνο η ερώτηση εμπιστοσύνης έχει εμπειρική βάση.');
   const plan: StudyPlan = {
     domain,

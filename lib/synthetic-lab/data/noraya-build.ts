@@ -34,7 +34,7 @@ export interface PriorWave {
 }
 
 /** Σχήμα αντιστοίχισης ομάδων πηγής -> χαρακτηριστικά πληθυσμού. */
-export type GroupScheme = 'eurobarometer' | 'eurostat_ict' | 'dianeosis';
+export type GroupScheme = 'eurobarometer' | 'eurostat_ict' | 'eurostat_silc' | 'dianeosis';
 
 /** Βαθμίδα άδειας: open = ανοιχτή άδεια· research_only = μόνο μη εμπορική έρευνα (ιδιωτικά, εκτός repo). */
 export type LicenseTier = 'open' | 'research_only';
@@ -52,6 +52,9 @@ export interface PriorMetric {
   question?: string;
   /** Προεπιλογή: 'open'. */
   tier?: LicenseTier;
+  /** Επιλογές απάντησης της ερώτησης πηγής (δυαδικοί δείκτες) και ποια αντιστοιχεί στο ποσοστό. */
+  answerOptions?: string[];
+  positiveOption?: string;
 }
 
 export interface NorayaPriors {

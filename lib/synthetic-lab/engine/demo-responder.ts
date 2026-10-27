@@ -16,6 +16,7 @@ import { ASSUMPTION_IDS, getAssumption } from './assumptions';
 import type { PriorFit } from './prior-model';
 import { describePersonaShort } from './persona-text';
 import { optionProbabilities } from './evidence';
+import { bcsDeviation } from '../data/ec-bcs';
 
 export const DEMO_ENGINE_VERSION = 'demo-rules-1.0';
 
@@ -55,6 +56,15 @@ function assumptionShift(p: Persona, q: Question, ctx: ResponderContext, salienc
       // σχετικό logit ως προς τον μέσο όρο πληθυσμού (μηδενική μετατόπιση κατά μέσο όρο)
       const pbar = Math.min(0.99, Math.max(0.01, (fit.usedTargets[0]?.fitted ?? 50) / 100));
       shift += 0.5 * beh.strength * (logit(pi) - logit(pbar));
+      used = true;
+    }
+  }
+  const climate = getAssumption(ctx.assumptions, ASSUMPTION_IDS.consumerClimate);
+  if (climate && (q.type === 'likert' || q.type === 'concept_test')) {
+    const dev = bcsDeviation(p, '9');
+    if (dev !== null) {
+      // 10 μονάδες ισοζυγίου ≈ 0,1 sd (οι διαστάσεις συσχετίζονται: συντηρητική κλίμακα)
+      shift += (dev / 100) * climate.strength;
       used = true;
     }
   }

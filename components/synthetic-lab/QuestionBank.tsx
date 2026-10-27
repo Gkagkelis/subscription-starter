@@ -11,6 +11,7 @@ interface Entry {
   source: string;
   tier: 'open' | 'research_only';
   waveKey: string | null;
+  years?: number[];
   n: number | null;
   observed: { option: string; value: number }[];
 }
@@ -74,6 +75,7 @@ export function QuestionBank({ nextId, onAdd, onClose }: { nextId: () => string;
             <div className="flex items-start justify-between gap-2">
               <button type="button" className="text-left" onClick={() => setOpen(open === e.id ? null : e.id)}>
                 {e.text}
+                <span className="mt-0.5 block text-xs text-stone-500">Επιλογές: {e.options.slice(0, 6).join(' / ')}{e.options.length > 6 ? ' / …' : ''}</span>
               </button>
               <Button variant="secondary" onClick={() => add(e.id)}>
                 Προσθήκη
@@ -81,7 +83,8 @@ export function QuestionBank({ nextId, onAdd, onClose }: { nextId: () => string;
             </div>
             <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-stone-500">
               <span>{e.source}</span>
-              {e.waveKey && <span>· {e.waveKey}</span>}
+              {e.waveKey && <span>· {e.waveKey.slice(0, 4)}</span>}
+              {e.years && e.years.length > 1 && <span>· κύματα {e.years.join(', ')}</span>}
               {e.n ? <span>· n={e.n}</span> : null}
               {e.tier === 'research_only' ? (
                 <span className="rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 font-medium text-amber-900">Μόνο για έρευνα</span>

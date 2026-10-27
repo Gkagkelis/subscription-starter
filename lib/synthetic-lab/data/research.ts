@@ -11,7 +11,7 @@
 //   commercial              -> ΔΕΝ φορτώνονται (π.χ. σε εμπορικό προϊόν)
 // ============================================================
 
-import { existsSync, readdirSync, readFileSync } from 'fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'fs';
 import path from 'path';
 import type { PriorMetric } from './noraya-build';
 import { dataRoot } from '../storage/paths';
@@ -33,6 +33,9 @@ export interface ResearchQuestion {
   dkOptions: string[];
   optionMetrics: Record<string, string>;
   n: number;
+  /** Κύματα (έτη) στα οποία τέθηκε η ίδια ερώτηση. */
+  years?: number[];
+  linked?: { year: number; part: string; var: string; text: string; score: number | null }[];
 }
 
 export interface ResearchDataset {
@@ -41,6 +44,7 @@ export interface ResearchDataset {
   source: string;
   license: string;
   importedAt: string;
+  years?: number[];
   questions: ResearchQuestion[];
   metrics: PriorMetric[];
   excludedPolitical?: { var: string; label: string; reason: string }[];
@@ -64,7 +68,7 @@ function load(): Loaded {
   const dir = researchDir();
   if (!existsSync(dir)) return empty;
   const files = readdirSync(dir).filter((f) => f.endsWith('.json')).sort();
-  const key = `${dir}|${files.join(',')}`;
+  const key = `${dir}|${files.map((f) => `${f}:${statSync(path.join(dir, f)).mtimeMs}`).join(',')}`;
   if (cache?.key === key) return cache.value;
   const out: Loaded = { datasets: [], metrics: new Map(), questions: new Map() };
   for (const f of files) {

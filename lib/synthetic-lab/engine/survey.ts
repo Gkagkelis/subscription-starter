@@ -27,6 +27,9 @@ import { LLM_PROMPT_VERSION, llmRespond } from './llm-responder';
 import { FIT_WARNING_PP, fitPriorModel, PRIOR_MODEL_VERSION, type PriorFit } from './prior-model';
 import { validationSummaryForQuestions } from './validation';
 import { questionMetrics } from './evidence';
+import { BCS_DATASET_ID } from '../data/ec-bcs';
+import { CES_DATASET_ID, HBS_DATASET_ID } from '../data/consumer-context';
+import { ASSUMPTION_IDS, getAssumption } from './assumptions';
 
 export const NOT_VALIDATED_MESSAGE =
   'Η συγκεκριμένη προσομοίωση δεν έχει ακόμη επικυρωθεί απέναντι σε ανεξάρτητη πραγματική έρευνα';
@@ -188,7 +191,8 @@ export async function runSurvey(o: RunSurveyOptions): Promise<StudyRun> {
             model,
             budget,
             signal: ctrl.signal,
-            seed
+            seed,
+            climate: !!getAssumption(o.plan.assumptions, ASSUMPTION_IDS.consumerClimate)
           });
           budget.completedUnits++;
           return { personaId: p.id, weight: p.weight, label: SIMULATED_LABEL, answers: applyFollowUps(o.plan.questions, r.answers), costUsd: r.usd } as SyntheticRespondent;
@@ -227,6 +231,9 @@ export async function runSurvey(o: RunSurveyOptions): Promise<StudyRun> {
     const id = metricDatasetId(m);
     if (!datasetsUsed.includes(id)) datasetsUsed.push(id);
   });
+  if (getAssumption(o.plan.assumptions, ASSUMPTION_IDS.consumerClimate) && !datasetsUsed.includes(BCS_DATASET_ID)) datasetsUsed.push(BCS_DATASET_ID);
+  // πλαίσιο καταναλωτικών μελετών (εμφανίζεται στην αναφορά, δεν τροφοδοτεί το μοντέλο)
+  if (o.plan.domain === 'consumer') datasetsUsed.push(...[CES_DATASET_ID, HBS_DATASET_ID].filter((d) => !datasetsUsed.includes(d)));
 
   const run: StudyRun = {
     ...base,

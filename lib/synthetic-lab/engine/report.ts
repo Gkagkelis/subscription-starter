@@ -7,6 +7,8 @@ import { csvRow as csvEscapeRow } from '../csv';
 import { allDatasets, freshness } from '../data/registry';
 import { getMetric, latestWave, metricSourceLabel, metricTier } from '../data/noraya';
 import { observedDistribution } from './evidence';
+import { climateSummary } from '../data/ec-bcs';
+import { cesSummary, spendingContext } from '../data/consumer-context';
 import { populationAttribution } from '../population/store';
 import type { EvidenceKind, Question, QuestionAggregate, StudyRun } from '../types';
 import { SIMULATED_LABEL } from '../types';
@@ -85,6 +87,7 @@ export function buildReport(run: StudyRun): StudyReport {
     evidence: 'observed',
     paragraphs: [
       ...datasets.map((d) => `${d.name} — ${d.organization}. Έτη συλλογής: ${d.collectionYears ? d.collectionYears.join('–') : 'άγνωστα'}. ${freshness(d).label}. Άδεια: ${d.license}.`),
+      ...(run.plan.domain === 'consumer' ? [climateSummary(), cesSummary(), ...spendingContext(`${run.plan.researchQuestion} ${run.plan.title}`)] : []),
       ...(linked.some((q) => metricTier(q.evidenceLink!.metric) === 'research_only')
         ? ['ΜΟΝΟ ΓΙΑ ΕΡΕΥΝΗΤΙΚΗ ΧΡΗΣΗ: η μελέτη χρησιμοποιεί δεδομένα που επιτρέπονται μόνο για μη εμπορική έρευνα με αναφορά πηγής. Για εμπορική χρήση των αποτελεσμάτων απαιτείται άδεια από τον κάτοχο των δεδομένων.']
         : [])
