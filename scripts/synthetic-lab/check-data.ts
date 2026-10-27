@@ -11,7 +11,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from 'fs';
 import path from 'path';
 import { PRIORS } from '../../lib/synthetic-lab/data/noraya';
 import { GLOPOP_GREECE_TOTALS } from '../../lib/synthetic-lab/population/glopop-schema';
-import { DEFAULT_POPULATION_ID, loadPopulation, populationIntegrity } from '../../lib/synthetic-lab/population/store';
+import { BASELINE_POPULATION_ID as DEFAULT_POPULATION_ID, CALIBRATED_POPULATION_ID, loadPopulation, populationIntegrity } from '../../lib/synthetic-lab/population/store';
 
 const root = path.resolve(__dirname, '../..');
 let failures = 0;
@@ -40,6 +40,11 @@ else {
   pop.personas.every((p) => p.dataVintage === 2015 && p.provenance.sourceFile) ? ok('Κάθε προφίλ έχει προέλευση και έτος αναφοράς') : bad('Προφίλ χωρίς προέλευση');
 }
 
+const cal = loadPopulation(CALIBRATED_POPULATION_ID);
+cal && cal.summary.updateStatus.calibrated && cal.summary.representedPopulation === 10372335
+  ? ok(`Βαθμονομημένος πληθυσμός 2025: ${cal.summary.representedPopulation} (Eurostat/ΕΛΣΤΑΤ 1/1/2025)`)
+  : bad('Ο βαθμονομημένος πληθυσμός 2025 δεν φορτώθηκε σωστά');
+
 // 3
 const walk = (d: string): string[] =>
   readdirSync(d).flatMap((f) => {
@@ -52,6 +57,20 @@ const sample = path.join(root, 'lib/synthetic-lab/data/populations/glopop-grc-20
 existsSync(sample) && statSync(sample).size < 1_000_000 ? ok(`Ενσωματωμένο δείγμα μικρό (${(statSync(sample).size / 1024).toFixed(0)} KB, CC BY 4.0)`) : bad('Το ενσωματωμένο δείγμα λείπει ή είναι πολύ μεγάλο');
 const gi = readFileSync(path.join(root, '.gitignore'), 'utf8');
 gi.includes('.synthetic-lab-data') ? ok('.synthetic-lab-data στο .gitignore') : bad('.synthetic-lab-data δεν είναι στο .gitignore');
+
+// 4. Δεδομένα «μόνο για έρευνα» ΔΕΝ μπαίνουν ποτέ στο repo
+const researchInRepo = [...walk(path.join(root, 'lib')), ...walk(path.join(root, 'public'))].filter((f) => {
+  if (!f.endsWith('.json') || statSync(f).size > 50_000_000) return false;
+  const head = readFileSync(f, 'utf8').slice(0, 4000);
+  return /"tier"\s*:\s*"research_only"/.test(head);
+});
+researchInRepo.length
+  ? bad(`Αρχεία ερευνητικής βαθμίδας μέσα στο repo: ${researchInRepo.join(', ')}`)
+  : ok('Κανένα αρχείο «μόνο για έρευνα» μέσα στο repo (μένουν στο .synthetic-lab-data/research)');
+for (const f of readdirSync(path.join(root, 'lib/synthetic-lab/data/official'))) {
+  const j = JSON.parse(readFileSync(path.join(root, 'lib/synthetic-lab/data/official', f), 'utf8'));
+  /CC BY 4\.0/.test(j.license || '') ? ok(`Επίσημο αρχείο ${f}: ${j.license.split('(')[0].trim()}`) : bad(`Χωρίς ανοιχτή άδεια: official/${f}`);
+}
 
 if (failures) {
   console.error(`\n${failures} αποτυχίες.`);

@@ -11,7 +11,7 @@ import { createHash } from 'crypto';
 import { z } from 'zod';
 import { parseCsvObjects } from '../csv';
 import { clearPopulationCache } from '../population/store';
-import { CALIBRATABLE_ATTRIBUTES, type CalibrationTargets, type MarginTarget } from '../population/calibration';
+import { CALIBRATABLE_ATTRIBUTES, isCalibratableAttribute, type CalibrationTargets, type MarginTarget } from '../population/calibration';
 import { saveDoc } from '../storage/file-store';
 import type { DatasetMeta } from '../types';
 
@@ -50,8 +50,8 @@ export function importDataset(req: ImportRequest): ImportResult {
     for (const c of ['attribute', 'category', 'value']) if (!cols.includes(c)) throw new Error(`Λείπει η στήλη «${c}».`);
     const byAttr = new Map<string, Record<string, number>>();
     rows.forEach((r, i) => {
-      if (!(CALIBRATABLE_ATTRIBUTES as readonly string[]).includes(r.attribute)) {
-        issues.push(`Γραμμή ${i + 2}: άγνωστο χαρακτηριστικό «${r.attribute}» (επιτρέπονται: ${CALIBRATABLE_ATTRIBUTES.join(', ')}).`);
+      if (!isCalibratableAttribute(r.attribute)) {
+        issues.push(`Γραμμή ${i + 2}: άγνωστο χαρακτηριστικό «${r.attribute}» (επιτρέπονται: ${CALIBRATABLE_ATTRIBUTES.join(', ')} ή ζεύγος με «|», π.χ. regionCode|ageBand).`);
         return;
       }
       const v = Number(r.value);

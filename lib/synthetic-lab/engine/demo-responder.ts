@@ -10,10 +10,12 @@
 // ============================================================
 
 import { createRng, deriveSeed, type Rng } from '../rng';
+import { logit } from '../stats';
 import type { AnswerBasis, Assumption, Persona, Question, SyntheticAnswer } from '../types';
 import { ASSUMPTION_IDS, getAssumption } from './assumptions';
 import type { PriorFit } from './prior-model';
 import { describePersonaShort } from './persona-text';
+import { optionProbabilities } from './evidence';
 
 export const DEMO_ENGINE_VERSION = 'demo-rules-1.0';
 
@@ -44,6 +46,17 @@ function assumptionShift(p: Persona, q: Question, ctx: ResponderContext, salienc
   if (sal && salienceP !== null && (q.type === 'likert' || q.type === 'concept_test')) {
     shift += (salienceP - 0.5) * 1.2 * sal.strength;
     used = true;
+  }
+  const beh = getAssumption(ctx.assumptions, ASSUMPTION_IDS.behaviourInterest);
+  if (beh?.metric && (q.type === 'likert' || q.type === 'concept_test')) {
+    const fit = ctx.priorFits[beh.metric];
+    const pi = fit?.p.get(p.id);
+    if (fit && pi !== undefined) {
+      // σχετικό logit ως προς τον μέσο όρο πληθυσμού (μηδενική μετατόπιση κατά μέσο όρο)
+      const pbar = Math.min(0.99, Math.max(0.01, (fit.usedTargets[0]?.fitted ?? 50) / 100));
+      shift += 0.5 * beh.strength * (logit(pi) - logit(pbar));
+      used = true;
+    }
   }
   // Σενάριο με τιμή: η τιμή επηρεάζει το ενδιαφέρον μέσω ευαισθησίας τιμής.
   if (ctx.scenario?.price != null && (q.type === 'likert' || q.type === 'concept_test')) {
@@ -127,7 +140,30 @@ function answerQuestion(
   }
 
   // 1) Εμπειρικά συνδεδεμένη ερώτηση
-  if (q.evidenceLink) {
+  if (q.evidenceLink?.optionMetrics) {
+    // Ερώτηση πηγής με κατανομή ανά επιλογή (π.χ. διαΝΕΟσις)
+    const dist = optionProbabilities(q, ctx.priorFits, p.id);
+    if (dist) {
+      let u = rng.next();
+      let choice = dist[dist.length - 1].option;
+      for (const d of dist) {
+        if (u < d.p) {
+          choice = d.option;
+          break;
+        }
+        u -= d.p;
+      }
+      const top = [...dist].sort((a, b) => b.p - a.p).slice(0, 3);
+      const fit = ctx.priorFits[q.evidenceLink.metric];
+      return {
+        questionId: q.id,
+        value: { choice },
+        skipped: false,
+        basis: 'empirical_prior',
+        rationale: `Κατανομή επιλογών για το προφίλ: ${top.map((d) => `«${d.option}» ${(d.p * 100).toFixed(0)}%`).join(', ')} (${fit?.waveKey || ''})`
+      };
+    }
+  } else if (q.evidenceLink) {
     const fit = ctx.priorFits[q.evidenceLink.metric];
     const pi = fit?.p.get(p.id);
     if (fit && pi !== undefined) {

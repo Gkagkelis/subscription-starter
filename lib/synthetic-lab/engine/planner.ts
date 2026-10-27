@@ -5,8 +5,10 @@
 // ============================================================
 
 import type { AudienceFilter, Question, ResearchDomain, StudyKind, StudyPlan } from '../types';
-import { defaultAssumptions } from './assumptions';
+import { behaviourAssumption, defaultAssumptions } from './assumptions';
+import { getMetric } from '../data/noraya';
 import { checkText } from './guardrails';
+import { bankQuestion, suggestResearchQuestions } from './question-bank';
 
 export const PLANNER_VERSION = 'rules-1.0';
 
@@ -31,6 +33,42 @@ const POLICY_TOPICS: { metric: string; label: string; keys: string[] }[] = [
   { metric: 'issue_country_crime_security', label: 'η εγκληματικότητα', keys: ['εγκλημ', 'ασφαλει', 'αστυνομ'] },
   { metric: 'issue_country_environment_climate', label: 'το περιβάλλον και το κλίμα', keys: ['περιβαλλ', 'κλιμα', 'πυρκαγι', 'ανακυκλ', 'ρυπανσ'] }
 ];
+
+/** Θέμα καταναλωτικής έρευνας -> δείκτης συμπεριφοράς (Έρευνα ΤΠΕ ΕΛΣΤΑΤ/Eurostat). */
+const CONSUMER_TOPICS: { metric: string; keys: string[] }[] = [
+  { metric: 'ict_buy_telecom_online', keys: ['κινητ', 'internet', 'ιντερνετ', 'συνδεσ', 'τηλεφων', 'data', 'καρτοκινητ', 'mobile', 'ινες', 'fiber'] },
+  { metric: 'ict_sub_video_streaming', keys: ['streaming', 'netflix', 'σειρ', 'ταινι', 'αθλητικ καναλ', 'τηλεορασ', 'disney', 'video'] },
+  { metric: 'ict_sub_music_streaming', keys: ['μουσικ', 'spotify', 'podcast'] },
+  { metric: 'ict_food_delivery', keys: ['φαγητ', 'delivery', 'ντελιβερ', 'εστιατορ', 'wolt', 'efood', 'παραγγελια φαγ'] },
+  { metric: 'ict_groceries_online', keys: ['σουπερ', 'τροφιμ', 'λαχανικ', 'φρουτ', 'παντοπωλ', 'ψωνια', 'μαναβ'] },
+  { metric: 'ict_clothes_online', keys: ['ρουχ', 'παπουτσ', 'μοδα', 'ενδυσ', 'αξεσουαρ'] },
+  { metric: 'ict_tickets_online', keys: ['εισιτηρι', 'συναυλι', 'θεατρ', 'εκδηλωσ', 'φεστιβαλ'] },
+  { metric: 'ict_accommodation_online', keys: ['ξενοδοχ', 'διαμον', 'ταξιδ', 'airbnb', 'καταλυμ', 'διακοπ'] },
+  { metric: 'ict_medicine_online', keys: ['φαρμακ', 'βιταμιν', 'συμπληρωμ'] },
+  { metric: 'ict_sub_news', keys: ['εφημεριδ', 'ειδησ', 'περιοδικ', 'news'] },
+  { metric: 'ict_sub_health_app', keys: ['γυμναστ', 'fitness', 'ασκησ', 'διατροφ εφαρμογ', 'wellness app'] },
+  { metric: 'ict_electronics_online', keys: ['υπολογιστ', 'tablet', 'laptop', 'κινητο τηλεφωνο', 'smartphone', 'ηλεκτρονικ συσκευ'] },
+  { metric: 'ict_cosmetics_online', keys: ['καλλυντικ', 'ομορφι', 'περιποιησ'] },
+  { metric: 'ict_buy_utilities_online', keys: ['ρευμα', 'ηλεκτρικ ενεργ', 'νερο', 'θερμανσ', 'φυσικο αεριο'] }
+];
+
+export function detectConsumerTopics(text: string): string[] {
+  const t = norm(text);
+  return CONSUMER_TOPICS.filter((x) => x.keys.some((k) => t.includes(norm(k)))).map((x) => x.metric).filter((m) => !!getMetric(m));
+}
+
+/** Ερώτηση συμπεριφοράς με εμπειρική σύνδεση (Ναι/Όχι). */
+function behaviourQuestion(id: string, metric: string): Question | null {
+  const m = getMetric(metric);
+  if (!m) return null;
+  return {
+    id,
+    type: 'single_choice',
+    text: m.question || m.label,
+    options: ['Ναι', 'Όχι'],
+    evidenceLink: { datasetId: m.datasetId || 'eurostat-isoc-ict', metric, positiveOption: 'Ναι' }
+  };
+}
 
 export function detectDomain(text: string): ResearchDomain {
   const t = norm(text);
@@ -68,8 +106,13 @@ const INTENT_SCALE = ['Σίγουρα όχι', 'Μάλλον όχι', 'Ίσως'
 const INTEREST_SCALE = ['Καθόλου', 'Λίγο', 'Μέτρια', 'Αρκετά', 'Πάρα πολύ'];
 const OBJECTIONS = ['Η τιμή', 'Δέσμευση / συμβόλαιο', 'Αμφιβολίες για την ποιότητα', 'Είμαι ικανοποιημένος/η με ό,τι έχω', 'Δεν το χρειάζομαι', 'Χρειάζομαι περισσότερες πληροφορίες'];
 
-export function consumerQuestions(concept: string, price: number | null): Question[] {
+export function consumerQuestions(concept: string, price: number | null, topics: string[] = []): Question[] {
+  // Ερωτήσεις συμπεριφοράς με εμπειρική βάση (Eurostat): γενική + έως 2 θεματικές.
+  const behaviour = ['ict_online_purchase_12m', ...topics.slice(0, 2)]
+    .map((m, i) => behaviourQuestion(`b${i + 1}`, m))
+    .filter((q): q is Question => !!q);
   const qs: Question[] = [
+    ...behaviour,
     { id: 'q1', type: 'concept_test', text: `Πόσο σας ενδιαφέρει: «${concept}»;`, scale: INTEREST_SCALE },
     { id: 'q2', type: 'likert', text: 'Πόσο πιθανό είναι να το αγοράσετε ή να εγγραφείτε μέσα στους επόμενους 3 μήνες;', scale: INTENT_SCALE }
   ];
@@ -169,10 +212,28 @@ export function planStudy(req: PlanRequest): PlanResult {
   const concept = conceptFromText(text);
   const price = domain === 'consumer' ? extractPrice(text) : null;
   const topic = domain === 'social_policy' ? detectPolicyTopic(text) : null;
-  const questions = domain === 'consumer' ? consumerQuestions(concept, price) : policyQuestions(concept, topic);
+  const consumerTopics = domain === 'consumer' ? detectConsumerTopics(text) : [];
+  const questions = domain === 'consumer' ? consumerQuestions(concept, price, consumerTopics) : policyQuestions(concept, topic);
   const warnings = [...guard.warnings];
+  // Ερωτήσεις πραγματικών ερευνών με θεματική επικάλυψη (π.χ. διαΝΕΟσις), αν υπάρχουν τοπικά.
+  const sourced = suggestResearchQuestions(text, 2)
+    .map((rq, i) => bankQuestion(rq.id, `s${i + 1}`))
+    .filter((q): q is Question => !!q);
+  if (sourced.length) {
+    const firstUnlinked = questions.findIndex((q) => !q.evidenceLink);
+    questions.splice(domain === 'consumer' ? 0 : firstUnlinked < 0 ? questions.length : firstUnlinked, 0, ...sourced);
+    warnings.push(
+      `Προστέθηκαν ${sourced.length} ερωτήσεις από πραγματική έρευνα (s*) με θεματική ομοιότητα — έλεγξε ότι ταιριάζουν και αφαίρεσέ τες αν όχι. Είναι δεδομένα ΜΟΝΟ ΓΙΑ ΕΡΕΥΝΗΤΙΚΗ ΧΡΗΣΗ.`
+    );
+  }
   if (domain === 'consumer' && !price) warnings.push('Δεν εντοπίστηκε τιμή — η ερώτηση τιμής παραλείφθηκε. Πρόσθεσέ τη αν χρειάζεται.');
-  if (domain === 'consumer') warnings.push('Δεν υπάρχουν ελληνικά καταναλωτικά δεδομένα στο Lab: οι απαντήσεις βασίζονται σε δημογραφικά + ρητές παραδοχές, όχι σε μετρημένες προτιμήσεις.');
+  if (domain === 'consumer') {
+    warnings.push(
+      consumerTopics.length
+        ? 'Οι ερωτήσεις συμπεριφοράς (b*) βασίζονται σε μετρημένα ποσοστά της Έρευνας ΤΠΕ ΕΛΣΤΑΤ/Eurostat. Το ενδιαφέρον για το ΝΕΟ προϊόν δεν έχει μετρηθεί: συνδέεται με τη συμπεριφορά μόνο μέσω δηλωμένης παραδοχής.'
+        : 'Για το νέο προϊόν δεν υπάρχουν μετρημένες προτιμήσεις· μόνο η γενική συμπεριφορά online αγορών (b1) έχει εμπειρική βάση. Οι υπόλοιπες απαντήσεις βασίζονται σε δηλωμένες παραδοχές.'
+    );
+  }
   if (domain === 'social_policy' && !topic) warnings.push('Το θέμα δεν αντιστοιχίστηκε σε δείκτη Eurobarometer· μόνο η ερώτηση εμπιστοσύνης έχει εμπειρική βάση.');
   const plan: StudyPlan = {
     domain,
@@ -180,7 +241,10 @@ export function planStudy(req: PlanRequest): PlanResult {
     title: concept.length > 80 ? concept.slice(0, 77) + '…' : concept,
     researchQuestion: text,
     questions,
-    assumptions: defaultAssumptions(domain, price),
+    assumptions: [
+      ...defaultAssumptions(domain, price),
+      ...(consumerTopics[0] ? [behaviourAssumption(consumerTopics[0], getMetric(consumerTopics[0])!.label)] : [])
+    ],
     audience: req.audience || { minAge: 15 },
     sampleSize: req.sampleSize || 500,
     warnings,

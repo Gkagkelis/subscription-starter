@@ -4,7 +4,7 @@
 
 import { liveConfig, type LiveModelId } from '../ai/config';
 import { BudgetExceededError, finishRun, mapWithConcurrency, registerRun, RunCancelledError, StudyBudget } from '../ai/live';
-import { latestWave, NORAYA_DATASET_ID } from '../data/noraya';
+import { latestWave, metricDatasetId } from '../data/noraya';
 import { loadPopulation, selectRespondents } from '../population/store';
 import { deriveSeed } from '../rng';
 import { round, sd, mean } from '../stats';
@@ -26,6 +26,7 @@ import { checkQuestionnaire } from './guardrails';
 import { LLM_PROMPT_VERSION, llmRespond } from './llm-responder';
 import { FIT_WARNING_PP, fitPriorModel, PRIOR_MODEL_VERSION, type PriorFit } from './prior-model';
 import { validationSummaryForQuestions } from './validation';
+import { questionMetrics } from './evidence';
 
 export const NOT_VALIDATED_MESSAGE =
   'Η συγκεκριμένη προσομοίωση δεν έχει ακόμη επικυρωθεί απέναντι σε ανεξάρτητη πραγματική έρευνα';
@@ -45,10 +46,22 @@ export interface RunSurveyOptions {
 }
 
 /** Fit των empirical priors για όσες ερωτήσεις συνδέονται με δείκτη. */
-export function fitPriorsForQuestions(questions: Question[], personas: Persona[]): { fits: Record<string, PriorFit>; warnings: string[] } {
+export function fitPriorsForQuestions(
+  questions: Question[],
+  personas: Persona[],
+  extraMetrics: string[] = []
+): { fits: Record<string, PriorFit>; warnings: string[] } {
   const fits: Record<string, PriorFit> = {};
   const warnings: string[] = [];
-  const metrics = Array.from(new Set(questions.map((q) => q.evidenceLink?.metric).filter((m): m is string => !!m)));
+  const metrics = Array.from(
+    new Set([...questions.flatMap(questionMetrics), ...extraMetrics].filter((m): m is string => !!m))
+  );
+  // Οι δείκτες ανά επιλογή μιας ερώτησης αναφέρονται μαζί (μία προειδοποίηση ανά ερώτηση).
+  const groupOf = new Map<string, string>();
+  questions.forEach((q) => {
+    if (q.evidenceLink?.optionMetrics) for (const m of questionMetrics(q)) groupOf.set(m, `ερώτηση ${q.id}`);
+  });
+  const groups = new Map<string, { waveKey: string; year: number; maxErr: number; converged: boolean }>();
   for (const m of metrics) {
     const wave = latestWave(m);
     if (!wave) {
@@ -57,14 +70,21 @@ export function fitPriorsForQuestions(questions: Question[], personas: Persona[]
     }
     const fit = fitPriorModel(m, wave, personas);
     fits[m] = fit;
-    const age = new Date().getFullYear() - wave.year;
-    if (age >= 2) warnings.push(`Το εμπειρικό prior «${m}» είναι από το κύμα ${wave.key} (${age} έτη πριν).`);
-    if (!fit.converged || fit.maxFitErrorPp > FIT_WARNING_PP) {
+    const key = groupOf.get(m) || `«${m}»`;
+    const g = groups.get(key) || { waveKey: wave.key, year: wave.year, maxErr: 0, converged: true };
+    g.maxErr = Math.max(g.maxErr, fit.maxFitErrorPp);
+    g.converged = g.converged && fit.converged;
+    groups.set(key, g);
+  }
+  groups.forEach((g, key) => {
+    const age = new Date().getFullYear() - g.year;
+    if (age >= 2) warnings.push(`Το εμπειρικό prior για ${key} είναι από το κύμα ${g.waveKey} (${age} έτη πριν).`);
+    if (!g.converged || g.maxErr > FIT_WARNING_PP) {
       warnings.push(
-        `Το μοντέλο για «${m}» αποκλίνει έως ${fit.maxFitErrorPp.toFixed(1)} π.μ. από τα παρατηρημένα ποσοστά (ασυμβατότητα δομής πληθυσμού 2015 με το δείγμα της έρευνας).`
+        `Το μοντέλο για ${key} αποκλίνει έως ${g.maxErr.toFixed(1)} π.μ. από τα παρατηρημένα ποσοστά (ασυμβατότητα δομής πληθυσμού με το δείγμα της έρευνας).`
       );
     }
-  }
+  });
   return { fits, warnings };
 }
 
@@ -137,7 +157,8 @@ export async function runSurvey(o: RunSurveyOptions): Promise<StudyRun> {
   const sel = selectRespondents(pop, o.plan.audience, n, deriveSeed(seed, 'sample'));
   base.warnings.push(...sel.warnings);
 
-  const { fits, warnings: fitWarnings } = fitPriorsForQuestions(o.plan.questions, pop.personas);
+  const assumptionMetrics = o.plan.assumptions.filter((a) => a.enabled && a.metric).map((a) => a.metric as string);
+  const { fits, warnings: fitWarnings } = fitPriorsForQuestions(o.plan.questions, pop.personas, assumptionMetrics);
   base.warnings.push(...fitWarnings);
   const ctx: ResponderContext = { seed, assumptions: o.plan.assumptions, priorFits: fits, scenario: o.scenario || null };
 
@@ -201,8 +222,11 @@ export async function runSurvey(o: RunSurveyOptions): Promise<StudyRun> {
   }
 
   const validation = validationSummaryForQuestions(o.plan.questions, mode);
-  const datasetsUsed = [pop.summary.datasetId];
-  if (Object.keys(fits).length) datasetsUsed.push(NORAYA_DATASET_ID);
+  const datasetsUsed = [pop.summary.datasetId, ...pop.summary.updateStatus.targetsDatasetIds];
+  Object.keys(fits).forEach((m) => {
+    const id = metricDatasetId(m);
+    if (!datasetsUsed.includes(id)) datasetsUsed.push(id);
+  });
 
   const run: StudyRun = {
     ...base,

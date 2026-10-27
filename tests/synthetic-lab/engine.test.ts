@@ -84,9 +84,9 @@ describe('survey engine (demo)', () => {
     expect(a.seed).toBe(11);
     expect(a.engine.engineVersion).toMatch(/demo-rules/);
     expect(a.cost.usd).toBe(0);
-    expect(a.datasetsUsed).toEqual(['glopop-s-grc-2015', 'noraya-public-opinion']);
+    expect(a.datasetsUsed).toEqual(['glopop-s-grc-2015', 'eurostat-demo_r_pjangroup-2025', 'noraya-public-opinion']);
     expect(a.stability!.runs).toBe(3);
-    expect(a.warnings.join(' ')).toMatch(/baseline 2015/);
+    expect(a.populationSummary.updateStatus.targetYear).toBe(2025);
   });
   it('empirically linked answers track the observed share', async () => {
     const run = await runSurvey({ plan: { ...plan, sampleSize: 2000 }, populationId: POP, seed: 3, save: false, stabilityRuns: 0 });

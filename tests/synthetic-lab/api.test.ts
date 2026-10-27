@@ -7,7 +7,7 @@ import { GET as exportGET } from '@/app/api/synthetic-lab/studies/[id]/export/ro
 import { POST as datasetsPOST, GET as datasetsGET } from '@/app/api/synthetic-lab/datasets/route';
 import { POST as fgPOST } from '@/app/api/synthetic-lab/focus-groups/route';
 import { POST as fgStep } from '@/app/api/synthetic-lab/focus-groups/[id]/step/route';
-import { clearPopulationCache, loadPopulation, DEFAULT_POPULATION_ID } from '@/lib/synthetic-lab/population/store';
+import { BASELINE_POPULATION_ID, clearPopulationCache, loadPopulation, DEFAULT_POPULATION_ID } from '@/lib/synthetic-lab/population/store';
 
 const json = (url: string, body: unknown, headers: Record<string, string> = {}) =>
   new Request(url, { method: 'POST', headers: { 'content-type': 'application/json', ...headers }, body: JSON.stringify(body) });
@@ -68,7 +68,7 @@ describe('API', () => {
     const d = await r.json();
     expect(d.ok).toBe(true);
     clearPopulationCache();
-    const pop = loadPopulation(DEFAULT_POPULATION_ID)!;
+    const pop = loadPopulation(BASELINE_POPULATION_ID)!;
     expect(pop.summary.updateStatus.calibrated).toBe(true);
     expect(pop.summary.updateStatus.message).toMatch(/Μερική βαθμονόμηση/);
     const list = await (await datasetsGET()).json();

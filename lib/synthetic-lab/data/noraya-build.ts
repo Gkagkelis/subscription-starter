@@ -17,7 +17,10 @@ import { parseCsvObjects } from '../csv';
 
 export interface PriorCell {
   value: number; // 0-100
-  n: number; // σταθμισμένο έγκυρο n
+  n: number; // σταθμισμένο έγκυρο n (0 αν δεν δημοσιεύεται — βλ. nUnknown)
+  /** Η πηγή δεν δημοσιεύει μέγεθος δείγματος ανά κελί (π.χ. Eurostat). */
+  nUnknown?: boolean;
+  flag?: string;
   confidence: string;
   sources: number; // πόσες γραμμές συνδυάστηκαν
   inconsistent: boolean;
@@ -30,12 +33,25 @@ export interface PriorWave {
   groups: Record<string, Record<string, PriorCell>>; // group_type -> group -> cell
 }
 
+/** Σχήμα αντιστοίχισης ομάδων πηγής -> χαρακτηριστικά πληθυσμού. */
+export type GroupScheme = 'eurobarometer' | 'eurostat_ict' | 'dianeosis';
+
+/** Βαθμίδα άδειας: open = ανοιχτή άδεια· research_only = μόνο μη εμπορική έρευνα (ιδιωτικά, εκτός repo). */
+export type LicenseTier = 'open' | 'research_only';
+
 export interface PriorMetric {
   metric: string;
   family: string;
   label: string;
   semanticsNote: string;
   waves: PriorWave[];
+  /** Προεπιλογή: 'eurobarometer' (δεδομένα NORAYA). */
+  scheme?: GroupScheme;
+  datasetId?: string;
+  /** Διατύπωση ερώτησης όπως στην πηγή (όπου είναι γνωστή). */
+  question?: string;
+  /** Προεπιλογή: 'open'. */
+  tier?: LicenseTier;
 }
 
 export interface NorayaPriors {

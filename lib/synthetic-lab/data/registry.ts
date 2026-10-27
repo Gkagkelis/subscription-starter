@@ -11,6 +11,7 @@ import type { DatasetMeta } from '../types';
 import { PRIORS } from './noraya';
 import { GLOPOP_DOI, GLOPOP_GREECE_TOTALS } from '../population/glopop-schema';
 import bundled from './populations/glopop-grc-2015-sample.json';
+import { catalogDatasets, officialDatasets, researchTierDatasets } from './registry-catalog';
 
 const EB_LICENSE_NOTE =
   'Τα δεδομένα Eurobarometer διανέμονται από το GESIS Data Archive· οι όροι επαναχρησιμοποίησης (ιδίως εμπορικής) πρέπει να επιβεβαιωθούν για τα πρωτογενή αρχεία. Το repository δεν τεκμηριώνει ποιες «ελληνικές έρευνες» περιλαμβάνονται ούτε την άδειά τους.';
@@ -196,7 +197,7 @@ export function importedDatasets(): DatasetMeta[] {
 }
 
 export function allDatasets(): DatasetMeta[] {
-  return [...builtInDatasets(), ...importedDatasets()];
+  return [...builtInDatasets(), ...officialDatasets(), ...researchTierDatasets(), ...importedDatasets(), ...catalogDatasets()];
 }
 
 /** Φρεσκάδα πηγής σε σχέση με σήμερα. */

@@ -3,6 +3,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import type { Assumption, AudienceFilter, Question, QuestionType, StudyPlan } from '@/lib/synthetic-lab/types';
 import { AudienceEditor, usePopulations } from './AudienceEditor';
+import { QuestionBank } from './QuestionBank';
 import { Banner, Button, Card, EvidenceBadge, Help, inputCls, labelCls, Spinner } from './ui';
 
 const STEPS = ['Τι θέλεις να ερευνήσεις;', 'Ποιο κοινό αφορά;', 'Τι τύπο έρευνας θέλεις;', 'Παραδοχές & δεδομένα', 'Εκτέλεση'];
@@ -352,6 +353,12 @@ export function LiveKeyInput() {
 
 export function QuestionEditor({ questions, onChange }: { questions: Question[]; onChange: (q: Question[]) => void }) {
   const set = (i: number, patch: Partial<Question>) => onChange(questions.map((q, j) => (j === i ? { ...q, ...patch } : q)));
+  const [bank, setBank] = useState(false);
+  const nextIdWith = (prefix: string) => {
+    let k = 1;
+    while (questions.some((q) => q.id === `${prefix}${k}`)) k++;
+    return `${prefix}${k}`;
+  };
   const nextId = () => {
     let k = questions.length + 1;
     while (questions.some((q) => q.id === `q${k}`)) k++;
@@ -361,15 +368,30 @@ export function QuestionEditor({ questions, onChange }: { questions: Question[];
     <Card className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Ερωτηματολόγιο</h2>
-        <Button variant="secondary" onClick={() => onChange([...questions, { id: nextId(), type: 'likert', text: 'Νέα ερώτηση', scale: ['Καθόλου', 'Λίγο', 'Μέτρια', 'Αρκετά', 'Πολύ'] }])}>
-          + Ερώτηση
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="secondary" onClick={() => setBank((b) => !b)} disabled={questions.length >= 25}>
+            + Ερώτηση με εμπειρική βάση
+          </Button>
+          <Button variant="secondary" onClick={() => onChange([...questions, { id: nextId(), type: 'likert', text: 'Νέα ερώτηση', scale: ['Καθόλου', 'Λίγο', 'Μέτρια', 'Αρκετά', 'Πολύ'] }])}>
+            + Ερώτηση
+          </Button>
+        </div>
       </div>
+      {bank && (
+        <QuestionBank
+          nextId={() => nextIdWith('src')}
+          onAdd={(q) => {
+            onChange([...questions, q].slice(0, 25));
+            setBank(false);
+          }}
+          onClose={() => setBank(false)}
+        />
+      )}
       {questions.map((q, i) => (
         <div key={q.id} className="rounded-lg border border-stone-200 p-3">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <span className="w-8 text-sm font-semibold text-stone-500">{q.id}</span>
-            <input aria-label={`Κείμενο ${q.id}`} className={inputCls} value={q.text} onChange={(e) => set(i, { text: e.target.value })} />
+            <input aria-label={`Κείμενο ${q.id}`} className={inputCls} value={q.text} readOnly={!!q.evidenceLink?.optionMetrics} onChange={(e) => set(i, { text: e.target.value })} />
             <select aria-label={`Τύπος ${q.id}`} className={`${inputCls} sm:w-56`} value={q.type} onChange={(e) => set(i, { type: e.target.value as QuestionType })} disabled={!!q.evidenceLink}>
               {Object.entries(TYPE_LABELS).map(([k, l]) => (
                 <option key={k} value={k}>
@@ -384,7 +406,10 @@ export function QuestionEditor({ questions, onChange }: { questions: Question[];
           <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-stone-600">
             {q.evidenceLink ? (
               <>
-                <EvidenceBadge kind="estimate" /> Συνδεδεμένη με δείκτη «{q.evidenceLink.metric}» — οι επιλογές δεν αλλάζουν.
+                <EvidenceBadge kind="estimate" />{' '}
+                {q.evidenceLink.optionMetrics
+                  ? `Ερώτηση πραγματικής έρευνας (${q.evidenceLink.datasetId}) — επιλογές: ${(q.options || []).join(' / ')}. Δεν αλλάζουν.`
+                  : `Συνδεδεμένη με δείκτη «${q.evidenceLink.metric}» — οι επιλογές δεν αλλάζουν.`}
               </>
             ) : (
               <EvidenceBadge kind="simulation" />

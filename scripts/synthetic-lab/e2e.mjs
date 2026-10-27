@@ -35,12 +35,12 @@ const page = await ctx.newPage();
 const consoleErrors = [];
 page.on('pageerror', (e) => consoleErrors.push(String(e)));
 
-await check('Αρχική: έξι λειτουργίες και banner baseline 2015', async () => {
+await check('Αρχική: έξι λειτουργίες και κατάσταση πληθυσμού 2025', async () => {
   await page.goto(`${BASE}/synthetic-lab`);
   for (const t of ['Νέα Έρευνα', 'Focus Group', 'Σύγκριση Σεναρίων', 'Πληθυσμός & Κοινά', 'Τα Δεδομένα μου', 'Έλεγχος Αξιοπιστίας']) {
     await page.getByRole('heading', { name: t }).waitFor();
   }
-  await page.getByText('Η επικαιροποίηση του πληθυσμού δεν έχει ολοκληρωθεί — χρησιμοποιείται ιστορικό baseline 2015').first().waitFor();
+  await page.getByText(/Βαθμονομημένο σε επίσημα στοιχεία 2025/).first().waitFor();
   await shot(page, '01-home');
 });
 
@@ -55,7 +55,14 @@ await check('Wizard: από φυσική γλώσσα σε εκτελεσμέν�
   await shot(page, '03-wizard-audience');
   await page.getByRole('button', { name: 'Επόμενο →' }).click();
   await page.getByRole('heading', { name: 'Ερωτηματολόγιο' }).waitFor();
-  await page.getByRole('button', { name: '+ Ερώτηση' }).click();
+  await page.getByRole('button', { name: '+ Ερώτηση', exact: true }).click();
+  // Τράπεζα ερωτήσεων με εμπειρική βάση (ανοιχτά δεδομένα Eurostat· διαθέσιμα πάντα)
+  await page.getByRole('button', { name: '+ Ερώτηση με εμπειρική βάση' }).click();
+  await page.getByLabel('Αναζήτηση ερωτήσεων').fill('streaming ταινίες');
+  await page.getByText('Ανοιχτά δεδομένα').first().waitFor();
+  await shot(page, '04a-question-bank');
+  await page.getByRole('button', { name: 'Προσθήκη' }).first().click();
+  await page.getByText(/Συνδεδεμένη με δείκτη «ict_/).first().waitFor();
   await shot(page, '04-wizard-questionnaire');
   await page.getByRole('button', { name: 'Επόμενο →' }).click();
   await page.getByRole('heading', { name: 'Ερευνητικές παραδοχές' }).waitFor();
@@ -131,6 +138,8 @@ await check('Δεδομένα: registry με άδειες και εξαιρέσ�
   await page.goto(`${BASE}/synthetic-lab/data`);
   await page.getByText('CC BY 4.0 (δεδομένα)', { exact: false }).first().waitFor();
   await page.getByText('Σκόπιμα εκτός χρήσης').first().waitFor();
+  await page.getByText('Απαιτεί εγγραφή').first().waitFor();
+  await page.getByText('Πληθυσμός 1/1/2025 ανά περιφέρεια, ηλικία, φύλο').first().waitFor();
   await shot(page, '12-data');
 });
 

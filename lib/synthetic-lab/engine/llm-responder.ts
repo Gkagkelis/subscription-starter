@@ -15,7 +15,8 @@ import { callJson, type StudyBudget } from '../ai/live';
 import type { LiveModelId } from '../ai/config';
 import { describePersonaLong } from './persona-text';
 import type { PriorFit } from './prior-model';
-import { getMetric } from '../data/noraya';
+import { getMetric, metricSourceLabel } from '../data/noraya';
+import { optionProbabilities } from './evidence';
 
 export const LLM_PROMPT_VERSION = 'llm-respondent-1.0';
 
@@ -118,8 +119,13 @@ export async function llmRespond(opts: {
     .filter((q) => q.evidenceLink && opts.priorFits[q.evidenceLink.metric]?.p.has(p.id))
     .map((q) => {
       const fit = opts.priorFits[q.evidenceLink!.metric];
+      const dist = optionProbabilities(q, opts.priorFits, p.id);
+      if (dist) {
+        const txt = [...dist].sort((a, b) => b.p - a.p).slice(0, 5).map((d) => `«${d.option}» ~${(d.p * 100).toFixed(0)}%`).join(', ');
+        return `- «${q.text}»: σε άτομα με παρόμοια χαρακτηριστικά η εκτιμώμενη κατανομή είναι ${txt} (εκτίμηση από ${metricSourceLabel(fit.metric)} ${fit.waveKey}).`;
+      }
       const m = getMetric(fit.metric);
-      return `- ${m?.label || fit.metric}: σε άτομα με παρόμοια χαρακτηριστικά, εκτιμάται ότι περίπου ${(fit.p.get(p.id)! * 100).toFixed(0)}% απαντούν «${q.evidenceLink!.positiveOption}» (εκτίμηση από Eurobarometer ${fit.waveKey}).`;
+      return `- ${m?.label || fit.metric}: σε άτομα με παρόμοια χαρακτηριστικά, εκτιμάται ότι περίπου ${(fit.p.get(p.id)! * 100).toFixed(0)}% απαντούν «${q.evidenceLink!.positiveOption}» (εκτίμηση από ${metricSourceLabel(fit.metric)} ${fit.waveKey}).`;
     });
 
   const user = [

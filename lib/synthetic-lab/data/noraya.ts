@@ -18,15 +18,33 @@
 // ============================================================
 
 import priorsJson from './noraya-priors.generated.json';
-import type { NorayaPriors, PriorCell, PriorMetric, PriorWave } from './noraya-build';
+import ictJson from './official/eurostat-ict.json';
+import type { GroupScheme, NorayaPriors, PriorCell, PriorMetric, PriorWave } from './noraya-build';
 import type { AgeBand, Persona } from '../types';
+import { researchDatasets, researchMetric, researchMetrics } from './research';
 
 export const NORAYA_DATASET_ID = 'noraya-public-opinion';
+export const EUROSTAT_ICT_DATASET_ID = 'eurostat-isoc-ict';
 export const PRIORS = priorsJson as unknown as NorayaPriors;
+const ICT = ictJson as unknown as { metrics: PriorMetric[]; source: string; license: string };
+const ICT_METRICS: Record<string, PriorMetric> = Object.fromEntries((ICT.metrics || []).map((m) => [m.metric, m]));
 
-/** Διαστάσεις που υπάρχουν ΚΑΙ στον πληθυσμό ΚΑΙ στα priors. */
+/** Διαστάσεις (Eurobarometer/NORAYA) που υπάρχουν ΚΑΙ στον πληθυσμό ΚΑΙ στα priors. */
 export const LINKED_DIMENSIONS = ['age_group', 'gender', 'education_group'] as const;
-export type LinkedDimension = (typeof LINKED_DIMENSIONS)[number];
+export type LinkedDimension = string;
+
+/** Διαστάσεις που χρησιμοποιεί το μοντέλο ανά σχήμα πηγής. */
+export const SCHEME_DIMENSIONS: Record<GroupScheme, string[]> = {
+  eurobarometer: ['age_group', 'gender', 'education_group'],
+  // Eurostat ΤΠΕ: κοινή κατανομή ηλικίας × φύλου + μόρφωση (ISCED)
+  eurostat_ict: ['age_gender', 'education_group'],
+  // διαΝΕΟσις: ηλικία × φύλο, μόρφωση, περιφέρεια (μικροδεδομένα, υπολογισμένα τοπικά)
+  dianeosis: ['age_gender', 'education_group', 'region']
+};
+
+export function metricScheme(metric: string): GroupScheme {
+  return getMetric(metric)?.scheme || 'eurobarometer';
+}
 
 export const UNLINKED_DIMENSIONS: Record<string, string> = {
   occupation_group: 'Επάγγελμα: δεν υπάρχει στο GLOPOP-S.',
@@ -55,11 +73,40 @@ const EDU_TO_EB: Record<string, string | null> = {
   unknown: null
 };
 
-/** Πιθανοτική συμμετοχή ενός προσώπου σε ομάδες NORAYA ανά διάσταση. */
-export function norayaMembership(p: Persona): Record<LinkedDimension, Record<string, number>> | null {
+// διαΝΕΟσις D3: «Α Βάθμια» / «Β Βάθμια» (γυμνάσιο ΚΑΙ λύκειο μαζί) + ΙΕΚ / ΑΕΙ-ΤΕΙ-μεταπτυχιακό.
+// Άρα «low» = έως δημοτικό και η κατώτερη δευτεροβάθμια πάει στη «medium».
+const EDU_TO_DN: Record<string, string | null> = {
+  less_than_primary: 'low_education',
+  primary: 'low_education',
+  lower_secondary: 'medium_education',
+  upper_secondary: 'medium_education',
+  tertiary: 'high_education',
+  unknown: null
+};
+
+/** Πιθανοτική συμμετοχή ενός προσώπου σε ομάδες ανά διάσταση, για το σχήμα της πηγής. */
+export function norayaMembership(p: Persona, scheme: GroupScheme = 'eurobarometer'): Record<string, Record<string, number>> | null {
+  const edu = EDU_TO_EB[p.education];
+  if (scheme === 'dianeosis') {
+    // Δείγμα 17+: η ζώνη GLOPOP 15-24 αντιστοιχίζεται στην ομάδα 17-24 της έρευνας.
+    if (p.ageBand === '0-4' || p.ageBand === '5-14') return null;
+    const dn = EDU_TO_DN[p.education];
+    return {
+      age_gender: { [`${p.ageBand}|${p.gender}`]: 1 },
+      education_group: dn ? { [dn]: 1 } : {},
+      region: { [p.regionCode]: 1 }
+    };
+  }
+  if (scheme === 'eurostat_ict') {
+    // Ζώνες GLOPOP = ζώνες Eurostat (16-24 ≈ 15-24· 65+ ≈ 65-74, με προέκταση στους 75+).
+    if (p.ageBand === '0-4' || p.ageBand === '5-14') return null;
+    return {
+      age_gender: { [`${p.ageBand}|${p.gender}`]: 1 },
+      education_group: edu ? { [edu]: 1 } : {}
+    };
+  }
   const age = AGE_TO_EB[p.ageBand];
   if (!age) return null; // εκτός πληθυσμού έρευνας (κάτω των 15)
-  const edu = EDU_TO_EB[p.education];
   return {
     age_group: age,
     gender: { [p.gender]: 1 },
@@ -83,7 +130,7 @@ export function waveCells(wave: PriorWave, dim: string): Record<string, PriorCel
     const present = parts.map((g) => cells[g]).filter(Boolean);
     parts.forEach((g) => delete cells[g]);
     if (!present.length) continue;
-    const n = present.reduce((s, c) => s + c.n, 0);
+    const n = present.reduce((s, c) => s + c.n, 0) || present.length;
     cells[merged] = {
       value: Math.round((present.reduce((s, c) => s + c.value * c.n, 0) / n) * 100) / 100,
       n,
@@ -95,12 +142,39 @@ export function waveCells(wave: PriorWave, dim: string): Record<string, PriorCel
   return cells;
 }
 
+/** Όλοι οι δείκτες: ανοιχτοί (NORAYA, Eurostat) + ερευνητικής βαθμίδας αν υπάρχουν τοπικά και επιτρέπονται. */
 export function listMetrics(): PriorMetric[] {
-  return Object.values(PRIORS.metrics).sort((a, b) => a.label.localeCompare(b.label, 'el'));
+  return [...Object.values(PRIORS.metrics), ...Object.values(ICT_METRICS), ...researchMetrics()].sort((a, b) =>
+    a.label.localeCompare(b.label, 'el')
+  );
 }
 
 export function getMetric(metric: string): PriorMetric | null {
-  return PRIORS.metrics[metric] || null;
+  return PRIORS.metrics[metric] || ICT_METRICS[metric] || researchMetric(metric) || null;
+}
+
+export function metricTier(metric: string): 'open' | 'research_only' {
+  return getMetric(metric)?.tier || 'open';
+}
+
+/** Dataset προέλευσης ενός δείκτη. */
+export function metricDatasetId(metric: string): string {
+  return getMetric(metric)?.datasetId || NORAYA_DATASET_ID;
+}
+
+/** Σύντομη περιγραφή πηγής για prompts/αναφορές. */
+export function metricSourceLabel(metric: string): string {
+  const scheme = metricScheme(metric);
+  if (scheme === 'eurostat_ict') return 'Έρευνα ΤΠΕ ΕΛΣΤΑΤ/Eurostat';
+  if (scheme === 'dianeosis') {
+    const ds = researchDatasets().find((d) => d.datasetId === getMetric(metric)?.datasetId);
+    return ds ? `διαΝΕΟσις «Τι πιστεύουν οι Έλληνες» (${ds.datasetId.slice(-4)}, μόνο για έρευνα)` : 'διαΝΕΟσις (μόνο για έρευνα)';
+  }
+  return 'Eurobarometer (NORAYA)';
+}
+
+export function ictMeta() {
+  return { source: ICT.source, license: ICT.license, count: Object.keys(ICT_METRICS).length };
 }
 
 /** Τελευταίο κύμα με συνολική τιμή ("all"). */

@@ -15,7 +15,8 @@
 // ούτε τις απαντήσεις AI — αυτές εμφανίζονται ως «μη επικυρωμένες».
 // ============================================================
 
-import { getMetric, latestWave, LINKED_DIMENSIONS, listMetrics, norayaMembership, waveCells, type LinkedDimension } from '../data/noraya';
+import { getMetric, latestWave, listMetrics, metricScheme, norayaMembership, SCHEME_DIMENSIONS, waveCells, type LinkedDimension } from '../data/noraya';
+import type { GroupScheme } from '../data/noraya-build';
 import type { PriorWave } from '../data/noraya-build';
 import { loadPopulation, marginals, selectRespondents } from '../population/store';
 import { createRng, deriveSeed } from '../rng';
@@ -74,13 +75,14 @@ function simulateGroups(
   respondents: Persona[],
   p: Map<string, number>,
   seed: number,
-  expected = false
+  expected = false,
+  scheme: GroupScheme = 'eurobarometer'
 ): Record<string, Record<string, { share: number; effN: number }>> {
   const rng = createRng(seed);
   const acc: Record<string, Record<string, { num: number; den: number; w: number[] }>> = { all: { all: { num: 0, den: 0, w: [] } } };
   for (const r of respondents) {
     const pi = p.get(r.id);
-    const m = norayaMembership(r);
+    const m = norayaMembership(r, scheme);
     if (pi === undefined || !m) continue;
     // expected=true: αναμενόμενη τιμή του μοντέλου (χωρίς θόρυβο τυχαίων απαντήσεων)
     const yes = expected ? pi : rng.next() < pi ? 1 : 0;
@@ -91,7 +93,7 @@ function simulateGroups(
       cell.w.push(r.weight * frac);
     };
     add('all', 'all', 1);
-    for (const d of LINKED_DIMENSIONS) for (const g in m[d]) add(d, g, m[d][g]);
+    for (const d of SCHEME_DIMENSIONS[scheme]) for (const g in m[d] || {}) add(d, g, m[d][g]);
   }
   const out: Record<string, Record<string, { share: number; effN: number }>> = {};
   for (const d in acc) {
@@ -133,13 +135,15 @@ export function runBacktest(opts: {
   if (!waves) throw new Error(`Ο δείκτης ${opts.metric} δεν έχει δύο διαδοχικά κύματα για backtest.`);
   const { train, test } = waves;
   const notes: string[] = [];
+  const scheme = metricScheme(opts.metric);
+  const simulate = (rs: Persona[], p: Map<string, number>, sd: number, expected = false) => simulateGroups(rs, p, sd, expected, scheme);
 
   const fit = fitPriorModel(opts.metric, train, pop.personas, { shrinkage: opts.shrinkage });
   const sel = selectRespondents(pop, { minAge: 15 }, n, deriveSeed(seed, 'bt-sample'));
-  const sim = simulateGroups(sel.respondents, fit.p, deriveSeed(seed, 'bt-draw'));
+  const sim = simulate(sel.respondents, fit.p, deriveSeed(seed, 'bt-draw'));
 
   const groups: GroupComparison[] = [];
-  const dims: string[] = ['all', ...LINKED_DIMENSIONS];
+  const dims: string[] = ['all', ...SCHEME_DIMENSIONS[scheme]];
   for (const d of dims) {
     const cells = d === 'all' ? test.groups.all || {} : waveCells(test, d);
     const trainCells = d === 'all' ? train.groups.all || {} : waveCells(train, d);
@@ -149,7 +153,8 @@ export function runBacktest(opts: {
       if (!s || Number.isNaN(s.share) || obs.inconsistent) continue;
       const [lo, hi] = wilson(s.share, s.effN);
       const seSim = seProportion(s.share, s.effN);
-      const seObs = seProportion(obs.value / 100, obs.n);
+      // Όταν η πηγή δεν δημοσιεύει n (π.χ. Eurostat), λαμβάνεται μόνο το σφάλμα της προσομοίωσης.
+      const seObs = obs.nUnknown ? 0 : seProportion(obs.value / 100, obs.n);
       const z = Math.abs(s.share - obs.value / 100) / Math.sqrt(seSim * seSim + seObs * seObs);
       const prev = trainCells[g];
       groups.push({
@@ -163,7 +168,7 @@ export function runBacktest(opts: {
         persistence: prev ? round(prev.value, 1) : null,
         absError: round(Math.abs(s.share * 100 - obs.value), 2),
         covered: z <= 1.96,
-        lowSample: obs.n < 50
+        lowSample: !obs.nUnknown && obs.n < 50
       });
     }
   }
@@ -171,7 +176,7 @@ export function runBacktest(opts: {
   if (evalGroups.length < groups.length) notes.push(`${groups.length - evalGroups.length} ομάδες με n<50 εμφανίζονται αλλά δεν μετρούν στους συνολικούς δείκτες.`);
   const maeModel = mae(evalGroups.map((g) => ({ predicted: g.simulated, observed: g.observed })));
   const persistencePairs = evalGroups.filter((g) => g.persistence !== null).map((g) => ({ predicted: g.persistence!, observed: g.observed }));
-  const simExp = simulateGroups(sel.respondents, fit.p, 0, true);
+  const simExp = simulate(sel.respondents, fit.p, 0, true);
   const expectedPairs = evalGroups
     .map((g) => ({ predicted: (simExp[g.dimension]?.[g.group]?.share ?? NaN) * 100, observed: g.observed }))
     .filter((x) => !Number.isNaN(x.predicted));
@@ -179,15 +184,23 @@ export function runBacktest(opts: {
   const overallOnly = mae(evalGroups.map((g) => ({ predicted: overallTrain, observed: g.observed })));
 
   // Ευαισθησία σε ρυθμίσεις μοντέλου
-  const settings: { setting: string; dims: LinkedDimension[] }[] = [
-    { setting: 'Ηλικία + φύλο + μόρφωση (προεπιλογή)', dims: ['age_group', 'gender', 'education_group'] },
-    { setting: 'Ηλικία + φύλο', dims: ['age_group', 'gender'] },
-    { setting: 'Μόνο ηλικία', dims: ['age_group'] },
-    { setting: 'Χωρίς δημογραφικά (μόνο σύνολο)', dims: [] }
-  ];
+  const settings: { setting: string; dims: LinkedDimension[] }[] =
+    scheme === 'eurostat_ict'
+      ? [
+          { setting: 'Ηλικία×φύλο + μόρφωση (προεπιλογή)', dims: ['age_gender', 'education_group'] },
+          { setting: 'Μόνο ηλικία×φύλο', dims: ['age_gender'] },
+          { setting: 'Μόνο μόρφωση', dims: ['education_group'] },
+          { setting: 'Χωρίς δημογραφικά (μόνο σύνολο)', dims: [] }
+        ]
+      : [
+          { setting: 'Ηλικία + φύλο + μόρφωση (προεπιλογή)', dims: ['age_group', 'gender', 'education_group'] },
+          { setting: 'Ηλικία + φύλο', dims: ['age_group', 'gender'] },
+          { setting: 'Μόνο ηλικία', dims: ['age_group'] },
+          { setting: 'Χωρίς δημογραφικά (μόνο σύνολο)', dims: [] }
+        ];
   const sensitivity = settings.map((st) => {
     const f = fitPriorModel(opts.metric, train, pop.personas, { dimensions: st.dims, shrinkage: opts.shrinkage });
-    const s2 = simulateGroups(sel.respondents, f.p, deriveSeed(seed, 'bt-draw'));
+    const s2 = simulate(sel.respondents, f.p, deriveSeed(seed, 'bt-draw'));
     const pairs = evalGroups.map((g) => ({ predicted: (s2[g.dimension]?.[g.group]?.share ?? NaN) * 100, observed: g.observed })).filter((x) => !Number.isNaN(x.predicted));
     return { setting: st.setting, dimensions: st.dims, maePp: round(mae(pairs), 2) };
   });
@@ -197,13 +210,13 @@ export function runBacktest(opts: {
   const maes: number[] = [];
   for (let i = 0; i < runs; i++) {
     const s3 = selectRespondents(pop, { minAge: 15 }, n, deriveSeed(seed, 'bt-stab-sample', i));
-    const simI = simulateGroups(s3.respondents, fit.p, deriveSeed(seed, 'bt-stab-draw', i));
+    const simI = simulate(s3.respondents, fit.p, deriveSeed(seed, 'bt-stab-draw', i));
     const pairs = evalGroups.map((g) => ({ predicted: (simI[g.dimension]?.[g.group]?.share ?? NaN) * 100, observed: g.observed })).filter((x) => !Number.isNaN(x.predicted));
     maes.push(mae(pairs));
   }
 
   // Δημογραφικός έλεγχος: δείγμα vs πληθυσμός (15+)
-  const pool = pop.personas.filter((p) => norayaMembership(p));
+  const pool = pop.personas.filter((p) => norayaMembership(p, scheme));
   const mp = marginals(pool);
   const ms = marginals(sel.respondents);
   const demographicCheck = Object.keys(mp).map((k) => ({ attribute: k, tvd: round(totalVariationDistance(mp[k], ms[k]) * 100, 2) }));
@@ -211,7 +224,9 @@ export function runBacktest(opts: {
   if (pop.summary.isDevFixture) notes.unshift('ΠΡΟΣΟΧΗ: εκτελέστηκε σε ΤΕΧΝΗΤΟ fixture — τα αποτελέσματα δεν έχουν νόημα.');
   notes.push(
     `Το fit έγινε στο κύμα ${train.key} και συγκρίθηκε με το ${test.key}, το οποίο δεν χρησιμοποιήθηκε στο fit.`,
-    'Οι παρατηρημένες τιμές είναι συγκεντρωτικά ποσοστά με δικό τους δειγματοληπτικό σφάλμα· η «κάλυψη» συνυπολογίζει και τα δύο σφάλματα.',
+    scheme === 'eurostat_ict'
+      ? 'Η Eurostat δεν δημοσιεύει n ανά κελί: η «κάλυψη» λαμβάνει υπόψη μόνο τον θόρυβο της προσομοίωσης (υπερεκτιμά την αυστηρότητα). Πληθυσμός πηγής: 16-74 ετών.'
+      : 'Οι παρατηρημένες τιμές είναι συγκεντρωτικά ποσοστά με δικό τους δειγματοληπτικό σφάλμα· η «κάλυψη» συνυπολογίζει και τα δύο σφάλματα.',
     'Το backtest μετρά κυρίως τη χρονική μεταβολή μεταξύ κυμάτων και το σφάλμα του μοντέλου κύριων επιδράσεων — όχι την ικανότητα πρόβλεψης για νέα θέματα.'
   );
   if (fit.skippedTargets.length) notes.push(`Παραλείφθηκαν ${fit.skippedTargets.length} στόχοι fit (μικρό n, μη αντιστοιχιζόμενες ομάδες ή ασυμβατότητες).`);
@@ -296,6 +311,15 @@ export function validationSummaryForQuestions(questions: Question[], mode: 'demo
   if (!linked.length) return { status: 'not_validated', message: NOT_VALIDATED, linkedMetrics: [], backtestIds: [] };
   const suite = latestSuite();
   const tested = suite ? suite.results.filter((r) => linked.includes(r.metric) && !r.populationIsFixture) : [];
+  const singleWave = linked.filter((m) => (getMetric(m)?.waves.filter((w) => w.groups.all?.all).length || 0) < 2);
+  if (!tested.length && singleWave.length === linked.length && mode === 'demo') {
+    return {
+      status: 'not_validated',
+      message: `${NOT_VALIDATED}. Οι συνδεδεμένοι δείκτες έχουν ένα μόνο κύμα μέτρησης, οπότε δεν υπάρχει ανεξάρτητο (held-out) κύμα για έλεγχο. Οι κατανομές ανά ομάδα αναπαράγουν την πηγή· η πρόβλεψη για συνδυασμούς χαρακτηριστικών είναι μοντέλο, όχι μέτρηση.`,
+      linkedMetrics: linked,
+      backtestIds: []
+    };
+  }
   if (!tested.length || mode === 'live') {
     return {
       status: 'not_validated',

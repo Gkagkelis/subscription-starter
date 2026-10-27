@@ -59,7 +59,18 @@ export interface DatasetMeta {
   /** sha256 του αρχείου πηγής (όπου υπάρχει τοπικό αρχείο). */
   sourceHash?: string | null;
   storage: string;
+  /** Βαθμίδα πρόσβασης/άδειας. */
+  tier?: DataTier;
+  /** Βήματα για σύνδεση (για πηγές που απαιτούν εγγραφή ή λήψη). */
+  howToConnect?: string;
 }
+
+/**
+ * open: ανοιχτή άδεια, μέσα στο Lab · research_only: μόνο μη εμπορική έρευνα (ιδιωτικά, εκτός repo)
+ * registration: δωρεάν με εγγραφή (ο χρήστης κατεβάζει) · cite_only: δημοσιευμένα νούμερα μόνο για σύγκριση/αναφορά
+ * paid: συνδρομητικά/εμπορικά
+ */
+export type DataTier = 'open' | 'research_only' | 'registration' | 'cite_only' | 'paid';
 
 // ------------------------------------------------------------
 // Πληθυσμός
@@ -203,8 +214,10 @@ export interface Question {
   /**
    * Σύνδεση με εμπειρική μέτρηση (π.χ. NORAYA/Eurobarometer metric).
    * Μόνο τότε οι απαντήσεις έχουν εμπειρική βάση.
+   * optionMetrics: για ερωτήσεις πολλών επιλογών, δείκτης ανά επιλογή
+   * (ποσοστό που επιλέγει την επιλογή)· οι πιθανότητες κανονικοποιούνται.
    */
-  evidenceLink?: { datasetId: string; metric: string; positiveOption: string } | null;
+  evidenceLink?: { datasetId: string; metric: string; positiveOption: string; optionMetrics?: Record<string, string> } | null;
   maxSelections?: number;
 }
 
@@ -223,6 +236,8 @@ export interface Assumption {
   strength: number;
   /** Π.χ. τιμή αναφοράς σε €. */
   value?: number | null;
+  /** Εμπειρικός δείκτης που χρησιμοποιεί η παραδοχή (π.χ. σχετική συμπεριφορά Eurostat). */
+  metric?: string | null;
 }
 
 // ------------------------------------------------------------

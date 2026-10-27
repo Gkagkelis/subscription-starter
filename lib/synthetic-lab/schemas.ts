@@ -36,7 +36,18 @@ export const QuestionSchema = z
       .optional(),
     pricePoints: z.array(z.number().min(0).max(1_000_000)).max(10).optional(),
     followUpOf: z.object({ questionId: str(20), whenAnswerIn: z.array(str(150)).max(12) }).nullable().optional(),
-    evidenceLink: z.object({ datasetId: str(60), metric: str(60), positiveOption: str(150) }).nullable().optional(),
+    evidenceLink: z
+      .object({
+        datasetId: str(60),
+        metric: str(60),
+        positiveOption: str(150),
+        optionMetrics: z
+          .record(str(150), str(60))
+          .refine((r) => Object.keys(r).length <= 12, 'Έως 12 επιλογές.')
+          .optional()
+      })
+      .nullable()
+      .optional(),
     maxSelections: z.number().int().min(1).max(12).optional()
   })
   .superRefine((q, ctx) => {
@@ -59,7 +70,8 @@ export const AssumptionSchema = z.object({
   source: z.enum(['researcher', 'default_assumption', 'data']),
   enabled: z.boolean(),
   strength: z.number().min(0).max(3),
-  value: z.number().min(0).max(1_000_000).nullable().optional()
+  value: z.number().min(0).max(1_000_000).nullable().optional(),
+  metric: str(60).nullable().optional()
 });
 
 export const PlanSchema = z.object({

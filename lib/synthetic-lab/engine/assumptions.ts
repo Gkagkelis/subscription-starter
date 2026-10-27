@@ -15,8 +15,23 @@ export const ASSUMPTION_IDS = {
   wtpDispersion: 'wtp_dispersion',
   ageNovelty: 'age_novelty_openness',
   salienceSupport: 'salience_support_link',
-  statusQuo: 'status_quo_preference'
+  statusQuo: 'status_quo_preference',
+  behaviourInterest: 'behaviour_interest_link'
 } as const;
+
+/** Παραδοχή: ενδιαφέρον/πρόθεση συνδέεται με σχετική μετρημένη συμπεριφορά (π.χ. συνδρομή streaming). */
+export function behaviourAssumption(metric: string, label: string): Assumption {
+  return {
+    id: ASSUMPTION_IDS.behaviourInterest,
+    title: `Ενδιαφέρον ανάλογο με τη σχετική συμπεριφορά: «${label}»`,
+    description:
+      'Όσοι, σύμφωνα με την Έρευνα ΤΠΕ ΕΛΣΤΑΤ/Eurostat, έχουν μεγαλύτερη πιθανότητα να έχουν τη σχετική συμπεριφορά (ανά ηλικία, φύλο, μόρφωση) δείχνουν μεγαλύτερο ενδιαφέρον. Η συμπεριφορά είναι μετρημένη· η ΣΥΝΔΕΣΗ της με το ενδιαφέρον για το νέο προϊόν είναι παραδοχή.',
+    source: 'default_assumption',
+    enabled: true,
+    strength: 1,
+    metric
+  };
+}
 
 export function defaultAssumptions(domain: ResearchDomain, referencePrice?: number | null): Assumption[] {
   const consumer: Assumption[] = [

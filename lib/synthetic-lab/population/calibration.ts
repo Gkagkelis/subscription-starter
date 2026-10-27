@@ -24,7 +24,14 @@ export function baselineUpdateStatus(referenceYear: number): PopulationUpdateSta
 
 /** Χαρακτηριστικά προσώπων που επιτρέπεται να βαθμονομηθούν. */
 export const CALIBRATABLE_ATTRIBUTES = ['ageBand', 'gender', 'regionCode', 'education', 'settlement', 'householdSize'] as const;
-export type CalibratableAttribute = (typeof CALIBRATABLE_ATTRIBUTES)[number];
+export type SimpleAttribute = (typeof CALIBRATABLE_ATTRIBUTES)[number];
+/** Απλό χαρακτηριστικό ή κοινή κατανομή δύο, π.χ. "regionCode|ageBand" (κατηγορίες "GRCr101|25-34"). */
+export type CalibratableAttribute = SimpleAttribute | `${SimpleAttribute}|${SimpleAttribute}`;
+
+export function isCalibratableAttribute(a: string): a is CalibratableAttribute {
+  const parts = a.split('|');
+  return parts.length <= 2 && parts.every((x) => (CALIBRATABLE_ATTRIBUTES as readonly string[]).includes(x));
+}
 
 export interface MarginTarget {
   attribute: CalibratableAttribute;
@@ -54,8 +61,13 @@ export interface RakingResult {
 }
 
 function attr(p: Persona, a: CalibratableAttribute): string {
-  const v = p[a];
-  return v === null || v === undefined ? 'unknown' : String(v);
+  return a
+    .split('|')
+    .map((k) => {
+      const v = p[k as SimpleAttribute];
+      return v === null || v === undefined ? 'unknown' : String(v);
+    })
+    .join('|');
 }
 
 export function marginalShares(personas: Persona[], weights: number[], a: CalibratableAttribute): Record<string, number> {
@@ -145,14 +157,16 @@ export function updateStatusFromTargets(
 ): PopulationUpdateStatus {
   const recent = targets.filter((t) => t.year >= currentYear - 1);
   if (!recent.length || !result || !result.converged) return baselineUpdateStatus(referenceYear);
-  const attrs = new Set(recent.flatMap((t) => t.margins.map((m) => m.attribute)));
+  const attrs = new Set(recent.flatMap((t) => t.margins.flatMap((m) => m.attribute.split('|'))));
+  const year = Math.max(...recent.map((t) => t.year));
+  const LABEL: Record<string, string> = { ageBand: 'ηλικία', gender: 'φύλο', regionCode: 'περιφέρεια', education: 'εκπαίδευση', settlement: 'αστική/αγροτική', householdSize: 'μέγεθος νοικοκυριού' };
+  const covered = Array.from(attrs).map((a) => LABEL[a] || a).join(', ');
+  const missing = CALIBRATABLE_ATTRIBUTES.filter((a) => !attrs.has(a)).map((a) => LABEL[a]);
   const partial = !(attrs.has('ageBand') && attrs.has('gender') && attrs.has('regionCode'));
   return {
     calibrated: true,
-    targetYear: Math.max(...recent.map((t) => t.year)),
+    targetYear: year,
     targetsDatasetIds: recent.map((t) => t.datasetId),
-    message: partial
-      ? `Μερική βαθμονόμηση σε στόχους ${Math.max(...recent.map((t) => t.year))} (${Array.from(attrs).join(', ')}). Οι κοινές κατανομές παραμένουν του 2015.`
-      : `Βαθμονομημένο σε περιθωριακές κατανομές ${Math.max(...recent.map((t) => t.year))} (${Array.from(attrs).join(', ')}). Οι κοινές κατανομές (π.χ. ηλικία × μόρφωση) παραμένουν του 2015.`
+    message: `${partial ? 'Μερική βαθμονόμηση' : 'Βαθμονομημένο'} σε επίσημα στοιχεία ${year} (${covered}). ${missing.length ? `Τα υπόλοιπα χαρακτηριστικά (${missing.join(', ')}, εισόδημα, τύπος νοικοκυριού) και οι συσχετίσεις τους παραμένουν του 2015.` : 'Οι υπόλοιπες συσχετίσεις παραμένουν του 2015.'}`
   };
 }

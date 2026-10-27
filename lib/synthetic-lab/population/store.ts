@@ -5,6 +5,7 @@
 
 import { existsSync, readdirSync, readFileSync } from 'fs';
 import bundledSample from '../data/populations/glopop-grc-2015-sample.json';
+import officialPop2025 from '../data/official/eurostat-population-2025.json';
 import { deriveSeed } from '../rng';
 import { dataPath, dataRoot } from '../storage/paths';
 import type { AudienceFilter, Persona, Population, PopulationSummary } from '../types';
@@ -15,7 +16,11 @@ import { AGE_BAND_BOUNDS } from './glopop-schema';
 import { largestRemainder, sampleIndices } from './sampling';
 import path from 'path';
 
-export const DEFAULT_POPULATION_ID = 'glopop-grc-2015-bundled';
+/** Ακατέργαστο baseline GLOPOP-S 2015 (ενσωματωμένο δείγμα). */
+export const BASELINE_POPULATION_ID = 'glopop-grc-2015-bundled';
+/** Το ίδιο δείγμα, βαθμονομημένο σε επίσημο πληθυσμό Eurostat/ΕΛΣΤΑΤ 2025 (προεπιλογή). */
+export const CALIBRATED_POPULATION_ID = 'glopop-grc-2025-calibrated';
+export const DEFAULT_POPULATION_ID = CALIBRATED_POPULATION_ID;
 
 const cache = new Map<string, Population>();
 
@@ -43,6 +48,44 @@ function readPrivate(): CompactPopulation[] {
     .filter((x): x is CompactPopulation => !!x && x.format === 'synthetic-lab-compact-v1');
 }
 
+interface OfficialPopulation {
+  datasetId: string;
+  source: string;
+  license: string;
+  year: number;
+  total: number;
+  cells: Record<string, number>; // "GRCr101|25-34|male"
+}
+
+/**
+ * Ενσωματωμένοι επίσημοι στόχοι (Eurostat demo_r_pjangroup, CC BY 4.0):
+ * κοινές κατανομές περιφέρεια × ηλικία και ηλικία × φύλο.
+ */
+export function builtInCalibrationTargets(): (CalibrationTargets & { total: number })[] {
+  const o = officialPop2025 as unknown as OfficialPopulation;
+  if (!o?.cells) return [];
+  const regionAge: Record<string, number> = {};
+  const ageGender: Record<string, number> = {};
+  Object.entries(o.cells).forEach(([k, v]) => {
+    const [region, age, sex] = k.split('|');
+    regionAge[`${region}|${age}`] = (regionAge[`${region}|${age}`] || 0) + v;
+    ageGender[`${age}|${sex}`] = (ageGender[`${age}|${sex}`] || 0) + v;
+  });
+  return [
+    {
+      datasetId: o.datasetId,
+      year: o.year,
+      source: o.source,
+      license: o.license,
+      total: o.total,
+      margins: [
+        { attribute: 'regionCode|ageBand', totals: regionAge },
+        { attribute: 'ageBand|gender', totals: ageGender }
+      ]
+    }
+  ];
+}
+
 /** Στόχοι βαθμονόμησης που έχει εισάγει ο χρήστης (ιδιωτικά). */
 export function loadCalibrationTargets(): CalibrationTargets[] {
   const dir = path.join(dataRoot(), 'calibration-targets');
@@ -55,7 +98,10 @@ export function loadCalibrationTargets(): CalibrationTargets[] {
 export function listPopulationSummaries(): PopulationSummary[] {
   const out: PopulationSummary[] = [];
   const b = bundled();
-  if (b) out.push(loadPopulation(b.summary.id)!.summary);
+  if (b) {
+    if (builtInCalibrationTargets().length) out.push(loadPopulation(CALIBRATED_POPULATION_ID)!.summary);
+    out.push(loadPopulation(b.summary.id)!.summary);
+  }
   readPrivate().forEach((p) => out.push(loadPopulation(p.summary.id)!.summary));
   // Το fixture εμφανίζεται ΜΟΝΟ αν δεν υπάρχει πραγματικό δείγμα.
   if (!out.length) out.push(expandCompactPopulation(buildDevFixture()).summary);
@@ -63,21 +109,34 @@ export function listPopulationSummaries(): PopulationSummary[] {
 }
 
 export function defaultPopulationId(): string {
-  return bundled() ? DEFAULT_POPULATION_ID : listPopulationSummaries()[0].id;
+  if (bundled()) return builtInCalibrationTargets().length ? CALIBRATED_POPULATION_ID : BASELINE_POPULATION_ID;
+  return listPopulationSummaries()[0].id;
 }
 
-function calibrate(pop: Population): { pop: Population; raking: RakingResult | null } {
-  const targets = loadCalibrationTargets();
+function calibrate(pop: Population, extra: (CalibrationTargets & { total?: number })[] = []): { pop: Population; raking: RakingResult | null } {
   const currentYear = new Date().getFullYear();
+  const targets: (CalibrationTargets & { total?: number })[] = [...extra, ...loadCalibrationTargets()];
   if (!targets.length || pop.summary.isDevFixture) return { pop, raking: null };
-  const margins = targets.filter((t) => t.year >= currentYear - 1).flatMap((t) => t.margins);
+  const recent = targets.filter((t) => t.year >= currentYear - 1);
+  const margins = recent.flatMap((t) => t.margins);
   if (!margins.length) return { pop, raking: null };
-  const res = rake(pop.personas, pop.personas.map((p) => p.weight), margins);
+  const res = rake(pop.personas, pop.personas.map((p) => p.weight), margins, { bounds: [0.1, 10], maxIter: 200 });
   const status = updateStatusFromTargets(pop.summary.referenceYear, targets, res, currentYear);
   if (!status.calibrated) return { pop: { ...pop, summary: { ...pop.summary, qualityNotes: [...pop.summary.qualityNotes, ...res.issues] } }, raking: res };
-  const personas = pop.personas.map((p, i) => ({ ...p, weight: res.weights[i] }));
+  // Αν οι στόχοι είναι απόλυτοι πληθυσμοί, τα βάρη κλιμακώνονται στο επίσημο σύνολο.
+  const absolute = recent.find((t) => typeof t.total === 'number')?.total;
+  const sumW = res.weights.reduce((a, b) => a + b, 0);
+  const scale = absolute ? absolute / sumW : 1;
+  const personas = pop.personas.map((p, i) => ({ ...p, weight: res.weights[i] * scale }));
+  const notes = [...pop.summary.qualityNotes, ...res.issues];
+  notes.push(
+    `Raking: ${res.iterations} επαναλήψεις, μέγιστη απόκλιση ${res.maxDeviationPp.toFixed(3)} π.μ., λόγος βαρών ${res.weightRatio.toFixed(1)}.`
+  );
   return {
-    pop: { personas, summary: { ...pop.summary, updateStatus: status, qualityNotes: [...pop.summary.qualityNotes, ...res.issues] } },
+    pop: {
+      personas,
+      summary: { ...pop.summary, representedPopulation: Math.round(sumW * scale), updateStatus: status, qualityNotes: notes }
+    },
     raking: res
   };
 }
@@ -86,6 +145,28 @@ export function loadPopulation(id: string): Population | null {
   if (cache.has(id)) return cache.get(id)!;
   let cp: CompactPopulation | null = null;
   const b = bundled();
+  if (b && id === CALIBRATED_POPULATION_ID) {
+    const official = builtInCalibrationTargets();
+    if (!official.length) return null;
+    const { pop } = calibrate(expandCompactPopulation(b), official);
+    const y = official[0].year;
+    const notes = pop.summary.qualityNotes
+      .filter((n) => !n.startsWith('Οι πληθυσμοί Βορείου Αιγαίου'))
+      .concat(
+        `Ο πληθυσμός ανά περιφέρεια, ηλικία και φύλο ακολουθεί τα επίσημα στοιχεία 1/1/${y} (Eurostat demo_r_pjangroup, δεδομένα ΕΛΣΤΑΤ). Έτσι διορθώνεται και η αντιστροφή Βορείου/Νοτίου Αιγαίου του GLOPOP-S.`
+      );
+    const calibrated: Population = {
+      personas: pop.personas,
+      summary: {
+        ...pop.summary,
+        id: CALIBRATED_POPULATION_ID,
+        name: `Ελλάδα ${y} — GLOPOP-S βαθμονομημένο σε Eurostat/ΕΛΣΤΑΤ (δείγμα ${pop.personas.length.toLocaleString('el-GR')})`,
+        qualityNotes: notes
+      }
+    };
+    cache.set(id, calibrated);
+    return calibrated;
+  }
   if (b && b.summary.id === id) cp = b;
   else if (id === DEV_FIXTURE_ID) cp = buildDevFixture();
   else cp = readPrivate().find((p) => p.summary.id === id) || null;
@@ -102,7 +183,7 @@ export function clearPopulationCache() {
 /** Λεπτομέρειες ακεραιότητας/περιθωρίων από το import (αν υπάρχουν). */
 export function populationIntegrity(id: string): Record<string, unknown> | null {
   const b = bundled();
-  if (b && b.summary.id === id) return (b.integrity as Record<string, unknown>) || null;
+  if (b && (b.summary.id === id || id === CALIBRATED_POPULATION_ID)) return (b.integrity as Record<string, unknown>) || null;
   const p = readPrivate().find((x) => x.summary.id === id);
   return (p?.integrity as Record<string, unknown>) || null;
 }
@@ -110,6 +191,10 @@ export function populationIntegrity(id: string): Record<string, unknown> | null 
 export function populationAttribution(id: string): string {
   const b = bundled();
   if (b && b.summary.id === id) return b.attribution;
+  if (b && id === CALIBRATED_POPULATION_ID) {
+    const o = officialPop2025 as unknown as OfficialPopulation;
+    return `${b.attribution} Βαθμονόμηση: ${o.source} — ${o.license}.`;
+  }
   if (id === DEV_FIXTURE_ID) return buildDevFixture().attribution;
   return readPrivate().find((x) => x.summary.id === id)?.attribution || '';
 }

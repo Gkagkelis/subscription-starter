@@ -5,7 +5,8 @@
 
 import { csvRow as csvEscapeRow } from '../csv';
 import { allDatasets, freshness } from '../data/registry';
-import { getMetric, latestWave } from '../data/noraya';
+import { getMetric, latestWave, metricSourceLabel, metricTier } from '../data/noraya';
+import { observedDistribution } from './evidence';
 import { populationAttribution } from '../population/store';
 import type { EvidenceKind, Question, QuestionAggregate, StudyRun } from '../types';
 import { SIMULATED_LABEL } from '../types';
@@ -82,8 +83,18 @@ export function buildReport(run: StudyRun): StudyReport {
     id: 'data',
     title: '3. Δεδομένα που χρησιμοποιήθηκαν',
     evidence: 'observed',
-    paragraphs: datasets.map((d) => `${d.name} — ${d.organization}. Έτη συλλογής: ${d.collectionYears ? d.collectionYears.join('–') : 'άγνωστα'}. ${freshness(d).label}. Άδεια: ${d.license}.`),
+    paragraphs: [
+      ...datasets.map((d) => `${d.name} — ${d.organization}. Έτη συλλογής: ${d.collectionYears ? d.collectionYears.join('–') : 'άγνωστα'}. ${freshness(d).label}. Άδεια: ${d.license}.`),
+      ...(linked.some((q) => metricTier(q.evidenceLink!.metric) === 'research_only')
+        ? ['ΜΟΝΟ ΓΙΑ ΕΡΕΥΝΗΤΙΚΗ ΧΡΗΣΗ: η μελέτη χρησιμοποιεί δεδομένα που επιτρέπονται μόνο για μη εμπορική έρευνα με αναφορά πηγής. Για εμπορική χρήση των αποτελεσμάτων απαιτείται άδεια από τον κάτοχο των δεδομένων.']
+        : [])
+    ],
     bullets: linked.map((q) => {
+      const dist = observedDistribution(q);
+      if (dist.length) {
+        const src = metricSourceLabel(q.evidenceLink!.metric);
+        return `${q.id}: «${q.text}» — ${src}, κύμα ${dist[0].waveKey} (n=${dist[0].n}): ${dist.map((d) => `«${d.option}» ${d.value}%`).join(', ')}.`;
+      }
       const m = getMetric(q.evidenceLink!.metric);
       const w = latestWave(q.evidenceLink!.metric);
       return `${q.id}: «${m?.label}» — κύμα ${w?.key}, συνολικό παρατηρημένο ποσοστό ${w?.groups.all?.all?.value}% (n=${w?.groups.all?.all?.n}).`;

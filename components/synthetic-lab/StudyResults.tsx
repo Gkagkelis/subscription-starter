@@ -200,12 +200,12 @@ export default function StudyResults({ study, report }: { study: StudyRun; repor
               {s.evidence && <EvidenceBadge kind={s.evidence} />}
             </div>
             {s.paragraphs.map((p, i) => (
-              <p key={i} className="text-sm text-stone-700">
+              <p key={i} className="text-sm text-stone-700 [overflow-wrap:anywhere]">
                 {p}
               </p>
             ))}
             {s.bullets && s.bullets.length > 0 && (
-              <ul className="list-disc space-y-1 pl-5 text-sm text-stone-700">
+              <ul className="list-disc space-y-1 pl-5 text-sm text-stone-700 [overflow-wrap:anywhere]">
                 {s.bullets.map((b, i) => (
                   <li key={i}>{b}</li>
                 ))}

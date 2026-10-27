@@ -21,7 +21,7 @@
 // Αποτέλεσμα = ΣΤΑΤΙΣΤΙΚΗ ΕΚΤΙΜΗΣΗ, όχι μέτρηση.
 // ============================================================
 
-import { LINKED_DIMENSIONS, norayaMembership, waveCells, type LinkedDimension } from '../data/noraya';
+import { metricScheme, norayaMembership, SCHEME_DIMENSIONS, waveCells, type LinkedDimension } from '../data/noraya';
 import type { PriorWave } from '../data/noraya-build';
 import { logit, sigmoid } from '../stats';
 import type { Persona } from '../types';
@@ -67,7 +67,8 @@ export function fitPriorModel(
   opts: { dimensions?: LinkedDimension[]; maxIter?: number; shrinkage?: number } = {}
 ): PriorFit {
   const k = opts.shrinkage ?? DEFAULT_SHRINKAGE;
-  const dims = opts.dimensions ?? [...LINKED_DIMENSIONS];
+  const scheme = metricScheme(metric);
+  const dims = opts.dimensions ?? [...SCHEME_DIMENSIONS[scheme]];
   const maxIter = opts.maxIter ?? 300;
   const all = wave.groups.all?.all;
   if (!all) throw new Error(`Το κύμα ${wave.key} δεν έχει συνολική τιμή για ${metric}.`);
@@ -81,7 +82,7 @@ export function fitPriorModel(
   const slotOf = new Map<string, number>();
   const slotKey = (d: number, g: string) => `${d}\u0001${g}`;
 
-  const memberships = personas.map((p) => ({ p, m: norayaMembership(p) }));
+  const memberships = personas.map((p) => ({ p, m: norayaMembership(p, scheme) }));
   const inUniverse = memberships.filter((x) => x.m);
   const outOfUniverse = personas.length - inUniverse.length;
 
@@ -89,16 +90,16 @@ export function fitPriorModel(
     const cells = waveCells(wave, d);
     Object.keys(cells).forEach((g) => {
       const c = cells[g];
-      const present = inUniverse.some((x) => (x.m![d][g] || 0) > 0);
+      const present = inUniverse.some((x) => (x.m![d]?.[g] || 0) > 0);
       if (!present) skippedTargets.push({ dimension: d, group: g, reason: 'Η ομάδα δεν αντιστοιχίζεται στον πληθυσμό' });
-      else if (c.n < MIN_GROUP_N) skippedTargets.push({ dimension: d, group: g, reason: `Μικρό δείγμα (n=${c.n})` });
+      else if (!c.nUnknown && c.n < MIN_GROUP_N) skippedTargets.push({ dimension: d, group: g, reason: `Μικρό δείγμα (n=${c.n})` });
       else if (c.inconsistent) skippedTargets.push({ dimension: d, group: g, reason: 'Ασυμβατότητα μετρήσεων στο ίδιο κύμα' });
       else {
         const slot = slotOf.size;
         slotOf.set(slotKey(di, g), slot);
         // Συρρίκνωση (τύπου empirical Bayes) προς το συνολικό ποσοστό: ομάδες με
         // μικρό n δεν «μεταφέρουν» τον θόρυβο του κύματος ως πραγματική διαφορά.
-        const shrunk = (c.n * (c.value / 100) + k * (all.value / 100)) / (c.n + k);
+        const shrunk = c.nUnknown || k === 0 ? c.value / 100 : (c.n * (c.value / 100) + k * (all.value / 100)) / (c.n + k);
         targets.push({ dim: di, group: g, slot, t: shrunk, n: c.n });
       }
     });
@@ -109,7 +110,7 @@ export function fitPriorModel(
     weights.push(x.p.weight);
     const row: { slot: number; frac: number }[] = [];
     dims.forEach((d, di) => {
-      const gm = x.m![d];
+      const gm = x.m![d] || {};
       for (const g in gm) {
         const s = slotOf.get(slotKey(di, g));
         if (s !== undefined && gm[g] > 0) row.push({ slot: s, frac: gm[g] });

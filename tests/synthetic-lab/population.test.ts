@@ -7,7 +7,7 @@ import { BASELINE_MESSAGE, rake } from '@/lib/synthetic-lab/population/calibrati
 import { glopopRowCount, readGlopopFile } from '@/lib/synthetic-lab/population/glopop-reader';
 import { GLOPOP_GREECE_TOTALS } from '@/lib/synthetic-lab/population/glopop-schema';
 import { DEV_FIXTURE_ID } from '@/lib/synthetic-lab/population/fixture';
-import { DEFAULT_POPULATION_ID, loadPopulation, marginals, matchesAudience, populationIntegrity, selectRespondents } from '@/lib/synthetic-lab/population/store';
+import { BASELINE_POPULATION_ID, CALIBRATED_POPULATION_ID, DEFAULT_POPULATION_ID, loadPopulation, marginals, matchesAudience, populationIntegrity, selectRespondents } from '@/lib/synthetic-lab/population/store';
 
 /** Φτιάχνει μικρό αρχείο GLOPOP-S (int32 LE, column-major, gzip). */
 function fakeGlopop(rows: number[][]): string {
@@ -45,7 +45,7 @@ describe('GLOPOP-S reader', () => {
 });
 
 describe('bundled GLOPOP-S Greece sample', () => {
-  const pop = loadPopulation(DEFAULT_POPULATION_ID)!;
+  const pop = loadPopulation(BASELINE_POPULATION_ID)!;
   it('loads 5000 personas representing the full 2015 population', () => {
     expect(pop.personas).toHaveLength(5000);
     expect(pop.summary.representedPopulation).toBe(GLOPOP_GREECE_TOTALS.individuals);
@@ -67,7 +67,7 @@ describe('bundled GLOPOP-S Greece sample', () => {
     }
   });
   it('integrity checks against published GLOPOP-S statistics passed for all 13 regions', () => {
-    const integ = populationIntegrity(DEFAULT_POPULATION_ID) as any;
+    const integ = populationIntegrity(BASELINE_POPULATION_ID) as any;
     expect(integ.regions).toHaveLength(13);
     for (const r of integ.regions) {
       expect(r.rows).toBe(r.expectedRows);
@@ -93,9 +93,26 @@ describe('bundled GLOPOP-S Greece sample', () => {
   });
 });
 
+describe('official 2025 calibration (Eurostat)', () => {
+  it('is the default population and matches official 2025 totals by region, age and sex', () => {
+    expect(DEFAULT_POPULATION_ID).toBe(CALIBRATED_POPULATION_ID);
+    const pop = loadPopulation(CALIBRATED_POPULATION_ID)!;
+    expect(pop.summary.representedPopulation).toBe(10372335);
+    expect(pop.summary.updateStatus.calibrated).toBe(true);
+    expect(pop.summary.updateStatus.targetYear).toBe(2025);
+    expect(pop.summary.updateStatus.message).toMatch(/παραμένουν του 2015/);
+    const byRegion = (code: string) => pop.personas.filter((p) => p.regionCode === code).reduce((s, p) => s + p.weight, 0);
+    expect(Math.abs(byRegion('GRCr101') - 3764272) / 3764272).toBeLessThan(0.002);
+    // διορθωμένη αντιστροφή Βορείου (EL41) / Νοτίου (EL42) Αιγαίου
+    expect(byRegion('GRCr103')).toBeGreaterThan(byRegion('GRCr102'));
+    const old65 = marginals(loadPopulation(BASELINE_POPULATION_ID)!.personas).ageBand['65+'];
+    expect(marginals(pop.personas).ageBand['65+']).toBeGreaterThan(old65);
+  });
+});
+
 describe('raking (calibration)', () => {
   it('matches target margins and reports convergence', () => {
-    const pop = loadPopulation(DEFAULT_POPULATION_ID)!;
+    const pop = loadPopulation(BASELINE_POPULATION_ID)!;
     const before = marginals(pop.personas).gender;
     const res = rake(pop.personas, pop.personas.map((p) => p.weight), [{ attribute: 'gender', totals: { female: 60, male: 40 } }]);
     expect(res.converged).toBe(true);

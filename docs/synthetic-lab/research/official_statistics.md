@@ -1,0 +1,117 @@
+# Official statistics for Greece (ELSTAT, Eurostat, data.gov.gr, OECD) to calibrate a 2015 GLOPOP-S synthetic population to 2025/2026
+
+Research date: 2026-10-27. Live HTTP checks were run from this environment against the Eurostat API and the data.gov.gr CKAN API. **statistics.gr (ELSTAT) could not be reached from this environment**: every HTTPS request timed out after 30-70 s, and WebFetch timed out too. So the ELSTAT findings below come from web search, from ELSTAT press-release PDFs mirrored by news sites, and from Eurostat (which republishes ELSTAT's transmitted data). Anything not checked against statistics.gr is marked UNVERIFIED.
+
+## 1. Eurostat API: access pattern, latest Greek years per dataset, and licence
+
+### Takeaway
+Eurostat is the best programmatic source. It holds Greek data at NUTS2 (EL30, EL41-EL43, EL51-EL54, EL61-EL65) for population to 1 Jan 2025 (national total to 1 Jan 2026), LFS education and households to 2025, EU-SILC to 2025, ICT to 2025 and the 2021 census. HBS is the exception: the latest Eurostat wave is 2020. All of it is free JSON-stat or SDMX-CSV, and it can be reused commercially with attribution.
+
+### Cited Findings
+**API patterns (live-tested 2026-10-27, HTTP 200):**
+- JSON-stat 2.0 Statistics API: `https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/{CODE}?geo=EL30&sex=T&age=TOTAL&time=2025&lang=en`. Each dimension is filtered with repeated `dim=value` parameters. `sinceTimePeriod=`, `untilTimePeriod=` and `lastTimePeriod=N` are supported. A live call to `demo_r_pjangroup?geo=EL30&sex=T&age=TOTAL` returned EL30 (Attiki) = 3,835,081 (2020), 3,838,210 (2021), 3,807,698 (2022), 3,789,105 (2023), 3,772,675 (2024) and 3,764,272 (2025), with "updated" 2026-08-28. — [Eurostat API demo_r_pjangroup](https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/demo_r_pjangroup?geo=EL30&sex=T&age=TOTAL)
+- SDMX 2.1 REST endpoint returning SDMX-CSV: `https://ec.europa.eu/eurostat/api/dissemination/sdmx/2.1/data/demo_r_pjangroup/A.NR.T.TOTAL.EL30?startPeriod=2024&format=SDMX-CSV`. The key order is freq.unit.sex.age.geo. The response was `application/vnd.sdmx.data+csv`, with rows such as `ESTAT:DEMO_R_PJANGROUP(1.0),28/08/26 23:00:00,A,NR,T,TOTAL,EL30,2025,3764272,,`. — [Eurostat SDMX 2.1](https://ec.europa.eu/eurostat/api/dissemination/sdmx/2.1/data/demo_r_pjangroup/A.NR.T.TOTAL.EL30?startPeriod=2024&format=SDMX-CSV)
+- The full catalogue (TOC), with codes, last update and data start/end, can be downloaded as TSV from `https://ec.europa.eu/eurostat/api/dissemination/catalogue/toc/txt?lang=en` (12,302 lines on 2026-10-27). — [Eurostat TOC](https://ec.europa.eu/eurostat/api/dissemination/catalogue/toc/txt?lang=en)
+- Greek NUTS2 codes in demo_r_pjangroup (NUTS 2021/2024), with 1 Jan 2025 population: EL30 Attiki 3,764,272; EL41 Voreio Aigaio 207,927; EL42 Notio Aigaio 327,036; EL43 Kriti 621,121; EL51 Anatoliki Makedonia, Thraki 565,195; EL52 Kentriki Makedonia 1,772,400; EL53 Dytiki Makedonia 243,575; EL54 Ipeiros 324,061; EL61 Thessalia 676,040; EL62 Ionia Nisia 198,421; EL63 Dytiki Elláda 635,954; EL64 Sterea Elláda 507,168; EL65 Peloponnisos 529,165. EL total 10,372,335. Old NUTS-2010 codes EL11-EL25 appear with no 2025 values. — [Eurostat API](https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/demo_r_pjangroup?sex=T&age=TOTAL&time=2025)
+
+**Population (age/sex/region):**
+- demo_r_pjangroup: population on 1 Jan by 5-year age group, sex and NUTS2. Coverage 1990-2025; latest EL year 2025; updated 2026-08-28. The EL 2025 age vector includes Y_LT5 387,011; Y5-9 442,286; Y10-14 497,982; Y15-19 560,835; Y20-24 542,904; ... Y60-64 702,124; Y65-69 660,033; Y70-74 567,683; Y75-79 494,261; Y80-84 330,332; Y_GE85 408,351. — [Eurostat API](https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/demo_r_pjangroup?geo=EL&sex=T&time=2025)
+- Other population datasets, all ending at 2025: demo_r_d2jan (single-year age, sex, NUTS2), demo_r_pjangrp3 (5-year age, NUTS3, 2014-2025), demo_r_pjanaggr3 (broad age groups, NUTS3), demo_pjan (single-year age, national, 1960-2025; updated 2026-09-25) and demo_pjangroup. — [Eurostat TOC](https://ec.europa.eu/eurostat/api/dissemination/catalogue/toc/txt?lang=en)
+- **1 Jan 2026 (national total only):** demo_gind indic_de=JAN gives EL 10,555,344 (2021), 10,461,627 (2022), 10,401,868 (2023), 10,375,764 (2024), 10,372,335 (2025) and **10,366,586 (2026)**; updated 2026-09-30. No dataset yet has a 2026 age/sex/NUTS2 breakdown: demo_r_gind3 lists data to 2026 in the TOC, but the live call for EL30 returned values only to 2025. — [Eurostat API demo_gind](https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/demo_gind?geo=EL&indic_de=JAN&sinceTimePeriod=2021)
+
+**Census 2021 (Census Hub, all reference year 2021):**
+- cens_21agr2: population by sex and single-year age (128 age codes) by NUTS2. The EL30 total is 1,976,723 for the first series returned, which is probably sex=M; the order was not confirmed. — [Eurostat API](https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/cens_21agr2?geo=EL30)
+- cens_21he_r2: population by household status (PRV, FAM, NFAM, P1 = one-person, MULTI, IST...), 28 age groups, ISCED11 ED0-ED8 and sex, by NUTS2. It has 10,080 series for EL30 and was updated 2026-10-14. This is the key joint age×sex×education×household-status×NUTS2 calibration table. — [Eurostat API](https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/cens_21he_r2?geo=EL30)
+- cens_21urb01: population by age, sex and degree of urbanisation. EL total 10,482,379: DEG1 cities 5,260,094; DEG2 towns/suburbs 2,414,557; DEG3 rural 2,807,728. Updated 2026-01-29. cens_21urb02 gives type of living quarters by DEGURBA. — [Eurostat API](https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/cens_21urb01?geo=EL&sex=T&age=TOTAL)
+- cens_21hhcs_r3: private households by composition (FAM1, CPL_NCH, CPL_YCH, M1_CH, F1_CH, FAM_GE2, NFAM, ...) and size (1, 2, 3, 4, 5, 6-10, GE11) by NUTS3, which can be aggregated to NUTS2. Also in the TOC: cens_21hhct_r3 (composition × tenure), cens_21fe_r2, cens_21me_r2, cens_21ae_r2 (activity × age × education × NUTS2), cens_21l_r3 (size of locality) and cens_21dwbo_r2 (dwellings). — [Eurostat API](https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/cens_21hhcs_r3?geo=EL30); [Eurostat TOC](https://ec.europa.eu/eurostat/api/dissemination/catalogue/toc/txt?lang=en)
+
+**Education (LFS):**
+- edat_lfse_04: population by educational attainment (ISCED11 groups) and NUTS2, 2000-2025, latest EL 2025, updated 2026-09-10. EL 2025, age 25-64: ED0-2 18.0%, ED3_4 47.1%, ED5-8 34.9%; EL30 ED5-8 = 44.6%. — [Eurostat API](https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/edat_lfse_04?geo=EL&sex=T&age=Y25-64&time=2025)
+- edat_lfs_9913: attainment by degree of urbanisation, 2004-2025. lfst_r_lfsd2pop: population in private households by attainment and NUTS2, 1999-2025. — [Eurostat TOC](https://ec.europa.eu/eurostat/api/dissemination/catalogue/toc/txt?lang=en)
+
+**Households and urban/rural (LFS):**
+- lfst_r_lfsd2hh: private households by degree of urbanisation and NUTS2, in thousands, 2006-2025. EL 2025: total 4,055.4k; DEG1 2,048.6k; DEG2 970.8k; DEG3 1,036.0k. EL30: 1,290.0k total. — [Eurostat API](https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/lfst_r_lfsd2hh?geo=EL&geo=EL30&time=2025)
+- lfst_hhnhwhtc: households by composition (14 types), number of children and labour status, national, 2006-2025. lfst_hhantych is also available to 2025. — [Eurostat API](https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/lfst_hhnhwhtc?geo=EL&lastTimePeriod=1)
+- About 50 lfst_r_* NUTS2 and DEGURBA labour datasets (for example lfst_r_lfe2emprt, employment rate 20-64; EL30 2025 = 73.1%) run to 2025 and were updated 2026-09-10. — [Eurostat API](https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/lfst_r_lfe2emprt?geo=EL30&sex=T&age=Y20-64)
+
+**Income and SILC (latest EL year 2025, updated 2026-10-20 to 2026-10-23):**
+- ilc_di01: income quantile cut-offs and shares. EL 2025 equivalised disposable income top cut-offs: QU1 €7,110; QU2 €10,269; QU3 €13,184; QU4 €17,056. Income share QU1 7.6%, QU5 39.3%. — [Eurostat API](https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/ilc_di01?geo=EL&statinfo=TC&unit=EUR&time=2025)
+- ilc_di17: mean/median income by DEGURBA × age × sex (2025). ilc_lvho01: population by DEGURBA × dwelling type × poverty status. EL 2025: DEG1 44.2%, DEG2 28.1%, DEG3 27.8%. — [Eurostat API](https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/ilc_lvho01?geo=EL&rskpovth=TOTAL&building=TOTAL&time=2025)
+- ilc_lvph01: average household size EL 2.6 (2021-22) and 2.4 (2023-2025). ilc_lvph02: distribution of households by 17 household types (2025). — [Eurostat API](https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/ilc_lvph01?geo=EL&sinceTimePeriod=2021)
+- Regional SILC: ilc_li41 (at-risk-of-poverty by NUTS2; EL30 2025 = 13.7%), ilc_peps11n (AROPE by NUTS2; EL30 2025 = 23.6%), ilc_di11_r (S80/S20 by NUTS2) and ilc_lvhl21n. National ilc_peps01n AROPE EL: 26.9% (2024), 27.5% (2025). ilc_mdsd11 severe material and social deprivation: 14.0% (2024), 14.9% (2025). These match ELSTAT's SILC 2025 press coverage. — [Eurostat API ilc_peps01n](https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/ilc_peps01n?geo=EL&unit=PC&age=TOTAL&sex=T&sinceTimePeriod=2024); [SKAI](https://www.skai.gr/news/finance/elstat-to-275-tou-plithysmou-dietrexe-kindyno-ftoxeias-to-2025)
+- nama_10r_2hhinc: household disposable income by NUTS2. Latest EL year 2023 (EL30 B6N = €56,263m). — [Eurostat API](https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/nama_10r_2hhinc?geo=EL30&unit=MIO_EUR&na_item=B6N&direct=BAL)
+
+**HBS (Eurostat), latest wave 2020 for all hbs_* tables (updated 2025-10-15/22):**
+- hbs_str_t211: consumption structure by COICOP, per mille. EL 2020: CP01 food 199; CP02 32; CP03 38; CP04 housing 323; CP05 34; CP06 64; CP07 90; CP08 38; CP09 28; CP10 30; CP11 66; CP12 57. — [Eurostat API](https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/hbs_str_t211?geo=EL&time=2020)
+- Breakdown tables: hbs_str_t223 (by income quintile × COICOP), hbs_str_t224 (by household type), hbs_str_t225 (by age of reference person), hbs_str_t226 (by DEGURBA), hbs_exp_t133 (mean expenditure by quintile; EL QU1 2020 = 12,462 PPS per household), hbs_exp_t134/t136, and hbs_car_t313/t315 (household characteristics). Eurostat HBS has no NUTS2 dimension. — [Eurostat TOC](https://ec.europa.eu/eurostat/api/dissemination/catalogue/toc/txt?lang=en)
+
+**ICT / e-commerce (latest EL year 2025, updated 2026-04-17):**
+- isoc_ec_ib20: individuals who bought online in the last 3 months (I_BUY3): 48.3% (2023), 54.17% (2024), 62.85% (2025). Last 12 months (I_BLT12): 57.53%, 64.94%, 68.0%. By age, I_BLT12 2025: 16-24 91.3%; 25-34 95.61%; 35-44 80.71%; 45-54 70.82%; 55-64 56.45%; 65-74 23.12%. — [Eurostat API](https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/isoc_ec_ib20?geo=EL&ind_type=IND_TOTAL&unit=PC_IND&indic_is=I_BLT12)
+- isoc_ec_ibgs: online purchase categories (47 indicators), EL 2025, % of individuals. Examples: I_BPHG (physical goods) 60.74%; I_BCS2 39.49%; I_BTICK2 (event tickets) 38.86%; I_BFLMS2 (film/series streaming) 35.83%; I_BTPS (transport services) 34.44%; I_BRA (holiday accommodation) 26.75%; I_BSIMC 26.48%; I_BSUTIL (utilities) 13.31%. — [Eurostat API](https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/isoc_ec_ibgs?geo=EL&unit=PC_IND&ind_type=IND_TOTAL&time=2025)
+- isoc_ci_ifp_iu: internet use in the last 12 months, EL 86.98% (2024), 89.9% (2025). isoc_ec_ibuy covers 2002-2019 (discontinued). — [Eurostat API](https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/isoc_ci_ifp_iu?geo=EL&ind_type=IND_TOTAL&unit=PC_IND&sinceTimePeriod=2024)
+- Regional ICT for Greece is published **only at NUTS1 EL3 (Attiki)** plus EL: isoc_r_iuse_i has geo EL and EL3; isoc_r_blt12_i has geo EL3 only. Neither has NUTS2. — [Eurostat API](https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/isoc_r_blt12_i?geo=EL3&lastTimePeriod=1)
+
+**Other surveys:** trng_aes_100 (Adult Education Survey) latest EL year 2022. tus_00age (Time Use) EL only 2010. prc_hicp_aind (HICP annual index) EL 2025 = 122.75 (2015=100). — [Eurostat API](https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/trng_aes_100?geo=EL)
+
+**Licence:**
+- Eurostat copyright notice (fetched): "Reuse of statistical data, metadata, publications, and other dissemination tools published on this website for commercial or non-commercial purposes is authorised provided the source is acknowledged." It follows Commission Decision 2011/833/EU, and editorial content is CC BY 4.0. Changes must be disclosed with a disclaimer that Eurostat is not responsible. Exceptions: third-party copyright material, logos, and some non-Eurostat or non-EU-country data that is non-commercial only. Greek (EU member) data is not in the exception. — [Eurostat copyright notice](https://ec.europa.eu/eurostat/help/copyright-notice)
+
+### Inferences
+- Recommended calibration targets for 2025: age×sex×NUTS2 marginals from demo_r_pjangroup 2025; national total scaled to 1 Jan 2026 using demo_gind (10,366,586, i.e. -0.055% vs 2025); education×NUTS2 from edat_lfse_04 2025; households×DEGURBA×NUTS2 from lfst_r_lfsd2hh 2025; average household size from ilc_lvph01; income quintile thresholds from ilc_di01 2025; joint seeds from census 2021 (cens_21he_r2, cens_21hhcs_r3, cens_21urb01).
+- GLOPOP-S's 5 education levels must be mapped to ISCED11 groups (ED0-1, ED2, ED3-4, ED5-6, ED7-8 are available in cens_21he_r2).
+- The 2025 urban share differs by source: 44.2% of persons in cities in SILC 2025 versus 50.2% in census 2021 (5.26M / 10.48M). Use one DEGURBA source consistently.
+- Eurostat HBS for Greece stops at 2020. For 2024/2025 consumption structure, use ELSTAT's national annual HBS (Section 2).
+
+### Gaps
+- No 2026 age×sex×NUTS2 population is published yet on Eurostat; ELSTAT's 1.1.2026 regional estimate had not been found by late October 2026.
+- ICT by DEGURBA for EL (ind_type DEG_URB_*) returned no values with the codes tried; it may use different codes. UNVERIFIED.
+- No NUTS2 ICT or HBS data for Greece.
+
+## 2. ELSTAT (statistics.gr): census 2021, population estimates, HBS, SILC, LFS, ICT, and terms of use
+
+### Takeaway
+ELSTAT publishes everything above, plus an annual national HBS (latest 2025, released 25 Sept 2026), as xlsx/PDF tables on statistics.gr. The site has no documented public API, and it was unreachable from this environment. The same ELSTAT-transmitted data is available through Eurostat's API, which is the practical download route.
+
+### Cited Findings
+- **Population estimates:** ELSTAT's press release of 18 Dec 2025 gives "Στοιχεία Εκτιμώμενου Πληθυσμού (1.1.2025) - Μεταναστευτικών Ροών της Χώρας (2024)". Population on 1 Jan 2025 was 10,372,335 (5,094,094 men, 5,278,241 women), -0.03% vs a revised 10,375,764 on 1 Jan 2024. Natural decrease was -57,564 (68,309 births vs 125,873 deaths) and net migration +54,135. Age shares: 0-14 12.8%, 15-64 63.5%, 65+ 23.7%; ageing index 185.4. The release revises 2012-2024 estimates to the 2021 census basis and includes tables by Region (NUTS2) and Regional Unit by sex. These figures match Eurostat demo_pjan/demo_r_pjangroup exactly. — [ELSTAT press release PDF (mirror on capital.gr)](https://www.capital.gr/Content/RelatedFiles/d7/d789c6eb19fa43ae861ff615a4ec24d6.pdf)
+- The release points users to statistics.gr → "Στατιστικές, Πληθυσμός και Κοινωνικές συνθήκες, Δημογραφία, Υπολογιζόμενος Πληθυσμός" for tables and methodology. The contact for data dissemination is data.dissem@statistics.gr. — [ELSTAT press release PDF](https://www.capital.gr/Content/RelatedFiles/d7/d789c6eb19fa43ae861ff615a4ec24d6.pdf)
+- Provisional 2025 vital statistics: 65,594 live births (-4.2%) and 121,841 deaths (-4.0%). — [paron.gr](https://www.paron.gr/elstat-dramatic-drop-births-greece-2025/)
+- **Census 2021:** headline totals vary by release. The press reported 10,432,481 (preliminary, July 2022) and 9,716,889 ("registered" population, Dec 2022). Wikipedia lists 10,482,487. Attica: 3,792,469. Eurostat cens_21urb01 gives 10,482,379. — [protothema](https://origin01-en.protothema.gr/?p=330816); [AMNA](https://amna.gr/en/article/697968/Greeces-population-reaches-9-716-889--ELSTAT-says); [Wikipedia](https://en.wikipedia.org/wiki/2021_Greek_census); [ot.gr](https://www.ot.gr/2022/07/19/english-edition/greeces-permanent-population-declines-by-3-5-in-2021-compared-to-decade-earlier)
+- **HBS (Έρευνα Οικογενειακών Προϋπολογισμών), annual:**
+  - 2025 survey (press release dated 25 Sept 2026): sample 5,540 private households; average annual household expenditure €21,842.40 (vs €20,694.48 in 2024, about +5.5%); median monthly spend €1,414.60. Renting households spend 23.4% of their budget on housing (rent alone 17.3%). The poorest quintile spends 54.4% on food and housing versus 34.5% for the richest quintile. — [newmoney.gr hosting the ELSTAT HBS 2025 PDF](https://www.newmoney.gr/wp-content/uploads/2026/09/Έρευνα-Οικογενειακών-Προϋπολογισμών-2025-.pdf); [to Vima](https://www.tovima.com/finance/greek-household-spending-climbs-5-5-but-still-trails-2008-levels/)
+  - 2024 survey: €20,694.48 per year (€1,724.54 per month), +3.6% nominal; €8,740.20 per person. Shares: food 20.7%, housing 14.4%, transport 13.3%. — [naftemporiki](https://naftemporiki.gr/english/1778832/average-annual-household-expenditure-increased-to-20223-36-euros); [powergame.gr](https://www.powergame.gr/ikonomia/1115772/elstat-sta-1-724-evro-i-mesi-miniaia-dapani-to-2024-gia-ta-ellinika-noikokyria/)
+- **EU-SILC 2025** (income reference 2024): AROPE 27.5% (2,797k persons), children 29.6%, severe material and social deprivation 14.9%. — [SKAI](https://www.skai.gr/news/finance/elstat-to-275-tou-plithysmou-dietrexe-kindyno-ftoxeias-to-2025); [Parapolitika](https://www.parapolitika.gr/oikonomia/article/1696604/kabanaki-elstat-275-se-kinduno-ftoheias-i-koinoniko-apokleismo-to-2025-anisuhitika-stoiheia/)
+- **ICT household survey:** ELSTAT's 2024 edition sampled 3,585 households and found 86.9% with home internet access. Eurostat holds the 2025 wave (see Section 1). — [paron.gr PDF of ELSTAT ICT 2024](https://paron.gr/wp-content/uploads/2024/12/Έρευνα-Χρήσης-Τεχνολογιών-Πληροφόρησης-και-Επικοινωνίας-από-Νοικοκυριά-και-Άτομα-2024_00_2024_01_F_GR-.pdf)
+- **Microdata:** per the EU CROS (CIMES) page for Greece, ELSTAT public-use files (PUFs) are posted on its website and accessible to anyone; PUFs and standardised scientific-use files (SUFs) are free of charge. SUFs are for scientific purposes under research-entity agreements. — [CROS CIMES Greece](https://cros.ec.europa.eu/cimes-greece)
+- **Terms of use:** statistics.gr has a page titled "Όροι χρήσης των ευρωπαϊκών στατιστικών" (Terms of use of European statistics). According to the search summary, it sets minimum reuse conditions aligned with the EU PSI Directive (ESSC-approved, Feb 2013): credit the source, do not distort the original meaning, and accept that ELSTAT is not liable for consequences of reuse. The verbatim text could not be retrieved (site timeout). — [ELSTAT european-statistics-terms](https://www.statistics.gr/en/european-statistics-terms)
+- Announced change: ELSTAT is adapting to Regulation (EU) 2025/2458 (population statistics), with quarterly publications until implementation on 1 Jan 2028. — [search summary, statistics.gr unreachable; UNVERIFIED]
+
+### Inferences
+- Licence verdict for ELSTAT: commercial reuse with attribution is **likely allowed**, given the ESS/PSI reuse policy and Greek Law 4727/2020 (PSI). However, the verbatim ELSTAT clause is unverified. The safe route is to download ELSTAT-produced data via Eurostat, whose CC BY 4.0 / 2011/833/EU terms are confirmed, credit "Source: ELSTAT / Eurostat", and disclose modifications.
+- ELSTAT HBS 2024/2025 is the only source for post-2020 Greek COICOP structure by quintile, household type and region. It is published as xlsx/PDF tables on statistics.gr (publication code believed to be SFA05; UNVERIFIED), with no API.
+
+### Gaps
+- Exact statistics.gr table URLs and formats for census 2021 (education, household size/type, urban/rural), HBS 2025 xlsx tables, LFS, ICT 2025/2026, Time Use and AES could not be verified: statistics.gr timed out on every request. Publication codes (e.g. SAM03 census, SFA05 HBS, SFC08 SILC?, SJO01 LFS, SPO18 population estimates) are from memory and UNVERIFIED.
+- No ELSTAT 1.1.2026 population estimate (by age/sex/region) was found as of October 2026.
+- The ELSTAT ICT 2026 (or 2025) release was not found in search; Eurostat holds the 2025 values.
+- Whether ELSTAT HBS microdata is a PUF or only a SUF is unconfirmed.
+
+## 3. data.gov.gr and OECD
+
+### Takeaway
+data.gov.gr is now a CKAN portal with a working open API. It has an ELSTAT organisation (`elstat-2026`) with 16 datasets, mostly trade, prices, LFS and waste, but **none for census, HBS or SILC**, and with licence fields unset or "notspecified". It adds little for calibration. OECD's SDMX endpoint could not be verified with a guessed dataflow.
+
+### Cited Findings
+- data.gov.gr CKAN API is live: `https://data.gov.gr/api/3/action/status_show` → success. The extensions include the harvest, dcat and bank_of_greece_harvester extensions. — [data.gov.gr API](https://data.gov.gr/api/3/action/status_show)
+- The ELSTAT organisation `elstat-2026` has 16 datasets (query: `package_search?fq=organization:elstat-2026&rows=50`). They include ΕνΔΤΚ/HICP (CSV/ZIP), "Απασχόληση και ποσοστό ανεργίας 15-74 (Ιαν 2004 - Ιαν 2026)" (CSV), international trade, PRODCOM, PPI, waste, air emissions, health expenditure, justice, and social protection (link to SHE27). license_id is None or "notspecified" for all. — [data.gov.gr API](https://data.gov.gr/api/3/action/package_search?fq=organization:elstat-2026&rows=50)
+- The licence options in data.gov.gr license_list include cc-by, cc-zero, odc-by, cc-nc and notspecified, so the licence is set per dataset. There is no portal-wide CC BY. — [data.gov.gr license_list](https://data.gov.gr/api/3/action/license_list)
+- EETT (telecoms regulator) publishes registries (post offices, trust service providers, .gr registrars) on data.gov.gr, but no consumer telecom-uptake datasets were found in a quick search. — [data.gov.gr API](https://data.gov.gr/api/3/action/package_search?q=ΕΕΤΤ)
+- The OECD SDMX endpoint `https://sdmx.oecd.org/public/rest/data/...` responded, but the guessed population dataflow returned 404 "Could not find Dataflow". — [OECD SDMX](https://sdmx.oecd.org/public/rest/data/OECD.SDD.TPS,DSD_POPULATION@DF_POP_HIST,1.0/GRC..PS._T._T.)
+
+### Inferences
+- For Greek official social and consumer aggregates, Eurostat outperforms data.gov.gr and OECD; OECD mostly re-disseminates Eurostat/ELSTAT data for Greece.
+- Do not assume data.gov.gr items are CC BY: where license_id is "notspecified", the originating agency's terms (ELSTAT's) apply.
+
+### Gaps
+- OECD Data Explorer dataflow IDs for Greek tables were not verified.
+- data.gov.gr's old (pre-CKAN) API at `/api/v1/query/` now returns the HTML portal. Whether token-based v1 datasets (e.g. telecom/energy) still exist was not verified.

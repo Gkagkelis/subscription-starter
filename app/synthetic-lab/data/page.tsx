@@ -16,6 +16,13 @@ const COMMERCIAL: Record<string, string> = {
   unclear: 'Ασαφής — απαιτείται έλεγχος',
   not_allowed: 'Δεν επιτρέπεται'
 };
+const TIER: Record<string, { label: string; cls: string }> = {
+  open: { label: 'Ανοιχτά δεδομένα', cls: 'border-emerald-300 bg-emerald-50 text-emerald-900' },
+  research_only: { label: 'Μόνο για έρευνα', cls: 'border-amber-300 bg-amber-50 text-amber-900' },
+  registration: { label: 'Απαιτεί εγγραφή', cls: 'border-sky-300 bg-sky-50 text-sky-900' },
+  cite_only: { label: 'Μόνο για σύγκριση', cls: 'border-stone-300 bg-stone-50 text-stone-800' },
+  paid: { label: 'Επί πληρωμή', cls: 'border-red-300 bg-red-50 text-red-900' }
+};
 const FRESH: Record<string, string> = { fresh: 'text-emerald-700', aging: 'text-amber-700', stale: 'text-red-700', unknown: 'text-stone-500' };
 
 export default function DataPage() {
@@ -33,7 +40,10 @@ export default function DataPage() {
                   <h2 className="font-semibold">{d.name}</h2>
                   <div className="text-sm text-stone-600">{d.organization}</div>
                 </div>
-                <span className={`self-start rounded-full px-2 py-0.5 text-xs font-medium ${USAGE[d.usage].cls}`}>{USAGE[d.usage].label}</span>
+                <div className="flex flex-wrap gap-2 self-start">
+                  {d.tier && <span className={`rounded-full border px-2 py-0.5 text-xs font-medium ${TIER[d.tier].cls}`}>{TIER[d.tier].label}</span>}
+                  <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${USAGE[d.usage].cls}`}>{USAGE[d.usage].label}</span>
+                </div>
               </div>
               <dl className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-3">
                 <div>
@@ -80,6 +90,11 @@ export default function DataPage() {
               <p className="text-sm text-stone-700">
                 <strong>Χρήση στο Lab:</strong> {d.usageNote}
               </p>
+              {d.howToConnect && d.usage === 'not_connected' && (
+                <p className="text-sm text-sky-900">
+                  <strong>Πώς συνδέεται:</strong> {d.howToConnect}
+                </p>
+              )}
               <details className="text-sm">
                 <summary className="cursor-pointer text-stone-700">Μεταβλητές, περιορισμοί, αποθήκευση</summary>
                 <ul className="mt-2 list-disc pl-5 text-stone-700">
