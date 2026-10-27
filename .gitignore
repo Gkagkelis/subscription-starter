@@ -41,3 +41,6 @@ yarn-error.log*
 certificates
 .env*.local
 /.synthetic-lab-data/
+
+# TypeScript incremental build cache
+*.tsbuildinfo
