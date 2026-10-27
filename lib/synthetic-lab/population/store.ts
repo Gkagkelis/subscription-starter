@@ -1,0 +1,232 @@
+// ============================================================
+// Διαχείριση πληθυσμών: ενσωματωμένο δείγμα GLOPOP-S, ιδιωτικά imports,
+// fixture development, βαθμονόμηση και επιλογή κοινού.
+// ============================================================
+
+import { existsSync, readdirSync, readFileSync } from 'fs';
+import bundledSample from '../data/populations/glopop-grc-2015-sample.json';
+import { deriveSeed } from '../rng';
+import { dataPath, dataRoot } from '../storage/paths';
+import type { AudienceFilter, Persona, Population, PopulationSummary } from '../types';
+import { rake, updateStatusFromTargets, type CalibrationTargets, type RakingResult } from './calibration';
+import { expandCompactPopulation, type CompactPopulation } from './compact';
+import { buildDevFixture, DEV_FIXTURE_ID } from './fixture';
+import { AGE_BAND_BOUNDS } from './glopop-schema';
+import { largestRemainder, sampleIndices } from './sampling';
+import path from 'path';
+
+export const DEFAULT_POPULATION_ID = 'glopop-grc-2015-bundled';
+
+const cache = new Map<string, Population>();
+
+function bundled(): CompactPopulation | null {
+  const b = bundledSample as unknown as CompactPopulation;
+  return b && b.format === 'synthetic-lab-compact-v1' && b.rows?.length ? b : null;
+}
+
+function privateDir() {
+  return path.join(dataRoot(), 'populations');
+}
+
+function readPrivate(): CompactPopulation[] {
+  const dir = privateDir();
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir)
+    .filter((f) => f.endsWith('.json'))
+    .map((f) => {
+      try {
+        return JSON.parse(readFileSync(path.join(dir, f), 'utf8')) as CompactPopulation;
+      } catch {
+        return null;
+      }
+    })
+    .filter((x): x is CompactPopulation => !!x && x.format === 'synthetic-lab-compact-v1');
+}
+
+/** Στόχοι βαθμονόμησης που έχει εισάγει ο χρήστης (ιδιωτικά). */
+export function loadCalibrationTargets(): CalibrationTargets[] {
+  const dir = path.join(dataRoot(), 'calibration-targets');
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir)
+    .filter((f) => f.endsWith('.json'))
+    .map((f) => JSON.parse(readFileSync(path.join(dir, f), 'utf8')) as CalibrationTargets);
+}
+
+export function listPopulationSummaries(): PopulationSummary[] {
+  const out: PopulationSummary[] = [];
+  const b = bundled();
+  if (b) out.push(loadPopulation(b.summary.id)!.summary);
+  readPrivate().forEach((p) => out.push(loadPopulation(p.summary.id)!.summary));
+  // Το fixture εμφανίζεται ΜΟΝΟ αν δεν υπάρχει πραγματικό δείγμα.
+  if (!out.length) out.push(expandCompactPopulation(buildDevFixture()).summary);
+  return out;
+}
+
+export function defaultPopulationId(): string {
+  return bundled() ? DEFAULT_POPULATION_ID : listPopulationSummaries()[0].id;
+}
+
+function calibrate(pop: Population): { pop: Population; raking: RakingResult | null } {
+  const targets = loadCalibrationTargets();
+  const currentYear = new Date().getFullYear();
+  if (!targets.length || pop.summary.isDevFixture) return { pop, raking: null };
+  const margins = targets.filter((t) => t.year >= currentYear - 1).flatMap((t) => t.margins);
+  if (!margins.length) return { pop, raking: null };
+  const res = rake(pop.personas, pop.personas.map((p) => p.weight), margins);
+  const status = updateStatusFromTargets(pop.summary.referenceYear, targets, res, currentYear);
+  if (!status.calibrated) return { pop: { ...pop, summary: { ...pop.summary, qualityNotes: [...pop.summary.qualityNotes, ...res.issues] } }, raking: res };
+  const personas = pop.personas.map((p, i) => ({ ...p, weight: res.weights[i] }));
+  return {
+    pop: { personas, summary: { ...pop.summary, updateStatus: status, qualityNotes: [...pop.summary.qualityNotes, ...res.issues] } },
+    raking: res
+  };
+}
+
+export function loadPopulation(id: string): Population | null {
+  if (cache.has(id)) return cache.get(id)!;
+  let cp: CompactPopulation | null = null;
+  const b = bundled();
+  if (b && b.summary.id === id) cp = b;
+  else if (id === DEV_FIXTURE_ID) cp = buildDevFixture();
+  else cp = readPrivate().find((p) => p.summary.id === id) || null;
+  if (!cp) return null;
+  const { pop } = calibrate(expandCompactPopulation(cp));
+  cache.set(id, pop);
+  return pop;
+}
+
+export function clearPopulationCache() {
+  cache.clear();
+}
+
+/** Λεπτομέρειες ακεραιότητας/περιθωρίων από το import (αν υπάρχουν). */
+export function populationIntegrity(id: string): Record<string, unknown> | null {
+  const b = bundled();
+  if (b && b.summary.id === id) return (b.integrity as Record<string, unknown>) || null;
+  const p = readPrivate().find((x) => x.summary.id === id);
+  return (p?.integrity as Record<string, unknown>) || null;
+}
+
+export function populationAttribution(id: string): string {
+  const b = bundled();
+  if (b && b.summary.id === id) return b.attribution;
+  if (id === DEV_FIXTURE_ID) return buildDevFixture().attribution;
+  return readPrivate().find((x) => x.summary.id === id)?.attribution || '';
+}
+
+// ------------------------------------------------------------
+// Κοινό (audience)
+// ------------------------------------------------------------
+
+export function matchesAudience(p: Persona, f: AudienceFilter): boolean {
+  const [lo, hi] = AGE_BAND_BOUNDS[p.ageBand];
+  // Μια ζώνη ταιριάζει αν επικαλύπτεται με το εύρος — το σημειώνουμε ως προειδοποίηση.
+  if (f.minAge !== undefined && hi < f.minAge) return false;
+  if (f.maxAge !== undefined && lo > f.maxAge) return false;
+  if (f.genders?.length && !f.genders.includes(p.gender)) return false;
+  if (f.regions?.length && !f.regions.includes(p.regionCode)) return false;
+  if (f.settlements?.length && !f.settlements.includes(p.settlement)) return false;
+  if (f.educations?.length && !f.educations.includes(p.education)) return false;
+  if (f.incomeQuintiles?.length && (p.incomeQuintile === null || !f.incomeQuintiles.includes(p.incomeQuintile))) return false;
+  return true;
+}
+
+export function audienceWarnings(f: AudienceFilter): string[] {
+  const w: string[] = [];
+  const edges = [0, 5, 15, 25, 35, 45, 55, 65];
+  if (f.minAge !== undefined && !edges.includes(f.minAge)) {
+    w.push(
+      `Η ηλικία στα δεδομένα είναι σε ζώνες· το κατώτατο όριο ${f.minAge} εφαρμόζεται στη ζώνη που το περιέχει (π.χ. 15-24 για 18).`
+    );
+  }
+  if (f.maxAge !== undefined && !edges.map((e) => e - 1).includes(f.maxAge) && f.maxAge < 120) {
+    w.push(`Το ανώτατο όριο ηλικίας ${f.maxAge} εφαρμόζεται σε ολόκληρη τη ζώνη που το περιέχει.`);
+  }
+  return w;
+}
+
+export interface AudienceSelection {
+  respondents: Persona[];
+  /** Πλήθος προσώπων του πληθυσμού που ταιριάζουν στο κοινό. */
+  poolSize: number;
+  /** Εκτιμώμενος πληθυσμός κοινού (άθροισμα βαρών). */
+  representedPopulation: number;
+  warnings: string[];
+}
+
+/**
+ * Επιλογή συνθετικών ερωτώμενων: στρωματοποίηση ανά περιφέρεια (αναλογικά
+ * με τον σταθμισμένο πληθυσμό του κοινού) και απλή τυχαία επιλογή χωρίς
+ * επανάθεση. Κάθε ερωτώμενος παίρνει βάρος = πληθυσμός στρώματος / n στρώματος.
+ */
+export function selectRespondents(pop: Population, filter: AudienceFilter, n: number, seed: number): AudienceSelection {
+  const pool = pop.personas.filter((p) => matchesAudience(p, filter));
+  const warnings = audienceWarnings(filter);
+  const represented = pool.reduce((s, p) => s + p.weight, 0);
+  if (!pool.length) return { respondents: [], poolSize: 0, representedPopulation: 0, warnings: [...warnings, 'Κανένα συνθετικό προφίλ δεν ταιριάζει στο κοινό.'] };
+  if (n > pool.length) {
+    warnings.push(`Ζητήθηκαν ${n} ερωτώμενοι αλλά το κοινό έχει ${pool.length} συνθετικά προφίλ· χρησιμοποιούνται όλα.`);
+    n = pool.length;
+  }
+  if (pool.length < 100) warnings.push(`Μικρό κοινό (${pool.length} προφίλ στο δείγμα πληθυσμού) — υψηλή αβεβαιότητα.`);
+
+  const byRegion = new Map<string, Persona[]>();
+  pool.forEach((p) => {
+    const arr = byRegion.get(p.regionCode) || [];
+    arr.push(p);
+    byRegion.set(p.regionCode, arr);
+  });
+  const sizes: Record<string, number> = {};
+  byRegion.forEach((arr, k) => (sizes[k] = arr.reduce((s, p) => s + p.weight, 0)));
+  const alloc = largestRemainder(sizes, n);
+  // Διόρθωση αν κάποιο στρώμα έχει λιγότερα προφίλ από την κατανομή.
+  let deficit = 0;
+  Object.keys(alloc).forEach((k) => {
+    const cap = byRegion.get(k)!.length;
+    if (alloc[k] > cap) {
+      deficit += alloc[k] - cap;
+      alloc[k] = cap;
+    }
+  });
+  for (const k of Object.keys(alloc).sort((a, b) => sizes[b] - sizes[a])) {
+    if (!deficit) break;
+    const room = byRegion.get(k)!.length - alloc[k];
+    const add = Math.min(room, deficit);
+    alloc[k] += add;
+    deficit -= add;
+  }
+
+  const respondents: Persona[] = [];
+  Array.from(byRegion.keys())
+    .sort()
+    .forEach((k) => {
+      const arr = byRegion.get(k)!;
+      const m = alloc[k];
+      if (!m) return;
+      const idx = sampleIndices(arr.length, m, deriveSeed(seed, 'audience', k));
+      const w = sizes[k] / m;
+      idx.forEach((i) => respondents.push({ ...arr[i], weight: w }));
+    });
+  return { respondents, poolSize: pool.length, representedPopulation: represented, warnings };
+}
+
+/** Περιθωριακές κατανομές (σταθμισμένες, %) για έλεγχο αντιπροσωπευτικότητας. */
+export function marginals(personas: Persona[], weighted = true): Record<string, Record<string, number>> {
+  const keys: (keyof Persona)[] = ['ageBand', 'gender', 'regionCode', 'education', 'settlement', 'incomeQuintile', 'householdType'];
+  const out: Record<string, Record<string, number>> = {};
+  keys.forEach((k) => {
+    const d: Record<string, number> = {};
+    let tot = 0;
+    personas.forEach((p) => {
+      const v = String(p[k] ?? 'unknown');
+      const w = weighted ? p.weight : 1;
+      d[v] = (d[v] || 0) + w;
+      tot += w;
+    });
+    Object.keys(d).forEach((v) => (d[v] = tot ? (d[v] / tot) * 100 : 0));
+    out[k as string] = d;
+  });
+  return out;
+}
+
+export { dataPath };
