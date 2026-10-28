@@ -260,6 +260,36 @@ export interface StudyPlan {
   warnings: string[];
   plannerVersion: string;
   plannerMode: 'rules' | 'ai';
+  /**
+   * Έτος αναφοράς της προσομοίωσης: δεν χρησιμοποιείται κανένα δεδομένο που συλλέχθηκε μετά από αυτό
+   * (και ο πληθυσμός είναι ο ιστορικός baseline αν το έτος είναι πριν από τη βαθμονόμηση). null = σήμερα.
+   */
+  referenceYear?: number | null;
+  /** Μελέτες αξιολόγησης (holdout): εξαιρούνται από τη βαθμονόμηση μαζί με διπλότυπα/παράγωγά τους. */
+  holdoutDatasets?: string[];
+}
+
+/** Προέλευση μιας εμπειρικής παραμέτρου (ποσοστό επιλογής) που χρησιμοποιήθηκε σε μια εκτέλεση. */
+export interface ParameterProvenance {
+  questionId: string | null;
+  option: string | null;
+  metric: string;
+  kind: 'observed' | 'excluded';
+  datasetId: string;
+  source: string;
+  waveKey: string | null;
+  year: number | null;
+  /** Παρατηρημένη συνολική τιμή (%) και μέγεθος δείγματος του κελιού, όπου δημοσιεύεται. */
+  observed: number | null;
+  n: number | null;
+  dimensions: string[];
+  level: string | null;
+  quality: number | null;
+  tier: 'open' | 'research_only';
+  license: string | null;
+  url: string | null;
+  fitErrorPp: number | null;
+  reason?: string;
 }
 
 export interface AnswerValue {
@@ -350,6 +380,9 @@ export interface StudyRun {
   aggregates: QuestionAggregate[];
   warnings: string[];
   datasetsUsed: string[];
+  /** Ανά παράμετρο: από ποια μελέτη/κύμα προήλθε (ή γιατί εξαιρέθηκε). Παρατηρήσεις ≠ παραδοχές ≠ συνθετικά αποτελέσματα. */
+  provenance?: ParameterProvenance[];
+  evidenceContext?: { referenceYear: number | null; holdout: string[]; populationNote: string | null };
   validation: StudyValidationSummary;
   stability?: StabilityResult | null;
 }

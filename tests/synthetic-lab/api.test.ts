@@ -32,7 +32,7 @@ describe('API', () => {
     const got = await (await studyGET(new Request('http://x'), { params: { id: run.id } })).json();
     expect(got.study.engine.mode).toBe('demo');
     expect(got.study.respondentCount).toBe(200);
-    expect(got.report.sections.length).toBe(12);
+    expect(got.report.sections.length).toBe(13); // + «3β. Προέλευση παραμέτρων»;
     const bytes = new Uint8Array(await (await exportGET(new Request('http://x?format=csv'), { params: { id: run.id } })).arrayBuffer());
     expect(Array.from(bytes.slice(0, 3))).toEqual([0xef, 0xbb, 0xbf]); // BOM για Excel
     const csv = new TextDecoder().decode(bytes);

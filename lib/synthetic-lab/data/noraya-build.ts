@@ -34,7 +34,7 @@ export interface PriorWave {
 }
 
 /** Σχήμα αντιστοίχισης ομάδων πηγής -> χαρακτηριστικά πληθυσμού. */
-export type GroupScheme = 'eurobarometer' | 'eurostat_ict' | 'eurostat_silc' | 'dianeosis';
+export type GroupScheme = 'eurobarometer' | 'eurostat_ict' | 'eurostat_silc' | 'dianeosis' | 'lake';
 
 /** Βαθμίδα άδειας: open = ανοιχτή άδεια· research_only = μόνο μη εμπορική έρευνα (ιδιωτικά, εκτός repo). */
 export type LicenseTier = 'open' | 'research_only';

@@ -23,6 +23,7 @@ import silcJson from './official/eurostat-silc.json';
 import type { GroupScheme, NorayaPriors, PriorCell, PriorMetric, PriorWave } from './noraya-build';
 import type { AgeBand, Persona } from '../types';
 import { researchDatasets, researchMetric, researchMetrics } from './research';
+import { lakeMetric, lakeStudy, lakeStudyIdOfMetric } from './lake';
 
 export const NORAYA_DATASET_ID = 'noraya-public-opinion';
 export const EUROSTAT_ICT_DATASET_ID = 'eurostat-isoc-ict';
@@ -61,7 +62,9 @@ export const SCHEME_DIMENSIONS: Record<GroupScheme, string[]> = {
   // EU-SILC: κοινή κατανομή τύπος νοικοκυριού × κίνδυνος φτώχειας
   eurostat_silc: ['hh_pov'],
   // διαΝΕΟσις: ηλικία × φύλο, μόρφωση, περιφέρεια (μικροδεδομένα, υπολογισμένα τοπικά)
-  dianeosis: ['age_gender', 'education_group', 'region']
+  dianeosis: ['age_gender', 'education_group', 'region'],
+  // Greek Research Data Lake: κάθε μελέτη έχει τις δικές της διασπάσεις· χρησιμοποιούνται όσες υπάρχουν στο κύμα
+  lake: ['age_band', 'age_group4', 'age_findex', 'gender', 'education_group', 'education_findex', 'income_quintile', 'income_findex']
 };
 
 export function metricScheme(metric: string): GroupScheme {
@@ -153,6 +156,22 @@ export function norayaMembership(p: Persona, scheme: GroupScheme = 'eurobaromete
       region: { [p.regionCode]: 1 }
     };
   }
+  if (scheme === 'lake') {
+    if (p.ageBand === '0-4' || p.ageBand === '5-14') return null;
+    const age4 = AGE_TO_EB[p.ageBand] || {};
+    const q = p.incomeQuintile;
+    return {
+      age_band: { [p.ageBand]: 1 },
+      age_group4: age4,
+      age_findex: { [p.ageBand === '15-24' ? '15-24' : '25+']: 1 },
+      gender: { [p.gender]: 1 },
+      education_group: edu ? { [edu]: 1 } : {},
+      education_findex:
+        p.education === 'unknown' ? {} : { [p.education === 'less_than_primary' || p.education === 'primary' ? 'primary_or_less' : 'secondary_or_more']: 1 },
+      income_quintile: q ? { [String(q)]: 1 } : {},
+      income_findex: q ? { [q <= 2 ? 'poorest_40' : 'richest_60']: 1 } : {}
+    };
+  }
   if (scheme === 'eurostat_ict') {
     // Ζώνες GLOPOP = ζώνες Eurostat (16-24 ≈ 15-24· 65+ ≈ 65-74, με προέκταση στους 75+).
     if (p.ageBand === '0-4' || p.ageBand === '5-14') return null;
@@ -206,6 +225,7 @@ export function listMetrics(): PriorMetric[] {
 }
 
 export function getMetric(metric: string): PriorMetric | null {
+  if (lakeStudyIdOfMetric(metric)) return lakeMetric(metric);
   return PRIORS.metrics[metric] || ICT_METRICS[metric] || researchMetric(metric) || null;
 }
 
@@ -221,6 +241,10 @@ export function metricDatasetId(metric: string): string {
 /** Σύντομη περιγραφή πηγής για prompts/αναφορές. */
 export function metricSourceLabel(metric: string): string {
   const scheme = metricScheme(metric);
+  if (scheme === 'lake') {
+    const s = lakeStudy(lakeStudyIdOfMetric(metric) || '');
+    return s ? `${s.title} — ${s.publisher || s.source}${s.tier === 'research_only' ? ' (μόνο για έρευνα)' : ''}` : 'Greek Research Data Lake';
+  }
   if (scheme === 'eurostat_ict') return 'Έρευνα ΤΠΕ ΕΛΣΤΑΤ/Eurostat';
   if (scheme === 'eurostat_silc') return 'EU-SILC ΕΛΣΤΑΤ/Eurostat';
   if (scheme === 'dianeosis') {
@@ -240,6 +264,33 @@ export function latestWave(metric: string, beforeKey?: string): PriorWave | null
   if (!m) return null;
   const waves = m.waves.filter((w) => w.groups.all?.all && (!beforeKey || w.key < beforeKey));
   return waves.length ? waves[waves.length - 1] : null;
+}
+
+/**
+ * Πλαίσιο τεκμηρίωσης μιας προσομοίωσης: χρονικό όριο και holdout.
+ * - asOfYear: κανένα κύμα με έτος > asOfYear (δεν «διαρρέει» μελλοντική πληροφορία).
+ * - holdout: datasetId/studyId που ΔΕΝ χρησιμοποιούνται (ήδη επεκτεταμένα σε διπλότυπα/παράγωγα).
+ * - holdoutYears: έτη που εξαιρούνται από παράγωγα σύνολα (π.χ. NORAYA από κύματα Eurobarometer holdout).
+ */
+export interface EvidenceContext {
+  asOfYear?: number;
+  holdout?: Set<string>;
+  holdoutYears?: Record<string, number[]>;
+}
+
+export type WaveExclusion = 'holdout' | 'after_reference_year' | 'no_wave';
+
+/** Τελευταίο επιτρεπτό κύμα για το πλαίσιο· αλλιώς ο λόγος αποκλεισμού. */
+export function latestWaveFor(metric: string, ctx: EvidenceContext = {}): { wave: PriorWave | null; excluded?: WaveExclusion } {
+  const m = getMetric(metric);
+  if (!m) return { wave: null, excluded: 'no_wave' };
+  const ds = m.datasetId || NORAYA_DATASET_ID;
+  if (ctx.holdout?.has(ds) || ctx.holdout?.has(metric)) return { wave: null, excluded: 'holdout' };
+  const skipYears = new Set(ctx.holdoutYears?.[ds] || []);
+  const all = m.waves.filter((w) => w.groups.all?.all && !skipYears.has(w.year));
+  const waves = ctx.asOfYear ? all.filter((w) => w.year <= ctx.asOfYear!) : all;
+  if (!waves.length) return { wave: null, excluded: all.length ? 'after_reference_year' : skipYears.size ? 'holdout' : 'no_wave' };
+  return { wave: waves[waves.length - 1] };
 }
 
 export function waveByKey(metric: string, key: string): PriorWave | null {

@@ -1,6 +1,6 @@
 // Βοηθητικά για ερωτήσεις με εμπειρική σύνδεση (δυαδική ή ανά επιλογή).
 
-import { latestWave } from '../data/noraya';
+import { latestWaveFor, type EvidenceContext } from '../data/noraya';
 import type { Question } from '../types';
 import type { PriorFit } from './prior-model';
 
@@ -32,12 +32,12 @@ export function optionProbabilities(q: Question, fits: Record<string, PriorFit>,
 }
 
 /** Παρατηρημένη συνολική κατανομή της πηγής (τελευταίο κύμα) για ερώτηση ανά επιλογή. */
-export function observedDistribution(q: Question): { option: string; value: number; n: number; waveKey: string }[] {
+export function observedDistribution(q: Question, ctx: EvidenceContext = {}): { option: string; value: number; n: number; waveKey: string }[] {
   const om = q.evidenceLink?.optionMetrics;
   if (!om) return [];
   return Object.entries(om)
     .map(([option, metric]) => {
-      const w = latestWave(metric);
+      const w = latestWaveFor(metric, ctx).wave;
       const c = w?.groups.all?.all;
       return c && w ? { option, value: c.value, n: c.n, waveKey: w.key } : null;
     })

@@ -5,7 +5,8 @@
 
 import { csvRow as csvEscapeRow } from '../csv';
 import { allDatasets, freshness } from '../data/registry';
-import { getMetric, latestWave, metricSourceLabel, metricTier } from '../data/noraya';
+import { getMetric, latestWaveFor, metricSourceLabel, metricTier, type EvidenceContext } from '../data/noraya';
+import { lakeStudy } from '../data/lake';
 import { observedDistribution } from './evidence';
 import { climateSummary } from '../data/ec-bcs';
 import { cesSummary, spendingContext } from '../data/consumer-context';
@@ -56,6 +57,8 @@ export function buildReport(run: StudyRun): StudyReport {
   const qs = run.plan.questions;
   const linked = qs.filter((q) => q.evidenceLink);
   const datasets = allDatasets().filter((d) => run.datasetsUsed.includes(d.id));
+  const lakeUsed = run.datasetsUsed.map((id) => lakeStudy(id)).filter((x): x is NonNullable<typeof x> => !!x);
+  const ctx: EvidenceContext = { asOfYear: run.plan.referenceYear || undefined, holdout: new Set(run.evidenceContext?.holdout || []) };
   const s: ReportSection[] = [];
 
   s.push({
@@ -87,22 +90,53 @@ export function buildReport(run: StudyRun): StudyReport {
     evidence: 'observed',
     paragraphs: [
       ...datasets.map((d) => `${d.name} — ${d.organization}. Έτη συλλογής: ${d.collectionYears ? d.collectionYears.join('–') : 'άγνωστα'}. ${freshness(d).label}. Άδεια: ${d.license}.`),
+      ...lakeUsed.map(
+        (d) =>
+          `${d.title} — ${d.publisher || d.source} (Greek Research Data Lake). Έτη συλλογής: ${d.yearStart ?? '—'}–${d.yearEnd ?? '—'}. Επίπεδο τεκμηρίωσης ${d.level}, ποιότητα ${d.quality ?? '—'}/100${d.sampleSize ? `, n≈${d.sampleSize}` : ''}. Άδεια: ${d.license || 'βλ. πηγή'}.${d.url ? ` ${d.url}` : ''}`
+      ),
       ...(run.plan.domain === 'consumer' ? [climateSummary(), cesSummary(), ...spendingContext(`${run.plan.researchQuestion} ${run.plan.title}`)] : []),
       ...(linked.some((q) => metricTier(q.evidenceLink!.metric) === 'research_only')
         ? ['ΜΟΝΟ ΓΙΑ ΕΡΕΥΝΗΤΙΚΗ ΧΡΗΣΗ: η μελέτη χρησιμοποιεί δεδομένα που επιτρέπονται μόνο για μη εμπορική έρευνα με αναφορά πηγής. Για εμπορική χρήση των αποτελεσμάτων απαιτείται άδεια από τον κάτοχο των δεδομένων.']
         : [])
     ],
     bullets: linked.map((q) => {
-      const dist = observedDistribution(q);
+      const dist = observedDistribution(q, ctx);
       if (dist.length) {
         const src = metricSourceLabel(q.evidenceLink!.metric);
         return `${q.id}: «${q.text}» — ${src}, κύμα ${dist[0].waveKey} (n=${dist[0].n}): ${dist.map((d) => `«${d.option}» ${d.value}%`).join(', ')}.`;
       }
       const m = getMetric(q.evidenceLink!.metric);
-      const w = latestWave(q.evidenceLink!.metric);
-      return `${q.id}: «${m?.label}» — κύμα ${w?.key}, συνολικό παρατηρημένο ποσοστό ${w?.groups.all?.all?.value}% (n=${w?.groups.all?.all?.n}).`;
+      const w = latestWaveFor(q.evidenceLink!.metric, ctx).wave;
+      if (!w) return `${q.id}: «${m?.label || q.text}» — καμία επιτρεπτή μέτρηση (έτος αναφοράς/holdout)· απαντάται χωρίς εμπειρική βάση.`;
+      return `${q.id}: «${m?.label}» — κύμα ${w.key}, συνολικό παρατηρημένο ποσοστό ${w.groups.all?.all?.value}% (n=${w.groups.all?.all?.nUnknown ? 'δεν δημοσιεύεται' : w.groups.all?.all?.n}).`;
     })
   });
+
+  if (run.provenance?.length || run.plan.referenceYear || run.plan.holdoutDatasets?.length) {
+    const prov = run.provenance || [];
+    const used = prov.filter((p) => p.kind === 'observed');
+    const excluded = prov.filter((p) => p.kind === 'excluded');
+    s.push({
+      id: 'provenance',
+      title: '3β. Προέλευση παραμέτρων (παρατηρήσεις ≠ παραδοχές ≠ συνθετικά αποτελέσματα)',
+      evidence: 'observed',
+      paragraphs: [
+        `Έτος αναφοράς: ${run.plan.referenceYear || 'τρέχον'} — δεν χρησιμοποιήθηκε κανένα δεδομένο που συλλέχθηκε μετά από αυτό.`,
+        ...(run.evidenceContext?.populationNote ? [run.evidenceContext.populationNote] : []),
+        run.evidenceContext?.holdout?.length
+          ? `Holdout (εξαιρέθηκαν από τη βαθμονόμηση, μαζί με διπλότυπα/παράγωγα): ${run.evidenceContext.holdout.join(', ')}.`
+          : 'Holdout: κανένα.',
+        `Εμπειρικές παράμετροι: ${used.length} (από ${new Set(used.map((p) => p.datasetId)).size} μελέτες)· εξαιρέθηκαν: ${excluded.length}. Οι παραδοχές του ερευνητή αναφέρονται χωριστά στη Μεθοδολογία.`
+      ],
+      bullets: [
+        ...used.map(
+          (p) =>
+            `${p.questionId || '—'}${p.option ? ` «${p.option}»` : ''}: ${p.observed ?? '—'}% (κύμα ${p.waveKey}, n=${p.n ?? 'δ/δ'}) — ${p.source}. Επίπεδο ${p.level || '—'}${p.quality != null ? `, ποιότητα ${p.quality}` : ''}, διασπάσεις: ${p.dimensions.join(', ') || 'μόνο σύνολο'}, απόκλιση fit ${p.fitErrorPp ?? '—'} π.μ.${p.tier === 'research_only' ? ' [μόνο για έρευνα]' : ''}`
+        ),
+        ...excluded.map((p) => `${p.questionId || '—'}${p.option ? ` «${p.option}»` : ''}: ΕΞΑΙΡΕΘΗΚΕ — ${p.reason} (${p.source}).`)
+      ]
+    });
+  }
 
   s.push({
     id: 'population',

@@ -78,6 +78,14 @@ for (const f of readdirSync(path.join(root, 'lib/synthetic-lab/data/official')))
     : bad(`Χωρίς ανοιχτή άδεια: official/${f}`);
 }
 
+// 5. Greek Research Data Lake: η βάση, τα raw αρχεία και οι εξαγωγές μένουν ΕΚΤΟΣ repo
+const lakeInRepo = [...walk(path.join(root, 'lib')), ...walk(path.join(root, 'public')), ...walk(path.join(root, 'scripts'))].filter((f) =>
+  /lake\.sqlite|lake_index\.json|[\\/]shards[\\/].*\.json$|\.json\.gz$/.test(f)
+);
+lakeInRepo.length
+  ? bad(`Δεδομένα του lake μέσα στο repo: ${lakeInRepo.join(', ')}`)
+  : ok('Κανένα δεδομένο του Research Data Lake μέσα στο repo (μένουν στο .synthetic-lab-data/lake)');
+
 if (failures) {
   console.error(`\n${failures} αποτυχίες.`);
   process.exit(1);

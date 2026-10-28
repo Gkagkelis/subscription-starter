@@ -9,7 +9,7 @@ import { behaviourAssumption, defaultAssumptions } from './assumptions';
 import { getMetric } from '../data/noraya';
 import { checkText } from './guardrails';
 import { climateSummary } from '../data/ec-bcs';
-import { bankQuestion, suggestResearchQuestions } from './question-bank';
+import { bankQuestion, suggestLakeQuestions, suggestResearchQuestions } from './question-bank';
 
 export const PLANNER_VERSION = 'rules-1.0';
 
@@ -207,6 +207,9 @@ export interface PlanRequest {
   domain?: ResearchDomain;
   audience?: AudienceFilter;
   sampleSize?: number;
+  /** Έτος αναφοράς (καμία πηγή μετά από αυτό) και μελέτες holdout. */
+  referenceYear?: number | null;
+  holdoutDatasets?: string[];
 }
 
 export interface PlanResult {
@@ -250,6 +253,18 @@ export function planStudy(req: PlanRequest): PlanResult {
       `Προστέθηκαν ${sourced.length} ερωτήσεις από πραγματική έρευνα (s*) με θεματική ομοιότητα — έλεγξε ότι ταιριάζουν και αφαίρεσέ τες αν όχι. Είναι δεδομένα ΜΟΝΟ ΓΙΑ ΕΡΕΥΝΗΤΙΚΗ ΧΡΗΣΗ.`
     );
   }
+  // Ερωτήσεις του Greek Research Data Lake (αν υπάρχει τοπικά), με χρονικό όριο/holdout του αιτήματος.
+  const lakeHits = suggestLakeQuestions(text, 2, { asOfYear: req.referenceYear || undefined, holdout: req.holdoutDatasets });
+  const fromLake = lakeHits.map((h, i) => bankQuestion(h.question.id, `k${i + 1}`)).filter((q): q is Question => !!q);
+  if (fromLake.length) {
+    const firstUnlinked = questions.findIndex((q) => !q.evidenceLink);
+    questions.splice(firstUnlinked < 0 ? questions.length : firstUnlinked, 0, ...fromLake);
+    warnings.push(
+      `Προστέθηκαν ${fromLake.length} ερωτήσεις από το Greek Research Data Lake (k*): ` +
+        lakeHits.map((h) => `${h.study.title} (${h.year}, επίπεδο ${h.study.level})`).join('· ') +
+        ' — έλεγξε ότι ταιριάζουν στο ερώτημα και αφαίρεσέ τες αν όχι.'
+    );
+  }
   if (domain === 'consumer' && !price) warnings.push('Δεν εντοπίστηκε τιμή — η ερώτηση τιμής παραλείφθηκε. Πρόσθεσέ τη αν χρειάζεται.');
   if (domain === 'consumer') {
     warnings.push(
@@ -274,7 +289,9 @@ export function planStudy(req: PlanRequest): PlanResult {
     sampleSize: req.sampleSize || 500,
     warnings,
     plannerVersion: PLANNER_VERSION,
-    plannerMode: 'rules'
+    plannerMode: 'rules',
+    referenceYear: req.referenceYear ?? null,
+    holdoutDatasets: req.holdoutDatasets || []
   };
   return { plan, blocked: false, blockedReasons: [], suggestions: { guide: focusGuide(domain, concept) } };
 }

@@ -124,7 +124,7 @@ describe('survey engine (demo)', () => {
   it('report has all 13 sections and exports carry the simulated label', async () => {
     const run = await runSurvey({ plan, populationId: POP, seed: 4, save: false, stabilityRuns: 0 });
     const rep = buildReport(run);
-    expect(rep.sections.map((s) => s.title.split('.')[0])).toEqual(['1', '2', '3', '4', '5', '6–7', '8', '9', '10', '11', '12', '13']);
+    expect(rep.sections.map((s) => s.title.split('.')[0])).toEqual(['1', '2', '3', '3β', '4', '5', '6–7', '8', '9', '10', '11', '12', '13']);
     expect(reportMarkdown(rep)).toContain(SIMULATED_LABEL);
     const csv = responsesCsv(run).split('\n');
     expect(csv[0]).toContain('label');

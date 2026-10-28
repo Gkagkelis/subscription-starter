@@ -7,6 +7,7 @@
 
 import { getMetric, listMetrics, metricSourceLabel, metricTier, latestWave, openQuestions, type OpenQuestion } from '../data/noraya';
 import { researchQuestion, researchQuestions, type ResearchQuestion } from '../data/research';
+import { lakeQuestion, searchLake, type RetrievalHit, type RetrievalOptions } from '../data/lake';
 import type { Question } from '../types';
 
 export interface BankEntry {
@@ -22,6 +23,8 @@ export interface BankEntry {
   n: number | null;
   /** Συνολικά παρατηρημένα ποσοστά ανά επιλογή (για προεπισκόπηση). */
   observed: { option: string; value: number }[];
+  /** Προέλευση (μόνο για ερωτήσεις του Greek Research Data Lake). */
+  lake?: { studyId: string; title: string; source: string; level: string; quality: number | null; year: number; url: string | null; score: number };
 }
 
 function norm(s: string) {
@@ -96,6 +99,36 @@ function distributionEntry(rq: ResearchQuestion | OpenQuestion): BankEntry {
   };
 }
 
+function lakeEntry(h: RetrievalHit): BankEntry & { score: number } {
+  const q = h.question;
+  const observed = q.options
+    .map((o) => {
+      const c = latestWave(q.optionMetrics[o] || '')?.groups.all?.all;
+      return c ? { option: o, value: c.value } : null;
+    })
+    .filter((x): x is { option: string; value: number } => !!x);
+  if (q.kind === 'binary' && observed.length === 1) observed.push({ option: 'Όχι', value: Math.round((100 - observed[0].value) * 100) / 100 });
+  return {
+    id: q.id,
+    kind: q.kind,
+    text: q.text,
+    options: q.options,
+    source: `${h.study.title} — ${h.study.publisher || h.study.source}`,
+    tier: h.study.tier,
+    waveKey: String(h.year),
+    years: q.years,
+    n: q.n,
+    observed,
+    lake: { studyId: h.study.studyId, title: h.study.title, source: h.study.source, level: h.study.level, quality: h.study.quality, year: h.year, url: h.study.url, score: Math.round(h.score * 1000) / 1000 },
+    score: h.breakdown.matched.length
+  };
+}
+
+/** Ερωτήσεις του Greek Research Data Lake για ένα ερώτημα (με χρονικό όριο/holdout). */
+export function searchLakeBank(query: string, limit = 20, opts: RetrievalOptions = {}): (BankEntry & { score: number })[] {
+  return searchLake(query, { ...opts, limit }).map(lakeEntry);
+}
+
 export function bankEntries(): BankEntry[] {
   return [...binaryEntries(), ...openQuestions().map(distributionEntry), ...researchQuestions().map(distributionEntry)];
 }
@@ -113,7 +146,9 @@ export function searchBank(query: string, limit = 50): (BankEntry & { score: num
   const hits = (q.size ? all.filter((e) => e.score > 0) : all).sort(
     (a, b) => b.score - a.score || recency(b).localeCompare(recency(a)) || (b.years?.length || 0) - (a.years?.length || 0)
   );
-  return hits.slice(0, limit);
+  // + Greek Research Data Lake (αν υπάρχει τοπικά): μόνο με ερώτημα
+  const lake = q.size ? searchLakeBank(query, limit) : [];
+  return [...hits.slice(0, Math.max(limit - Math.min(lake.length, Math.ceil(limit / 2)), 0)), ...lake].slice(0, limit);
 }
 
 /** Μετατροπή εγγραφής της τράπεζας σε ερώτηση μελέτης. */
@@ -135,6 +170,26 @@ export function bankQuestion(entryId: string, questionId: string): Question | nu
       evidenceLink: { datasetId: rq.datasetId || 'eurostat-silc', metric: rq.optionMetrics[top] || firstMetric, positiveOption: top, optionMetrics: rq.optionMetrics }
     };
   }
+  const lq = lakeQuestion(entryId);
+  if (lq) {
+    const om = lq.optionMetrics;
+    if (lq.kind === 'binary') {
+      const metric = Object.values(om)[0];
+      return { id: questionId, type: 'single_choice', text: lq.text.slice(0, 500), options: ['Ναι', 'Όχι'], evidenceLink: { datasetId: lq.studyId, metric, positiveOption: 'Ναι' } };
+    }
+    const substantive = lq.options.filter((o) => !lq.dkOptions.includes(o));
+    const top =
+      (substantive.length ? substantive : lq.options)
+        .map((o) => ({ o, v: latestWave(om[o])?.groups.all?.all?.value ?? -1 }))
+        .sort((a, b) => b.v - a.v)[0]?.o || lq.options[0];
+    return {
+      id: questionId,
+      type: 'single_choice',
+      text: lq.text.length > 500 ? lq.text.slice(0, 497) + '…' : lq.text,
+      options: lq.options.slice(0, 12),
+      evidenceLink: { datasetId: lq.studyId, metric: om[top], positiveOption: top, optionMetrics: Object.fromEntries(lq.options.slice(0, 12).map((o) => [o, om[o]])) }
+    };
+  }
   const m = getMetric(entryId);
   if (m && m.question) {
     const { options, positive } = binaryOptions(m);
@@ -147,6 +202,23 @@ export function bankQuestion(entryId: string, questionId: string): Question | nu
     };
   }
   return null;
+}
+
+/**
+ * Προτάσεις του lake για τον planner: ερωτήσεις με ισχυρή επικάλυψη (≥2 ρίζες), μία ανά μελέτη,
+ * σεβόμενες το έτος αναφοράς και το holdout.
+ */
+export function suggestLakeQuestions(text: string, max = 2, opts: RetrievalOptions = {}): RetrievalHit[] {
+  const out: RetrievalHit[] = [];
+  const seen = new Set<string>();
+  for (const h of searchLake(text, { ...opts, limit: 200 })) {
+    if (h.breakdown.matched.length < 2 || h.breakdown.relevance < 0.5) continue;
+    if (h.question.options.length > 12 || seen.has(h.study.studyId)) continue;
+    seen.add(h.study.studyId);
+    out.push(h);
+    if (out.length >= max) break;
+  }
+  return out;
 }
 
 /** Προτάσεις για τον planner: ερωτήσεις πηγών με ισχυρή θεματική επικάλυψη. */

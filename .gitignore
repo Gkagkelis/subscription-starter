@@ -44,3 +44,7 @@ certificates
 
 # TypeScript incremental build cache
 *.tsbuildinfo
+
+# Greek Research Data Lake — logs/caches του pipeline (τα δεδομένα είναι στο .synthetic-lab-data/lake)
+scripts/synthetic-lab/lane_*.log
+scripts/synthetic-lab/**/__pycache__/

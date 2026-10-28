@@ -85,7 +85,9 @@ export const PlanSchema = z.object({
   sampleSize: z.number().int().min(10).max(2000),
   warnings: z.array(str(1000)).max(50),
   plannerVersion: str(40),
-  plannerMode: z.enum(['rules', 'ai'])
+  plannerMode: z.enum(['rules', 'ai']),
+  referenceYear: z.number().int().min(2000).max(2100).nullable().optional(),
+  holdoutDatasets: z.array(str(300)).max(200).optional()
 });
 
 export const RunStudySchema = z.object({
@@ -102,7 +104,9 @@ export const PlanRequestSchema = z.object({
   kind: z.enum(['survey', 'focus_group', 'scenario_comparison']).optional(),
   domain: z.enum(['consumer', 'social_policy']).optional(),
   audience: AudienceSchema.optional(),
-  sampleSize: z.number().int().min(10).max(2000).optional()
+  sampleSize: z.number().int().min(10).max(2000).optional(),
+  referenceYear: z.number().int().min(2000).max(2100).nullable().optional(),
+  holdoutDatasets: z.array(str(300)).max(200).optional()
 });
 
 export const FocusCreateSchema = z.object({
