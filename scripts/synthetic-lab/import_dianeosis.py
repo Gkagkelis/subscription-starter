@@ -329,11 +329,15 @@ def main():
     ap.add_argument("--raw", required=True)
     ap.add_argument("--margins", required=True, help="JSON με περιθώρια πληθυσμού (export-population-margins.ts)")
     ap.add_argument("--out", required=True)
+    ap.add_argument("--weighting", choices=["source", "raked2025"], default="source",
+                    help="source = βάρος της πηγής (σχεδιασμένο για τον πληθυσμό του έτους της έρευνας)· raked2025 = παλιά συμπεριφορά (επαναστάθμιση όλων των κυμάτων στο 2025)")
+    ap.add_argument("--audit", help="JSON με τη σύγκριση των δύο σταθμίσεων ανά κύμα")
     args = ap.parse_args()
     with open(args.margins, encoding="utf-8") as fh:
         margins = json.load(fh)["margins"]
 
     items = []  # ανά (κύμα, ερώτηση)
+    audit_rows = []
     excluded = []
     files_meta = []
     for year, part, rel, wvar in WAVES:
@@ -347,7 +351,17 @@ def main():
         keys = [{dim: g for dim, g in row_groups(r, demo) if dim != "all"} for r in rows]
         base = [float(r.get(wvar)) if wvar in df.columns and r.get(wvar) == r.get(wvar) and r.get(wvar) else 1.0 for r in rows]
         use_margins = {k: v for k, v in margins.items() if any(k in kk for kk in keys)}
-        wts, diag = rake(rows, keys, use_margins, base)
+        raked, diag = rake(rows, keys, use_margins, base)
+        mb = sum(base) / len(base) if base else 1.0
+        src = [b / mb for b in base]
+        ess_src = sum(src) ** 2 / sum(x * x for x in src) if src else 0
+        diag.update({"effectiveNSource": round(ess_src, 1), "effectiveNRaked2025": diag["effectiveN"],
+                     "sourceWeightMin": round(min(src), 3) if src else None, "sourceWeightMax": round(max(src), 3) if src else None,
+                     "sourceWeightZeroOrMissing": sum(1 for r in rows if not (wvar in df.columns and r.get(wvar) == r.get(wvar) and r.get(wvar))),
+                     "weightingUsed": args.weighting})
+        wts, alt = (src, raked) if args.weighting == "source" else (raked, src)
+        wave_diff = {"all": [], "groups": []}
+        audit_rows.append((diag, wave_diff))
         diag.update({"year": year, "part": part, "file": os.path.basename(path), "weightVar": wvar if wvar in df.columns else None,
                      "dimensions": sorted(use_margins)})
         files_meta.append(diag)
@@ -371,17 +385,26 @@ def main():
                 excluded.append({"year": year, "part": part, "var": var, "label": label[:200], "reason": "πολιτική μεταβλητή"})
                 continue
             acc = {}
-            for row, kk, w in zip(rows, keys, wts):
+            for row, kk, w, w2 in zip(rows, keys, wts, alt):
                 v = row.get(var)
                 if v is None or v != v or v not in vl:
                     continue
                 for dim, g in [("all", "all")] + list(kk.items()):
-                    cell = acc.setdefault((dim, g), {"w": 0.0, "n": 0, "by": Counter()})
+                    cell = acc.setdefault((dim, g), {"w": 0.0, "n": 0, "by": Counter(), "w2": 0.0, "by2": Counter(), "ww": 0.0})
                     cell["w"] += w
+                    cell["ww"] += w * w
+                    cell["w2"] += w2
+                    cell["by2"][v] += w2
                     cell["n"] += 1
                     cell["by"][v] += w
             if ("all", "all") not in acc or acc[("all", "all")]["n"] < 100:
                 continue
+            for (dim, g), cell in acc.items():
+                if cell["n"] < 30 or cell["w2"] <= 0:
+                    continue
+                for c in codes:
+                    d = abs(100.0 * cell["by"].get(c, 0.0) / cell["w"] - 100.0 * cell["by2"].get(c, 0.0) / cell["w2"])
+                    wave_diff["all" if dim == "all" else "groups"].append(d)
             # οι «0 = δεν επιλέχθηκε» δυαδικές πολλαπλής επιλογής: κρατούνται (2 επιλογές)
             dist = {}
             for c, opt in zip(codes, options):
@@ -390,6 +413,7 @@ def main():
                     groups.setdefault(dim, {})[g] = {
                         "value": round(100.0 * cell["by"].get(c, 0.0) / cell["w"], 2),
                         "n": cell["n"],
+                        "nEff": round(cell["w"] ** 2 / cell["ww"], 1) if cell["ww"] > 0 else cell["n"],
                         "confidence": "high" if cell["n"] >= 200 else "medium" if cell["n"] >= 50 else "low",
                         "sources": 1,
                         "inconsistent": False,
@@ -467,7 +491,7 @@ def main():
                 "metric": mid,
                 "family": "dianeosis_attitudes",
                 "label": f"{canon['label']} — «{opt}»",
-                "semanticsNote": "διαΝΕΟσις «Τι πιστεύουν οι Έλληνες» (Metron Analysis/MRB κατά κύμα). Ποσοστό επιλογής, βάρος της πηγής επαναστάθμισμένο (raking) σε ηλικία×φύλο, μόρφωση, περιφέρεια του πληθυσμού 15+· n = πραγματικός αριθμός ερωτώμενων ανά κελί.",
+                "semanticsNote": "διαΝΕΟσις «Τι πιστεύουν οι Έλληνες» (Metron Analysis/MRB κατά κύμα). Ποσοστό επιλογής, " + ("βάρος της πηγής του κύματος" if args.weighting == "source" else "βάρος της πηγής επαναστάθμισμένο (raking) σε ηλικία×φύλο, μόρφωση, περιφέρεια του πληθυσμού 15+ 2025") + "· n = πραγματικός αριθμός ερωτώμενων ανά κελί, nEff = αποτελεσματικό μέγεθος (Kish).",
                 "waves": waves,
                 "scheme": "dianeosis",
                 "datasetId": "dianeosis-tpe",
@@ -490,7 +514,8 @@ def main():
         "files": files_meta,
         "linking": {"method": "ίδιες ουσιαστικές επιλογές + ομοιότητα κειμένου (IDF-Jaccard)", "threshold": THRESH,
                     "linkedQuestions": sum(1 for q in questions if q["linked"])},
-        "weighting": {"raked": True, "note": "Περιθώρια πληθυσμού 15+ (2025) για όλα τα κύματα."},
+        "weighting": ({"raked": False, "method": "source", "note": "Βάρος της πηγής (Metron Analysis/MRB) κάθε κύματος, σχεδιασμένο για τον πληθυσμό του έτους της έρευνας. nEff = αποτελεσματικό μέγεθος δείγματος (Kish) ανά κελί."}
+                      if args.weighting == "source" else {"raked": True, "method": "raked2025", "note": "Περιθώρια πληθυσμού 15+ (2025) για όλα τα κύματα (παλιά συμπεριφορά)."}),
         "questions": questions,
         "metrics": metrics,
         "excludedPolitical": excluded,
@@ -498,6 +523,14 @@ def main():
     os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
     with open(args.out, "w", encoding="utf-8") as fh:
         json.dump(out, fh, ensure_ascii=False, separators=(",", ":"))
+    if args.audit:
+        mean = lambda xs: round(sum(xs) / len(xs), 3) if xs else None
+        audit = [{**{k: d[k] for k in ("year", "part", "file", "n", "weightVar", "effectiveNSource", "effectiveNRaked2025", "sourceWeightMin",
+                                       "sourceWeightMax", "sourceWeightZeroOrMissing", "dimensions") if k in d},
+                  "meanAbsDiffAllPp": mean(w["all"]), "maxAbsDiffAllPp": round(max(w["all"]), 2) if w["all"] else None,
+                  "meanAbsDiffGroupsPp": mean(w["groups"]), "cellsCompared": len(w["all"]) + len(w["groups"])} for d, w in audit_rows]
+        with open(args.audit, "w", encoding="utf-8") as fh:
+            json.dump({"compare": "source weight vs raked to 2025 margins", "used": args.weighting, "waves": audit}, fh, ensure_ascii=False, indent=1)
     multi = sum(1 for q in questions if len(q["years"]) >= 2)
     print(f"✓ {len(questions)} ερωτήσεις ({multi} σε ≥2 κύματα), {len(metrics)} δείκτες επιλογών, "
           f"{len(excluded)} πολιτικές μεταβλητές εξαιρέθηκαν -> {args.out}")

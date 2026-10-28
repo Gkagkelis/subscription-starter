@@ -15,6 +15,7 @@ import { expandCompactPopulation, type CompactPopulation } from './compact';
 import { buildDevFixture, DEV_FIXTURE_ID } from './fixture';
 import { AGE_BAND_BOUNDS } from './glopop-schema';
 import { largestRemainder, sampleIndices } from './sampling';
+import { createRng } from '../rng';
 import path from 'path';
 
 /** Ακατέργαστο baseline GLOPOP-S 2015 (ενσωματωμένο δείγμα). */
@@ -391,7 +392,7 @@ export function selectRespondents(
   filter: AudienceFilter,
   n: number,
   seed: number,
-  opts: { weighting?: 'region_srs' | 'persona_weight' } = {}
+  opts: { weighting?: 'region_srs' | 'persona_weight' | 'pps' } = {}
 ): AudienceSelection {
   const pool = pop.personas.filter((p) => matchesAudience(p, filter));
   const warnings = audienceWarnings(filter);
@@ -412,9 +413,9 @@ export function selectRespondents(
   const sizes: Record<string, number> = {};
   byRegion.forEach((arr, k) => (sizes[k] = arr.reduce((s, p) => s + p.weight, 0)));
   const alloc = largestRemainder(sizes, n);
-  // Διόρθωση αν κάποιο στρώμα έχει λιγότερα προφίλ από την κατανομή.
+  // Διόρθωση αν κάποιο στρώμα έχει λιγότερα προφίλ από την κατανομή (όχι στο pps: επιτρέπει επανάληψη προσώπων).
   let deficit = 0;
-  Object.keys(alloc).forEach((k) => {
+  if (opts.weighting !== 'pps') Object.keys(alloc).forEach((k) => {
     const cap = byRegion.get(k)!.length;
     if (alloc[k] > cap) {
       deficit += alloc[k] - cap;
@@ -436,6 +437,29 @@ export function selectRespondents(
       const arr = byRegion.get(k)!;
       const m = alloc[k];
       if (!m) return;
+      if (opts.weighting === 'pps') {
+        // Συστηματική δειγματοληψία με πιθανότητα ανάλογη του βάρους βαθμονόμησης (σε τυχαία σειρά): η σύνθεση του δείγματος
+        // ακολουθεί τον βαθμονομημένο πληθυσμό και οι ερωτώμενοι έχουν ίσα βάρη (χωρίς απώλεια αποτελεσματικού μεγέθους).
+        // Πρόσωπα με βάρος > διάστημα επιλέγονται > 1 φορά ως ανεξάρτητοι συνθετικοί ερωτώμενοι (id «…~2»).
+        const rng = createRng(deriveSeed(seed, 'pps', k));
+        const order = rng.shuffle(arr.map((_, i) => i));
+        const step = sizes[k] / m;
+        let u = rng.next() * step;
+        let cum = 0;
+        let drawn = 0;
+        const w = sizes[k] / m;
+        for (const i of order) {
+          cum += arr[i].weight;
+          let copy = 0;
+          while (u < cum && drawn < m) {
+            drawn++;
+            copy++;
+            respondents.push({ ...arr[i], id: copy === 1 ? arr[i].id : `${arr[i].id}~${copy}`, weight: w });
+            u += step;
+          }
+        }
+        return;
+      }
       const idx = sampleIndices(arr.length, m, deriveSeed(seed, 'audience', k));
       if (opts.weighting === 'persona_weight') {
         // εκτιμητής Hájek: τα βάρη βαθμονόμησης (ηλικία×φύλο×μόρφωση) μεταφέρονται στους ερωτώμενους

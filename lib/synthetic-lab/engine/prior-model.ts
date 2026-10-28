@@ -22,7 +22,8 @@
 // ============================================================
 
 import { metricScheme, norayaMembership, SCHEME_DIMENSIONS, waveCells, type LinkedDimension } from '../data/noraya';
-import type { PriorWave } from '../data/noraya-build';
+import type { MetricUniverse, PriorWave } from '../data/noraya-build';
+import { universeFraction } from '../data/universe';
 import { logit, sigmoid } from '../stats';
 import type { Persona } from '../types';
 
@@ -64,7 +65,7 @@ export function fitPriorModel(
   metric: string,
   wave: PriorWave,
   personas: Persona[],
-  opts: { dimensions?: LinkedDimension[]; maxIter?: number; shrinkage?: number; anchorOverall?: boolean } = {}
+  opts: { dimensions?: LinkedDimension[]; maxIter?: number; shrinkage?: number; anchorOverall?: boolean; universe?: MetricUniverse | null } = {}
 ): PriorFit {
   const k = opts.shrinkage ?? DEFAULT_SHRINKAGE;
   const scheme = metricScheme(metric);
@@ -107,7 +108,8 @@ export function fitPriorModel(
 
   for (const x of inUniverse) {
     ids.push(x.p.id);
-    weights.push(x.p.weight);
+    // πληθυσμός αναφοράς του δείκτη: οι στόχοι (σύνολο, ομάδες) ισχύουν μόνο για το μέρος του προσώπου που ανήκει σε αυτόν
+    weights.push(x.p.weight * (opts.universe ? universeFraction(x.p, opts.universe) : 1));
     const row: { slot: number; frac: number }[] = [];
     dims.forEach((d, di) => {
       const gm = x.m![d] || {};

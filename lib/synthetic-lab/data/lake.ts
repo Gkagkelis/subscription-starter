@@ -16,6 +16,7 @@
 
 import { existsSync, readFileSync, statSync } from 'fs';
 import path from 'path';
+import type { MetricUniverse } from './noraya-build';
 import type { PriorCell, PriorMetric, PriorWave } from './noraya-build';
 import { licenseMode } from './research';
 import { dataRoot } from '../storage/paths';
@@ -59,6 +60,8 @@ export interface LakeQuestion {
   n: number | null;
   topics: string[];
   multi: boolean;
+  /** Πληθυσμός αναφοράς (Eurostat: άτομα/νοικοκυριά/ηλικίες· Eurobarometer: περιορισμένη βάση). */
+  universe?: MetricUniverse;
 }
 
 export interface LakeIndex {

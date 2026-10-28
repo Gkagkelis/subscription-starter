@@ -12,6 +12,7 @@
 // ============================================================
 
 import { getMetric, latestWaveFor, norayaMembership, type EvidenceContext } from '../data/noraya';
+import { band65Comparable, universeFraction } from '../data/universe';
 import type { PriorWave } from '../data/noraya-build';
 import { expandHoldout, lakeMetric, lakePoolId, lakeTransferId, sampleKeyOf, searchLake } from '../data/lake';
 import { checkQuestionnaire } from '../engine/guardrails';
@@ -82,7 +83,7 @@ function ebEvidence(item: BenchItem, model: ModelConfig): { link: Question['evid
   if (!hits.length) return null;
   // παραγωγή: η πρώτη συμβατή κατά την κατάταξη του retrieval· pool: έως K συμβατές από διαφορετικά δείγματα, νεότερες πρώτα
   let chosen = [hits[0]];
-  if (model.wavePolicy === 'pool') {
+  if (model.wavePolicy === 'pool' || model.wavePolicy === 'forecast') {
     const seen = new Set<string>();
     chosen = [...hits]
       .sort((a, b) => b.year - a.year)
@@ -92,7 +93,7 @@ function ebEvidence(item: BenchItem, model: ModelConfig): { link: Question['evid
         seen.add(k);
         return true;
       })
-      .slice(0, model.poolMaxWaves ?? 3)
+      .slice(0, model.wavePolicy === 'forecast' ? 12 : model.poolMaxWaves ?? 3)
       .reverse();
   }
   const hasGroups = (metric: string) => {
@@ -242,18 +243,21 @@ export async function runBenchmark(suite: BenchSuite, cfg: RunConfig): Promise<{
         const byId = new Map(pop.personas.map((p) => [p.id, p]));
         const acc = new Map<string, Map<string, number>>();
         for (const r of run.respondents) {
-          const persona = byId.get(r.personaId);
+          const persona = byId.get(r.personaId.split('~')[0]);
           if (!persona) continue;
           for (const a of r.answers) {
             const mm = meta.get(a.questionId);
             if (!mm || a.skipped || !a.value?.choice || a.basis !== 'empirical_prior') continue;
             const mem = memberships(persona, mm.item);
             if (!mem) continue;
+            // σύγκριση στον πληθυσμό αναφοράς του στόχου (π.χ. 16-74): μέτρηση, όχι μοντέλο — ίδιο για όλες τις εκδόσεις
+            const uf = mm.item.universe ? universeFraction(persona, mm.item.universe) : 1;
+            if (uf <= 0) continue;
             const m = acc.get(a.questionId) || new Map<string, number>();
             for (const [dim, gs] of Object.entries(mem)) {
               for (const [g, f] of Object.entries(gs)) {
                 if (f <= 0) continue;
-                const w = r.weight * f;
+                const w = r.weight * f * uf;
                 m.set(`${dim}\u0001${g}\u0001`, (m.get(`${dim}\u0001${g}\u0001`) || 0) + w);
                 m.set(`${dim}\u0001${g}\u0001${a.value.choice}`, (m.get(`${dim}\u0001${g}\u0001${a.value.choice}`) || 0) + w);
               }
@@ -274,10 +278,11 @@ export async function runBenchmark(suite: BenchSuite, cfg: RunConfig): Promise<{
           continue;
         }
         const evMetrics = mm.ev ? mm.ev.metrics : Object.values(item.targetMetrics);
-        const ctx: EvidenceContext = { ...evidenceContextForPlan(plan), wavePolicy: model.wavePolicy, poolMaxWaves: model.poolMaxWaves, poolHalfLifeYears: model.poolHalfLifeYears };
+        const ctx: EvidenceContext = { ...evidenceContextForPlan(plan), wavePolicy: model.wavePolicy, poolMaxWaves: model.poolMaxWaves, poolHalfLifeYears: model.poolHalfLifeYears, forecast: model.forecast };
         const evWaveOf = (opt: string): PriorWave | null => {
           const metric = mm.ev ? mm.ev.link!.optionMetrics![opt] : item.targetMetrics[opt];
-          return metric ? latestWaveFor(metric, ctx).wave : null;
+          // «επιμονή» = η τελευταία πραγματική μέτρηση, ανεξάρτητα από την πολιτική κύματος της έκδοσης
+          return metric ? latestWaveFor(metric, { ...ctx, wavePolicy: 'last' }).wave : null;
         };
         const opts = item.binary ? ['Ναι'] : item.options;
         const dims = item.compareOverall ? ['all', ...item.compareDims] : item.compareDims;
@@ -290,7 +295,9 @@ export async function runBenchmark(suite: BenchSuite, cfg: RunConfig): Promise<{
             const cells = targetCells(tw, dim);
             const ecells = ew ? targetCells(ew, dim) : {};
             for (const [g, c] of Object.entries(cells)) {
-              if (item.family === 'eurostat_ts' && (dim !== 'age_band' || g === '65+')) continue;
+              // η ζώνη «65+» της πηγής μπορεί να είναι μόνο 65-74 (π.χ. Έρευνα ΤΠΕ): τότε δεν συγκρίνεται
+              if (dim === 'age_band' && g === '65+' && item.universe && !band65Comparable(item.universe)) continue;
+              if (item.family === 'eurostat_ts' && !item.universe && (dim !== 'age_band' || g === '65+')) continue; // παλιές σουίτες
               if (!c.nUnknown && c.n < 30) continue;
               const vals = perSeed
                 .map((s) => {

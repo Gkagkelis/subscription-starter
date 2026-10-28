@@ -20,6 +20,7 @@
 import priorsJson from './noraya-priors.generated.json';
 import ictJson from './official/eurostat-ict.json';
 import silcJson from './official/eurostat-silc.json';
+import { forecastWave, type ForecastConfig } from '../engine/forecast';
 import type { GroupScheme, NorayaPriors, PriorCell, PriorMetric, PriorWave } from './noraya-build';
 import type { AgeBand, Persona } from '../types';
 import { researchDatasets, researchMetric, researchMetrics } from './research';
@@ -276,10 +277,27 @@ export interface EvidenceContext {
   asOfYear?: number;
   holdout?: Set<string>;
   holdoutYears?: Record<string, number[]>;
-  /** Πολιτική κύματος (βλ. ModelConfig): last (παραγωγή) ή pool. */
-  wavePolicy?: 'last' | 'pool';
+  /** Πολιτική κύματος (βλ. ModelConfig): last (παραγωγή), pool ή forecast. */
+  wavePolicy?: 'last' | 'pool' | 'forecast';
   poolMaxWaves?: number;
   poolHalfLifeYears?: number;
+  /** forecast: ρυθμίσεις ανά οικογένεια πηγών (eb_trend, eurostat_ts, …) και προεπιλογή. */
+  forecast?: { default: ForecastConfig; byFamily?: Record<string, ForecastConfig> };
+  /** forecast: έτος-στόχος της πρόβλεψης (προεπιλογή asOfYear + 1 ή τρέχον έτος). */
+  targetYear?: number;
+}
+
+/** Οικογένεια πηγών ενός δείκτη για τις ρυθμίσεις πρόβλεψης (ίδια ονόματα με τις οικογένειες του benchmark). */
+export function forecastFamilyOf(metric: string): string {
+  const m = getMetric(metric);
+  const scheme = m?.scheme || 'eurobarometer';
+  if (scheme === 'dianeosis') return 'dianeosis_ts';
+  if (scheme !== 'lake') return scheme === 'eurobarometer' ? 'noraya_ts' : 'eurostat_ts';
+  const fam = m?.family || '';
+  if (fam === 'lake:eurobarometer') return 'eb_trend';
+  if (fam === 'lake:eurostat') return 'eurostat_ts';
+  if (fam === 'lake:worldbank') return 'findex_ts';
+  return 'other';
 }
 
 /**
@@ -343,13 +361,21 @@ export function latestWaveFor(metric: string, ctx: EvidenceContext = {}): { wave
   }
   const skipYears = new Set(ctx.holdoutYears?.[ds] || []);
   // σε σύνθετους δείκτες κάθε κύμα φέρει τη μελέτη του: τα κύματα μελετών holdout αφαιρούνται
-  const all = m.waves.filter((w) => w.groups.all?.all && !skipYears.has(w.year) && !(w.datasetId && ctx.holdout?.has(w.datasetId)));
+  // κύματα με σημαία ποιότητας (π.χ. NORAYA «mixed_surveys») απομονώνονται από την τεκμηρίωση
+  const all = m.waves.filter((w) => w.groups.all?.all && !w.qualityFlag && !skipYears.has(w.year) && !(w.datasetId && ctx.holdout?.has(w.datasetId)));
   const waves = ctx.asOfYear ? all.filter((w) => w.year <= ctx.asOfYear!) : all;
   if (!waves.length) {
     const valid = m.waves.some((w) => w.groups.all?.all);
     return { wave: null, excluded: all.length ? 'after_reference_year' : valid ? 'holdout' : 'no_wave' };
   }
   if (ctx.wavePolicy === 'pool') return { wave: poolWaves(waves, ctx.poolMaxWaves, ctx.poolHalfLifeYears) };
+  if (ctx.wavePolicy === 'forecast' && ctx.forecast) {
+    // πρόβλεψη του κύματος του έτους-στόχου από ΟΛΑ τα επιτρεπτά (προγενέστερα) κύματα — εκτίμηση, όχι μέτρηση
+    const target = ctx.targetYear ?? (ctx.asOfYear !== undefined ? ctx.asOfYear + 1 : new Date().getFullYear());
+    const cfg = ctx.forecast.byFamily?.[forecastFamilyOf(metric)] || ctx.forecast.default;
+    const fw = forecastWave(waves, target, cfg);
+    if (fw) return { wave: fw };
+  }
   return { wave: waves[waves.length - 1] };
 }
 

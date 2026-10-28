@@ -42,6 +42,49 @@ NOT_PERSON = re.compile(r"(?i)as a percentage of (earnings|hours|gdp|expenditure
                         r"gender pay gap|prisoners|budget|\bgva\b|value added|enterprises|business")
 
 
+AGE_TOTALS = ["TOTAL", "Y_GE16", "Y_GE15", "Y16-74", "Y15-74", "Y_GE18", "Y18-74", "Y16-64", "Y15-64", "Y_GE0", "Y20-64", "Y25-64"]
+AGE_RANGE = {"Y_GE16": (16, None), "Y_GE15": (15, None), "Y16-74": (16, 74), "Y15-74": (15, 74), "Y_GE18": (18, None), "Y18-74": (18, 74),
+             "Y16-64": (16, 64), "Y15-64": (15, 64), "Y_GE0": (0, None), "Y20-64": (20, 64), "Y25-64": (25, 64)}
+# «TOTAL» σημαίνει άλλο πληθυσμό ανά έρευνα: EHIS = 15+, EU-SILC = όλες οι ηλικίες (και παιδιά)
+TOTAL_RANGE = {"hlth_ehis": (15, None), "hlth_": (16, None), "lfs": (15, None), "ilc_": (0, None)}
+
+
+def _eurostat_universe(st, unit):
+    """Πληθυσμός αναφοράς ενός δείκτη Eurostat: μονάδα (άτομα/νοικοκυριά/υποσύνολο) και ηλικιακό εύρος του «συνόλου».
+    Χωρίς αυτό το engine συγκρίνει (και αγκυρώνει) σε διαφορετικό πληθυσμό από αυτόν που μετρά η πηγή."""
+    code = st["study_id"].split(":", 1)[1]
+    u = (unit or "").upper()
+    if u in ("PC_HH",) or u.startswith("PC_HH"):
+        kind = "households"
+    elif u in ("PC_IND", "PC", "PC_POP", "PC_PER", "PC_Y16_74"):
+        kind = "individuals"
+    elif u.startswith("PC_IND_") or u.startswith("PC_"):
+        kind = "subpopulation"
+    else:
+        kind = "unknown"
+    try:
+        meta = json.loads(st["raw_meta"] or "{}")
+    except ValueError:
+        meta = {}
+    dims = set((meta.get("dimensions") or {}).keys())
+    try:
+        ages = json.loads(st["age_groups"] or "null") or []
+    except ValueError:
+        ages = []
+    total, rng = None, None
+    if "ind_type" in dims:
+        total, rng = "IND_TOTAL", (16, 74)  # Έρευνα ΤΠΕ νοικοκυριών: άτομα 16-74
+    elif "age" in dims:
+        total = next((a for a in AGE_TOTALS if a in ages), None)
+        if total == "TOTAL":
+            rng = next((r for pre, r in TOTAL_RANGE.items() if code.startswith(pre)), None)
+        elif total:
+            rng = AGE_RANGE.get(total)
+    band65 = "65-74" if ("ind_type" in dims or "Y65-74" in ages) else ("65+" if "Y_GE65" in ages else None)
+    return {"kind": kind, "unitCode": unit, "ageTotalCode": total, "ageMin": rng[0] if rng else None,
+            "ageMax": rng[1] if rng else None, "band65": band65}
+
+
 def _person_indicator(study_id, unit, label, var_type):
     code = study_id.split(":", 1)[1]
     if NOT_PERSON.search(label or "") or code.startswith(("hlth_cd", "hlth_co", "hlth_rs")):
@@ -108,6 +151,10 @@ def run(con):
            AND EXISTS (SELECT 1 FROM variables v WHERE v.study_id = studies.study_id)"""
     ).fetchall()
     index_studies, index_questions, exported, written = [], [], set(), set()
+    try:
+        base_of = {r["var_id"]: r["value"] for r in con.execute("SELECT var_id, value FROM variable_meta WHERE key='base'")}
+    except Exception:  # noqa: BLE001 — πριν από την πρώτη επισκευή ο πίνακας δεν υπάρχει
+        base_of = {}
     t0 = time.time()
     for st in studies:
         sid = st["study_id"]
@@ -140,12 +187,14 @@ def run(con):
                 if not waves:
                     continue
                 mid = base_id
+                universe = _eurostat_universe(st, unit) if st["source_id"] == "eurostat" else None
                 metrics.append({"metric": mid, "family": f"lake:{st['source_id']}", "label": v["label"] or qtext, "question": qtext,
                                 "semanticsNote": f"{st['title']} ({st['publisher'] or st['source_id']}). Ποσοστό πληθυσμού με το χαρακτηριστικό· έτη {waves[0]['year']}–{waves[-1]['year']}.",
-                                "waves": waves, "scheme": "lake", "datasetId": sid, "tier": tier, "answerOptions": ["Ναι", "Όχι"], "positiveOption": "Ναι"})
+                                "waves": waves, "scheme": "lake", "datasetId": sid, "tier": tier, "answerOptions": ["Ναι", "Όχι"], "positiveOption": "Ναι",
+                                **({"universe": universe} if universe else {})})
                 index_questions.append({"id": mid, "studyId": sid, "kind": "binary", "code": v["name"], "text": qtext[:400], "options": ["Ναι", "Όχι"],
                                         "dkOptions": [], "optionMetrics": {"Ναι": mid}, "years": [w["year"] for w in waves],
-                                        "n": None, "topics": topics, "multi": False})
+                                        "n": None, "topics": topics, "multi": False, **({"universe": universe} if universe else {})})
                 qcount += 1
                 continue
             if vt == "percent_yes":
@@ -164,6 +213,9 @@ def run(con):
                 qcount += 1
                 continue
             # κατηγορική ερώτηση: ένας δείκτης ανά επιλογή
+            base = base_of.get(v["var_id"])
+            # «SPLIT A/B» = τυχαίο μισό δείγμα (ίδιος πληθυσμός), όχι περιορισμένη βάση
+            eb_universe = {"kind": "subpopulation", "base": base} if base and not re.search(r"(?i)split\s*[ab12]\b", base) else None
             opts = json.loads(v["options"] or "[]") if v["options"] and v["options"].startswith("[") else []
             by_opt = defaultdict(list)
             for r in rows:
@@ -182,7 +234,8 @@ def run(con):
                 metrics.append({"metric": mid, "family": f"lake:{st['source_id']}", "label": f"{qtext[:200]} — «{o}»", "question": qtext,
                                 "semanticsNote": f"{st['title']} ({st['publisher'] or st['source_id']}). Ποσοστό που επέλεξε «{o}»" + (" (πολλαπλές απαντήσεις)" if multi else "") + ".",
                                 "waves": waves, "scheme": "lake", "datasetId": sid, "tier": tier,
-                                **({"answerOptions": ["Ναι", "Όχι"], "positiveOption": "Ναι"} if multi else {})})
+                                **({"answerOptions": ["Ναι", "Όχι"], "positiveOption": "Ναι"} if multi else {}),
+                                **({"universe": eb_universe} if eb_universe else {})})
             if len(om) < (1 if multi else 2):
                 continue
             if multi:
@@ -193,7 +246,8 @@ def run(con):
             else:
                 index_questions.append({"id": base_id, "studyId": sid, "kind": "distribution", "code": v["name"], "text": qtext[:400],
                                         "options": list(om), "dkOptions": [o for o in om if DK.search(o)], "optionMetrics": om,
-                                        "years": sorted(years), "n": n_all, "topics": topics, "multi": False})
+                                        "years": sorted(years), "n": n_all, "topics": topics, "multi": False,
+                                        **({"universe": eb_universe} if eb_universe else {})})
             qcount += 1
         if not metrics:
             continue

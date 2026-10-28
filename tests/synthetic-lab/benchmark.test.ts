@@ -6,10 +6,11 @@ import path from 'path';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { expandHoldout, lakeMetric, lakePoolId, lakeTransferId, resetLakeCache, sampleKeyOf } from '@/lib/synthetic-lab/data/lake';
 import { latestWaveFor, poolWaves } from '@/lib/synthetic-lab/data/noraya';
-import { buildSuite, incoherentWave, normOption, splitOf } from '@/lib/synthetic-lab/benchmark/suite';
+import { buildSuite, incoherentWave, normOption, splitOf, temporalSplit } from '@/lib/synthetic-lab/benchmark/suite';
 import { runBenchmark } from '@/lib/synthetic-lab/benchmark/runner';
 import { gapStats, summarize } from '@/lib/synthetic-lab/benchmark/score';
 import { pairedCompare } from '@/lib/synthetic-lab/benchmark/experiments';
+import { forecastItem, seriesFor } from '@/lib/synthetic-lab/benchmark/temporal';
 import { PRODUCTION_MODEL } from '@/lib/synthetic-lab/engine/model-config';
 import { batteryKey } from '@/lib/synthetic-lab/engine/demo-responder';
 import { runSurvey } from '@/lib/synthetic-lab/engine/survey';
@@ -79,14 +80,21 @@ describe('Έλεγχοι διαρροής', () => {
     expect(h.has(STUDIES[1].id)).toBe(false);
   });
 
-  it('η σουίτα χωρίζει ανά δείγμα και κρατά μαζί τις έρευνες του ίδιου δείγματος', () => {
+  it('η σουίτα χωρίζει χρονικά (φάση 2) και κρατά μαζί τις έρευνες του ίδιου δείγματος', () => {
     const s = buildSuite();
     const eb = s.items.filter((i) => i.family === 'eb_trend');
     // 2021 (έχει προγενέστερο 2019) και τα δύο του 2023· το 2019 δεν έχει προγενέστερο δείγμα
     expect(eb.map((i) => i.year).sort()).toEqual([2021, 2023, 2023]);
     const s23 = eb.filter((i) => i.year === 2023);
     expect(new Set(s23.map((i) => i.split)).size).toBe(1);
-    expect(s23[0].split).toBe(splitOf('EB99.1'));
+    expect(s23[0].split).toBe('validation');
+    expect(eb.find((i) => i.year === 2021)!.split).toBe('calibration');
+    // κανόνες holdout2: ≥ 2025 μόνο για items που δεν υπήρξαν στόχοι· δεδομένα παραγωγής ποτέ
+    expect(temporalSplit(2025, 'x', false, new Set())).toBe('holdout2');
+    expect(temporalSplit(2025, 'x', false, new Set(['x']))).toBeNull();
+    expect(temporalSplit(2025, 'y', true, new Set())).toBeNull();
+    expect(temporalSplit(2024, 'y', true, new Set())).toBe('calibration');
+    expect(splitOf('EB99.1')).toBeTruthy();
   });
 
   it('τυφλή εκτέλεση: καμία πληροφορία από το δείγμα-στόχο ή μεταγενέστερη', async () => {
@@ -182,5 +190,17 @@ describe('Πειραματικές ρυθμίσεις', () => {
     const wave = (all: number) => ({ key: '2021', year: 2021, quarter: '', groups: { all: { all: cell(all) }, gender: { female: cell(12.5), male: cell(18.4) } } });
     expect(incoherentWave(wave(91.4), ['gender'])).toBe('gender');
     expect(incoherentWave(wave(15.5), ['gender'])).toBeNull();
+  });
+
+  it('χρονική πρόβλεψη: μόνο προγενέστερα κύματα, όχι το ίδιο δείγμα, ίδια συνάρτηση με τον engine', () => {
+    const s = buildSuite();
+    const item = s.items.find((i) => i.family === 'eb_trend' && i.year === 2023)!;
+    const series = seriesFor(item);
+    expect(series.map((p) => p.year)).toEqual([2019, 2021]);
+    expect(series.every((p) => p.sampleKey !== item.sampleKey)).toBe(true);
+    const r = forecastItem(item, { params: { method: 'locf' } }, series);
+    const very = r.cells.find((c) => c.dim === 'all' && c.option === OPTS[0])!;
+    expect(very.sim).toBeCloseTo(34, 0); // 2021, όχι 2023 (40/41)
+    expect(r.evidence!.gapYears).toBe(2);
   });
 });

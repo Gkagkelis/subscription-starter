@@ -187,3 +187,76 @@ export function summarizeBy(results: ItemResult[], key: (r: ItemResult) => strin
 export function primaryScore(results: ItemResult[]): number | null {
   return summarize(results).sampleMeanMae;
 }
+
+// ---------------- Φάση 2: προκαθορισμένες μετρικές (PHASE2_PREREGISTRATION.md §3) ----------------
+
+/** Τιμή κύριας μετρικής ανά item (σύνολο όπου συγκρίσιμο, αλλιώς ομάδες). */
+function itemValue(r: ItemResult): number | null {
+  const s = scoreItem(r);
+  return s.overallMae ?? s.groupMae;
+}
+
+/** Μέσος όρος με ίσο βάρος ανά οικογένεια πηγών (οι οικογένειες: μέσος όρος συστάδων). */
+export function familyBalanced(results: ItemResult[]): number | null {
+  const fam = new Map<string, Map<string, number[]>>();
+  for (const r of results) {
+    if (r.status !== 'ok') continue;
+    const v = itemValue(r);
+    if (v === null) continue;
+    const m = fam.get(r.family) || new Map<string, number[]>();
+    m.set(r.sampleKey, [...(m.get(r.sampleKey) || []), v]);
+    fam.set(r.family, m);
+  }
+  const fams = Array.from(fam.values()).map((m) => avg(Array.from(m.values()).map((v) => avg(v) as number)) as number);
+  return r2(avg(fams));
+}
+
+/**
+ * Ζευγαρωτή διαφορά (alt − ref) στην κύρια μετρική: μέσος όρος ανά συστάδα (δείγμα), μετά μέσος όρος συστάδων.
+ * Διάστημα 95%: cluster bootstrap στρωματοποιημένο ανά οικογένεια πηγών (2.000 επαναλήψεις, σταθερό seed).
+ * Μόνο κοινά items με τιμή και στις δύο εκδόσεις.
+ */
+export function pairedCompareStrat(ref: ItemResult[], alt: ItemResult[], reps = 2000) {
+  const a = new Map(ref.filter((r) => r.status === 'ok').map((r) => [r.itemId, r]));
+  const byCluster = new Map<string, { family: string; d: number[]; g: number[] }>();
+  let n = 0;
+  for (const r of alt) {
+    const r0 = a.get(r.itemId);
+    if (!r0 || r.status !== 'ok') continue;
+    const v0 = itemValue(r0);
+    const v1 = itemValue(r);
+    if (v0 === null || v1 === null) continue;
+    n++;
+    const c = byCluster.get(r.sampleKey) || { family: r.family, d: [], g: [] };
+    c.d.push(v1 - v0);
+    const g0 = scoreItem(r0).groupMae;
+    const g1 = scoreItem(r).groupMae;
+    if (g0 !== null && g1 !== null) c.g.push(g1 - g0);
+    byCluster.set(r.sampleKey, c);
+  }
+  const clusters = Array.from(byCluster.values()).map((c) => ({ family: c.family, d: avg(c.d) as number, g: avg(c.g) }));
+  const mean = (xs: number[]) => (xs.length ? xs.reduce((s, x) => s + x, 0) / xs.length : NaN);
+  const est = mean(clusters.map((c) => c.d));
+  const strata = new Map<string, number[]>();
+  clusters.forEach((c) => strata.set(c.family, [...(strata.get(c.family) || []), c.d]));
+  let seed = 20261028;
+  const rnd = () => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff);
+  const boots: number[] = [];
+  for (let b = 0; b < reps; b++) {
+    const all: number[] = [];
+    strata.forEach((xs) => {
+      for (let i = 0; i < xs.length; i++) all.push(xs[Math.floor(rnd() * xs.length)]);
+    });
+    boots.push(mean(all));
+  }
+  boots.sort((x, y) => x - y);
+  const gs = clusters.map((c) => c.g).filter((x): x is number => x !== null);
+  return {
+    items: n,
+    clusters: clusters.length,
+    meanDelta: r2(est),
+    ci95: clusters.length >= 5 ? ([r2(boots[Math.floor(0.025 * reps)]), r2(boots[Math.floor(0.975 * reps)])] as [number | null, number | null]) : null,
+    meanDeltaGroup: r2(gs.length ? mean(gs) : null),
+    improvedClusters: Math.round((1000 * clusters.filter((c) => c.d < 0).length) / Math.max(1, clusters.length)) / 10
+  };
+}

@@ -8,6 +8,8 @@
 // αποδεδειγμένη βελτίωση στο validation και στο ανεξάρτητο final holdout.
 // ============================================================
 
+import type { ForecastConfig } from './forecast';
+
 export interface ModelConfig {
   /** Αναγνωριστικό έκδοσης (π.χ. prod-1, exp-2026-10-28-a). */
   version: string;
@@ -22,7 +24,12 @@ export interface ModelConfig {
    *  - last: το τελευταίο επιτρεπτό κύμα (παραγωγή)·
    *  - pool: σταθμισμένος συνδυασμός έως `poolMaxWaves` επιτρεπτών κυμάτων με βάρη n·0.5^(Δέτη/halfLife).
    */
-  wavePolicy: 'last' | 'pool';
+  wavePolicy: 'last' | 'pool' | 'forecast';
+  /**
+   * forecast (φάση 2.2): το κύμα τεκμηρίωσης είναι ΠΡΟΒΛΕΨΗ για το έτος της μελέτης από όλα τα προγενέστερα κύματα
+   * (engine/forecast.ts), με ρυθμίσεις ανά οικογένεια πηγών επιλεγμένες στο calibration.
+   */
+  forecast?: { default: ForecastConfig; byFamily?: Record<string, ForecastConfig> };
   poolMaxWaves?: number;
   poolHalfLifeYears?: number;
   /**
@@ -30,7 +37,7 @@ export interface ModelConfig {
    *  - region_srs: απλή τυχαία επιλογή μέσα στην περιφέρεια, ίσα βάρη (παραγωγή — αγνοεί τη βαθμονόμηση ηλικίας/μόρφωσης)·
    *  - persona_weight: τα βάρη βαθμονόμησης του προσώπου μεταφέρονται στον ερωτώμενο (εκτιμητής Hájek ανά περιφέρεια).
    */
-  respondentWeighting: 'region_srs' | 'persona_weight';
+  respondentWeighting: 'region_srs' | 'persona_weight' | 'pps';
   /**
    * Πληθυσμός για έτος αναφοράς:
    *  - rule: κανόνας παραγωγής (baseline 2015 πριν από το 2025, αλλιώς βαθμονομημένος 2025)·
@@ -58,6 +65,11 @@ export interface ModelConfig {
    * της πηγής (οι διαφορές ομάδων διατηρούνται). Αντιμετωπίζει ασυμβατότητα σύνθεσης πληθυσμού/δείγματος.
    */
   anchorOverall?: boolean;
+  /**
+   * Αυστηρή αντιστοίχιση πληθυσμών (φάση 2.1B): το fit και η αγκύρωση γίνονται μόνο στο μέρος του συνθετικού
+   * πληθυσμού που ανήκει στον πληθυσμό αναφοράς του δείκτη (π.χ. 16-74 για την Έρευνα ΤΠΕ) — data/universe.ts.
+   */
+  universeMatching?: boolean;
   /** Ελεύθερες σημειώσεις/τεκμηρίωση αλλαγών. */
   notes?: string[];
   /** Προέλευση: από ποια έκδοση και ποιο πείραμα προέκυψε. */
@@ -77,11 +89,16 @@ export const PRODUCTION_MODEL: ModelConfig = {
 export function describeModel(c: ModelConfig): string {
   return [
     `συρρίκνωση k=${c.shrinkage}`,
-    c.wavePolicy === 'pool' ? `συνδυασμός έως ${c.poolMaxWaves ?? 3} κυμάτων (half-life ${c.poolHalfLifeYears ?? 2} έτη)` : 'τελευταίο κύμα',
-    c.respondentWeighting === 'persona_weight' ? 'βάρη βαθμονόμησης στους ερωτώμενους' : 'ίσα βάρη ανά περιφέρεια',
+    c.wavePolicy === 'pool'
+      ? `συνδυασμός έως ${c.poolMaxWaves ?? 3} κυμάτων (half-life ${c.poolHalfLifeYears ?? 2} έτη)`
+      : c.wavePolicy === 'forecast'
+        ? `χρονική πρόβλεψη (${Array.from(new Set([c.forecast?.default.params.method, ...Object.values(c.forecast?.byFamily || {}).map((f) => f.params.method)])).join('/')}${c.forecast?.default.decompose || Object.values(c.forecast?.byFamily || {}).some((f) => f.decompose) ? ', επίπεδο + επιδράσεις ομάδων' : ''})`
+        : 'τελευταίο κύμα',
+    c.respondentWeighting === 'persona_weight' ? 'βάρη βαθμονόμησης στους ερωτώμενους' : c.respondentWeighting === 'pps' ? 'επιλογή ανάλογη του βάρους (PPS)' : 'ίσα βάρη ανά περιφέρεια',
     c.population === 'year_raked' ? 'πληθυσμός βαθμονομημένος στο έτος αναφοράς' : 'πληθυσμός κατά τον κανόνα παραγωγής',
     ...(c.anchorOverall ? ['αγκύρωση επιπέδου'] : []),
     ...(c.structureTransfer ? ['μεταφορά δομής ομάδων'] : []),
-    ...(c.batteryRho ? [`λανθάνων παράγοντας συστοιχίας ρ=${c.batteryRho}`] : [])
+    ...(c.batteryRho ? [`λανθάνων παράγοντας συστοιχίας ρ=${c.batteryRho}`] : []),
+    ...(c.universeMatching ? ['αντιστοίχιση πληθυσμού αναφοράς'] : [])
   ].join(' · ');
 }

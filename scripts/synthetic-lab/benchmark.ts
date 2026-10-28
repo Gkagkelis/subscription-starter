@@ -133,6 +133,65 @@ async function main() {
     log(`επιλογή στο calibration: ρ=${best.rho}`);
     return;
   }
+  if (cmd === 'temporal' || cmd === 'temporal-tune') {
+    const { runTemporal } = await import('../../lib/synthetic-lab/benchmark/temporal');
+    const { familyBalanced, pairedCompareStrat } = await import('../../lib/synthetic-lab/benchmark/score');
+    const splits = list('splits', cmd === 'temporal-tune' ? 'calibration' : 'validation') as Split[];
+    if (splits.includes('holdout2' as Split) && !args.includes('--i-understand-this-is-final')) throw new Error('Το holdout2 αξιολογείται μόνο στο τέλος (--i-understand-this-is-final).');
+    const families = opt('families') ? list('families', '') : undefined;
+    type V = { label: string; cfg: import('../../lib/synthetic-lab/engine/forecast').ForecastConfig };
+    const baselines: V[] = [
+      { label: 'επιμονή (LOCF)', cfg: { params: { method: 'locf' } } },
+      { label: 'ιστορικός μέσος', cfg: { params: { method: 'mean' } } },
+      { label: 'γραμμική τάση', cfg: { params: { method: 'linear' } } }
+    ];
+    const show = (label: string, items: any[], ref: any[]) => {
+      const s = summarize(items);
+      const p = pairedCompareStrat(ref, items);
+      console.log(`  ${label.padEnd(58)} ανά συστάδα ${s.sampleMeanMae} · οικογ. ${familyBalanced(items)} · σύνολο ${s.overallMae} · ομάδες ${s.groupMae} | Δ vs LOCF ${p.meanDelta} CI ${JSON.stringify(p.ci95)} (${p.clusters} συστάδες)`);
+      return s;
+    };
+    const suiteT = { ...suite, items: suite.items };
+    if (cmd === 'temporal-tune') {
+      // πλέγμα ανά οικογένεια στο calibration (προκαθορισμένο)· επιλογή με την κύρια μετρική
+      const grid: V[] = [];
+      for (const q of [0.001, 0.003, 0.01, 0.03, 0.1, 0.3])
+        for (const qSlope of [0, 0.0005, 0.002])
+          for (const phi of qSlope ? [0.6, 0.9] : [1])
+            for (const noiseUnknownN of [0.0003, 0.001, 0.003, 0.01]) grid.push({ label: `kalman q=${q} qs=${qSlope} φ=${phi} ε=${noiseUnknownN}`, cfg: { params: { method: 'kalman', q, qSlope, phi, noiseUnknownN } } });
+      for (const slopeShrink of [0.25, 0.5, 0.75, 1]) for (const phi of [0.5, 0.8, 1]) grid.push({ label: `damped κ=${slopeShrink} φ=${phi}`, cfg: { params: { method: 'damped', slopeShrink, phi } } });
+      const fams = families || Array.from(new Set(suite.items.filter((i) => splits.includes(i.split)).map((i) => i.family)));
+      const chosen: Record<string, any> = {};
+      for (const f of fams) {
+        const res = runTemporal(suiteT, [...baselines, ...grid], { splits, families: [f] });
+        const locf = res[0].items;
+        const scored = res.map((r) => ({ label: r.label, cfg: r.cfg, score: summarize(r.items).sampleMeanMae ?? 1e9 }));
+        const best = [...scored].slice(3).sort((a, b) => a.score - b.score)[0];
+        log(`${f}: LOCF ${scored[0].score} · μέσος ${scored[1].score} · τάση ${scored[2].score} · καλύτερο ${best.label} ${best.score}`);
+        show(`${f} καλύτερο`, res.find((r) => r.label === best.label)!.items, locf);
+        chosen[f] = { ...best, baselines: scored.slice(0, 3), gridSize: grid.length, items: locf.filter((x) => x.status === 'ok').length };
+      }
+      writeFileSync(benchDir('temporal_params.json'), JSON.stringify({ at: new Date().toISOString(), suiteHash: suite.hash, split: splits, chosen }, null, 1));
+      log(`→ ${benchDir('temporal_params.json')}`);
+      return;
+    }
+    const tuned = JSON.parse(require('fs').readFileSync(benchDir('temporal_params.json'), 'utf8'));
+    const fams = families || Array.from(new Set(suite.items.filter((i) => splits.includes(i.split)).map((i) => i.family)));
+    const all: Record<string, any[]> = {};
+    for (const f of fams) {
+      const tv: V[] = tuned.chosen[f] ? [{ label: `συντονισμένο (${tuned.chosen[f].label})`, cfg: tuned.chosen[f].cfg }] : [];
+      const res = runTemporal(suiteT, [...baselines, ...tv], { splits, families: [f] });
+      console.log(`— ${f}`);
+      res.forEach((r) => show(r.label, r.items, res[0].items));
+      res.forEach((r, i) => (all[i === 3 ? 'tuned' : r.label] = [...(all[i === 3 ? 'tuned' : r.label] || []), ...r.items]));
+    }
+    console.log('— όλες οι οικογένειες');
+    for (const [k, v] of Object.entries(all)) show(k, v, all['επιμονή (LOCF)']);
+    const file = benchDir('experiments', `T-temporal-${splits.join('+')}-${stamp()}.json`);
+    writeFileSync(file, JSON.stringify({ id: 'T-temporal', splits, suiteHash: suite.hash, tuned: tuned.chosen, variants: Object.entries(all).map(([label, items]) => ({ label, summary: summarize(items), familyBalanced: familyBalanced(items), byGap: summarizeBy(items, (x) => String(x.evidence?.gapYears ?? 'na')), byFamily: summarizeBy(items, (x) => x.family), items })) }));
+    log(`→ ${file}`);
+    return;
+  }
   if (cmd === 'select') return void (await selectOnValidation(suite, { log, note: opt('note'), versions: opt('models') ? list('models', '') : undefined }));
   if (cmd === 'holdout') return void (await holdoutEvaluate(suite, opt('model')!, { log, confirm: args.includes('--i-understand-this-is-final') }));
   if (cmd === 'history') {

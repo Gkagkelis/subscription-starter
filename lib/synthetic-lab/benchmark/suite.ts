@@ -20,12 +20,16 @@
 
 import { createHash } from 'crypto';
 import { getMetric, listMetrics, waveCells } from '../data/noraya';
-import type { GroupScheme, PriorWave } from '../data/noraya-build';
+import type { GroupScheme, MetricUniverse, PriorWave } from '../data/noraya-build';
+import { band65Comparable, overallComparable } from '../data/universe';
+import { existsSync, readFileSync } from 'fs';
+import { benchDir } from './registry';
 import { lakeMeta, lakeMetric, lakeQuestions, lakeStudies, sampleKeyOf, type LakeQuestion, type LakeStudy } from '../data/lake';
 import { researchQuestions } from '../data/research';
 
-export const SUITE_VERSION = 'bench-suite-2';
-export type Split = 'calibration' | 'validation' | 'holdout';
+export const SUITE_VERSION = 'bench-suite-3';
+/** holdout = final holdout της φάσης 1 (ήδη αποκαλυμμένο)· holdout2 = νέο ανεξάρτητο holdout της φάσης 2 (≥ 2025, νέα items). */
+export type Split = 'calibration' | 'validation' | 'holdout' | 'holdout2';
 export type Family = 'eb_trend' | 'eurostat_ts' | 'findex_ts' | 'dianeosis_ts' | 'noraya_ts';
 
 export interface BenchItem {
@@ -54,6 +58,8 @@ export interface BenchItem {
   /** Συγκρίσιμες διαστάσεις (συμβατοί πληθυσμοί/παρονομαστές). */
   compareOverall: boolean;
   compareDims: string[];
+  /** Πληθυσμός αναφοράς του δείκτη-στόχου (Eurostat κ.λπ.) — για σύγκριση στον ίδιο πληθυσμό. */
+  universe?: MetricUniverse | null;
 }
 
 export interface BenchSuite {
@@ -71,6 +77,22 @@ export interface BenchSuite {
 export function hash01(s: string): number {
   const h = createHash('sha1').update(s).digest();
   return h.readUInt32BE(0) / 0x100000000;
+}
+
+/** Χρονικός χωρισμός της φάσης 2 (PHASE2_PREREGISTRATION.md §2). null = εκτός σουίτας. */
+export function temporalSplit(year: number, id: string, productionUsed: boolean, past: Set<string>): Split | null {
+  if (year >= 2025) return productionUsed || past.has(id) ? null : 'holdout2';
+  if (productionUsed) return 'calibration';
+  return year <= 2022 ? 'calibration' : 'validation';
+}
+
+/** Όλα τα items που υπήρξαν στόχοι στη φάση 1 (αποκλείονται από το holdout2). */
+export function pastTargets(): { ids: Set<string>; studies: Set<string> } {
+  const f = benchDir('past_targets_phase1.json');
+  if (!existsSync(f)) return { ids: new Set(), studies: new Set() };
+  const ids: string[] = JSON.parse(readFileSync(f, 'utf8')).ids || [];
+  const studies = new Set(ids.filter((i) => i.startsWith('es:') || i.startsWith('wb:')).map((i) => i.replace(/^(es|wb):lake:/, '').split('::')[0]));
+  return { ids: new Set(ids), studies };
 }
 
 export function splitOf(sampleKey: string): Split {
@@ -143,6 +165,12 @@ export function buildSuite(opts: { maxEurostatPerStudy?: number; maxEurostat?: n
   const items: BenchItem[] = [];
   const studies = new Map<string, LakeStudy>(lakeStudies().map((s) => [s.studyId, s]));
   const qs = lakeQuestions();
+  const past = pastTargets();
+  const split = (year: number, id: string, used: boolean) => {
+    const sp = temporalSplit(year, id, used, past.ids);
+    if (!sp) skip(year >= 2025 ? 'έτος ≥ 2025 και ήδη στόχος στη φάση 1 ή δεδομένα παραγωγής (εκτός holdout2)' : 'εκτός χωρισμού');
+    return sp;
+  };
 
   // --- Eurobarometer: επαναλαμβανόμενες ερωτήσεις σε διαφορετικά δείγματα ---
   const eb = qs.filter((q) => studies.get(q.studyId)?.source === 'eurobarometer' && q.kind === 'distribution' && !q.multi);
@@ -164,6 +192,10 @@ export function buildSuite(opts: { maxEurostatPerStudy?: number; maxEurostat?: n
     }
     if (DEMOGRAPHIC.test(t)) {
       skip('eb: δημογραφική ερώτηση (σύνθεση δείγματος, όχι στάση/συμπεριφορά)');
+      continue;
+    }
+    if (q.universe?.kind === 'subpopulation') {
+      skip('eb: περιορισμένη βάση («Base: ...») — άλλος πληθυσμός από το σύνολο των ερωτώμενων');
       continue;
     }
     const subst = q.options.filter((o) => !['dk', 'refusal'].includes(normOption(o)));
@@ -188,6 +220,8 @@ export function buildSuite(opts: { maxEurostatPerStudy?: number; maxEurostat?: n
       continue;
     }
     const s = studies.get(u.q.studyId)!;
+    const sp = split(u.year, `eb:${u.q.id}`, false);
+    if (!sp) continue;
     items.push({
       id: `eb:${u.q.id}`,
       family: 'eb_trend',
@@ -206,88 +240,122 @@ export function buildSuite(opts: { maxEurostatPerStudy?: number; maxEurostat?: n
       topics: u.q.topics.length ? u.q.topics : s.topics,
       compatKey: u.key,
       n: u.q.n,
-      split: splitOf(u.sample),
+      split: sp,
       productionUsed: false,
       compareOverall: true,
       compareDims: ['gender', 'age_band', 'age_group4', 'education_group']
     });
   }
 
-  // --- Eurostat: ποσοστά ατόμων/νοικοκυριών, χρονοσειρές ---
+  // --- Eurostat: ποσοστά ατόμων, χρονοσειρές με κυλιόμενους στόχους (ένας ανά χωρισμό) ---
+  // Πληθυσμός αναφοράς: μόνο «άτομα»· νοικοκυριά/υποσύνολα (π.χ. χρήστες internet) δεν αναπαράγονται από άτομα 15+.
+  // Σύνολο και μη ηλικιακές ομάδες συγκρίνονται μόνο αν ο πληθυσμός του συνόλου είναι συμβατός (data/universe.ts).
   const maxPer = opts.maxEurostatPerStudy ?? 4;
   const maxAll = opts.maxEurostat ?? 900;
-  const perStudy = new Map<string, number>();
+  const perStudySplit = new Map<string, number>();
+  const perSplit = new Map<string, number>();
   const es = qs
     .filter((q) => studies.get(q.studyId)?.source === 'eurostat' && q.kind === 'binary' && q.years.length >= 3 && Math.max(...q.years) >= 2014)
     .sort((a, b) => hash01(a.id) - hash01(b.id));
   for (const q of es) {
-    if (items.filter((i) => i.family === 'eurostat_ts').length >= maxAll) break;
-    if ((perStudy.get(q.studyId) || 0) >= maxPer) continue;
-    const metric = q.optionMetrics['Ναι'];
-    const w = lakeMetric(metric)?.waves.filter((x) => x.groups.all?.all);
-    const last = w?.[w.length - 1];
-    const bands = last ? Object.keys(last.groups.age_band || {}).filter((b) => b !== '65+') : [];
-    if (!last || bands.length < 3) {
-      skip('eurostat: χωρίς ζώνες ηλικίας στο τελευταίο έτος (μη συγκρίσιμος πληθυσμός)');
+    const u = q.universe || null;
+    if (!u || u.kind !== 'individuals') {
+      skip(`eurostat: πληθυσμός αναφοράς «${u?.kind || 'άγνωστος'}» (όχι άτομα)`);
       continue;
     }
-    perStudy.set(q.studyId, (perStudy.get(q.studyId) || 0) + 1);
-    const s = studies.get(q.studyId)!;
-    const family = q.studyId.split(':')[1].split('_')[0];
+    const metric = q.optionMetrics['Ναι'];
+    const waves = (lakeMetric(metric)?.waves || []).filter((x) => x.groups.all?.all);
     const used = PRODUCTION_EUROSTAT.test(q.studyId);
-    items.push({
-      id: `es:${q.id}`,
-      family: 'eurostat_ts',
-      source: 'eurostat',
-      studyId: q.studyId,
-      sampleKey: `ES:${family}`,
-      title: s.title,
-      year: last.year,
-      text: q.text,
-      options: ['Ναι', 'Όχι'],
-      dkOptions: [],
-      targetMetrics: { Ναι: metric },
-      targetWaveKey: last.key,
-      binary: true,
-      scheme: 'lake',
-      topics: q.topics.length ? q.topics : s.topics,
-      n: null,
-      split: used ? 'calibration' : splitOf(`ES:${family}`),
-      productionUsed: used,
-      productionReason: used ? 'Σύνολο Eurostat που ήδη τροφοδοτεί το παραγωγικό μοντέλο' : undefined,
-      // ο πληθυσμός-βάση των Eurostat διαφέρει (16-74, όλες οι ηλικίες…): συγκρίνονται μόνο οι ζώνες ηλικίας 15-64
-      compareOverall: false,
-      compareDims: ['age_band']
-    });
+    const fam = q.studyId.split(':')[1].split('_')[0];
+    // στόχος ανά χωρισμό: calibration = τελευταίο έτος ≤ 2022· validation = 2023–2024· holdout2 = 2025 (νέοι πίνακες)
+    const picks: [Split, PriorWave | undefined][] = [
+      ['calibration', [...waves].reverse().find((w) => w.year <= 2022)],
+      ['validation', [...waves].reverse().find((w) => w.year >= 2023 && w.year <= 2024)],
+      ['holdout2', waves.find((w) => w.year === 2025)]
+    ];
+    for (const [want, tw] of picks) {
+      if (!tw || waves.filter((w) => w.year < tw.year).length < 2) continue;
+      const id = `es:${q.id}@${tw.year}`;
+      let sp = temporalSplit(tw.year, id, used, past.ids);
+      if (sp === 'holdout2' && past.studies.has(q.studyId)) sp = null; // ο πίνακας υπήρξε στόχος στη φάση 1
+      if (sp !== want) {
+        if (want === 'holdout2') skip('eurostat: 2025 από πίνακα ήδη χρησιμοποιημένο ή παραγωγής (εκτός holdout2)');
+        continue;
+      }
+      const sk = `${q.studyId}|${sp}`;
+      if ((perStudySplit.get(sk) || 0) >= maxPer || (perSplit.get(sp) || 0) >= maxAll) continue;
+      const bands = Object.keys(tw.groups.age_band || {}).filter((b) => b !== '65+' || band65Comparable(u));
+      const okOverall = overallComparable(u);
+      const dims = [
+        ...(bands.length >= 3 ? ['age_band'] : []),
+        ...(okOverall ? ['gender', 'education_group', 'income_quintile'].filter((d) => Object.keys(tw.groups[d] || {}).length >= 2) : [])
+      ];
+      if (!okOverall && !dims.length) {
+        skip('eurostat: κανένα συγκρίσιμο κελί (ασύμβατος πληθυσμός συνόλου και χωρίς ζώνες ηλικίας)');
+        continue;
+      }
+      perStudySplit.set(sk, (perStudySplit.get(sk) || 0) + 1);
+      perSplit.set(sp, (perSplit.get(sp) || 0) + 1);
+      const s = studies.get(q.studyId)!;
+      items.push({
+        id,
+        family: 'eurostat_ts',
+        source: 'eurostat',
+        studyId: q.studyId,
+        sampleKey: `ES:${fam}|${tw.year}`,
+        title: s.title,
+        year: tw.year,
+        text: q.text,
+        options: ['Ναι', 'Όχι'],
+        dkOptions: [],
+        targetMetrics: { Ναι: metric },
+        targetWaveKey: tw.key,
+        binary: true,
+        scheme: 'lake',
+        topics: q.topics.length ? q.topics : s.topics,
+        n: null,
+        split: sp,
+        productionUsed: used,
+        productionReason: used ? 'Σύνολο Eurostat που ήδη τροφοδοτεί το παραγωγικό μοντέλο' : undefined,
+        compareOverall: okOverall,
+        compareDims: dims,
+        universe: u
+      });
+    }
   }
 
-  // --- World Bank Findex ---
+  // --- World Bank Findex: κάθε κύμα με προγενέστερο κύμα είναι στόχος (2025: ήδη στόχος στη φάση 1 → εκτός) ---
   for (const q of qs.filter((x) => studies.get(x.studyId)?.source === 'worldbank' && x.years.length >= 2)) {
     const metric = q.optionMetrics['Ναι'];
-    const last = lastWave(metric);
-    if (!last || last.year < 2014) continue;
-    items.push({
-      id: `wb:${q.id}`,
-      family: 'findex_ts',
-      source: 'worldbank',
-      studyId: q.studyId,
-      sampleKey: 'WB:findex',
-      title: studies.get(q.studyId)!.title,
-      year: last.year,
-      text: q.text,
-      options: ['Ναι', 'Όχι'],
-      dkOptions: [],
-      targetMetrics: { Ναι: metric },
-      targetWaveKey: last.key,
-      binary: true,
-      scheme: 'lake',
-      topics: q.topics,
-      n: 1000,
-      split: splitOf('WB:findex'),
-      productionUsed: false,
-      compareOverall: true,
-      compareDims: ['gender', 'age_findex', 'education_findex', 'income_findex']
-    });
+    const waves = (getMetric(metric)?.waves || []).filter((w) => w.groups.all?.all);
+    for (const tw of waves) {
+      if (tw.year < 2014 || !waves.some((w) => w.year < tw.year)) continue;
+      const id = tw.year === waves[waves.length - 1].year ? `wb:${q.id}` : `wb:${q.id}@${tw.year}`;
+      const sp = split(tw.year, id, false);
+      if (!sp) continue;
+      items.push({
+        id,
+        family: 'findex_ts',
+        source: 'worldbank',
+        studyId: q.studyId,
+        sampleKey: `WB:findex|${tw.year}`,
+        title: studies.get(q.studyId)!.title,
+        year: tw.year,
+        text: q.text,
+        options: ['Ναι', 'Όχι'],
+        dkOptions: [],
+        targetMetrics: { Ναι: metric },
+        targetWaveKey: tw.key,
+        binary: true,
+        scheme: 'lake',
+        topics: q.topics,
+        n: 1000,
+        split: sp,
+        productionUsed: false,
+        compareOverall: true,
+        compareDims: ['gender', 'age_findex', 'education_findex', 'income_findex']
+      });
+    }
   }
 
   // --- διαΝΕΟσις (ήδη στην παραγωγή: μόνο calibration) ---
@@ -324,7 +392,7 @@ export function buildSuite(opts: { maxEurostatPerStudy?: number; maxEurostat?: n
   // --- NORAYA (δείκτες της παραγωγής: μόνο calibration), ένα κύμα ανά έτος 2016–2024 ---
   for (const m of listMetrics().filter((x) => (x.scheme || 'eurobarometer') === 'eurobarometer')) {
     const byYear = new Map<number, PriorWave>();
-    m.waves.filter((w) => w.groups.all?.all).forEach((w) => byYear.set(w.year, w));
+    m.waves.filter((w) => w.groups.all?.all && !w.qualityFlag).forEach((w) => byYear.set(w.year, w));
     for (const [year, w] of Array.from(byYear.entries())) {
       if (year < 2016 || year > 2024) continue;
       if (!m.waves.some((x) => x.year < year && x.groups.all?.all)) continue;

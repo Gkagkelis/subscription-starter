@@ -93,13 +93,14 @@ function provenanceFor(metric: string, q: { id: string; option: string | null } 
 // κρατούνται ανά αντικείμενο πληθυσμού για να μην επαναλαμβάνονται σε επαναλήψεις/seeds.
 const FIT_CACHE = new WeakMap<Persona[], Map<string, PriorFit>>();
 const FIT_CACHE_MAX = 1500;
-function cachedFit(metric: string, wave: Parameters<typeof fitPriorModel>[1], personas: Persona[], shrinkage: number | undefined, dims?: string[], anchor?: boolean): PriorFit {
+function cachedFit(metric: string, wave: Parameters<typeof fitPriorModel>[1], personas: Persona[], shrinkage: number | undefined, dims?: string[], anchor?: boolean, universeMatching?: boolean): PriorFit {
   let m = FIT_CACHE.get(personas);
   if (!m) FIT_CACHE.set(personas, (m = new Map()));
-  const key = `${metric}\u0001${wave.key}\u0001${wave.year}\u0001${shrinkage ?? 0}\u0001${dims ? dims.join(',') : '*'}\u0001${anchor ? 'A' : ''}\u0001${JSON.stringify(wave.groups)}`;
+  const universe = universeMatching ? getMetric(metric)?.universe || null : null;
+  const key = `${metric}\u0001${wave.key}\u0001${wave.year}\u0001${shrinkage ?? 0}\u0001${dims ? dims.join(',') : '*'}\u0001${anchor ? 'A' : ''}\u0001${universe ? JSON.stringify(universe) : ''}\u0001${JSON.stringify(wave.groups)}`;
   const hit = m.get(key);
   if (hit) return hit;
-  const fit = fitPriorModel(metric, wave, personas, { shrinkage, dimensions: dims, anchorOverall: anchor });
+  const fit = fitPriorModel(metric, wave, personas, { shrinkage, dimensions: dims, anchorOverall: anchor, universe });
   if (m.size >= FIT_CACHE_MAX) m.clear();
   m.set(key, fit);
   return fit;
@@ -111,7 +112,7 @@ export function fitPriorsForQuestions(
   personas: Persona[],
   extraMetrics: string[] = [],
   ctx: EvidenceContext = {},
-  fitOpts: { shrinkage?: number; dimensions?: Partial<Record<string, string[]>>; anchorOverall?: boolean } = {}
+  fitOpts: { shrinkage?: number; dimensions?: Partial<Record<string, string[]>>; anchorOverall?: boolean; universeMatching?: boolean } = {}
 ): { fits: Record<string, PriorFit>; warnings: string[]; provenance: ParameterProvenance[] } {
   const fits: Record<string, PriorFit> = {};
   const warnings: string[] = [];
@@ -145,7 +146,7 @@ export function fitPriorsForQuestions(
       provenance.push(provenanceFor(m, owner.get(m) || null, null, null, reason));
       continue;
     }
-    const fit = cachedFit(m, wave, personas, fitOpts.shrinkage, fitOpts.dimensions?.[metricScheme(m)], fitOpts.anchorOverall);
+    const fit = cachedFit(m, wave, personas, fitOpts.shrinkage, fitOpts.dimensions?.[metricScheme(m)], fitOpts.anchorOverall, fitOpts.universeMatching);
     fits[m] = fit;
     provenance.push(provenanceFor(m, owner.get(m) || null, wave.key, fit));
     const key = groupOf.get(m) || `«${m}»`;
@@ -195,7 +196,8 @@ export async function runSurvey(input: RunSurveyOptions): Promise<StudyRun> {
     ...evidenceContextForPlan(o.plan),
     wavePolicy: model0.wavePolicy,
     poolMaxWaves: model0.poolMaxWaves,
-    poolHalfLifeYears: model0.poolHalfLifeYears
+    poolHalfLifeYears: model0.poolHalfLifeYears,
+    forecast: model0.forecast
   };
   // Χρονικός κανόνας: για έτος αναφοράς πριν από τη βαθμονόμηση 2025 χρησιμοποιείται ο ιστορικός baseline (GLOPOP-S 2015),
   // ώστε να μη «διαρρέει» στον πληθυσμό πληροφορία από μεταγενέστερα έτη.
@@ -262,7 +264,7 @@ export async function runSurvey(input: RunSurveyOptions): Promise<StudyRun> {
   base.warnings.push(...sel.warnings);
 
   const assumptionMetrics = o.plan.assumptions.filter((a) => a.enabled && a.metric).map((a) => a.metric as string);
-  const { fits, warnings: fitWarnings, provenance } = fitPriorsForQuestions(o.plan.questions, pop.personas, assumptionMetrics, ctx0, { shrinkage: model0.shrinkage, dimensions: model0.dimensions, anchorOverall: model0.anchorOverall });
+  const { fits, warnings: fitWarnings, provenance } = fitPriorsForQuestions(o.plan.questions, pop.personas, assumptionMetrics, ctx0, { shrinkage: model0.shrinkage, dimensions: model0.dimensions, anchorOverall: model0.anchorOverall, universeMatching: model0.universeMatching });
   base.warnings.push(...fitWarnings);
   const ctx: ResponderContext = { seed, assumptions: o.plan.assumptions, priorFits: fits, scenario: o.scenario || null, batteryRho: model0.batteryRho || 0 };
 

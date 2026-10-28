@@ -33,6 +33,12 @@ export interface PriorWave {
   /** Μελέτη προέλευσης του κύματος (σε σύνθετους δείκτες που συνδυάζουν πολλές έρευνες). */
   datasetId?: string;
   groups: Record<string, Record<string, PriorCell>>; // group_type -> group -> cell
+  /**
+   * Ποιότητα κύματος. «mixed_surveys»: το κύμα συνδυάζει γραμμές διαφορετικών ερευνών του ίδιου τριμήνου που διαφέρουν
+   * πέρα από 3 SE· χωρίς κωδικό έρευνας στην πηγή οι σωστές τιμές δεν ανακτώνται → το κύμα απομονώνεται (δεν χρησιμοποιείται
+   * ως τεκμηρίωση ούτε ως στόχος), οι τιμές του μένουν για ιστορικό.
+   */
+  qualityFlag?: string;
 }
 
 /** Σχήμα αντιστοίχισης ομάδων πηγής -> χαρακτηριστικά πληθυσμού. */
@@ -57,6 +63,21 @@ export interface PriorMetric {
   /** Επιλογές απάντησης της ερώτησης πηγής (δυαδικοί δείκτες) και ποια αντιστοιχεί στο ποσοστό. */
   answerOptions?: string[];
   positiveOption?: string;
+  /** Πληθυσμός αναφοράς του δείκτη (π.χ. άτομα 16-74, νοικοκυριά, χρήστες internet) — βλ. data/universe.ts. */
+  universe?: MetricUniverse;
+}
+
+export interface MetricUniverse {
+  kind: 'individuals' | 'households' | 'subpopulation' | 'unknown';
+  unitCode?: string | null;
+  ageTotalCode?: string | null;
+  /** Ηλικιακό εύρος του «συνόλου» (null = άγνωστο / χωρίς άνω όριο). */
+  ageMin?: number | null;
+  ageMax?: number | null;
+  /** Τι σημαίνει η ζώνη «65+» της πηγής: μόνο 65-74 ή όλοι οι 65+. */
+  band65?: '65-74' | '65+' | null;
+  /** Περιορισμένη βάση ερώτησης (Eurobarometer «Base: ...»). */
+  base?: string;
 }
 
 export interface NorayaPriors {
@@ -164,6 +185,17 @@ export function buildNorayaPriors(csvText: string, sourceSha256: string): Noraya
   });
 
   Object.values(metrics).forEach((m) => m.waves.sort((x, y) => x.key.localeCompare(y.key)));
+  // Απομόνωση κυμάτων με ασυμβατότητα συνόλου: τα κελιά ομάδων του ίδιου κύματος είναι μείγμα των ίδιων ερευνών
+  // (το σύνολο που προκύπτει από το φύλο ταυτίζεται με το μείγμα), οπότε απομονώνεται ολόκληρο το κύμα.
+  let isolated = 0;
+  Object.values(metrics).forEach((m) =>
+    m.waves.forEach((w) => {
+      if (w.groups.all?.all?.inconsistent) {
+        w.qualityFlag = 'mixed_surveys';
+        isolated++;
+      }
+    })
+  );
 
   return {
     meta: {
@@ -176,6 +208,7 @@ export function buildNorayaPriors(csvText: string, sourceSha256: string): Noraya
       notes: [
         'Συγκεντρωτικά ποσοστά ανά μία διάσταση· όχι ατομικές απαντήσεις, όχι διασταυρώσεις.',
         'Διπλές μετρήσεις ίδιου κύματος συνδυάζονται με στάθμιση n· ασυμβατότητες > 3 SE σημειώνονται.',
+        `Κύματα με ασύμβατο σύνολο (μείγμα διαφορετικών ερευνών του τριμήνου, χωρίς κωδικό έρευνας στην πηγή): ${isolated} — απομονώνονται (qualityFlag = mixed_surveys).`,
         SEMANTICS_NOTE
       ]
     },
