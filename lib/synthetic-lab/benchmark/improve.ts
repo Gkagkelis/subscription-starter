@@ -37,6 +37,7 @@ function familyScores(items: ItemResult[]): Record<string, number | null> {
  * μεταφορά δομής (ελλιπείς διασπάσεις), συρρίκνωση (θόρυβος ομάδων), βάρη ερωτώμενων, πληθυσμός έτους, συνδυασμός κυμάτων.
  */
 export const TUNING_AXES: { name: string; values: Partial<ModelConfig>[] }[] = [
+  { name: 'αγκύρωση επιπέδου', values: [{ anchorOverall: false }, { anchorOverall: true }] },
   { name: 'μεταφορά δομής', values: [{ structureTransfer: false }, { structureTransfer: true }] },
   { name: 'συρρίκνωση', values: [{ shrinkage: 0 }, { shrinkage: 100 }, { shrinkage: 300 }, { shrinkage: 1000 }] },
   { name: 'βάρη ερωτώμενων', values: [{ respondentWeighting: 'region_srs' }, { respondentWeighting: 'persona_weight' }] },

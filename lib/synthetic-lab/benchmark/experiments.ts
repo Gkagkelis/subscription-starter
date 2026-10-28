@@ -142,6 +142,20 @@ export const EXPERIMENTS: ExperimentDef[] = [
       { label: 'blind · k=1000', mode: 'blind', model: { shrinkage: 1000 } }
     ]
   }
+  ,
+  {
+    id: 'E8-anchor-level',
+    hypothesis:
+      'Ασυμβατότητα σύνθεσης: το engine υπολογίζει το σύνολο ως δομή συνθετικού πληθυσμού × ποσοστά ομάδων· όταν η δομή (π.χ. proxy μόρφωσης, baseline 2015) διαφέρει από τη σταθμισμένη σύνθεση της έρευνας, το επίπεδο μετατοπίζεται. Η αγκύρωση στο παρατηρημένο σύνολο το διορθώνει.',
+    families: ['eb_trend', 'dianeosis_ts', 'noraya_ts', 'eurostat_ts'],
+    splits: ['calibration'],
+    variants: [
+      { label: 'blind · παραγωγή', mode: 'blind', model: {} },
+      { label: 'blind · αγκύρωση επιπέδου', mode: 'blind', model: { anchorOverall: true } },
+      { label: 'oracle · παραγωγή', mode: 'oracle', model: {} },
+      { label: 'oracle · αγκύρωση επιπέδου', mode: 'oracle', model: { anchorOverall: true } }
+    ]
+  }
 ];
 
 /** Ανάλυση σφαλμάτων μιας εκτέλεσης ανά χρονικό κενό, ταύτιση τύπου έρευνας, μέγεθος δείγματος, θέμα (χωρίς νέες εκτελέσεις). */

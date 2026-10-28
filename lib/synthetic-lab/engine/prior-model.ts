@@ -64,7 +64,7 @@ export function fitPriorModel(
   metric: string,
   wave: PriorWave,
   personas: Persona[],
-  opts: { dimensions?: LinkedDimension[]; maxIter?: number; shrinkage?: number } = {}
+  opts: { dimensions?: LinkedDimension[]; maxIter?: number; shrinkage?: number; anchorOverall?: boolean } = {}
 ): PriorFit {
   const k = opts.shrinkage ?? DEFAULT_SHRINKAGE;
   const scheme = metricScheme(metric);
@@ -202,6 +202,21 @@ export function fitPriorModel(
       converged = true;
       break;
     }
+  }
+
+  // Αγκύρωση επιπέδου (πειραματική): οι διαφορές ομάδων μένουν, το σταθμισμένο σύνολο στον πληθυσμό = παρατηρημένο σύνολο.
+  if (opts.anchorOverall && targets.length) {
+    const base = a;
+    let lo = -6;
+    let hi = 6;
+    for (let it = 0; it < 50; it++) {
+      a = base + (lo + hi) / 2;
+      recompute();
+      if (groupMeans().overall < all.value / 100) lo = (lo + hi) / 2;
+      else hi = (lo + hi) / 2;
+    }
+    a = base + (lo + hi) / 2;
+    recompute();
   }
 
   const { m, overall } = groupMeans();
