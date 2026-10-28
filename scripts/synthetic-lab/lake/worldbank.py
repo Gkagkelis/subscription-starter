@@ -15,12 +15,12 @@ API = "https://api.worldbank.org/v2"
 LICENSE = "CC BY 4.0 (World Bank Open Data Terms of Use)"
 
 GROUPS = [
-    (r", female$", ("gender", "female")), (r", male$", ("gender", "male")),
+    (r", (?:female|women)$", ("gender", "female")), (r", (?:male|men)$", ("gender", "male")),
     (r", young(?: adults)?$", ("age_findex", "15-24")), (r", older(?: adults)?$", ("age_findex", "25+")),
     (r", primary education or less$", ("education_findex", "primary_or_less")),
     (r", secondary education or more$", ("education_findex", "secondary_or_more")),
-    (r", income, poorest 40%$", ("income_findex", "poorest_40")), (r", income, richest 60%$", ("income_findex", "richest_60")),
-    (r", in labor force$", ("labor_force", "in")), (r", out of labor force$", ("labor_force", "out")),
+    (r",(?: income,)? poorest 40%$", ("income_findex", "poorest_40")), (r",(?: income,)? richest 60%$", ("income_findex", "richest_60")),
+    (r", in labou?r ?force$", ("labor_force", "in")), (r", out of labou?r ?force$", ("labor_force", "out")),
     (r", rural$", ("urbanisation", "rural")), (r", urban$", ("urbanisation", "urban")),
 ]
 

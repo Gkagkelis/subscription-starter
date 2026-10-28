@@ -78,6 +78,10 @@ class Filters(unittest.TestCase):
         self.assertEqual(worldbank._split("Account, female (% age 15+)")[:2], ("Account", ("gender", "female")))
         self.assertEqual(worldbank._split("Account, income, poorest 40% (% ages 15+)")[1], ("income_findex", "poorest_40"))
         self.assertEqual(worldbank._split("Account (% age 15+)")[1], ("all", "all"))
+        # ονομασίες κυμάτων 2021+: men/women, in laborforce, χωρίς «income,»
+        self.assertEqual(worldbank._split("Used a mobile phone or the internet to buy something online, men (% age 15+)")[1], ("gender", "male"))
+        self.assertEqual(worldbank._split("Made a digital payment, in laborforce (% age 15+)")[1], ("labor_force", "in"))
+        self.assertEqual(worldbank._split("Saved any money, poorest 40% (% age 15+)")[1], ("income_findex", "poorest_40"))
 
     def test_dedup_key_normalises(self):
         self.assertEqual(topics.dedup_key("Eurobarometer 77.2: Food!", 2012), topics.dedup_key("eurobarometer 77.2 food", 2012))
