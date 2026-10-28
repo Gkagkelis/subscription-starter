@@ -81,6 +81,13 @@ function ebEvidence(item: BenchItem, model: ModelConfig): { link: Question['evid
     return Array.from(new Set(h.question.options.map(normOption))).sort().join('|') === want;
   });
   if (!hits.length) return null;
+  // ακριβής αντιστοίχιση (φάση 2, μετά το holdout2): αν υπάρχει η ΙΔΙΑ ερώτηση (ίδια κανονικοποιημένη διατύπωση, μαζί με
+  // την ετικέτα υπο-ερώτησης), προηγείται — αλλιώς η κατάταξη του retrieval διαλέγει συχνά «αδελφή» υπο-ερώτηση συστοιχίας
+  if (model.exactQuestionMatch) {
+    const want = normText(item.text);
+    const exact = hits.filter((h) => normText(h.question.text) === want);
+    if (exact.length) hits.splice(0, hits.length, ...exact, ...hits.filter((h) => !exact.includes(h)));
+  }
   // παραγωγή: η πρώτη συμβατή κατά την κατάταξη του retrieval· pool: έως K συμβατές από διαφορετικά δείγματα, νεότερες πρώτα
   let chosen = [hits[0]];
   if (model.wavePolicy === 'pool' || model.wavePolicy === 'forecast') {

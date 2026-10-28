@@ -75,6 +75,11 @@ export interface ModelConfig {
    * πριν από το έτος αξιολόγησης (fittedOnYears). Για ερωτήσεις χωρίς φορτίσεις ισχύει το batteryRho.
    */
   itemFactors?: { K: number; fittedOnYears: number[]; loadings: Record<string, number[]> };
+  /**
+   * Ακριβής αντιστοίχιση ερώτησης στην ανάκτηση τεκμηρίωσης: προηγείται η ίδια κανονικοποιημένη διατύπωση (μαζί με την
+   * ετικέτα υπο-ερώτησης συστοιχίας). Εντοπίστηκε στο holdout2 — αξιολογείται μόνο στο validation (μη επιβεβαιωμένο).
+   */
+  exactQuestionMatch?: boolean;
   /** Ελεύθερες σημειώσεις/τεκμηρίωση αλλαγών. */
   notes?: string[];
   /** Προέλευση: από ποια έκδοση και ποιο πείραμα προέκυψε. */
@@ -105,6 +110,7 @@ export function describeModel(c: ModelConfig): string {
     ...(c.structureTransfer ? ['μεταφορά δομής ομάδων'] : []),
     ...(c.batteryRho ? [`λανθάνων παράγοντας συστοιχίας ρ=${c.batteryRho}`] : []),
     ...(c.universeMatching ? ['αντιστοίχιση πληθυσμού αναφοράς'] : []),
+    ...(c.exactQuestionMatch ? ['ακριβής αντιστοίχιση ερώτησης'] : []),
     ...(c.itemFactors ? [`παράγοντες ερωτήσεων K=${c.itemFactors.K} (μικροδεδομένα ${c.itemFactors.fittedOnYears.join(', ')})`] : [])
   ].join(' · ');
 }
