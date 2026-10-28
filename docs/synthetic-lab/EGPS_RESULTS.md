@@ -1,6 +1,6 @@
 # EGPS: Evidence-Grounded Predictive Simulation, αποτελέσματα πειραματικής έκδοσης
 
-**Κατάσταση.** Πειραματική έκδοση `egps-exp-0.1` (`lib/synthetic-lab/experimental/egps.ts`). **Δεν** είναι συνδεδεμένη με την παραγωγή. Το `prod-1` και το `runSurvey` είναι αμετάβλητα, και η έρευνα Cinobo **δεν** ξανάτρεξε.
+**Κατάσταση.** Ο πυρήνας `egps-exp-0.1` (`lib/synthetic-lab/experimental/egps.ts`) είναι πλέον **ενταγμένος στην πλατφόρμα** ως μηχανισμός «Τεκμηριωμένη πρόβλεψη» (βλ. `docs/synthetic-lab/EGPS_INTEGRATION.md`)· ο τυπικός `prod-1` παραμένει διαθέσιμος και αμετάβλητος.
 
 **Προκαταχώριση.** `docs/synthetic-lab/EGPS_PREREGISTRATION.md`, commit `a12843b`, πριν από κάθε αποτέλεσμα. Αποκλίσεις από το πρωτόκολλο: καμία.
 

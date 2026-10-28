@@ -22,7 +22,7 @@
 // ============================================================
 
 import { metricScheme, norayaMembership, SCHEME_DIMENSIONS, waveCells, type LinkedDimension } from '../data/noraya';
-import type { MetricUniverse, PriorWave } from '../data/noraya-build';
+import type { GroupScheme, MetricUniverse, PriorWave } from '../data/noraya-build';
 import { universeFraction } from '../data/universe';
 import { logit, sigmoid } from '../stats';
 import type { Persona } from '../types';
@@ -65,10 +65,10 @@ export function fitPriorModel(
   metric: string,
   wave: PriorWave,
   personas: Persona[],
-  opts: { dimensions?: LinkedDimension[]; maxIter?: number; shrinkage?: number; anchorOverall?: boolean; universe?: MetricUniverse | null } = {}
+  opts: { dimensions?: LinkedDimension[]; maxIter?: number; shrinkage?: number; anchorOverall?: boolean; universe?: MetricUniverse | null; scheme?: GroupScheme } = {}
 ): PriorFit {
   const k = opts.shrinkage ?? DEFAULT_SHRINKAGE;
-  const scheme = metricScheme(metric);
+  const scheme = opts.scheme ?? metricScheme(metric);
   const dims = opts.dimensions ?? [...SCHEME_DIMENSIONS[scheme]];
   const maxIter = opts.maxIter ?? 300;
   const all = wave.groups.all?.all;

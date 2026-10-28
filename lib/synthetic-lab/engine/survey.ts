@@ -25,6 +25,7 @@ import {
 } from '../types';
 import { aggregateQuestion } from './aggregate';
 import { DEMO_ENGINE_VERSION, demoRespond, type ResponderContext } from './demo-responder';
+import { EVIDENCE_ENGINE_VERSION, evidenceRespond, prepareEvidence, type PreparedQuestion } from './evidence-responder';
 import { checkQuestionnaire } from './guardrails';
 import { LLM_PROMPT_VERSION, llmRespond } from './llm-responder';
 import { FIT_WARNING_PP, fitPriorModel, PRIOR_MODEL_VERSION, type PriorFit } from './prior-model';
@@ -225,7 +226,9 @@ export async function runSurvey(input: RunSurveyOptions): Promise<StudyRun> {
     engine: {
       mode,
       engineVersion:
-        (mode === 'demo' ? `${DEMO_ENGINE_VERSION}+${PRIOR_MODEL_VERSION}` : `${LLM_PROMPT_VERSION}+${PRIOR_MODEL_VERSION}`) +
+        (mode === 'demo'
+          ? `${o.plan.engine === 'evidence' ? EVIDENCE_ENGINE_VERSION : DEMO_ENGINE_VERSION}+${PRIOR_MODEL_VERSION}`
+          : `${LLM_PROMPT_VERSION}+${PRIOR_MODEL_VERSION}`) +
         (model0.version !== PRODUCTION_MODEL.version ? `+${model0.version}` : ''),
       model: mode === 'live' ? model : null
     },
@@ -272,12 +275,23 @@ export async function runSurvey(input: RunSurveyOptions): Promise<StudyRun> {
   let status = 'completed' as StudyRun['status'];
   const budget = new StudyBudget(base.cost.capUsd, sel.respondents.length, model);
 
+  // Μηχανισμός «Τεκμηριωμένη πρόβλεψη» (EGPS): μόνο σε demo mode· όπου λείπει τεκμηρίωση → NA, όχι ομοιόμορφη κατανομή.
+  const useEvidence = o.plan.engine === 'evidence' && mode === 'demo';
+  if (o.plan.engine === 'evidence' && mode !== 'demo') base.warnings.push('Ο μηχανισμός «Τεκμηριωμένη πρόβλεψη» λειτουργεί μόνο χωρίς AI· η εκτέλεση live χρησιμοποιεί τον τυπικό μηχανισμό.');
+  const prepared: PreparedQuestion[] | null = useEvidence ? prepareEvidence(o.plan.questions, pop.personas, fits, ctx0) : null;
+  if (prepared) {
+    const ne = prepared.filter((x) => x.evidence.evidenceClass === 'NOT_ESTIMABLE').map((x) => x.q.id);
+    base.warnings.push(
+      `Μηχανισμός «Τεκμηριωμένη πρόβλεψη» (${EVIDENCE_ENGINE_VERSION}): κάθε ερώτηση έχει κατηγορία τεκμηρίωσης (EMPIRICALLY ANCHORED / MODEL-EXTRAPOLATED / NOT ESTIMABLE).` +
+        (ne.length ? ` Μη εκτιμήσιμες (καμία συνθετική απάντηση): ${ne.join(', ')}.` : '')
+    );
+  }
   if (mode === 'demo') {
     respondents = sel.respondents.map((p): SyntheticRespondent => ({
       personaId: p.id,
       weight: p.weight,
       label: SIMULATED_LABEL,
-      answers: applyFollowUps(o.plan.questions, demoRespond(p, o.plan.questions, ctx))
+      answers: prepared ? evidenceRespond(p, prepared, seed, ctx) : applyFollowUps(o.plan.questions, demoRespond(p, o.plan.questions, ctx))
     }));
   } else {
     const ctrl = registerRun(runId);
@@ -321,11 +335,19 @@ export async function runSurvey(input: RunSurveyOptions): Promise<StudyRun> {
   }
 
   const personaMap = new Map(sel.respondents.map((p) => [p.id, p]));
-  const aggregates = o.plan.questions.map((q) => aggregateQuestion(q, respondents, personaMap));
+  const aggregates = o.plan.questions.map((q) => {
+    const a = aggregateQuestion(q, respondents, personaMap);
+    const ev = prepared?.find((x) => x.q.id === q.id)?.evidence;
+    if (ev) {
+      a.evidence = ev;
+      a.evidenceKind = ev.evidenceClass === 'EMPIRICALLY_ANCHORED' ? 'estimate' : 'simulation';
+    }
+    return a;
+  });
 
   let stability: StabilityResult | null = null;
   if (mode === 'demo' && (o.stabilityRuns ?? 5) > 1) {
-    stability = stabilityCheck(o, pop.personas, sel.respondents.length, fits, o.stabilityRuns ?? 5, seed);
+    stability = stabilityCheck(o, pop.personas, sel.respondents.length, fits, o.stabilityRuns ?? 5, seed, prepared);
   }
 
   const validation = validationSummaryForQuestions(o.plan.questions, mode);
@@ -369,14 +391,15 @@ function stabilityCheck(
   n: number,
   fits: Record<string, PriorFit>,
   runs: number,
-  seed: number
+  seed: number,
+  prepared: PreparedQuestion[] | null = null
 ): StabilityResult {
   const pop = loadPopulation(o.populationId)!;
   const seeds = Array.from({ length: runs }, (_, i) => deriveSeed(seed, 'stability', i));
   const perRun = seeds.map((s) => {
     const sel = selectRespondents(pop, o.plan.audience, n, deriveSeed(s, 'sample'), { weighting: (o.modelConfig || PRODUCTION_MODEL).respondentWeighting });
     const ctx: ResponderContext = { seed: s, assumptions: o.plan.assumptions, priorFits: fits, scenario: o.scenario || null, batteryRho: (o.modelConfig || PRODUCTION_MODEL).batteryRho || 0, itemFactors: (o.modelConfig || PRODUCTION_MODEL).itemFactors || null };
-    const rs = sel.respondents.map((p): SyntheticRespondent => ({ personaId: p.id, weight: p.weight, label: SIMULATED_LABEL, answers: applyFollowUps(o.plan.questions, demoRespond(p, o.plan.questions, ctx)) }));
+    const rs = sel.respondents.map((p): SyntheticRespondent => ({ personaId: p.id, weight: p.weight, label: SIMULATED_LABEL, answers: prepared ? evidenceRespond(p, prepared, s, ctx) : applyFollowUps(o.plan.questions, demoRespond(p, o.plan.questions, ctx)) }));
     const pm = new Map(sel.respondents.map((p) => [p.id, p]));
     return o.plan.questions.map((q) => aggregateQuestion(q, rs, pm));
   });

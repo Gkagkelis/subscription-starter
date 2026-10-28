@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "note": "Κατηγορίες μαρκών και μετρήσεις που υποστηρίζονται. Τα «upperBound» είναι ΛΟΓΙΚΑ άνω όρια από επίσημες μετρήσεις της κατηγορίας (π.χ. συνδρομητές μιας μάρκας ≤ συνδρομητές streaming συνολικά) — όχι εκτιμήσεις της μάρκας. Νέες κατηγορίες: προσθήκη εδώ· μάρκες άλλων κατηγοριών γίνονται δεκτές με τις γενικές μετρήσεις.",
+  "genericMeasures": {
+    "awareness_aided": "Υποβοηθούμενη αναγνωρισιμότητα (% ενηλίκων)",
+    "awareness_spontaneous": "Αυθόρμητη αναγνωρισιμότητα (% ενηλίκων)",
+    "usage_3m": "Χρήση/αγορά τους τελευταίους 3 μήνες (% ενηλίκων)",
+    "customer_current": "Τρέχων πελάτης/συνδρομητής (% ενηλίκων)",
+    "consideration": "Θα το εξέταζαν (% ενηλίκων)"
+  },
+  "categories": [
+    { "id": "svod", "label": "Streaming ταινιών και σειρών", "upperBounds": { "usage_3m": "lake:eurostat:isoc_ci_ac_i::86427b640b", "customer_current": "lake:eurostat:isoc_ec_ibgs::66be139691" } },
+    { "id": "music_streaming", "label": "Streaming μουσικής", "upperBounds": { "customer_current": "ict_sub_music_streaming" } },
+    { "id": "food_delivery", "label": "Παράδοση φαγητού", "upperBounds": { "usage_3m": "ict_food_delivery" } },
+    { "id": "online_grocery", "label": "Online σούπερ μάρκετ", "upperBounds": { "usage_3m": "ict_groceries_online" } },
+    { "id": "supermarket", "label": "Σούπερ μάρκετ (φυσικά καταστήματα)", "upperBounds": {} },
+    { "id": "telecom", "label": "Τηλεπικοινωνίες (κινητή/σταθερή)", "upperBounds": {} },
+    { "id": "banking", "label": "Τράπεζες", "upperBounds": {} },
+    { "id": "ecommerce", "label": "Ηλεκτρονικό εμπόριο / marketplaces", "upperBounds": { "usage_3m": "ict_online_purchase_12m" } }
+  ]
+}

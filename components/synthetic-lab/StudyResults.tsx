@@ -3,12 +3,15 @@ import type { StudyReport } from '@/lib/synthetic-lab/engine/report';
 import type { Question, QuestionAggregate, StudyRun } from '@/lib/synthetic-lab/types';
 import { BarChart, PriceCurve } from './charts';
 import { Banner, Card, EvidenceBadge, SimulatedLabel, Stat } from './ui';
+import { EvidenceClassBadge, EvidenceDetails } from './EvidenceEngine';
 
 const BASIS_LABEL: Record<string, string> = {
   empirical_prior: 'εμπειρική βάση',
   assumption: 'παραδοχές',
   uninformed: 'χωρίς βάση',
-  llm: 'AI'
+  llm: 'AI',
+  model_extrapolated: 'πρόβλεψη από συγγενικά δεδομένα',
+  not_estimable: 'μη εκτιμήσιμο'
 };
 
 const SEG_LABEL: Record<string, string> = { ageBand: 'Ηλικία', gender: 'Φύλο', education: 'Εκπαίδευση', incomeQuintile: 'Εισόδημα', settlement: 'Περιοχή' };
@@ -52,15 +55,29 @@ function QuestionResult({ q, a }: { q: Question; a: QuestionAggregate }) {
           <div className="text-xs font-semibold uppercase tracking-wide text-stone-500">{q.id}</div>
           <h3 className="font-semibold">{q.text}</h3>
         </div>
-        <EvidenceBadge kind={a.evidenceKind} />
+        {a.evidence ? <EvidenceClassBadge c={a.evidence.evidenceClass} /> : <EvidenceBadge kind={a.evidenceKind} />}
       </div>
+      {a.evidence && <EvidenceDetails e={a.evidence} />}
       <div className="text-xs text-stone-500">
         {a.n} απαντήσεις · effective n {a.effectiveN} · βάση: {mix || '—'}
         {q.followUpOf ? ` · ακολουθεί την ${q.followUpOf.questionId}` : ''}
       </div>
-      {a.n === 0 && <p className="text-sm text-stone-500">Καμία απάντηση (π.χ. η συνθήκη follow-up δεν ικανοποιήθηκε).</p>}
-      {a.shares && a.n > 0 && <BarChart title={q.text} data={a.shares.map((s) => ({ label: s.option, value: s.share, low: s.ciLow, high: s.ciHigh }))} />}
-      {a.meanScore != null && (
+      {a.n === 0 && a.evidence?.evidenceClass === 'NOT_ESTIMABLE' && (
+        <p className="text-sm text-stone-600">Μη εκτιμήσιμο: δεν παράχθηκαν συνθετικές απαντήσεις (καμία κατασκευασμένη κατανομή).</p>
+      )}
+      {a.n === 0 && a.evidence?.evidenceClass !== 'NOT_ESTIMABLE' && <p className="text-sm text-stone-500">Καμία απάντηση (π.χ. η συνθήκη follow-up δεν ικανοποιήθηκε).</p>}
+      {a.shares && a.n > 0 && (
+        <BarChart
+          title={q.text}
+          data={a.shares.map((s) => (a.evidence?.evidenceClass === 'MODEL_EXTRAPOLATED' ? { label: s.option, value: s.share } : { label: s.option, value: s.share, low: s.ciLow, high: s.ciHigh }))}
+        />
+      )}
+      {a.meanScore != null && a.evidence?.evidenceClass === 'MODEL_EXTRAPOLATED' && (
+        <p className="text-sm text-stone-700">
+          Μέση τιμή κλίμακας: <strong>{a.meanScore}</strong> (πρόβλεψη μοντέλου· η αβεβαιότητα είναι αυτή που αναφέρεται παραπάνω, όχι το διάστημα της προσομοίωσης)
+        </p>
+      )}
+      {a.meanScore != null && a.evidence?.evidenceClass !== 'MODEL_EXTRAPOLATED' && (
         <p className="text-sm text-stone-700">
           Μέση τιμή κλίμακας: <strong>{a.meanScore}</strong> (95% διάστημα προσομοίωσης {a.meanScoreCi?.[0]}–{a.meanScoreCi?.[1]})
         </p>
@@ -136,7 +153,7 @@ export default function StudyResults({ study, report }: { study: StudyRun; repor
   const qs = study.plan.questions;
   return (
     <div className="space-y-6">
-      <style>{`@media print { body > nav, body > footer, [data-lab-noprint], header, details > summary { display: none !important; } details { display:block } details > * { display:block !important } body { background: white !important } }`}</style>
+      <style dangerouslySetInnerHTML={{ __html: `@media print { body > nav, body > footer, [data-lab-noprint], header, details > summary { display: none !important; } details { display:block } details > * { display:block !important } body { background: white !important } }` }} />
       <div className="space-y-3">
         <SimulatedLabel />
         <h1 className="text-2xl font-semibold tracking-tight">{study.plan.title}</h1>

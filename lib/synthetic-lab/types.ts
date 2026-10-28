@@ -219,6 +219,40 @@ export interface Question {
    */
   evidenceLink?: { datasetId: string; metric: string; positiveOption: string; optionMetrics?: Record<string, string> } | null;
   maxSelections?: number;
+  /**
+   * EGPS (μηχανισμός «Τεκμηριωμένη πρόβλεψη»): συγγενικοί δείκτες της ίδιας κατηγορίας για μεταβλητή χωρίς άμεση μέτρηση
+   * (π.χ. άλλες υπο-κατηγορίες). Δυαδικές ερωτήσεις· η τελευταία επιλογή = «θετική».
+   */
+  relatedEvidence?: { metrics: string[]; rationale: string } | null;
+  /** EGPS: σύνδεση με το μητρώο μαρκών (μέτρηση μάρκας, ή πρόβλεψη από άλλες μάρκες της κατηγορίας αν έχει επικυρωθεί). */
+  brandLink?: { category: string; brand: string; measure: string } | null;
+  /** EGPS: για πολλαπλή επιλογή μαρκών — κάθε επιλογή αντιστοιχεί σε μάρκα της κατηγορίας. */
+  brandOptions?: { category: string; measure: string; brands: Record<string, string> } | null;
+  /** EGPS: τι μετρά η ερώτηση (για τη δομή εξαρτήσεων μεταξύ απαντήσεων). Επιλογές με σειρά «χαμηλό → υψηλό». */
+  construct?: { object: string; kind: ConstructKind } | null;
+  /** EGPS: ρητή ασθενής παραδοχή του ερευνητή (πιθανότητα ανά επιλογή) — δίνει ΜΟΝΟ σενάριο με ευρύ διάστημα. */
+  scenarioPrior?: { probs: number[]; rationale: string } | null;
+}
+
+export type ConstructKind = 'evaluation' | 'intention' | 'usage' | 'general_usage' | 'other';
+/** Μηχανισμός απαντήσεων: «standard» = prod-1 (ομοιόμορφη προεπιλογή όπου λείπουν δεδομένα)· «evidence» = EGPS. */
+export type ResponseEngine = 'standard' | 'evidence';
+export type EvidenceClass = 'EMPIRICALLY_ANCHORED' | 'MODEL_EXTRAPOLATED' | 'NOT_ESTIMABLE';
+export interface QuestionEvidence {
+  evidenceClass: EvidenceClass;
+  basis: 'direct' | 'related_transfer' | 'brand_transfer' | 'assumption_scenario' | 'researcher_assumptions' | 'none';
+  reason: string;
+  sources: string[];
+  /** Για δυαδικές MODEL_EXTRAPOLATED: διαστήματα του ποσοστού της «θετικής» επιλογής (π.μ.). */
+  point?: number | null;
+  int80?: [number, number] | null;
+  int95?: [number, number] | null;
+  /** Λογικό άνω όριο από την κατηγορία (π.χ. χρήστες μάρκας ≤ χρήστες κατηγορίας). */
+  upperBound?: { value: number; source: string } | null;
+  /** Σενάρια ερευνητή: σημείο και διάστημα 80% ανά επιλογή (ευρύ — μικρή ισοδύναμη βάση). */
+  distribution?: { option: string; point: number; int80: [number, number] }[] | null;
+  /** Εξαρτήσεις με άλλες ερωτήσεις (κατηγορία σχέσης, ρ, κατάσταση). */
+  dependence?: { with: string; cls: string; rho: number; status: string }[];
 }
 
 // ------------------------------------------------------------
@@ -267,6 +301,8 @@ export interface StudyPlan {
   referenceYear?: number | null;
   /** Μελέτες αξιολόγησης (holdout): εξαιρούνται από τη βαθμονόμηση μαζί με διπλότυπα/παράγωγά τους. */
   holdoutDatasets?: string[];
+  /** Μηχανισμός απαντήσεων (προεπιλογή «standard» = prod-1). */
+  engine?: ResponseEngine;
 }
 
 /** Προέλευση μιας εμπειρικής παραμέτρου (ποσοστό επιλογής) που χρησιμοποιήθηκε σε μια εκτέλεση. */
@@ -307,7 +343,9 @@ export type AnswerBasis =
   | 'empirical_prior' // βασίζεται σε εμπειρική κατανομή (π.χ. Eurobarometer)
   | 'assumption' // βασίζεται σε δηλωμένες παραδοχές του ερευνητή
   | 'uninformed' // καμία εμπειρική πληροφορία — ουδέτερη προεπιλογή
-  | 'llm'; // παράχθηκε από μοντέλο AI (μη επικυρωμένο)
+  | 'llm' // παράχθηκε από μοντέλο AI (μη επικυρωμένο)
+  | 'model_extrapolated' // EGPS: μεταφορά από συγγενικές μετρήσεις ή ρητό σενάριο
+  | 'not_estimable'; // EGPS: καμία επαρκής τεκμηρίωση — η απάντηση μένει NA
 
 export interface SyntheticAnswer {
   questionId: string;
@@ -351,6 +389,8 @@ export interface QuestionAggregate {
   bySegment?: Record<string, { segment: string; n: number; headline: number | null }[]>;
   basisMix: Record<AnswerBasis, number>;
   evidenceKind: EvidenceKind;
+  /** Μόνο με τον μηχανισμό EGPS: κατηγορία τεκμηρίωσης, αιτία, διαστήματα. */
+  evidence?: QuestionEvidence;
 }
 
 export interface CostRecord {

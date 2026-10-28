@@ -92,7 +92,7 @@ export function aggregateQuestion(q: Question, respondents: SyntheticRespondent[
   const n = rows.length;
   const effN = effectiveN(weights);
   const totalW = weights.reduce((s, w) => s + w, 0);
-  const basisMix: Record<AnswerBasis, number> = { empirical_prior: 0, assumption: 0, uninformed: 0, llm: 0 };
+  const basisMix: Record<AnswerBasis, number> = { empirical_prior: 0, assumption: 0, uninformed: 0, llm: 0, model_extrapolated: 0, not_estimable: 0 };
   rows.forEach((x) => (basisMix[x.a!.basis] += 1));
   Object.keys(basisMix).forEach((k) => (basisMix[k as AnswerBasis] = n ? round((basisMix[k as AnswerBasis] / n) * 100, 1) : 0));
 

@@ -1,4 +1,5 @@
 import DatasetImportForm from '@/components/synthetic-lab/DatasetImportForm';
+import { BrandDataPanel } from '@/components/synthetic-lab/EvidenceEngine';
 import { Card, PageTitle } from '@/components/synthetic-lab/ui';
 import { allDatasets, freshness } from '@/lib/synthetic-lab/data/registry';
 import { lakeDir, lakeMeta } from '@/lib/synthetic-lab/data/lake';
@@ -92,6 +93,7 @@ export default function DataPage() {
     <div className="space-y-6">
       <PageTitle title="Τα Δεδομένα μου" subtitle="Κάθε πηγή με οργανισμό, έτη συλλογής (όχι δημοσίευσης), άδεια, περιορισμούς και τρόπο χρήσης. Δημόσια διαθέσιμο δεν σημαίνει ελεύθερο για εμπορική χρήση." />
       <LakeCard />
+      <BrandDataPanel />
       <div className="space-y-4">
         {ds.map((d) => {
           const f = freshness(d);

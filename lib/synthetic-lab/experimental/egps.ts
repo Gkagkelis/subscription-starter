@@ -102,16 +102,7 @@ export function predictMarginal(item: EgpsItem, personas: Persona[], ctx: Eviden
     if (int80[1] - int80[0] > TP.notEstimable.maxWidth80pp) {
       return none(item, `Το διάστημα 80% (${int80[0]}–${int80[1]}%) είναι ευρύτερο από ${TP.notEstimable.maxWidth80pp} π.μ.: δεν δίνεται σημειακή εκτίμηση.`);
     }
-    // προφίλ ομάδων: μέσες αποκλίσεις logit των συγγενικών δεικτών × β
-    const groups: Record<string, Record<string, PriorCell>> = { all: { all: cell(inv(lvl)) } };
-    for (const d of DIMS) {
-      const keys = Array.from(new Set(waves.flatMap((x) => Object.keys(x.w.groups[d] || {}))));
-      for (const g of keys) {
-        const devs = waves.filter((x) => x.w.groups[d]?.[g]).map((x) => logit(x.w.groups[d][g].value) - logit(x.w.groups.all.all.value));
-        if (devs.length === waves.length) (groups[d] ||= {})[g] = cell(inv(lvl + TP.beta * (devs.reduce((a, b) => a + b, 0) / devs.length)));
-      }
-    }
-    const wave: PriorWave = { key: `egps-${item.id}`, year: waves[0].w.year, quarter: '', groups };
+    const wave = transferWave(lvl, waves.map((x) => valuesOf(x.w)), TP.beta, `egps-${item.id}`, waves[0].w.year);
     const fit = fitPriorModel(waves[0].m, wave, personas); // ίδια σχήματα ομάδων με τους συγγενικούς δείκτες
     return {
       id: item.id, evidenceClass: 'MODEL_EXTRAPOLATED', basis: 'related_transfer',
@@ -136,6 +127,29 @@ export function predictMarginal(item: EgpsItem, personas: Persona[], ctx: Eviden
   }
   return none(item, 'Δεν υπάρχει άμεση ή συγγενική μέτρηση, ούτε ρητή παραδοχή.');
 }
+
+/** Τιμές κύματος ως dim → group → %. */
+export function valuesOf(w: PriorWave): Record<string, Record<string, number>> {
+  return Object.fromEntries(Object.entries(w.groups).map(([d, g]) => [d, Object.fromEntries(Object.entries(g).map(([k, c]) => [k, c.value]))]));
+}
+
+/**
+ * Κύμα πρόβλεψης: επίπεδο (logit) + β × μέσο προφίλ αποκλίσεων ομάδων των πηγών (μόνο ομάδες που έχουν ΟΛΕΣ οι πηγές).
+ * Χρησιμοποιείται από τη μεταφορά συγγενικών δεικτών και από τη μεταφορά μεταξύ μαρκών.
+ */
+export function transferWave(levelLogit: number, sources: Record<string, Record<string, number>>[], beta: number, key: string, year: number): PriorWave {
+  const groups: Record<string, Record<string, PriorCell>> = { all: { all: cell(inv(levelLogit)) } };
+  for (const d of DIMS) {
+    const keys = Array.from(new Set(sources.flatMap((x) => Object.keys(x[d] || {}))));
+    for (const g of keys) {
+      const devs = sources.filter((x) => x[d]?.[g] != null && x.all?.all != null).map((x) => logit(x[d][g]) - logit(x.all.all));
+      if (devs.length && devs.length === sources.length) (groups[d] ||= {})[g] = cell(inv(levelLogit + beta * (devs.reduce((a, b) => a + b, 0) / devs.length)));
+    }
+  }
+  return { key, year, quarter: '', groups };
+}
+
+export const TRANSFER_BETA = TP.beta;
 
 function none(item: EgpsItem, reason: string): EgpsItemResult {
   return { id: item.id, evidenceClass: 'NOT_ESTIMABLE', basis: 'none', reason, overall: null, groups: null, sources: [] };

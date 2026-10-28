@@ -364,6 +364,8 @@ export function basisLabel(b: AnswerBasis): string {
     empirical_prior: 'Εμπειρική βάση (εκτίμηση από πραγματική έρευνα)',
     assumption: 'Παραδοχή ερευνητή',
     uninformed: 'Χωρίς εμπειρική βάση',
-    llm: 'Παραγωγή AI (μη επικυρωμένη)'
+    llm: 'Παραγωγή AI (μη επικυρωμένη)',
+    model_extrapolated: 'Πρόβλεψη από συγγενικά δεδομένα (EGPS)',
+    not_estimable: 'Μη εκτιμήσιμο (EGPS)'
   }[b];
 }

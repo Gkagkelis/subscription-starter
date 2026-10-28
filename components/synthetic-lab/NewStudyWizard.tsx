@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { Assumption, AudienceFilter, Question, QuestionType, StudyPlan } from '@/lib/synthetic-lab/types';
 import { AudienceEditor, usePopulations } from './AudienceEditor';
 import { QuestionBank } from './QuestionBank';
+import { EstimabilityPanel, QuestionEvidenceFields } from './EvidenceEngine';
 import { Banner, Button, Card, EvidenceBadge, Help, inputCls, labelCls, Spinner } from './ui';
 
 const STEPS = ['Τι θέλεις να ερευνήσεις;', 'Ποιο κοινό αφορά;', 'Τι τύπο έρευνας θέλεις;', 'Παραδοχές & δεδομένα', 'Εκτέλεση'];
@@ -49,6 +50,7 @@ export default function NewStudyWizard() {
   const [error, setError] = useState<string | null>(null);
   const [confirmed, setConfirmed] = useState(false);
   const [mode, setMode] = useState<'demo' | 'live'>('demo');
+  const [engine, setEngine] = useState<'evidence' | 'standard'>('evidence');
   const [model, setModel] = useState('');
   const [cap, setCap] = useState(1);
   const [seed, setSeed] = useState<number>(() => Math.floor(Math.random() * 100000));
@@ -87,7 +89,7 @@ export default function NewStudyWizard() {
       const r = await fetch('/api/synthetic-lab/studies', {
         method: 'POST',
         headers: { 'content-type': 'application/json', ...(mode === 'live' ? liveKeyHeader() : {}) },
-        body: JSON.stringify({ plan, populationId, seed, mode, ...(mode === 'live' ? { model, costCapUsd: cap } : {}) })
+        body: JSON.stringify({ plan: { ...plan, engine }, populationId, seed, mode, ...(mode === 'live' ? { model, costCapUsd: cap } : {}) })
       });
       const d = await r.json();
       if (!d.ok) throw new Error(d.error);
@@ -216,6 +218,8 @@ export default function NewStudyWizard() {
                 {pop.updateStatus.message}. Αντιπροσωπεύει {pop.representedPopulation.toLocaleString('el-GR')} άτομα (έτος αναφοράς {pop.referenceYear || '—'}).
               </Banner>
             )}
+            {engine !== 'evidence' && (
+              <>
             <ul className="space-y-2 text-sm">
               {plan.questions.map((q) => (
                 <li key={q.id} className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
@@ -232,7 +236,10 @@ export default function NewStudyWizard() {
                 και μόρφωση. «Συνθετική προσομοίωση»: καμία μέτρηση δεν υπάρχει — οι απαντήσεις ακολουθούν τις παραδοχές παρακάτω ή είναι ουδέτερες.
               </p>
             </Help>
+              </>
+            )}
           </Card>
+          {engine === 'evidence' && populationId && <EstimabilityPanel plan={plan} populationId={populationId} />}
           <AssumptionsEditor assumptions={plan.assumptions} onChange={(assumptions) => updatePlan({ assumptions })} />
           {plan.warnings.length > 0 && (
             <Banner tone="warning" title="Προειδοποιήσεις">
@@ -250,6 +257,22 @@ export default function NewStudyWizard() {
       {plan && step === 4 && (
         <Card className="space-y-4">
           <h2 className="text-lg font-semibold">Εκτέλεση</h2>
+          <fieldset className="space-y-2 text-sm">
+            <legend className={labelCls}>Μηχανισμός απαντήσεων</legend>
+            <label className="flex items-start gap-2">
+              <input type="radio" checked={engine === 'evidence'} onChange={() => setEngine('evidence')} />
+              <span>
+                <strong>Τεκμηριωμένη πρόβλεψη (προτείνεται)</strong> — κάθε ερώτηση χαρακτηρίζεται «εμπειρικά τεκμηριωμένη», «πρόβλεψη μοντέλου» (με διάστημα) ή «μη
+                εκτιμήσιμη» (χωρίς συνθετικές απαντήσεις). Οι σχετιζόμενες ερωτήσεις έχουν εξαρτήσεις μαθημένες από πραγματικά δεδομένα.
+              </span>
+            </label>
+            <label className="flex items-start gap-2">
+              <input type="radio" checked={engine === 'standard'} onChange={() => setEngine('standard')} />
+              <span>
+                <strong>Τυπικός (prod-1)</strong> — όπου λείπουν δεδομένα, ουδέτερες ομοιόμορφες απαντήσεις· ανεξάρτητες ερωτήσεις.
+              </span>
+            </label>
+          </fieldset>
           <fieldset className="space-y-2 text-sm">
             <legend className={labelCls}>Λειτουργία</legend>
             <label className="flex items-start gap-2">
@@ -437,6 +460,7 @@ export function QuestionEditor({ questions, onChange }: { questions: Question[];
               onChange={(e) => set(i, { scale: e.target.value.split('|').map((x) => x.trim()).filter(Boolean) })}
             />
           )}
+          <QuestionEvidenceFields q={q} onChange={(patch) => set(i, patch)} />
           {q.type === 'price_test' && (
             <input
               aria-label={`Τιμές ${q.id}`}

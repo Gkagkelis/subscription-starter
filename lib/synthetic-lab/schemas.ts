@@ -48,7 +48,15 @@ export const QuestionSchema = z
       })
       .nullable()
       .optional(),
-    maxSelections: z.number().int().min(1).max(12).optional()
+    maxSelections: z.number().int().min(1).max(12).optional(),
+    relatedEvidence: z.object({ metrics: z.array(str(80)).min(1).max(8), rationale: str(500).min(3) }).nullable().optional(),
+    brandLink: z.object({ category: str(40).regex(/^[a-z0-9_-]+$/), brand: str(80).min(1), measure: str(40).regex(/^[a-z0-9_]+$/) }).nullable().optional(),
+    brandOptions: z
+      .object({ category: str(40).regex(/^[a-z0-9_-]+$/), measure: str(40).regex(/^[a-z0-9_]+$/), brands: z.record(str(150), str(80)) })
+      .nullable()
+      .optional(),
+    construct: z.object({ object: str(80).min(1), kind: z.enum(['evaluation', 'intention', 'usage', 'general_usage', 'other']) }).nullable().optional(),
+    scenarioPrior: z.object({ probs: z.array(z.number().min(0).max(100)).min(2).max(12), rationale: str(500).min(3) }).nullable().optional()
   })
   .superRefine((q, ctx) => {
     const needsOptions = ['single_choice', 'multiple_choice', 'ranking'];
@@ -87,7 +95,8 @@ export const PlanSchema = z.object({
   plannerVersion: str(40),
   plannerMode: z.enum(['rules', 'ai']),
   referenceYear: z.number().int().min(2000).max(2100).nullable().optional(),
-  holdoutDatasets: z.array(str(300)).max(200).optional()
+  holdoutDatasets: z.array(str(300)).max(200).optional(),
+  engine: z.enum(['standard', 'evidence']).optional()
 });
 
 export const RunStudySchema = z.object({

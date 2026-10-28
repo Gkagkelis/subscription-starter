@@ -172,6 +172,13 @@ export function buildReport(run: StudyRun): StudyReport {
     bullets: run.aggregates.map((a) => {
       const q = qs.find((x) => x.id === a.questionId)!;
       const mix = Object.entries(a.basisMix).filter(([, v]) => v > 0).map(([k, v]) => `${basisLabel(k as any)} ${v}%`).join(', ');
+      if (a.evidence) {
+        const e = a.evidence;
+        const cls = { EMPIRICALLY_ANCHORED: 'EMPIRICALLY ANCHORED', MODEL_EXTRAPOLATED: 'MODEL-EXTRAPOLATED', NOT_ESTIMABLE: 'NOT ESTIMABLE' }[e.evidenceClass];
+        const interval = e.point != null && e.int80 ? ` Πρόβλεψη ${e.point}% (διάστημα 80%: ${e.int80[0]}–${e.int80[1]}%).` : '';
+        if (e.evidenceClass === 'NOT_ESTIMABLE') return `${q.id}: ${cls} — ${e.reason} Δεν παράχθηκαν συνθετικές απαντήσεις.`;
+        return `${q.id} (${a.n} απαντήσεις, effective n ${a.effectiveN}): ${topLine(q, a)} [${cls} — ${e.reason}${interval}]`;
+      }
       return `${q.id} (${a.n} απαντήσεις, effective n ${a.effectiveN}): ${topLine(q, a)} [${EVIDENCE_LABEL[a.evidenceKind]}; βάση: ${mix || '—'}]`;
     })
   });
@@ -306,13 +313,15 @@ export function responsesCsv(run: StudyRun): string {
 
 /** Συγκεντρωτικά αποτελέσματα σε CSV. */
 export function aggregatesCsv(run: StudyRun): string {
-  const header = ['label', 'question_id', 'question', 'option', 'share_pct', 'ci_low', 'ci_high', 'n', 'effective_n', 'evidence_kind'];
+  const header = ['label', 'question_id', 'question', 'option', 'share_pct', 'ci_low', 'ci_high', 'n', 'effective_n', 'evidence_kind', 'evidence_class', 'evidence_reason'];
   const rows = [csvEscapeRow(header)];
   run.aggregates.forEach((a) => {
     const q = run.plan.questions.find((x) => x.id === a.questionId)!;
-    (a.shares || []).forEach((s) => rows.push(csvEscapeRow([SIMULATED_LABEL, a.questionId, q.text, s.option, s.share, s.ciLow, s.ciHigh, a.n, a.effectiveN, a.evidenceKind])));
-    (a.priceCurve || []).forEach((p) => rows.push(csvEscapeRow([SIMULATED_LABEL, a.questionId, q.text, `${p.price}€`, p.acceptance, p.ciLow, p.ciHigh, a.n, a.effectiveN, a.evidenceKind])));
-    (a.rankingScores || []).forEach((p) => rows.push(csvEscapeRow([SIMULATED_LABEL, a.questionId, q.text, `${p.option} (μέση θέση ${p.meanRank})`, p.firstPlaceShare, '', '', a.n, a.effectiveN, a.evidenceKind])));
+    const ev = [a.evidence?.evidenceClass || '', a.evidence?.reason || ''];
+    (a.shares || []).forEach((s) => rows.push(csvEscapeRow([SIMULATED_LABEL, a.questionId, q.text, s.option, s.share, s.ciLow, s.ciHigh, a.n, a.effectiveN, a.evidenceKind, ...ev])));
+    (a.priceCurve || []).forEach((p) => rows.push(csvEscapeRow([SIMULATED_LABEL, a.questionId, q.text, `${p.price}€`, p.acceptance, p.ciLow, p.ciHigh, a.n, a.effectiveN, a.evidenceKind, ...ev])));
+    (a.rankingScores || []).forEach((p) => rows.push(csvEscapeRow([SIMULATED_LABEL, a.questionId, q.text, `${p.option} (μέση θέση ${p.meanRank})`, p.firstPlaceShare, '', '', a.n, a.effectiveN, a.evidenceKind, ...ev])));
+    if (a.evidence?.evidenceClass === 'NOT_ESTIMABLE') rows.push(csvEscapeRow([SIMULATED_LABEL, a.questionId, q.text, '', '', '', '', 0, 0, a.evidenceKind, ...ev]));
   });
   return rows.join('\n') + '\n';
 }
