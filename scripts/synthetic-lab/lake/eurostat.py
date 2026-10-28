@@ -380,12 +380,15 @@ def _group(row, demo_dims, totals):
 
 
 def run(con, max_tasks=None, log_every=25):
+    db.release_stale(con, "eurostat_fetch")
     done = 0
     while True:
         tasks = db.next_tasks(con, "eurostat_fetch", limit=50)
         if not tasks:
             break
         for t in tasks:
+            if not db.claim(con, t["task_id"]):
+                continue  # την πήρε άλλος worker
             p = json.loads(t["payload"])
             try:
                 res = fetch(con, p["code"], p["title"])
