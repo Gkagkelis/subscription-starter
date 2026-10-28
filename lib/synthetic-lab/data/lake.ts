@@ -73,8 +73,10 @@ interface Loaded {
   index: LakeIndex;
   studies: Map<string, LakeStudy>;
   questions: Map<string, LakeQuestion>;
-  /** Ρίζες λέξεων ανά ερώτηση (για ανάκτηση). */
-  stems: Map<string, Set<string>>;
+  /** Ρίζες λέξεων ανά ερώτηση: κείμενο, επιλογές, τίτλος μελέτης (για ανάκτηση). */
+  stems: Map<string, { text: Set<string>; options: Set<string>; title: Set<string> }>;
+  /** Αντίστροφη συχνότητα εγγράφων ανά ρίζα (σπάνιοι όροι μετρούν περισσότερο). */
+  idf: Map<string, number>;
 }
 
 let cache: { key: string; value: Loaded | null } | null = null;
@@ -100,9 +102,16 @@ function load(): Loaded | null {
     const allowed = (s: LakeStudy) => licenseMode() === 'research' || s.tier === 'open';
     const studies = new Map(raw.studies.filter(allowed).map((s) => [s.studyId, s]));
     const questions = new Map(raw.questions.filter((q) => studies.has(q.studyId)).map((q) => [q.id, q]));
-    const stems = new Map<string, Set<string>>();
-    questions.forEach((q) => stems.set(q.id, stemSet(`${q.text} ${q.options.join(' ')} ${studies.get(q.studyId)?.title || ''}`)));
-    value = { index: { ...raw, studies: Array.from(studies.values()), questions: Array.from(questions.values()) }, studies, questions, stems };
+    const stems: Loaded['stems'] = new Map();
+    const df = new Map<string, number>();
+    questions.forEach((q) => {
+      const e = { text: stemSet(q.text), options: stemSet(q.options.join(' ')), title: stemSet(studies.get(q.studyId)?.title || '') };
+      stems.set(q.id, e);
+      new Set(Array.from(e.text).concat(Array.from(e.options))).forEach((x) => df.set(x, (df.get(x) || 0) + 1));
+    });
+    const N = Math.max(1, questions.size);
+    const idf = new Map(Array.from(df, ([k, v]) => [k, Math.log(1 + N / v)]));
+    value = { index: { ...raw, studies: Array.from(studies.values()), questions: Array.from(questions.values()) }, studies, questions, stems, idf };
   } catch {
     value = null; // κατεστραμμένη/μερική εξαγωγή: το lake αγνοείται
   }
@@ -225,7 +234,8 @@ function norm(s: string) {
 const STOP = new Set([
   'ποια', 'ποιοσ', 'ποιεσ', 'ποιο', 'ποιοι', 'πωσ', 'πολυ', 'λιγο', 'οτι', 'αυτο', 'αυτη', 'αυτεσ', 'αυτα', 'ειναι', 'εχετε', 'σασ', 'μασ',
   'στην', 'στον', 'στο', 'στα', 'στισ', 'στουσ', 'απο', 'για', 'και', 'μια', 'ενα', 'εναν', 'οπωσ', 'καθε', 'μεταξυ', 'θεωρειτε', 'πιστευετε',
-  'νεα', 'νεοσ', 'νεο', 'θα', 'την', 'τον', 'του', 'τησ', 'των', 'τουσ', 'with', 'what', 'which', 'your', 'have', 'that', 'this', 'from', 'about',
+  'νεα', 'νεοσ', 'νεο', 'θα', 'ποσο', 'ποσοι', 'ποσεσ', 'ποτε', 'πιο', 'οσο', 'μονο', 'ακομη', 'οπου', 'ποιον', 'ποιαν', 'ειχε', 'εχει', 'εχουν',
+  'ηταν', 'ειναι', 'θελω', 'θελουν', 'μπορει', 'καποιο', 'καποια', 'αυτουσ', 'εκεινο', 'αλλα', 'λοιπον', 'την', 'τον', 'του', 'τησ', 'των', 'τουσ', 'with', 'what', 'which', 'your', 'have', 'that', 'this', 'from', 'about',
   'would', 'could', 'following', 'tell', 'please', 'there', 'their', 'they', 'does', 'more', 'than', 'other', 'total', 'some', 'into'
 ]);
 
@@ -258,7 +268,16 @@ const EL_EN: [string, string[]][] = [
   ['οικογεν', ['family']], ['παιδι', ['children', 'child']], ['νεοι', ['young']], ['ηλικιωμεν', ['elderly', 'older']], ['καταναλω', ['consumer', 'consumption']],
   ['προϊον', ['product', 'products']], ['προιον', ['product', 'products']], ['ποιοτητ', ['quality']], ['ικανοποιησ', ['satisfaction', 'satisfied']],
   ['επιχειρ', ['business', 'company']], ['ζωα', ['animals', 'animal']], ['αγροτ', ['agriculture', 'farmers', 'farming']], ['ενθαρρυν', ['encourage']],
-  ['ταυτοτητ', ['identity']], ['θρησκ', ['religion', 'religious']], ['ισοτητ', ['equality']], ['φυλο', ['gender']], ['γυναικ', ['women']]
+  ['ταυτοτητ', ['identity']], ['θρησκ', ['religion', 'religious']], ['ισοτητ', ['equality']], ['φυλο', ['gender']], ['γυναικ', ['women']],
+  ['ανησυχ', ['concerned', 'worried', 'concern']], ['φοβ', ['afraid', 'fear']], ['προτιμ', ['prefer', 'preference']], ['εμπιστευ', ['trust']],
+  ['κυβερν', ['government']], ['βουλ', ['parliament']], ['δικαιοσυν', ['justice']], ['δικαστ', ['justice', 'courts']], ['αστυνομ', ['police']],
+  ['στρατ', ['army']], ['κομματ', ['parties']], ['δημοσιογραφ', ['journalists', 'media']], ['μεσα ενημερωσ', ['media']], ['εκκλησι', ['church', 'religious']],
+  ['ευτυχ', ['happy', 'happiness']], ['ζωη', ['life']], ['μελλον', ['future']], ['οικονομ', ['economic', 'economy']], ['κριση', ['crisis']],
+  ['ανισοτητ', ['inequality']], ['μισθ', ['wages', 'salary']], ['φορ', ['tax', 'taxes']], ['ηλεκτρικο αυτοκινητο', ['electric car', 'electric vehicle']],
+  ['ανανεωσιμ', ['renewable']], ['εξοικονομ', ['save', 'saving', 'reduce']], ['καφε', ['coffee']], ['ζαχαρ', ['sugar']], ['κρεα', ['meat']],
+  ['ψαρ', ['fish']], ['φρουτ', ['fruit']], ['λαχανικ', ['vegetables']], ['σουπερ μαρκετ', ['supermarket', 'shops']], ['καταστημ', ['shops', 'stores']],
+  ['εκπτωσ', ['discount', 'promotion']], ['διαφημισ', ['advertising', 'advertisements']], ['εγγυησ', ['guarantee', 'warranty']],
+  ['παραπον', ['complaint', 'complain']], ['απατ', ['fraud', 'scam']], ['ασφαλισ', ['insurance']], ['συνταξιοδοτ', ['retirement', 'pension']]
 ];
 
 function stemSet(s: string): Set<string> {
@@ -270,12 +289,37 @@ function stemSet(s: string): Set<string> {
   return out;
 }
 
-/** Ρίζες ερωτήματος + αγγλικές αντιστοιχίες. */
+/** Ρίζες ερωτήματος + αγγλικές αντιστοιχίες (επίπεδη λίστα). */
 export function queryStems(query: string): Set<string> {
+  return new Set(queryGroups(query).flat());
+}
+
+/**
+ * Ομάδες εννοιών του ερωτήματος: κάθε λέξη μαζί με τις αγγλικές αντιστοιχίες της μετρά ΜΙΑ φορά
+ * (ώστε μια ελληνική λέξη με πολλές μεταφράσεις να μη «φουσκώνει» τη συνάφεια).
+ */
+export function queryGroups(query: string): string[][] {
+  const groups: string[][] = [];
   const n = norm(query);
-  const stems = stemSet(query);
-  for (const [el, en] of EL_EN) if (n.includes(norm(el))) en.forEach((w) => stemSet(w).forEach((s) => stems.add(s)));
-  return stems;
+  const used = new Set<string>();
+  for (const [el, en] of EL_EN) {
+    const k = norm(el);
+    if (!k.includes(' ')) continue;
+    if (n.includes(k)) {
+      groups.push(Array.from(new Set(Array.from(stemSet(el)).concat(en.flatMap((w) => Array.from(stemSet(w)))))));
+      k.split(' ').forEach((w) => used.add(w));
+    }
+  }
+  for (const w of n.split(/[^a-zα-ω0-9]+/)) {
+    if (w.length < 3 || STOP.has(w) || used.has(w)) continue;
+    const g = new Set<string>([w.slice(0, 5)]);
+    for (const [el, en] of EL_EN) {
+      const k = norm(el);
+      if (!k.includes(' ') && w.startsWith(k)) en.forEach((x) => stemSet(x).forEach((s) => g.add(s)));
+    }
+    groups.push(Array.from(g));
+  }
+  return groups;
 }
 
 export interface RetrievalOptions {
@@ -307,10 +351,18 @@ export interface RetrievalHit {
 export function searchLake(query: string, opts: RetrievalOptions = {}): RetrievalHit[] {
   const l = load();
   if (!l) return [];
-  const q = queryStems(query);
+  const groups = queryGroups(query);
   const holdout = expandHoldout(opts.holdout);
   const asOf = opts.asOfYear ?? new Date().getFullYear();
   const hits: RetrievalHit[] = [];
+  const idf = (x: string) => l.idf.get(x) ?? Math.log(1 + l.index.questions.length);
+  // μέγιστο δυνατό: κάθε ομάδα με τον σπανιότερο όρο της στο κείμενο της ερώτησης (έως 4 ομάδες)
+  // όροι που δεν εμφανίζονται πουθενά στο lake (π.χ. αμετάφραστες λέξεις) δεν μετρούν στον παρονομαστή
+  const gMax = groups
+    .filter((g) => g.some((x) => l.idf.has(x)))
+    .map((g) => Math.max(...g.filter((x) => l.idf.has(x)).map(idf)))
+    .sort((a, b) => b - a);
+  const denom = gMax.slice(0, 4).reduce((a, b) => a + b, 0) || 1;
   for (const question of l.index.questions) {
     if (opts.kinds && !opts.kinds.includes(question.kind)) continue;
     const study = l.studies.get(question.studyId);
@@ -322,14 +374,33 @@ export function searchLake(query: string, opts: RetrievalOptions = {}): Retrieva
     if (!years.length) continue;
     const t = l.stems.get(question.id)!;
     const matched: string[] = [];
-    if (q.size) q.forEach((s) => t.has(s) && matched.push(s));
-    if (q.size && !matched.length) continue;
-    const relevance = q.size ? Math.min(1, matched.length / Math.min(q.size, 4)) : 0;
+    let raw = 0;
+    for (const g of groups) {
+      let best = 0;
+      let hit: string | null = null;
+      for (const x of g) {
+        const w = t.text.has(x) ? 1 : t.options.has(x) ? 0.45 : t.title.has(x) ? 0.35 : 0;
+        if (w && w * idf(x) > best) (best = w * idf(x)), (hit = x);
+      }
+      if (hit) (raw += best), matched.push(hit);
+    }
+    if (groups.length && !matched.length) continue;
+    const relevance = groups.length ? Math.min(1, raw / denom) : 0;
     const year = Math.max(...years);
     const recency = Math.exp(-(asOf - year) / 6);
     const quality = (study.quality ?? 30) / 100;
     hits.push({ question, study, year, score: 0.6 * relevance + 0.25 * quality + 0.15 * recency, breakdown: { relevance, quality, recency, matched } });
   }
   hits.sort((a, b) => b.score - a.score || b.year - a.year);
-  return hits.slice(0, opts.limit ?? 50);
+  // μία εμφάνιση ανά ερώτηση πηγής (οι επιλογές πολλαπλής απάντησης είναι ξεχωριστοί δείκτες της ίδιας ερώτησης)
+  const seen = new Set<string>();
+  const out: RetrievalHit[] = [];
+  for (const h of hits) {
+    const key = h.question.multi ? `${h.study.studyId}::${h.question.code}` : h.question.id;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(h);
+    if (out.length >= (opts.limit ?? 50)) break;
+  }
+  return out;
 }

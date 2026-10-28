@@ -470,7 +470,7 @@ def _fieldwork_year(path):
                 ys = re.findall(r"(?<!\d)(19\d{2}|20[0-2]\d)(?!\d)", line)
                 if ys:
                     return int(ys[0]), int(ys[-1])
-                m = re.search(r"/(\d{2})\s*$", line.strip())
+                m = re.search(r"\b\d{1,2}/\d{1,2}/(\d{2})\b", line)  # μόνο πλήρης ημερομηνία ηη/μμ/εε (όχι «3/10 - 11/10»)
                 if m:
                     return 2000 + int(m.group(1)), 2000 + int(m.group(1))
     return None
@@ -606,7 +606,13 @@ def process(con, sid, rid, with_c=True):
             items_c += parse_volume_c(f)
         except Exception as e:  # noqa: BLE001
             db.log(con, "parse", f"{os.path.basename(f)}: {e}", ok=False, source_id=SRC, study_id=sid)
-    y0, y1 = years or (st["collection_year_start"], st["collection_year_end"])
+    if years:
+        y0, y1 = years
+    else:  # εκτίμηση από κύμα/αριθμό, με άνω όριο το έτος δημοσίευσης (για καταχωρίσεις μετά το 2016)
+        y0, y1 = st["collection_year_start"], st["collection_year_end"]
+        iy = int((meta.get("issued") or "0")[:4] or 0)
+        if iy >= 2016:
+            y0, y1 = (min(y0, iy) if y0 else iy), (min(y1, iy) if y1 else iy)
     if not items_a and not items_c:
         db.upsert_study(con, study_id=sid, evidence_level="C", collection_year_start=y0, collection_year_end=y1)
         db.set_status(con, sid, "VERIFIED", "Πίνακες κατέβηκαν αλλά δεν εντοπίστηκε στήλη Ελλάδας (EL/GR) σε αναγνώσιμη μορφή")
@@ -615,7 +621,9 @@ def process(con, sid, rid, with_c=True):
     n = next((it["n"] for it in items_a + items_c if it.get("n")), None)
     qtexts = " ".join(it["question"] for it in (items_a + items_c)[:60])
     in_period = y1 is not None and 2012 <= y1 <= 2026
-    business = any(it.get("business") for it in items_c) or bool(re.search(r"(?i)\bSMEs?\b|companies|enterprises|businesses|retailers", st["title"] or ""))
+    b2b_q = sum(1 for it in items_a + items_c if re.search(r"(?i)your (company|enterprise|business|firm|organisation)|employees in your", it["question"]))
+    business = (any(it.get("business") for it in items_c) or bool(re.search(r"(?i)\bSMEs?\b|companies|enterprises|businesses|retailers", st["title"] or ""))
+                or b2b_q >= max(2, 0.3 * len(items_a + items_c)))
     db.upsert_study(
         con, study_id=sid, collection_year_start=y0, collection_year_end=y1, sample_size=n,
         fieldwork_dates=str(y0) if y0 == y1 else f"{y0}–{y1}", topics=classify(st["title"], qtexts),

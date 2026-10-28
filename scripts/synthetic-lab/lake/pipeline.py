@@ -6,6 +6,7 @@ Greek Research Data Lake — ενιαίο CLI ingestion pipeline (επανεκκ
   python -m lake.pipeline run <connector> [--max N]
   python -m lake.pipeline export                  # εξαγωγή για το simulation engine
   python -m lake.pipeline report                  # coverage_report από τη βάση
+  python -m lake.pipeline monitor                 # νέες εκδόσεις/νέες έρευνες → ουρά (επαυξητικά)
   python -m lake.pipeline status                  # σύνοψη καταστάσεων
 
 Εκτέλεση από scripts/synthetic-lab:  python -m lake.pipeline ...
@@ -31,7 +32,7 @@ CONNECTORS = {
 
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="lake.pipeline")
-    ap.add_argument("cmd", choices=["sources", "discover", "run", "export", "report", "status"])
+    ap.add_argument("cmd", choices=["sources", "discover", "run", "export", "report", "status", "monitor"])
     ap.add_argument("connector", nargs="?")
     ap.add_argument("--max", type=int, default=None)
     ap.add_argument("--limit", type=int, default=None)
@@ -47,6 +48,9 @@ def main(argv=None):
     elif a.cmd == "export":
         from . import export
         export.run(con)
+    elif a.cmd == "monitor":
+        from . import monitor
+        monitor.run(con)
     elif a.cmd == "report":
         from . import report
         report.run(con)

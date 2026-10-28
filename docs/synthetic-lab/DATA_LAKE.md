@@ -33,6 +33,7 @@ simulation engine μέσω `lib/synthetic-lab/data/lake.ts`.
 | `lake/existing.py` | Τα σύνολα που ήδη χρησιμοποιεί το Lab (NORAYA, Eurostat ΤΠΕ/SILC, BCS, CES, HBS, GLOPOP-S, διαΝΕΟσις), ως INTEGRATED |
 | `lake/export.py` | Εξαγωγή για το engine (Deliverables D/E/F) |
 | `lake/report.py` | Αναφορά κάλυψης (Deliverable I) |
+| `lake/monitor.py` | Παρακολούθηση νέων εκδόσεων/ερευνών (επαυξητική ενημέρωση, change log στα `events`) |
 | `lake/run_all.sh` | Πλήρης συλλογή σε παράλληλες λωρίδες |
 
 ## 2. Καταστάσεις και επίπεδα τεκμηρίωσης
@@ -125,6 +126,7 @@ cd scripts/synthetic-lab
 python -m venv .venv && .venv/bin/pip install -r lake/requirements.txt
 PY=.venv/bin/python lake/run_all.sh            # πλήρης συλλογή (ώρες· επανεκκινήσιμη)
 .venv/bin/python -m lake.pipeline status        # σύνοψη καταστάσεων και ουράς
+.venv/bin/python -m lake.pipeline monitor       # νέες εκδόσεις Eurostat, νέα Eurobarometer/εγγραφές → ουρά
 .venv/bin/python -m lake.pipeline export        # εξαγωγή για το engine
 .venv/bin/python -m lake.pipeline report        # reports/coverage_report.{md,json}
 .venv/bin/python -m unittest lake.test_lake     # unit tests (χωρίς δίκτυο)
