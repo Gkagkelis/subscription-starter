@@ -33,6 +33,12 @@ export interface SyntheticPanel {
   audience: AudienceFilter;
   size: number;
   seed: number;
+  /**
+   * Τρόπος επιλογής από τον βαθμονομημένο πληθυσμό. 'pps' (προεπιλογή από pie-runtime-2): πιθανότητα ανάλογη του βάρους
+   * βαθμονόμησης, ίσα βάρη — η σύνθεση ακολουθεί τον δηλωμένο πληθυσμό. 'region_srs': απλή τυχαία ανά περιφέρεια
+   * (pie-runtime-1· αγνοούσε τα βάρη ηλικίας × φύλου × μόρφωσης — π.χ. πτυχιούχοι ~19% αντί για 23%).
+   */
+  sampling?: 'pps' | 'region_srs';
   /** Ποιες άγκυρες παράχθηκαν και από ποια δεδομένα (για την αναφορά προέλευσης). */
   anchorSources: { node: string; trainFiles: string[]; wave: string; n: number; pvElection: string | null }[];
   personas: PersonaState[];
@@ -87,7 +93,26 @@ export function generateAnchors(model: PersonaModel, d: PersonaDemographics, see
   return a;
 }
 
-export function buildPanel(o: { modelVersion: string; populationId: string; size: number; seed: number; audience?: AudienceFilter; save?: boolean; personas?: Persona[] }): SyntheticPanel {
+/** Ελάχιστη ηλικία συνθετικού ερωτώμενου PIE: τα μοντέλα εκτιμήθηκαν σε ενήλικες (17+)· παιδιά δεν δημιουργούνται ποτέ. */
+export const PIE_MIN_AGE = 17;
+
+/** Κοινό χωρίς ανηλίκους: αν λείπει ή είναι μικρότερο, η ελάχιστη ηλικία γίνεται PIE_MIN_AGE. */
+export function adultAudience(a: AudienceFilter | undefined): AudienceFilter {
+  const aud = { ...(a || {}) };
+  if (aud.minAge == null || aud.minAge < PIE_MIN_AGE) aud.minAge = PIE_MIN_AGE;
+  return aud;
+}
+
+export function buildPanel(o: {
+  modelVersion: string;
+  populationId: string;
+  size: number;
+  seed: number;
+  audience?: AudienceFilter;
+  save?: boolean;
+  personas?: Persona[];
+  sampling?: 'pps' | 'region_srs';
+}): SyntheticPanel {
   const model = loadPersonaModel(o.modelVersion);
   if (!model) throw new Error(`Το μοντέλο ${o.modelVersion} δεν βρέθηκε.`);
   let selected: { p: Persona; weight: number }[];
@@ -96,7 +121,7 @@ export function buildPanel(o: { modelVersion: string; populationId: string; size
   } else {
     const pop = loadPopulation(o.populationId);
     if (!pop) throw new Error(`Ο πληθυσμός ${o.populationId} δεν βρέθηκε.`);
-    const sel = selectRespondents(pop, o.audience || {}, o.size, deriveSeed(o.seed, 'pie-sample'));
+    const sel = selectRespondents(pop, adultAudience(o.audience), o.size, deriveSeed(o.seed, 'pie-sample'), { weighting: o.sampling || 'pps' });
     selected = sel.respondents.map((p) => ({ p, weight: p.weight }));
   }
   const personas = selected.map(({ p, weight }, i) => {
@@ -110,7 +135,8 @@ export function buildPanel(o: { modelVersion: string; populationId: string; size
     modelVersion: model.version,
     modelSnapshot: model.dataSnapshot,
     populationId: o.populationId,
-    audience: o.audience || {},
+    audience: o.personas ? o.audience || {} : adultAudience(o.audience),
+    sampling: o.personas ? undefined : o.sampling || 'pps',
     size: personas.length,
     seed: o.seed,
     anchorSources: model.anchorNodes.map((n) => ({ node: n.node, trainFiles: n.trainFiles, wave: n.wave, n: n.n, pvElection: n.pvElection })),

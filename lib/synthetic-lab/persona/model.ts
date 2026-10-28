@@ -12,7 +12,11 @@ import path from 'path';
 import { dataRoot } from '../storage/paths';
 import type { Persona } from '../types';
 
-export const PIE_RUNTIME_VERSION = 'pie-runtime-1';
+/**
+ * pie-runtime-2 (Phase 3, 10/2026): επιλογή δείγματος PPS με τα βάρη βαθμονόμησης, κανόνες παράλειψης (followUpOf),
+ * ελάχιστη ηλικία 17. pie-runtime-1: απλή τυχαία ανά περιφέρεια, χωρίς κανόνες παράλειψης.
+ */
+export const PIE_RUNTIME_VERSION = 'pie-runtime-2';
 
 export interface AnchorNode {
   node: 'emp' | 'inc6' | 'econ4' | 'class3' | 'lr7' | 'pv' | 'believer' | 'polint4' | string;

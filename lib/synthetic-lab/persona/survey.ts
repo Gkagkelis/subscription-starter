@@ -13,7 +13,9 @@ import { checkQuestionnaire } from '../engine/guardrails';
 import {
   SIMULATED_LABEL,
   type Persona,
+  type Question,
   type StabilityResult,
+  type SyntheticAnswer,
   type StudyPlan,
   type StudyRun,
   type SyntheticRespondent
@@ -40,13 +42,41 @@ function referenceMonthOf(plan: StudyPlan): string {
   return `${y}-${String(m).padStart(2, '0')}`;
 }
 
+/** Η επιλογή (ή οι επιλογές) μιας απάντησης ως ετικέτες, για τους κανόνες παράλειψης. */
+function givenOptions(q: Question, a: SyntheticAnswer | undefined): string[] {
+  const v = a && !a.skipped ? a.value : null;
+  if (!v) return [];
+  if (v.choice != null) return [v.choice];
+  if (v.choices) return v.choices;
+  if (v.scaleIndex != null && v.scaleIndex >= 0) return [(q.scale || [])[v.scaleIndex]].filter(Boolean) as string[];
+  return [];
+}
+
+/**
+ * Ατομικές απαντήσεις με τη σειρά του ερωτηματολογίου· ερώτηση συνέχειας (followUpOf) τίθεται ΜΟΝΟ αν η προηγούμενη
+ * απάντηση του ίδιου προσώπου είναι μία από τις δηλωμένες (αλλιώς skipped, rationale «εκτός ροής»).
+ */
 export function respondPanel(panel: SyntheticPanel, prepared: PreparedPersonaQuestion[], seed: number): SyntheticRespondent[] {
-  return panel.personas.map((ps) => ({
-    personaId: ps.personaId,
-    weight: ps.weight,
-    label: SIMULATED_LABEL,
-    answers: prepared.map((pq) => answerPersona(pq, ps, seed))
-  }));
+  const qById = new Map(prepared.map((pq) => [pq.q.id, pq.q]));
+  return panel.personas.map((ps) => {
+    const given = new Map<string, SyntheticAnswer>();
+    const answers = prepared.map((pq) => {
+      const f = pq.q.followUpOf;
+      if (f) {
+        const prevQ = qById.get(f.questionId);
+        const opts = prevQ ? givenOptions(prevQ, given.get(f.questionId)) : [];
+        if (!opts.some((o) => f.whenAnswerIn.includes(o))) {
+          const skip: SyntheticAnswer = { questionId: pq.q.id, value: null, skipped: true, basis: pq.support === 'NOT_RELIABLY_ESTIMABLE' ? 'not_estimable' : 'persona_model', rationale: 'εκτός ροής (κανόνας παράλειψης)' };
+          given.set(pq.q.id, skip);
+          return skip;
+        }
+      }
+      const a = answerPersona(pq, ps, seed);
+      given.set(pq.q.id, a);
+      return a;
+    });
+    return { personaId: ps.personaId, weight: ps.weight, label: SIMULATED_LABEL, answers };
+  });
 }
 
 export function runPersonaSurvey(o: PersonaSurveyOptions): StudyRun {
@@ -126,7 +156,14 @@ export function runPersonaSurvey(o: PersonaSurveyOptions): StudyRun {
   );
 
   // Συγκέντρωση (μόνο από τις ατομικές απαντήσεις)
-  const personaMap = new Map<string, Persona>(pop.personas.map((p) => [p.id, p]));
+  // Διασταυρώσεις: κάθε συνθετικός ερωτώμενος (και τα επαναλαμβανόμενα «…~2» της επιλογής PPS) → το προφίλ πληθυσμού του
+  const popById = new Map<string, Persona>(pop.personas.map((p) => [p.id, p]));
+  const personaMap = new Map<string, Persona>();
+  const addIds = (ids: string[]) => ids.forEach((id) => {
+    const p = popById.get(id.split('~')[0]);
+    if (p) personaMap.set(id, p);
+  });
+  addIds(panel.personas.map((ps) => ps.personaId));
   const aggregates = o.plan.questions.map((q, i) => {
     const a = aggregateQuestion(q, respondents, personaMap);
     const pq = prepared[i];
@@ -147,6 +184,7 @@ export function runPersonaSurvey(o: PersonaSurveyOptions): StudyRun {
     const seeds = Array.from({ length: runs }, (_, i) => deriveSeed(seed, 'pie-stability', i));
     const per = seeds.map((s) => {
       const p2 = buildPanel({ modelVersion: model.version, populationId: o.populationId, size: o.plan.sampleSize, seed: s, audience: o.plan.audience, save: false });
+      addIds(p2.personas.map((ps) => ps.personaId));
       const rs = respondPanel(p2, prepared, s);
       return o.plan.questions.map((q) => aggregateQuestion(q, rs, personaMap));
     });
