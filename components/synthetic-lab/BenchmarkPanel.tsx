@@ -81,15 +81,75 @@ export default function BenchmarkPanel() {
           ))}
         </Card>
       ))}
+      {o.assoc && (
+        <Card className="space-y-2">
+          <h3 className="text-sm font-semibold">Συσχετίσεις μεταξύ ερωτήσεων (μικροδεδομένα διαΝΕΟσις, {o.assoc.split})</h3>
+          <p className="text-xs text-stone-600">
+            Phi μεταξύ ζευγών ερωτήσεων: πραγματικά έναντι συνθετικών. «Συστοιχία» = ερωτήσεις του ίδιου μπλοκ. ρ = ισχύς του κοινού λανθάνοντα παράγοντα ανά συστοιχία
+            (0 = παραγωγή, ανεξάρτητες απαντήσεις). Επιλογή ρ = {fmt(o.assoc.chosenRho)}.
+          </p>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[480px] text-xs">
+              <thead>
+                <tr className="text-left text-stone-500">
+                  <th className="py-1 pr-2">ρ</th>
+                  <th className="pr-2">phi πραγμ. (συστοιχία)</th>
+                  <th className="pr-2">phi συνθ. (συστοιχία)</th>
+                  <th className="pr-2">MAE συστοιχία</th>
+                  <th>MAE εκτός συστοιχίας</th>
+                </tr>
+              </thead>
+              <tbody>
+                {o.assoc.rows.map((r: any) => (
+                  <tr key={r.rho} className="border-t border-stone-100">
+                    <td className="py-1 pr-2">{r.rho}</td>
+                    <td className="pr-2">{fmt(r.withinRealMean)}</td>
+                    <td className="pr-2">{fmt(r.withinSimMean)}</td>
+                    <td className="pr-2">{fmt(r.withinMae)}</td>
+                    <td>{fmt(r.acrossMae)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      )}
+      {o.models.length > 0 && (
+        <Card className="space-y-1">
+          <h3 className="text-sm font-semibold">Πειραματικές εκδόσεις (δεν είναι παραγωγικές)</h3>
+          {o.models.map((m) => (
+            <div key={m.version} className="text-xs text-stone-700">
+              <p>
+                <span className="font-medium">{m.version}</span>: {m.description}
+              </p>
+              <ul className="list-disc pl-5 text-stone-500">
+                {m.notes.map((n: string) => (
+                  <li key={n}>{n}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </Card>
+      )}
       {o.decisions.length > 0 && (
         <Card className="space-y-1">
           <h3 className="text-sm font-semibold">Αποφάσεις (validation / final holdout)</h3>
           {o.decisions.map((d: any) => (
-            <p key={`${d.type}-${d.at}`} className="text-xs text-stone-700">
-              {d.type === 'select'
-                ? `Validation ${String(d.at).slice(0, 10)}: παραγωγή ${fmt(d.production?.score)} π.μ. — επιλέχθηκε ${d.selected || 'καμία υποψήφια'}.`
-                : `Final holdout ${String(d.at).slice(0, 10)} (${d.version}): παραγωγή ${fmt(d.production?.score)} → υποψήφια ${fmt(d.candidate?.score)} π.μ. ${d.recommendation}`}
-            </p>
+            <div key={`${d.type}-${d.at}`} className="text-xs text-stone-700">
+              <p>
+                {d.type === 'select'
+                  ? `Validation ${String(d.at).slice(0, 10)} (σουίτα ${d.suiteHash}): παραγωγή ${fmt(d.production?.score)} π.μ. — επιλέχθηκε ${d.selected || 'καμία υποψήφια'}.`
+                  : `Final holdout ${String(d.at).slice(0, 10)} (${d.version}): παραγωγή ${fmt(d.production?.score)} → υποψήφια ${fmt(d.candidate?.score)} π.μ. ${d.recommendation}`}
+              </p>
+              {d.type === 'select' &&
+                (d.outcomes || []).map((x: any) => (
+                  <p key={x.version} className="pl-3 text-stone-500">
+                    {x.version}: {fmt(x.score)} π.μ. (ομάδες {fmt(x.group)}) — {x.accepted ? 'πέρασε τους κανόνες' : x.reasons.join(' ')}
+                    {x.priorValidationLooks ? ` · ${x.priorValidationLooks + 1}η αξιολόγηση στο validation` : ''}
+                  </p>
+                ))}
+              {d.note && <p className="pl-3 text-stone-500">Σημείωση: {d.note}</p>}
+            </div>
           ))}
         </Card>
       )}

@@ -8,14 +8,15 @@
  *   npx tsx scripts/synthetic-lab/benchmark.ts select   (validation: σύγκριση παραγωγής vs υποψηφίων, κανόνες αποδοχής)
  *   npx tsx scripts/synthetic-lab/benchmark.ts holdout --model <version>   (ΜΙΑ φορά, μετά την οριστικοποίηση)
  *   npx tsx scripts/synthetic-lab/benchmark.ts history
+ *   npx tsx scripts/synthetic-lab/benchmark.ts analyze <run.json|experiment.json> [--variant 0]   (σφάλμα ανά χρονικό κενό/τύπο έρευνας/θέμα/έτος)
  *
  * Τα αποτελέσματα αποθηκεύονται στο <dataRoot>/benchmarks (ιδιωτικά). Η παραγωγική έκδοση δεν αλλάζει από εδώ.
  */
-import { writeFileSync } from 'fs';
+import { readFileSync, writeFileSync } from 'fs';
 import { buildSuite, type Family, type Split } from '../../lib/synthetic-lab/benchmark/suite';
 import { runBenchmark } from '../../lib/synthetic-lab/benchmark/runner';
 import { gapStats, summarize, summarizeBy } from '../../lib/synthetic-lab/benchmark/score';
-import { EXPERIMENTS, runExperiment } from '../../lib/synthetic-lab/benchmark/experiments';
+import { EXPERIMENTS, breakdownAnalysis, runExperiment } from '../../lib/synthetic-lab/benchmark/experiments';
 import { benchDir, loadModel, loadSuite, readHistory, saveRun, saveSuite } from '../../lib/synthetic-lab/benchmark/registry';
 import { holdoutEvaluate, selectOnValidation, tuneOnCalibration } from '../../lib/synthetic-lab/benchmark/improve';
 
@@ -39,6 +40,16 @@ function suiteOrBuild() {
 }
 
 async function main() {
+  if (cmd === 'analyze') {
+    const data = JSON.parse(readFileSync(args[1], 'utf8'));
+    const items = data.variants ? data.variants[Number(opt('variant', '0'))].items : data.items;
+    const b = breakdownAnalysis(items);
+    for (const [dim, groups] of Object.entries(b)) {
+      console.log(`— ${dim}`);
+      for (const [k, s] of Object.entries(groups)) console.log(`   ${k.padEnd(44)} items ${s.okItems} δείγματα ${s.samples} | σύνολο ${s.overallMae} (επιμονή ${s.persistOverallMae}) | ομάδες ${s.groupMae}`);
+    }
+    return;
+  }
   if (cmd === 'suite') {
     const s = buildSuite();
     saveSuite(s);
@@ -128,7 +139,7 @@ async function main() {
     for (const h of readHistory()) console.log(JSON.stringify(h).slice(0, 400));
     return;
   }
-  console.log('Εντολές: suite | run | experiment | tune | select | holdout | history');
+  console.log('Εντολές: suite | run | experiment | tune | assoc | select | holdout | history | analyze');
 }
 
 main().catch((e) => {
