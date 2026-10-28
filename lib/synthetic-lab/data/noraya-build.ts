@@ -28,9 +28,11 @@ export interface PriorCell {
 }
 
 export interface PriorWave {
-  key: string; // "2024-Q4"
+  key: string; // "2024-Q4" ή "2024-06" (μηνιαία κύματα)
   year: number;
   quarter: string;
+  /** Μήνας (1–12) για μηνιαία κύματα (π.χ. μέσος όρος δημοσκοπήσεων)· υπερισχύει του τριμήνου στο χρονικό όριο. */
+  month?: number;
   /** Μελέτη προέλευσης του κύματος (σε σύνθετους δείκτες που συνδυάζουν πολλές έρευνες). */
   datasetId?: string;
   groups: Record<string, Record<string, PriorCell>>; // group_type -> group -> cell

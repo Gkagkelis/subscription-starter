@@ -10,7 +10,8 @@ CSES (Comparative Study of Electoral Systems), ελληνικές μετεκλο
   - cses:lr:<left|centre|right>  αυτοτοποθέτηση 0–10 (0–3 / 4–6 / 7–10), επί όσων απάντησαν
   - cses:dem_satisfied      ικανοποιημένος/η από τη λειτουργία της δημοκρατίας (πολύ + αρκετά)
   - cses:party_close        αισθάνεται κοντά σε κάποιο κόμμα
-Ομάδες: all · age_gender (15-24…65+ | male/female) · education_group (low/medium/high).
+Ομάδες: all · age_gender (15-24…65+ | male/female) · education_group (low/medium/high) · και, για σύγκριση με τη
+NORAYA/Eurobarometer, gender και age_group (18-24 / 25-39 / 40-54 / 55+).
 Βάρος: δημογραφικό βάρος της μελέτης (IMD1010_2)· ΟΧΙ το «πολιτικό» βάρος, που ευθυγραμμίζει την ψήφο
 με το αποτέλεσμα. n = ερωτώμενοι στο κελί, nEff = Kish.
 Κύμα: το τρίμηνο της τελευταίας ημέρας πεδίου (χρονικό όριο), όχι η ημερομηνία των εκλογών.
@@ -65,6 +66,11 @@ def groups_of(r):
     g = {1: "male", 2: "female"}.get(int(num(r["IMD2002"]) or 0))
     if a and g:
         out.append(("age_gender", f"{a}|{g}"))
+    if g:
+        out.append(("gender", g))
+    age = num(r["IMD2001_1"])
+    if age is not None and 18 <= age <= 110:
+        out.append(("age_group", "18-24" if age <= 24 else "25-39" if age <= 39 else "40-54" if age <= 54 else "55+"))
     e = {0: "low_education", 1: "low_education", 2: "medium_education", 3: "medium_education", 4: "high_education"}.get(int(num(r["IMD2003"]) if num(r["IMD2003"]) is not None else -1))
     if e:
         out.append(("education_group", e))

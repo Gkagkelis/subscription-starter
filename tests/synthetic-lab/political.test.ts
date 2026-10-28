@@ -26,6 +26,9 @@ describe('political data (NORAYA vote intention / leaders)', () => {
     expect(waveBeforeCutoff({ year: 2022, quarter: 'Q2' }, { asOfYear: 2022, asOfMonth: 7 })).toBe(true);
     expect(waveBeforeCutoff({ year: 2022, quarter: '' }, { asOfYear: 2022, asOfMonth: 7 })).toBe(false);
     expect(waveBeforeCutoff({ year: 2022, quarter: '' }, { asOfYear: 2022 })).toBe(true);
+    // μηνιαία κύματα (μέσος όρος δημοσκοπήσεων): ο μήνας υπερισχύει του τριμήνου
+    expect(waveBeforeCutoff({ year: 2022, quarter: 'Q3', month: 7 }, { asOfYear: 2022, asOfMonth: 7 })).toBe(true);
+    expect(waveBeforeCutoff({ year: 2022, quarter: 'Q3', month: 8 }, { asOfYear: 2022, asOfMonth: 7 })).toBe(false);
     expect(latestWaveFor('pol:vote:nd', { asOfYear: 2022, asOfMonth: 7 }).wave?.key).toBe('2019-Q2');
     expect(latestWaveFor('pol:vote:nd', { asOfYear: 2022 }).wave?.key).toBe('2022-Q4');
   });

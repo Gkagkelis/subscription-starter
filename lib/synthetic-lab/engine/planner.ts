@@ -6,7 +6,7 @@
 
 import type { AudienceFilter, Question, ResearchDomain, StudyKind, StudyPlan } from '../types';
 import { behaviourAssumption, defaultAssumptions } from './assumptions';
-import { getMetric, latestWaveFor, type EvidenceContext } from '../data/noraya';
+import { getMetric, latestWaveFor, listMetrics, type EvidenceContext } from '../data/noraya';
 import { PARTY_LABELS } from '../data/political-build';
 import { checkText, isPoliticalContent } from './guardrails';
 import { climateSummary } from '../data/ec-bcs';
@@ -203,23 +203,41 @@ export function politicalQuestions(ctx: EvidenceContext, topic: ReturnType<typeo
   const qs: Question[] = [];
   const warnings: string[] = [];
   const has = (m: string) => !!latestWaveFor(m, ctx).wave;
-  const parties = Object.entries(PARTY_LABELS).filter(([key]) => has(`pol:vote:${key}`));
-  if (parties.length) {
-    const wave = latestWaveFor('pol:vote:nd', ctx).wave;
+  // 1) μηνιαίος μέσος όρος δημοσκοπήσεων (εθνικό επίπεδο επικυρωμένο, P1)· 2) αλλιώς κύμα NORAYA.
+  // Επιλογές: μόνο κόμματα με μέτρηση στο ΙΔΙΟ (τελευταίο επιτρεπτό) κύμα με τη ΝΔ — όχι κόμματα που έχουν πάψει.
+  const voteSource = (prefix: string, refMetric: string, labelOf: (metric: string) => string, minShare: number) => {
+    const ref = latestWaveFor(refMetric, ctx).wave;
+    if (!ref) return null;
+    const parties = listMetrics()
+      .filter((m) => m.metric.startsWith(prefix))
+      .map((m) => ({ metric: m.metric, cell: latestWaveFor(m.metric, ctx).wave }))
+      .filter((x) => x.cell?.key === ref.key && (x.cell.groups.all?.all?.value ?? 0) >= minShare)
+      .sort((x, y) => (y.cell!.groups.all.all.value ?? 0) - (x.cell!.groups.all.all.value ?? 0))
+      .map((x) => ({ metric: x.metric, label: labelOf(x.metric) }));
+    return parties.length ? { parties, wave: ref.key } : null;
+  };
+  const fromPolls = voteSource('polls:vote:', 'polls:vote:nd', (m) => (getMetric(m)?.label || m).replace(/^Εκτίμηση ψήφου: | \(μέσος.*$/g, ''), 1);
+  const fromNoraya = fromPolls ? null : voteSource('pol:vote:', 'pol:vote:nd', (m) => PARTY_LABELS[m.slice('pol:vote:'.length)] || m, 0);
+  const vote = fromPolls || fromNoraya;
+  if (vote) {
+    // «Άλλο κόμμα» στο τέλος
+    vote.parties.sort((x, y) => Number(/:other$/.test(x.metric)) - Number(/:other$/.test(y.metric)));
     qs.push({
       id: 'p1',
       type: 'single_choice',
       text: 'Αν είχαμε βουλευτικές εκλογές την επόμενη Κυριακή, ποιο κόμμα θα ψηφίζατε;',
-      options: parties.map(([, label]) => label),
+      options: vote.parties.map((p) => p.label),
       evidenceLink: {
-        datasetId: 'noraya-political',
-        metric: `pol:vote:${parties[0][0]}`,
-        positiveOption: parties[0][1],
-        optionMetrics: Object.fromEntries(parties.map(([key, label]) => [label, `pol:vote:${key}`]))
+        datasetId: fromPolls ? 'polls-greece' : 'noraya-political',
+        metric: vote.parties[0].metric,
+        positiveOption: vote.parties[0].label,
+        optionMetrics: Object.fromEntries(vote.parties.map((p) => [p.label, p.metric]))
       }
     });
     warnings.push(
-      `Η πρόθεση ψήφου (p1) βασίζεται στο κύμα ${wave?.key || '—'} των πολιτικών ερευνών NORAYA και αφορά ποσοστά επί των εγκύρων (χωρίς αναποφάσιστους/λευκό/αποχή). Αν το κύμα είναι παλιό, τα ποσοστά δεν αντιστοιχούν στη σημερινή εικόνα.`
+      fromPolls
+        ? `Η πρόθεση ψήφου (p1) βασίζεται στον μέσο όρο των δημοσιευμένων δημοσκοπήσεων του μήνα ${vote.wave} (εκτίμηση επί των εγκύρων). Εθνικό επίπεδο: επικυρωμένο σε 6 εκλογές (μέσο σφάλμα ~1,6 π.μ., όσο ο μέσος όρος δημοσκοπήσεων). Διασπάσεις ανά ομάδα: ΜΗ επικυρωμένες — στη δοκιμή ήταν λιγότερο ακριβείς από το να δοθεί σε κάθε ομάδα το εθνικό ποσοστό.`
+        : `Η πρόθεση ψήφου (p1) βασίζεται στο κύμα ${vote.wave} των πολιτικών ερευνών NORAYA (επί των εγκύρων). Αν το κύμα είναι παλιό, τα ποσοστά δεν αντιστοιχούν στη σημερινή εικόνα.`
     );
   } else {
     warnings.push('Δεν υπάρχει μέτρηση πρόθεσης ψήφου πριν από το χρονικό όριο· η ερώτηση ψήφου παραλείφθηκε.');

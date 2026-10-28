@@ -354,11 +354,11 @@ export function poolWaves(waves: PriorWave[], maxWaves = 3, halfLifeYears = 2): 
 const QUARTER_END: Record<string, number> = { Q1: 3, Q2: 6, Q3: 9, Q4: 12 };
 
 /** Το κύμα είναι πριν από το χρονικό όριο (έτος και, αν δοθεί, μήνας αναφοράς). */
-export function waveBeforeCutoff(w: Pick<PriorWave, 'year' | 'quarter'>, ctx: Pick<EvidenceContext, 'asOfYear' | 'asOfMonth'>): boolean {
+export function waveBeforeCutoff(w: Pick<PriorWave, 'year' | 'quarter' | 'month'>, ctx: Pick<EvidenceContext, 'asOfYear' | 'asOfMonth'>): boolean {
   if (!ctx.asOfYear) return true;
   if (w.year !== ctx.asOfYear) return w.year < ctx.asOfYear;
   if (!ctx.asOfMonth) return true;
-  const end = QUARTER_END[w.quarter];
+  const end = w.month ?? QUARTER_END[w.quarter];
   return end !== undefined && end <= ctx.asOfMonth;
 }
 
