@@ -1,0 +1,25 @@
+{
+  "note": "Αντιστοίχιση DEMOTEC (validation, 9–11/2022) → items/άγκυρες του μοντέλου. Καταγράφηκε ΠΡΙΝ από την εκτέλεση. Η εκπαίδευση έχει cutoff 2022-09 (κανένα δεδομένο μεταγενέστερο του πεδίου).",
+  "holdout": "demotec2022",
+  "cutoff": "2022-09",
+  "refMonth": "2022-10",
+  "families": "dianeosis_tpe,cses,undpolar,maple",
+  "lam": 3.0,
+  "items": [
+    {"hold": "demotec2022::trust_institutional_government", "target": "dn2018b::B21_3", "map": {"4": "1", "3": "2", "2": "3", "1": "4"}, "series": "government", "kind": "repeated-scale", "positiveLowCodes": true},
+    {"hold": "demotec2022::trust_institutional_parliament", "target": "dn2018b::B21_6", "map": {"4": "1", "3": "2", "2": "3", "1": "4"}, "series": "parliament", "kind": "repeated-scale", "positiveLowCodes": true},
+    {"hold": "demotec2022::trust_institutional_polParties", "target": "dn2018b::B21_8", "map": {"4": "1", "3": "2", "2": "3", "1": "4"}, "series": "parties", "kind": "repeated-scale", "positiveLowCodes": true},
+    {"hold": "demotec2022::trust_institutional_Courts", "target": "dn2018b::B21_7", "map": {"4": "1", "3": "2", "2": "3", "1": "4"}, "series": "justice", "kind": "equivalent (δικαστήρια ↔ δικαιοσύνη)", "positiveLowCodes": true},
+    {"hold": "demotec2022::trust_institutional_EU", "target": "dn2018b::B21_17", "map": {"4": "1", "3": "2", "2": "3", "1": "4"}, "series": "eu", "kind": "repeated-scale", "positiveLowCodes": true},
+    {"hold": "demotec2022::trust_institutional_localGovernment", "target": "dn2018b::B21_5", "map": {"4": "1", "3": "2", "2": "3", "1": "4"}, "series": "local", "kind": "equivalent (τοπική αυτοδιοίκηση ↔ δήμαρχος)", "positiveLowCodes": true},
+    {"hold": "demotec2022::trust_institutional_media", "target": "dn2018b::B21_20", "map": {"4": "1", "3": "2", "2": "3", "1": "4"}, "series": "media", "kind": "equivalent (μέσα ενημέρωσης ↔ τηλεόραση)", "positiveLowCodes": true},
+    {"hold": "demotec2022::trust_institutional_church", "target": "dn2018b::B21_14", "map": {"4": "1", "3": "2", "2": "3", "1": "4"}, "series": "religious", "kind": "repeated-scale", "positiveLowCodes": true}
+  ],
+  "anchors": [
+    {"hold": "polint4", "target": "anchor:polint4", "kind": "equivalent (very/somewhat/not very/not at all)"},
+    {"hold": "econ4", "target": "anchor:econ4", "kind": "equivalent (ESS-type income feeling ↔ «πώς τα βγάζετε πέρα»)"}
+  ],
+  "associationOnly": [{"hold": "demotec2022::pol_leftRight", "target": "anchor:lr7", "note": "διαφορετική κλίμακα (1–10 ↔ 7 κατηγορίες): μόνο συσχετίσεις τάξης"}],
+  "metrics": ["marginal MAE", "TVD", "subgroup MAE (age_band, gender, edu3)", "Spearman pairs (real vs synthetic)", "sign agreement", "seed SD"],
+  "baselines": ["B_last (περιθώριο πηγής 2017)", "B_prod (μόνο δημογραφικά, ίδιο item)", "B_unif", "B_ebshift (περιθώριο πηγής μετατοπισμένο με την ίδια μεταβολή Eurobarometer, χωρίς πρόσωπα)"]
+}
