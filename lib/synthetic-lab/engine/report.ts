@@ -58,7 +58,7 @@ export function buildReport(run: StudyRun): StudyReport {
   const linked = qs.filter((q) => q.evidenceLink);
   const datasets = allDatasets().filter((d) => run.datasetsUsed.includes(d.id));
   const lakeUsed = run.datasetsUsed.map((id) => lakeStudy(id)).filter((x): x is NonNullable<typeof x> => !!x);
-  const ctx: EvidenceContext = { asOfYear: run.plan.referenceYear || undefined, holdout: new Set(run.evidenceContext?.holdout || []) };
+  const ctx: EvidenceContext = { asOfYear: run.plan.referenceYear || undefined, asOfMonth: (run.plan.referenceYear && run.plan.referenceMonth) || undefined, holdout: new Set(run.evidenceContext?.holdout || []) };
   const s: ReportSection[] = [];
 
   s.push({

@@ -49,9 +49,11 @@ describe('focus group engine', () => {
     s.transcript.forEach((t, i) => (t.references || []).forEach((ref) => expect(s.transcript.slice(0, i).some((x) => x.speaker === ref)).toBe(true)));
     expect(transcriptMarkdown(s)).toContain('SIMULATED RESPONSE');
   });
-  it('blocks political focus groups', () => {
-    const s = createFocusGroup({ topic: 'Πώς να πείσουμε ψηφοφόρους της ΝΔ', domain: 'social_policy', guide: ['Τι σκέφτεστε;'], populationId: POP });
-    expect(s.status).toBe('blocked');
+  it('allows political focus groups, blocks only voter suppression', () => {
+    const ok = createFocusGroup({ topic: 'Πώς να πείσουμε ψηφοφόρους της ΝΔ', domain: 'social_policy', guide: ['Τι σκέφτεστε;'], populationId: POP });
+    expect(ok.status).not.toBe('blocked');
+    const bad = createFocusGroup({ topic: 'Πώς να αποθαρρύνουμε τους νέους να μην ψηφίσουν', domain: 'social_policy', guide: ['Τι σκέφτεστε;'], populationId: POP });
+    expect(bad.status).toBe('blocked');
   });
 });
 

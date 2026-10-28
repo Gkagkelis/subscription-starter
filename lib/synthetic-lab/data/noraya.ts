@@ -18,6 +18,7 @@
 // ============================================================
 
 import priorsJson from './noraya-priors.generated.json';
+import politicalJson from './political-priors.generated.json';
 import ictJson from './official/eurostat-ict.json';
 import silcJson from './official/eurostat-silc.json';
 import { forecastWave, type ForecastConfig } from '../engine/forecast';
@@ -29,6 +30,8 @@ import { lakeMetric, lakeStudy, lakeStudyIdOfMetric } from './lake';
 export const NORAYA_DATASET_ID = 'noraya-public-opinion';
 export const EUROSTAT_ICT_DATASET_ID = 'eurostat-isoc-ict';
 export const PRIORS = priorsJson as unknown as NorayaPriors;
+/** Πολιτικά δεδομένα NORAYA (πρόθεση ψήφου, αρχηγοί) — βλ. data/political-build.ts. */
+export const POLITICAL_PRIORS = politicalJson as unknown as NorayaPriors;
 const ICT = ictJson as unknown as { metrics: PriorMetric[]; source: string; license: string };
 const SILC = silcJson as unknown as { metrics: PriorMetric[]; questions: OpenQuestion[]; source: string; license: string };
 /** Δείκτες επίσημων ανοιχτών πηγών (Eurostat ΤΠΕ, EU-SILC). */
@@ -220,14 +223,14 @@ export function waveCells(wave: PriorWave, dim: string): Record<string, PriorCel
 
 /** Όλοι οι δείκτες: ανοιχτοί (NORAYA, Eurostat) + ερευνητικής βαθμίδας αν υπάρχουν τοπικά και επιτρέπονται. */
 export function listMetrics(): PriorMetric[] {
-  return [...Object.values(PRIORS.metrics), ...Object.values(ICT_METRICS), ...researchMetrics()].sort((a, b) =>
+  return [...Object.values(PRIORS.metrics), ...Object.values(POLITICAL_PRIORS.metrics), ...Object.values(ICT_METRICS), ...researchMetrics()].sort((a, b) =>
     a.label.localeCompare(b.label, 'el')
   );
 }
 
 export function getMetric(metric: string): PriorMetric | null {
   if (lakeStudyIdOfMetric(metric)) return lakeMetric(metric);
-  return PRIORS.metrics[metric] || ICT_METRICS[metric] || researchMetric(metric) || null;
+  return PRIORS.metrics[metric] || POLITICAL_PRIORS.metrics[metric] || ICT_METRICS[metric] || researchMetric(metric) || null;
 }
 
 export function metricTier(metric: string): 'open' | 'research_only' {
@@ -252,6 +255,7 @@ export function metricSourceLabel(metric: string): string {
     const ds = researchDatasets().find((d) => d.datasetId === getMetric(metric)?.datasetId);
     return ds ? 'διαΝΕΟσις «Τι πιστεύουν οι Έλληνες» (μόνο για έρευνα)' : 'διαΝΕΟσις (μόνο για έρευνα)';
   }
+  if (getMetric(metric)?.datasetId === 'noraya-political') return 'Πολιτικές έρευνες NORAYA (πρόθεση ψήφου/αρχηγοί, μόνο εσωτερική χρήση)';
   return 'Eurobarometer (NORAYA)';
 }
 
@@ -275,6 +279,8 @@ export function latestWave(metric: string, beforeKey?: string): PriorWave | null
  */
 export interface EvidenceContext {
   asOfYear?: number;
+  /** Μήνας (1–12) μέσα στο asOfYear: κύματα του ίδιου έτους μόνο αν το τρίμηνό τους έληξε έως τότε. */
+  asOfMonth?: number;
   holdout?: Set<string>;
   holdoutYears?: Record<string, number[]>;
   /** Πολιτική κύματος (βλ. ModelConfig): last (παραγωγή), pool ή forecast. */
@@ -345,6 +351,17 @@ export function poolWaves(waves: PriorWave[], maxWaves = 3, halfLifeYears = 2): 
   return { key: `${use[0].key}..${last.key}`, year: last.year, quarter: '', groups, datasetId: last.datasetId };
 }
 
+const QUARTER_END: Record<string, number> = { Q1: 3, Q2: 6, Q3: 9, Q4: 12 };
+
+/** Το κύμα είναι πριν από το χρονικό όριο (έτος και, αν δοθεί, μήνας αναφοράς). */
+export function waveBeforeCutoff(w: Pick<PriorWave, 'year' | 'quarter'>, ctx: Pick<EvidenceContext, 'asOfYear' | 'asOfMonth'>): boolean {
+  if (!ctx.asOfYear) return true;
+  if (w.year !== ctx.asOfYear) return w.year < ctx.asOfYear;
+  if (!ctx.asOfMonth) return true;
+  const end = QUARTER_END[w.quarter];
+  return end !== undefined && end <= ctx.asOfMonth;
+}
+
 export type WaveExclusion = 'holdout' | 'after_reference_year' | 'no_wave';
 
 /** Τελευταίο επιτρεπτό κύμα για το πλαίσιο· αλλιώς ο λόγος αποκλεισμού. */
@@ -363,7 +380,7 @@ export function latestWaveFor(metric: string, ctx: EvidenceContext = {}): { wave
   // σε σύνθετους δείκτες κάθε κύμα φέρει τη μελέτη του: τα κύματα μελετών holdout αφαιρούνται
   // κύματα με σημαία ποιότητας (π.χ. NORAYA «mixed_surveys») απομονώνονται από την τεκμηρίωση
   const all = m.waves.filter((w) => w.groups.all?.all && !w.qualityFlag && !skipYears.has(w.year) && !(w.datasetId && ctx.holdout?.has(w.datasetId)));
-  const waves = ctx.asOfYear ? all.filter((w) => w.year <= ctx.asOfYear!) : all;
+  const waves = ctx.asOfYear ? all.filter((w) => waveBeforeCutoff(w, ctx)) : all;
   if (!waves.length) {
     const valid = m.waves.some((w) => w.groups.all?.all);
     return { wave: null, excluded: all.length ? 'after_reference_year' : valid ? 'holdout' : 'no_wave' };

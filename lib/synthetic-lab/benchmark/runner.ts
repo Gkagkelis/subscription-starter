@@ -15,7 +15,7 @@ import { getMetric, latestWaveFor, norayaMembership, type EvidenceContext } from
 import { band65Comparable, universeFraction } from '../data/universe';
 import type { PriorWave } from '../data/noraya-build';
 import { expandHoldout, lakeMetric, lakePoolId, lakeTransferId, sampleKeyOf, searchLake } from '../data/lake';
-import { checkQuestionnaire } from '../engine/guardrails';
+import { legacyPoliticalBlock } from '../engine/guardrails';
 import { PRODUCTION_MODEL, type ModelConfig } from '../engine/model-config';
 import { evidenceContextForPlan, runSurvey } from '../engine/survey';
 import { CALIBRATED_POPULATION_ID, loadPopulation } from '../population/store';
@@ -202,7 +202,7 @@ export async function runBenchmark(suite: BenchSuite, cfg: RunConfig): Promise<{
         itemId: item.id, family: item.family, split: item.split, year: item.year, sampleKey: item.sampleKey, topics: item.topics,
         binary: item.binary, dkOptions: item.dkOptions, status: 'ok', cells: [], noiseFloorPp: null
       };
-      if (!checkQuestionnaire('benchmark', [{ text: item.text, options: item.options }]).allowed) {
+      if (legacyPoliticalBlock([item.text, ...item.options].join(' '))) {
         results.push({ ...base, status: 'guardrail', note: 'Η ερώτηση μπλοκάρεται από τους κανόνες (πολιτικό/εκλογικό περιεχόμενο).' });
         continue;
       }

@@ -299,6 +299,11 @@ export interface StudyPlan {
    * (και ο πληθυσμός είναι ο ιστορικός baseline αν το έτος είναι πριν από τη βαθμονόμηση). null = σήμερα.
    */
   referenceYear?: number | null;
+  /**
+   * Μήνας αναφοράς (1–12) μέσα στο referenceYear. Αν δοθεί, κύματα του ίδιου έτους χρησιμοποιούνται μόνο
+   * αν το τρίμηνό τους έληξε έως αυτόν τον μήνα· κύματα του ίδιου έτους χωρίς τρίμηνο εξαιρούνται.
+   */
+  referenceMonth?: number | null;
   /** Μελέτες αξιολόγησης (holdout): εξαιρούνται από τη βαθμονόμηση μαζί με διπλότυπα/παράγωγά τους. */
   holdoutDatasets?: string[];
   /** Μηχανισμός απαντήσεων (προεπιλογή «standard» = prod-1). */
@@ -422,7 +427,7 @@ export interface StudyRun {
   datasetsUsed: string[];
   /** Ανά παράμετρο: από ποια μελέτη/κύμα προήλθε (ή γιατί εξαιρέθηκε). Παρατηρήσεις ≠ παραδοχές ≠ συνθετικά αποτελέσματα. */
   provenance?: ParameterProvenance[];
-  evidenceContext?: { referenceYear: number | null; holdout: string[]; populationNote: string | null };
+  evidenceContext?: { referenceYear: number | null; referenceMonth?: number | null; holdout: string[]; populationNote: string | null };
   validation: StudyValidationSummary;
   stability?: StabilityResult | null;
 }

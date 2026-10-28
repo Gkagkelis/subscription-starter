@@ -43,8 +43,10 @@ describe('API', () => {
     expect(list.studies.some((s: any) => s.id === run.id)).toBe(true);
   });
 
-  it('rejects political requests with 422 and invalid input with 400', async () => {
-    const r = await planPOST(json('http://x', { text: 'Πρόθεση ψήφου για τις εκλογές' }));
+  it('accepts political requests, rejects voter suppression with 422 and invalid input with 400', async () => {
+    const ok = await planPOST(json('http://x', { text: 'Πρόθεση ψήφου για τις εκλογές' }));
+    expect(ok.status).toBe(200);
+    const r = await planPOST(json('http://x', { text: 'Πώς να αποθαρρύνουμε τους συνταξιούχους να μην ψηφίσουν' }));
     expect(r.status).toBe(422);
     const bad = await studiesPOST(json('http://x', { plan: { title: 'x' }, populationId: 'p' }));
     expect(bad.status).toBe(400);

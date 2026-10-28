@@ -405,7 +405,8 @@ export function buildSuite(opts: { maxEurostatPerStudy?: number; maxEurostat?: n
   }
 
   // --- NORAYA (δείκτες της παραγωγής: μόνο calibration), ένα κύμα ανά έτος 2016–2024 ---
-  for (const m of listMetrics().filter((x) => (x.scheme || 'eurobarometer') === 'eurobarometer')) {
+  // τα πολιτικά δεδομένα (από 10/2026) μένουν εκτός, ώστε η προκαταχωρισμένη σουίτα να μην αλλάζει
+  for (const m of listMetrics().filter((x) => (x.scheme || 'eurobarometer') === 'eurobarometer' && x.datasetId !== 'noraya-political')) {
     const byYear = new Map<number, PriorWave>();
     m.waves.filter((w) => w.groups.all?.all && !w.qualityFlag).forEach((w) => byYear.set(w.year, w));
     for (const [year, w] of Array.from(byYear.entries())) {

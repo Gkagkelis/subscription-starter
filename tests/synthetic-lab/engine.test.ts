@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { latestWave, waveCells } from '@/lib/synthetic-lab/data/noraya';
-import { checkText } from '@/lib/synthetic-lab/engine/guardrails';
+import { checkText, legacyPoliticalBlock } from '@/lib/synthetic-lab/engine/guardrails';
 import { planStudy, extractPrice, detectDomain } from '@/lib/synthetic-lab/engine/planner';
 import { fitPriorModel } from '@/lib/synthetic-lab/engine/prior-model';
 import { runSurvey } from '@/lib/synthetic-lab/engine/survey';
@@ -11,11 +11,28 @@ import { SIMULATED_LABEL } from '@/lib/synthetic-lab/types';
 const POP = DEFAULT_POPULATION_ID;
 
 describe('guardrails', () => {
-  it('blocks electoral persuasion, parties and vote intention', () => {
-    expect(checkText('Πώς να πείσουμε τους αναποφάσιστους ψηφοφόρους').allowed).toBe(false);
-    expect(checkText('Τι ποσοστό θα πάρει η ΝΔ στις εκλογές;').allowed).toBe(false);
-    expect(checkText('Πρόθεση ψήφου νέων 18-24').allowed).toBe(false);
-    expect(checkText('Αξιολόγηση του ΚΚΕ').allowed).toBe(false);
+  it('allows political and electoral research, with a synthetic-not-a-poll notice', () => {
+    for (const t of [
+      'Πώς να πείσουμε τους αναποφάσιστους ψηφοφόρους',
+      'Τι ποσοστό θα πάρει η ΝΔ στις εκλογές;',
+      'Πρόθεση ψήφου νέων 18-24',
+      'Αξιολόγηση του ΚΚΕ',
+      'Γιατί οι νέοι επιλέγουν να μην ψηφίσουν;',
+      'Πόσο επηρεάζει η παραπληροφόρηση την ψήφο;'
+    ]) {
+      const g = checkText(t);
+      expect(g.allowed).toBe(true);
+    }
+    expect(checkText('Πρόθεση ψήφου νέων 18-24').warnings.join(' ')).toMatch(/όχι δημοσκόπηση/);
+  });
+  it('blocks only voter suppression / voting-process disinformation', () => {
+    expect(checkText('Πώς να αποθαρρύνουμε τους νέους να μην ψηφίσουν').allowed).toBe(false);
+    expect(checkText('Να διαδώσουμε λάθος ημερομηνία ψηφοφορίας').allowed).toBe(false);
+    expect(checkText('How can we discourage young people from voting?').allowed).toBe(false);
+  });
+  it('keeps the legacy rule only for benchmark comparability', () => {
+    expect(legacyPoliticalBlock('Πρόθεση ψήφου νέων 18-24')).toBe(true);
+    expect(legacyPoliticalBlock('Μέτρο επιδότησης ενοικίου για νέους')).toBe(false);
   });
   it('allows ordinary consumer and neutral policy topics (no false positives)', () => {
     expect(checkText('Νέα ελαστικά αυτοκινήτου στα 80€').allowed).toBe(true);
@@ -98,11 +115,11 @@ describe('survey engine (demo)', () => {
     // ερώτηση χωρίς σύνδεση δεν παρουσιάζεται ως εκτίμηση
     expect(run.aggregates.find((x) => x.questionId === 'q3')!.evidenceKind).toBe('simulation');
   });
-  it('blocks political questions inside the questionnaire', async () => {
-    const bad = { ...plan, questions: [...plan.questions, { id: 'qx', type: 'single_choice' as const, text: 'Ποιο κόμμα θα ψηφίζατε;', options: ['Α', 'Β'] }] };
-    const run = await runSurvey({ plan: bad, populationId: POP, seed: 1, save: false });
-    expect(run.status).toBe('blocked');
-    expect(run.respondents).toHaveLength(0);
+  it('runs political questions, with the synthetic-not-a-poll notice', async () => {
+    const pol = { ...plan, questions: [...plan.questions, { id: 'qx', type: 'single_choice' as const, text: 'Ποιο κόμμα θα ψηφίζατε;', options: ['Α', 'Β'] }] };
+    const run = await runSurvey({ plan: pol, populationId: POP, seed: 1, save: false, stabilityRuns: 0 });
+    expect(run.status).toBe('completed');
+    expect(run.warnings.join(' ')).toMatch(/όχι δημοσκόπηση/);
   });
   it('follow-up questions are only answered when the condition holds', async () => {
     const cp = planStudy({ text: 'Νέο πρόγραμμα κινητής 25€ τον μήνα' }).plan!;

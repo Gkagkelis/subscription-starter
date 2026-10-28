@@ -95,6 +95,7 @@ export const PlanSchema = z.object({
   plannerVersion: str(40),
   plannerMode: z.enum(['rules', 'ai']),
   referenceYear: z.number().int().min(2000).max(2100).nullable().optional(),
+  referenceMonth: z.number().int().min(1).max(12).nullable().optional(),
   holdoutDatasets: z.array(str(300)).max(200).optional(),
   engine: z.enum(['standard', 'evidence']).optional()
 });

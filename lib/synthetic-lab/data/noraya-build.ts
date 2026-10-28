@@ -10,7 +10,8 @@
 //  - Διπλές μετρήσεις στο ίδιο κύμα (π.χ. δύο έρευνες στο ίδιο τρίμηνο)
 //    συνδυάζονται με στάθμιση n· αν διαφέρουν πέρα από 3 τυπικά σφάλματα,
 //    η ομάδα σημειώνεται "inconsistent" και δεν χρησιμοποιείται στην επικύρωση.
-//  - Πολιτικός προσανατολισμός (left_right_placement) εξαιρείται πολιτικά.
+//  - Η αυτοτοποθέτηση αριστερά–δεξιά (left_right_placement) εξαιρείται για λόγους μορφής: είναι μέση
+//    θέση κλίμακας (0–100), όχι ποσοστό απάντησης, και δεν ερμηνεύεται από το μοντέλο ποσοστών.
 // ============================================================
 
 import { parseCsvObjects } from '../csv';
@@ -95,7 +96,7 @@ export interface NorayaPriors {
 
 export const EXCLUDED_METRICS: Record<string, string> = {
   left_right_placement:
-    'Πολιτικός αυτοπροσδιορισμός (αριστερά–δεξιά). Εξαιρείται: το Lab δεν μοντελοποιεί πολιτικό προσανατολισμό ατόμων.'
+    'Μέση αυτοτοποθέτηση αριστερά–δεξιά (κλίμακα 0–100), όχι ποσοστό απάντησης· το μοντέλο ποσοστών δεν την ερμηνεύει. Η κατανομή θέλει μικροδεδομένα (π.χ. Eurobarometer D1, ESS lrscale).'
 };
 
 export const METRIC_LABELS: Record<string, string> = {
@@ -121,15 +122,26 @@ export const METRIC_LABELS: Record<string, string> = {
 const SEMANTICS_NOTE =
   'Η ακριβής διατύπωση και κωδικοποίηση της ερώτησης δεν τεκμηριώνεται μέσα στο repository· η ερμηνεία ως «ποσοστό θετικής/καταφατικής απάντησης» προκύπτει από το όνομα του δείκτη και πρέπει να επιβεβαιωθεί με την πρωτογενή πηγή (Eurobarometer).';
 
-export function buildNorayaPriors(csvText: string, sourceSha256: string): NorayaPriors {
+export interface BuildPriorsOptions {
+  datasetId?: string;
+  sourceFile?: string;
+  labels?: Record<string, string>;
+  exclude?: Record<string, string>;
+  semanticsNote?: string;
+}
+
+export function buildNorayaPriors(csvText: string, sourceSha256: string, opts: BuildPriorsOptions = {}): NorayaPriors {
   const rows = parseCsvObjects(csvText);
+  const excluded = opts.exclude ?? EXCLUDED_METRICS;
+  const labels = opts.labels ?? METRIC_LABELS;
+  const note = opts.semanticsNote ?? SEMANTICS_NOTE;
   type Acc = { values: number[]; ns: number[]; conf: string[] };
   const acc = new Map<string, Acc>();
   const familyOf: Record<string, string> = {};
   let used = 0;
 
   for (const r of rows) {
-    if (EXCLUDED_METRICS[r.metric]) continue;
+    if (excluded[r.metric]) continue;
     if (r.data_status && r.data_status !== 'ok') continue;
     const value = Number(r.value_weighted_0_100);
     const n = Number(r.n_valid_weighted);
@@ -165,8 +177,8 @@ export function buildNorayaPriors(csvText: string, sourceSha256: string): Noraya
       (metrics[metric] = {
         metric,
         family: familyOf[metric] || 'unknown',
-        label: METRIC_LABELS[metric] || metric,
-        semanticsNote: SEMANTICS_NOTE,
+        label: labels[metric] || metric,
+        semanticsNote: note,
         waves: []
       });
     const wkey = `${year}-${quarter}`;
@@ -199,17 +211,17 @@ export function buildNorayaPriors(csvText: string, sourceSha256: string): Noraya
 
   return {
     meta: {
-      datasetId: 'noraya-public-opinion',
-      sourceFile: 'public/noraya-data/public_opinion.csv',
+      datasetId: opts.datasetId ?? 'noraya-public-opinion',
+      sourceFile: opts.sourceFile ?? 'public/noraya-data/public_opinion.csv',
       sourceSha256,
       rows: rows.length,
       builtFromRows: used,
-      excludedMetrics: EXCLUDED_METRICS,
+      excludedMetrics: excluded,
       notes: [
         'Συγκεντρωτικά ποσοστά ανά μία διάσταση· όχι ατομικές απαντήσεις, όχι διασταυρώσεις.',
         'Διπλές μετρήσεις ίδιου κύματος συνδυάζονται με στάθμιση n· ασυμβατότητες > 3 SE σημειώνονται.',
         `Κύματα με ασύμβατο σύνολο (μείγμα διαφορετικών ερευνών του τριμήνου, χωρίς κωδικό έρευνας στην πηγή): ${isolated} — απομονώνονται (qualityFlag = mixed_surveys).`,
-        SEMANTICS_NOTE
+        note
       ]
     },
     metrics

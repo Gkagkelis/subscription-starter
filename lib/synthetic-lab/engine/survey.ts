@@ -55,9 +55,14 @@ export interface RunSurveyOptions {
 }
 
 /** Πλαίσιο τεκμηρίωσης (χρονικό όριο, holdout) από το σχέδιο μελέτης. */
-export function evidenceContextForPlan(plan: Pick<StudyPlan, 'referenceYear' | 'holdoutDatasets'>): EvidenceContext {
+export function evidenceContextForPlan(plan: Pick<StudyPlan, 'referenceYear' | 'referenceMonth' | 'holdoutDatasets'>): EvidenceContext {
   const holdout = expandHoldout(plan.holdoutDatasets || []);
-  return { asOfYear: plan.referenceYear || undefined, holdout, holdoutYears: holdoutDerivedYears(holdout) };
+  return {
+    asOfYear: plan.referenceYear || undefined,
+    asOfMonth: (plan.referenceYear && plan.referenceMonth) || undefined,
+    holdout,
+    holdoutYears: holdoutDerivedYears(holdout)
+  };
 }
 
 const LEVEL_OF_SCHEME: Record<string, string> = { eurobarometer: 'B', eurostat_ict: 'B', eurostat_silc: 'B', dianeosis: 'A' };
@@ -371,7 +376,7 @@ export async function runSurvey(input: RunSurveyOptions): Promise<StudyRun> {
     cost: { ...base.cost, inputTokens: budget.inputTokens, outputTokens: budget.outputTokens, usd: round(budget.spent, 4), calls: budget.calls },
     datasetsUsed,
     provenance,
-    evidenceContext: { referenceYear: o.plan.referenceYear || null, holdout: Array.from(ctx0.holdout || []), populationNote },
+    evidenceContext: { referenceYear: o.plan.referenceYear || null, referenceMonth: o.plan.referenceMonth || null, holdout: Array.from(ctx0.holdout || []), populationNote },
     validation,
     stability,
     warnings: Array.from(new Set(base.warnings))

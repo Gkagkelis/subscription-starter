@@ -7,7 +7,7 @@
 Κανόνες:
 - Μόνο μελέτες VALIDATED/INTEGRATED από το lake (όχι τα ήδη ενσωματωμένα σύνολα του Lab), μη διπλότυπες, Ελλάδα,
   ατομικός πληθυσμός (τα B2B δείγματα εξαιρούνται), κύματα 2012–2026.
-- Ερωτήσεις ψήφου/κομματικής προτίμησης εξαιρούνται (το Lab δεν μοντελοποιεί εκλογική συμπεριφορά ατόμων).
+- Ερωτήσεις ψήφου/κομματικής προτίμησης εξάγονται κανονικά (από 10/2026) και σημαίνονται με το θέμα «politics».
 - tier = open μόνο με ρητά ανοικτή άδεια· αλλιώς research_only.
 - Κανονικοποίηση ομάδων: age_band | age_group4 | age_findex · education_group (ή proxy ηλικίας ολοκλήρωσης) | education_findex ·
   income_quintile | income_findex · gender. Οι υπόλοιπες διασπάσεις μένουν στη βάση (δεν χρησιμοποιούνται στο μοντέλο).
@@ -170,11 +170,12 @@ def run(con):
             if not rows:
                 continue
             qtext = ((v["label"] if st["source_id"] in ("eurostat", "worldbank") else v["question_text"]) or v["label"] or v["name"] or "").strip()
-            if POLITICAL.search(qtext):
-                continue
+            political = bool(POLITICAL.search(qtext))
             vt = v["var_type"] or ""
             base_id = f"lake:{sid}::{v['name']}"
             topics = json.loads(v["topics"] or "[]") if v["topics"] else []
+            if political and "politics" not in topics:
+                topics = topics + ["politics"]
             if vt in ("percent", "share_of_counts") and all(r["option_label"] == "ποσοστό" for r in rows):
                 try:
                     unit = (json.loads(v["options"] or "{}") or {}).get("unit")

@@ -70,11 +70,11 @@ export function builtInDatasets(): DatasetMeta[] {
       license: 'Άγνωστη',
       licenseVerified: false,
       commercialUse: 'unclear',
-      restrictions: ['Εκλογικά δεδομένα.', '366 γραμμές χωρίς έτος/τρίμηνο.'],
-      usage: 'excluded',
-      usageNote: 'Σκόπιμα εκτός χρήσης: το Lab δεν προσομοιώνει πρόθεση ψήφου ούτε παράγει εκλογικές προβλέψεις.',
-      validationStatus: 'not_applicable',
-      storage: 'public/noraya-data/vote_intention.csv (δεν διαβάζεται από το Lab)'
+      restrictions: ['366 γραμμές χωρίς έτος/τρίμηνο (δεν χρησιμοποιούνται).', 'Πολλές έρευνες ανά τρίμηνο χωρίς κωδικό έρευνας.'],
+      usage: 'used',
+      usageNote: 'Τεκμηρίωση για ερωτήσεις πρόθεσης ψήφου (12 κόμματα, 5 τρίμηνα 2018–2022). Το σύνολο είναι παράγωγο από τις ομάδες φύλου· μόνο εσωτερική χρήση (άγνωστη άδεια).',
+      validationStatus: 'not_validated',
+      storage: 'public/noraya-data/vote_intention.csv → lib/synthetic-lab/data/political-priors.generated.json'
     },
     {
       id: 'noraya-leader-traits',
@@ -92,11 +92,11 @@ export function builtInDatasets(): DatasetMeta[] {
       license: 'Άγνωστη',
       licenseVerified: false,
       commercialUse: 'unclear',
-      restrictions: ['Αφορά συγκεκριμένα πολιτικά πρόσωπα.', '952 γραμμές χωρίς έτος/τρίμηνο.'],
-      usage: 'excluded',
-      usageNote: 'Σκόπιμα εκτός χρήσης: το Lab δεν μοντελοποιεί στάσεις απέναντι σε πολιτικά πρόσωπα.',
-      validationStatus: 'not_applicable',
-      storage: 'public/noraya-data/leader_traits.csv (δεν διαβάζεται από το Lab)'
+      restrictions: ['952 γραμμές χωρίς έτος/τρίμηνο (δεν χρησιμοποιούνται).', 'Χωρίς μέγεθος δείγματος ανά κελί.'],
+      usage: 'used',
+      usageNote: 'Τεκμηρίωση για ερωτήσεις αρχηγών (καταλληλότερος πρωθυπουργός, έγκριση, χαρακτηριστικά, ευθύνη). Η πηγή δεν δίνει n· μόνο εσωτερική χρήση (άγνωστη άδεια).',
+      validationStatus: 'not_validated',
+      storage: 'public/noraya-data/leader_traits.csv → lib/synthetic-lab/data/political-priors.generated.json'
     },
     {
       id: 'noraya-data-index',
