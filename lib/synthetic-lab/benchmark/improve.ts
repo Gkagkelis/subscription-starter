@@ -39,17 +39,22 @@ function familyScores(items: ItemResult[]): Record<string, number | null> {
 export const TUNING_AXES: { name: string; values: Partial<ModelConfig>[] }[] = [
   { name: 'αγκύρωση επιπέδου', values: [{ anchorOverall: false }, { anchorOverall: true }] },
   { name: 'μεταφορά δομής', values: [{ structureTransfer: false }, { structureTransfer: true }] },
-  { name: 'συρρίκνωση', values: [{ shrinkage: 0 }, { shrinkage: 100 }, { shrinkage: 300 }, { shrinkage: 1000 }] },
-  { name: 'βάρη ερωτώμενων', values: [{ respondentWeighting: 'region_srs' }, { respondentWeighting: 'persona_weight' }] },
-  { name: 'πληθυσμός', values: [{ population: 'rule' }, { population: 'year_raked' }] },
-  { name: 'κύματα', values: [{ wavePolicy: 'last' }, { wavePolicy: 'pool', poolMaxWaves: 2, poolHalfLifeYears: 2 }, { wavePolicy: 'pool', poolMaxWaves: 3, poolHalfLifeYears: 3 }] }
+  { name: 'συρρίκνωση', values: [{ shrinkage: 0 }, { shrinkage: 100 }, { shrinkage: 300 }, { shrinkage: 1000 }] }
 ];
+/**
+ * Άξονες που ΑΠΟΡΡΙΦΘΗΚΑΝ από τα διαγνωστικά πειράματα (δεν μπαίνουν στη ρύθμιση):
+ *  - βάρη ερωτώμενων (E2: Δ=0), πληθυσμός έτους (E4: Δ≈0, CI περιέχει 0), συνδυασμός κυμάτων (E5: Δ>0, CI [-0.62, 0.51]).
+ */
+export const REJECTED_AXES = ['respondentWeighting (E2)', 'population year_raked (E4)', 'wavePolicy pool (E5)'];
 
 /**
  * Coordinate search ΜΟΝΟ στο calibration: ξεκινά από την παραγωγή και για κάθε άξονα κρατά την τιμή με το μικρότερο
  * σφάλμα, μόνο αν βελτιώνει ≥ minGain π.μ. (αλλιώς μένει η τιμή παραγωγής). Δύο περάσματα.
  */
-export async function tuneOnCalibration(suite: BenchSuite, opts: { maxGroups?: number; log?: (m: string) => void; minGain?: number; passes?: number } = {}) {
+export async function tuneOnCalibration(
+  suite: BenchSuite,
+  opts: { maxGroups?: number; log?: (m: string) => void; minGain?: number; passes?: number; extra?: Partial<ModelConfig>; extraNote?: string } = {}
+) {
   const log = opts.log || (() => undefined);
   const minGain = opts.minGain ?? 0.03;
   const cache = new Map<string, { summary: Summary; byFamily: Record<string, number | null> }>();
@@ -91,14 +96,17 @@ export async function tuneOnCalibration(suite: BenchSuite, opts: { maxGroups?: n
   const version = `exp-${stamp()}-a`;
   const final: ModelConfig = {
     ...best,
+    ...(opts.extra || {}),
     version,
     label: describeModel(best),
     parent: PRODUCTION_MODEL.version,
     notes: [
       `Coordinate search στο calibration: MAE ανά δείγμα ${bestScore} vs παραγωγή ${prod.summary.sampleMeanMae}.`,
+      ...(opts.extraNote ? [opts.extraNote] : []),
       'ΔΕΝ είναι αποδεδειγμένη βελτίωση: απαιτείται validation και final holdout.'
     ]
   };
+  final.label = describeModel(final);
   saveModel(final);
   appendHistory({ type: 'tune', at: new Date().toISOString(), suiteHash: suite.hash, production: { score: prod.summary.sampleMeanMae, group: prod.summary.groupMae }, trail, saved: [version], evaluated: cache.size });
   log(`αποθηκεύτηκε υποψήφια ${version}: ${final.label}`);

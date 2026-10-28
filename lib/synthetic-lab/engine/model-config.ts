@@ -79,6 +79,9 @@ export function describeModel(c: ModelConfig): string {
     `συρρίκνωση k=${c.shrinkage}`,
     c.wavePolicy === 'pool' ? `συνδυασμός έως ${c.poolMaxWaves ?? 3} κυμάτων (half-life ${c.poolHalfLifeYears ?? 2} έτη)` : 'τελευταίο κύμα',
     c.respondentWeighting === 'persona_weight' ? 'βάρη βαθμονόμησης στους ερωτώμενους' : 'ίσα βάρη ανά περιφέρεια',
-    c.population === 'year_raked' ? 'πληθυσμός βαθμονομημένος στο έτος αναφοράς' : 'πληθυσμός κατά τον κανόνα παραγωγής'
+    c.population === 'year_raked' ? 'πληθυσμός βαθμονομημένος στο έτος αναφοράς' : 'πληθυσμός κατά τον κανόνα παραγωγής',
+    ...(c.anchorOverall ? ['αγκύρωση επιπέδου'] : []),
+    ...(c.structureTransfer ? ['μεταφορά δομής ομάδων'] : []),
+    ...(c.batteryRho ? [`λανθάνων παράγοντας συστοιχίας ρ=${c.batteryRho}`] : [])
   ].join(' · ');
 }

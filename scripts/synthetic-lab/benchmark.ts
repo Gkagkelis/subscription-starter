@@ -99,7 +99,29 @@ async function main() {
     }
     return;
   }
-  if (cmd === 'tune') return void (await tuneOnCalibration(suite, { maxGroups: opt('max-groups') ? Number(opt('max-groups')) : undefined, log }));
+  if (cmd === 'tune') {
+    const rho = opt('battery-rho') ? Number(opt('battery-rho')) : undefined;
+    return void (await tuneOnCalibration(suite, {
+      maxGroups: opt('max-groups') ? Number(opt('max-groups')) : undefined,
+      log,
+      extra: rho ? { batteryRho: rho } : undefined,
+      extraNote: rho ? `batteryRho=${rho}: επιλέχθηκε στις συσχετίσεις calibration (μικροδεδομένα 2017–2020), ανεξάρτητα από τα ποσοστά.` : undefined
+    }));
+  }
+  if (cmd === 'assoc') {
+    const { associationBenchmark } = await import('../../lib/synthetic-lab/benchmark/assoc');
+    const { PRODUCTION_MODEL } = await import('../../lib/synthetic-lab/engine/model-config');
+    const rows = [];
+    for (const rho of list('rhos', '0,0.1,0.2,0.3,0.45').map(Number)) {
+      const r = await associationBenchmark({ model: { ...PRODUCTION_MODEL, version: `rho-${rho}`, batteryRho: rho }, splits: ['calibration'] });
+      rows.push({ rho, ...r.bySplit.calibration });
+      log(`ρ=${rho}: ${JSON.stringify(r.bySplit.calibration)}`);
+    }
+    const best = [...rows].sort((a: any, b: any) => (a.withinMae ?? 9) - (b.withinMae ?? 9))[0];
+    writeFileSync(benchDir('assoc_results.json'), JSON.stringify({ at: new Date().toISOString(), split: 'calibration', rows, chosenRho: best.rho }, null, 1));
+    log(`επιλογή στο calibration: ρ=${best.rho}`);
+    return;
+  }
   if (cmd === 'select') return void (await selectOnValidation(suite, { log }));
   if (cmd === 'holdout') return void (await holdoutEvaluate(suite, opt('model')!, { log, confirm: args.includes('--i-understand-this-is-final') }));
   if (cmd === 'history') {
