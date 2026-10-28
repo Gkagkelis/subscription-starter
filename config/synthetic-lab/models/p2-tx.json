@@ -1,0 +1,65 @@
+{
+ "version": "p2-tx",
+ "label": "συρρίκνωση k=0 · τελευταίο κύμα · ίσα βάρη ανά περιφέρεια · πληθυσμός κατά τον κανόνα παραγωγής · αγκύρωση επιπέδου · λανθάνων παράγοντας συστοιχίας ρ=0.3 · αντιστοίχιση πληθυσμού αναφοράς · PPS · χρονική πρόβλεψη (Kalman ανά οικογένεια) · ακριβής αντιστοίχιση ερώτησης",
+ "shrinkage": 0,
+ "wavePolicy": "forecast",
+ "respondentWeighting": "pps",
+ "population": "rule",
+ "parent": "p2-t",
+ "anchorOverall": true,
+ "batteryRho": 0.3,
+ "notes": [
+  "Φάση 2.1B: fit/αγκύρωση μόνο στον πληθυσμό αναφοράς του δείκτη (data/universe.ts).",
+  "Φάση 2.1A: επιλογή ερωτώμενων ανάλογη του βάρους (PPS) — επηρεάζει μόνο έτη με βαθμονομημένο πληθυσμό (≥2025).",
+  "Φάση 2.2: κύμα τεκμηρίωσης = πρόβλεψη για το έτος της μελέτης (Kalman), παράμετροι ανά οικογένεια από το calibration με τον κανόνα αξιοπιστίας (απόκλιση 5)· οικογένειες με < 5 συστάδες: επιμονή (απόκλιση 4)· σειρά = ίδια ερώτηση (απόκλιση 6).",
+  "Μετά το holdout2: η ανάκτηση τεκμηρίωσης προτιμά την ίδια ακριβώς ερώτηση (υπο-ετικέτα συστοιχίας). Αξιολόγηση μόνο στο validation — ΜΗ επιβεβαιωμένο σε ανεξάρτητο holdout."
+ ],
+ "universeMatching": true,
+ "forecast": {
+  "default": {
+   "params": {
+    "method": "locf"
+   }
+  },
+  "byFamily": {
+   "dianeosis_ts": {
+    "params": {
+     "method": "locf"
+    }
+   },
+   "eb_trend": {
+    "params": {
+     "method": "kalman",
+     "q": 0.01,
+     "qSlope": 0,
+     "phi": 1,
+     "noiseUnknownN": 0.0003
+    }
+   },
+   "eurostat_ts": {
+    "params": {
+     "method": "kalman",
+     "q": 0.01,
+     "qSlope": 0.0005,
+     "phi": 0.9,
+     "noiseUnknownN": 0.003
+    }
+   },
+   "noraya_ts": {
+    "params": {
+     "method": "kalman",
+     "q": 0.03,
+     "qSlope": 0,
+     "phi": 1,
+     "noiseUnknownN": 0.0003
+    }
+   },
+   "findex_ts": {
+    "params": {
+     "method": "locf"
+    }
+   }
+  }
+ },
+ "exactQuestionMatch": true
+}
