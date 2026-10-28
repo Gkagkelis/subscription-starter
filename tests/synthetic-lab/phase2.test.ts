@@ -41,8 +41,9 @@ describe('Χρονική πρόβλεψη', () => {
       { key: '2018', year: 2018, quarter: '', groups: { all: { all: cell(40) }, gender: { female: cell(50, 250), male: cell(30, 250) } } },
       { key: '2022', year: 2022, quarter: '', groups: { all: { all: cell(60) } } }
     ];
-    const noShrink = forecastWave(waves, 2023, { params: { method: 'locf' }, decompose: true })!;
-    const shrunk = forecastWave(waves, 2023, { params: { method: 'locf' }, decompose: true, effectTau2: 0.02 })!;
+    const ws = waves as unknown as Parameters<typeof forecastWave>[0];
+    const noShrink = forecastWave(ws, 2023, { params: { method: 'locf' }, decompose: true })!;
+    const shrunk = forecastWave(ws, 2023, { params: { method: 'locf' }, decompose: true, effectTau2: 0.02 })!;
     expect(noShrink.groups.gender.female.value).toBeGreaterThan(65);
     expect(noShrink.groups.gender.male.value).toBeLessThan(55);
     expect(shrunk.groups.gender.female.value - shrunk.groups.gender.male.value).toBeLessThan(noShrink.groups.gender.female.value - noShrink.groups.gender.male.value);

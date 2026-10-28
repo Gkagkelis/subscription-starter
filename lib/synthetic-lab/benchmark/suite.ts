@@ -79,6 +79,21 @@ export function hash01(s: string): number {
   return h.readUInt32BE(0) / 0x100000000;
 }
 
+/**
+ * Έρευνα (δείγμα) πίσω από έναν πίνακα Eurostat: πίνακες της ίδιας έρευνας και του ίδιου έτους μοιράζονται δείγμα
+ * (π.χ. lfsa_/lfst_/lfsq_/edat_lfs_/trng_lfs_ = Έρευνα Εργατικού Δυναμικού) → μία συστάδα για την αβεβαιότητα.
+ */
+export function eurostatSurveyOf(code: string): string {
+  if (/lfs/.test(code)) return 'lfs';
+  if (/^ilc_|silc/.test(code)) return 'silc';
+  if (/^isoc_/.test(code)) return 'ict';
+  if (/ehis|^hlth_(ehis|dh|dhc|silc)/.test(code)) return /silc|^hlth_dh/.test(code) ? 'silc' : 'ehis';
+  if (/aes|^trng_aes/.test(code)) return 'aes';
+  if (/^hbs_/.test(code)) return 'hbs';
+  if (/^tus_/.test(code)) return 'tus';
+  return code.split('_')[0];
+}
+
 /** Χρονικός χωρισμός της φάσης 2 (PHASE2_PREREGISTRATION.md §2). null = εκτός σουίτας. */
 export function temporalSplit(year: number, id: string, productionUsed: boolean, past: Set<string>): Split | null {
   if (year >= 2025) return productionUsed || past.has(id) ? null : 'holdout2';
@@ -266,7 +281,7 @@ export function buildSuite(opts: { maxEurostatPerStudy?: number; maxEurostat?: n
     const metric = q.optionMetrics['Ναι'];
     const waves = (lakeMetric(metric)?.waves || []).filter((x) => x.groups.all?.all);
     const used = PRODUCTION_EUROSTAT.test(q.studyId);
-    const fam = q.studyId.split(':')[1].split('_')[0];
+    const fam = eurostatSurveyOf(q.studyId.split(':')[1]);
     // στόχος ανά χωρισμό: calibration = τελευταίο έτος ≤ 2022· validation = 2023–2024· holdout2 = 2025 (νέοι πίνακες)
     const picks: [Split, PriorWave | undefined][] = [
       ['calibration', [...waves].reverse().find((w) => w.year <= 2022)],
@@ -434,7 +449,7 @@ export function buildSuite(opts: { maxEurostatPerStudy?: number; maxEurostat?: n
   });
   const items2 = coherent.sort((a, b) => a.id.localeCompare(b.id));
   const hash = createHash('sha1')
-    .update(JSON.stringify(items2.map((i) => [i.id, i.split, i.targetWaveKey])))
+    .update(JSON.stringify(items2.map((i) => [i.id, i.split, i.targetWaveKey, i.sampleKey])))
     .digest('hex')
     .slice(0, 12);
   return {
