@@ -6,8 +6,9 @@
 
 import type { AudienceFilter, Question, ResearchDomain, StudyKind, StudyPlan } from '../types';
 import { behaviourAssumption, defaultAssumptions } from './assumptions';
-import { getMetric } from '../data/noraya';
-import { checkText } from './guardrails';
+import { getMetric, latestWaveFor, type EvidenceContext } from '../data/noraya';
+import { PARTY_LABELS } from '../data/political-build';
+import { checkText, isPoliticalContent } from './guardrails';
 import { climateSummary } from '../data/ec-bcs';
 import { bankQuestion, suggestLakeQuestions, suggestResearchQuestions } from './question-bank';
 
@@ -85,6 +86,7 @@ function behaviourQuestion(id: string, metric: string): Question | null {
 
 export function detectDomain(text: string): ResearchDomain {
   const t = norm(text);
+  if (isPoliticalContent(text) || /βαρομετρ|κυβερνησ|αντιπολιτευσ|αρχηγ/.test(t)) return 'political';
   const c = CONSUMER_HINTS.filter((k) => t.includes(norm(k))).length;
   const p = POLICY_HINTS.filter((k) => t.includes(norm(k))).length;
   return p > c ? 'social_policy' : 'consumer';
@@ -185,7 +187,101 @@ export function policyQuestions(policy: string, topic: ReturnType<typeof detectP
   return qs;
 }
 
+const POL_LEADER = 'pol:leader:';
+const MITSOTAKIS_APPROVAL = `${POL_LEADER}leader_approval:εγκριση_αποδοχη_κυριακος_μητσοτακης:positive_approval`;
+const SUITABLE_PM: Record<string, string> = {
+  'Κυριάκος Μητσοτάκης': `${POL_LEADER}suitable_pm:καταλληλοτερος_για_πρωθυπουργος:κυριακος_μητσοτακης`,
+  'Αλέξης Τσίπρας': `${POL_LEADER}suitable_pm:καταλληλοτερος_για_πρωθυπουργος:αλεξης_τσιπρας`,
+  'Κανένας από τους δύο': `${POL_LEADER}suitable_pm:καταλληλοτερος_για_πρωθυπουργος:none`
+};
+
+/**
+ * Πολιτικό ερωτηματολόγιο με εμπειρική σύνδεση. Οι επιλογές κομμάτων είναι όσα κόμματα έχουν μέτρηση πριν
+ * από το χρονικό όριο· ερωτήσεις χωρίς μέτρηση για την περίοδο παραλείπονται με προειδοποίηση.
+ */
+export function politicalQuestions(ctx: EvidenceContext, topic: ReturnType<typeof detectPolicyTopic>): { questions: Question[]; warnings: string[] } {
+  const qs: Question[] = [];
+  const warnings: string[] = [];
+  const has = (m: string) => !!latestWaveFor(m, ctx).wave;
+  const parties = Object.entries(PARTY_LABELS).filter(([key]) => has(`pol:vote:${key}`));
+  if (parties.length) {
+    const wave = latestWaveFor('pol:vote:nd', ctx).wave;
+    qs.push({
+      id: 'p1',
+      type: 'single_choice',
+      text: 'Αν είχαμε βουλευτικές εκλογές την επόμενη Κυριακή, ποιο κόμμα θα ψηφίζατε;',
+      options: parties.map(([, label]) => label),
+      evidenceLink: {
+        datasetId: 'noraya-political',
+        metric: `pol:vote:${parties[0][0]}`,
+        positiveOption: parties[0][1],
+        optionMetrics: Object.fromEntries(parties.map(([key, label]) => [label, `pol:vote:${key}`]))
+      }
+    });
+    warnings.push(
+      `Η πρόθεση ψήφου (p1) βασίζεται στο κύμα ${wave?.key || '—'} των πολιτικών ερευνών NORAYA και αφορά ποσοστά επί των εγκύρων (χωρίς αναποφάσιστους/λευκό/αποχή). Αν το κύμα είναι παλιό, τα ποσοστά δεν αντιστοιχούν στη σημερινή εικόνα.`
+    );
+  } else {
+    warnings.push('Δεν υπάρχει μέτρηση πρόθεσης ψήφου πριν από το χρονικό όριο· η ερώτηση ψήφου παραλείφθηκε.');
+  }
+  if (topic) {
+    qs.push({
+      id: 'p2',
+      type: 'single_choice',
+      text: `Θεωρείτε ότι ${topic.label} είναι από τα σημαντικότερα προβλήματα της χώρας σήμερα;`,
+      options: ['Ναι', 'Όχι'],
+      evidenceLink: { datasetId: 'noraya-public-opinion', metric: topic.metric, positiveOption: 'Ναι' }
+    });
+  }
+  qs.push({
+    id: 'p3',
+    type: 'single_choice',
+    text: 'Γενικά, τείνετε να εμπιστεύεστε την κυβέρνηση;',
+    options: ['Τείνω να εμπιστεύομαι', 'Τείνω να μην εμπιστεύομαι'],
+    evidenceLink: { datasetId: 'noraya-public-opinion', metric: 'trust_national_government', positiveOption: 'Τείνω να εμπιστεύομαι' }
+  });
+  if (has('democracy_satisfaction_country')) {
+    qs.push({
+      id: 'p4',
+      type: 'single_choice',
+      text: 'Είστε ικανοποιημένος/η από τον τρόπο που λειτουργεί η δημοκρατία στην Ελλάδα;',
+      options: ['Ικανοποιημένος/η', 'Μη ικανοποιημένος/η'],
+      evidenceLink: { datasetId: 'noraya-public-opinion', metric: 'democracy_satisfaction_country', positiveOption: 'Ικανοποιημένος/η' }
+    });
+  }
+  if (has(MITSOTAKIS_APPROVAL)) {
+    qs.push({
+      id: 'p5',
+      type: 'single_choice',
+      text: 'Έχετε θετική ή αρνητική γνώμη για τον Κυριάκο Μητσοτάκη;',
+      options: ['Θετική', 'Αρνητική'],
+      evidenceLink: { datasetId: 'noraya-political', metric: MITSOTAKIS_APPROVAL, positiveOption: 'Θετική' }
+    });
+  }
+  const year = ctx.asOfYear ?? new Date().getFullYear();
+  if (year <= 2023 && Object.values(SUITABLE_PM).every(has)) {
+    qs.push({
+      id: 'p6',
+      type: 'single_choice',
+      text: 'Ποιος από τους δύο είναι καταλληλότερος για πρωθυπουργός;',
+      options: Object.keys(SUITABLE_PM),
+      evidenceLink: { datasetId: 'noraya-political', metric: SUITABLE_PM['Κυριάκος Μητσοτάκης'], positiveOption: 'Κυριάκος Μητσοτάκης', optionMetrics: SUITABLE_PM }
+    });
+  } else {
+    warnings.push('Η ερώτηση «καταλληλότερος πρωθυπουργός» υπάρχει μόνο για το δίλημμα Μητσοτάκη–Τσίπρα (2018–2022)· για άλλη περίοδο ή άλλους αρχηγούς δεν υπάρχει μέτρηση και παραλείφθηκε.');
+  }
+  qs.push({ id: 'p7', type: 'open_ended', text: 'Τι θα σας έκανε να αλλάξετε την ψήφο σας;' });
+  return { questions: qs, warnings };
+}
+
 export function focusGuide(domain: ResearchDomain, concept: string): string[] {
+  if (domain === 'political')
+    return [
+      `Πρώτη αντίδραση: «${concept}».`,
+      'Ποια θέματα θα κρίνουν την ψήφο σας στις επόμενες εκλογές;',
+      'Τι εικόνα έχετε για τα κόμματα και τους αρχηγούς τους;',
+      'Τι θα σας έκανε να αλλάξετε γνώμη;'
+    ];
   return domain === 'consumer'
     ? [
         `Πρώτη εντύπωση: τι σκέφτεστε όταν ακούτε «${concept}»;`,
@@ -209,6 +305,8 @@ export interface PlanRequest {
   sampleSize?: number;
   /** Έτος αναφοράς (καμία πηγή μετά από αυτό) και μελέτες holdout. */
   referenceYear?: number | null;
+  /** Μήνας αναφοράς (1–12) μέσα στο έτος αναφοράς. */
+  referenceMonth?: number | null;
   holdoutDatasets?: string[];
 }
 
@@ -227,10 +325,12 @@ export function planStudy(req: PlanRequest): PlanResult {
   const kind = req.kind || 'survey';
   const concept = conceptFromText(text);
   const price = domain === 'consumer' ? extractPrice(text) : null;
-  const topic = domain === 'social_policy' ? detectPolicyTopic(text) : null;
+  const topic = domain !== 'consumer' ? detectPolicyTopic(text) : null;
   const consumerTopics = domain === 'consumer' ? detectConsumerTopics(text) : [];
-  const questions = domain === 'consumer' ? consumerQuestions(concept, price, consumerTopics) : policyQuestions(concept, topic);
-  const warnings = [...guard.warnings];
+  const evCtx: EvidenceContext = { asOfYear: req.referenceYear || undefined, asOfMonth: (req.referenceYear && req.referenceMonth) || undefined };
+  const political = domain === 'political' ? politicalQuestions(evCtx, topic) : null;
+  const questions = political ? political.questions : domain === 'consumer' ? consumerQuestions(concept, price, consumerTopics) : policyQuestions(concept, topic);
+  const warnings = [...guard.warnings, ...(political?.warnings || [])];
   // Οικονομική κατάσταση νοικοκυριού (EU-SILC) για σχετικά θέματα πολιτικής.
   if (domain === 'social_policy') {
     const household = detectHouseholdEntries(text)
@@ -291,6 +391,7 @@ export function planStudy(req: PlanRequest): PlanResult {
     plannerVersion: PLANNER_VERSION,
     plannerMode: 'rules',
     referenceYear: req.referenceYear ?? null,
+    ...(req.referenceMonth ? { referenceMonth: req.referenceMonth } : {}),
     holdoutDatasets: req.holdoutDatasets || []
   };
   return { plan, blocked: false, blockedReasons: [], suggestions: { guide: focusGuide(domain, concept) } };

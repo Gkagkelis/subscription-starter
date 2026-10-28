@@ -42,7 +42,9 @@ export default function NewStudyWizard() {
   const { status, error: popError } = usePopulations();
   const [step, setStep] = useState(0);
   const [text, setText] = useState(params.get('q') || '');
-  const [domain, setDomain] = useState<'auto' | 'consumer' | 'social_policy'>('auto');
+  const [domain, setDomain] = useState<'auto' | 'consumer' | 'social_policy' | 'political'>('auto');
+  const [refYear, setRefYear] = useState<string>('');
+  const [refMonth, setRefMonth] = useState<string>('');
   const [plan, setPlan] = useState<StudyPlan | null>(null);
   const [guide, setGuide] = useState<string[]>([]);
   const [populationId, setPopulationId] = useState<string>('');
@@ -67,7 +69,11 @@ export default function NewStudyWizard() {
       const r = await fetch('/api/synthetic-lab/plan', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ text, ...(domain !== 'auto' ? { domain } : {}) })
+        body: JSON.stringify({
+          text,
+          ...(domain !== 'auto' ? { domain } : {}),
+          ...(refYear ? { referenceYear: Number(refYear), ...(refMonth ? { referenceMonth: Number(refMonth) } : {}) } : {})
+        })
       });
       const d = await r.json();
       if (!d.ok) throw new Error(d.error);
@@ -145,13 +151,44 @@ export default function NewStudyWizard() {
               {[
                 ['auto', 'Αυτόματος εντοπισμός'],
                 ['consumer', 'Καταναλωτική έρευνα'],
-                ['social_policy', 'Κοινωνική έρευνα & δημόσιες πολιτικές']
+                ['social_policy', 'Κοινωνική έρευνα & δημόσιες πολιτικές'],
+                ['political', 'Πολιτική / εκλογική έρευνα']
               ].map(([v, l]) => (
                 <label key={v} className="inline-flex items-center gap-2">
                   <input type="radio" name="domain" checked={domain === v} onChange={() => setDomain(v as any)} /> {l}
                 </label>
               ))}
             </div>
+          </fieldset>
+          <fieldset>
+            <legend className={labelCls}>Χρονικό σημείο αναφοράς (προαιρετικό)</legend>
+            <div className="flex flex-wrap items-center gap-3 text-sm">
+              <label className="inline-flex items-center gap-2">
+                Έτος
+                <input
+                  type="number"
+                  min={2000}
+                  max={2100}
+                  className={`${inputCls} w-24`}
+                  value={refYear}
+                  onChange={(e) => setRefYear(e.target.value)}
+                  placeholder="σήμερα"
+                  aria-label="Έτος αναφοράς"
+                />
+              </label>
+              <label className="inline-flex items-center gap-2">
+                Μήνας
+                <select className={`${inputCls} w-24`} value={refMonth} onChange={(e) => setRefMonth(e.target.value)} disabled={!refYear} aria-label="Μήνας αναφοράς">
+                  <option value="">—</option>
+                  {Array.from({ length: 12 }, (_, i) => (
+                    <option key={i + 1} value={i + 1}>
+                      {i + 1}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            <p className="mt-1 text-xs text-stone-500">Για ιστορικές μελέτες: δεν χρησιμοποιείται κανένα δεδομένο που συλλέχθηκε μετά από αυτό το σημείο.</p>
           </fieldset>
           <Help>
             Υποστηρίζονται και πολιτικές/εκλογικές μελέτες (πρόθεση ψήφου, κόμματα, πρόσωπα, μηνύματα). Τα αποτελέσματα είναι συνθετική προσομοίωση

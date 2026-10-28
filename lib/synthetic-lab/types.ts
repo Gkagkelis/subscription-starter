@@ -278,7 +278,7 @@ export interface Assumption {
 // Μελέτες
 // ------------------------------------------------------------
 
-export type ResearchDomain = 'consumer' | 'social_policy';
+export type ResearchDomain = 'consumer' | 'social_policy' | 'political';
 export type StudyKind = 'survey' | 'focus_group' | 'scenario_comparison';
 export type EngineMode = 'demo' | 'live';
 

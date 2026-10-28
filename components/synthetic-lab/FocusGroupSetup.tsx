@@ -8,16 +8,17 @@ import { Banner, Button, Card, Help, inputCls, labelCls, Spinner } from './ui';
 
 const DEFAULT_GUIDE = {
   consumer: ['Ποια είναι η πρώτη σας εντύπωση;', 'Τι θα σας έπειθε να το δοκιμάσετε και τι θα σας απέτρεπε;', 'Πώς συγκρίνεται με ό,τι χρησιμοποιείτε σήμερα;', 'Αν αλλάζατε ένα πράγμα, ποιο θα ήταν;'],
-  social_policy: ['Ποια είναι η πρώτη σας αντίδραση στην πρόταση;', 'Ποιους θα ωφελούσε και ποιους θα επιβάρυνε;', 'Τι θα χρειαζόταν για να λειτουργήσει στην πράξη;', 'Τι θα αλλάζατε ώστε να είναι πιο δίκαιο;']
+  social_policy: ['Ποια είναι η πρώτη σας αντίδραση στην πρόταση;', 'Ποιους θα ωφελούσε και ποιους θα επιβάρυνε;', 'Τι θα χρειαζόταν για να λειτουργήσει στην πράξη;', 'Τι θα αλλάζατε ώστε να είναι πιο δίκαιο;'],
+  political: ['Ποια θέματα θα κρίνουν την ψήφο σας στις επόμενες εκλογές;', 'Τι εικόνα έχετε για τα κόμματα και τους αρχηγούς τους;', 'Τι θα σας έκανε να αλλάξετε γνώμη;', 'Ποιο μήνυμα σας πείθει περισσότερο και γιατί;']
 };
 
 export default function FocusGroupSetup() {
   const router = useRouter();
   const params = useSearchParams();
   const { status } = usePopulations();
-  const initialDomain = (params.get('domain') as 'consumer' | 'social_policy') || 'consumer';
+  const initialDomain = (params.get('domain') as 'consumer' | 'social_policy' | 'political') || 'consumer';
   const [topic, setTopic] = useState(params.get('topic') || '');
-  const [domain, setDomain] = useState<'consumer' | 'social_policy'>(initialDomain);
+  const [domain, setDomain] = useState<'consumer' | 'social_policy' | 'political'>(initialDomain);
   const [guide, setGuide] = useState<string>(() => {
     try {
       const g = JSON.parse(params.get('guide') || '[]');
@@ -84,7 +85,8 @@ export default function FocusGroupSetup() {
           {(
             [
               ['consumer', 'Καταναλωτικό'],
-              ['social_policy', 'Κοινωνικό / δημόσια πολιτική']
+              ['social_policy', 'Κοινωνικό / δημόσια πολιτική'],
+              ['political', 'Πολιτικό / εκλογικό']
             ] as const
           ).map(([v, l]) => (
             <label key={v} className="inline-flex items-center gap-2">

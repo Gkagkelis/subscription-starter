@@ -23,7 +23,7 @@ export default function ScenarioForm() {
   const params = useSearchParams();
   const { status } = usePopulations();
   const [topic, setTopic] = useState(params.get('topic') || 'Νέο πρόγραμμα κινητής τηλεφωνίας');
-  const [domain, setDomain] = useState<'consumer' | 'social_policy'>('consumer');
+  const [domain, setDomain] = useState<'consumer' | 'social_policy' | 'political'>('consumer');
   const [scenarios, setScenarios] = useState<ScenarioInput[]>(CONSUMER_EXAMPLE);
   const [refPrice, setRefPrice] = useState<number | ''>(25);
   const [n, setN] = useState(500);
@@ -80,7 +80,8 @@ export default function ScenarioForm() {
           {(
             [
               ['consumer', 'Προϊόντα / υπηρεσίες'],
-              ['social_policy', 'Δημόσιες πολιτικές']
+              ['social_policy', 'Δημόσιες πολιτικές'],
+              ['political', 'Πολιτικό / εκλογικό']
             ] as const
           ).map(([v, l]) => (
             <label key={v} className="inline-flex items-center gap-2">

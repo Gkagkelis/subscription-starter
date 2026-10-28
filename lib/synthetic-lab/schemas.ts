@@ -83,7 +83,7 @@ export const AssumptionSchema = z.object({
 });
 
 export const PlanSchema = z.object({
-  domain: z.enum(['consumer', 'social_policy']),
+  domain: z.enum(['consumer', 'social_policy', 'political']),
   kind: z.enum(['survey', 'focus_group', 'scenario_comparison']),
   title: str(200).min(1),
   researchQuestion: str(2000).min(3),
@@ -112,16 +112,17 @@ export const RunStudySchema = z.object({
 export const PlanRequestSchema = z.object({
   text: str(2000).min(3),
   kind: z.enum(['survey', 'focus_group', 'scenario_comparison']).optional(),
-  domain: z.enum(['consumer', 'social_policy']).optional(),
+  domain: z.enum(['consumer', 'social_policy', 'political']).optional(),
   audience: AudienceSchema.optional(),
   sampleSize: z.number().int().min(10).max(2000).optional(),
   referenceYear: z.number().int().min(2000).max(2100).nullable().optional(),
+  referenceMonth: z.number().int().min(1).max(12).nullable().optional(),
   holdoutDatasets: z.array(str(300)).max(200).optional()
 });
 
 export const FocusCreateSchema = z.object({
   topic: str(500).min(3),
-  domain: z.enum(['consumer', 'social_policy']),
+  domain: z.enum(['consumer', 'social_policy', 'political']),
   guide: z.array(str(400).min(3)).min(1).max(8),
   participants: z.number().int().min(3).max(8).optional(),
   rounds: z.number().int().min(1).max(3).optional(),

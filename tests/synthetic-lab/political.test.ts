@@ -57,3 +57,27 @@ describe('political data (NORAYA vote intention / leaders)', () => {
     expect(agg.basisMix.empirical_prior || 0).toBeGreaterThan(0);
   });
 });
+
+describe('political planner', () => {
+  it('builds a data-linked political questionnaire respecting the reference date', async () => {
+    const r = planStudy({ text: 'Πολιτικό βαρόμετρο: πρόθεση ψήφου και ακρίβεια', referenceYear: 2022, referenceMonth: 7, sampleSize: 600 });
+    expect(r.blocked).toBe(false);
+    const plan = r.plan!;
+    expect(plan.domain).toBe('political');
+    expect(plan.referenceMonth).toBe(7);
+    const p1 = plan.questions.find((q) => q.id === 'p1')!;
+    expect(p1.options).toContain('ΝΔ');
+    expect(p1.evidenceLink?.optionMetrics?.['ΝΔ']).toBe('pol:vote:nd');
+    expect(plan.questions.some((q) => q.id === 'p2')).toBe(true); // ακρίβεια -> issue_country_inflation
+    expect(plan.questions.some((q) => q.id === 'p6')).toBe(true); // Μητσοτάκης–Τσίπρας, 2022
+    expect(plan.warnings.join(' ')).toMatch(/2019-Q2/);
+    const run = await runSurvey({ plan: { ...plan, engine: 'evidence' }, populationId: DEFAULT_POPULATION_ID, seed: 3, save: false, stabilityRuns: 0 });
+    expect(run.status).toBe('completed');
+    expect(run.aggregates.find((a) => a.questionId === 'p1')!.evidence?.evidenceClass).toBe('EMPIRICALLY_ANCHORED');
+  });
+  it('omits the two-leader dilemma outside 2018–2023', () => {
+    const plan = planStudy({ text: 'Πρόθεση ψήφου σήμερα' }).plan!;
+    expect(plan.domain).toBe('political');
+    expect(plan.questions.some((q) => q.id === 'p6')).toBe(false);
+  });
+});
