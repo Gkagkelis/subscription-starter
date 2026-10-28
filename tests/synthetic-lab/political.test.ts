@@ -108,3 +108,13 @@ describe('research data loader', () => {
     expect(researchMetric('bk_test_m')?.waves[0].groups.all.all.value).toBe(40);
   });
 });
+
+describe('Eurobarometer season -> quarter (month-level cutoff)', () => {
+  it('reads the fieldwork season from the wave title', async () => {
+    const { seasonQuarter } = await import('@/lib/synthetic-lab/data/lake');
+    expect(seasonQuarter('Standard Eurobarometer 96 - Winter 2021-2022')).toEqual({ year: 2022, quarter: 'Q1' });
+    expect(seasonQuarter('Standard Eurobarometer 95 - Spring 2021')).toEqual({ year: 2021, quarter: 'Q2' });
+    expect(seasonQuarter('Standard Eurobarometer 97 - Summer 2022')).toEqual({ year: 2022, quarter: 'Q3' });
+    expect(seasonQuarter('Special Eurobarometer 517 : Future of Europe 2021')).toBeNull();
+  });
+});

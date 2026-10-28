@@ -172,6 +172,19 @@ export function lakePoolId(metricIds: string[]): string {
   return LAKE_POOL_PREFIX + metricIds.join('|');
 }
 
+/**
+ * Τρίμηνο πεδίου από τον τίτλο κύματος Eurobarometer («Winter 2021-2022» → 2022 Q1, «Spring» Q2, «Summer» Q3,
+ * «Autumn» Q4). Χρησιμοποιείται μόνο από το χρονικό όριο ανά μήνα (referenceMonth)· χωρίς εποχή στον τίτλο το
+ * κύμα μένει χωρίς τρίμηνο και αποκλείεται αυστηρά μέσα στο ίδιο έτος.
+ */
+export function seasonQuarter(title: string): { year: number; quarter: string } | null {
+  const m = title.match(/\b(Winter|Spring|Summer|Autumn)\s+(\d{4})(?:\s*[-–]\s*(\d{4}))?/i);
+  if (!m) return null;
+  const s = m[1].toLowerCase();
+  const year = Number(m[3] || m[2]);
+  return { year, quarter: s === 'winter' ? 'Q1' : s === 'spring' ? 'Q2' : s === 'summer' ? 'Q3' : 'Q4' };
+}
+
 function shard(studyId: string): Map<string, PriorMetric> | null {
   const s = lakeStudy(studyId);
   if (!s) return null;
@@ -179,7 +192,19 @@ function shard(studyId: string): Map<string, PriorMetric> | null {
   if (hit) return hit;
   try {
     const d = JSON.parse(readFileSync(path.join(lakeDir(), 'export', 'shards', s.shard), 'utf8')) as { metrics: PriorMetric[] };
-    const m = new Map(d.metrics.map((x) => [x.metric, { ...x, scheme: 'lake' as const, tier: s.tier, datasetId: s.studyId }]));
+    const season = seasonQuarter(s.title || '');
+    const m = new Map(
+      d.metrics.map((x) => [
+        x.metric,
+        {
+          ...x,
+          scheme: 'lake' as const,
+          tier: s.tier,
+          datasetId: s.studyId,
+          waves: season ? x.waves.map((w) => (!w.quarter && w.year === season.year ? { ...w, quarter: season.quarter } : w)) : x.waves
+        }
+      ])
+    );
     if (shardCache.size >= SHARD_CACHE_MAX) shardCache.delete(shardCache.keys().next().value as string);
     shardCache.set(s.shard, m);
     return m;
