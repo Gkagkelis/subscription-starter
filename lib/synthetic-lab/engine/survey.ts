@@ -92,7 +92,7 @@ function provenanceFor(metric: string, q: { id: string; option: string | null } 
 // Τα fits είναι ντετερμινιστικά (ίδιος πληθυσμός, δείκτης, κύμα, συρρίκνωση -> ίδιο αποτέλεσμα):
 // κρατούνται ανά αντικείμενο πληθυσμού για να μην επαναλαμβάνονται σε επαναλήψεις/seeds.
 const FIT_CACHE = new WeakMap<Persona[], Map<string, PriorFit>>();
-const FIT_CACHE_MAX = 20000;
+const FIT_CACHE_MAX = 1500;
 function cachedFit(metric: string, wave: Parameters<typeof fitPriorModel>[1], personas: Persona[], shrinkage: number | undefined, dims?: string[], anchor?: boolean): PriorFit {
   let m = FIT_CACHE.get(personas);
   if (!m) FIT_CACHE.set(personas, (m = new Map()));

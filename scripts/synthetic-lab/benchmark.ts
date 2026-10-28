@@ -77,7 +77,8 @@ async function main() {
   }
   if (cmd === 'experiment') {
     const which = args[1] || 'all';
-    const defs = which === 'all' ? EXPERIMENTS : EXPERIMENTS.filter((e) => e.id === which);
+    const wanted = which.split(',');
+    const defs = which === 'all' ? EXPERIMENTS : EXPERIMENTS.filter((e) => wanted.includes(e.id));
     for (const def of defs) {
       const res = await runExperiment(suite, def, {
         maxGroups: opt('max-groups') ? Number(opt('max-groups')) : undefined,
