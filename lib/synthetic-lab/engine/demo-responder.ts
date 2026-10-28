@@ -365,7 +365,8 @@ export function basisLabel(b: AnswerBasis): string {
     assumption: 'Παραδοχή ερευνητή',
     uninformed: 'Χωρίς εμπειρική βάση',
     llm: 'Παραγωγή AI (μη επικυρωμένη)',
-    model_extrapolated: 'Πρόβλεψη από συγγενικά δεδομένα (EGPS)',
-    not_estimable: 'Μη εκτιμήσιμο (EGPS)'
+    model_extrapolated: 'Πρόβλεψη από συγγενικά δεδομένα / ρητή παραδοχή',
+    not_estimable: 'Μη εκτιμήσιμο',
+    persona_model: 'Ατομική απάντηση συνθετικού προσώπου (μοντέλο σε πραγματικά μικροδεδομένα)'
   }[b];
 }

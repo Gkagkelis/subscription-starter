@@ -32,11 +32,17 @@ import pandas as pd
 
 sys.path.insert(0, os.path.dirname(__file__))
 import pie  # noqa: E402
+from pie import read_resp  # noqa: E402
 
 SPLITS = {
     "validation": {"holdout": ["dn2022a", "dn2022b", "dn2022s"], "cutoff": "2021-11"},
     "final": {"holdout": ["dn2024a", "dn2024b", "dn2024c"], "cutoff": "2023-11"},
+    # Test C (προκαταχώριση §9): καταναλωτική συμπεριφορά νοικοκυριών, ΕΛΣΤΑΤ ΕΟΠ
+    "hbs-validation": {"holdout": ["hbs2019"], "cutoff": "2018-12", "families": "hbs", "cond": "incq5"},
+    "hbs-final": {"holdout": ["hbs2020"], "cutoff": "2019-12", "families": "hbs", "cond": "incq5"},
 }
+KEYVARS = {"lr7": ["age_band", "gender", "edu3", "nuts1", "urban", "emp", "inc6", "econ4", "class3", "lr7", "lr_none"],
+           "incq5": ["age_band", "gender", "edu3", "nuts1", "urban", "emp", "incq5", "hhsize5"]}
 DEMO_FEATS = ["age_17_24", "age_25_34", "age_35_44", "age_55_64", "age_65p", "female", "edu_low", "edu_high", "n_attica", "n_north", "n_islands", "rural"]
 SKEL = ["age_band", "gender", "edu3", "nuts1", "urban", "weight"]
 
@@ -86,6 +92,8 @@ def train(root, split, lam, factors, tag):
            "--version", ver, "--holdout", ",".join(SPLITS[split]["holdout"]), "--lam", str(lam), "--out", out]
     if not factors:
         cmd.append("--no-factors")
+    if SPLITS[split].get("families"):
+        cmd += ["--families", SPLITS[split]["families"]]
     subprocess.run(cmd, check=True, capture_output=True)
     return json.load(open(os.path.join(out, "model.json"))), json.load(open(os.path.join(out, "items.json"))), out
 
@@ -137,7 +145,7 @@ def demo_model(train_item, root, cache={}):
     key = train_item["id"]
     if key in cache:
         return cache[key]
-    df = pd.read_csv(os.path.join(root, ".synthetic-lab-data/persona/harmonized/resp", f"{train_item['file']}.csv.gz"), low_memory=False)
+    df = read_resp(os.path.join(root, ".synthetic-lab-data/persona/harmonized/resp", f"{train_item['file']}.csv.gz"))
     col = df[train_item["id"]].astype(str).where(df[train_item["id"]].notna(), None)
     codes = [o["code"] for o in train_item["options"]]
     sub = col.isin(codes).values
@@ -169,7 +177,7 @@ def run(a):
     preds = {}
     reals = {}
     for fid in split["holdout"]:
-        real = pd.read_csv(os.path.join(hz, "resp", f"{fid}.csv.gz"), low_memory=False)
+        real = read_resp(os.path.join(hz, "resp", f"{fid}.csv.gz"))
         skel = real[SKEL].copy()
         w = real["weight"].values.astype(float)
         hitems = [h for h in bank if h["file"] == fid]
@@ -187,9 +195,9 @@ def run(a):
                 t = mt["train"]
                 ans[mt["hold"]["id"]] = pie.answer_item(t, P, np.random.default_rng(stable_seed(s, t["id"], 0)), factors=True)
                 ans_noth[mt["hold"]["id"]] = pie.answer_item(t, P, np.random.default_rng(stable_seed(s, t["id"], 1)), factors=False)
-            syn[s] = {"personas": P[["lr7", "lr_none", "pv"]].copy(), "ans": ans, "ans_noth": ans_noth}
+            syn[s] = {"personas": P[[c for c in ("lr7", "lr_none", "pv", "incq5", "hhsize5") if c in P]].copy(), "ans": ans, "ans_noth": ans_noth}
             if s == 0:
-                syn_full = P[["emp", "inc6", "econ4", "class3"]].reset_index(drop=True)
+                syn_full = P[[c for c in ("emp", "inc6", "econ4", "class3", "lr7", "lr_none", "incq5", "hhsize5") if c in P]].reset_index(drop=True)
         bprod = {}
         rngb = np.random.default_rng(99)
         for mt in matches:
@@ -271,11 +279,12 @@ def run(a):
             for k, v in subs.items():
                 row[f"sub_{k}"] = float(np.mean(v)) if v else None
             # εξάρτηση από αυτοτοποθέτηση (αριστερά/κέντρο/δεξιά/καμία)
-            if real["lr7"].notna().any():
-                lrg_real = lr_group(real)
+            cond = split.get("cond", "lr7")
+            if cond in real and real[cond].notna().any():
+                lrg_real = cond_group(real, cond)
                 lr_errs = {"PIE": [], "B_prod": []}
-                lrg_syn = lr_group(P["syn"][0]["personas"])
-                for g in ("left", "centre", "right", "none"):
+                lrg_syn = cond_group(P["syn"][0]["personas"], cond)
+                for g in sorted(set(lrg_real) - {"na"}):
                     cr = (lrg_real == g) & ok
                     if cr.sum() < 50:
                         continue
@@ -290,6 +299,9 @@ def run(a):
                 row["lr_PIE"] = float(np.mean(lr_errs["PIE"])) if lr_errs["PIE"] else None
                 row["lr_B_prod"] = float(np.mean(lr_errs["B_prod"])) if lr_errs["B_prod"] else None
             row["status"] = "DIRECTLY_SUPPORTED" if mt["kind"] == "repeated" else "MODEL_EXTRAPOLATED"
+            if mt["kind"] == "transfer":
+                u = np.full(len(hcodes), 1 / len(hcodes))
+                row["alpha"] = {str(al): float(np.mean(np.abs(truth - (al * pie_d + (1 - al) * u))) * 100) for al in (0.0, 0.25, 0.5, 0.75, 1.0)}
             file_rows.append(row)
         # συσχετίσεις μεταξύ items του ίδιου αρχείου (ordinal, επαναλαμβανόμενα)
         ords = [r["item"] for r in file_rows if r.get("status") == "DIRECTLY_SUPPORTED" and r["K"] >= 2]
@@ -336,7 +348,7 @@ def run(a):
             assoc.append(out)
         results["files"][fid] = {"items": file_rows, "assoc": assoc}
     # ---------------- M8 ιδιωτικότητα: πλήρης ταύτιση με εγγραφές εκπαίδευσης (δημογραφικά + άγκυρες, χωρίς ψήφο)
-    keyvars = ["age_band", "gender", "edu3", "nuts1", "urban", "emp", "inc6", "econ4", "class3", "lr7", "lr_none"]
+    keyvars = KEYVARS[split.get("cond", "lr7")]
 
     def keys(df):
         d = df.reindex(columns=keyvars)
@@ -354,13 +366,15 @@ def run(a):
     train_keys = set()
     for fid in results["trainFiles"]:
         df = pd.read_csv(os.path.join(hz, "resp", f"{fid}.csv.gz"), usecols=lambda c: c in keyvars, low_memory=False)
+        if "lr_none" in keyvars and "lr_none" not in df and "lr7" in df:
+            df["lr_none"] = np.where(df["lr7"].notna(), 0, np.nan)
         if all(c in df for c in keyvars):
             train_keys |= keys(df)[0]
     syn_k, real_k = [], []
     for fid in split["holdout"]:
         sp = preds[fid]["syn"][0]["personas"]
-        full = pd.concat([reals[fid][["age_band", "gender", "edu3", "nuts1", "urban"]].reset_index(drop=True), sp.reset_index(drop=True)], axis=1)
-        _, ks = keys(full.assign(**{c: preds[fid]["syn_full"][c] for c in ["emp", "inc6", "econ4", "class3"]}))
+        full = pd.concat([reals[fid][["age_band", "gender", "edu3", "nuts1", "urban"]].reset_index(drop=True), preds[fid]["syn_full"]], axis=1)
+        _, ks = keys(full)
         syn_k += list(ks)
         _, kr = keys(reals[fid])
         real_k += list(kr)
@@ -386,11 +400,12 @@ def run(a):
         "M3_pairs": len(ass), "M3_real_mean_abs_rho": mean([abs(x["real"]) for x in ass]),
         "M3_same_construct_abs_err": {k: mean([abs(x[k] - x["real"]) for x in ass if x["same_construct"]]) for k in ("PIE", "PIE_noθ", "B_prod")},
         "M3_sign_agreement_|real|>0.1": {k: mean([float(np.sign(x[k]) == np.sign(x["real"])) for x in ass if abs(x["real"]) > 0.1]) for k in ("PIE", "PIE_noθ", "B_prod")},
-        "M4_lr_conditional_MAE_pp": {"PIE": mean([r.get("lr_PIE") for r in rep]), "B_prod": mean([r.get("lr_B_prod") for r in rep])},
+        "M4_conditional_MAE_pp": {"by": split.get("cond", "lr7"), "PIE": mean([r.get("lr_PIE") for r in rep]), "B_prod": mean([r.get("lr_B_prod") for r in rep])},
         "M5_dk_abs_err_pp": {"PIE": mean([r.get("dk_err") for r in rep]), "B_last": mean([r.get("dk_err_last") for r in rep])},
         "M6_seed_sd_max_pp": round(float(np.max([r["PIE_seed_sd_max"] for r in rep])), 3) if rep else None,
         "M6_seed_sd_mean_pp": mean([r["PIE_seed_sd_max"] for r in rep]),
         "M7_transfer_MAE_pp": {"PIE": mean([r["PIE"] for r in trf]), "B_unif": mean([r["B_unif"] for r in trf])},
+        "M7_transfer_alpha_MAE_pp": {al: mean([r["alpha"][al] for r in trf if "alpha" in r]) for al in ("0.0", "0.25", "0.5", "0.75", "1.0")},
         "M8_privacy": results.get("privacy"),
         "seconds": round(time.time() - t0, 1),
     }
@@ -409,6 +424,13 @@ def tmap_inv(tmap, x):
         if t == x:
             return h
     return None
+
+
+def cond_group(df, cond):
+    if cond == "lr7":
+        return lr_group(df)
+    v = pd.to_numeric(df[cond], errors="coerce").values
+    return np.array(["na" if x != x else str(int(x)) for x in v], dtype=object)
 
 
 def lr_group(df):

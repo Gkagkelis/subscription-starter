@@ -1,0 +1,209 @@
+{
+ "id": "2026-10",
+ "referenceMonth": "2026-10",
+ "previousElection": "2023-06",
+ "facts": [
+  "Λίστα κομμάτων του ερωτηματολογίου, ονομασίες επαληθευμένες στις 28/10/2026· δεν υποτίθεται ότι όλα θα κατέβουν σε εκλογές.",
+  "ΕΛ.Α.Σ.: ίδρυση 5/2026 (Α. Τσίπρας). Ελπίδα για τη Δημοκρατία: ίδρυση 5/2026 (Μ. Καρυστιανού). Δημοκράτες – Προοδευτικό Κέντρο: μετονομασία 2/2026 (Σ. Κασσελάκης).",
+  "Κυβέρνηση ΝΔ από 7/2019. Κανένα ποσοστό δημοσκόπησης δεν χρησιμοποιείται."
+ ],
+ "parties": [
+  {
+   "key": "nd",
+   "label": "ΝΔ",
+   "position": 5.14,
+   "positionSource": "CHES 2024: lrgen 6.90 → 1 + 0,6·lrgen",
+   "lineage": [],
+   "lineageSource": "—",
+   "isNew": false,
+   "prevShare": 40.56,
+   "prevShareSource": "επίσημο αποτέλεσμα 25/6/2023",
+   "incumbent": true
+  },
+  {
+   "key": "elas",
+   "label": "ΕΛ.Α.Σ.",
+   "position": 2.4,
+   "positionSource": "παραδοχή: θέση ΣΥΡΙΖΑ επί Τσίπρα (CHES 2019) (lrgen 2.3)",
+   "lineage": [
+    "syriza"
+   ],
+   "lineageSource": "ιδρυτής ο πρόεδρος του ΣΥΡΙΖΑ στις εκλογές 2023 (Α. Τσίπρας)",
+   "isNew": true,
+   "prevShare": null,
+   "prevShareSource": "επίσημο αποτέλεσμα 25/6/2023",
+   "incumbent": false
+  },
+  {
+   "key": "pasok",
+   "label": "ΠΑΣΟΚ–ΚΙΝΑΛ",
+   "position": 3.52,
+   "positionSource": "CHES 2024: lrgen 4.20 → 1 + 0,6·lrgen",
+   "lineage": [],
+   "lineageSource": "—",
+   "isNew": false,
+   "prevShare": 11.84,
+   "prevShareSource": "επίσημο αποτέλεσμα 25/6/2023",
+   "incumbent": false
+  },
+  {
+   "key": "el",
+   "label": "Ελληνική Λύση",
+   "position": 6.34,
+   "positionSource": "CHES 2024: lrgen 8.90 → 1 + 0,6·lrgen",
+   "lineage": [],
+   "lineageSource": "—",
+   "isNew": false,
+   "prevShare": 4.44,
+   "prevShareSource": "επίσημο αποτέλεσμα 25/6/2023",
+   "incumbent": false
+  },
+  {
+   "key": "kke",
+   "label": "ΚΚΕ",
+   "position": 1.3,
+   "positionSource": "CHES 2024: lrgen 0.50 → 1 + 0,6·lrgen",
+   "lineage": [],
+   "lineageSource": "—",
+   "isNew": false,
+   "prevShare": 7.69,
+   "prevShareSource": "επίσημο αποτέλεσμα 25/6/2023",
+   "incumbent": false
+  },
+  {
+   "key": "plefsi",
+   "label": "Πλεύση Ελευθερίας",
+   "position": 2.8,
+   "positionSource": "CHES 2024: lrgen 3.00 → 1 + 0,6·lrgen",
+   "lineage": [],
+   "lineageSource": "—",
+   "isNew": false,
+   "prevShare": 3.17,
+   "prevShareSource": "επίσημο αποτέλεσμα 25/6/2023",
+   "incumbent": false
+  },
+  {
+   "key": "foni_logikis",
+   "label": "Φωνή Λογικής",
+   "position": 6.667,
+   "positionSource": "CHES 2024: lrgen 9.44 → 1 + 0,6·lrgen",
+   "lineage": [],
+   "lineageSource": "—",
+   "isNew": false,
+   "prevShare": 0.43,
+   "prevShareSource": "επίσημο αποτέλεσμα 25/6/2023",
+   "incumbent": false
+  },
+  {
+   "key": "elpida",
+   "label": "Ελπίδα για τη Δημοκρατία",
+   "position": 4.0,
+   "positionSource": "παραδοχή: δεν αυτοτοποθετείται αριστερά/δεξιά → κέντρο (μέγιστη αβεβαιότητα) (lrgen 5.0)",
+   "lineage": [],
+   "lineageSource": "—",
+   "isNew": true,
+   "prevShare": null,
+   "prevShareSource": "επίσημο αποτέλεσμα 25/6/2023",
+   "incumbent": false
+  },
+  {
+   "key": "symmachia",
+   "label": "Συμμαχία Ελλήνων",
+   "position": 7.0,
+   "positionSource": "παραδοχή: ακροδεξιός χώρος (δημοσιεύματα για στήριξη Κασιδιάρη· όχι επίσημη επιβεβαίωση) (lrgen 10.0)",
+   "lineage": [
+    "spartiates"
+   ],
+   "lineageSource": "δημοσιεύματα για στήριξη Η. Κασιδιάρη (Σπαρτιάτες 2023)",
+   "isNew": true,
+   "prevShare": null,
+   "prevShareSource": "επίσημο αποτέλεσμα 25/6/2023",
+   "incumbent": false
+  },
+  {
+   "key": "mera25",
+   "label": "ΜέΡΑ25",
+   "position": 1.857,
+   "positionSource": "CHES 2019 (δεν μετρήθηκε 2024): lrgen 1.43 → 1 + 0,6·lrgen",
+   "lineage": [],
+   "lineageSource": "—",
+   "isNew": false,
+   "prevShare": 2.5,
+   "prevShareSource": "επίσημο αποτέλεσμα 25/6/2023",
+   "incumbent": false
+  },
+  {
+   "key": "syriza",
+   "label": "ΣΥΡΙΖΑ",
+   "position": 2.8,
+   "positionSource": "CHES 2024: lrgen 3.00 → 1 + 0,6·lrgen",
+   "lineage": [],
+   "lineageSource": "—",
+   "isNew": false,
+   "prevShare": 17.83,
+   "prevShareSource": "επίσημο αποτέλεσμα 25/6/2023",
+   "incumbent": false
+  },
+  {
+   "key": "niki",
+   "label": "ΝΙΚΗ",
+   "position": 6.52,
+   "positionSource": "CHES 2024: lrgen 9.20 → 1 + 0,6·lrgen",
+   "lineage": [],
+   "lineageSource": "—",
+   "isNew": false,
+   "prevShare": 3.7,
+   "prevShareSource": "επίσημο αποτέλεσμα 25/6/2023",
+   "incumbent": false
+  },
+  {
+   "key": "dpk",
+   "label": "Δημοκράτες – Προοδευτικό Κέντρο",
+   "position": 3.4,
+   "positionSource": "παραδοχή: «Προοδευτικό Κέντρο» → κεντροαριστερά/κέντρο (lrgen 4.0)",
+   "lineage": [
+    "syriza"
+   ],
+   "lineageSource": "ιδρυτής πρώην πρόεδρος ΣΥΡΙΖΑ (Σ. Κασσελάκης)",
+   "isNew": true,
+   "prevShare": null,
+   "prevShareSource": "επίσημο αποτέλεσμα 25/6/2023",
+   "incumbent": false
+  },
+  {
+   "key": "nea_aristera",
+   "label": "Νέα Αριστερά",
+   "position": 1.9,
+   "positionSource": "παραδοχή: διάσπαση αριστερής πτέρυγας ΣΥΡΙΖΑ (lrgen 1.5)",
+   "lineage": [
+    "syriza"
+   ],
+   "lineageSource": "διάσπαση της ΚΟ του ΣΥΡΙΖΑ (12/2023)",
+   "isNew": true,
+   "prevShare": null,
+   "prevShareSource": "επίσημο αποτέλεσμα 25/6/2023",
+   "incumbent": false
+  },
+  {
+   "key": "spartiates",
+   "label": "Σπαρτιάτες",
+   "position": 7.0,
+   "positionSource": "CHES 2024: lrgen 10.00 → 1 + 0,6·lrgen",
+   "lineage": [],
+   "lineageSource": "—",
+   "isNew": false,
+   "prevShare": 4.68,
+   "prevShareSource": "επίσημο αποτέλεσμα 25/6/2023",
+   "incumbent": false
+  }
+ ],
+ "otherSplit": {
+  "spartiates": 4.68,
+  "el": 4.44,
+  "niki": 3.7,
+  "plefsi": 3.17,
+  "mera25": 2.5,
+  "foni_logikis": 0.43
+ },
+ "newPartyPrevShare": 0.5
+}

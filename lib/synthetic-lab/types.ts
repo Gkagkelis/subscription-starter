@@ -232,11 +232,37 @@ export interface Question {
   construct?: { object: string; kind: ConstructKind } | null;
   /** EGPS: ρητή ασθενής παραδοχή του ερευνητή (πιθανότητα ανά επιλογή) — δίνει ΜΟΝΟ σενάριο με ευρύ διάστημα. */
   scenarioPrior?: { probs: number[]; rationale: string } | null;
+  /** PIE (Persona Intelligence Engine): σύνδεση με ερώτηση που μετρήθηκε σε πραγματικά μικροδεδομένα του μοντέλου. */
+  personaLink?: PersonaLink | null;
 }
+
+/**
+ * Σύνδεση ερώτησης με item του μοντέλου PIE.
+ *  direct     ίδια ερώτηση και επιλογές
+ *  collapsed  ίδια ερώτηση· επιλογές της πηγής συγχωνεύονται (η διάσπαση κατηγορίας ΔΕΝ επιτρέπεται)
+ *  equivalent συγγενική διατύπωση με ρητή παραδοχή ισοδυναμίας (→ MODEL_EXTRAPOLATED)
+ */
+export interface PersonaLink {
+  itemId?: string | null;
+  family?: string | null;
+  optionMap: Record<string, string[]>;
+  dkOption?: string | null;
+  kind: 'direct' | 'collapsed' | 'equivalent';
+  assumption?: string | null;
+  /** Πολλαπλή επιλογή: κάθε επιλογή απαντιέται από δικό της δυαδικό item (κωδικός «ναι»). */
+  optionItems?: Record<string, { itemId: string; yesCode: string }> | null;
+  /** Απάντηση από άγκυρα του προσώπου (π.χ. econ4, lr7, pv, polint4): τιμές άγκυρας ανά επιλογή ('none' = καμία αυτοτοποθέτηση). */
+  anchor?: { name: 'emp' | 'inc6' | 'econ4' | 'class3' | 'lr7' | 'pv' | 'believer' | 'polint4' | 'incq5' | 'hhsize5'; optionMap: Record<string, string[]> } | null;
+  /** Πρόθεση ψήφου: μοντέλο εκλογικής επιλογής με σενάριο κομμάτων (χωρίς δημοσκοπήσεις). */
+  vote?: { scenario: string; optionParty: Record<string, string>; abstainOption?: string | null; undecidedOption?: string | null } | null;
+}
+
+/** Κατηγορία υποστήριξης μιας ερώτησης στον μηχανισμό PIE. */
+export type PersonaSupport = 'DIRECTLY_SUPPORTED' | 'MODEL_EXTRAPOLATED' | 'NOT_RELIABLY_ESTIMABLE';
 
 export type ConstructKind = 'evaluation' | 'intention' | 'usage' | 'general_usage' | 'other';
 /** Μηχανισμός απαντήσεων: «standard» = prod-1 (ομοιόμορφη προεπιλογή όπου λείπουν δεδομένα)· «evidence» = EGPS. */
-export type ResponseEngine = 'standard' | 'evidence';
+export type ResponseEngine = 'standard' | 'evidence' | 'persona';
 export type EvidenceClass = 'EMPIRICALLY_ANCHORED' | 'MODEL_EXTRAPOLATED' | 'NOT_ESTIMABLE';
 export interface QuestionEvidence {
   evidenceClass: EvidenceClass;
@@ -308,6 +334,10 @@ export interface StudyPlan {
   holdoutDatasets?: string[];
   /** Μηχανισμός απαντήσεων (προεπιλογή «standard» = prod-1). */
   engine?: ResponseEngine;
+  /** PIE: έκδοση μοντέλου (προεπιλογή: η εγκεκριμένη/τελευταία υποψήφια του μητρώου). */
+  personaModelVersion?: string | null;
+  /** PIE: επαναχρησιμοποίηση υπάρχοντος συνθετικού panel (αντί για νέο). */
+  panelId?: string | null;
 }
 
 /** Προέλευση μιας εμπειρικής παραμέτρου (ποσοστό επιλογής) που χρησιμοποιήθηκε σε μια εκτέλεση. */
@@ -350,7 +380,8 @@ export type AnswerBasis =
   | 'uninformed' // καμία εμπειρική πληροφορία — ουδέτερη προεπιλογή
   | 'llm' // παράχθηκε από μοντέλο AI (μη επικυρωμένο)
   | 'model_extrapolated' // EGPS: μεταφορά από συγγενικές μετρήσεις ή ρητό σενάριο
-  | 'not_estimable'; // EGPS: καμία επαρκής τεκμηρίωση — η απάντηση μένει NA
+  | 'not_estimable' // EGPS/PIE: καμία επαρκής τεκμηρίωση — η απάντηση μένει NA
+  | 'persona_model'; // PIE: ατομική απάντηση από μοντέλο εκτιμημένο σε πραγματικά μικροδεδομένα της ίδιας ερώτησης
 
 export interface SyntheticAnswer {
   questionId: string;
@@ -396,6 +427,8 @@ export interface QuestionAggregate {
   evidenceKind: EvidenceKind;
   /** Μόνο με τον μηχανισμό EGPS: κατηγορία τεκμηρίωσης, αιτία, διαστήματα. */
   evidence?: QuestionEvidence;
+  /** Μόνο με τον μηχανισμό PIE: κατηγορία υποστήριξης και προέλευση. */
+  persona?: { support: PersonaSupport; reason: string; provenance: Record<string, unknown> };
 }
 
 export interface CostRecord {
@@ -430,6 +463,8 @@ export interface StudyRun {
   evidenceContext?: { referenceYear: number | null; referenceMonth?: number | null; holdout: string[]; populationNote: string | null };
   validation: StudyValidationSummary;
   stability?: StabilityResult | null;
+  /** PIE: panel και έκδοση μοντέλου (αναπαραγωγιμότητα). */
+  personaRun?: { panelId: string; modelVersion: string; modelSnapshot: string; licencePolicy: string; modelStatus: string | null; anchorSources: unknown[] } | null;
 }
 
 export interface StudyValidationSummary {

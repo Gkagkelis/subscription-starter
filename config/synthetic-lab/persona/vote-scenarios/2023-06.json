@@ -1,0 +1,122 @@
+{
+ "id": "2023-06",
+ "referenceMonth": "2023-06",
+ "previousElection": "2019-07",
+ "facts": [
+  "Εκλογές 2023-06-25· προηγούμενες 2019-07."
+ ],
+ "parties": [
+  {
+   "key": "nd",
+   "label": "ΝΔ",
+   "position": 5.267,
+   "positionSource": "CHES 2019: lrgen 7.11 → 1 + 0,6·lrgen",
+   "lineage": [],
+   "lineageSource": "—",
+   "isNew": false,
+   "prevShare": 39.85,
+   "prevShareSource": "επίσημο αποτέλεσμα 2019-07",
+   "incumbent": true
+  },
+  {
+   "key": "syriza",
+   "label": "ΣΥΡΙΖΑ",
+   "position": 2.4,
+   "positionSource": "CHES 2019: lrgen 2.33 → 1 + 0,6·lrgen",
+   "lineage": [],
+   "lineageSource": "—",
+   "isNew": false,
+   "prevShare": 31.53,
+   "prevShareSource": "επίσημο αποτέλεσμα 2019-07",
+   "incumbent": false
+  },
+  {
+   "key": "pasok",
+   "label": "ΠΑΣΟΚ–ΚΙΝΑΛ",
+   "position": 3.6,
+   "positionSource": "CHES 2019: lrgen 4.33 → 1 + 0,6·lrgen",
+   "lineage": [],
+   "lineageSource": "—",
+   "isNew": false,
+   "prevShare": 8.1,
+   "prevShareSource": "επίσημο αποτέλεσμα 2019-07",
+   "incumbent": false
+  },
+  {
+   "key": "kke",
+   "label": "ΚΚΕ",
+   "position": 1.133,
+   "positionSource": "CHES 2019: lrgen 0.22 → 1 + 0,6·lrgen",
+   "lineage": [],
+   "lineageSource": "—",
+   "isNew": false,
+   "prevShare": 5.3,
+   "prevShareSource": "επίσημο αποτέλεσμα 2019-07",
+   "incumbent": false
+  },
+  {
+   "key": "spartiates",
+   "label": "Σπαρτιάτες",
+   "position": 7.0,
+   "positionSource": "CHES 2024 (μεταγενέστερη μέτρηση): lrgen 10.00 → 1 + 0,6·lrgen",
+   "lineage": [
+    "xa"
+   ],
+   "lineageSource": "ιστορικό γεγονός (διάσπαση/αρχηγός)",
+   "isNew": true,
+   "prevShare": null,
+   "prevShareSource": "επίσημο αποτέλεσμα 2019-07",
+   "incumbent": false
+  },
+  {
+   "key": "el",
+   "label": "Ελληνική Λύση",
+   "position": 6.4,
+   "positionSource": "CHES 2019: lrgen 9.00 → 1 + 0,6·lrgen",
+   "lineage": [],
+   "lineageSource": "—",
+   "isNew": false,
+   "prevShare": 3.7,
+   "prevShareSource": "επίσημο αποτέλεσμα 2019-07",
+   "incumbent": false
+  },
+  {
+   "key": "niki",
+   "label": "ΝΙΚΗ",
+   "position": 6.52,
+   "positionSource": "CHES 2024 (μεταγενέστερη μέτρηση): lrgen 9.20 → 1 + 0,6·lrgen",
+   "lineage": [],
+   "lineageSource": "—",
+   "isNew": true,
+   "prevShare": null,
+   "prevShareSource": "επίσημο αποτέλεσμα 2019-07",
+   "incumbent": false
+  },
+  {
+   "key": "plefsi",
+   "label": "Πλεύση Ελευθερίας",
+   "position": 2.8,
+   "positionSource": "CHES 2024 (μεταγενέστερη μέτρηση): lrgen 3.00 → 1 + 0,6·lrgen",
+   "lineage": [],
+   "lineageSource": "—",
+   "isNew": false,
+   "prevShare": 1.47,
+   "prevShareSource": "επίσημο αποτέλεσμα 2019-07",
+   "incumbent": false
+  },
+  {
+   "key": "mera25",
+   "label": "ΜέΡΑ25",
+   "position": 1.857,
+   "positionSource": "CHES 2019: lrgen 1.43 → 1 + 0,6·lrgen",
+   "lineage": [],
+   "lineageSource": "—",
+   "isNew": false,
+   "prevShare": 3.44,
+   "prevShareSource": "επίσημο αποτέλεσμα 2019-07",
+   "incumbent": false
+  }
+ ],
+ "otherSplit": {},
+ "newPartyPrevShare": 0.5
+}

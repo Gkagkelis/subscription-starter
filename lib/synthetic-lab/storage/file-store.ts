@@ -6,7 +6,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, statSync,
 import path from 'path';
 import { dataRoot } from './paths';
 
-export type Collection = 'studies' | 'focus-groups' | 'scenarios' | 'validations' | 'datasets' | 'calibration-targets' | 'logs';
+export type Collection = 'studies' | 'focus-groups' | 'scenarios' | 'validations' | 'datasets' | 'calibration-targets' | 'logs' | 'panels';
 
 const SAFE_ID = /^[a-zA-Z0-9_-]{1,100}$/;
 

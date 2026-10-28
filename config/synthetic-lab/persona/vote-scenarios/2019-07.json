@@ -1,0 +1,125 @@
+{
+ "id": "2019-07",
+ "referenceMonth": "2019-07",
+ "previousElection": "2015-09",
+ "facts": [
+  "Εκλογές 2019-07-07· προηγούμενες 2015-09."
+ ],
+ "parties": [
+  {
+   "key": "nd",
+   "label": "ΝΔ",
+   "position": 5.267,
+   "positionSource": "CHES 2019: lrgen 7.11 → 1 + 0,6·lrgen",
+   "lineage": [],
+   "lineageSource": "—",
+   "isNew": false,
+   "prevShare": 28.09,
+   "prevShareSource": "επίσημο αποτέλεσμα 2015-09",
+   "incumbent": false
+  },
+  {
+   "key": "syriza",
+   "label": "ΣΥΡΙΖΑ",
+   "position": 2.4,
+   "positionSource": "CHES 2019: lrgen 2.33 → 1 + 0,6·lrgen",
+   "lineage": [],
+   "lineageSource": "—",
+   "isNew": false,
+   "prevShare": 35.46,
+   "prevShareSource": "επίσημο αποτέλεσμα 2015-09",
+   "incumbent": true
+  },
+  {
+   "key": "pasok",
+   "label": "ΠΑΣΟΚ–ΚΙΝΑΛ",
+   "position": 3.6,
+   "positionSource": "CHES 2019: lrgen 4.33 → 1 + 0,6·lrgen",
+   "lineage": [],
+   "lineageSource": "—",
+   "isNew": false,
+   "prevShare": 6.29,
+   "prevShareSource": "επίσημο αποτέλεσμα 2015-09",
+   "incumbent": false
+  },
+  {
+   "key": "kke",
+   "label": "ΚΚΕ",
+   "position": 1.133,
+   "positionSource": "CHES 2019: lrgen 0.22 → 1 + 0,6·lrgen",
+   "lineage": [],
+   "lineageSource": "—",
+   "isNew": false,
+   "prevShare": 5.55,
+   "prevShareSource": "επίσημο αποτέλεσμα 2015-09",
+   "incumbent": false
+  },
+  {
+   "key": "el",
+   "label": "Ελληνική Λύση",
+   "position": 6.4,
+   "positionSource": "CHES 2019: lrgen 9.00 → 1 + 0,6·lrgen",
+   "lineage": [],
+   "lineageSource": "—",
+   "isNew": true,
+   "prevShare": null,
+   "prevShareSource": "επίσημο αποτέλεσμα 2015-09",
+   "incumbent": false
+  },
+  {
+   "key": "mera25",
+   "label": "ΜέΡΑ25",
+   "position": 1.857,
+   "positionSource": "CHES 2019: lrgen 1.43 → 1 + 0,6·lrgen",
+   "lineage": [
+    "syriza"
+   ],
+   "lineageSource": "ιστορικό γεγονός (διάσπαση/αρχηγός)",
+   "isNew": true,
+   "prevShare": null,
+   "prevShareSource": "επίσημο αποτέλεσμα 2015-09",
+   "incumbent": false
+  },
+  {
+   "key": "xa",
+   "label": "Χρυσή Αυγή",
+   "position": 7.0,
+   "positionSource": "CHES 2019: lrgen 10.00 → 1 + 0,6·lrgen",
+   "lineage": [],
+   "lineageSource": "—",
+   "isNew": false,
+   "prevShare": 6.99,
+   "prevShareSource": "επίσημο αποτέλεσμα 2015-09",
+   "incumbent": false
+  },
+  {
+   "key": "plefsi",
+   "label": "Πλεύση Ελευθερίας",
+   "position": 2.8,
+   "positionSource": "CHES 2024 (μεταγενέστερη μέτρηση): lrgen 3.00 → 1 + 0,6·lrgen",
+   "lineage": [
+    "syriza",
+    "lae"
+   ],
+   "lineageSource": "ιστορικό γεγονός (διάσπαση/αρχηγός)",
+   "isNew": true,
+   "prevShare": null,
+   "prevShareSource": "επίσημο αποτέλεσμα 2015-09",
+   "incumbent": false
+  },
+  {
+   "key": "ek",
+   "label": "Ένωση Κεντρώων",
+   "position": 4.0,
+   "positionSource": "παραδοχή: κέντρο: lrgen 5.00 → 1 + 0,6·lrgen",
+   "lineage": [],
+   "lineageSource": "—",
+   "isNew": false,
+   "prevShare": 3.44,
+   "prevShareSource": "επίσημο αποτέλεσμα 2015-09",
+   "incumbent": false
+  }
+ ],
+ "otherSplit": {},
+ "newPartyPrevShare": 0.5
+}

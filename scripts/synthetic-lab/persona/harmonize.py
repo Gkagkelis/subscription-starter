@@ -275,8 +275,17 @@ def construct_of(text):
     return "other"
 
 
+SENSITIVE = re.compile(r"ethnic|minority ethnic|μειονοτ.{0,20}(ανηκ|ομαδ)|παρενοχλ|κακοποι|βιασ|sexual orient|σεξουαλικ.{0,10}προσανατολ|"
+                       r"διαγνωσ|χρονια νοσ|ψυχικη ασθεν|αναπηρ|disab|hiv|ναρκωτικ|drug")
+
+
 def is_skip_var(name, label):
     t = norm(fix_text(label)) + " " + name.lower()
+    if SENSITIVE.search(t):
+        return True  # ευαίσθητα δεδομένα (άρθρο 9 GDPR): δεν γίνονται items, ούτε συνθετικές απαντήσεις
+    if re.match(r"^d\d", name.lower()) or re.match(r"^\s*(ηλικια|φυλο|μορφωση|εκπαιδευτικο επιπεδο|επαγγελματικ|θεση στην απασχολ|οικογενειακη κατασταση|"
+                                                      r"εισοδημα|μηνιαιο οικογενειακο|κοινωνικη ταξη|περιοχη κατοικιας|αστικοτητα|δημογραφ)", norm(fix_text(label))):
+        return True
     return bool(re.search(r"κωδικ|recordno|^id\b|ημερομηνια|γεννησ|year_born|νομο|area\b|weight|σταθμ|στρωμα|βαρο|ερευνητ|interviewer|"
                           r"\bfilter|μεθοδολογ|type\b|duration|διαρκεια|time|record|quota|version|comp\b|language|^\s*$", t))
 
@@ -686,6 +695,135 @@ def harmonize_undpolar(files_meta, bank):
     print(f"{file_id}: n={len(g)} items={len(items)} anchors={files_meta[-1]['anchors']}")
 
 
+
+# ---------------------------------------------------------------- MAPLE II (Ελλάδα, προ/μετεκλογικά 2019· CC0)
+MAPLE_REGION = {1: "north", 2: "north", 3: "north", 4: "north", 5: "centre", 6: "centre", 7: "centre", 8: "centre", 9: "attica", 10: "centre",
+                11: "islands", 12: "islands", 13: "islands"}
+MAPLE_REGION13 = {1: "GRCr105", 2: "GRCr106", 3: "GRCr107", 4: "GRCr108", 5: "GRCr109", 6: "GRCr110", 7: "GRCr111", 8: "GRCr112", 9: "GRCr101",
+                  10: "GRCr113", 11: "GRCr102", 12: "GRCr103", 13: "GRCr104"}
+MAPLE_PV2015 = {1: "syriza", 2: "nd", 3: "pasok", 5: "xa", 6: "kke", 7: "ek", 8: "anel", 9: "potami", 66: "other", 77: "blank", 88: "dk"}
+MAPLE_VI2019 = {1: "syriza", 2: "nd", 3: "pasok", 4: "xa", 5: "kke", 6: "anel", 7: "ek", 8: "el", 9: "mera25", 66: "other", 76: "undecided",
+                77: "blank", 78: "abstain", 88: "dk"}
+MAPLE_PV2019 = {1: "syriza", 2: "nd", 3: "pasok", 4: "xa", 5: "kke", 6: "ek", 7: "el", 8: "mera25", 66: "other", 77: "blank", 88: "dk"}
+
+
+def harmonize_maple(files_meta, bank):
+    path = os.path.join(DATA, "raw/political/repos/harvard_10.7910_DVN_RCNK8E/files/wave3_4merged_new.dta")
+    df, meta = pyreadstat.read_dta(path)
+    vls = meta.variable_value_labels or {}
+    g = df[df.country == "Greece"].reset_index(drop=True)
+    for w, wave, pv_map, election in (("w3", "2019-06", MAPLE_PV2015, "2015-09"), ("w4", "2019-07", MAPLE_PV2019, "2019-07")):
+        sub = g[g.wave.isin([1, 3] if w == "w3" else [2, 3])].reset_index(drop=True)
+        file_id = f"maple2019{'pre' if w == 'w3' else 'post'}"
+        out = pd.DataFrame(index=sub.index)
+        out["rid"] = [rid(file_id, i) for i in range(len(sub))]
+        wv = pd.to_numeric(sub.get(f"weight1_gr_{w}"), errors="coerce") if f"weight1_gr_{w}" in sub else pd.Series(1.0, index=sub.index)
+        wv = wv.fillna(wv.mean() if wv.notna().any() else 1.0)
+        out["weight"] = (wv / wv.mean()).round(5)
+        out["age_band"] = sub[f"Q4_{w}"].map(age_band)
+        out["gender"] = sub[f"Q3_{w}"].map({1: "female", 2: "male"})
+        out["edu3"] = sub[f"Q5_{w}"].map(lambda v: None if v != v else "low" if v <= 2 else "medium" if v <= 5 else "high" if v <= 9 else None)
+        out["nuts1"] = sub[f"Q6_{w}"].map(MAPLE_REGION)
+        out["region13"] = sub[f"Q6_{w}"].map(MAPLE_REGION13)
+        emp_lab = vls.get(f"Q63_{w}", {})
+        out["emp"] = sub[f"Q63_{w}"].map(lambda v: None if v != v else (lambda t: "employed" if re.search(r"employed - |^employed", t) else "self_emp" if "self" in t else
+                                                                         "unemployed" if "unemploy" in t else "student" if "student" in t or "education" in t else
+                                                                         "retired" if "retire" in t else "homemaker" if "house" in t or "home" in t else "other")(str(emp_lab.get(v, "")).lower()))
+        turned = sub[f"Q27_{w}"]
+        pv = sub[f"Q28_{w}"].map(lambda v: pv_map.get(int(v)) if v == v else None)
+        out["pv"] = [("abstain" if t in (2, 3, 4) else p) for t, p in zip(turned, pv)]
+        out["pv_election"] = election
+        if w == "w3":
+            out["vi"] = sub["Q38_w3"].map(lambda v: MAPLE_VI2019.get(int(v)) if v == v else None)
+            out["vi_wave"] = "2019-06"
+            out["vi_lean"] = sub["Q38A_gr_w3"].map(lambda v: MAPLE_VI2019.get(int(v)) if v == v else None)
+        skip = {c for c in sub.columns if not c.endswith(f"_{w}") or re.search(r"_(pt|ie|es|ger)_", c)}
+        skip |= {f"Q{k}_{w}" for k in ("3", "4", "4A", "5", "5A", "6", "27", "28", "38", "38A_gr", "63", "66")} | {"country", "wave"}
+        skip |= {c for c in sub.columns if c.startswith("weight") or re.match(r"Q(82|85)_\d+_", c)}
+        items, data = build_items(sub, meta, skip, file_id, wave)
+        for k, s_ in data.items():
+            out[k] = s_.values
+        write_file(file_id, out)
+        bank.extend(items)
+        files_meta.append({
+            "fileId": file_id, "family": "maple", "source": f"MAPLE II, Ελλάδα, κύμα {w[-1]} (Harvard Dataverse doi:10.7910/DVN/RCNK8E)", "url": "https://doi.org/10.7910/DVN/RCNK8E",
+            "wave": wave, "waveApprox": False, "n": int(len(sub)), "weightVar": f"weight1_gr_{w}", "licence": "CC0 1.0", "tier": "open",
+            "commercialUse": "allowed", "mode": "online πάνελ (πεδίο 07–21/06/2019 και 09–18/07/2019)", "population": "Ελλάδα 18+",
+            "anchors": sorted(c for c in ANCHORS + DEMO if c in out and out[c].notna().any()), "pvElection": election, "nItems": len(items),
+        })
+        print(f"{file_id}: n={len(sub)} items={len(items)} anchors={files_meta[-1]['anchors']}")
+
+
+# ---------------------------------------------------------------- Έρευνα Οικογενειακών Προϋπολογισμών (ΕΛΣΤΑΤ), μικροδεδομένα ενέργειας (Zenodo 7487147, CC BY 4.0)
+HBS_NUTS = {"Attica": "attica", "Central_Macedonia": "north", "East_Maced_Thrace": "north", "Western_Macedonia": "north", "Epirus": "north",
+            "Thessaly": "centre", "Western_GR": "centre", "Central_GR": "centre", "Peloponnese": "centre", "Ionian_Islands": "centre",
+            "Crete": "islands", "North_Aegean": "islands", "South_Aegean": "islands"}
+HBS_ITEMS = [
+    ("Car", "Το νοικοκυριό διαθέτει αυτοκίνητο"), ("PC", "Το νοικοκυριό διαθέτει υπολογιστή"), ("Mobile", "Το νοικοκυριό διαθέτει κινητό τηλέφωνο"),
+    ("DishWash", "Το νοικοκυριό διαθέτει πλυντήριο πιάτων"), ("Freezer", "Το νοικοκυριό διαθέτει καταψύκτη"), ("DVD", "Το νοικοκυριό διαθέτει συσκευή DVD"),
+    ("Camera", "Το νοικοκυριό διαθέτει φωτογραφική/βιντεοκάμερα"), ("Game", "Το νοικοκυριό διαθέτει κονσόλα παιχνιδιών"),
+    ("Solar_water", "Το νοικοκυριό διαθέτει ηλιακό θερμοσίφωνα"), ("Aircon", "Το νοικοκυριό διαθέτει κλιματιστικό"), ("Double_glaze", "Η κατοικία έχει διπλά τζάμια"),
+    ("Public_transport", "Μέλη του νοικοκυριού χρησιμοποιούν δημόσια συγκοινωνία"),
+    ("fuel_Oil", "Το νοικοκυριό αγόρασε πετρέλαιο θέρμανσης"), ("fuel_Nat_gas", "Το νοικοκυριό χρησιμοποιεί φυσικό αέριο"),
+    ("fuel_Liq_gas", "Το νοικοκυριό αγόρασε υγραέριο"), ("fuel_Wood", "Το νοικοκυριό αγόρασε καυσόξυλα"), ("Heat_electr", "Το νοικοκυριό θερμαίνεται με ηλεκτρισμό"),
+]
+
+
+def harmonize_hbs(files_meta, bank):
+    import numpy as np
+
+    path = os.path.join(DATA, "lake/raw/zenodo/7487147/HBS_final.csv")
+    d = pd.read_csv(path, low_memory=False)
+    fuels = d.pivot_table(index=["Year", "Hh_ID"], columns="GS010", values="Expenditure", aggfunc="sum").fillna(0) > 0
+    h = d.drop_duplicates(["Year", "Hh_ID"]).set_index(["Year", "Hh_ID"])
+    for f in ("Oil", "Nat_gas", "Liq_gas", "Wood"):
+        h[f"fuel_{f}"] = fuels[f].reindex(h.index).fillna(False) if f in fuels else False
+    h = h.reset_index()
+    for year, g in h.groupby("Year"):
+        g = g.reset_index(drop=True)
+        file_id = f"hbs{year}"
+        out = pd.DataFrame(index=g.index)
+        out["rid"] = [rid(file_id, i) for i in range(len(g))]
+        w = pd.to_numeric(g.Sample_weight, errors="coerce").fillna(1.0)
+        out["weight"] = (w / w.mean()).round(5)
+        out["age_band"] = g.Age_head.map(age_band)
+        out["gender"] = g.Gender_head.map({"Male": "male", "Female": "female"})
+        hi = (g["AEI-TEI"] + g["MSc"] + g["PhD"]) > 0
+        mid = (g["Lyceum"] + g["IEK"] + g["Gymnasium"]) > 0
+        out["edu3"] = np.where(hi, "high", np.where(mid, "medium", "low"))
+        out["nuts1"] = g.NUTS2.map(HBS_NUTS)
+        out["urban"] = g.Urb_degree.map({1.0: "urban", 2.0: "urban", 3.0: "rural"})
+        out["emp"] = g.Activity_head.map({"Employed": "employed", "Retired": "retired", "Unemployed": "unemployed", "Non_active": "other"})
+        # εισοδηματικό πεμπτημόριο μέσα στο έτος (σταθμισμένο) — συγκρίσιμο διαχρονικά, σε αντίθεση με το ονομαστικό εισόδημα
+        order = np.argsort(g.HH_inc.values)
+        cw = np.cumsum(w.values[order]) / w.sum()
+        q = np.empty(len(g), dtype=int)
+        q[order] = np.minimum((cw * 5).astype(int) + 1, 5)
+        out["incq5"] = q
+        out["hhsize5"] = g.Hh_size.clip(upper=5)
+        items = []
+        for var, text in HBS_ITEMS:
+            if var not in g:
+                continue
+            v = g[var]
+            if v.isna().mean() > 0.7:
+                continue
+            iid = f"{file_id}::{var}"
+            out[iid] = v.map(lambda x: None if x != x else ("1" if bool(x) else "0"))
+            items.append({"id": iid, "file": file_id, "wave": f"{year}-12", "var": var, "text": text, "type": "binary",
+                          "options": [{"code": "0", "label": "Όχι"}, {"code": "1", "label": "Ναι"}], "dkCode": None, "construct": "household_consumption"})
+        write_file(file_id, out)
+        bank.extend(items)
+        files_meta.append({
+            "fileId": file_id, "family": "hbs", "source": f"ΕΛΣΤΑΤ, Έρευνα Οικογενειακών Προϋπολογισμών {year} — μικροδεδομένα ενέργειας (Zenodo 7487147)",
+            "url": "https://doi.org/10.5281/zenodo.7487147", "wave": f"{year}-12", "waveApprox": True, "n": int(len(g)), "weightVar": "Sample_weight",
+            "licence": "CC BY 4.0", "tier": "open", "commercialUse": "allowed_with_attribution", "mode": "συνέντευξη νοικοκυριού (ΕΛΣΤΑΤ)",
+            "population": "Ιδιωτικά νοικοκυριά Ελλάδας (μονάδα: νοικοκυριό· δημογραφικά = υπεύθυνος νοικοκυριού, μόρφωση = υψηλότερη του νοικοκυριού)",
+            "anchors": sorted(c for c in ANCHORS + DEMO + ["incq5", "hhsize5"] if c in out and out[c].notna().any()), "pvElection": None, "nItems": len(items),
+            "realRespondents": True,
+        })
+    print(f"hbs: {h.Year.nunique()} έτη, {len(h)} νοικοκυριά")
+
 # ---------------------------------------------------------------- διαχρονική σύνδεση items (οικογένειες)
 def tokens(text):
     t = norm(fix_text(text))
@@ -694,39 +832,74 @@ def tokens(text):
 
 
 def link_families(bank):
-    """Ίδια ερώτηση σε διαφορετικά κύματα: ίδιες ουσιαστικές επιλογές + Jaccard κειμένου ≥ 0,6 (και ίδιος τύπος)."""
+    """Ίδια ερώτηση σε διαφορετικά κύματα. Απαιτεί: ίδιο τύπο και ίδιες ουσιαστικές επιλογές, Jaccard όλου του κειμένου ≥ 0,5,
+    και Jaccard του ΔΙΑΚΡΙΤΙΚΟΥ τμήματος ≥ 0,5. Διακριτικό = λέξεις που δεν ανήκουν στον κοινό «κορμό» μιας μπαταρίας
+    (λέξεις που εμφανίζονται σε ≥ 3 items του ίδιου αρχείου). Η σύνδεση μεταξύ δύο αρχείων είναι ένα-προς-ένα (άπληστη, κατά σκορ)."""
     def okey(it):
         return tuple(sorted(re.sub(r"[^a-zα-ω0-9]", "", norm(fix_text(o["label"]))) for o in it["options"]))
+    # κορμός μπαταριών ανά αρχείο
+    stem = {}
+    by_file = defaultdict(list)
+    for it in bank:
+        by_file[it["file"]].append(it)
+    for f, its in by_file.items():
+        c = Counter(w for it in its for w in tokens(it["text"]))
+        stem[f] = {w for w, k in c.items() if k >= 3}
+    tok = {it["id"]: tokens(it["text"]) for it in bank}
+    spec = {it["id"]: tok[it["id"]] - stem[it["file"]] for it in bank}
     groups = defaultdict(list)
     for it in bank:
         groups[(it["type"], okey(it))].append(it)
-    fam = 0
-    for _, its in groups.items():
-        toks = [tokens(it["text"]) for it in its]
-        parent = list(range(len(its)))
+    parent = {it["id"]: it["id"] for it in bank}
 
-        def find(i):
-            while parent[i] != i:
-                parent[i] = parent[parent[i]]
-                i = parent[i]
-            return i
+    def find(i):
+        while parent[i] != i:
+            parent[i] = parent[parent[i]]
+            i = parent[i]
+        return i
+    for _, its in groups.items():
+        edges = []
         for i in range(len(its)):
             for j in range(i + 1, len(its)):
-                if its[i]["file"] == its[j]["file"] or not toks[i] or not toks[j]:
+                a, b = its[i], its[j]
+                if a["file"] == b["file"] or not tok[a["id"]] or not tok[b["id"]]:
                     continue
-                jac = len(toks[i] & toks[j]) / len(toks[i] | toks[j])
-                if jac >= 0.6:
-                    parent[find(i)] = find(j)
-        roots = defaultdict(list)
-        for i in range(len(its)):
-            roots[find(i)].append(its[i])
-        for members in roots.values():
-            fam += 1
-            fid = f"fam{fam:05d}"
-            waves = sorted({m["wave"] for m in members})
+                ja = len(tok[a["id"]] & tok[b["id"]]) / len(tok[a["id"]] | tok[b["id"]])
+                sa, sb = spec[a["id"]], spec[b["id"]]
+                if sa and sb:
+                    js = len(sa & sb) / len(sa | sb)
+                    ok = ja >= 0.5 and js >= 0.5
+                else:
+                    js = ja
+                    ok = ja >= 0.75 and not (sa or sb)
+                if ok:
+                    edges.append((0.5 * ja + 0.5 * js, a, b))
+        used = set()
+        for score, a, b in sorted(edges, key=lambda e: -e[0]):
+            if (a["id"], b["file"]) in used or (b["id"], a["file"]) in used:
+                continue
+            used.add((a["id"], b["file"]))
+            used.add((b["id"], a["file"]))
+            parent[find(a["id"])] = find(b["id"])
+    roots = defaultdict(list)
+    for it in bank:
+        roots[find(it["id"])].append(it)
+    fam = 0
+    for members in roots.values():
+        # μία οικογένεια δεν περιέχει δύο items του ίδιου αρχείου
+        files = Counter(m["file"] for m in members)
+        if max(files.values()) > 1:
             for m in members:
-                m["family"] = fid
-                m["familyWaves"] = waves
+                fam += 1
+                m["family"] = f"fam{fam:05d}"
+                m["familyWaves"] = [m["wave"]]
+            continue
+        fam += 1
+        fid = f"fam{fam:05d}"
+        waves = sorted({m["wave"] for m in members})
+        for m in members:
+            m["family"] = fid
+            m["familyWaves"] = waves
 
 
 def equate_lr(files_meta):
@@ -749,7 +922,8 @@ def equate_lr(files_meta):
         if f["family"] not in ("cses", "undpolar"):
             continue
         path = os.path.join(OUT, "resp", f"{f['fileId']}.csv.gz")
-        d = pd.read_csv(path, low_memory=False)
+        cols = pd.read_csv(path, nrows=0).columns
+        d = pd.read_csv(path, dtype={c: str for c in cols if "::" in c}, low_memory=False)
         w0 = min(ref, key=lambda w: abs(ym(w) - ym(f["wave"])))
         r = ref[w0]
         rc = np.cumsum([r.weight[r.lr7 == k].sum() for k in range(1, 8)]) / r.weight.sum()
@@ -770,6 +944,8 @@ def main():
     harmonize_dianeosis(files_meta, bank)
     harmonize_cses(files_meta, bank)
     harmonize_undpolar(files_meta, bank)
+    harmonize_maple(files_meta, bank)
+    harmonize_hbs(files_meta, bank)
     equate_lr(files_meta)
     link_families(bank)
     multi = Counter(it["family"] for it in bank)

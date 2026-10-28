@@ -10,8 +10,9 @@ const BASIS_LABEL: Record<string, string> = {
   assumption: 'παραδοχές',
   uninformed: 'χωρίς βάση',
   llm: 'AI',
-  model_extrapolated: 'πρόβλεψη από συγγενικά δεδομένα',
-  not_estimable: 'μη εκτιμήσιμο'
+  model_extrapolated: 'πρόβλεψη από συγγενικά δεδομένα / παραδοχή',
+  not_estimable: 'μη εκτιμήσιμο',
+  persona_model: 'συνθετικά πρόσωπα (μοντέλο σε μικροδεδομένα)'
 };
 
 const SEG_LABEL: Record<string, string> = { ageBand: 'Ηλικία', gender: 'Φύλο', education: 'Εκπαίδευση', incomeQuintile: 'Εισόδημα', settlement: 'Περιοχή' };

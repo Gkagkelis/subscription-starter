@@ -13,6 +13,7 @@
 Έξοδος: <out>/model.json (+ items.json), ιδιωτικά.
 """
 import argparse
+import re
 import hashlib
 import json
 import os
@@ -25,9 +26,10 @@ import pandas as pd
 
 sys.path.insert(0, os.path.dirname(__file__))
 import pie  # noqa: E402
+from pie import read_resp  # noqa: E402
 
 NODES = [
-    ("emp", ["private_emp", "public_emp", "self_emp", "farmer", "unemployed", "retired", "student", "homemaker", "other"]),
+    ("emp", ["private_emp", "public_emp", "self_emp", "farmer", "employed", "unemployed", "retired", "student", "homemaker", "other"]),
     ("inc6", [1, 2, 3, 4, 5, 6]),
     ("econ4", [1, 2, 3, 4]),
     ("class3", [1, 2, 3]),
@@ -35,6 +37,8 @@ NODES = [
     ("pv", None),  # κατηγορίες από τις τελευταίες εκλογές ≤ cutoff
     ("believer", [0, 1]),
     ("polint4", [1, 2, 3, 4]),
+    ("incq5", [1, 2, 3, 4, 5]),
+    ("hhsize5", [1, 2, 3, 4, 5]),
 ]
 DEMO_FEATS = ["age_17_24", "age_25_34", "age_35_44", "age_55_64", "age_65p", "female", "edu_low", "edu_high",
               "n_attica", "n_north", "n_islands", "rural"]
@@ -42,7 +46,7 @@ NODE_FEATS = {
     "emp": ["emp_unemp", "emp_retired", "emp_student", "emp_home", "emp_public", "emp_self", "emp_other"],
     "inc6": ["inc"], "econ4": ["econ"], "class3": ["cls_low", "cls_high"], "lr7": ["lr", "lr2", "lr_none"],
     "pv": ["pv_nd", "pv_syriza", "pv_pasok", "pv_kke", "pv_farright", "pv_leftother", "pv_centre", "pv_other"],
-    "believer": ["believer"], "polint4": ["polint"],
+    "believer": ["believer"], "polint4": ["polint"], "incq5": ["inc_q"], "hhsize5": ["hhsize"],
 }
 POS = r"^(πολυ|συμφων|απολυτα|σιγουρα ναι|ναι|θετικ|πολυ θετικ|καλυτερ|εμπιστευ|ισχυει πολυ|very|strongly agree|agree|yes|always|παντα|καθε|πανω)"
 NEG = r"^(καθολου|διαφων|σιγουρα οχι|οχι|αρνητικ|χειροτερ|δεν|ποτε|1 (δεν|πολυ αρνητ|πολυ μακρ)|not at all|strongly dis|disagree|no\b|never|very dis)"
@@ -56,7 +60,7 @@ def ym(w):
 def assert_real_inputs(root):
     hz = os.path.join(root, ".synthetic-lab-data", "persona", "harmonized")
     for f in json.load(open(os.path.join(hz, "files.json"))):
-        assert f["family"] in ("dianeosis_tpe", "cses", "undpolar") or f.get("realRespondents") is True, f"μη πραγματική πηγή: {f['fileId']}"
+        assert f["family"] in ("dianeosis_tpe", "cses", "undpolar", "maple", "hbs") or f.get("realRespondents") is True, f"μη πραγματική πηγή: {f['fileId']}"
     return hz
 
 
@@ -88,7 +92,7 @@ def pie_norm(s):
 
 def load_file(hz, fid, cache={}):
     if fid not in cache:
-        cache[fid] = pd.read_csv(os.path.join(hz, "resp", f"{fid}.csv.gz"), low_memory=False)
+        cache[fid] = read_resp(os.path.join(hz, "resp", f"{fid}.csv.gz"))
     return cache[fid]
 
 
@@ -119,11 +123,11 @@ def fit_anchor_nodes(files, hz, lam, log):
         frames = [load_file(hz, f["fileId"]) for f in use]
         df = pd.concat(frames, ignore_index=True).copy()
         if node == "lr7":
-            df = df[df["lr7"].notna() | (df["lr_none"] == 1)]
+            df = df[df["lr7"].notna() | (df.get("lr_none", pd.Series(0, index=df.index)) == 1)]
         else:
             df = df[df[node].notna()]
         if node == "lr7":
-            y_raw = np.where(df["lr_none"].fillna(0).values == 1, "none", df["lr7"].values)
+            y_raw = np.where(df.get("lr_none", pd.Series(0, index=df.index)).fillna(0).values == 1, "none", df["lr7"].values)
             df = df.assign(_y=[("none" if v == "none" else int(float(v))) if v == v and v is not None else None for v in y_raw])
             df = df[df._y.notna()]
         else:
@@ -209,21 +213,31 @@ def fit_items(files, bank, hz, lam, log, factors=True, seed=7):
             rec["inSampleMaxErrPp"] = round(float(100 * np.max(np.abs(fitted - obs))), 3)
             rec["lambda"] = 0.0
             out.append(rec)
-        # λανθάνοντες παράγοντες ανά κατασκευή μέσα στο αρχείο
+        # λανθάνοντα χαρακτηριστικά ανά «μπαταρία»: διαδοχικές ordinal ερωτήσεις του ίδιου αρχείου με ίδιες επιλογές
+        # (κοινή εισαγωγή/κλίμακα). Φορτίσεις από τα PIT υπόλοιπα (ό,τι μένει μετά τα δημογραφικά και τις άγκυρες).
         if factors:
-            by_c = {}
-            for rec in out:
-                if rec["file"] == f["fileId"] and rec["id"] in scores and rec.get("construct") not in (None, "other"):
-                    by_c.setdefault(rec["construct"], []).append(rec)
-            for c, recs in by_c.items():
-                if len(recs) < 2:
-                    continue
+            order = [it["id"] for it in by_file.get(f["fileId"], [])]
+            recs_f = {r["id"]: r for r in out if r["file"] == f["fileId"]}
+            runs, cur, key = [], [], None
+            for iid in order:
+                r = recs_f.get(iid)
+                eligible = r is not None and r["id"] in scores and not re.match(r"^m[\d.]+$", r["id"].split("::")[-1])
+                k = tuple(o["label"] for o in r["options"]) if eligible else None
+                if k is not None and k == key:
+                    cur.append(r)
+                else:
+                    if len(cur) >= 2:
+                        runs.append(cur)
+                    cur = [r] if k is not None else []
+                    key = k
+            if len(cur) >= 2:
+                runs.append(cur)
+            for bi, recs in enumerate(runs):
                 S = np.column_stack([scores[r["id"]] for r in recs])
-                lam_c, _ = pie.one_factor(S)
-                orient = sum(l * r.get("polarity", 0) for l, r in zip(lam_c, recs))
-                sign = -1.0 if orient < 0 else 1.0
-                for l, r in zip(lam_c, recs):
-                    r["lambda"] = round(sign * float(l), 4)
+                lam_b, _ = pie.one_factor(S)
+                for l, r in zip(lam_b, recs):
+                    r["lambda"] = round(float(l), 4)
+                    r["factorKey"] = f"{f['fileId']}:b{bi}"
         log.append(f"items {f['fileId']}: {sum(1 for r in out if r['file'] == f['fileId'])}")
     return out
 
@@ -238,6 +252,7 @@ def main():
     ap.add_argument("--lam", type=float, default=1.0)
     ap.add_argument("--no-factors", action="store_true")
     ap.add_argument("--out", default=None)
+    ap.add_argument("--families", default="", help="περιορισμός σε οικογένειες πηγών (π.χ. hbs)")
     a = ap.parse_args()
     root = os.path.abspath(a.root)
     hz = assert_real_inputs(root)
@@ -245,7 +260,7 @@ def main():
     bank = json.load(open(os.path.join(hz, "item_bank.json")))
     hold = {h for h in a.holdout.split(",") if h}
     files = [f for f in files_all if ym(f["wave"]) <= ym(a.cutoff) and f["fileId"] not in hold
-             and (a.policy == "research" or f["tier"] == "open")]
+             and (a.policy == "research" or f["tier"] == "open") and (not a.families or f["family"] in a.families.split(","))]
     log = []
     t0 = time.time()
     nodes = fit_anchor_nodes(files, hz, a.lam, log)

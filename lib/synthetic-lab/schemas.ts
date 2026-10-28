@@ -56,7 +56,32 @@ export const QuestionSchema = z
       .nullable()
       .optional(),
     construct: z.object({ object: str(80).min(1), kind: z.enum(['evaluation', 'intention', 'usage', 'general_usage', 'other']) }).nullable().optional(),
-    scenarioPrior: z.object({ probs: z.array(z.number().min(0).max(100)).min(2).max(12), rationale: str(500).min(3) }).nullable().optional()
+    scenarioPrior: z.object({ probs: z.array(z.number().min(0).max(100)).min(2).max(12), rationale: str(500).min(3) }).nullable().optional(),
+    personaLink: z
+      .object({
+        itemId: str(120).nullable().optional(),
+        family: str(40).nullable().optional(),
+        optionMap: z.record(str(150), z.array(str(20)).max(12)).refine((r) => Object.keys(r).length <= 12, 'Έως 12 επιλογές.'),
+        dkOption: str(150).nullable().optional(),
+        kind: z.enum(['direct', 'collapsed', 'equivalent']),
+        assumption: str(500).nullable().optional(),
+        optionItems: z.record(str(150), z.object({ itemId: str(120), yesCode: str(20) })).nullable().optional(),
+        anchor: z
+          .object({ name: z.enum(['emp', 'inc6', 'econ4', 'class3', 'lr7', 'pv', 'believer', 'polint4', 'incq5', 'hhsize5']), optionMap: z.record(str(150), z.array(str(40)).max(20)) })
+          .nullable()
+          .optional(),
+        vote: z
+          .object({
+            scenario: str(40).regex(/^[\w.\-]+$/),
+            optionParty: z.record(str(150), str(40)),
+            abstainOption: str(150).nullable().optional(),
+            undecidedOption: str(150).nullable().optional()
+          })
+          .nullable()
+          .optional()
+      })
+      .nullable()
+      .optional()
   })
   .superRefine((q, ctx) => {
     const needsOptions = ['single_choice', 'multiple_choice', 'ranking'];
@@ -97,7 +122,9 @@ export const PlanSchema = z.object({
   referenceYear: z.number().int().min(2000).max(2100).nullable().optional(),
   referenceMonth: z.number().int().min(1).max(12).nullable().optional(),
   holdoutDatasets: z.array(str(300)).max(200).optional(),
-  engine: z.enum(['standard', 'evidence']).optional()
+  engine: z.enum(['standard', 'evidence', 'persona']).optional(),
+  personaModelVersion: z.string().max(80).regex(/^[\w.\-]+$/).nullable().optional(),
+  panelId: z.string().max(100).regex(/^[\w\-]+$/).nullable().optional()
 });
 
 export const RunStudySchema = z.object({

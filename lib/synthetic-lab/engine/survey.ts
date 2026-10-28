@@ -34,6 +34,7 @@ import { questionMetrics } from './evidence';
 import { BCS_DATASET_ID } from '../data/ec-bcs';
 import { CES_DATASET_ID, HBS_DATASET_ID } from '../data/consumer-context';
 import { ASSUMPTION_IDS, getAssumption } from './assumptions';
+import { runPersonaSurvey } from '../persona/survey';
 
 export const NOT_VALIDATED_MESSAGE =
   'Η συγκεκριμένη προσομοίωση δεν έχει ακόμη επικυρωθεί απέναντι σε ανεξάρτητη πραγματική έρευνα';
@@ -191,6 +192,11 @@ function applyFollowUps(questions: Question[], answers: SyntheticAnswer[]): Synt
 
 export async function runSurvey(input: RunSurveyOptions): Promise<StudyRun> {
   let o = input;
+  // Persona Intelligence Engine: ξεχωριστή διαδρομή (πρώτα συνθετικά πρόσωπα, μετά ατομικές απαντήσεις)· ο prod-1 μένει ανέπαφος.
+  if (o.plan.engine === 'persona') {
+    if ((o.mode || 'demo') !== 'demo') throw new Error('Ο μηχανισμός PIE είναι στατιστικός (χωρίς κλήσεις AI)· η εκτέλεση live δεν υποστηρίζεται.');
+    return runPersonaSurvey({ plan: o.plan, populationId: o.populationId, seed: o.seed, runId: o.runId, save: o.save, stabilityRuns: o.stabilityRuns });
+  }
   const t0 = Date.now();
   const runId = o.runId || newId('study');
   const seed = o.seed ?? (Date.now() % 1_000_000);

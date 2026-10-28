@@ -25,7 +25,7 @@ FEATURES = [
     "emp_unemp", "emp_retired", "emp_student", "emp_home", "emp_public", "emp_self", "emp_other",
     "inc", "econ", "cls_low", "cls_high", "lr", "lr2", "lr_none",
     "pv_nd", "pv_syriza", "pv_pasok", "pv_kke", "pv_farright", "pv_leftother", "pv_centre", "pv_other",
-    "believer", "polint",
+    "believer", "polint", "inc_q", "hhsize",
 ]
 # ποια μεταβλητή του προσώπου χρειάζεται κάθε ομάδα χαρακτηριστικών
 FEATURE_SOURCE = {
@@ -35,7 +35,7 @@ FEATURE_SOURCE = {
     "emp_public": "emp_detail", "emp_self": "emp_detail", "inc": "inc6", "econ": "econ4", "cls_low": "class3", "cls_high": "class3",
     "lr": "lr7", "lr2": "lr7", "lr_none": "lr7",
     **{f: "pv" for f in ["pv_nd", "pv_syriza", "pv_pasok", "pv_kke", "pv_farright", "pv_leftother", "pv_centre", "pv_other"]},
-    "believer": "believer", "polint": "polint4",
+    "believer": "believer", "polint": "polint4", "inc_q": "incq5", "hhsize": "hhsize5",
 }
 PV_FAMILY = {"nd": "nd", "syriza": "syriza", "pasok": "pasok", "kke": "kke", "xa": "farright", "el": "farright", "spartiates": "farright",
              "niki": "farright", "laos": "farright", "anel": "farright", "potami": "centre", "ek": "centre", "dimar": "centre",
@@ -107,7 +107,19 @@ def feature_columns(df):
         put("believer", pd_num(df["believer"]))
     if "polint4" in df:
         put("polint", (pd_num(df["polint4"]) - 2.5) / 1.0)
+    if "incq5" in df:
+        put("inc_q", (pd_num(df["incq5"]) - 3.0) / 1.41)
+    if "hhsize5" in df:
+        put("hhsize", (pd_num(df["hhsize5"]) - 2.5) / 1.2)
     return X
+
+
+def read_resp(path, **kw):
+    """Harmonised αρχείο: οι στήλες items (με «::») διαβάζονται ΩΣ ΚΕΙΜΕΝΟ (κωδικοί «1», όχι 1.0)."""
+    import pandas as pd
+
+    cols = pd.read_csv(path, nrows=0).columns
+    return pd.read_csv(path, dtype={c: str for c in cols if "::" in c}, low_memory=False, **kw)
 
 
 def pd_num(s):
@@ -313,16 +325,27 @@ def generate_anchors(model, skel, rng, constructs=None):
         if name == "lr7":
             df["lr_none"] = [1 if v == "none" else 0 for v in vals]
             df["lr7"] = [np.nan if v == "none" else float(v) for v in vals]
-        elif name in ("inc6", "econ4", "class3", "believer", "polint4"):
+        elif name in ("inc6", "econ4", "class3", "believer", "polint4", "incq5", "hhsize5"):
             df[name] = [float(v) for v in vals]
         else:
             df[name] = vals
-    for c in constructs or model.get("constructs", []):
-        df[f"theta_{c}"] = rng.standard_normal(len(df))
+    df["_pseed"] = rng.integers(0, 2**31 - 1, len(df))
     return df
 
 
-def answer_item(item, personas, rng, factors=True, theta=None):
+def theta(personas, key):
+    """Λανθάνον χαρακτηριστικό του προσώπου για μια μπαταρία: N(0,1), ντετερμινιστικό από τον σπόρο του προσώπου και το κλειδί."""
+    import hashlib
+
+    h = int(hashlib.sha256(key.encode()).hexdigest()[:8], 16)
+    seeds = personas["_pseed"].values.astype(np.int64)
+    out = np.empty(len(seeds))
+    for i, s in enumerate(seeds):
+        out[i] = np.random.default_rng([int(s), h]).standard_normal()
+    return out
+
+
+def answer_item(item, personas, rng, factors=True, theta_override=None):
     """Στάδιο Β για ένα item: επιστρέφει πίνακα κωδικών (str) ανά πρόσωπο, με 'dk' όπου ο ερωτώμενος δεν απαντά."""
     X = feature_columns(personas)
     Z, _ = design(X, item["feats"], np.array(item["means"]))
@@ -339,7 +362,7 @@ def answer_item(item, personas, rng, factors=True, theta=None):
         tau = np.array(m["tau"])
         eta = Z @ b
         lam = float(item.get("lambda", 0.0)) if factors else 0.0
-        th = theta if theta is not None else (personas[f"theta_{item['construct']}"].values if f"theta_{item.get('construct')}" in personas else np.zeros(n))
+        th = theta_override if theta_override is not None else (theta(personas, item["factorKey"]) if item.get("factorKey") and lam != 0 else np.zeros(n))
         e = lam * th + math.sqrt(max(1 - lam * lam, 0.0)) * rng.standard_normal(n)
         y = np.searchsorted(tau, eta + e)
     else:
