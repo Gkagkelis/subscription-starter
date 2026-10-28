@@ -14,6 +14,8 @@
 - Οι εξαγόμενες μελέτες μαρκάρονται INTEGRATED.
 """
 
+import csv
+import gzip
 import hashlib
 import json
 import os
@@ -220,7 +222,40 @@ def run(con):
     with open(tmp, "w", encoding="utf-8") as fh:
         json.dump(index, fh, ensure_ascii=False, separators=(",", ":"))
     os.replace(tmp, os.path.join(EXPORT, "lake_index.json"))
+    deliverables(con, index_questions)
     db.log(con, "export", f"{len(index_studies)} μελέτες, {len(index_questions)} ερωτήσεις/δείκτες ({time.time() - t0:.0f}s)")
     con.commit()
     print(f"✓ export: {len(index_studies)} μελέτες, {len(index_questions)} ερωτήσεις/δείκτες → {EXPORT}")
     return len(index_studies)
+
+
+def _csv(path, header, rows, gz=False):
+    tmp = path + ".tmp"
+    opener = (lambda: gzip.open(tmp, "wt", encoding="utf-8", newline="")) if gz else (lambda: open(tmp, "w", encoding="utf-8-sig", newline=""))
+    with opener() as fh:
+        w = csv.writer(fh)
+        w.writerow(header)
+        n = 0
+        for r in rows:
+            w.writerow(r)
+            n += 1
+    os.replace(tmp, path)
+    return n
+
+
+def deliverables(con, index_questions):
+    """Παραδοτέα σε μορφή πίνακα (ιδιωτικά, εκτός repo): registry (A), κατάλογος (B), τράπεζα ερωτήσεων (D), κατανομές (E)."""
+    cols = [r[1] for r in con.execute("PRAGMA table_info(sources)")]
+    _csv(os.path.join(EXPORT, "research_sources_registry.csv"), cols, (tuple(r) for r in con.execute("SELECT * FROM sources ORDER BY source_id")))
+    scols = [c for c in db.STUDY_COLS if c != "raw_meta"]
+    _csv(os.path.join(EXPORT, "greek_research_catalog.csv"), scols,
+         (tuple(r) for r in con.execute(f"SELECT {','.join(scols)} FROM studies ORDER BY source_id, study_id")))
+    _csv(os.path.join(EXPORT, "survey_question_bank.csv"), ["question_id", "study_id", "kind", "code", "text", "options", "years", "n", "topics", "multi"],
+         ((q["id"], q["studyId"], q["kind"], q["code"], q["text"], " | ".join(q["options"]), ",".join(map(str, q["years"])), q["n"] or "",
+           ",".join(q["topics"]), int(q["multi"])) for q in index_questions))
+    _csv(os.path.join(EXPORT, "empirical_distribution_bank.csv.gz"),
+         ["study_id", "var_id", "wave_year", "group_dim", "group_value", "option_label", "value", "unit", "n", "weighted", "flag", "note"],
+         (tuple(r) for r in con.execute(
+             "SELECT d.study_id, d.var_id, d.wave_year, d.group_dim, d.group_value, d.option_label, d.value, d.unit, d.n, d.weighted, d.flag, d.note "
+             "FROM distributions d JOIN studies s USING(study_id) WHERE s.status IN ('VALIDATED','INTEGRATED') AND s.duplicate_of IS NULL ORDER BY d.study_id, d.var_id")),
+         gz=True)
