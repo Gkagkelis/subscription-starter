@@ -23,7 +23,9 @@ export function benchmarkOverview() {
 
   const expDir = path.dirname(benchDir('experiments', 'x'));
   const byId = new Map<string, string>();
-  latestFiles(expDir).forEach((f) => byId.set(f.replace(/-\d{4}-\d{2}-\d{2}T.*$/, ''), f));
+  latestFiles(expDir)
+    .filter((f) => !f.startsWith('T-'))
+    .forEach((f) => byId.set(f.replace(/-\d{4}-\d{2}-\d{2}T.*$/, ''), f));
   const experiments = Array.from(byId.entries()).map(([id, f]) => {
     const e = JSON.parse(readFileSync(path.join(expDir, f), 'utf8'));
     return {
@@ -38,7 +40,33 @@ export function benchmarkOverview() {
   const decisions = history.filter((h) => h.type === 'select' || h.type === 'holdout').slice(-10);
   const assocPath = benchDir('assoc_results.json');
   const assoc = existsSync(assocPath) ? JSON.parse(readFileSync(assocPath, 'utf8')) : null;
+  // ---------------- Φάση 2 ----------------
+  const readJson = (p: string) => (existsSync(p) ? JSON.parse(readFileSync(p, 'utf8')) : null);
+  const temporalFile = latestFiles(expDir, 'T-temporal-validation').pop();
+  const temporal = temporalFile
+    ? (() => {
+        const t = readJson(path.join(expDir, temporalFile));
+        return { file: temporalFile, variants: t.variants.map((v: any) => ({ label: v.label, summary: v.summary, familyBalanced: v.familyBalanced, byFamily: Object.fromEntries(Object.entries(v.byFamily || {}).map(([k, x]: any) => [k, { samples: x.samples, sampleMeanMae: x.sampleMeanMae }])) })) };
+      })()
+    : null;
+  const factors = readJson(benchDir('item_factors.json'));
+  const weights = readJson(benchDir('weights_audit_dianeosis.json'));
+  const splitCounts: Record<string, { items: number; samples: number }> = {};
+  suite?.items.forEach((i) => {
+    splitCounts[i.split] ||= { items: 0, samples: 0 };
+    splitCounts[i.split].items++;
+  });
+  if (suite) for (const sp of Object.keys(splitCounts)) splitCounts[sp].samples = new Set(suite.items.filter((i) => i.split === sp).map((i) => i.sampleKey)).size;
+  const phase2 = {
+    splits: splitCounts,
+    temporal,
+    factors: factors ? { chosen: factors.chosen, validation2022: factors.validation2022, revealed2024: factors.revealed2024 } : null,
+    weightsAudit: weights?.waves || null,
+    comparisons: history.filter((h) => h.type === 'p2_compare').slice(-12).map((h: any) => ({ at: h.at, label: h.label, ref: h.ref?.version, alt: h.alt?.version, refScore: h.ref?.summary?.sampleMeanMae, altScore: h.alt?.summary?.sampleMeanMae, paired: h.paired, familyDelta: h.familyDelta, accepted: h.accepted, reasons: h.reasons })),
+    final2: readJson(benchDir('final2_results.json'))
+  };
   return {
+    phase2,
     production: { version: PRODUCTION_MODEL.version, description: describeModel(PRODUCTION_MODEL) },
     suite: suite ? { version: suite.version, hash: suite.hash, generatedAt: suite.generatedAt, items: suite.items.length, counts, samples, rules: suite.rules } : null,
     models: listModels().map((m) => ({ version: m.version, label: m.label, description: describeModel(m), batteryRho: m.batteryRho || 0, structureTransfer: !!m.structureTransfer, notes: m.notes || [] })),

@@ -1,5 +1,6 @@
 import { Card } from './ui';
 import { benchmarkOverview } from '@/lib/synthetic-lab/benchmark/overview';
+import Phase2Panel from './Phase2Panel';
 
 const FAMILY: Record<string, string> = {
   eb_trend: 'Eurobarometer (επαναλαμβανόμενες ερωτήσεις)',
@@ -26,6 +27,7 @@ export default function BenchmarkPanel() {
   }
   return (
     <div className="space-y-4">
+      <Phase2Panel p2={o.phase2} />
       <Card className="space-y-2">
         <h2 className="font-semibold">Benchmark πραγματικών ελληνικών ερευνών</h2>
         <p className="text-sm text-stone-700">
