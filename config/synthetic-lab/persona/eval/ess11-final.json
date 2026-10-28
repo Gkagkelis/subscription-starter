@@ -1,0 +1,87 @@
+{
+  "note": "ΤΕΛΙΚΟ HOLDOUT. Αντιστοίχιση ESS11 Ελλάδα (πεδίο 2–5/2024, CAPI) → μοντέλο, ίδια με το ESS10 validation. Καταγράφηκε και δεσμεύτηκε (commit) ΠΡΙΝ από οποιαδήποτε εκτέλεση· εκτελείται ΜΙΑ φορά για v0 (pie-0.2 ρυθμίσεις) και για τον κλειδωμένο υποψήφιο. Cutoff 2024-01. pv = ψήφος 6/2023.",
+  "holdout": "ess11",
+  "cutoff": "2024-01",
+  "refMonth": "2024-03",
+  "families": "dianeosis_tpe,cses,undpolar,maple",
+  "lam": 3.0,
+  "items": [],
+  "anchors": [
+    {
+      "hold": "polint4",
+      "target": "anchor:polint4",
+      "kind": "ίδια κλίμακα (very/quite/hardly/not at all)"
+    },
+    {
+      "hold": "econ4",
+      "target": "anchor:econ4",
+      "kind": "equivalent (hincfel ↔ «πώς τα βγάζετε πέρα»)"
+    },
+    {
+      "hold": "pv",
+      "target": "anchor:pv",
+      "kind": "ψήφος 2019",
+      "nominal": true,
+      "categories": [
+        "nd",
+        "syriza",
+        "pasok",
+        "kke",
+        "other",
+        "abstain"
+      ]
+    },
+    {
+      "hold": "emp",
+      "target": "anchor:emp",
+      "kind": "κύρια δραστηριότητα",
+      "nominal": true,
+      "categories": [
+        "employed",
+        "student",
+        "unemployed",
+        "retired",
+        "homemaker",
+        "other"
+      ]
+    }
+  ],
+  "lrColumn": "lr11",
+  "assocItems": [
+    {
+      "hold": "ess11::trstprl",
+      "target": "dn2018b::B21_6",
+      "sign": -1
+    },
+    {
+      "hold": "ess11::trstlgl",
+      "target": "dn2018b::B21_7",
+      "sign": -1
+    },
+    {
+      "hold": "ess11::trstplc",
+      "target": "dn2018b::B21_10",
+      "sign": -1
+    },
+    {
+      "hold": "ess11::trstprt",
+      "target": "dn2018b::B21_8",
+      "sign": -1
+    },
+    {
+      "hold": "ess11::trstep",
+      "target": "dn2018b::B21_17",
+      "sign": -1
+    },
+    {
+      "hold": "ess11::stfgov",
+      "target": "dn2018b::B21_3",
+      "sign": -1
+    },
+    {
+      "hold": "ess11::stfdem",
+      "target": "cses2019::IMD3010",
+      "sign": -1
+    }
+  ]
+}

@@ -202,12 +202,15 @@ ALL_FEATS = set(pie.FEATURES)
 
 def vote_json(root, choice_eids, results, ches):
     beta, n = fit_choice(cses_choice_data(root, choice_eids, results, ches))
-    abstain = fit_binary(root, ["undpolar2022"], {"abstain"}, ALL_FEATS - {"pv_nd", "pv_syriza", "pv_pasok", "pv_kke", "pv_farright", "pv_leftother", "pv_centre", "pv_other"})
-    undecided = fit_binary(root, ["maple2019pre"], {"undecided", "dk"}, ALL_FEATS)
-    return {"version": "ecm-0.1", "trainedOn": [CSES_FILES[e] for e in choice_eids] + ["maple2019pre", "undpolar2022"], "beta": beta, "nChoice": n,
+    # C4a (sprint 10/2026, αποδεκτό στις δημοσιευμένες ροές): αποχή/αναποφάσιστοι ΜΕ προηγούμενη ψήφο, από MAPLE 2/2019
+    # (πρόθεση × ανάκληση, μέσα σε κυβερνητική περίοδο). Πριν: UNDPOLAR χωρίς ανάκληση → 16–21% αποχή σε ψηφοφόρους κομμάτων.
+    abstain = fit_binary(root, ["maple2019feb"], {"abstain", "blank"}, ALL_FEATS)
+    undecided = fit_binary(root, ["maple2019feb", "maple2019pre"], {"undecided", "dk"}, ALL_FEATS)
+    return {"version": "ecm-0.2a", "trainedOn": [CSES_FILES[e] for e in choice_eids] + ["maple2019feb", "maple2019pre"], "beta": beta, "nChoice": n,
             "abstain": abstain, "undecided": undecided,
-            "notes": ["Conditional logit χωρίς σταθερές ανά κόμμα (CSES).", "Αναποφάσιστοι: MAPLE II 6/2019 (online πάνελ, ένα μήνα πριν τις εκλογές).",
-                      "Πρόθεση αποχής: UNDPOLAR 1/2022 (online πάνελ με ποσοστώσεις)."]}
+            "notes": ["Conditional logit χωρίς σταθερές ανά κόμμα (CSES).",
+                      "Αποχή/λευκό και αναποφάσιστοι: MAPLE 2/2019 (+6/2019 για αναποφάσιστους), με προηγούμενη ψήφο (C4a).",
+                      "Αξιολόγηση: δημοσιευμένοι πίνακες συσπείρωσης/εκροών 2024–4/2026 (SPRINT_PREREGISTRATION §6)."]}
 
 
 # ---------------------------------------------------------------- backtest (προκαταχώριση §7)
