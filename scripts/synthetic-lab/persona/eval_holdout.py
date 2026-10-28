@@ -58,13 +58,22 @@ def main():
     ap.add_argument("--seeds", type=int, default=5)
     ap.add_argument("--tag", default=None)
     ap.add_argument("--verbose", action="store_true")
+    ap.add_argument("--model-dir", default=None, help="αξιολόγηση ΥΠΑΡΧΟΝΤΟΣ μοντέλου (π.χ. έκδοσης προς κυκλοφορία)· απορρίπτεται αν κάποια πηγή είναι μεταγενέστερη του cutoff")
     a = ap.parse_args()
     spec = json.load(open(os.path.join(ROOT, a.spec) if not os.path.isabs(a.spec) else a.spec))
     tag = a.tag or f"{spec['holdout']}-{spec['cutoff']}"
     if a.variant == "c7":
         spec["batteryCov"] = True
         tag += "-c7"
-    model, items = train(spec, tag)
+    if a.model_dir:
+        md = os.path.join(ROOT, a.model_dir) if not os.path.isabs(a.model_dir) else a.model_dir
+        model = json.load(open(os.path.join(md, "model.json")))
+        late = [(x["fileId"], x["wave"]) for x in model["sources"] if x["wave"] > spec["cutoff"]]
+        if late or spec["holdout"] in {x["fileId"] for x in model["sources"]}:
+            sys.exit(f"Άρνηση: το μοντέλο περιέχει πηγές μετά το cutoff ή το ίδιο το holdout: {late}")
+        items = {t["id"]: t for t in json.load(open(os.path.join(md, "items.json")))}
+    else:
+        model, items = train(spec, tag)
     real = pie.read_resp(os.path.join(HZ, "resp", f"{spec['holdout']}.csv.gz"))
     w = real["weight"].values.astype(float)
     skel = real[[c for c in SKEL if c in real]].copy()
@@ -152,12 +161,17 @@ def main():
         rank = {c: i for i, c in enumerate(tcodes)}
         syn_codes[m["hold"]] = (np.array([rank.get(v, np.nan) for v in syn[0]["ans"][m["hold"]]], dtype=float),
                                 np.array([hcodes.index(v) if v in hcodes else np.nan for v in rc.values], dtype=float))
-    # άγκυρες
+    # άγκυρες· σύμπτυξη λεπτομερών κατηγοριών του μοντέλου στις κατηγορίες σύγκρισης (διόρθωση βαθμολόγησης 28/10:
+    # πριν, οι εργαζόμενοι ανά τομέα και τα μικρά κόμματα δεν μετρούσαν σε καμία κατηγορία)
+    COLLAPSE = {"emp": {k: "employed" for k in ("private_emp", "public_emp", "self_emp", "farmer")},
+                "pv": {k: "other" for k in ("el", "mera25", "xa", "plefsi", "ek", "niki", "spartiates", "foni_logikis", "anel", "potami",
+                                             "laos", "lae", "dimar", "antarsya", "nea_aristera", "blank")}}
     for an in spec.get("anchors", []):
         c = an["hold"]
         if c not in real or c not in syn[0]["anc"]:
             continue
-        norm_ = lambda v: None if v is None or v != v else (str(int(float(v))) if isinstance(v, (int, float)) or str(v).replace('.', '', 1).isdigit() else str(v))  # noqa: E731
+        _n = lambda v: None if v is None or v != v else (str(int(float(v))) if isinstance(v, (int, float)) or str(v).replace('.', '', 1).isdigit() else str(v))  # noqa: E731
+        norm_ = lambda v, _c=COLLAPSE.get(c, {}): (lambda x: _c.get(x, x) if x is not None else None)(_n(v))  # noqa: E731
         allowed = an.get("categories")
         rv_all = np.array([norm_(v) for v in real[c].values], dtype=object)
         cats = allowed or sorted(set(v for v in rv_all if v is not None))
@@ -213,7 +227,7 @@ def main():
         summ["marginal_MAE"]["B_ebshift"] = round(float(np.mean([r.get("B_ebshift", r["B_last"]) for r in est])), 3)
     res = {"spec": a.spec, "variant": a.variant, "model": model["version"], "modelSnapshot": model["dataSnapshot"], "cutoff": spec["cutoff"],
            "predictionsLockSha256": lock, "lockedAt": lockedAt, "summary": summ, "rows": rows, "pairs": pairs}
-    out = os.path.join(ROOT, ".synthetic-lab-data", "persona", "sprint", f"holdout-{spec['holdout']}-{a.variant}.json")
+    out = os.path.join(ROOT, ".synthetic-lab-data", "persona", "sprint", f"holdout-{spec['holdout']}-{a.variant}" + (f"-{model['version']}" if a.model_dir else "") + ".json")
     json.dump(res, open(out, "w"), ensure_ascii=False, indent=1, default=float)
     print(json.dumps(summ, ensure_ascii=False))
     for r in rows:

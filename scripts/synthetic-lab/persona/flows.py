@@ -50,6 +50,11 @@ def key_of(label):
     return None, False
 
 
+# Εκδότες που ζητούν ρητά να μη χρησιμοποιείται το περιεχόμενό τους για εκπαίδευση AI (π.χ. Content-Signal ai-train=no):
+# μόνο αναφορά, ποτέ εκπαίδευση/βαθμονόμηση.
+NO_TRAINING_ORGS = {"Pulse RC"}
+
+
 def partition(month):
     return "calibration" if month <= "2026-04" else ("validation" if month <= "2026-07" else "final")
 
@@ -66,6 +71,9 @@ def normalise(root):
     out, skipped = [], []
     for r in records(root):
         if r.get("kind") not in ("flow", "flow_matrix"):
+            continue
+        if r.get("org") in NO_TRAINING_ORGS:
+            skipped.append((r["docId"], r["page"], "ο εκδότης δεν επιτρέπει εκπαίδευση AI"))
             continue
         title = (r.get("title") or "") + " " + (r.get("base") or "")
         if re.search(r"ΔΟΜΗ|ΚΕΝΤΡΙΚΗ ΜΑΚΕΔΟΝΙΑ|ΠΕΡΙΦΕΡΕΙ", title, re.I) or r.get("org") == "Palmos Analysis":

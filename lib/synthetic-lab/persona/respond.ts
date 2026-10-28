@@ -60,6 +60,16 @@ export interface PersonaQuestionProvenance {
   autoLink?: { version: string; accepted: boolean; confidence: number; target: string | null; reason: string } | null;
 }
 
+/**
+ * Γνωστές εξαρτήσεις επιπέδου από το εργαλείο μέτρησης (sprint 10/2026, τυφλή αξιολόγηση σε ESS10 και DEMOTEC).
+ * Δεν διορθώνουν την απάντηση· προστίθενται ως ρητή προειδοποίηση στην αιτιολόγηση.
+ */
+export const ANCHOR_INSTRUMENT_CAVEATS: Record<string, string> = {
+  polint4:
+    'Το επίπεδο εξαρτάται από τη διατύπωση: στη διαΝΕΟσις (πηγή του μοντέλου) «πολύ» δηλώνει ~21%, ενώ στο ESS 2021–22 (CAPI) και στο DEMOTEC 2022 (online) 4–5%. ' +
+    'Στην τυφλή αξιολόγηση τα πρόσωπα έδωσαν ~18–20% «πολύ» — η κατανομή να διαβάζεται ως κλίμακα τύπου διαΝΕΟσις, όχι ως ESS.'
+};
+
 function yearsBetween(wave: string, ref: string): number {
   const [y1, m1] = wave.split('-').map(Number);
   const [y2, m2] = ref.split('-').map(Number);
@@ -135,7 +145,8 @@ export function prepareQuestion(model: PersonaModel, q: Question, referenceMonth
     const why =
       `Η απάντηση είναι χαρακτηριστικό του ίδιου του προσώπου (άγκυρα ${node.node}), που παράχθηκε στο Στάδιο Α από μοντέλο εκτιμημένο σε ${node.trainFiles.join(', ')} (κύμα ${node.wave}, n=${node.n}).` +
       (link.kind === 'equivalent' ? ` Η διατύπωση/κλίμακα διαφέρει: ${link.assumption || 'ρητή παραδοχή αντιστοίχισης'}.` : '') +
-      (age > PIE_TEMPORAL_LIMIT_YEARS ? ` Χρονική μεταφορά ${age.toFixed(1)} ετών.` : '');
+      (age > PIE_TEMPORAL_LIMIT_YEARS ? ` Χρονική μεταφορά ${age.toFixed(1)} ετών.` : '') +
+      (ANCHOR_INSTRUMENT_CAVEATS[node.node] ? ` Προσοχή: ${ANCHOR_INSTRUMENT_CAVEATS[node.node]}` : '');
     return base(extrap ? 'MODEL_EXTRAPOLATED' : 'DIRECTLY_SUPPORTED', why, { anchor: { name: node.node, valueToOption }, assumption: extrap ? link.assumption || null : null });
   }
   if (link.optionItems) {
