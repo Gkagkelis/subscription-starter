@@ -1,0 +1,23 @@
+{
+ "version": "p2-t-locf",
+ "label": "συρρίκνωση k=0 · τελευταίο κύμα · ίσα βάρη ανά περιφέρεια · πληθυσμός κατά τον κανόνα παραγωγής · αγκύρωση επιπέδου · λανθάνων παράγοντας συστοιχίας ρ=0.3 · αντιστοίχιση πληθυσμού αναφοράς · PPS · σειρά της ίδιας ερώτησης, τελευταία μέτρηση (ablation)",
+ "shrinkage": 0,
+ "wavePolicy": "forecast",
+ "respondentWeighting": "pps",
+ "population": "rule",
+ "parent": "p2-t",
+ "anchorOverall": true,
+ "batteryRho": 0.3,
+ "notes": [
+  "Ablation: ίδια συλλογή σειράς με την p2-t (όλα τα κύματα της ίδιας ερώτησης), αλλά πρόβλεψη = τελευταία μέτρηση (χωρίς Kalman)."
+ ],
+ "universeMatching": true,
+ "forecast": {
+  "default": {
+   "params": {
+    "method": "locf"
+   }
+  },
+  "byFamily": {}
+ }
+}

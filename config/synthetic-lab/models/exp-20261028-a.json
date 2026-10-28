@@ -1,0 +1,16 @@
+{
+ "version": "exp-20261028-a",
+ "label": "συρρίκνωση k=0 · τελευταίο κύμα · ίσα βάρη ανά περιφέρεια · πληθυσμός κατά τον κανόνα παραγωγής · αγκύρωση επιπέδου · λανθάνων παράγοντας συστοιχίας ρ=0.3",
+ "shrinkage": 0,
+ "wavePolicy": "last",
+ "respondentWeighting": "region_srs",
+ "population": "rule",
+ "parent": "prod-1",
+ "anchorOverall": true,
+ "batteryRho": 0.3,
+ "notes": [
+  "Coordinate search στο calibration: MAE ανά δείγμα 4.37 vs παραγωγή 4.59.",
+  "batteryRho=0.3: επιλέχθηκε στις συσχετίσεις calibration (μικροδεδομένα 2017–2020), ανεξάρτητα από τα ποσοστά.",
+  "ΔΕΝ είναι αποδεδειγμένη βελτίωση: απαιτείται validation και final holdout."
+ ]
+}
