@@ -276,6 +276,53 @@ export interface EvidenceContext {
   asOfYear?: number;
   holdout?: Set<string>;
   holdoutYears?: Record<string, number[]>;
+  /** Πολιτική κύματος (βλ. ModelConfig): last (παραγωγή) ή pool. */
+  wavePolicy?: 'last' | 'pool';
+  poolMaxWaves?: number;
+  poolHalfLifeYears?: number;
+}
+
+/**
+ * Συνδυασμός κυμάτων: τιμή κελιού = σταθμισμένος μέσος με βάρος n·0.5^(Δέτη/halfLife)
+ * (n=1 όταν η πηγή δεν δημοσιεύει μέγεθος δείγματος). Έτος = του νεότερου κύματος.
+ */
+export function poolWaves(waves: PriorWave[], maxWaves = 3, halfLifeYears = 2): PriorWave {
+  const use = waves.slice(-Math.max(1, maxWaves));
+  const last = use[use.length - 1];
+  if (use.length === 1) return last;
+  const decay = (w: PriorWave) => Math.pow(0.5, (last.year - w.year) / Math.max(0.1, halfLifeYears));
+  const acc: Record<string, Record<string, { num: number; den: number; n: number; unk: boolean; flags: string[] }>> = {};
+  for (const w of use) {
+    const d = decay(w);
+    for (const [dim, cells] of Object.entries(w.groups)) {
+      for (const [g, c] of Object.entries(cells)) {
+        if (c.inconsistent) continue;
+        const nn = c.nUnknown || !c.n ? 1 : c.n;
+        const a = ((acc[dim] ||= {})[g] ||= { num: 0, den: 0, n: 0, unk: true, flags: [] });
+        a.num += d * nn * c.value;
+        a.den += d * nn;
+        a.n += c.nUnknown ? 0 : c.n;
+        a.unk = a.unk && !!c.nUnknown;
+        if (c.flag) a.flags.push(c.flag);
+      }
+    }
+  }
+  const groups: PriorWave['groups'] = {};
+  for (const [dim, cells] of Object.entries(acc)) {
+    groups[dim] = {};
+    for (const [g, a] of Object.entries(cells)) {
+      groups[dim][g] = {
+        value: Math.round((a.num / a.den) * 100) / 100,
+        n: a.n,
+        ...(a.unk ? { nUnknown: true } : {}),
+        confidence: 'pooled',
+        sources: use.length,
+        inconsistent: false,
+        ...(a.flags.length ? { flag: Array.from(new Set(a.flags)).join(' ') } : {})
+      };
+    }
+  }
+  return { key: `${use[0].key}..${last.key}`, year: last.year, quarter: '', groups, datasetId: last.datasetId };
 }
 
 export type WaveExclusion = 'holdout' | 'after_reference_year' | 'no_wave';
@@ -285,11 +332,22 @@ export function latestWaveFor(metric: string, ctx: EvidenceContext = {}): { wave
   const m = getMetric(metric);
   if (!m) return { wave: null, excluded: 'no_wave' };
   const ds = m.datasetId || NORAYA_DATASET_ID;
-  if (ctx.holdout?.has(ds) || ctx.holdout?.has(metric)) return { wave: null, excluded: 'holdout' };
+  const composite = m.waves.some((w) => w.datasetId);
+  if ((!composite && ctx.holdout?.has(ds)) || ctx.holdout?.has(metric)) return { wave: null, excluded: 'holdout' };
+  // μεταφορά δομής: αν η έρευνα που δίνει τις διαφορές ομάδων είναι holdout, ο δείκτης εξαιρείται ολόκληρος
+  if (metric.startsWith('lakexfer:') && ctx.holdout?.size) {
+    const embedded = (metric.match(/lake:([^|>]+?)::/g) || []).map((x) => x.slice(5, -2));
+    if (embedded.some((sid) => ctx.holdout!.has(sid))) return { wave: null, excluded: 'holdout' };
+  }
   const skipYears = new Set(ctx.holdoutYears?.[ds] || []);
-  const all = m.waves.filter((w) => w.groups.all?.all && !skipYears.has(w.year));
+  // σε σύνθετους δείκτες κάθε κύμα φέρει τη μελέτη του: τα κύματα μελετών holdout αφαιρούνται
+  const all = m.waves.filter((w) => w.groups.all?.all && !skipYears.has(w.year) && !(w.datasetId && ctx.holdout?.has(w.datasetId)));
   const waves = ctx.asOfYear ? all.filter((w) => w.year <= ctx.asOfYear!) : all;
-  if (!waves.length) return { wave: null, excluded: all.length ? 'after_reference_year' : skipYears.size ? 'holdout' : 'no_wave' };
+  if (!waves.length) {
+    const valid = m.waves.some((w) => w.groups.all?.all);
+    return { wave: null, excluded: all.length ? 'after_reference_year' : valid ? 'holdout' : 'no_wave' };
+  }
+  if (ctx.wavePolicy === 'pool') return { wave: poolWaves(waves, ctx.poolMaxWaves, ctx.poolHalfLifeYears) };
   return { wave: waves[waves.length - 1] };
 }
 

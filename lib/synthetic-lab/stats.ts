@@ -112,3 +112,10 @@ export function quantile(sorted: number[], q: number): number {
   const hi = Math.ceil(pos);
   return sorted[lo] + (sorted[hi] - sorted[lo]) * (pos - lo);
 }
+
+/** Τυπική κανονική αθροιστική (Abramowitz–Stegun 7.1.26, σφάλμα < 1.5e-7). */
+export function normCdf(x: number): number {
+  const t = 1 / (1 + 0.3275911 * Math.abs(x / Math.SQRT2));
+  const y = 1 - ((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-(x * x) / 2);
+  return x >= 0 ? (1 + y) / 2 : (1 - y) / 2;
+}

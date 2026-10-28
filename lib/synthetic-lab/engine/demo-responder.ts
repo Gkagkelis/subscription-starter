@@ -10,7 +10,7 @@
 // ============================================================
 
 import { createRng, deriveSeed, type Rng } from '../rng';
-import { logit } from '../stats';
+import { logit, normCdf } from '../stats';
 import type { AnswerBasis, Assumption, Persona, Question, SyntheticAnswer } from '../types';
 import { ASSUMPTION_IDS, getAssumption } from './assumptions';
 import type { PriorFit } from './prior-model';
@@ -26,6 +26,29 @@ export interface ResponderContext {
   priorFits: Record<string, PriorFit>;
   /** Σενάριο (για σύγκριση σεναρίων): ρητές τιμές/ποιότητα. */
   scenario?: { id: string; label: string; price?: number | null; quality?: number | null } | null;
+  /** Συσχέτιση κοινού λανθάνοντος παράγοντα ανά συστοιχία ερωτήσεων (βλ. ModelConfig.batteryRho). */
+  batteryRho?: number;
+}
+
+/** Κλειδί συστοιχίας από τον δείκτη τεκμηρίωσης (π.χ. dn24_1_Q10_3__1 → dn24_1_Q10, lake:…::QA16.2::0 → lake:…::QA16). */
+export function batteryKey(q: Question): string | null {
+  const m = q.evidenceLink?.metric;
+  if (!m) return null;
+  const first = m.startsWith('lakepool:') ? m.slice(9).split('|')[0] : m;
+  const dn = first.match(/^(dn\d\d_\d_[A-Za-z]+\d+)_\d+__/);
+  if (dn) return dn[1];
+  const lk = first.match(/^(lake:[^:]+:[^:]+::[A-Za-z]+\d+)[._]\d+/);
+  if (lk) return lk[1];
+  return null;
+}
+
+/** Ομοιόμορφη τυχαία τιμή για την επιλογή απάντησης· με batteryRho > 0, μοιράζεται κοινό παράγοντα ανά συστοιχία. */
+function drawUniform(p: Persona, q: Question, ctx: ResponderContext, rng: Rng): number {
+  const rho = ctx.batteryRho || 0;
+  const key = rho > 0 ? batteryKey(q) : null;
+  if (!key) return rng.next();
+  const z = createRng(deriveSeed(ctx.seed, p.id, 'battery', key)).normal();
+  return Math.min(1 - 1e-12, Math.max(1e-12, normCdf(Math.sqrt(rho) * z + Math.sqrt(1 - rho) * rng.normal())));
 }
 
 /** Λανθάνουσα «διάθεση» ανά persona+ερώτηση από παραδοχές (0 = ουδέτερο). */
@@ -154,7 +177,7 @@ function answerQuestion(
     // Ερώτηση πηγής με κατανομή ανά επιλογή (π.χ. διαΝΕΟσις)
     const dist = optionProbabilities(q, ctx.priorFits, p.id);
     if (dist) {
-      let u = rng.next();
+      let u = drawUniform(p, q, ctx, rng);
       let choice = dist[dist.length - 1].option;
       for (const d of dist) {
         if (u < d.p) {
@@ -177,7 +200,7 @@ function answerQuestion(
     const fit = ctx.priorFits[q.evidenceLink.metric];
     const pi = fit?.p.get(p.id);
     if (fit && pi !== undefined) {
-      const positive = rng.next() < pi;
+      const positive = drawUniform(p, q, ctx, rng) < pi;
       if (q.type === 'likert' || q.type === 'concept_test') {
         const sc = scaleOf(q);
         const k = sc.length;

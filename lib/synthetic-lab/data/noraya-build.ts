@@ -30,6 +30,8 @@ export interface PriorWave {
   key: string; // "2024-Q4"
   year: number;
   quarter: string;
+  /** Μελέτη προέλευσης του κύματος (σε σύνθετους δείκτες που συνδυάζουν πολλές έρευνες). */
+  datasetId?: string;
   groups: Record<string, Record<string, PriorCell>>; // group_type -> group -> cell
 }
 

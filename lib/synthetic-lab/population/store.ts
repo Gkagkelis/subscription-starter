@@ -222,8 +222,57 @@ function calibrate(pop: Population, extra: (CalibrationTargets & { total?: numbe
   };
 }
 
+// ---------------- Πληθυσμός βαθμονομημένος σε συγκεκριμένο έτος (πειραματικό, για benchmark) ----------------
+const YEAR_RAKED_PREFIX = 'glopop-grc-raked-';
+export function yearRakedPopulationId(year: number): string {
+  return `${YEAR_RAKED_PREFIX}${year}`;
+}
+
+interface PopulationByYear {
+  source: string;
+  license: string;
+  years: Record<string, Record<string, number>>; // "2019" -> {"15-24|male": άτομα, ...}
+}
+
+function populationByYearFile(): PopulationByYear | null {
+  const p = path.join(process.env.SYNTHETIC_LAB_LAKE_DIR || path.join(dataRoot(), 'lake'), 'export', 'population_by_year.json');
+  try {
+    return existsSync(p) ? (JSON.parse(readFileSync(p, 'utf8')) as PopulationByYear) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Baseline GLOPOP-S 2015 με raking στα επίσημα ηλικία×φύλο του έτους (Eurostat demo_pjangroup) — χωρίς δεδομένα μετά το έτος. */
+function yearRakedPopulation(year: number): Population | null {
+  const b = bundled();
+  const file = populationByYearFile();
+  const totals = file?.years[String(year)];
+  if (!b || !totals) return null;
+  const base = expandCompactPopulation(b);
+  const res = rake(base.personas, base.personas.map((p) => p.weight), [{ attribute: 'ageBand|gender', totals }], { bounds: [0.2, 5], maxIter: 200 });
+  const sumW = res.weights.reduce((a, x) => a + x, 0);
+  const total = Object.values(totals).reduce((a, x) => a + x, 0);
+  const personas = base.personas.map((p, i) => ({ ...p, weight: (res.weights[i] * total) / sumW }));
+  return {
+    personas,
+    summary: {
+      ...base.summary,
+      id: yearRakedPopulationId(year),
+      name: `Ελλάδα — GLOPOP-S βαθμονομημένος σε ηλικία×φύλο ${year} (πειραματικός)`,
+      representedPopulation: Math.round(total),
+      qualityNotes: [...base.summary.qualityNotes, `Raking σε ηλικία×φύλο ${year} (${file!.source}): μέγιστη απόκλιση ${res.maxDeviationPp.toFixed(3)} π.μ.`]
+    }
+  };
+}
+
 export function loadPopulation(id: string): Population | null {
   if (cache.has(id)) return cache.get(id)!;
+  if (id.startsWith(YEAR_RAKED_PREFIX)) {
+    const pop = yearRakedPopulation(Number(id.slice(YEAR_RAKED_PREFIX.length)));
+    if (pop) cache.set(id, pop);
+    return pop;
+  }
   let cp: CompactPopulation | null = null;
   const b = bundled();
   if (b && id === CALIBRATED_POPULATION_ID) {
@@ -337,7 +386,13 @@ export interface AudienceSelection {
  * με τον σταθμισμένο πληθυσμό του κοινού) και απλή τυχαία επιλογή χωρίς
  * επανάθεση. Κάθε ερωτώμενος παίρνει βάρος = πληθυσμός στρώματος / n στρώματος.
  */
-export function selectRespondents(pop: Population, filter: AudienceFilter, n: number, seed: number): AudienceSelection {
+export function selectRespondents(
+  pop: Population,
+  filter: AudienceFilter,
+  n: number,
+  seed: number,
+  opts: { weighting?: 'region_srs' | 'persona_weight' } = {}
+): AudienceSelection {
   const pool = pop.personas.filter((p) => matchesAudience(p, filter));
   const warnings = audienceWarnings(filter);
   const represented = pool.reduce((s, p) => s + p.weight, 0);
@@ -382,8 +437,14 @@ export function selectRespondents(pop: Population, filter: AudienceFilter, n: nu
       const m = alloc[k];
       if (!m) return;
       const idx = sampleIndices(arr.length, m, deriveSeed(seed, 'audience', k));
-      const w = sizes[k] / m;
-      idx.forEach((i) => respondents.push({ ...arr[i], weight: w }));
+      if (opts.weighting === 'persona_weight') {
+        // εκτιμητής Hájek: τα βάρη βαθμονόμησης (ηλικία×φύλο×μόρφωση) μεταφέρονται στους ερωτώμενους
+        const sel = idx.reduce((sum, i) => sum + arr[i].weight, 0) || 1;
+        idx.forEach((i) => respondents.push({ ...arr[i], weight: (arr[i].weight * sizes[k]) / sel }));
+      } else {
+        const w = sizes[k] / m;
+        idx.forEach((i) => respondents.push({ ...arr[i], weight: w }));
+      }
     });
   return { respondents, poolSize: pool.length, representedPopulation: represented, warnings };
 }

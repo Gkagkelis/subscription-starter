@@ -16,7 +16,7 @@
 
 import { existsSync, readFileSync, statSync } from 'fs';
 import path from 'path';
-import type { PriorMetric } from './noraya-build';
+import type { PriorCell, PriorMetric, PriorWave } from './noraya-build';
 import { licenseMode } from './research';
 import { dataRoot } from '../storage/paths';
 
@@ -154,8 +154,19 @@ export function lakeQuestions(): LakeQuestion[] {
 
 /** studyId ενός δείκτη του lake («lake:<studyId>::<μεταβλητή>[::<επιλογή>]»). */
 export function lakeStudyIdOfMetric(metric: string): string | null {
+  if (metric.startsWith('lakexfer:')) return lakeStudyIdOfMetric(metric.slice(9).split('>>')[0]);
+  if (metric.startsWith(LAKE_POOL_PREFIX)) return lakeStudyIdOfMetric(metric.slice(LAKE_POOL_PREFIX.length).split('|')[0]);
   if (!metric.startsWith(LAKE_DATASET_PREFIX)) return null;
   return metric.slice(LAKE_DATASET_PREFIX.length).split('::')[0] || null;
+}
+
+/**
+ * Σύνθετος δείκτης: η ίδια ερώτηση/επιλογή σε διαφορετικές έρευνες (π.χ. διαδοχικά κύματα Eurobarometer).
+ * Κάθε κύμα κρατά τη μελέτη του (`datasetId`), ώστε το holdout και το χρονικό όριο να εφαρμόζονται ανά κύμα.
+ */
+export const LAKE_POOL_PREFIX = 'lakepool:';
+export function lakePoolId(metricIds: string[]): string {
+  return LAKE_POOL_PREFIX + metricIds.join('|');
 }
 
 function shard(studyId: string): Map<string, PriorMetric> | null {
@@ -174,7 +185,70 @@ function shard(studyId: string): Map<string, PriorMetric> | null {
   }
 }
 
+/**
+ * Μεταφορά δομής: το ΕΠΙΠΕΔΟ από την πιο πρόσφατη έρευνα (χωρίς διασπάσεις) και οι ΔΙΑΦΟΡΕΣ ΟΜΑΔΩΝ από
+ * προγενέστερη έρευνα με διασπάσεις, μετατοπισμένες (σε logit, ανά διάσταση) ώστε ο σταθμισμένος με n μέσος
+ * των ομάδων να ισούται με το νέο επίπεδο. Μορφή: lakexfer:<δείκτης επιπέδου>>><δείκτης δομής>.
+ */
+export const LAKE_XFER_PREFIX = 'lakexfer:';
+export function lakeTransferId(levelMetric: string, structureMetric: string): string {
+  return `${LAKE_XFER_PREFIX}${levelMetric}>>${structureMetric}`;
+}
+
+function shiftToLevel(cells: Record<string, PriorCell>, level: number): Record<string, PriorCell> {
+  const ent = Object.entries(cells).filter(([, c]) => c.value > 0 && c.value < 100);
+  if (!ent.length) return cells;
+  const L = (p: number) => Math.log(p / (1 - p));
+  const S = (x: number) => 1 / (1 + Math.exp(-x));
+  const w = ent.map(([, c]) => (c.nUnknown || !c.n ? 1 : c.n));
+  const target = Math.min(0.995, Math.max(0.005, level / 100));
+  let lo = -10;
+  let hi = 10;
+  for (let it = 0; it < 60; it++) {
+    const mid = (lo + hi) / 2;
+    const m = ent.reduce((s, [, c], i) => s + w[i] * S(L(Math.min(0.995, Math.max(0.005, c.value / 100))) + mid), 0) / w.reduce((a, b) => a + b, 0);
+    if (m < target) lo = mid;
+    else hi = mid;
+  }
+  const d = (lo + hi) / 2;
+  return Object.fromEntries(
+    Object.entries(cells).map(([g, c]) => [g, { ...c, value: Math.round(100 * 100 * S(L(Math.min(0.995, Math.max(0.005, c.value / 100))) + d)) / 100, flag: [c.flag, 'μεταφορά δομής'].filter(Boolean).join(' ') }])
+  );
+}
+
 export function lakeMetric(metric: string): PriorMetric | null {
+  if (metric.startsWith(LAKE_XFER_PREFIX)) {
+    const [lid, sid] = metric.slice(LAKE_XFER_PREFIX.length).split('>>');
+    const lm = lakeMetric(lid);
+    const sm = lakeMetric(sid);
+    if (!lm || !sm) return lm;
+    const sw = [...sm.waves].reverse().find((w) => Object.keys(w.groups).some((d) => d !== 'all'));
+    if (!sw) return { ...lm, metric };
+    const waves = lm.waves.map((w) => {
+      if (!w.groups.all?.all) return w;
+      const level = w.groups.all.all.value;
+      const groups: PriorWave['groups'] = { all: w.groups.all };
+      for (const [dim, cells] of Object.entries(sw.groups)) if (dim !== 'all') groups[dim] = shiftToLevel(cells, level);
+      return { ...w, groups, datasetId: lm.datasetId };
+    });
+    return { ...lm, metric, waves, semanticsNote: `${lm.semanticsNote} · διαφορές ομάδων από ${sm.datasetId} (${sw.year}), μετατοπισμένες στο επίπεδο ${lm.datasetId}` };
+  }
+  if (metric.startsWith(LAKE_POOL_PREFIX)) {
+    const parts = metric.slice(LAKE_POOL_PREFIX.length).split('|').map((id) => lakeMetric(id)).filter((m): m is PriorMetric => !!m);
+    if (!parts.length) return null;
+    const waves = parts
+      .flatMap((m) => m.waves.map((w) => ({ ...w, key: `${w.key}:${m.datasetId}`, datasetId: m.datasetId })))
+      .sort((a, b) => a.year - b.year || a.key.localeCompare(b.key));
+    const head = parts[parts.length - 1];
+    return {
+      ...head,
+      metric,
+      waves,
+      datasetId: head.datasetId,
+      tier: parts.every((m) => m.tier === 'open') ? 'open' : 'research_only',
+      semanticsNote: `Σύνθετος δείκτης από ${parts.length} έρευνες: ${parts.map((m) => m.datasetId).join(', ')}`
+    };
+  }
   const sid = lakeStudyIdOfMetric(metric);
   if (!sid) return null;
   return shard(sid)?.get(metric) || null;
@@ -192,13 +266,31 @@ export function resetLakeCache() {
  * Επεκτείνει τη λίστα holdout με ό,τι μοιράζεται δείγμα με αυτές: διπλότυπα σε άλλα αποθετήρια
  * (`duplicates`), ίδιο κλειδί τίτλου+έτους. Δέχεται studyId ή datasetId του Lab.
  */
+/**
+ * «Κλειδί δείγματος»: μελέτες με το ίδιο κλειδί μοιράζονται ερωτώμενους. Στο Eurobarometer, το Standard και
+ * τα Special του ίδιου κύματος (π.χ. 99.3) είναι ΤΟ ΙΔΙΟ δείγμα· κάθε Flash είναι ξεχωριστό δείγμα.
+ */
+export function sampleKeyOf(studyId: string, title = ''): string {
+  const m = studyId.match(/^eurobarometer:s\d+_(\d{2,3})_(\d)(?:_|$)/);
+  if (m) return `EB${m[1]}.${m[2]}`;
+  const f = title.match(/flash eurobarometer\s+(?:FL)?\s*(\d{2,3})/i) || studyId.match(/_fl(\d{3})/i);
+  if (studyId.startsWith('eurobarometer:') && f) return `FL${f[1]}`;
+  return studyId;
+}
+
 export function expandHoldout(ids: string[] = []): Set<string> {
   const out = new Set(ids.filter(Boolean));
   const l = load();
   if (!l || !out.size) return out;
   const keys = new Set<string>();
+  const samples = new Set<string>();
   l.index.studies.forEach((s) => {
     if (out.has(s.studyId) && s.dedupKey) keys.add(s.dedupKey);
+    if (out.has(s.studyId)) samples.add(sampleKeyOf(s.studyId, s.title));
+  });
+  // ίδιο δείγμα (π.χ. Standard + Special του ίδιου κύματος Eurobarometer)
+  l.index.studies.forEach((s) => {
+    if (samples.has(sampleKeyOf(s.studyId, s.title))) out.add(s.studyId);
   });
   let changed = true;
   while (changed) {

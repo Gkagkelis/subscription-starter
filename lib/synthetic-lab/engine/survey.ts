@@ -4,9 +4,10 @@
 
 import { liveConfig, type LiveModelId } from '../ai/config';
 import { BudgetExceededError, finishRun, mapWithConcurrency, registerRun, RunCancelledError, StudyBudget } from '../ai/live';
-import { getMetric, latestWaveFor, metricDatasetId, metricSourceLabel, metricTier, type EvidenceContext } from '../data/noraya';
+import { getMetric, latestWaveFor, metricDatasetId, metricScheme, metricSourceLabel, metricTier, type EvidenceContext } from '../data/noraya';
 import { expandHoldout, holdoutDerivedYears, lakeStudy } from '../data/lake';
-import { BASELINE_POPULATION_ID, CALIBRATED_POPULATION_ID, loadPopulation, selectRespondents } from '../population/store';
+import { BASELINE_POPULATION_ID, CALIBRATED_POPULATION_ID, loadPopulation, selectRespondents, yearRakedPopulationId } from '../population/store';
+import { PRODUCTION_MODEL, type ModelConfig } from './model-config';
 import { deriveSeed } from '../rng';
 import { round, sd, mean } from '../stats';
 import { newId, saveDoc } from '../storage/file-store';
@@ -48,6 +49,8 @@ export interface RunSurveyOptions {
   runId?: string;
   save?: boolean;
   stabilityRuns?: number;
+  /** Ρυθμίσεις μοντέλου· προεπιλογή η παραγωγική έκδοση (πειραματικές μόνο από το benchmark). */
+  modelConfig?: ModelConfig;
 }
 
 /** Πλαίσιο τεκμηρίωσης (χρονικό όριο, holdout) από το σχέδιο μελέτης. */
@@ -86,12 +89,29 @@ function provenanceFor(metric: string, q: { id: string; option: string | null } 
   };
 }
 
+// Τα fits είναι ντετερμινιστικά (ίδιος πληθυσμός, δείκτης, κύμα, συρρίκνωση -> ίδιο αποτέλεσμα):
+// κρατούνται ανά αντικείμενο πληθυσμού για να μην επαναλαμβάνονται σε επαναλήψεις/seeds.
+const FIT_CACHE = new WeakMap<Persona[], Map<string, PriorFit>>();
+const FIT_CACHE_MAX = 20000;
+function cachedFit(metric: string, wave: Parameters<typeof fitPriorModel>[1], personas: Persona[], shrinkage: number | undefined, dims?: string[]): PriorFit {
+  let m = FIT_CACHE.get(personas);
+  if (!m) FIT_CACHE.set(personas, (m = new Map()));
+  const key = `${metric}\u0001${wave.key}\u0001${wave.year}\u0001${shrinkage ?? 0}\u0001${dims ? dims.join(',') : '*'}\u0001${JSON.stringify(wave.groups)}`;
+  const hit = m.get(key);
+  if (hit) return hit;
+  const fit = fitPriorModel(metric, wave, personas, { shrinkage, dimensions: dims });
+  if (m.size >= FIT_CACHE_MAX) m.clear();
+  m.set(key, fit);
+  return fit;
+}
+
 /** Fit των empirical priors για όσες ερωτήσεις συνδέονται με δείκτη (με χρονικό όριο και holdout). */
 export function fitPriorsForQuestions(
   questions: Question[],
   personas: Persona[],
   extraMetrics: string[] = [],
-  ctx: EvidenceContext = {}
+  ctx: EvidenceContext = {},
+  fitOpts: { shrinkage?: number; dimensions?: Partial<Record<string, string[]>> } = {}
 ): { fits: Record<string, PriorFit>; warnings: string[]; provenance: ParameterProvenance[] } {
   const fits: Record<string, PriorFit> = {};
   const warnings: string[] = [];
@@ -125,7 +145,7 @@ export function fitPriorsForQuestions(
       provenance.push(provenanceFor(m, owner.get(m) || null, null, null, reason));
       continue;
     }
-    const fit = fitPriorModel(m, wave, personas);
+    const fit = cachedFit(m, wave, personas, fitOpts.shrinkage, fitOpts.dimensions?.[metricScheme(m)]);
     fits[m] = fit;
     provenance.push(provenanceFor(m, owner.get(m) || null, wave.key, fit));
     const key = groupOf.get(m) || `«${m}»`;
@@ -170,14 +190,23 @@ export async function runSurvey(input: RunSurveyOptions): Promise<StudyRun> {
   const mode: EngineMode = o.mode || 'demo';
   const cfg = liveConfig();
   const model = (o.model || cfg.defaultModel) as LiveModelId;
-  const ctx0 = evidenceContextForPlan(o.plan);
+  const model0 = o.modelConfig || PRODUCTION_MODEL;
+  const ctx0: EvidenceContext = {
+    ...evidenceContextForPlan(o.plan),
+    wavePolicy: model0.wavePolicy,
+    poolMaxWaves: model0.poolMaxWaves,
+    poolHalfLifeYears: model0.poolHalfLifeYears
+  };
   // Χρονικός κανόνας: για έτος αναφοράς πριν από τη βαθμονόμηση 2025 χρησιμοποιείται ο ιστορικός baseline (GLOPOP-S 2015),
   // ώστε να μη «διαρρέει» στον πληθυσμό πληροφορία από μεταγενέστερα έτη.
   let populationId = o.populationId;
   let populationNote: string | null = null;
   const requested = loadPopulation(o.populationId);
   const calYear = requested?.summary.updateStatus.targetYear || null;
-  if (ctx0.asOfYear && calYear && ctx0.asOfYear < calYear && o.populationId === CALIBRATED_POPULATION_ID && loadPopulation(BASELINE_POPULATION_ID)) {
+  if (model0.population === 'year_raked' && ctx0.asOfYear && o.populationId === CALIBRATED_POPULATION_ID && loadPopulation(yearRakedPopulationId(ctx0.asOfYear))) {
+    populationId = yearRakedPopulationId(ctx0.asOfYear);
+    populationNote = `Πληθυσμός βάσης GLOPOP-S βαθμονομημένος στα επίσημα ηλικία×φύλο του ${ctx0.asOfYear} (πειραματική ρύθμιση ${model0.version}).`;
+  } else if (ctx0.asOfYear && calYear && ctx0.asOfYear < calYear && o.populationId === CALIBRATED_POPULATION_ID && loadPopulation(BASELINE_POPULATION_ID)) {
     populationId = BASELINE_POPULATION_ID;
     populationNote = `Έτος αναφοράς ${ctx0.asOfYear} < έτος βαθμονόμησης ${calYear}: χρησιμοποιείται ο ιστορικός πληθυσμός βάσης GLOPOP-S 2015 (όχι η δομή ${calYear}).`;
   }
@@ -193,7 +222,9 @@ export async function runSurvey(input: RunSurveyOptions): Promise<StudyRun> {
     populationSummary: pop.summary,
     engine: {
       mode,
-      engineVersion: mode === 'demo' ? `${DEMO_ENGINE_VERSION}+${PRIOR_MODEL_VERSION}` : `${LLM_PROMPT_VERSION}+${PRIOR_MODEL_VERSION}`,
+      engineVersion:
+        (mode === 'demo' ? `${DEMO_ENGINE_VERSION}+${PRIOR_MODEL_VERSION}` : `${LLM_PROMPT_VERSION}+${PRIOR_MODEL_VERSION}`) +
+        (model0.version !== PRODUCTION_MODEL.version ? `+${model0.version}` : ''),
       model: mode === 'live' ? model : null
     },
     seed,
@@ -227,13 +258,13 @@ export async function runSurvey(input: RunSurveyOptions): Promise<StudyRun> {
     base.warnings.push(`Live mode: ο αριθμός συνθετικών ερωτώμενων περιορίστηκε σε ${cfg.maxAgents}.`);
     n = cfg.maxAgents;
   }
-  const sel = selectRespondents(pop, o.plan.audience, n, deriveSeed(seed, 'sample'));
+  const sel = selectRespondents(pop, o.plan.audience, n, deriveSeed(seed, 'sample'), { weighting: model0.respondentWeighting });
   base.warnings.push(...sel.warnings);
 
   const assumptionMetrics = o.plan.assumptions.filter((a) => a.enabled && a.metric).map((a) => a.metric as string);
-  const { fits, warnings: fitWarnings, provenance } = fitPriorsForQuestions(o.plan.questions, pop.personas, assumptionMetrics, ctx0);
+  const { fits, warnings: fitWarnings, provenance } = fitPriorsForQuestions(o.plan.questions, pop.personas, assumptionMetrics, ctx0, { shrinkage: model0.shrinkage, dimensions: model0.dimensions });
   base.warnings.push(...fitWarnings);
-  const ctx: ResponderContext = { seed, assumptions: o.plan.assumptions, priorFits: fits, scenario: o.scenario || null };
+  const ctx: ResponderContext = { seed, assumptions: o.plan.assumptions, priorFits: fits, scenario: o.scenario || null, batteryRho: model0.batteryRho || 0 };
 
   let respondents: SyntheticRespondent[] = [];
   let status = 'completed' as StudyRun['status'];
@@ -341,8 +372,8 @@ function stabilityCheck(
   const pop = loadPopulation(o.populationId)!;
   const seeds = Array.from({ length: runs }, (_, i) => deriveSeed(seed, 'stability', i));
   const perRun = seeds.map((s) => {
-    const sel = selectRespondents(pop, o.plan.audience, n, deriveSeed(s, 'sample'));
-    const ctx: ResponderContext = { seed: s, assumptions: o.plan.assumptions, priorFits: fits, scenario: o.scenario || null };
+    const sel = selectRespondents(pop, o.plan.audience, n, deriveSeed(s, 'sample'), { weighting: (o.modelConfig || PRODUCTION_MODEL).respondentWeighting });
+    const ctx: ResponderContext = { seed: s, assumptions: o.plan.assumptions, priorFits: fits, scenario: o.scenario || null, batteryRho: (o.modelConfig || PRODUCTION_MODEL).batteryRho || 0 };
     const rs = sel.respondents.map((p): SyntheticRespondent => ({ personaId: p.id, weight: p.weight, label: SIMULATED_LABEL, answers: applyFollowUps(o.plan.questions, demoRespond(p, o.plan.questions, ctx)) }));
     const pm = new Map(sel.respondents.map((p) => [p.id, p]));
     return o.plan.questions.map((q) => aggregateQuestion(q, rs, pm));
