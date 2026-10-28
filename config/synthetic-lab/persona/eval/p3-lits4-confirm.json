@@ -1,0 +1,104 @@
+{
+ "note": "PHASE3 επιβεβαίωση K1 (μία εκτέλεση). Αντιστοίχιση από κείμενα/ετικέτες ΜΟΝΟ, δεσμευμένη πριν από την εκτέλεση. Κλίμακες διαφορετικές → μόνο σχέσεις (R1–R5), όχι περιθώρια. sign: +1 αν υψηλότερος κωδικός στο K1 = υψηλότερος κωδικός στο item του μοντέλου.",
+ "holdout": "lits4",
+ "cutoff": "2022-11",
+ "refMonth": "2023-01",
+ "families": "dianeosis_tpe,cses,undpolar,maple",
+ "lam": 3.0,
+ "items": [],
+ "anchors": [],
+ "assocItems": [
+  {
+   "hold": "lits4::q403a",
+   "target": "dn2018b::B21_1",
+   "sign": -1,
+   "battery": "trust"
+  },
+  {
+   "hold": "lits4::q403b",
+   "target": "dn2018b::B21_3",
+   "sign": -1,
+   "battery": "trust"
+  },
+  {
+   "hold": "lits4::q403d",
+   "target": "dn2018b::B21_5",
+   "sign": -1,
+   "battery": "trust"
+  },
+  {
+   "hold": "lits4::q403e",
+   "target": "dn2018b::B21_6",
+   "sign": -1,
+   "battery": "trust"
+  },
+  {
+   "hold": "lits4::q403f",
+   "target": "dn2018b::B21_7",
+   "sign": -1,
+   "battery": "trust"
+  },
+  {
+   "hold": "lits4::q403g",
+   "target": "dn2018b::B21_8",
+   "sign": -1,
+   "battery": "trust"
+  },
+  {
+   "hold": "lits4::q403h",
+   "target": "dn2018b::B21_9",
+   "sign": -1,
+   "battery": "trust"
+  },
+  {
+   "hold": "lits4::q403i",
+   "target": "dn2018b::B21_10",
+   "sign": -1,
+   "battery": "trust"
+  },
+  {
+   "hold": "lits4::q403j",
+   "target": "dn2018b::B21_11",
+   "sign": -1,
+   "battery": "trust"
+  },
+  {
+   "hold": "lits4::q403l",
+   "target": "dn2018b::B21_14",
+   "sign": -1,
+   "battery": "trust"
+  },
+  {
+   "hold": "lits4::q402",
+   "target": "dn2022b::Q33",
+   "sign": -1
+  },
+  {
+   "hold": "lits4::q829a",
+   "target": "dn2022a::Q21_1",
+   "sign": -1,
+   "battery": "samesex"
+  },
+  {
+   "hold": "lits4::q829b",
+   "target": "dn2022a::Q21_2",
+   "sign": -1,
+   "battery": "samesex"
+  },
+  {
+   "hold": "lits4::q836b",
+   "target": "dn2022a::Q17_2",
+   "sign": -1
+  },
+  {
+   "hold": "lits4::q836e",
+   "target": "dn2022a::Q17_3",
+   "sign": -1
+  }
+ ],
+ "groups": [
+  "age_band",
+  "gender",
+  "edu3"
+ ]
+}

@@ -1,0 +1,56 @@
+{
+ "note": "PHASE3 επιβεβαίωση K2 (μία εκτέλεση). Αντιστοίχιση από κείμενα/ετικέτες ΜΟΝΟ, δεσμευμένη πριν από την εκτέλεση. Μόνο σχέσεις (R1–R5) και lr. Τρόπος: web (όπως DEMOTEC).",
+ "holdout": "issp2023",
+ "cutoff": "2023-04",
+ "refMonth": "2023-07",
+ "families": "dianeosis_tpe,cses,undpolar,maple",
+ "lam": 3.0,
+ "items": [],
+ "anchors": [],
+ "lrColumn": "lr11",
+ "assocItems": [
+  {
+   "hold": "issp23::v27",
+   "target": "dn2022a::Q17_2",
+   "sign": 1
+  },
+  {
+   "hold": "issp23::v38",
+   "target": "cses2019::IMD3010",
+   "sign": -1
+  },
+  {
+   "hold": "issp23::v45",
+   "target": "undpolar2022::egalitarianism_right",
+   "sign": 1
+  },
+  {
+   "hold": "issp23::v48",
+   "target": "dn2020a::Q362",
+   "sign": 1,
+   "battery": "populism"
+  },
+  {
+   "hold": "issp23::v51",
+   "target": "undpolar2022::populism_2",
+   "sign": -1,
+   "battery": "populism"
+  },
+  {
+   "hold": "issp23::v53",
+   "target": "undpolar2022::populism_3",
+   "sign": -1,
+   "battery": "populism"
+  },
+  {
+   "hold": "issp23::v59",
+   "target": "dn2022b::Q33",
+   "sign": 1
+  }
+ ],
+ "groups": [
+  "age_band",
+  "gender",
+  "edu3"
+ ]
+}
