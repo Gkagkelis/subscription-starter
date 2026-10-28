@@ -1,6 +1,9 @@
 import DatasetImportForm from '@/components/synthetic-lab/DatasetImportForm';
 import { Card, PageTitle } from '@/components/synthetic-lab/ui';
 import { allDatasets, freshness } from '@/lib/synthetic-lab/data/registry';
+import { lakeDir, lakeMeta } from '@/lib/synthetic-lab/data/lake';
+import { existsSync, readFileSync } from 'fs';
+import path from 'path';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,11 +28,70 @@ const TIER: Record<string, { label: string; cls: string }> = {
 };
 const FRESH: Record<string, string> = { fresh: 'text-emerald-700', aging: 'text-amber-700', stale: 'text-red-700', unknown: 'text-stone-500' };
 
+const SOURCE_LABEL: Record<string, string> = {
+  eurostat: 'Eurostat (ΕΛΣΤΑΤ)',
+  eurobarometer: 'Eurobarometer',
+  worldbank: 'World Bank Findex',
+  zenodo: 'Zenodo',
+  figshare: 'Figshare',
+  harvard_dataverse: 'Harvard Dataverse',
+  dataverse_nl: 'DataverseNL'
+};
+
+/** Σύνοψη του Greek Research Data Lake (αν υπάρχει τοπικά): αριθμοί από την εξαγωγή και την αναφορά κάλυψης. */
+function LakeCard() {
+  const meta = lakeMeta();
+  let report: { statusTotals?: Record<string, number>; studiesTotal?: number; variablesTotal?: number; distributionsTotal?: number; generatedAt?: string } | null = null;
+  const rp = path.join(lakeDir(), 'reports', 'coverage_report.json');
+  try {
+    if (existsSync(rp)) report = JSON.parse(readFileSync(rp, 'utf8'));
+  } catch {
+    report = null;
+  }
+  return (
+    <Card className="space-y-2">
+      <h2 className="font-semibold">Greek Research Data Lake (2012–2026)</h2>
+      {!meta.available ? (
+        <p className="text-sm text-stone-600">
+          Δεν υπάρχει τοπικό lake. Χτίζεται με <code>scripts/synthetic-lab/lake/run_all.sh</code> (βλ. docs/synthetic-lab/DATA_LAKE.md) σε ιδιωτικό φάκελο — τα δεδομένα δεν
+          μπαίνουν στο repo.
+        </p>
+      ) : (
+        <>
+          <p className="text-sm text-stone-700">
+            {meta.studies.toLocaleString('el-GR')} μελέτες και {meta.questions.toLocaleString('el-GR')} ερωτήσεις/δείκτες διαθέσιμα στο simulation engine
+            (εξαγωγή {meta.generatedAt?.slice(0, 10)}). Κάθε παράμετρος μιας προσομοίωσης φέρει την προέλευσή της· ισχύει χρονικό όριο (έτος αναφοράς) και holdout.
+          </p>
+          <ul className="flex flex-wrap gap-2 text-xs">
+            {Object.entries(meta.bySource).map(([k, v]) => (
+              <li key={k} className="rounded-full border border-sky-200 bg-sky-50 px-2 py-0.5 text-sky-900">
+                {SOURCE_LABEL[k] || k}: {v}
+              </li>
+            ))}
+          </ul>
+          {report?.statusTotals && (
+            <p className="text-xs text-stone-600">
+              Κατάλογος: {report.studiesTotal?.toLocaleString('el-GR')} έρευνες/σύνολα ·{' '}
+              {Object.entries(report.statusTotals)
+                .filter(([, v]) => v > 0)
+                .map(([k, v]) => `${k} ${v.toLocaleString('el-GR')}`)
+                .join(' · ')}{' '}
+              · {report.variablesTotal?.toLocaleString('el-GR')} μεταβλητές · {report.distributionsTotal?.toLocaleString('el-GR')} κελιά κατανομών (αναφορά{' '}
+              {report.generatedAt?.slice(0, 10)}).
+            </p>
+          )}
+        </>
+      )}
+    </Card>
+  );
+}
+
 export default function DataPage() {
   const ds = allDatasets();
   return (
     <div className="space-y-6">
       <PageTitle title="Τα Δεδομένα μου" subtitle="Κάθε πηγή με οργανισμό, έτη συλλογής (όχι δημοσίευσης), άδεια, περιορισμούς και τρόπο χρήσης. Δημόσια διαθέσιμο δεν σημαίνει ελεύθερο για εμπορική χρήση." />
+      <LakeCard />
       <div className="space-y-4">
         {ds.map((d) => {
           const f = freshness(d);

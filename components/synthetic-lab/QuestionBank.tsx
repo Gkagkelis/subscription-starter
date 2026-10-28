@@ -14,6 +14,7 @@ interface Entry {
   years?: number[];
   n: number | null;
   observed: { option: string; value: number }[];
+  lake?: { studyId: string; title: string; source: string; level: string; quality: number | null; year: number; url: string | null; score: number };
 }
 
 /** Αναζήτηση και προσθήκη ερωτήσεων πραγματικών ερευνών (με εμπειρική βάση). */
@@ -86,6 +87,12 @@ export function QuestionBank({ nextId, onAdd, onClose }: { nextId: () => string;
               {e.waveKey && <span>· {e.waveKey.slice(0, 4)}</span>}
               {e.years && e.years.length > 1 && <span>· κύματα {e.years.join(', ')}</span>}
               {e.n ? <span>· n={e.n}</span> : null}
+              {e.lake && (
+                <span className="rounded-full border border-sky-300 bg-sky-50 px-2 py-0.5 font-medium text-sky-900">
+                  Data Lake · επίπεδο {e.lake.level}
+                  {e.lake.quality != null ? ` · ποιότητα ${e.lake.quality}` : ''}
+                </span>
+              )}
               {e.tier === 'research_only' ? (
                 <span className="rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 font-medium text-amber-900">Μόνο για έρευνα</span>
               ) : (
