@@ -123,8 +123,10 @@ export interface SelectionOutcome {
   familyDelta: Record<string, number | null>;
 }
 
-export async function selectOnValidation(suite: BenchSuite, opts: { versions?: string[]; log?: (m: string) => void } = {}) {
+export async function selectOnValidation(suite: BenchSuite, opts: { versions?: string[]; log?: (m: string) => void; note?: string } = {}) {
   const log = opts.log || (() => undefined);
+  // πόσες φορές έχει ήδη κοιταχτεί το validation για κάθε υποψήφια (κάθε επανάληψη «φθείρει» το validation)
+  const priorSelects = readHistory().filter((h) => h.type === 'select') as { outcomes?: { version: string }[] }[];
   const lastTune = [...readHistory()].reverse().find((h) => h.type === 'tune') as { saved?: string[] } | undefined;
   const versions = opts.versions || lastTune?.saved || [];
   if (!versions.length) throw new Error('Δεν υπάρχουν υποψήφιες εκδόσεις (τρέξε πρώτα «tune»).');
@@ -177,7 +179,11 @@ export async function selectOnValidation(suite: BenchSuite, opts: { versions?: s
   const best = outcomes.filter((o) => o.accepted).sort((a, b) => (a.validation.sampleMeanMae ?? 1e9) - (b.validation.sampleMeanMae ?? 1e9))[0] || null;
   saveDecision({
     id: `select-${Date.now()}`, type: 'select', at: new Date().toISOString(), suiteHash: suite.hash,
-    outcomes: outcomes.map(({ version, accepted, reasons, validation, delta, familyDelta }) => ({ version, accepted, reasons, score: validation.sampleMeanMae, group: validation.groupMae, delta, familyDelta })),
+    outcomes: outcomes.map(({ version, accepted, reasons, validation, delta, familyDelta }) => ({
+      version, accepted, reasons, score: validation.sampleMeanMae, group: validation.groupMae, delta, familyDelta,
+      priorValidationLooks: priorSelects.filter((h) => h.outcomes?.some((o) => o.version === version)).length
+    })),
+    note: opts.note || null,
     production: { score: prodSummary.sampleMeanMae, group: prodSummary.groupMae },
     assoc,
     selected: best?.version || null
@@ -190,8 +196,9 @@ export async function holdoutEvaluate(suite: BenchSuite, version: string, opts: 
   const log = opts.log || (() => undefined);
   const model = loadModel(version);
   if (!model) throw new Error(`Άγνωστη έκδοση ${version}`);
-  const prior = readHistory().find((h) => h.type === 'holdout' && h.suiteHash === suite.hash && h.version === version);
-  if (prior) throw new Error(`Το final holdout έχει ήδη χρησιμοποιηθεί για την ${version} σε αυτή τη σουίτα — δεν επαναλαμβάνεται.`);
+  // μία φορά ανά έκδοση, ανεξάρτητα από την αναδημιουργία της σουίτας (αλλιώς θα ήταν δυνατό να «ξαναρίξεις τα ζάρια»)
+  const prior = readHistory().find((h) => h.type === 'holdout' && h.version === version);
+  if (prior) throw new Error(`Το final holdout έχει ήδη χρησιμοποιηθεί για την ${version} — δεν επαναλαμβάνεται.`);
   if (!opts.confirm) throw new Error('Το final holdout χρησιμοποιείται μία φορά. Πρόσθεσε --i-understand-this-is-final.');
   const prod = await runBenchmark(suite, { model: PRODUCTION_MODEL, mode: 'blind', splits: ['holdout'], families: FAMILIES, seeds: SEEDS, n: N });
   const cand = await runBenchmark(suite, { model, mode: 'blind', splits: ['holdout'], families: FAMILIES, seeds: SEEDS, n: N });

@@ -25,13 +25,29 @@ GROUPS = [
 ]
 
 
+BASE_POP = re.compile(r"^%\s*ages?\s*15\+$", re.I)
+AGE_POP = {re.compile(r"^%\s*ages?\s*15-24$", re.I): ("age_findex", "15-24"), re.compile(r"^%\s*ages?\s*25\+$", re.I): ("age_findex", "25+")}
+
+
 def _split(name):
-    base = re.sub(r"\s*\(%[^)]*\)\s*$", "", re.sub(r"\s+", " ", name)).strip()
-    pop = (re.search(r"\((%[^)]*)\)\s*$", name) or [None, None])[1]
+    """(βασικό όνομα, (διάσταση, ομάδα), παρονομαστής). Οι ζώνες ηλικίας μπορεί να δίνονται στον παρονομαστή
+    («% ages 15-24»)· κάθε άλλος παρονομαστής (π.χ. «% of account owners») είναι ΔΙΑΦΟΡΕΤΙΚΟΣ πληθυσμός-βάση."""
+    clean = re.sub(r"\s+", " ", name).strip()
+    base = re.sub(r"\s*\(%[^)]*\)\s*$", "", clean).strip()
+    m = re.search(r"\((%[^)]*)\)\s*$", clean)
+    pop = m.group(1).strip() if m else None
+    group = ("all", "all")
     for rx, g in GROUPS:
         if re.search(rx, base, re.I):
-            return re.sub(rx, "", base, flags=re.I).strip(), g, pop
-    return base, ("all", "all"), pop
+            base, group = re.sub(rx, "", base, flags=re.I).strip(), g
+            break
+    if pop:
+        for rx, g in AGE_POP.items():
+            if rx.match(pop):
+                return base, g, "% age 15+"
+        if BASE_POP.match(pop):
+            pop = "% age 15+"
+    return base, group, pop
 
 
 def discover(con, limit=None):
@@ -88,8 +104,10 @@ def fetch_findex(con, sid):
     for r in obs:
         iid = r["indicator"]["id"]
         base, (gd, gv), pop = _split(names.get(iid) or r["indicator"]["value"])
-        fam.setdefault(base, {"pop": pop, "ids": set(), "note": notes.get(iid)})["ids"].add(iid)
-        fam[base].setdefault("rows", []).append((int(r["date"]), gd, gv, float(r["value"])))
+        # Ο παρονομαστής είναι μέρος της ταυτότητας: «% ηλικίας 15+» ≠ «% κατόχων λογαριασμού» (διόρθωση ασύμβατων παρονομαστών)
+        key = base if (not pop or pop == "% age 15+") else f"{base} ({pop})"
+        fam.setdefault(key, {"pop": pop, "ids": set(), "note": notes.get(iid)})["ids"].add(iid)
+        fam[key].setdefault("rows", []).append((int(r["date"]), gd, gv, float(r["value"])))
     years = set()
     for base, f in fam.items():
         vid = f"{sid}::{re.sub(r'[^A-Za-z0-9]+', '_', base)[:80]}"

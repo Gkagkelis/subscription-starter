@@ -122,7 +122,7 @@ async function main() {
     log(`επιλογή στο calibration: ρ=${best.rho}`);
     return;
   }
-  if (cmd === 'select') return void (await selectOnValidation(suite, { log }));
+  if (cmd === 'select') return void (await selectOnValidation(suite, { log, note: opt('note'), versions: opt('models') ? list('models', '') : undefined }));
   if (cmd === 'holdout') return void (await holdoutEvaluate(suite, opt('model')!, { log, confirm: args.includes('--i-understand-this-is-final') }));
   if (cmd === 'history') {
     for (const h of readHistory()) console.log(JSON.stringify(h).slice(0, 400));
