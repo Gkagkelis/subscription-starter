@@ -146,7 +146,10 @@ async function main() {
       { label: 'ιστορικός μέσος', cfg: { params: { method: 'mean' } } },
       { label: 'γραμμική τάση', cfg: { params: { method: 'linear' } } }
     ];
-    const show = (label: string, items: any[], ref: any[]) => {
+    const { reliableView } = await import('../../lib/synthetic-lab/benchmark/suite');
+    const show = (label: string, items0: any[], ref0: any[]) => {
+      const items = reliableView(items0, suite);
+      const ref = reliableView(ref0, suite);
       const s = summarize(items);
       const p = pairedCompareStrat(ref, items);
       console.log(`  ${label.padEnd(58)} ανά συστάδα ${s.sampleMeanMae} · οικογ. ${familyBalanced(items)} · σύνολο ${s.overallMae} · ομάδες ${s.groupMae} | Δ vs LOCF ${p.meanDelta} CI ${JSON.stringify(p.ci95)} (${p.clusters} συστάδες)`);
@@ -166,7 +169,8 @@ async function main() {
       for (const f of fams) {
         const res = runTemporal(suiteT, [...baselines, ...grid], { splits, families: [f] });
         const locf = res[0].items;
-        const scored = res.map((r) => ({ label: r.label, cfg: r.cfg, score: summarize(r.items).sampleMeanMae ?? 1e9 }));
+        const { reliableView: rv } = await import('../../lib/synthetic-lab/benchmark/suite');
+        const scored = res.map((r) => ({ label: r.label, cfg: r.cfg, score: summarize(rv(r.items, suite)).sampleMeanMae ?? 1e9 }));
         const best = [...scored].slice(3).sort((a, b) => a.score - b.score)[0];
         log(`${f}: LOCF ${scored[0].score} · μέσος ${scored[1].score} · τάση ${scored[2].score} · καλύτερο ${best.label} ${best.score}`);
         show(`${f} καλύτερο`, res.find((r) => r.label === best.label)!.items, locf);
@@ -261,6 +265,8 @@ async function main() {
       out[v] = r.items;
       saveRun({ id: `final2-${v}-${Date.now()}`, createdAt: new Date().toISOString(), tag: 'final2', suiteVersion: suite.version, suiteHash: suite.hash, model, config: { mode: 'blind', splits: split, seeds: [1, 2], n: 2000 }, durationMs: r.durationMs, summary: summarize(r.items), bySplit: summarizeBy(r.items, (x) => x.split), byFamily: summarizeBy(r.items, (x) => x.family), gaps: gapStats(r.items), items: r.items });
     }
+    const { reliableView } = await import('../../lib/synthetic-lab/benchmark/suite');
+    for (const k of Object.keys(out)) out[k] = reliableView(out[k], suite);
     const ref = out['baseline: επιμονή (LOCF)'];
     const prod = out['prod-1'];
     const rows = Object.entries(out).map(([label, items]) => ({
@@ -286,8 +292,11 @@ async function main() {
     // Κανόνες αποδοχής της φάσης 2 (PHASE2_PREREGISTRATION.md §5) για δύο εκτελέσεις στα ίδια items.
     const { familyBalanced, pairedCompareStrat } = await import('../../lib/synthetic-lab/benchmark/score');
     const { saveDecision } = await import('../../lib/synthetic-lab/benchmark/registry');
+    const { reliableView } = await import('../../lib/synthetic-lab/benchmark/suite');
     const ref = JSON.parse(readFileSync(args[1], 'utf8'));
     const alt = JSON.parse(readFileSync(args[2], 'utf8'));
+    ref.items = reliableView(ref.items, suite);
+    alt.items = reliableView(alt.items, suite);
     const ids = new Set(alt.items.filter((i: any) => i.status === 'ok').map((i: any) => i.itemId));
     const refItems = ref.items.filter((i: any) => ids.has(i.itemId));
     const altItems = alt.items.filter((i: any) => refItems.some((r: any) => r.itemId === i.itemId));

@@ -474,3 +474,36 @@ export function buildSuite(opts: { maxEurostatPerStudy?: number; maxEurostat?: n
 export function targetCells(wave: PriorWave, dim: string) {
   return dim === 'all' ? wave.groups.all || {} : waveCells(wave, dim);
 }
+
+/**
+ * Αξιοπιστία στόχων (φάση 2, απόκλιση 5): η πηγή σημαίνει κελιά «u» (χαμηλή αξιοπιστία — π.χ. πολύ μικρό δείγμα της ΕΕΔ)
+ * και «b» (διακοπή χρονοσειράς). Κελιά-στόχοι «u» δεν βαθμολογούνται· items με διακοπή σειράς ΣΤΟ έτος-στόχο δεν
+ * συγκρίνονται με προγενέστερα έτη. Ίδιος κανόνας για όλες τις εκδόσεις και τα baselines.
+ */
+export function targetFlagOf(item: BenchItem, option: string, dim: string, group: string): string {
+  const m = getMetric(item.targetMetrics[option]) || lakeMetric(item.targetMetrics[option]);
+  const w = m?.waves.find((x) => x.key === item.targetWaveKey);
+  if (!w) return '';
+  const c = dim === 'all' ? w.groups.all?.all : waveCells(w, dim)[group];
+  return c?.flag || '';
+}
+
+export function breakAtTarget(item: BenchItem): boolean {
+  const first = Object.keys(item.targetMetrics)[0];
+  return /b/.test(targetFlagOf(item, first, 'all', 'all'));
+}
+
+export function reliableView<T extends { itemId: string; status: string; cells: { dim: string; group: string; option: string }[] }>(results: T[], suite: BenchSuite): T[] {
+  const byId = new Map(suite.items.map((i) => [i.id, i]));
+  return results
+    .filter((r) => {
+      const it = byId.get(r.itemId);
+      return !it || !breakAtTarget(it);
+    })
+    .map((r) => {
+      const it = byId.get(r.itemId);
+      if (!it || r.status !== 'ok') return r;
+      const cells = r.cells.filter((c) => !/u/.test(targetFlagOf(it, c.option, c.dim, c.group)));
+      return { ...r, cells, status: cells.length ? r.status : 'no_fit' };
+    });
+}

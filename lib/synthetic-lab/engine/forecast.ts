@@ -182,7 +182,13 @@ function cellVar(c: PriorCell, prm: ForecastParams): number {
  * Τα κελιά φέρουν confidence «forecast» και n = n του πιο πρόσφατου κελιού (για τους ελέγχους μεγέθους).
  */
 export function forecastWave(waves: PriorWave[], targetYear: number, cfg: ForecastConfig): PriorWave | null {
-  const ws = waves.filter((w) => w.groups.all?.all && w.year < targetYear + 1).sort((a, b) => a.year - b.year || a.key.localeCompare(b.key));
+  let ws = waves.filter((w) => w.groups.all?.all && w.year < targetYear + 1).sort((a, b) => a.year - b.year || a.key.localeCompare(b.key));
+  // διακοπή χρονοσειράς («b» της πηγής): τα προηγούμενα κύματα δεν είναι συγκρίσιμα με τα επόμενα
+  const brk = ws.map((w) => /b/.test(w.groups.all.all.flag || '')).lastIndexOf(true);
+  if (brk > 0) ws = ws.slice(brk);
+  // κελιά χαμηλής αξιοπιστίας («u») δεν χρησιμοποιούνται ως παρατηρήσεις όταν υπάρχουν αξιόπιστες
+  const reliable = ws.filter((w) => !/u/.test(w.groups.all.all.flag || ''));
+  if (reliable.length) ws = reliable;
   if (!ws.length) return null;
   const last = ws[ws.length - 1];
   const prm = cfg.params;
@@ -208,7 +214,7 @@ export function forecastWave(waves: PriorWave[], targetYear: number, cfg: Foreca
       const ref = [...ws].reverse().find((w) => w.groups[d]?.[g] && !w.groups[d][g].inconsistent)?.groups[d][g];
       if (!ref) continue;
       if (!cfg.decompose) {
-        const obs: Obs[] = ws.filter((w) => w.groups[d]?.[g] && !w.groups[d][g].inconsistent).map((w) => ({ year: w.year, value: w.groups[d][g].value, n: w.groups[d][g].nUnknown ? null : w.groups[d][g].n }));
+        const obs: Obs[] = ws.filter((w) => w.groups[d]?.[g] && !w.groups[d][g].inconsistent && !/u/.test(w.groups[d][g].flag || '')).map((w) => ({ year: w.year, value: w.groups[d][g].value, n: w.groups[d][g].nUnknown ? null : w.groups[d][g].n }));
         const f = forecastSeries(obs, targetYear, prm);
         if (f) (groups[d] ||= {})[g] = mk(f.value, ref);
         continue;
