@@ -105,7 +105,11 @@ function load(): Loaded | null {
     const stems: Loaded['stems'] = new Map();
     const df = new Map<string, number>();
     questions.forEach((q) => {
-      const e = { text: stemSet(q.text), options: stemSet(q.options.join(' ')), title: stemSet(studies.get(q.studyId)?.title || '') };
+      // ερώτηση πολλαπλής απάντησης: «ερώτηση — επιλογή»· η επιλογή μετρά ως επιλογή, όχι ως κείμενο ερώτησης
+      const cut = q.multi ? q.text.lastIndexOf(' — ') : -1;
+      const stem = cut > 0 ? q.text.slice(0, cut) : q.text;
+      const opt = cut > 0 ? `${q.text.slice(cut + 3)} ${q.options.join(' ')}` : q.options.join(' ');
+      const e = { text: stemSet(stem), options: stemSet(opt), title: stemSet(studies.get(q.studyId)?.title || '') };
       stems.set(q.id, e);
       new Set(Array.from(e.text).concat(Array.from(e.options))).forEach((x) => df.set(x, (df.get(x) || 0) + 1));
     });
@@ -340,7 +344,7 @@ export interface RetrievalHit {
   /** Τελευταίο έτος με μέτρηση ≤ asOfYear. */
   year: number;
   score: number;
-  breakdown: { relevance: number; quality: number; recency: number; matched: string[] };
+  breakdown: { relevance: number; quality: number; recency: number; matched: string[]; textMatches: number };
 }
 
 /**
@@ -375,6 +379,7 @@ export function searchLake(query: string, opts: RetrievalOptions = {}): Retrieva
     const t = l.stems.get(question.id)!;
     const matched: string[] = [];
     let raw = 0;
+    let textMatches = 0;
     for (const g of groups) {
       let best = 0;
       let hit: string | null = null;
@@ -382,14 +387,14 @@ export function searchLake(query: string, opts: RetrievalOptions = {}): Retrieva
         const w = t.text.has(x) ? 1 : t.options.has(x) ? 0.45 : t.title.has(x) ? 0.35 : 0;
         if (w && w * idf(x) > best) (best = w * idf(x)), (hit = x);
       }
-      if (hit) (raw += best), matched.push(hit);
+      if (hit) (raw += best), matched.push(hit), t.text.has(hit) && textMatches++;
     }
     if (groups.length && !matched.length) continue;
     const relevance = groups.length ? Math.min(1, raw / denom) : 0;
     const year = Math.max(...years);
     const recency = Math.exp(-(asOf - year) / 6);
     const quality = (study.quality ?? 30) / 100;
-    hits.push({ question, study, year, score: 0.6 * relevance + 0.25 * quality + 0.15 * recency, breakdown: { relevance, quality, recency, matched } });
+    hits.push({ question, study, year, score: 0.6 * relevance + 0.25 * quality + 0.15 * recency, breakdown: { relevance, quality, recency, matched, textMatches } });
   }
   hits.sort((a, b) => b.score - a.score || b.year - a.year);
   // μία εμφάνιση ανά ερώτηση πηγής (οι επιλογές πολλαπλής απάντησης είναι ξεχωριστοί δείκτες της ίδιας ερώτησης)

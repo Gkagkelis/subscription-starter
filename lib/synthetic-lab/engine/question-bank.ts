@@ -212,7 +212,8 @@ export function suggestLakeQuestions(text: string, max = 2, opts: RetrievalOptio
   const out: RetrievalHit[] = [];
   const seen = new Set<string>();
   for (const h of searchLake(text, { ...opts, limit: 200 })) {
-    if (h.breakdown.matched.length < 2 || h.breakdown.relevance < 0.5) continue;
+    // αυστηρό κριτήριο για αυτόματη προσθήκη: ≥2 έννοιες του ερωτήματος στο ΚΕΙΜΕΝΟ της ερώτησης (όχι μόνο στις επιλογές)
+    if (h.breakdown.textMatches < 2 || h.breakdown.relevance < 0.6) continue;
     if (h.question.options.length > 12 || seen.has(h.study.studyId)) continue;
     seen.add(h.study.studyId);
     out.push(h);
