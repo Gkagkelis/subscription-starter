@@ -20,14 +20,14 @@ import { runSurvey } from '../../../lib/synthetic-lab/engine/survey';
 import { BASELINE_POPULATION_ID, DEFAULT_POPULATION_ID, loadPopulation } from '../../../lib/synthetic-lab/population/store';
 import { dataRoot } from '../../../lib/synthetic-lab/storage/paths';
 import type { Persona, Question } from '../../../lib/synthetic-lab/types';
-import { collapse, DAY, ENGINE_KEY, inv, iso, loadPolls, logit, mean, normalize, pollAverage, profileSource, results, waveBefore, type Dist, type Poll } from './polls_common';
+import { collapse, DAY, ENGINE_KEY, inv, iso, loadPolls, logit, mean, normalize, pollAverage, profileSource, results, waveBefore, type Dist, type Poll, type ProfileChoice } from './polls_common';
 
 const SEED = 20261028;
 // Διερευνητικές παραλλαγές (ΜΗ προκαταχωρισμένες· γράφονται σε χωριστό αρχείο):
-//   EVAL_N=<μέγεθος πάνελ>  EVAL_PROFILE=auto|noraya|cses|none
+//   EVAL_N=<μέγεθος πάνελ>  EVAL_PROFILE=prereg (προεπιλογή, κύρια εκτέλεση)|auto|noraya|cses|undpolar|none
 const EXPLORATORY = !!(process.env.EVAL_N || process.env.EVAL_PROFILE);
 const N_PANEL = Number(process.env.EVAL_N || 2000);
-const PROFILE = (process.env.EVAL_PROFILE || 'auto') as 'auto' | 'noraya' | 'cses' | 'none';
+const PROFILE = (process.env.EVAL_PROFILE || 'prereg') as ProfileChoice;
 const EVAL_FILE = path.join(dataRoot(), 'research/zz-political-eval.json');
 
 // ---------- βοηθητικά ----------

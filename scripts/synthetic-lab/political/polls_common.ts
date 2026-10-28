@@ -8,7 +8,12 @@ import { dataRoot } from '../../../lib/synthetic-lab/storage/paths';
 
 export const TIDY = path.join(dataRoot(), 'raw/political/tidy');
 export const DAY = 86400000;
-export type ProfileChoice = 'auto' | 'noraya' | 'cses' | 'none';
+/**
+ * Πηγές διαφορών ομάδων: prereg = όσες υπήρχαν στην προκαταχώριση (NORAYA, CSES)· auto = όλες, μαζί με το UNDPOLAR
+ * (εισήχθη μετά την πρώτη εκτέλεση· βλ. POLITICAL_RESULTS.md, αποκλίσεις).
+ */
+export type ProfileChoice = 'auto' | 'prereg' | 'noraya' | 'cses' | 'undpolar' | 'none';
+type Prefix = 'pol:vote:' | 'cses:vote:' | 'undpolar:vote:';
 
 export const logit = (p: number) => {
   const x = Math.min(0.998, Math.max(0.002, p));
@@ -127,14 +132,17 @@ export function waveBefore(w: PriorWave, T: number): boolean {
   return Date.UTC(w.year, endMonth, 0) <= T;
 }
 /** Η νεότερη πηγή διαφορών ομάδων πριν από το T: NORAYA (pol:vote) ή CSES (cses:vote). */
-export function profileSource(T: number, PROFILE: ProfileChoice = 'auto'): { prefix: 'pol:vote:' | 'cses:vote:'; scheme: 'eurobarometer' | 'dianeosis'; waveKey: string } | null {
-  const cand: { prefix: 'pol:vote:' | 'cses:vote:'; scheme: 'eurobarometer' | 'dianeosis'; w: PriorWave }[] = [];
+export function profileSource(T: number, PROFILE: ProfileChoice = 'auto'): { prefix: Prefix; scheme: 'eurobarometer' | 'dianeosis'; waveKey: string } | null {
+  const cand: { prefix: Prefix; scheme: 'eurobarometer' | 'dianeosis'; w: PriorWave }[] = [];
   if (PROFILE === 'none') return null;
   for (const [prefix, scheme] of [
     ['pol:vote:', 'eurobarometer'],
-    ['cses:vote:', 'dianeosis']
+    ['cses:vote:', 'dianeosis'],
+    ['undpolar:vote:', 'eurobarometer']
   ] as const) {
-    if ((PROFILE === 'noraya' && prefix !== 'pol:vote:') || (PROFILE === 'cses' && prefix !== 'cses:vote:')) continue;
+    const only: Partial<Record<ProfileChoice, Prefix>> = { noraya: 'pol:vote:', cses: 'cses:vote:', undpolar: 'undpolar:vote:' };
+    if (only[PROFILE] && only[PROFILE] !== prefix) continue;
+    if (PROFILE === 'prereg' && prefix === 'undpolar:vote:') continue;
     const m = getMetric(`${prefix}nd`);
     const ws = (m?.waves || []).filter((w) => w.groups.all?.all && !w.qualityFlag && waveBefore(w, T));
     if (ws.length) cand.push({ prefix, scheme, w: ws[ws.length - 1] });
