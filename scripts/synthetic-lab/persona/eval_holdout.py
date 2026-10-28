@@ -33,7 +33,7 @@ def train(spec, tag):
     out = os.path.join(ROOT, ".synthetic-lab-data", "persona", "models", "eval", ver)
     if not os.path.exists(os.path.join(out, "items.json")):
         cmd = [sys.executable, os.path.join(os.path.dirname(__file__), "train.py"), "--root", ROOT, "--cutoff", spec["cutoff"], "--version", ver,
-               "--lam", str(spec.get("lam", 3.0)), "--out", out, "--families", spec["families"]]
+               "--lam", str(spec.get("lam", 3.0)), "--out", out, "--families", spec["families"]] + (["--battery-cov"] if spec.get("batteryCov") else [])
         subprocess.run(cmd, check=True, capture_output=True)
     return json.load(open(os.path.join(out, "model.json"))), {t["id"]: t for t in json.load(open(os.path.join(out, "items.json")))}
 
@@ -54,13 +54,16 @@ def cum_shift(dist, delta, positive_low):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--spec", required=True)
-    ap.add_argument("--variant", choices=["v0", "c3", "c3b"], required=True)
+    ap.add_argument("--variant", choices=["v0", "c3", "c3b", "c7"], required=True)
     ap.add_argument("--seeds", type=int, default=5)
     ap.add_argument("--tag", default=None)
     ap.add_argument("--verbose", action="store_true")
     a = ap.parse_args()
     spec = json.load(open(os.path.join(ROOT, a.spec) if not os.path.isabs(a.spec) else a.spec))
     tag = a.tag or f"{spec['holdout']}-{spec['cutoff']}"
+    if a.variant == "c7":
+        spec["batteryCov"] = True
+        tag += "-c7"
     model, items = train(spec, tag)
     real = pie.read_resp(os.path.join(HZ, "resp", f"{spec['holdout']}.csv.gz"))
     w = real["weight"].values.astype(float)

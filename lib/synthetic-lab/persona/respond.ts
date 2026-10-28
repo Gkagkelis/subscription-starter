@@ -234,8 +234,13 @@ export function answerPersona(pq: PreparedPersonaQuestion, ps: PersonaState, see
   let k: number;
   if (item.model.kind === 'ordinal') {
     const eta = linear(item.feats, item.means, item.model.b, fv);
-    const lam = item.factorKey ? item.lambda : 0;
-    const e = lam * (lam ? theta(ps.pseed, item.factorKey!) : 0) + Math.sqrt(Math.max(1 - lam * lam, 0)) * rng.normal();
+    let e: number;
+    if (item.factorKey && item.latentRow?.length) {
+      e = item.latentRow.reduce((s, l, k) => (l ? s + l * theta(ps.pseed, `${item.factorKey}#${k}`) : s), 0);
+    } else {
+      const lam = item.factorKey ? item.lambda : 0;
+      e = lam * (lam ? theta(ps.pseed, item.factorKey!) : 0) + Math.sqrt(Math.max(1 - lam * lam, 0)) * rng.normal();
+    }
     const y = eta + e;
     k = item.model.tau.filter((t) => t < y).length;
   } else {

@@ -106,6 +106,32 @@ describe('PIE — αναπαραγωγιμότητα και λανθάνοντα
   });
 });
 
+describe('PIE — C7: πλήρης συσχέτιση μπαταρίας (latentRow)', () => {
+  const zero = { kind: 'ordinal' as const, b: [0, 0], tau: [0] };
+  const item = (id: string, latentRow: number[]) => ({
+    id, file: 'f2024', wave: '2024-11', type: 'ordinal', text: id, options: [{ code: '1', label: 'καθόλου' }, { code: '2', label: 'πολύ' }],
+    feats: FEATS, means: [0.5, 0], n: 1000, dkShare: 0, observed: [0.5, 0.5], model: zero, lambda: 0.5, factorKey: 'f2024:b9', latentRow, inSampleMaxErrPp: 0
+  });
+  const r = 0.95;
+  const m: PersonaModel = { ...fixtureModel, items: [...fixtureModel.items, item('f2024::X', [1]), item('f2024::Y', [r, Math.sqrt(1 - r * r)]), item('f2024::Z', [0, 0, 1])] as PersonaModel['items'] };
+  const BIN = ['Καθόλου', 'Πολύ'];
+  const link = (id: string) => ({ kind: 'direct' as const, itemId: id, optionMap: { Καθόλου: ['1'], Πολύ: ['2'] } });
+  const ans = (id: string, i: number, seed: number) => (answerPersona(prepareQuestion(m, q(id, link(id), BIN), '2026-10'), state(i), seed).value as { choice: string }).choice;
+  it('το λανθάνον είναι ντετερμινιστικό ανά πρόσωπο (ανεξάρτητο από τον σπόρο της απάντησης)', () => {
+    for (let i = 0; i < 20; i++) expect(ans('f2024::X', i, 1)).toBe(ans('f2024::X', i, 999));
+  });
+  it('ισχυρή συσχέτιση στη μπαταρία αναπαράγεται· ανεξάρτητη στήλη δεν συσχετίζεται', () => {
+    let same = 0, sameZ = 0;
+    const N = 400;
+    for (let i = 0; i < N; i++) {
+      same += ans('f2024::X', i, i) === ans('f2024::Y', i, i) ? 1 : 0;
+      sameZ += ans('f2024::X', i, i) === ans('f2024::Z', i, i) ? 1 : 0;
+    }
+    expect(same / N).toBeGreaterThan(0.85);
+    expect(Math.abs(sameZ / N - 0.5)).toBeLessThan(0.1);
+  });
+});
+
 describe('PIE — μητρώο εκδόσεων', () => {
   it('καμία έκδοση δεν είναι εγκεκριμένη χωρίς όνομα εγκρίνοντος και αξιολόγηση', () => {
     for (const v of readRegistry()) if (v.status === 'approved') expect(v.approvedBy && v.evaluation).toBeTruthy();
@@ -113,6 +139,13 @@ describe('PIE — μητρώο εκδόσεων', () => {
   it('το προεπιλεγμένο μοντέλο δηλώνει αν είναι μόνο υποψήφιο', () => {
     const d = defaultModelVersion('research');
     if (d.version) expect(['approved', 'candidate']).toContain(d.status);
+  });
+  it('έκδοση «staged» (έτοιμη προς ενεργοποίηση) δεν επιλέγεται ποτέ αυτόματα', () => {
+    const staged = new Set(readRegistry().filter((v) => v.status === 'staged').map((v) => v.version));
+    for (const pol of ['research', 'commercial'] as const) {
+      const d = defaultModelVersion(pol);
+      expect(d.version == null || !staged.has(d.version)).toBe(true);
+    }
   });
   it('σενάριο ψήφου: μόνο γεγονότα (εκλογές, θέσεις CHES), καμία δημοσκόπηση', () => {
     const s = loadScenario('2026-10')!;

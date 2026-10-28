@@ -11,6 +11,8 @@ Model Registry του Persona Intelligence Engine (μεταδεδομένα στ
   - 'approved' μόνο με ρητή εντολή προσώπου (--by) ΚΑΙ αποτέλεσμα αξιολόγησης σε ανεξάρτητο holdout που δεν χειροτερεύει
     τα M1/M3 της προηγούμενης εγκεκριμένης πέρα από τα όρια ανοχής (0,5 π.μ. / 0,01).
   - Η έγκριση νέας έκδοσης αποσύρει την προηγούμενη εγκεκριμένη της ίδιας πολιτικής αδειών ('retired').
+  - register --staged: «έτοιμη προς ενεργοποίηση» — δεν επιλέγεται ΠΟΤΕ αυτόματα από το runtime (ούτε ως πιο πρόσφατη υποψήφια)·
+    ενεργοποιείται μόνο με approve --by ή ρητή επιλογή έκδοσης στο σχέδιο μελέτης.
 """
 import argparse
 import json
@@ -52,6 +54,7 @@ def main():
     ap.add_argument("--candidate")
     ap.add_argument("--baseline")
     ap.add_argument("--force-without-eval", action="store_true")
+    ap.add_argument("--staged", action="store_true", help="καταχώριση ως 'staged' (όχι αυτόματη επιλογή στο runtime)")
     a = ap.parse_args()
     r = load()
     if a.cmd == "list":
@@ -64,14 +67,14 @@ def main():
             sys.exit("Άρνηση: το μοντέλο δεν πιστοποιεί πραγματικές εισόδους.")
         r["versions"] = [v for v in r["versions"] if v["version"] != a.version]
         r["versions"].append({
-            "version": a.version, "status": "candidate", "licencePolicy": m["licencePolicy"], "cutoff": m["cutoff"], "dataSnapshot": m["dataSnapshot"],
+            "version": a.version, "status": "staged" if a.staged else "candidate", "licencePolicy": m["licencePolicy"], "cutoff": m["cutoff"], "dataSnapshot": m["dataSnapshot"],
             "createdAt": m["createdAt"], "codeCommit": m.get("codeCommit"), "nItems": m["nItems"], "sources": [s["fileId"] for s in m["sources"]],
             "evaluation": os.path.relpath(a.evaluation, ROOT) if a.evaluation else None, "evaluationSummary": summary_of(a.evaluation),
             "approvedBy": None, "approvedAt": None, "notes": a.notes,
             "scope": "household" if {s["family"] for s in m["sources"]} == {"hbs"} else "general",
         })
         save(r)
-        print("registered", a.version, "candidate")
+        print("registered", a.version, "staged" if a.staged else "candidate")
     elif a.cmd == "compare":
         c = next(v for v in r["versions"] if v["version"] == a.candidate)
         b = next(v for v in r["versions"] if v["version"] == a.baseline)

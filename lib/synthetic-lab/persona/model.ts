@@ -51,6 +51,8 @@ export interface PersonaItem {
   model: { kind: 'ordinal'; b: number[]; tau: number[] } | { kind: 'nominal'; a: number[]; B: number[][] };
   lambda: number;
   factorKey?: string;
+  /** C7: γραμμή του Cholesky της μπαταρίας (e = Σ_k L[k]·z_k, z_k κοινά για όλα τα items της μπαταρίας του προσώπου). */
+  latentRow?: number[];
   inSampleMaxErrPp: number;
 }
 
@@ -284,7 +286,8 @@ export function clearPersonaModelCache() {
 
 export interface RegistryEntry {
   version: string;
-  status: 'candidate' | 'approved' | 'rejected' | 'retired';
+  /** staged = έτοιμη προς ενεργοποίηση· δεν επιλέγεται ποτέ αυτόματα (μόνο με ρητή έκδοση ή έγκριση). */
+  status: 'candidate' | 'staged' | 'approved' | 'rejected' | 'retired';
   licencePolicy: 'research' | 'commercial';
   cutoff: string;
   dataSnapshot: string;

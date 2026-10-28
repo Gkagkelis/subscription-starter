@@ -85,13 +85,15 @@ def wspearman(x, y, w):
     return cov / (sx * sy) if sx > 0 and sy > 0 else np.nan
 
 
-def train(root, split, lam, factors, tag):
+def train(root, split, lam, factors, tag, battery_cov=False):
     ver = f"eval-{split}-{tag}"
     out = os.path.join(root, ".synthetic-lab-data", "persona", "models", "eval", ver)
     cmd = [sys.executable, os.path.join(os.path.dirname(__file__), "train.py"), "--root", root, "--cutoff", SPLITS[split]["cutoff"],
            "--version", ver, "--holdout", ",".join(SPLITS[split]["holdout"]), "--lam", str(lam), "--out", out]
     if not factors:
         cmd.append("--no-factors")
+    if battery_cov:
+        cmd.append("--battery-cov")
     if SPLITS[split].get("families"):
         cmd += ["--families", SPLITS[split]["families"]]
     subprocess.run(cmd, check=True, capture_output=True)
@@ -170,7 +172,7 @@ def run(a):
     hz = os.path.join(root, ".synthetic-lab-data", "persona", "harmonized")
     bank = json.load(open(os.path.join(hz, "item_bank.json")))
     t0 = time.time()
-    model, titems, mdir = train(root, a.split, a.lam, not a.no_factors, a.tag)
+    model, titems, mdir = train(root, a.split, a.lam, not a.no_factors, a.tag, a.battery_cov)
     tby = {t["id"]: t for t in titems}
     results = {"split": a.split, "cutoff": split["cutoff"], "holdout": split["holdout"], "lam": a.lam, "factors": not a.no_factors,
                "seeds": a.seeds, "modelSnapshot": model["dataSnapshot"], "trainFiles": [s["fileId"] for s in model["sources"]], "files": {}}
@@ -446,6 +448,7 @@ if __name__ == "__main__":
     ap.add_argument("--split", choices=list(SPLITS), required=True)
     ap.add_argument("--lam", type=float, default=1.0)
     ap.add_argument("--no-factors", action="store_true")
+    ap.add_argument("--battery-cov", action="store_true")
     ap.add_argument("--seeds", type=int, default=5)
     ap.add_argument("--tag", default="default")
     ap.add_argument("--out", default=None)

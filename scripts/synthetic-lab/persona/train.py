@@ -156,7 +156,7 @@ def fit_anchor_nodes(files, hz, lam, log):
     return nodes
 
 
-def fit_items(files, bank, hz, lam, log, factors=True, seed=7):
+def fit_items(files, bank, hz, lam, log, factors=True, seed=7, battery_cov=False):
     by_file = {}
     for it in bank:
         by_file.setdefault(it["file"], []).append(it)
@@ -234,10 +234,13 @@ def fit_items(files, bank, hz, lam, log, factors=True, seed=7):
                 runs.append(cur)
             for bi, recs in enumerate(runs):
                 S = np.column_stack([scores[r["id"]] for r in recs])
-                lam_b, _ = pie.one_factor(S)
-                for l, r in zip(lam_b, recs):
+                lam_b, R_b = pie.one_factor(S)
+                L = pie.battery_cholesky(R_b, lam_b) if battery_cov else None
+                for i, (l, r) in enumerate(zip(lam_b, recs)):
                     r["lambda"] = round(float(l), 4)
                     r["factorKey"] = f"{f['fileId']}:b{bi}"
+                    if L is not None:
+                        r["latentRow"] = [round(float(v), 5) for v in L[i, : i + 1]]
         log.append(f"items {f['fileId']}: {sum(1 for r in out if r['file'] == f['fileId'])}")
     return out
 
@@ -251,6 +254,7 @@ def main():
     ap.add_argument("--holdout", default="")
     ap.add_argument("--lam", type=float, default=1.0)
     ap.add_argument("--no-factors", action="store_true")
+    ap.add_argument("--battery-cov", action="store_true", help="C7: πλήρης συσχέτιση ανά μπαταρία (Cholesky) αντί για έναν παράγοντα")
     ap.add_argument("--out", default=None)
     ap.add_argument("--families", default="", help="περιορισμός σε οικογένειες πηγών (π.χ. hbs)")
     a = ap.parse_args()
@@ -265,7 +269,7 @@ def main():
     log = []
     t0 = time.time()
     nodes = fit_anchor_nodes(files, hz, a.lam, log)
-    items = fit_items(files, bank, hz, a.lam, log, factors=not a.no_factors)
+    items = fit_items(files, bank, hz, a.lam, log, factors=not a.no_factors, battery_cov=a.battery_cov)
     out = a.out or os.path.join(root, ".synthetic-lab-data", "persona", "models", a.version)
     os.makedirs(out, exist_ok=True)
     try:
@@ -275,7 +279,7 @@ def main():
     constructs = sorted({r["construct"] for r in items if r.get("construct")})
     model = {
         "version": a.version, "engine": "pie", "createdAt": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "codeCommit": commit,
-        "cutoff": a.cutoff, "licencePolicy": a.policy, "holdout": sorted(hold), "l2": a.lam, "factors": not a.no_factors,
+        "cutoff": a.cutoff, "licencePolicy": a.policy, "holdout": sorted(hold), "l2": a.lam, "factors": not a.no_factors, "batteryCov": a.battery_cov,
         "dataSnapshot": snapshot_hash(hz, [f["fileId"] for f in files]),
         "sources": [{k: f.get(k) for k in ("fileId", "family", "source", "url", "wave", "waveApprox", "n", "licence", "tier", "commercialUse", "mode", "population", "pvElection")} for f in files],
         "features": pie.FEATURES, "featureSource": pie.FEATURE_SOURCE, "pvFamily": pie.PV_FAMILY,

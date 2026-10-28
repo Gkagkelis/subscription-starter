@@ -303,6 +303,19 @@ def one_factor(Zs):
     return lam.tolist(), R
 
 
+def battery_cholesky(R, lam, shrink=0.2, min_eig=0.05):
+    """C7: πίνακας συσχετίσεων μπαταρίας (συρρίκνωση προς λλᵀ, θετικά ορισμένος, διαγώνιος 1) → κάτω τριγωνικός Cholesky."""
+    lam = np.asarray(lam, dtype=float)
+    F = np.outer(lam, lam)
+    np.fill_diagonal(F, 1.0)
+    S = (1 - shrink) * np.asarray(R, dtype=float) + shrink * F
+    vals, vecs = np.linalg.eigh((S + S.T) / 2)
+    S = (vecs * np.maximum(vals, min_eig)) @ vecs.T
+    d = np.sqrt(np.diag(S))
+    S = S / np.outer(d, d)
+    return np.linalg.cholesky(S)
+
+
 # ------------------------------------------------------------------ γεννήτρια (Python, για αξιολόγηση· ίδια λογική με το TS runtime)
 def _sample_rows(P, rng):
     u = rng.random(P.shape[0])
@@ -362,8 +375,15 @@ def answer_item(item, personas, rng, factors=True, theta_override=None):
         tau = np.array(m["tau"])
         eta = Z @ b
         lam = float(item.get("lambda", 0.0)) if factors else 0.0
-        th = theta_override if theta_override is not None else (theta(personas, item["factorKey"]) if item.get("factorKey") and lam != 0 else np.zeros(n))
-        e = lam * th + math.sqrt(max(1 - lam * lam, 0.0)) * rng.standard_normal(n)
+        if factors and item.get("latentRow") and theta_override is None:
+            # C7: e_i = Σ_k L[i,k]·z_k, z_k κοινά για όλη τη μπαταρία του προσώπου
+            e = np.zeros(n)
+            for k, l in enumerate(item["latentRow"]):
+                if l:
+                    e += l * theta(personas, f"{item['factorKey']}#{k}")
+        else:
+            th = theta_override if theta_override is not None else (theta(personas, item["factorKey"]) if item.get("factorKey") and lam != 0 else np.zeros(n))
+            e = lam * th + math.sqrt(max(1 - lam * lam, 0.0)) * rng.standard_normal(n)
         y = np.searchsorted(tau, eta + e)
     else:
         P = mnl_probs(Z, m)
