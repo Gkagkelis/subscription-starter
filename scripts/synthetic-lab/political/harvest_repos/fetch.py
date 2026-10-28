@@ -40,7 +40,7 @@ def want(name, size, restrict):
     if n.endswith(DOC_EXT) and (size or 0) <= 25 * 1024 * 1024 and re.search(r"codebook|readme|questionnaire|ερωτηματ|variables|"
                                                                             r"documentation|codeplan|dictionary|survey|qnr|methodolog", n):
         return True
-    return n.startswith("readme")
+    return n.startswith(("readme", "read me", "read_me"))
 
 
 # ------------------------------------------------------------------ Dataverse (Harvard and others)
@@ -104,6 +104,19 @@ def zenodo(t):
 
 # ------------------------------------------------------------------ figshare
 def figshare(t):
+    if t["id"].startswith("c."):  # collection: merge files of all member articles
+        cid = t["id"][2:]
+        c = polite.get_json(f"https://api.figshare.com/v2/collections/{cid}")
+        arts = polite.get_json(f"https://api.figshare.com/v2/collections/{cid}/articles", params={"page_size": 100})
+        files = []
+        for a in arts:
+            m, f = figshare({"id": str(a["id"])})
+            files += f
+        meta = {"title": c.get("title"), "authors": [a.get("full_name") for a in c.get("authors", [])],
+                "description": re.sub(r"<[^>]+>", " ", c.get("description") or "")[:4000], "doi": c.get("doi"),
+                "url": c.get("url_public_html") or c.get("url"), "publication_date": c.get("published_date"),
+                "licence": m.get("licence") if arts else None, "member_articles": [a.get("title") for a in arts]}
+        return meta, files
     r = polite.get_json(f"https://api.figshare.com/v2/articles/{t['id']}")
     files = [{"name": f.get("name"), "size": f.get("size"), "url": f.get("download_url"),
               "restricted": bool(f.get("is_link_only")) and False, "md5": f.get("computed_md5")} for f in r.get("files", [])]

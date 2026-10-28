@@ -12,21 +12,21 @@ DIKKI,party,DIKKI,Δημοκρατικό Κοινωνικό Κίνημα,Democra
 LAOS,party,LAOS,Λαϊκός Ορθόδοξος Συναγερμός,Popular Orthodox Rally,ΛΑΟΣ,2000,,LAOS|ΛΑΟΣ|ΛΑ.Ο.Σ.|LAOS (Greece)|Popular Orthodox Rally|Λαϊκός Ορθόδοξος Συναγερμός
 KEP,party,KEP,Κίνημα Ελεύθερων Πολιτών,Movement of Free Citizens,ΚΕΠ,2001,2004,KEP|ΚΕΠ|Movement of Free Citizens|Movement of Free Citizens (Greece)|Κίνημα Ελεύθερων Πολιτών
 OP,party,OP,Οικολόγοι Πράσινοι,Ecologist Greens,ΟΠ,2002,,OP|ΟΠ|Ecologist Greens|Οικολόγοι Πράσινοι|Greens|Πράσινοι|Οικολόγοι Πράσινοι (Ελλάδα)
-XA,party,XA,Χρυσή Αυγή,Golden Dawn,ΧΑ,1985,,XA|ΧΑ|Χ.Α.|GD|Golden Dawn|Golden Dawn (Greece)|Golden Dawn (political party)|Χρυσή Αυγή|ΛΣ-ΧΑ|Λαϊκός Σύνδεσμος – Χρυσή Αυγή|Popular Association – Golden Dawn|ΛΣ–ΧΑ|Λαϊκός Σύνδεσμος - Χρυσή Αυγή
+XA,party,XA,Χρυσή Αυγή,Golden Dawn,ΧΑ,1985,,XA|Peoples Association -- Golden Dawn|People's Association – Golden Dawn|ΧΑ|Χ.Α.|GD|Golden Dawn|Golden Dawn (Greece)|Golden Dawn (political party)|Χρυσή Αυγή|ΛΣ-ΧΑ|Λαϊκός Σύνδεσμος – Χρυσή Αυγή|Popular Association – Golden Dawn|ΛΣ–ΧΑ|Λαϊκός Σύνδεσμος - Χρυσή Αυγή
 ANEL,party,ANEL,Ανεξάρτητοι Έλληνες,Independent Greeks,ΑΝΕΛ,2012,,ANEL|ΑΝΕΛ|ΑΝ.ΕΛ.|Independent Greeks|Ανεξάρτητοι Έλληνες
 DIMAR,party,DIMAR,Δημοκρατική Αριστερά,Democratic Left,ΔΗΜΑΡ,2010,,DIMAR|ΔΗΜΑΡ|ΔΗΜ.ΑΡ.|Democratic Left|Democratic Left (Greece)|Δημοκρατική Αριστερά
-DIMSYM,party,DIMSYM,Δημοκρατική Συμμαχία,Democratic Alliance (2010),ΔΗΣΥ (2010-12),2010,2012,Democratic Alliance|Democratic Alliance (Greece)|Δημοκρατική Συμμαχία|DISY (2012)|DS
+DIMSYM,party,DIMSYM,Δημοκρατική Συμμαχία,Democratic Alliance (2010),ΔΗΣΥ (2010-12),2010,2012,DISY|ΔΗΣΥ|Democratic Alliance|Democratic Alliance (Greece)|Δημοκρατική Συμμαχία|DISY (2012)|DS
 DX,party,DX,Δημιουργία Ξανά,Recreate Greece,ΔΞ,2012,,DX|ΔΞ|Recreate Greece|Δημιουργία Ξανά|Δημιουργία ξανά|Dimiourgia Xana
-DRASI,party,DRASI,Δράση,Drassi,Δράση,2009,,Drasi|Drassi|Δράση|Action (Greece)|Drasi (party)
+DRASI,party,DRASI,Δράση,Drassi,Δράση,2009,,Drasi|Action -- Liberal Alliance|Action – Liberal Alliance|Drassi|Δράση|Action (Greece)|Drasi (party)
 KOISY,party,KOISY,Κοινωνική Συμφωνία,Social Agreement,ΚΟΙΣΥ,2012,2013,Social Agreement|Social Pact|Κοινωνική Συμφωνία|KOISY|KS|ΚΣ
 PARMAP,party,PARMAP,Πανελλήνιο Άρμα Πολιτών,Panhellenic Citizen Chariot,ΠΑΡΜΑ,2012,,PARMAP|Panhellenic Citizen Chariot|Πανελλήνιο Άρμα Πολιτών|ΠΑΡΜΑ|Panhellenic Chariot of Citizens
 ANTARSYA,party,ANTARSYA,Αντικαπιταλιστική Αριστερή Συνεργασία για την Ανατροπή,ANTARSYA,ΑΝΤΑΡΣΥΑ,2009,,ANTARSYA|ΑΝΤΑΡΣΥΑ|Antarsya|Anticapitalist Left Cooperation for the Overthrow|ΑΝΤΑΡΣΥΑ-ΜΑΡΣ|ANTARSYA–MARS|ΑΝΤ.ΑΡ.ΣΥ.Α.|Front of the Greek Anticapitalist Left|Αντικαπιταλιστική Αριστερή Συνεργασία για την Ανατροπή|ΑΝΤΑΡΣΥΑ–ΕΕΚ
 KKE_ML,party,KKE_ML,ΚΚΕ (μ-λ) / Μ-Λ ΚΚΕ,KKE (m-l) / M-L KKE,ΚΚΕ μ-λ,1976,,KKE (m-l)|ΚΚΕ (μ-λ)|M-L KKE|Μ-Λ ΚΚΕ|ΚΚΕ (μ-λ) - Μ-Λ ΚΚΕ|Communist Party of Greece (Marxist–Leninist)|Marxist–Leninist Communist Party of Greece
 EEK,party,EEK,Εργατικό Επαναστατικό Κόμμα,Workers Revolutionary Party,ΕΕΚ,1985,,EEK|ΕΕΚ|Workers Revolutionary Party (Greece)|Εργατικό Επαναστατικό Κόμμα
-POTAMI,party,POTAMI,Το Ποτάμι,To Potami,Ποτάμι,2014,,Potami|To Potami|The River|The River (Greece)|Ποτάμι|Το Ποτάμι|ΠΟΤΑΜΙ
+POTAMI,party,POTAMI,Το Ποτάμι,To Potami,Ποτάμι,2014,,Potami|River|To Potami|The River|The River (Greece)|Ποτάμι|Το Ποτάμι|ΠΟΤΑΜΙ
 KIDISO,party,KIDISO,Κίνημα Δημοκρατών Σοσιαλιστών,Movement of Democratic Socialists,ΚΙΔΗΣΟ,2015,2018,KIDISO|ΚΙΔΗΣΟ|Movement of Democratic Socialists|Κίνημα Δημοκρατών Σοσιαλιστών|ΚΙΝΗΜΑ|KINIMA
 EK,party,EK,Ένωση Κεντρώων,Union of Centrists,ΕΚ,1992,,EK|ΕΚ|Ε.Κ.|Union of Centrists|Ένωση Κεντρώων|UC
-TELEIA,party,TELEIA,Τελεία,Teleia,Τελεία,2014,2015,Teleia|Τελεία
+TELEIA,party,TELEIA,Τελεία,Teleia,Τελεία,2014,2015,Teleia|Dot -- Apostolos Gkletsos|Dot|Τελεία
 LAE,party,LAE,Λαϊκή Ενότητα,Popular Unity,ΛΑΕ,2015,,LAE|ΛΑΕ|ΛΑ.Ε.|Popular Unity|Popular Unity (Greece)|Λαϊκή Ενότητα|PU
 EPAM,party,EPAM,Ενιαίο Παλλαϊκό Μέτωπο,United Popular Front,ΕΠΑΜ,2011,,EPAM|ΕΠΑΜ|United Popular Front|Ενιαίο Παλλαϊκό Μέτωπο
 PE,party,PE,Πλεύση Ελευθερίας,Course of Freedom,ΠΕ,2016,,PE|ΠΕ|Πλεύση|Πλεύση Ελευθερίας|Course of Freedom|Plefsi Eleftherias|Freedom Course|Zoe Konstantopoulou
@@ -38,7 +38,7 @@ NEA_ARISTERA,party,NEA_ARISTERA,Νέα Αριστερά,New Left,ΝΑ,2023,,New 
 KINIMA_DIMOKRATIAS,party,KINIMA_DIMOKRATIAS,Κίνημα Δημοκρατίας,Movement of Democracy,ΚΙΔΗ,2024,,Movement of Democracy|Κίνημα Δημοκρατίας|KD|ΚΔ|KIDI|ΚΙΔΗ|Democracy Movement|Movement for Democracy (Greece)
 FONI_LOGIKIS,party,FONI_LOGIKIS,Φωνή Λογικής,Voice of Reason,ΦΛ,2020,,Voice of Reason|Voice of Reason (Greece)|Φωνή Λογικής|FL|ΦΛ|Foni Logikis
 DIMOKRATES,party,DIMOKRATES,Δημοκράτες (Ανδρέα Λοβέρδου),Democrats (Loverdos),Δημοκράτες,2023,2024,Democrats (Greece)|Δημοκράτες|Democrats|Democrats – Andreas Loverdos
-PATRIOTES,party,PATRIOTES,Πατριώτες (Πρίγκηπας),Patriots,Πατριώτες,2023,,Patriots|Πατριώτες|Patriots (Greece)|Πατριώτες - Πρίγκηπα
+PATRIOTES,party,PATRIOTES,Πατριώτες – Πρόδρομος Εμφιετζόγλου,Patriots – Prodromos Emfietzoglou,ΠΑΤ,2024,,Patriots|Πατριώτες|PAT|Patriots – Prodromos Emfietzoglou|Πατριώτες – Πρόδρομος Εμφιετζόγλου
 ELLINES,party,ELLINES,Έλληνες για την Πατρίδα,Greeks for the Fatherland,ΕΛΛΗΝΕΣ,2022,2023,Greeks for the Fatherland|Έλληνες για την Πατρίδα|Ellines|Έλληνες
 ANTARSYA_MARS,party,ANTARSYA,ΑΝΤΑΡΣΥΑ–ΜΑΡΣ,ANTARSYA–MARS,ΑΝΤΑΡΣΥΑ-ΜΑΡΣ,2014,2015,
 OKDE,party,OKDE,ΟΚΔΕ,OKDE,ΟΚΔΕ,1985,,OKDE|ΟΚΔΕ
@@ -49,13 +49,13 @@ ELLINIKI_ARISTERA,party,OTHER_MINOR,Ελληνική Αριστερά,Greek Left
 NEW_TSIPRAS_PARTY,party,TSIPRAS_NEW,Νέο κόμμα Τσίπρα (υποθετικό σε δημοσκοπήσεις),Tsipras's new party (hypothetical),,2025,,Tsipras party|Κόμμα Τσίπρα|Tsipras's party|New Tsipras party|Τσίπρας (νέο κόμμα)
 NEW_SAMARAS_PARTY,party,SAMARAS_NEW,Νέο κόμμα Σαμαρά (υποθετικό σε δημοσκοπήσεις),Samaras's new party (hypothetical),,2025,,Samaras party|Κόμμα Σαμαρά|Samaras's party|New Samaras party|Σαμαράς (νέο κόμμα)
 NEW_KARYSTIANOU_PARTY,party,KARYSTIANOU_NEW,Κόμμα Καρυστιανού (υποθετικό/νέο),Karystianou's party,,2025,,Karystianou party|Κόμμα Καρυστιανού|Karystianou's party|Karystianou|Καρυστιανού
-OTHERS,aggregate,OTHERS,Άλλα κόμματα,Others,,,,Others|Other|Άλλα|Άλλο|Λοιπά|Λοιπά κόμματα|Άλλο κόμμα|Other parties|Others (total)|Οι υπόλοιποι|Άλλοι
-UNDECIDED,aggregate,UNDECIDED,Αναποφάσιστοι,Undecided,,,,Undecided|Αναποφάσιστοι|Αναποφάσιστος|Don't know|DK|ΔΓ/ΔΑ|Δεν γνωρίζω|ΔΞ/ΔΑ|Δ.Γ./Δ.Α.|ΔΓ|Don't know/No answer|Undecided/DK|Αναποφ.|Δεν ξέρω/Δεν απαντώ|Undecided/No answer|DK/NA
-BLANK_INVALID,aggregate,BLANK_INVALID,Λευκό/Άκυρο,Blank/Invalid,,,,Blank|Invalid|Blank/Invalid|Λευκό|Άκυρο|Λευκό/Άκυρο|Άκυρο/Λευκό|Invalid/Blank|Λευκό / Άκυρο|Άκυρα/Λευκά|Blank/null
+OTHERS,aggregate,OTHERS,Άλλα κόμματα,Others,,,,Others|Other party|Other|Άλλα|Άλλο|Λοιπά|Λοιπά κόμματα|Άλλο κόμμα|Other parties|Others (total)|Οι υπόλοιποι|Άλλοι
+UNDECIDED,aggregate,UNDECIDED,Αναποφάσιστοι,Undecided,,,,Undecided|Αναποφάσιστοι Αδιευκρίνιστη ψήφος|Αδιευκρίνιστη ψήφος|Question|Don't know/None|Don't know/ None|Unsure|Not sure|Αναποφάσιστοι/ΔΓ|Αναποφάσιστοι|Αναποφάσιστος|Don't know|DK|ΔΓ/ΔΑ|Δεν γνωρίζω|ΔΞ/ΔΑ|Δ.Γ./Δ.Α.|ΔΓ|Don't know/No answer|Undecided/DK|Αναποφ.|Δεν ξέρω/Δεν απαντώ|Undecided/No answer|DK/NA
+BLANK_INVALID,aggregate,BLANK_INVALID,Λευκό/Άκυρο,Blank/Invalid,,,,Άκυρα/Λευκά/Αποχή|Άκυρο/Λευκό/Αποχή|Blank|Invalid|Blank/Invalid|Λευκό|Άκυρο|Λευκό/Άκυρο|Άκυρο/Λευκό|Invalid/Blank|Λευκό / Άκυρο|Άκυρα/Λευκά|Blank/null
 ABSTENTION,aggregate,ABSTENTION,Αποχή,Abstention,,,,Abstention|Αποχή|Will not vote|Δεν θα ψηφίσω|Won't vote|Abstain|Αποχή/Δεν θα ψηφίσει
 NONE,aggregate,NONE,Κανένας,None,,,,None|Κανένας|Κανείς|Neither|Κανένας από τους δύο|Nobody|Κανένα|None of them
-YES,referendum_option,YES,ΝΑΙ,Yes,,2015,2015,Yes|ΝΑΙ|Ναι|YES
-NO,referendum_option,NO,ΟΧΙ,No,,2015,2015,No|ΟΧΙ|Όχι|NO
+YES,referendum_option,YES,ΝΑΙ,Yes,,2015,2015,Yes|ΝΑΙ|Ναι|YES|For|Ποσοστό ΝΑΙ|Ποσοστό Ναι|Yes (accept)
+NO,referendum_option,NO,ΟΧΙ,No,,2015,2015,No|ΟΧΙ|Όχι|ΌΧΙ|NO|Against|Ποσοστό ΟΧΙ|Ποσοστό ΌΧΙ|Ποσοστό Όχι|No (reject)
 LDR_MITSOTAKIS,leader,ND,Κυριάκος Μητσοτάκης,Kyriakos Mitsotakis,,2016,,Mitsotakis|Kyriakos Mitsotakis|Μητσοτάκης|Κυριάκος Μητσοτάκης|K. Mitsotakis|Κ. Μητσοτάκης
 LDR_TSIPRAS,leader,SYRIZA,Αλέξης Τσίπρας,Alexis Tsipras,,2008,,Tsipras|Alexis Tsipras|Τσίπρας|Αλέξης Τσίπρας|Α. Τσίπρας|A. Tsipras
 LDR_ANDROULAKIS,leader,PASOK_KINAL,Νίκος Ανδρουλάκης,Nikos Androulakis,,2021,,Androulakis|Nikos Androulakis|Ανδρουλάκης|Νίκος Ανδρουλάκης|N. Androulakis|Ν. Ανδρουλάκης
@@ -85,3 +85,10 @@ LDR_LAFAZANIS,leader,LAE,Παναγιώτης Λαφαζάνης,Panagiotis Lafa
 LDR_KOUTSOUMBAS_ALT,leader,KKE,Αλέκα Παπαρήγα,Aleka Papariga,,1991,2013,Papariga|Aleka Papariga|Παπαρήγα|Αλέκα Παπαρήγα
 LDR_LATINOPOULOU,leader,FONI_LOGIKIS,Αφροδίτη Λατινοπούλου,Afroditi Latinopoulou,,2020,,Latinopoulou|Afroditi Latinopoulou|Λατινοπούλου|Αφροδίτη Λατινοπούλου
 LDR_STIGKAS,leader,SPARTIATES,Βασίλης Στίγκας,Vasilis Stigkas,,2023,,Stigkas|Vasilis Stigkas|Στίγκας|Βασίλης Στίγκας
+POLAN,party,POLAN,Πολιτική Άνοιξη,Political Spring,ΠΟΛΑΝ,1993,2004,POLAN|ΠΟΛΑΝ|ΠΟΛ.ΑΝ.|Political Spring|Πολιτική Άνοιξη
+FILELEFTHEROI_2000,party,FILELEFTHEROI_2000,Φιλελεύθεροι (Στέφανος Μάνος),The Liberals (Manos),Φιλ.,1999,2000,Fil|The Liberals (Greece)|Φιλελεύθεροι|Liberals (Greece)
+EKE,party,EKE,Εθνικό Κόμμα – Έλληνες,National Party – Greeks,ΕΚΕ,2020,,EKE|National Party – Greeks|National Party - Greeks|Εθνικό Κόμμα – Έλληνες|Εθνικό Κόμμα - Έλληνες|Έλληνες (Κασιδιάρη)
+ETHNIKI_DIMIOURGIA,party,ETHNIKI_DIMIOURGIA,Εθνική Δημιουργία,National Creation,ΕΔ,2021,,ED|National Creation|Εθνική Δημιουργία
+ELAS,party,ELAS,ΕΛΑΣ (αριστερή συμπαράταξη),Greek/Hellenic Left Alliance (ELAS),ΕΛΑΣ,2025,,ELAS|Greek Left Alliance|Hellenic Left Alignment|ΕΛΑΣ
+UNDECIDED_AND_OTHERS,aggregate,OTHERS,Αναποφάσιστοι και άλλα,Undecided and others,,,,Undecided and others|Others/Undecided|Άλλο/ΔΓ|Άλλο ή αναποφάσιστοι
+KOSMOS,party,KOSMOS,ΚΟΣΜΟΣ,Kosmos,ΚΟΣ,2023,,KOS|Kosmos|ΚΟΣΜΟΣ|Κόσμος|Kosmos (Greece)

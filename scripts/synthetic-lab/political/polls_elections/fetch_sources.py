@@ -75,6 +75,10 @@ ELECTION_PAGES = [
     ("el", "Ελληνικές ευρωεκλογές 2024", "GR_ep_2024-06-09"),
 ]
 
+EXCLUDE_CONSTITUENCY = ["Λευκωσίας", "Λεμεσού", "Πάφου", "Αμμοχώστου", "Λάρνακας", "Κερύνειας", "Καλλιπόλεως",
+                        "Ραιδεστού", "Αδριανουπόλεως", "Σαράντα Εκκλησιών", "Κορυτσάς", "Αργυροκάστρου",
+                        "Τρινήσων", "(Βουλγαρία)", "Απόδημ", "Κοινοβουλίου"]
+
 PARLGOV_FILES = ["view_election.csv", "view_party.csv", "election.csv", "election_result.csv", "party.csv"]
 PARLGOV_BASE = "https://parlgov.org/data/parlgov-development_csv-utf-8/"
 
@@ -133,6 +137,37 @@ def main():
         write_bytes(path, body)
         em.add(rel, PARLGOV_BASE + fn, body, PARLGOV_LICENCE)
         print("OK parlgov", fn, len(body))
+    # el σελίδες εκλογικών περιφερειών (πίνακες «Πρώτο κόμμα … Πέμπτο κόμμα» ανά εκλογή)
+    try:
+        b = http_get("https://el.wikipedia.org/w/api.php", {"action": "query", "list": "search", "format": "json",
+                                                            "srsearch": 'intitle:"Εκλογική περιφέρεια"',
+                                                            "srlimit": 200, "maxlag": 5})
+        titles = [x["title"] for x in json.loads(b)["query"]["search"]]
+    except Exception as e:  # noqa: BLE001
+        print("FAIL constituency search", e, file=sys.stderr)
+        titles = []
+    titles = [t for t in titles if t.startswith("Εκλογική περιφέρεια ") and not any(
+        x in t for x in EXCLUDE_CONSTITUENCY)]
+    for title in sorted(titles):
+        rel = f"wikipedia_constituencies/el__{slug(title)}.json"
+        path = os.path.join(raw, "elections", rel)
+        if skip and os.path.exists(path) and rel in em.items:
+            continue
+        try:
+            body, url = fetch_page("el", title)
+        except Exception as e:  # noqa: BLE001
+            print("FAIL", title, e, file=sys.stderr)
+            continue
+        d = json.loads(body)
+        if "error" in d:
+            continue
+        p = d["parse"]
+        write_bytes(path, body)
+        em.add(rel, url, body, WIKI_LICENCE, wiki="el", title=p["title"], revid=p.get("revid"),
+               pageid=p.get("pageid"), election_context="constituency_page",
+               page_url=f"https://el.wikipedia.org/w/index.php?title={p['title'].replace(' ', '_')}&oldid={p.get('revid')}")
+        print("OK", p["title"])
+        em.save()
     # ΥΠΕΣ / CLEA: καταγραφή απόπειρας (μπλοκάρονται από Akamai/Cloudflare — ΔΕΝ παρακάμπτονται)
     probes = {}
     for u in ["https://ekloges.ypes.gr/", "https://www.electiondataarchive.org/"]:

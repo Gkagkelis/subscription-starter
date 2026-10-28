@@ -145,6 +145,19 @@ MONTHS = {
 }
 
 
+LAT2GR = str.maketrans("IOAEKMNPTXYZBHiokaeuv", "ΙΟΑΕΚΜΝΡΤΧΥΖΒΗιοκαευν")
+
+
+def fix_mixed_script(t):
+    """'Iουλ' (λατινικό I + ελληνικά) -> 'Ιουλ'."""
+    def fx(m):
+        w = m.group(0)
+        if re.search(r"[Α-Ωα-ωάέήίόύώ]", w) and re.search(r"[A-Za-z]", w):
+            return w.translate(LAT2GR)
+        return w
+    return re.sub(r"[A-Za-zΑ-Ωα-ωάέήίόύώϊϋΐΰΆΈΉΊΌΎΏ]+", fx, t)
+
+
 def month_of(tok):
     t = strip_accents(tok.lower()).replace("ς", "σ")
     t = t.replace("ϊ", "ι")
@@ -170,6 +183,9 @@ def parse_date_range(text, default_year=None, sortval=None):
         return None, None, "no_date"
     t = text.replace("\xa0", " ")
     t = re.sub(r"\[[^\]]*\]", "", t)
+    t = re.sub(r"\(?\b\d{1,2}[:.]\d{2}\b(?![./]\d)\s*(?:[ap]\.?m\.?|EEST|EET)?\)?", " ", t)
+    t = re.sub(r"\((?:exit poll|exit|απόγευμα|βράδυ)[^)]*\)", " ", t, flags=re.I)
+    t = fix_mixed_script(t)
     t = t.replace("–", "-").replace("—", "-").replace("‒", "-").replace(" to ", "-")
     t = re.sub(r"\s*-\s*", "-", t).strip()
     # ISO
@@ -179,6 +195,20 @@ def parse_date_range(text, default_year=None, sortval=None):
         ds = [d for d in ds if d]
         if ds:
             return min(ds), max(ds), ""
+    # 'yy-mm-dd' ή 'dd-mm-yy' (π.χ. '09-03-09', '06-09-09' σε σελίδες 2009)
+    m0 = re.fullmatch(r"(\d{2})-(\d{2})-(\d{2})", t)
+    if m0 and default_year:
+        yy = default_year % 100
+        a, b, c = int(m0.group(1)), int(m0.group(2)), int(m0.group(3))
+        if a == yy:
+            d0, tag = _mk(default_year, b, c) or _mk(default_year, b, 1), ("yy-mm-dd" if _mk(default_year, b, c) else "yy-mm-dd;day_invalid_set_to_1")
+        elif c == yy:
+            d0, tag = _mk(default_year, b, a), "dd-mm-yy"
+        else:
+            d0, tag = None, ""
+        if d0:
+            return d0, d0, tag
+
     # numeric d/m/y or d.m.y
     nums = re.findall(r"(\d{1,2})[/.](\d{1,2})[/.](\d{2,4})", t)
     if nums:
@@ -266,6 +296,15 @@ def parse_date_range(text, default_year=None, sortval=None):
 
 # ---------------------------------------------------------------- party map
 
+def clean_label(x):
+    if not x:
+        return x
+    x = re.sub(r"\s*\(page does not exist\)", "", x)
+    x = re.sub(r"\s*\(δεν έχει γραφτεί ακόμα\)", "", x)
+    x = re.sub(r"\s*\[(el|en|a|b|c|d|e|\d+)\]", "", x)
+    return x.strip()
+
+
 class PartyMap:
     def __init__(self, path):
         self.rows = list(csv.DictReader(open(path, encoding="utf-8")))
@@ -297,6 +336,7 @@ class PartyMap:
 
     def match(self, labels, year=None):
         """labels: λίστα υποψηφίων (link title, κείμενο, alt). Επιστρέφει row ή None."""
+        labels = [clean_label(x) for x in labels]
         for lab in labels:
             if not lab:
                 continue
@@ -307,6 +347,7 @@ class PartyMap:
         return None
 
     def key_for(self, labels, year=None, auto_ok=True):
+        labels = [clean_label(x) for x in labels]
         r = self.match(labels, year)
         if r:
             return r["party_key"], r
