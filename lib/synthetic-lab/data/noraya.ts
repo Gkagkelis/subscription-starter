@@ -322,6 +322,8 @@ export function poolWaves(waves: PriorWave[], maxWaves = 3, halfLifeYears = 2): 
       };
     }
   }
+  // το σύνολο πρέπει να υπάρχει πάντα (αν όλα τα συνολικά κελιά ήταν «ασύμβατα», κρατάμε του νεότερου κύματος)
+  if (!groups.all?.all && last.groups.all?.all) groups.all = { all: last.groups.all.all };
   return { key: `${use[0].key}..${last.key}`, year: last.year, quarter: '', groups, datasetId: last.datasetId };
 }
 
