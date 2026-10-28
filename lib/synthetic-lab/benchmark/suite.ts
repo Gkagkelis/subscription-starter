@@ -24,7 +24,7 @@ import type { GroupScheme, PriorWave } from '../data/noraya-build';
 import { lakeMeta, lakeMetric, lakeQuestions, lakeStudies, sampleKeyOf, type LakeQuestion, type LakeStudy } from '../data/lake';
 import { researchQuestions } from '../data/research';
 
-export const SUITE_VERSION = 'bench-suite-1';
+export const SUITE_VERSION = 'bench-suite-2';
 export type Split = 'calibration' | 'validation' | 'holdout';
 export type Family = 'eb_trend' | 'eurostat_ts' | 'findex_ts' | 'dianeosis_ts' | 'noraya_ts';
 
@@ -117,6 +117,22 @@ function lastWave(metric: string): PriorWave | null {
   const m = getMetric(metric);
   const w = m?.waves.filter((x) => x.groups.all?.all);
   return w?.length ? w[w.length - 1] : null;
+}
+
+/**
+ * Συνοχή δεδομένων: σε δείκτη ενός ποσοστού, το σύνολο είναι σταθμισμένος μέσος των ομάδων μιας διάστασης,
+ * άρα πρέπει να βρίσκεται μέσα στο εύρος τους (ανοχή 3 π.μ. για στρογγυλοποίηση/μη καταγεγραμμένες ομάδες).
+ * Αν όχι, το σύνολο και οι ομάδες προέρχονται από διαφορετικό πληθυσμό-βάση (σφάλμα πηγής ή ingestion).
+ */
+export function incoherentWave(wave: PriorWave, dims: string[], tol = 3): string | null {
+  const all = wave.groups.all?.all?.value;
+  if (all === undefined || all === null) return null;
+  for (const d of dims) {
+    const vals = Object.values(waveCells(wave, d)).map((c) => c.value).filter((v): v is number => typeof v === 'number');
+    if (vals.length < 2) continue;
+    if (all < Math.min(...vals) - tol || all > Math.max(...vals) + tol) return d;
+  }
+  return null;
 }
 
 // ---------------- Κατασκευή ----------------
@@ -338,7 +354,17 @@ export function buildSuite(opts: { maxEurostatPerStudy?: number; maxEurostat?: n
     }
   }
 
-  const items2 = items.sort((a, b) => a.id.localeCompare(b.id));
+  // κανόνας συνοχής (μόνο για δείκτες ενός ποσοστού με σύγκριση συνόλου): ασυνεπή κύματα στόχου ή τεκμηρίωσης αποκλείονται
+  const coherent = items.filter((it) => {
+    const ms = Object.values(it.targetMetrics);
+    if (!it.compareOverall || ms.length !== 1) return true;
+    const m = getMetric(ms[0]);
+    const waves = (m?.waves || []).filter((w) => w.year <= it.year);
+    const bad = waves.some((w) => incoherentWave(w, it.compareDims));
+    if (bad) skip(`${it.family}: σύνολο εκτός του εύρους των ομάδων (ασυνεπής πληθυσμός-βάση στην πηγή)`);
+    return !bad;
+  });
+  const items2 = coherent.sort((a, b) => a.id.localeCompare(b.id));
   const hash = createHash('sha1')
     .update(JSON.stringify(items2.map((i) => [i.id, i.split, i.targetWaveKey])))
     .digest('hex')
@@ -353,6 +379,7 @@ export function buildSuite(opts: { maxEurostatPerStudy?: number; maxEurostat?: n
       'Ό,τι χρησιμοποιείται ήδη από το παραγωγικό μοντέλο (NORAYA, διαΝΕΟσις, Eurostat ΤΠΕ/SILC/πληθυσμός) μόνο στο calibration.',
       'Eurobarometer: μόνο ερωτήσεις με μοναδική διατύπωση στην έρευνα, όχι δημογραφικές, με ίδιες επιλογές σε προγενέστερο ανεξάρτητο δείγμα.',
       'Eurostat: μόνο ποσοστά ατόμων/νοικοκυριών· σύγκριση μόνο στις ζώνες ηλικίας 15-64 (διαφορετικοί πληθυσμοί-βάση στο σύνολο).',
+      'Συνοχή: σε δείκτες ενός ποσοστού, κύματα όπου το σύνολο βρίσκεται εκτός του εύρους των ομάδων (> 3 π.μ.) αποκλείονται ως σφάλμα δεδομένων.',
       'Τυφλή προσομοίωση: έτος αναφοράς = έτος πεδίου − 1, holdout της έρευνας-στόχου μαζί με διπλότυπα και ίδιο δείγμα.'
     ],
     items: items2,

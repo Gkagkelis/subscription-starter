@@ -4,6 +4,7 @@ World Bank — Global Findex (source 28): έρευνα Gallup World Poll για 
 Άδεια: CC BY 4.0 (World Bank Open Data). Επίπεδο B (σταθμισμένα ποσοστά με διασπάσεις φύλου/ηλικίας/μόρφωσης/εισοδήματος).
 """
 
+import hashlib
 import json
 import re
 
@@ -48,6 +49,13 @@ def _split(name):
         if BASE_POP.match(pop):
             pop = "% age 15+"
     return base, group, pop
+
+
+def _var_id(sid, key):
+    slug = re.sub(r"[^A-Za-z0-9]+", "_", key)
+    if len(slug) > 80:
+        slug = f"{slug[:70]}_{hashlib.sha1(key.encode()).hexdigest()[:8]}"
+    return f"{sid}::{slug}"
 
 
 def discover(con, limit=None):
@@ -110,7 +118,8 @@ def fetch_findex(con, sid):
         fam[key].setdefault("rows", []).append((int(r["date"]), gd, gv, float(r["value"])))
     years = set()
     for base, f in fam.items():
-        vid = f"{sid}::{re.sub(r'[^A-Za-z0-9]+', '_', base)[:80]}"
+        # η ταυτότητα (και το var_id) περιλαμβάνει τον παρονομαστή· αλλιώς δύο δείκτες με ίδιο όνομα συγχωνεύονται
+        vid = _var_id(sid, base)
         con.execute("INSERT OR REPLACE INTO variables VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
                     (vid, sid, None, sorted(f["ids"])[0], base, (f["note"] or base)[:2000], json.dumps(["Ναι", "Όχι"], ensure_ascii=False), None,
                      None, None, "percent_yes", "indicator", json.dumps(classify(base, f["note"] or ""))))

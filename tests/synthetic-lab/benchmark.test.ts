@@ -6,7 +6,7 @@ import path from 'path';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { expandHoldout, lakeMetric, lakePoolId, lakeTransferId, resetLakeCache, sampleKeyOf } from '@/lib/synthetic-lab/data/lake';
 import { latestWaveFor, poolWaves } from '@/lib/synthetic-lab/data/noraya';
-import { buildSuite, normOption, splitOf } from '@/lib/synthetic-lab/benchmark/suite';
+import { buildSuite, incoherentWave, normOption, splitOf } from '@/lib/synthetic-lab/benchmark/suite';
 import { runBenchmark } from '@/lib/synthetic-lab/benchmark/runner';
 import { gapStats, summarize } from '@/lib/synthetic-lab/benchmark/score';
 import { pairedCompare } from '@/lib/synthetic-lab/benchmark/experiments';
@@ -175,5 +175,12 @@ describe('Πειραματικές ρυθμίσεις', () => {
     const cmp = pairedCompare(prod.items, prod.items);
     expect(cmp.meanDeltaOverall).toBe(0);
     expect(normOption("Don't know (SPONTANEOUS)")).toBe('dk');
+  });
+
+  it('κανόνας συνοχής: σύνολο εκτός εύρους ομάδων = σφάλμα δεδομένων', () => {
+    const cell = (value: number) => ({ value, n: 0, confidence: 'official', sources: 1, inconsistent: false }) as any;
+    const wave = (all: number) => ({ key: '2021', year: 2021, quarter: '', groups: { all: { all: cell(all) }, gender: { female: cell(12.5), male: cell(18.4) } } });
+    expect(incoherentWave(wave(91.4), ['gender'])).toBe('gender');
+    expect(incoherentWave(wave(15.5), ['gender'])).toBeNull();
   });
 });

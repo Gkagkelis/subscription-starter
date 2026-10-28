@@ -86,6 +86,9 @@ class Filters(unittest.TestCase):
         self.assertEqual(worldbank._split("Made a digital payment (% of account owners, age 15+)")[2], "% of account owners, age 15+")
         self.assertEqual(worldbank._split("Account (% ages 15-24)")[:2], ("Account", ("age_findex", "15-24")))
         self.assertEqual(worldbank._split("Account (% age 25+)")[1], ("age_findex", "25+"))
+        # ίδιο όνομα, διαφορετικός παρονομαστής → διαφορετικό var_id (όχι συγχώνευση)
+        a = "Received a public sector pension: into an account"
+        self.assertNotEqual(worldbank._var_id("wb", a), worldbank._var_id("wb", f"{a} (% of public sector pension recipients, age 15+)"))
 
     def test_dedup_key_normalises(self):
         self.assertEqual(topics.dedup_key("Eurobarometer 77.2: Food!", 2012), topics.dedup_key("eurobarometer 77.2 food", 2012))
