@@ -20,7 +20,7 @@ import { PRODUCTION_MODEL, type ModelConfig } from '../engine/model-config';
 import { evidenceContextForPlan, runSurvey } from '../engine/survey';
 import { CALIBRATED_POPULATION_ID, loadPopulation } from '../population/store';
 import type { Persona, Question, StudyPlan } from '../types';
-import { hash01, normOption, targetCells, type BenchItem, type BenchSuite, type Family, type Split } from './suite';
+import { hash01, normOption, normText, targetCells, type BenchItem, type BenchSuite, type Family, type Split } from './suite';
 
 export interface RunConfig {
   model: ModelConfig;
@@ -85,7 +85,11 @@ function ebEvidence(item: BenchItem, model: ModelConfig): { link: Question['evid
   let chosen = [hits[0]];
   if (model.wavePolicy === 'pool' || model.wavePolicy === 'forecast') {
     const seen = new Set<string>();
+    // σειρά = η ΙΔΙΑ ερώτηση με την καλύτερη αντιστοίχιση (ίδια κανονικοποιημένη διατύπωση + επιλογές), όχι απλώς «παρόμοιες»
+    // (π.χ. «δημοκρατία στη χώρα» ≠ «δημοκρατία στην ΕΕ» — ίδιες επιλογές, διαφορετική ερώτηση)
+    const head = normText(hits[0].question.text);
     chosen = [...hits]
+      .filter((h) => normText(h.question.text) === head)
       .sort((a, b) => b.year - a.year)
       .filter((h) => {
         const k = sampleKeyOf(h.study.studyId, h.study.title);
