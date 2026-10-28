@@ -70,6 +70,11 @@ export interface ModelConfig {
    * πληθυσμού που ανήκει στον πληθυσμό αναφοράς του δείκτη (π.χ. 16-74 για την Έρευνα ΤΠΕ) — data/universe.ts.
    */
   universeMatching?: boolean;
+  /**
+   * Φάση 2.4: φορτίσεις λανθανόντων παραγόντων ανά ερώτηση (αλυσίδα διαΝΕΟσις), εκτιμημένες ΜΟΝΟ από μικροδεδομένα κυμάτων
+   * πριν από το έτος αξιολόγησης (fittedOnYears). Για ερωτήσεις χωρίς φορτίσεις ισχύει το batteryRho.
+   */
+  itemFactors?: { K: number; fittedOnYears: number[]; loadings: Record<string, number[]> };
   /** Ελεύθερες σημειώσεις/τεκμηρίωση αλλαγών. */
   notes?: string[];
   /** Προέλευση: από ποια έκδοση και ποιο πείραμα προέκυψε. */
@@ -99,6 +104,7 @@ export function describeModel(c: ModelConfig): string {
     ...(c.anchorOverall ? ['αγκύρωση επιπέδου'] : []),
     ...(c.structureTransfer ? ['μεταφορά δομής ομάδων'] : []),
     ...(c.batteryRho ? [`λανθάνων παράγοντας συστοιχίας ρ=${c.batteryRho}`] : []),
-    ...(c.universeMatching ? ['αντιστοίχιση πληθυσμού αναφοράς'] : [])
+    ...(c.universeMatching ? ['αντιστοίχιση πληθυσμού αναφοράς'] : []),
+    ...(c.itemFactors ? [`παράγοντες ερωτήσεων K=${c.itemFactors.K} (μικροδεδομένα ${c.itemFactors.fittedOnYears.join(', ')})`] : [])
   ].join(' · ');
 }

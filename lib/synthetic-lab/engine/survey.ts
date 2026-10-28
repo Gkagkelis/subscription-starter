@@ -266,7 +266,7 @@ export async function runSurvey(input: RunSurveyOptions): Promise<StudyRun> {
   const assumptionMetrics = o.plan.assumptions.filter((a) => a.enabled && a.metric).map((a) => a.metric as string);
   const { fits, warnings: fitWarnings, provenance } = fitPriorsForQuestions(o.plan.questions, pop.personas, assumptionMetrics, ctx0, { shrinkage: model0.shrinkage, dimensions: model0.dimensions, anchorOverall: model0.anchorOverall, universeMatching: model0.universeMatching });
   base.warnings.push(...fitWarnings);
-  const ctx: ResponderContext = { seed, assumptions: o.plan.assumptions, priorFits: fits, scenario: o.scenario || null, batteryRho: model0.batteryRho || 0 };
+  const ctx: ResponderContext = { seed, assumptions: o.plan.assumptions, priorFits: fits, scenario: o.scenario || null, batteryRho: model0.batteryRho || 0, itemFactors: model0.itemFactors || null };
 
   let respondents: SyntheticRespondent[] = [];
   let status = 'completed' as StudyRun['status'];
@@ -375,7 +375,7 @@ function stabilityCheck(
   const seeds = Array.from({ length: runs }, (_, i) => deriveSeed(seed, 'stability', i));
   const perRun = seeds.map((s) => {
     const sel = selectRespondents(pop, o.plan.audience, n, deriveSeed(s, 'sample'), { weighting: (o.modelConfig || PRODUCTION_MODEL).respondentWeighting });
-    const ctx: ResponderContext = { seed: s, assumptions: o.plan.assumptions, priorFits: fits, scenario: o.scenario || null, batteryRho: (o.modelConfig || PRODUCTION_MODEL).batteryRho || 0 };
+    const ctx: ResponderContext = { seed: s, assumptions: o.plan.assumptions, priorFits: fits, scenario: o.scenario || null, batteryRho: (o.modelConfig || PRODUCTION_MODEL).batteryRho || 0, itemFactors: (o.modelConfig || PRODUCTION_MODEL).itemFactors || null };
     const rs = sel.respondents.map((p): SyntheticRespondent => ({ personaId: p.id, weight: p.weight, label: SIMULATED_LABEL, answers: applyFollowUps(o.plan.questions, demoRespond(p, o.plan.questions, ctx)) }));
     const pm = new Map(sel.respondents.map((p) => [p.id, p]));
     return o.plan.questions.map((q) => aggregateQuestion(q, rs, pm));

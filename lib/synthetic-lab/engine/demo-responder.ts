@@ -28,6 +28,15 @@ export interface ResponderContext {
   scenario?: { id: string; label: string; price?: number | null; quality?: number | null } | null;
   /** Συσχέτιση κοινού λανθάνοντος παράγοντα ανά συστοιχία ερωτήσεων (βλ. ModelConfig.batteryRho). */
   batteryRho?: number;
+  /** Φορτίσεις λανθανόντων παραγόντων ανά ερώτηση-αλυσίδα, εκτιμημένες από μικροδεδομένα ΠΡΟΗΓΟΥΜΕΝΩΝ κυμάτων (ModelConfig.itemFactors). */
+  itemFactors?: { K: number; loadings: Record<string, number[]> } | null;
+}
+
+/** Κανονικό id αλυσίδας ερώτησης με μικροδεδομένα (διαΝΕΟσις): dn24_1_Q10_3__1 → dn24_1_Q10_3. */
+export function chainKey(q: Question): string | null {
+  const m = q.evidenceLink?.metric;
+  const dn = m?.match(/^(dn\d\d_\d_.+?)__\d+$/);
+  return dn ? dn[1] : null;
 }
 
 /** Κλειδί συστοιχίας από τον δείκτη τεκμηρίωσης (π.χ. dn24_1_Q10_3__1 → dn24_1_Q10, lake:…::QA16.2::0 → lake:…::QA16). */
@@ -44,6 +53,17 @@ export function batteryKey(q: Question): string | null {
 
 /** Ομοιόμορφη τυχαία τιμή για την επιλογή απάντησης· με batteryRho > 0, μοιράζεται κοινό παράγοντα ανά συστοιχία. */
 function drawUniform(p: Persona, q: Question, ctx: ResponderContext, rng: Rng): number {
+  // δομή εξάρτησης από πραγματικά μικροδεδομένα (ίδιες ερωτήσεις, προηγούμενα κύματα): u = Φ(λ·z + √(1−|λ|²)·ε)
+  const lam = ctx.itemFactors ? ctx.itemFactors.loadings[chainKey(q) || ''] : undefined;
+  if (lam && ctx.itemFactors) {
+    let x = 0;
+    let l2 = 0;
+    for (let k = 0; k < lam.length; k++) {
+      x += lam[k] * createRng(deriveSeed(ctx.seed, p.id, 'factor', k)).normal();
+      l2 += lam[k] * lam[k];
+    }
+    return Math.min(1 - 1e-12, Math.max(1e-12, normCdf(x + Math.sqrt(Math.max(0, 1 - l2)) * rng.normal())));
+  }
   const rho = ctx.batteryRho || 0;
   const key = rho > 0 ? batteryKey(q) : null;
   if (!key) return rng.next();

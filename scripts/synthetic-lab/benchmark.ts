@@ -65,6 +65,7 @@ async function main() {
     if (!model) throw new Error('Άγνωστη έκδοση μοντέλου');
     const splits = list('splits', 'calibration') as Split[];
     if (splits.includes('holdout')) throw new Error('Το final holdout αξιολογείται μόνο με την εντολή «holdout».');
+    if (splits.includes('holdout2' as Split)) throw new Error('Το holdout2 αξιολογείται μόνο με την εντολή «final2» (μία φορά).');
     const cfg = {
       model,
       mode: (opt('mode', 'blind') as 'blind' | 'oracle'),
@@ -190,6 +191,136 @@ async function main() {
     const file = benchDir('experiments', `T-temporal-${splits.join('+')}-${stamp()}.json`);
     writeFileSync(file, JSON.stringify({ id: 'T-temporal', splits, suiteHash: suite.hash, tuned: tuned.chosen, variants: Object.entries(all).map(([label, items]) => ({ label, summary: summarize(items), familyBalanced: familyBalanced(items), byGap: summarizeBy(items, (x) => String(x.evidence?.gapYears ?? 'na')), byFamily: summarizeBy(items, (x) => x.family), items })) }));
     log(`→ ${file}`);
+    return;
+  }
+  if (cmd === 'factors') {
+    // Φάση 2.4: εκτίμηση φορτίσεων από ΠΡΟΗΓΟΥΜΕΝΑ κύματα, έλεγχος στο επόμενο (ποτέ από το ίδιο κύμα)
+    const A = await import('../../lib/synthetic-lab/benchmark/assoc');
+    const { PRODUCTION_MODEL } = await import('../../lib/synthetic-lab/engine/model-config');
+    const base = { ...PRODUCTION_MODEL, version: 'rho-0.3', batteryRho: 0.3 };
+    const report: any = { at: new Date().toISOString(), steps: [] };
+    const demoCache = new Map<number, any[]>();
+    const demo = async (y: number) => {
+      if (!demoCache.has(y)) demoCache.set(y, await A.linkedPairs({ model: PRODUCTION_MODEL, years: [y] }));
+      return demoCache.get(y)!;
+    };
+    // 1) επιλογή K, μ μέσα στο calibration: εκπαίδευση ≤ 2018, έλεγχος 2020
+    const grid: [number, number][] = [[1, 0.5], [2, 0.5], [3, 0.5], [3, 2], [5, 2], [5, 5]];
+    const tr18 = [...(await demo(2017)), ...(await demo(2018))];
+    let best: any = null;
+    for (const [K, mu] of grid) {
+      const fit = A.fitItemFactors(tr18, K, mu);
+      const m = { ...base, version: `f${K}-${mu}`, itemFactors: { K, fittedOnYears: [2017, 2018], loadings: fit.loadings } };
+      const res = A.summarizePairs(await A.linkedPairs({ model: m, years: [2020] }));
+      log(`calibration (εκπ. ≤2018 → 2020) K=${K} μ=${mu}: ${JSON.stringify(res)} (rmse εκπ. ${fit.rmseTrain})`);
+      report.steps.push({ stage: 'calibration', K, mu, res });
+      const score = (res.withinMae ?? 0) * res.withinPairs + (res.acrossMae ?? 0) * res.acrossPairs;
+      if (!best || score < best.score) best = { K, mu, score };
+    }
+    const r0 = A.summarizePairs(await demo(2020));
+    const rb = A.summarizePairs(await A.linkedPairs({ model: base, years: [2020] }));
+    log(`calibration 2020: παραγωγή ${JSON.stringify(r0)} · ρ=0.3 ${JSON.stringify(rb)} · επιλογή K=${best.K} μ=${best.mu}`);
+    // 2) validation: εκπαίδευση ≤ 2020 → 2022
+    const tr20 = [...tr18, ...(await demo(2020))];
+    const fit20 = A.fitItemFactors(tr20, best.K, best.mu);
+    const m20 = { ...base, version: 'factors-le2020', itemFactors: { K: best.K, fittedOnYears: [2017, 2018, 2020], loadings: fit20.loadings } };
+    const v = { prod: A.summarizePairs(await demo(2022)), rho: A.summarizePairs(await A.linkedPairs({ model: base, years: [2022] })), factors: A.summarizePairs(await A.linkedPairs({ model: m20, years: [2022] })) };
+    log(`validation 2022: ${JSON.stringify(v)}`);
+    // 3) 2024 (ήδη αποκαλυμμένο στη φάση 1 — όχι «άγνωστο»): εκπαίδευση ≤ 2022
+    const tr22 = [...tr20, ...(await demo(2022))];
+    const fit22 = A.fitItemFactors(tr22, best.K, best.mu);
+    const m22 = { ...base, version: 'factors-le2022', itemFactors: { K: best.K, fittedOnYears: [2017, 2018, 2020, 2022], loadings: fit22.loadings } };
+    const h = { prod: A.summarizePairs(await demo(2024)), rho: A.summarizePairs(await A.linkedPairs({ model: base, years: [2024] })), factors: A.summarizePairs(await A.linkedPairs({ model: m22, years: [2024] })) };
+    log(`2024 (προηγουμένως αποκαλυμμένο): ${JSON.stringify(h)}`);
+    Object.assign(report, { chosen: best, validation2022: v, revealed2024: h, loadings: { le2020: m20.itemFactors, le2022: m22.itemFactors } });
+    writeFileSync(benchDir('item_factors.json'), JSON.stringify(report));
+    log(`→ ${benchDir('item_factors.json')}`);
+    return;
+  }
+  if (cmd === 'final2') {
+    // PHASE2_PREREGISTRATION.md §6: ΜΙΑ εκτέλεση στο holdout2 με όλες τις εκδόσεις και τα baselines μαζί.
+    if (!args.includes('--i-understand-this-is-final')) throw new Error('Το holdout2 χρησιμοποιείται μία φορά. Πρόσθεσε --i-understand-this-is-final.');
+    if (readHistory().some((h) => h.type === 'final2')) throw new Error('Το holdout2 έχει ήδη αξιολογηθεί — δεν επαναλαμβάνεται.');
+    const versions = list('models', 'prod-1,exp-20261028-a');
+    if (versions.length > 4) throw new Error('Έως prod-1, exp-20261028-a και 2 νέες υποψήφιες (προκαταχώριση §6).');
+    const { runTemporal } = await import('../../lib/synthetic-lab/benchmark/temporal');
+    const { familyBalanced, pairedCompareStrat } = await import('../../lib/synthetic-lab/benchmark/score');
+    const { saveDecision } = await import('../../lib/synthetic-lab/benchmark/registry');
+    const split = ['holdout2' as Split];
+    const out: Record<string, any[]> = {};
+    for (const r of runTemporal(suite, [
+      { label: 'baseline: επιμονή (LOCF)', cfg: { params: { method: 'locf' } } },
+      { label: 'baseline: ιστορικός μέσος', cfg: { params: { method: 'mean' } } },
+      { label: 'baseline: γραμμική τάση', cfg: { params: { method: 'linear' } } }
+    ], { splits: split })) out[r.label] = r.items;
+    for (const v of versions) {
+      const model = loadModel(v);
+      if (!model) throw new Error(`Άγνωστη έκδοση ${v}`);
+      log(`holdout2: ${v}`);
+      const r = await runBenchmark(suite, { model, mode: 'blind', splits: split, seeds: [1, 2], n: 2000, onProgress: (d, t) => d % 20 === 0 && log(`  ${d}/${t}`) });
+      out[v] = r.items;
+      saveRun({ id: `final2-${v}-${Date.now()}`, createdAt: new Date().toISOString(), tag: 'final2', suiteVersion: suite.version, suiteHash: suite.hash, model, config: { mode: 'blind', splits: split, seeds: [1, 2], n: 2000 }, durationMs: r.durationMs, summary: summarize(r.items), bySplit: summarizeBy(r.items, (x) => x.split), byFamily: summarizeBy(r.items, (x) => x.family), gaps: gapStats(r.items), items: r.items });
+    }
+    const ref = out['baseline: επιμονή (LOCF)'];
+    const prod = out['prod-1'];
+    const rows = Object.entries(out).map(([label, items]) => ({
+      label,
+      summary: summarize(items),
+      familyBalanced: familyBalanced(items),
+      vsLOCF: pairedCompareStrat(ref, items),
+      vsProd: prod ? pairedCompareStrat(prod, items) : null,
+      byFamily: summarizeBy(items, (x) => x.family),
+      byTopic: summarizeBy(items, (x) => x.topics[0] || 'other'),
+      byYear: summarizeBy(items, (x) => String(x.year)),
+      byHorizon: summarizeBy(items, (x) => String(x.evidence?.gapYears ?? 'na')),
+      gaps: gapStats(items)
+    }));
+    for (const r of rows) console.log(`${r.label.padEnd(34)} ανά συστάδα ${r.summary.sampleMeanMae} · οικογ. ${r.familyBalanced} · σύνολο ${r.summary.overallMae} · ομάδες ${r.summary.groupMae} | vs LOCF ${r.vsLOCF.meanDelta} ${JSON.stringify(r.vsLOCF.ci95)} | vs prod ${r.vsProd?.meanDelta} ${JSON.stringify(r.vsProd?.ci95)}`);
+    const rec = { id: `final2-${Date.now()}`, type: 'final2', at: new Date().toISOString(), suiteHash: suite.hash, versions, rows };
+    saveDecision(rec);
+    writeFileSync(benchDir('final2_results.json'), JSON.stringify(rec));
+    log(`→ ${benchDir('final2_results.json')}`);
+    return;
+  }
+  if (cmd === 'compare') {
+    // Κανόνες αποδοχής της φάσης 2 (PHASE2_PREREGISTRATION.md §5) για δύο εκτελέσεις στα ίδια items.
+    const { familyBalanced, pairedCompareStrat } = await import('../../lib/synthetic-lab/benchmark/score');
+    const { saveDecision } = await import('../../lib/synthetic-lab/benchmark/registry');
+    const ref = JSON.parse(readFileSync(args[1], 'utf8'));
+    const alt = JSON.parse(readFileSync(args[2], 'utf8'));
+    const ids = new Set(alt.items.filter((i: any) => i.status === 'ok').map((i: any) => i.itemId));
+    const refItems = ref.items.filter((i: any) => ids.has(i.itemId));
+    const altItems = alt.items.filter((i: any) => refItems.some((r: any) => r.itemId === i.itemId));
+    const p = pairedCompareStrat(refItems, altItems);
+    const sr = summarize(refItems);
+    const sa = summarize(altItems);
+    const famR = summarizeBy(refItems, (x) => x.family);
+    const famA = summarizeBy(altItems, (x) => x.family);
+    const topR = summarizeBy(refItems, (x) => x.topics[0] || 'other');
+    const topA = summarizeBy(altItems, (x) => x.topics[0] || 'other');
+    const reasons: string[] = [];
+    const gain = (sr.sampleMeanMae ?? 0) - (sa.sampleMeanMae ?? 0);
+    if (!(gain >= 0.1)) reasons.push(`κύρια μετρική: βελτίωση ${gain.toFixed(2)} < 0,10`);
+    if (!p.ci95 || !((p.ci95[1] ?? 1) < 0)) reasons.push(`95% διάστημα ${JSON.stringify(p.ci95)} όχι αυστηρά < 0`);
+    for (const f of Object.keys(famA)) {
+      const d = (famA[f].sampleMeanMae ?? 0) - (famR[f]?.sampleMeanMae ?? 0);
+      if (d > 0.25) reasons.push(`οικογένεια ${f}: +${d.toFixed(2)}`);
+    }
+    if ((sa.groupMae ?? 0) - (sr.groupMae ?? 0) > 0.25) reasons.push(`ομάδες: ${sr.groupMae} → ${sa.groupMae}`);
+    for (const t of Object.keys(topA)) {
+      if (topA[t].samples < 5) continue;
+      const d = (topA[t].sampleMeanMae ?? 0) - (topR[t]?.sampleMeanMae ?? 0);
+      if (d > 0.5) reasons.push(`θέμα ${t}: +${d.toFixed(2)}`);
+    }
+    const rec = {
+      id: `p2-compare-${Date.now()}`, type: 'p2_compare', at: new Date().toISOString(), suiteHash: suite.hash, label: opt('label', ''),
+      ref: { file: args[1], version: ref.model?.version, summary: sr, familyBalanced: familyBalanced(refItems) },
+      alt: { file: args[2], version: alt.model?.version, summary: sa, familyBalanced: familyBalanced(altItems) },
+      paired: p, familyDelta: Object.fromEntries(Object.keys(famA).map((f) => [f, Math.round(((famA[f].sampleMeanMae ?? 0) - (famR[f]?.sampleMeanMae ?? 0)) * 100) / 100])),
+      accepted: reasons.length === 0, reasons
+    };
+    saveDecision(rec);
+    console.log(JSON.stringify({ ref: [sr.sampleMeanMae, sr.overallMae, sr.groupMae, sr.persistOverallMae, sr.persistGroupMae], alt: [sa.sampleMeanMae, sa.overallMae, sa.groupMae], familyBalanced: [rec.ref.familyBalanced, rec.alt.familyBalanced], paired: p, familyDelta: rec.familyDelta, accepted: rec.accepted, reasons }, null, 1));
     return;
   }
   if (cmd === 'select') return void (await selectOnValidation(suite, { log, note: opt('note'), versions: opt('models') ? list('models', '') : undefined }));
