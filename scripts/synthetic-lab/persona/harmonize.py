@@ -290,6 +290,28 @@ def is_skip_var(name, label):
                           r"\bfilter|μεθοδολογ|type\b|duration|διαρκεια|time|record|quota|version|comp\b|language|^\s*$", t))
 
 
+def complete_numeric_scale(s, subst, opts):
+    """Κλίμακα με ετικέτες μόνο στα άκρα (π.χ. 0 «καθόλου» … 10 «απόλυτα»): συμπληρώνει τις ενδιάμεσες τιμές που
+    υπάρχουν στα δεδομένα. Χωρίς αυτό, οι απαντήσεις 1–9 χάνονταν και το item γινόταν ψευδο-δυαδικό (διόρθωση sprint 10/2026)."""
+    try:
+        keys = sorted(float(k) for k in subst)
+    except (TypeError, ValueError):
+        return subst
+    if len(keys) < 2 or not all(k.is_integer() for k in keys):
+        return subst
+    lo, hi = int(keys[0]), int(keys[-1])
+    if not 4 <= hi - lo <= 10 or len(keys) == hi - lo + 1:
+        return subst
+    dk = {k for k, v in opts.items() if DK.search(norm(v))}
+    vals = pd.to_numeric(s, errors="coerce")
+    vals = vals[vals.notna() & ~vals.isin(dk)]
+    inside = vals[(vals >= lo) & (vals <= hi) & (vals % 1 == 0)]
+    if len(vals) == 0 or len(inside) / len(vals) < 0.98 or inside.nunique() < hi - lo - 1:
+        return subst
+    lab = {int(float(k)): v for k, v in subst.items()}
+    return {float(v): (f"{v} {lab[v]}" if v in lab else str(v)) for v in range(lo, hi + 1)}
+
+
 def build_items(df, meta, skip_cols, file_id, wave):
     """Κατηγορικά items + ομάδες πολλαπλών αναφορών («Και ποια άλλη;») ως δυαδικά items ανά επιλογή."""
     vls = meta.variable_value_labels or {}
@@ -318,6 +340,7 @@ def build_items(df, meta, skip_cols, file_id, wave):
                 j += 1
         opts = {k: fix_text(str(v)).strip() for k, v in vl.items()}
         subst = {k: v for k, v in opts.items() if not DK.search(norm(v))}
+        subst = complete_numeric_scale(df[c], subst, opts)
         if len(group) > 1 and len(subst) >= 3:
             for k, v in subst.items():
                 if re.search(r"^(αλλο|other|τιποτα|none|κανεν)", norm(v)):
@@ -345,6 +368,7 @@ def build_items(df, meta, skip_cols, file_id, wave):
             continue
         olabels = [subst[k] for k in sorted(subst)]
         ordinal = len(subst) == 2 or sum(1 for o in olabels if ORDINAL_VOCAB.search(norm(o))) >= max(2, int(0.6 * len(olabels)))
+        ordinal = ordinal or all(re.match(r"^\d", o) for o in olabels)
         iid = f"{file_id}::{c}"
         data[iid] = code
         items.append({"id": iid, "file": file_id, "wave": wave, "var": c, "text": re.sub(r"\s+", " ", lab).strip(),
