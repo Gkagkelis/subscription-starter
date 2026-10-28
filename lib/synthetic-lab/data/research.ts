@@ -67,7 +67,8 @@ function load(): Loaded {
   if (licenseMode() === 'commercial') return empty;
   const dir = researchDir();
   if (!existsSync(dir)) return empty;
-  const files = readdirSync(dir).filter((f) => f.endsWith('.json')).sort();
+  // αντίγραφα ασφαλείας (π.χ. *.backup.json) δεν φορτώνονται: θα αντικαθιστούσαν τους δείκτες της τρέχουσας έκδοσης
+  const files = readdirSync(dir).filter((f) => f.endsWith('.json') && !/\.(backup|bak)\b/i.test(f)).sort();
   const key = `${dir}|${files.map((f) => `${f}:${statSync(path.join(dir, f)).mtimeMs}`).join(',')}`;
   if (cache?.key === key) return cache.value;
   const out: Loaded = { datasets: [], metrics: new Map(), questions: new Map() };

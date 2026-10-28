@@ -81,3 +81,27 @@ describe('political planner', () => {
     expect(plan.questions.some((q) => q.id === 'p6')).toBe(false);
   });
 });
+
+describe('research data loader', () => {
+  it('ignores backup copies so they cannot override the current version', async () => {
+    const { mkdirSync, writeFileSync } = await import('fs');
+    const path = (await import('path')).default;
+    const { dataRoot } = await import('@/lib/synthetic-lab/storage/paths');
+    const { researchMetric, resetResearchCache } = await import('@/lib/synthetic-lab/data/research');
+    const dir = path.join(dataRoot(), 'research');
+    mkdirSync(dir, { recursive: true });
+    const ds = (value: number) => ({
+      datasetId: 'bk-test',
+      tier: 'research_only',
+      source: 'test',
+      license: 'test',
+      importedAt: '2026-10-28',
+      questions: [],
+      metrics: [{ metric: 'bk_test_m', family: 't', label: 't', semanticsNote: '', scheme: 'dianeosis', waves: [{ key: '2024-Q1', year: 2024, quarter: 'Q1', groups: { all: { all: { value, n: 100, confidence: 'high', sources: 1, inconsistent: false } } } }] }]
+    });
+    writeFileSync(path.join(dir, 'bk-test.json'), JSON.stringify(ds(40)));
+    writeFileSync(path.join(dir, 'bk-test.old.backup.json'), JSON.stringify(ds(10)));
+    resetResearchCache();
+    expect(researchMetric('bk_test_m')?.waves[0].groups.all.all.value).toBe(40);
+  });
+});
