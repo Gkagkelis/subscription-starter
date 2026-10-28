@@ -21,6 +21,7 @@ import {
 import { defaultModelVersion, loadPersonaModel, PIE_RUNTIME_VERSION, readRegistry, type PersonaModel } from './model';
 import { buildPanel, loadPanel, type SyntheticPanel } from './panel';
 import { answerPersona, expectedDistribution, prepareQuestion, type PreparedPersonaQuestion } from './respond';
+import { AUTOLINK_VERSION, buildIdf, suggestLink } from './autolink';
 
 export interface PersonaSurveyOptions {
   plan: StudyPlan;
@@ -106,7 +107,17 @@ export function runPersonaSurvey(o: PersonaSurveyOptions): StudyRun {
   if (!panel) panel = buildPanel({ modelVersion: model.version, populationId: o.populationId, size: o.plan.sampleSize, seed: deriveSeed(seed, 'panel'), audience: o.plan.audience, save: o.save });
 
   // Στάδιο Β — ατομικές απαντήσεις (αποθηκεύονται ΠΡΙΝ από τη συγκέντρωση)
-  const prepared = o.plan.questions.map((q) => prepareQuestion(model, q, refMonth));
+  // Ερωτήσεις χωρίς χειροκίνητη σύνδεση: αυτόματη ερμηνεία (αποδοχή μόνο πάνω από κατώφλι· αλλιώς «δεν εκτιμάται»)
+  const idf = o.plan.personaAutoLink === false ? null : buildIdf(model);
+  const prepared = o.plan.questions.map((q) => {
+    if (q.personaLink || !idf) return prepareQuestion(model, q, refMonth);
+    const s = suggestLink(model, q, refMonth, { idf });
+    const pq = prepareQuestion(model, s.accepted && s.link ? { ...q, personaLink: s.link } : q, refMonth);
+    pq.provenance.autoLink = { version: AUTOLINK_VERSION, accepted: s.accepted, confidence: s.confidence, target: s.target, reason: s.reason };
+    return pq;
+  });
+  const auto = prepared.filter((p) => p.provenance.autoLink?.accepted).map((p) => p.q.id);
+  if (auto.length) warnings.push(`Αυτόματη ερμηνεία (${AUTOLINK_VERSION}): ${auto.join(', ')} συνδέθηκαν αυτόματα με πραγματικά δεδομένα (MODEL-EXTRAPOLATED, η αντιστοίχιση καταγράφεται στην προέλευση).`);
   const respondents = respondPanel(panel, prepared, seed);
   const ne = prepared.filter((p) => p.support === 'NOT_RELIABLY_ESTIMABLE').map((p) => p.q.id);
   const ex = prepared.filter((p) => p.support === 'MODEL_EXTRAPOLATED').map((p) => p.q.id);

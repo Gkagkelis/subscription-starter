@@ -259,7 +259,8 @@ def main():
     files_all = json.load(open(os.path.join(hz, "files.json")))
     bank = json.load(open(os.path.join(hz, "item_bank.json")))
     hold = {h for h in a.holdout.split(",") if h}
-    files = [f for f in files_all if ym(f["wave"]) <= ym(a.cutoff) and f["fileId"] not in hold
+    # Σύνολα validation/τελικού holdout του sprint δεν μπαίνουν ΠΟΤΕ στην εκπαίδευση.
+    files = [f for f in files_all if ym(f["wave"]) <= ym(a.cutoff) and f["fileId"] not in hold and f.get("role") not in ("validation", "final_holdout")
              and (a.policy == "research" or f["tier"] == "open") and (not a.families or f["family"] in a.families.split(","))]
     log = []
     t0 = time.time()

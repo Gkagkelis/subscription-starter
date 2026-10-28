@@ -1,0 +1,21 @@
+{
+  "note": "Αντιστοίχιση ESS10 Ελλάδα (validation, 11/2021–4/2022, CAPI) → μοντέλο. Καταγράφηκε ΠΡΙΝ από την εκτέλεση. Cutoff 2021-10. Περιθώρια μόνο για ίδιες κλίμακες (άγκυρες)· τα items 0–10 μόνο για συσχετίσεις τάξης.",
+  "holdout": "ess10", "cutoff": "2021-10", "refMonth": "2022-01", "families": "dianeosis_tpe,cses,undpolar,maple", "lam": 3.0,
+  "items": [],
+  "anchors": [
+    {"hold": "polint4", "target": "anchor:polint4", "kind": "ίδια κλίμακα (very/quite/hardly/not at all)"},
+    {"hold": "econ4", "target": "anchor:econ4", "kind": "equivalent (hincfel ↔ «πώς τα βγάζετε πέρα»)"},
+    {"hold": "pv", "target": "anchor:pv", "kind": "ψήφος 2019", "nominal": true, "categories": ["nd", "syriza", "pasok", "kke", "other", "abstain"]},
+    {"hold": "emp", "target": "anchor:emp", "kind": "κύρια δραστηριότητα", "nominal": true, "categories": ["employed", "student", "unemployed", "retired", "homemaker", "other"]}
+  ],
+  "lrColumn": "lr11",
+  "assocItems": [
+    {"hold": "ess10::trstprl", "target": "dn2018b::B21_6", "sign": -1},
+    {"hold": "ess10::trstlgl", "target": "dn2018b::B21_7", "sign": -1},
+    {"hold": "ess10::trstplc", "target": "dn2018b::B21_10", "sign": -1},
+    {"hold": "ess10::trstprt", "target": "dn2018b::B21_8", "sign": -1},
+    {"hold": "ess10::trstep", "target": "dn2018b::B21_17", "sign": -1},
+    {"hold": "ess10::stfgov", "target": "dn2018b::B21_3", "sign": -1},
+    {"hold": "ess10::stfdem", "target": "cses2019::IMD3010", "sign": -1}
+  ]
+}

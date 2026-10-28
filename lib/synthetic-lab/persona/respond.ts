@@ -56,6 +56,8 @@ export interface PersonaQuestionProvenance {
   responseModel: 'ordinal_probit' | 'multinomial_logit' | 'electoral_choice' | 'persona_anchor' | 'none';
   anchorSource?: { node: string; trainFiles: string[]; wave: string; n: number; observed: Record<string, number> } | null;
   generatedBy: 'statistical_model';
+  /** Αυτόματη ερμηνεία (C6): πρόταση/αποδοχή σύνδεσης για ερώτηση χωρίς χειροκίνητη σύνδεση. */
+  autoLink?: { version: string; accepted: boolean; confidence: number; target: string | null; reason: string } | null;
 }
 
 function yearsBetween(wave: string, ref: string): number {

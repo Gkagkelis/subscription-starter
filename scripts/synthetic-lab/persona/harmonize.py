@@ -33,6 +33,7 @@ import sys
 import zipfile
 from collections import Counter, defaultdict
 
+import numpy as np
 import pandas as pd
 import pyreadstat
 
@@ -338,7 +339,8 @@ def build_items(df, meta, skip_cols, file_id, wave):
             while j < len(cols) and (vls.get(cols[j]) or {}) == vl and norm(fix_text(labs.get(cols[j]) or "")) == norm(lab):
                 group.append(cols[j])
                 j += 1
-        opts = {k: fix_text(str(v)).strip() for k, v in vl.items()}
+        # κωδικοί-γράμματα (Stata «.a/.b/.c» = άρνηση/ΔΞ/ΔΑ) δεν είναι επιλογές απάντησης
+        opts = {k: fix_text(str(v)).strip() for k, v in vl.items() if isinstance(k, (int, float))}
         subst = {k: v for k, v in opts.items() if not DK.search(norm(v))}
         subst = complete_numeric_scale(df[c], subst, opts)
         if len(group) > 1 and len(subst) >= 3:
@@ -778,6 +780,174 @@ def harmonize_maple(files_meta, bank):
         print(f"{file_id}: n={len(sub)} items={len(items)} anchors={files_meta[-1]['anchors']}")
 
 
+# MAPLE I (κύμα 1, 2–4/2019): πρόθεση ψήφου × ανάκληση 2015. Οι κωδικοί των μικρών κομμάτων στην πρόθεση δεν τεκμηριώνονται
+# στο codebook («Party N»)· επιβεβαιώθηκαν μόνο τα μεγάλα με τη μέση αυτοτοποθέτηση των ψηφοφόρων τους (ΣΥΡΙΖΑ 3,3· ΝΔ 6,9·
+# ΚΙΝΑΛ 4,5· ΧΑ 7,1· ΚΚΕ 1,9)· όλα τα άλλα → other (sprint 10/2026).
+MAPLE1_VI = {1: "syriza", 2: "nd", 3: "pasok", 5: "xa", 6: "kke", 66: "other", 77: "blank", 78: "abstain", 88: "undecided"}
+
+
+def harmonize_maple1(files_meta, bank):
+    path = os.path.join(DATA, "raw/political/repos/harvard_10.7910_DVN_AGFZFO/files/wave1_2_merged.dta")
+    df, meta = pyreadstat.read_dta(path)
+    vls = meta.variable_value_labels or {}
+    sub = df[df.Country == "Greece"].reset_index(drop=True)
+    w, file_id, wave = "w1", "maple2019feb", "2019-03"
+    out = pd.DataFrame(index=sub.index)
+    out["rid"] = [rid(file_id, i) for i in range(len(sub))]
+    wv = pd.to_numeric(sub["WEIGHT_RIM_w1"], errors="coerce")
+    wv = wv.fillna(wv.mean())
+    out["weight"] = (wv / wv.mean()).round(5)
+    out["age_band"] = sub["Q4_w1"].map(age_band)
+    out["gender"] = sub["Q3_w1"].map({1: "female", 2: "male"})
+    out["edu3"] = sub["Q5_w1"].map(lambda v: None if v != v else "low" if v <= 2 else "medium" if v <= 5 else "high" if v <= 9 else None)
+    out["nuts1"] = sub["Q6_w1"].map(MAPLE_REGION)
+    out["region13"] = sub["Q6_w1"].map(MAPLE_REGION13)
+    emp_lab = vls.get("Q63_w1", {})
+    if "Q63_w1" in sub:
+        out["emp"] = sub["Q63_w1"].map(lambda v: None if v != v else (lambda t: "employed" if re.search(r"employed - |^employed", t) else "self_emp" if "self" in t else
+                                                                    "unemployed" if "unemploy" in t else "student" if "student" in t or "education" in t else
+                                                                    "retired" if "retire" in t else "homemaker" if "house" in t or "home" in t else "other")(str(emp_lab.get(v, "")).lower()))
+    pv = sub["Q28_w1"].map(lambda v: MAPLE_PV2015.get(int(v), "other") if v == v else None)
+    out["pv"] = [("abstain" if t in (2, 3, 4) else p) for t, p in zip(sub["Q27_w1"], pv)]
+    out["pv_election"] = "2015-09"
+    out["vi"] = sub["Q38_w1"].map(lambda v: MAPLE1_VI.get(int(v), "other") if v == v else None)
+    out["vi_wave"] = wave
+    out["lr11"] = sub["Q39_w1"].map(lambda v: v if v == v and 0 <= v <= 10 else None)
+    out["lr_none"] = sub["Q39_w1"].map(lambda v: None if v != v else 1 if v == 88 else 0 if 0 <= v <= 10 else None)
+    skip = {c for c in sub.columns if not c.endswith("_w1")} | {"Country"}
+    skip |= {f"Q{k}_w1" for k in ("3", "4", "4A", "5", "5A", "6", "27", "28", "38", "39", "42", "63", "66")}
+    skip |= {c for c in sub.columns if c.startswith(("WEIGHT", "Rd_", "recall_", "vote_", "id_", "soph_", "maplenews", "TotalEU", "MeanEU", "EUsalience"))}
+    items, data = build_items(sub, meta, skip, file_id, wave)
+    for k, s_ in data.items():
+        out[k] = s_.values
+    write_file(file_id, out)
+    bank.extend(items)
+    files_meta.append({
+        "fileId": file_id, "family": "maple", "source": "MAPLE I, Ελλάδα, κύμα 1 (Harvard Dataverse doi:10.7910/DVN/AGFZFO)", "url": "https://doi.org/10.7910/DVN/AGFZFO",
+        "wave": wave, "waveApprox": False, "n": int(len(sub)), "weightVar": "WEIGHT_RIM_w1", "licence": "CC0 1.0", "tier": "open",
+        "commercialUse": "allowed", "mode": "online πάνελ (πεδίο 15/02–26/04/2019)", "population": "Ελλάδα 18+",
+        "anchors": sorted(c for c in ANCHORS + DEMO if c in out and out[c].notna().any()), "pvElection": "2015-09", "nItems": len(items),
+    })
+    print(f"{file_id}: n={len(sub)} items={len(items)} anchors={files_meta[-1]['anchors']}")
+
+
+# DEMOTEC (H2020), ελληνικό δείγμα 9–11/2022, online πάνελ CINT, n=3.000 — ΣΥΝΟΛΟ VALIDATION του sprint (ποτέ στην εκπαίδευση).
+# Το CSV δεν έχει ετικέτες· οι ετικέτες πιο κάτω είναι από το επίσημο codebook (DEMOTEC_citizenSurveyData_codebook.pdf).
+DEMOTEC_TRUST = [(1, "Καθόλου εμπιστοσύνη"), (2, "Όχι πολλή εμπιστοσύνη"), (3, "Αρκετή εμπιστοσύνη"), (4, "Πολλή εμπιστοσύνη")]
+DEMOTEC_MEDIA = [(1, "Ποτέ"), (2, "Λιγότερο από μία φορά τον μήνα"), (3, "Μηνιαία"), (4, "Εβδομαδιαία"), (5, "Καθημερινά")]
+DEMOTEC_ITEMS = [
+    ("trust_institutional_government", "Πόση εμπιστοσύνη έχετε στην Κυβέρνηση;", DEMOTEC_TRUST, "pol.trust"),
+    ("trust_institutional_parliament", "Πόση εμπιστοσύνη έχετε στη Βουλή;", DEMOTEC_TRUST, "pol.trust"),
+    ("trust_institutional_polParties", "Πόση εμπιστοσύνη έχετε στα πολιτικά κόμματα;", DEMOTEC_TRUST, "pol.trust"),
+    ("trust_institutional_Courts", "Πόση εμπιστοσύνη έχετε στα δικαστήρια;", DEMOTEC_TRUST, "pol.trust"),
+    ("trust_institutional_EU", "Πόση εμπιστοσύνη έχετε στην Ευρωπαϊκή Ένωση;", DEMOTEC_TRUST, "pol.trust"),
+    ("trust_institutional_localGovernment", "Πόση εμπιστοσύνη έχετε στην τοπική αυτοδιοίκηση;", DEMOTEC_TRUST, "pol.trust"),
+    ("trust_institutional_media", "Πόση εμπιστοσύνη έχετε στα μέσα ενημέρωσης;", DEMOTEC_TRUST, "pol.trust"),
+    ("trust_institutional_church", "Πόση εμπιστοσύνη έχετε στην Εκκλησία;", DEMOTEC_TRUST, "pol.trust"),
+    ("mediaUse_newspapers", "Πόσο συχνά ενημερώνεστε από ημερήσιες εφημερίδες;", DEMOTEC_MEDIA, "cons.media"),
+    ("mediaUse_tvRadio", "Πόσο συχνά ενημερώνεστε από τηλεόραση/ραδιόφωνο;", DEMOTEC_MEDIA, "cons.media"),
+    ("mediaUse_internet", "Πόσο συχνά ενημερώνεστε από το διαδίκτυο;", DEMOTEC_MEDIA, "cons.media"),
+    ("mediaUse_socialMedia", "Πόσο συχνά ενημερώνεστε από τα κοινωνικά δίκτυα;", DEMOTEC_MEDIA, "cons.media"),
+    ("pol_voteNational", "Στις εθνικές εκλογές ψηφίζετε πάντα, συνήθως ή ποτέ;", [(1, "Ποτέ"), (2, "Συνήθως"), (3, "Πάντα")], "pol.participation"),
+    ("pol_efficacy", "Πόσο σίγουρος/η νιώθετε για την ικανότητά σας να συμμετέχετε στην πολιτική;",
+     [(1, "Καθόλου"), (2, "Λίγο"), (3, "Αρκετά"), (4, "Πολύ"), (5, "Απόλυτα")], "pol.participation"),
+    ("pol_leftRight", "Αυτοτοποθέτηση αριστερά (1) – δεξιά (10)", [(k, str(k)) for k in range(1, 11)], "pol.left_right"),
+]
+
+
+def harmonize_demotec(files_meta, bank):
+    path = os.path.join(DATA, "raw/political/repos/zenodo_14591024/files/DEMOTEC_citizenSurveyData.csv")
+    g = pd.read_csv(path, low_memory=False)
+    g = g[g.country == "gr"].reset_index(drop=True)
+    file_id, wave = "demotec2022", "2022-10"
+    out = pd.DataFrame(index=g.index)
+    out["rid"] = [rid(file_id, i) for i in range(len(g))]
+    w = pd.to_numeric(g.psWeight, errors="coerce").fillna(1.0)
+    out["weight"] = (w / w.mean()).round(5)
+    out["age_band"] = g.demo_age.map(age_band)
+    out["gender"] = g.demo_sex.map({0: "male", 1: "female"})
+    out["edu3"] = g.demo_education.map({"gr_1": "low", "gr_2": "low", "gr_3": "medium", "gr_4": "medium", "gr_5": "high", "gr_6": "high"})
+    out["nuts1"] = g.demo_region.map({"gr_1": "attica", "gr_2": "islands", "gr_3": "north", "gr_4": "centre"})
+    out["urban"] = g.demo_urbanRural.map({1: "rural", 2: "urban", 3: "urban", 4: "urban"})
+    # «Δυσκολεύομαι πολύ / δυσκολεύομαι / τα βγάζω πέρα / ζω άνετα» ↔ άγκυρα econ4 (ρητή παραδοχή ισοδυναμίας)
+    out["econ4"] = g.demo_income.map({1: 1, 2: 2, 3: 3, 4: 4})
+    out["polint4"] = g.pol_interestInPolitics.map({4: 1, 3: 2, 2: 3, 1: 4})
+    items = []
+    for var, text, opts, construct in DEMOTEC_ITEMS:
+        iid = f"{file_id}::{var}"
+        valid = {k for k, _ in opts}
+        out[iid] = g[var].map(lambda v: str(int(v)) if v == v and int(v) in valid else ("dk" if v == v and int(v) in (-900, -998) else None))
+        items.append({"id": iid, "file": file_id, "wave": wave, "var": var, "text": text, "type": "ordinal",
+                      "options": [{"code": str(k), "label": l} for k, l in opts], "dkCode": "dk", "construct": construct})
+    write_file(file_id, out)
+    bank.extend(items)
+    files_meta.append({
+        "fileId": file_id, "family": "demotec", "source": "DEMOTEC citizen survey, Ελλάδα (Zenodo 14591024)", "url": "https://zenodo.org/records/14591024",
+        "wave": wave, "waveApprox": True, "n": int(len(g)), "weightVar": "psWeight", "licence": "CC BY 4.0", "tier": "open",
+        "commercialUse": "allowed_with_attribution", "mode": "online πάνελ CINT (πεδίο 9–11/2022)", "population": "Ελλάδα, ενήλικες χρήστες διαδικτύου",
+        "anchors": sorted(c for c in ANCHORS + DEMO if c in out and out[c].notna().any()), "pvElection": None, "nItems": len(items),
+        "role": "validation", "realRespondents": True,
+    })
+    print(f"{file_id}: n={len(g)} items={len(items)}")
+
+
+# European Social Survey, Ελλάδα (sprint 10/2026). Ρόλοι κατά την προκαταχώριση: R10 (11/2021–4/2022) validation, R11 (2–5/2024) ΤΕΛΙΚΟ holdout.
+ESS_FILES = [
+    ("ess10", "raw/sprint/microdata/harvard_10.7910_DVN_7QODL6_ess10/ESS10.dta", "2022-01", "prtvtdgr", "2019-07", "validation",
+     {1: "nd", 2: "syriza", 3: "pasok", 4: "kke", 5: "el", 6: "mera25", 7: "xa", 8: "plefsi", 9: "ek"}, "prtcldgr"),
+    ("ess11", "raw/sprint/microdata/harvard_10.7910_DVN_CUT5RQ/ESS11.dta", "2024-03", "prtvtegr", "2023-06", "final_holdout",
+     {1: "nd", 2: "syriza", 3: "pasok", 4: "kke", 5: "el", 6: "spartiates", 7: "niki", 8: "plefsi", 10: "nea_aristera", 11: "mera25", 15: "ek"}, "prtclegr"),
+]
+ESS_NUTS = {"EL30": "attica", "EL41": "islands", "EL42": "islands", "EL43": "islands", "EL51": "north", "EL52": "north", "EL53": "north", "EL54": "north",
+            "EL61": "centre", "EL62": "centre", "EL63": "centre", "EL64": "centre", "EL65": "centre"}
+
+
+def harmonize_ess(files_meta, bank):
+    for file_id, rel, wave, vote_var, election, role, parties, close_var in ESS_FILES:
+        path = os.path.join(DATA, rel)
+        if not os.path.exists(path):
+            continue
+        df, meta = pyreadstat.read_dta(path)
+        g = df[df.cntry == "GR"].reset_index(drop=True)
+        out = pd.DataFrame(index=g.index)
+        out["rid"] = [rid(file_id, i) for i in range(len(g))]
+        w = pd.to_numeric(g.get("anweight", g.get("pspwght")), errors="coerce").fillna(1.0)
+        out["weight"] = (w / w.mean()).round(5)
+        out["age_band"] = pd.to_numeric(g.agea, errors="coerce").map(age_band)
+        out["gender"] = g.gndr.map({1: "male", 2: "female"})
+        out["edu3"] = pd.to_numeric(g.eisced, errors="coerce").map(lambda v: None if v != v or v < 1 or v > 7 else "low" if v <= 2 else "medium" if v <= 5 else "high")
+        out["nuts1"] = g.region.astype(str).str[:4].map(ESS_NUTS)
+        out["urban"] = pd.to_numeric(g.domicil, errors="coerce").map({1: "urban", 2: "urban", 3: "urban", 4: "rural", 5: "rural"})
+        out["emp"] = pd.to_numeric(g.mnactic, errors="coerce").map({1: "employed", 2: "student", 3: "unemployed", 4: "unemployed", 6: "retired", 8: "homemaker", 5: "other", 7: "other", 9: "other"})
+        out["econ4"] = pd.to_numeric(g.hincfel, errors="coerce").map({1: 4, 2: 3, 3: 2, 4: 1})
+        out["polint4"] = pd.to_numeric(g.polintr, errors="coerce").map({1: 1, 2: 2, 3: 3, 4: 4})
+        lr = pd.to_numeric(g.lrscale, errors="coerce")
+        out["lr11"] = lr.where(lr.between(0, 10))
+        out["lr_none"] = g.lrscale.map(lambda v: None if v is None or v != v else 0 if isinstance(v, (int, float)) and 0 <= v <= 10 else 1 if v in ("b",) else None)
+        voted = pd.to_numeric(g.vote, errors="coerce")
+        pv = pd.to_numeric(g[vote_var], errors="coerce").map(lambda v: None if v != v else parties.get(int(v), "other"))
+        out["pv"] = [("abstain" if vt == 2 else p if vt == 1 else None) for vt, p in zip(voted, pv)]
+        out["pv_election"] = election
+        # κόμμα που νιώθει πιο κοντά (μέτρηση μετά τις εκλογές· για τον έλεγχο του μοντέλου μετακινήσεων)
+        cl = pd.to_numeric(g.get(close_var), errors="coerce") if close_var in g else pd.Series(np.nan, index=g.index)
+        out["pclose"] = cl.map(lambda v: None if v != v else parties.get(int(v), "other"))
+        out.loc[g.get("clsprty") == 2, "pclose"] = "none"
+        skip = {c for c in g.columns if re.match(r"^(name|essround|edition|proddate|idno|cntry|dweight|pspwght|pweight|anweight|prob|stratum|psu|region|inw|ainw|binw|cinw|dinw|einw|finw|ginw|hinw|iinw|kinw|supq|vdcond|vdovexre|vdtype|vdtpsvre|vdtpitre|vdtpscre|vdtpaure|vdtpvire|vdtpoire|vdtpntre|vdtpapre|vdtprere|vdtpdkre|vdtpnare|inwtm|mode|domain|prtv|prtc|prtm|rshpsgr|edlvd|edupl|edagegr|eduagegr|icpart|lnghom|cntbrth|ctzship|cntryp|fbrncnt|mbrncnt|pdjobyr|isco|nace|tporgwk|emprm|edlvp|edlvf|edlvm|emplrel|emplno|wkhct|wkhtot|hinctnta|agea|gndr|yrbrn|eisced|domicil|mnactic|hincfel|polintr|lrscale|vote|clsprty)", c)}
+        items, data = build_items(g, meta, skip, file_id, wave)
+        for k, s_ in data.items():
+            out[k] = s_.values
+        write_file(file_id, out)
+        bank.extend(items)
+        files_meta.append({
+            "fileId": file_id, "family": "ess", "source": f"European Social Survey {file_id.upper()}, Ελλάδα (αντίγραφο Harvard Dataverse, CC0· ESS: CC BY 4.0)",
+            "url": "https://www.europeansocialsurvey.org/", "wave": wave, "waveApprox": True, "n": int(len(g)), "weightVar": "anweight", "licence": "CC BY 4.0 (ESS ERIC)",
+            "tier": "open", "commercialUse": "allowed_with_attribution", "mode": "προσωπική συνέντευξη (CAPI)", "population": "Ελλάδα 15+",
+            "anchors": sorted(c for c in ANCHORS + DEMO if c in out and out[c].notna().any()), "pvElection": election, "nItems": len(items),
+            "role": role, "realRespondents": True,
+        })
+        print(f"{file_id}: n={len(g)} items={len(items)} role={role}")
+
+
 # ---------------------------------------------------------------- Έρευνα Οικογενειακών Προϋπολογισμών (ΕΛΣΤΑΤ), μικροδεδομένα ενέργειας (Zenodo 7487147, CC BY 4.0)
 HBS_NUTS = {"Attica": "attica", "Central_Macedonia": "north", "East_Maced_Thrace": "north", "Western_Macedonia": "north", "Epirus": "north",
             "Thessaly": "centre", "Western_GR": "centre", "Central_GR": "centre", "Peloponnese": "centre", "Ionian_Islands": "centre",
@@ -943,10 +1113,10 @@ def equate_lr(files_meta):
         y, m = w.split("-")
         return int(y) * 12 + int(m)
     for f in files_meta:
-        if f["family"] not in ("cses", "undpolar"):
-            continue
         path = os.path.join(OUT, "resp", f"{f['fileId']}.csv.gz")
         cols = pd.read_csv(path, nrows=0).columns
+        if f["family"] == "dianeosis_tpe" or "lr11" not in cols:
+            continue
         d = pd.read_csv(path, dtype={c: str for c in cols if "::" in c}, low_memory=False)
         w0 = min(ref, key=lambda w: abs(ym(w) - ym(f["wave"])))
         r = ref[w0]
@@ -955,10 +1125,11 @@ def equate_lr(files_meta):
         sc = np.cumsum([src.weight[src.lr11 == v].sum() for v in range(11)]) / src.weight.sum()
         lo = np.concatenate([[0], sc[:-1]])
         mapping = {v: int(np.searchsorted(rc, (lo[v] + sc[v]) / 2) + 1) for v in range(11)}
-        d["lr7_naive"] = d["lr7"]
+        d["lr7_naive"] = d["lr7"] if "lr7" in d else None
         d["lr7"] = d.lr11.map(lambda v: mapping.get(int(v)) if v == v else None)
         d.to_csv(path, index=False, compression="gzip")
         f["lrEquating"] = {"referenceWave": w0, "map0to10": mapping}
+        f["anchors"] = sorted(set(f["anchors"]) | {"lr7"} | ({"lr_none"} if "lr_none" in d else set()))
         print(f"  lr equating {f['fileId']} → {w0}: {mapping}")
 
 
@@ -969,6 +1140,9 @@ def main():
     harmonize_cses(files_meta, bank)
     harmonize_undpolar(files_meta, bank)
     harmonize_maple(files_meta, bank)
+    harmonize_maple1(files_meta, bank)
+    harmonize_demotec(files_meta, bank)
+    harmonize_ess(files_meta, bank)
     harmonize_hbs(files_meta, bank)
     equate_lr(files_meta)
     link_families(bank)

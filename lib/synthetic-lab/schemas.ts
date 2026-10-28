@@ -124,7 +124,8 @@ export const PlanSchema = z.object({
   holdoutDatasets: z.array(str(300)).max(200).optional(),
   engine: z.enum(['standard', 'evidence', 'persona']).optional(),
   personaModelVersion: z.string().max(80).regex(/^[\w.\-]+$/).nullable().optional(),
-  panelId: z.string().max(100).regex(/^[\w\-]+$/).nullable().optional()
+  panelId: z.string().max(100).regex(/^[\w\-]+$/).nullable().optional(),
+  personaAutoLink: z.boolean().optional()
 });
 
 export const RunStudySchema = z.object({
