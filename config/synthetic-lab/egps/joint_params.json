@@ -1,0 +1,52 @@
+{
+ "version": "egps-joint-0.1",
+ "measure": "normal-scores correlation (van der Waerden)",
+ "classes": {
+  "EE": {
+   "accepted": true,
+   "rho_mean": 0.377,
+   "rho_min": 0.102,
+   "rho_max": 0.781,
+   "n_datasets": 4,
+   "mae_model": 0.273,
+   "mae_independence": 0.377
+  },
+  "EI": {
+   "accepted": true,
+   "rho_mean": 0.705,
+   "rho_min": 0.531,
+   "rho_max": 0.87,
+   "n_datasets": 3,
+   "mae_model": 0.175,
+   "mae_independence": 0.705
+  },
+  "UG": {
+   "accepted": false,
+   "rho_mean": 0.103,
+   "rho_min": 0.07,
+   "rho_max": 0.136,
+   "n_datasets": 2
+  },
+  "UE": {
+   "accepted": false,
+   "rho_mean": 0.285,
+   "rho_min": 0.235,
+   "rho_max": 0.335,
+   "n_datasets": 2
+  },
+  "UI": {
+   "accepted": false,
+   "rho_mean": 0.218,
+   "rho_min": 0.218,
+   "rho_max": 0.218,
+   "n_datasets": 1
+  }
+ },
+ "sources": [
+  "D1 zenodo:22763861 Metaverse/TAM3",
+  "D2 zenodo:14394129 SINFONICA",
+  "D3 zenodo:10947346 επισκέπτες Αώου (B1–B3)",
+  "D4 zenodo:19448697 ιδιοκτήτες σκύλων",
+  "D5 zenodo:20773326 TEAMIT"
+ ]
+}

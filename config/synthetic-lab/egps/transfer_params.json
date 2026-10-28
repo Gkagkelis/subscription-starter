@@ -1,0 +1,75 @@
+{
+ "version": "egps-transfer-0.1",
+ "source": "Δοκιμή Α (Eurostat ICT, Ελλάδα), μόνο calibration οικογένειες",
+ "w": 1,
+ "lambda": 0.25,
+ "beta": 0.8876,
+ "topk": 5,
+ "global_logit_mean_cal": -2.0912,
+ "intervals_logit": {
+  "overall": {
+   "80": [
+    -1.8608137988101427,
+    1.6660713906860192
+   ],
+   "95": [
+    -3.1104494329583563,
+    2.546385176020788
+   ]
+  },
+  "groups": {
+   "80": [
+    -1.9021065844150393,
+    1.8096406044679387
+   ],
+   "95": [
+    -3.187287858596609,
+    2.9266377276192355
+   ]
+  }
+ },
+ "notEstimable": {
+  "minProxies": 2,
+  "maxWidth80pp": 40
+ },
+ "acceptance": {
+  "rule1_beats_P0_P1": true,
+  "rule2_not_worse_than_P2": true,
+  "rule3_calibrated_intervals": true,
+  "model_extrapolated_capable": true
+ },
+ "testSummary": {
+  "P0": {
+   "M1_overall_mae": 34.6,
+   "M2_group_mae": 36.26
+  },
+  "P1": {
+   "M1_overall_mae": 16.68,
+   "M2_group_mae": 17.56
+  },
+  "P2": {
+   "M1_overall_mae": 14.44,
+   "M2_group_mae": 16.12
+  },
+  "EGPS": {
+   "M1_overall_mae": 12.8,
+   "M2_group_mae": 13.08
+  },
+  "EGPS_level_only": {
+   "M1_overall_mae": 12.8,
+   "M2_group_mae": 14.54
+  },
+  "P2_plus_gradient": {
+   "M1_overall_mae": 14.44,
+   "M2_group_mae": 14.5
+  }
+ },
+ "coverage": {
+  "cov80_all": 79.6,
+  "cov95_all": 93.2,
+  "median_width80_pp": 35.0,
+  "n_estimable": 170,
+  "n_test_scored": 294,
+  "n_not_estimable": 124
+ }
+}
