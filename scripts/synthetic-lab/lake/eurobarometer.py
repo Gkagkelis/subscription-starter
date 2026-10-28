@@ -647,12 +647,15 @@ def run_c(con, max_tasks=None):
 
 
 def run(con, max_tasks=None, kind="eb_fetch"):
+    db.release_stale(con, kind)
     done = 0
     while True:
         tasks = db.next_tasks(con, kind, 20)
         if not tasks:
             break
         for t in tasks:
+            if not db.claim(con, t["task_id"]):
+                continue  # την πήρε άλλος worker
             p = json.loads(t["payload"])
             sid = t["task_id"].split("#")[0]
             try:

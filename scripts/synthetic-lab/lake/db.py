@@ -182,6 +182,20 @@ def next_tasks(con, kind, limit=50):
     ).fetchall()
 
 
+def claim(con, task_id):
+    """Ατομική «δέσμευση» εργασίας ώστε πολλοί workers να δουλεύουν την ίδια ουρά χωρίς διπλή επεξεργασία."""
+    cur = con.execute("UPDATE queue SET state='running', updated_at=? WHERE task_id=? AND state IN ('pending','retry')", (now(), task_id))
+    con.commit()
+    return cur.rowcount == 1
+
+
+def release_stale(con, kind, older_than_s=3 * 3600):
+    """Εργασίες «running» που έμειναν από διακοπείσα εκτέλεση → ξανά pending."""
+    cutoff = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(time.time() - older_than_s))
+    con.execute("UPDATE queue SET state='pending' WHERE kind=? AND state='running' AND updated_at < ?", (kind, cutoff))
+    con.commit()
+
+
 def task_done(con, task_id, state="done", error=None, max_attempts=4):
     if state == "retry":
         r = con.execute("SELECT attempts FROM queue WHERE task_id=?", (task_id,)).fetchone()
