@@ -1,0 +1,173 @@
+{
+ "version": "phase6-holdouts-1",
+ "createdAt": "2026-10-29T18:21:00Z",
+ "policy": "Κάθε έρευνα εδώ αποκλείεται από κάθε εκπαίδευση/ρύθμιση. Η ελληνική στήλη είναι σφραγισμένη (locked) έως τη βαθμολόγηση μετά το κλείδωμα των προβλέψεων.",
+ "holdouts": [
+  {
+   "surveyId": "fl015ep",
+   "dataset": "s3732_fl015ep_eng",
+   "issued": "2026-06-10",
+   "title": "Flash Eurobarometer FL015EP : Europeans' perception of the economy",
+   "nItems": 45,
+   "volumeASha256": "347cf29af3fb3cc7642a48b17048972d8414d93a7f52c90698b8f9ef0d1f07a4",
+   "visibleSha256": "65a36660d2d1a8f0ade2165b486af00300df8e329a0b9d30fb28c144b833760b",
+   "lockedSha256": "e65f52d71ba2cb2135b9cc0ad879ff9e8d4505bfd262ec31930cbb7f74c8043b",
+   "volumeC_EL": {
+    "name": "Volume C/Europeans'_perception_economy_2026_FL015EP_volumeC_EL.xlsx",
+    "sha256": "f426ca1eb44e12c7eecde79f6f38106fcf2ad067269230379176e3d15f8a0b76"
+   },
+   "role": "final_H6",
+   "status": "sealed"
+  },
+  {
+   "surveyId": "fl574",
+   "dataset": "s3652_fl574_eng",
+   "issued": "2026-02-12",
+   "title": "Flash Eurobarometer FL574 : The European Union in Defence and Space",
+   "nItems": 21,
+   "volumeASha256": "58e7f5d59347a8658acf7e0c41e8ea33c7cb163d50946034ed25fdd4e1f3001e",
+   "visibleSha256": "fb02814d3534af8f5e2da4c5076e1bbe3a9e8e7e7515925cc7b47c2ab605bfc3",
+   "lockedSha256": "743e1a73e30c1ffa0d220a967f2d207e51dc28cfe8003f2d962eeeacecc1ce3b",
+   "volumeC_EL": null,
+   "role": "final_H6",
+   "status": "sealed"
+  },
+  {
+   "surveyId": "eb050ep",
+   "dataset": "s3752_105_3_eb050ep_eng",
+   "issued": "2026-07-01",
+   "title": "Special Eurobarometer EB050EP : EP Spring 2026 survey",
+   "nItems": 74,
+   "volumeASha256": "036d538aef310e011310f6d5804dda92eef4f9ae323739c85ce4fc04be57f805",
+   "visibleSha256": "1c328aa173f55262d3e76c75321c657ba4faa0b7134a9b79edeefc1e6acd5d46",
+   "lockedSha256": "f274cd491906f7e89c80eb2580b9e8653c394905451f6540c9136b303c95e930",
+   "volumeC_EL": null,
+   "role": "final_H6",
+   "status": "sealed"
+  },
+  {
+   "surveyId": "eb049ep",
+   "dataset": "s3632_104_2_eb049ep_eng",
+   "issued": "2026-02-04",
+   "title": "Special Eurobarometer EB049EP : EP Autumn 2025 survey",
+   "nItems": 80,
+   "volumeASha256": "6ad85aba5b72ee6083d09b24588d92fee2c41c0ae81c3e5519475d056df3f975",
+   "visibleSha256": "56dc1bcf67f4b8942c08e53f9cf0d2d7ba2fc7d41835c809148ca85d478a4872",
+   "lockedSha256": "0e86230d123144f75360645afcdb6cbd28daa32101efd52af70a8086ce0f38f6",
+   "volumeC_EL": null,
+   "role": "final_H6",
+   "status": "sealed"
+  },
+  {
+   "surveyId": "sp564",
+   "dataset": "s3413_103_2_sp564_eng",
+   "issued": "2025-09-02",
+   "title": "Special Eurobarometer SP564 : Attitudes towards EU Enlargement",
+   "nItems": 81,
+   "volumeASha256": "ac182dbbb2d7e8e641d19ccf4f249a26ad4f592b2b3c3ad5b4980dfbb2d2e579",
+   "visibleSha256": "7cba9b80ebc55714fc6c3d27720a3fafc98d233d2f5f9c46bf056e7d0ac74b58",
+   "lockedSha256": "8f6af4a9caa8f0458a410a74b9ea402f78055b89422566beb28112b227971838",
+   "volumeC_EL": null,
+   "role": "final_H6",
+   "status": "sealed"
+  },
+  {
+   "surveyId": "fl563",
+   "dataset": "s3355_fl563_eng",
+   "issued": "2026-03-17",
+   "title": "Flash Eurobarometer FL563 : Citizens´ awareness and perception of EU Regional policy",
+   "nItems": 36,
+   "volumeASha256": "16937478530554e1b65a19a536758c270ebede9ba99b7a21ae4738b09c95c4d5",
+   "visibleSha256": "57829f7f574fb3a5ed2687554f0270ecbd2422dfe0496e9eac87ddf240eadab4",
+   "lockedSha256": "d122fbe5f89abc3a14875d148d820de90a61dff7469417f804cb3a54dd02379b",
+   "volumeC_EL": null,
+   "role": "final_H6",
+   "status": "sealed"
+  },
+  {
+   "surveyId": "eb048ep",
+   "dataset": "s3572_103_4_eb048ep_eng",
+   "issued": "2025-09-03",
+   "title": "Special Eurobarometer EB048EP : EP Spring 2025 survey",
+   "nItems": 78,
+   "volumeASha256": "6d440739ddecb66eb5e6057f81058eab09457b8ce658f7b0b65663895681d3c8",
+   "visibleSha256": "a783fc99cfb4ccbb5cb1b9bfca0a80dc9a7860786023953c79e233e0024da870",
+   "lockedSha256": "d2959ae27d0b6a935012b52ac3fc07e205905047e60d203bf38534c2817ccd24",
+   "volumeC_EL": null,
+   "role": "final_H6",
+   "status": "sealed"
+  },
+  {
+   "surveyId": "eb047ep",
+   "dataset": "s3492_103_1_eb047ep_eng",
+   "issued": "2025-04-14",
+   "title": "Special Eurobarometer EB047EP : EP Winter 2025 survey",
+   "nItems": 69,
+   "volumeASha256": "420e93fb9711ade155f04db352b2e1abfdc617f79f97fe2b799b9839af3249ee",
+   "visibleSha256": "1e237de0ff9fcb294e4d4e4edfc147102d5f32c885e3d1ed891311a6c089c233",
+   "lockedSha256": "970ef410b748089f2618cc0c01b70d5cca7addeab6e9ac717b758c0b1f9e581b",
+   "volumeC_EL": {
+    "name": "volume C/EP_Winter_2025__EB047EP_volumeC_EL.xlsx",
+    "sha256": "e2af9e9e4bae5d7b5b4ea04970e4c38bce7e1893d57def548d21817b128f6db1"
+   },
+   "role": "final_H6",
+   "status": "sealed"
+  },
+  {
+   "surveyId": "fl570",
+   "dataset": "s3385_fl570_eng",
+   "issued": "2026-03-17",
+   "title": "Flash Eurobarometer FL570 : Views and attitudes related to the euro in the 20 euro area Member States – Autumn 2025",
+   "nItems": 25,
+   "volumeASha256": "af5e59e24c8151b5368174b24971306dd3f582a3e25d91b10b8b65a1a10bc99c",
+   "visibleSha256": "c1bc029bb120dac3fef1c0df773f1d0c7ab36973d1dabffc9c3ac27cdeb70b02",
+   "lockedSha256": "5bd38225aaacbcf147ba8f219b9e9fd28a6d97305d65fa2b2dedfa4d37879708",
+   "volumeC_EL": null,
+   "role": "final_H6",
+   "status": "sealed"
+  }
+ ],
+ "excludedCandidates": {
+  "reason": "ήδη στη λίμνη lake.sqlite (INTEGRATED) ή στα PDF του Lab",
+  "surveys": [
+   "sp561",
+   "sp563",
+   "sp565",
+   "sp567",
+   "sp568",
+   "sp569",
+   "sp570",
+   "sp571",
+   "sp573",
+   "sp574",
+   "sp578",
+   "fl562",
+   "fl564",
+   "fl567",
+   "fl569",
+   "fl584",
+   "fl588",
+   "std104",
+   "std105",
+   "sp559",
+   "sp560",
+   "sp562",
+   "sp566",
+   "sp572",
+   "fl014ep",
+   "fl566",
+   "fl579"
+  ]
+ },
+ "prospective": [
+  {
+   "surveyId": "ess12_GR",
+   "expected": "2027-01",
+   "note": "πρόβλεψη πριν από τη δημοσίευση (προκαταχώριση §8)"
+  },
+  {
+   "surveyId": "std106",
+   "expected": "2026-12"
+  }
+ ]
+}

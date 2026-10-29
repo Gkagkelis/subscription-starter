@@ -309,7 +309,7 @@ def main():
                for d in names}
     pairs = list(itertools.combinations(names, 2))
     rep["dimCoverage"] = dim_cov
-    rep["dimPairs"] = {f"{a}|{b}": co.get(f"{a}|{b}", {"surveys": [], "respondents": 0}) for a, b in pairs}
+    rep["dimPairs"] = {f"{a}|{b}": co.get("|".join(sorted((a, b))), {"surveys": [], "respondents": 0}) for a, b in pairs}
     rep["dimPairsIdentified"] = sum(1 for k, v in rep["dimPairs"].items() if v["respondents"] >= 1000)
     rep["dimPairsTotal"] = len(pairs)
 

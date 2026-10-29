@@ -77,9 +77,8 @@ def wdist(y, w, K):
 
 def ridit_gap(y, w, g, K):
     ok = (y >= 0) & np.isfinite(g)
-    out = {}
     if ok.sum() < 100:
-        return out
+        return np.nan
     p = wdist(y[ok], w[ok], K)
     cum = np.cumsum(p) - p / 2
     r = cum[y[ok]]

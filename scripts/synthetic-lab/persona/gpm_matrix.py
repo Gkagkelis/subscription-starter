@@ -36,7 +36,7 @@ ANCHORS = {"lr7": ("ordinal", ["1", "2", "3", "4", "5", "6", "7"]), "econ4": ("o
            "inc6": ("ordinal", ["1", "2", "3", "4", "5", "6"]), "class3": ("ordinal", ["1", "2", "3"]), "incq5": ("ordinal", ["1", "2", "3", "4", "5"]),
            "believer": ("binary", ["0", "1"]), "hhsize5": ("ordinal", ["1", "2", "3", "4", "5"]),
            "emp": ("nominal", ["private_emp", "public_emp", "self_emp", "farmer", "employed", "unemployed", "retired", "student", "homemaker", "other"])}
-SERIES = re.compile(r"^(ess|eb|ebs|ebcult|fl|maple_w|wrp|wgm|efsa|qog|lits|piaac|cses|hbs|dn)")
+SERIES = re.compile(r"^(ess|eb|ebs|ebcult|fl|maple_w|wrp|wgm|efsa|qog|lits|piaac|cses|hbs|dn)")  # οικογένειες ερευνών
 # ίδιοι ερωτώμενοι σε δύο αντίγραφα: κρατείται το ελληνικό εναρμονισμένο
 DUPLICATE_GLOBAL = {"ess10": "ess10", "ess11": "ess11", "lits4": "lits4", "covidistress": "covidistress", "qog2024": "qog2024", "tisp": "tisp",
                     "wgm2020": "wellcome2020", "maple_w12": "maple2019feb", "maple_w34": "maple2019pre+post"}
@@ -211,10 +211,15 @@ def main():
         for c in f.get("famGlobal", []) + f.get("famBank", []):
             if k in cs and c in cs:
                 uf.union(k, c)
+    # ίδια μεταβλητή μόνο σε σειρές με ΣΤΑΘΕΡΑ ονόματα μεταβλητών ανά κύμα (ESS)· στη διαΝΕΟσις και στο Eurobarometer
+    # τα ονόματα αλλάζουν νόημα από κύμα σε κύμα και η σύνδεση γίνεται μόνο μέσω ελεγμένων οικογενειών
     byvar = {}
     for c in col_ids:
         it = items[c]
-        byvar.setdefault((series_of(it["survey"]), (it.get("var") or c.split("::")[-1]).lower(), len(it["options"])), []).append(c)
+        if series_of(it["survey"]) != "ess" or it["src"] == "anchor":
+            continue
+        labs = tuple(o["label"].strip().lower() for o in it["options"])
+        byvar.setdefault(("ess", "::".join(c.split("::")[1:]).lower(), labs), []).append(c)
     for grp in byvar.values():
         for c in grp[1:]:
             uf.union(grp[0], c)
