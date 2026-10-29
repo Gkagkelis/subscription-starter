@@ -21,7 +21,7 @@ from eval_unseen import nrm  # noqa: E402
 from iqge_core import IQGE, IQGE_VERSION  # noqa: E402
 
 DK_RE = re.compile(r"(^|\b)(δξ|δα|δεν ξερ|δεν απαντ|δεν γνωριζ|αρνηση|dk|don t know|refus|no answer|δεν τοποθετ)")
-SCALE_RE = re.compile(r"(συμφων|διαφων|πολυ|λιγο|καθολου|αρκετ|ικανοποι|καλ|κακ|θετικ|αρνητικ|πιθαν|σιγουρ|συχνα|ποτε|παντα|agree|disagree|very|fairly|not at all|"
+SCALE_RE = re.compile(r"(συμφων|διαφων|πολυ|λιγο|καθολου|αρκετ|ικανοποι|καλ|κακ|θετικ|αρνητικ|πιθαν|σιγουρ|συχν|ποτε|παντα|καθημεριν|εβδομαδ|μηνα|σπανι|φορεσ|daily|weekly|monthly|rarely|agree|disagree|very|fairly|not at all|"
                       r"satisf|good|bad|likely|often|never|always|^\d+\b)")
 
 
@@ -47,11 +47,11 @@ def main():
     ap.add_argument("--params", default="config/synthetic-lab/persona/iqge/params.json")
     ap.add_argument("--in", dest="inp", required=True)
     ap.add_argument("--out", required=True)
-    ap.add_argument("--no-p4-lake", action="store_true")
+    ap.add_argument("--p4-lake", action="store_true", help="πρόσθετη βάση φάσης 4 (δεν βελτίωσε την ανάπτυξη· εκτός προεπιλογής)")
     a = ap.parse_args()
     root = os.path.abspath(a.root)
     params = json.load(open(os.path.join(root, a.params)))
-    G = IQGE(root, os.path.join(root, ".synthetic-lab-data", "persona", "models", a.model), params, use_p4_lake=not a.no_p4_lake)
+    G = IQGE(root, os.path.join(root, ".synthetic-lab-data", "persona", "models", a.model), params, use_p4_lake=a.p4_lake)
     doc = json.load(open(a.inp))
     qs = doc["questions"] if isinstance(doc, dict) else doc
     report = []

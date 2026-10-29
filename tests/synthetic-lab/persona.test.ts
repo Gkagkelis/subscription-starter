@@ -208,6 +208,50 @@ describe('PIE — χρονικά μεταβλητή πρόθεση ψήφου (P
   });
 });
 
+describe('PIE — IQGE (Phase 4): προϋπολογισμένη ερμηνεία νέας ερώτησης', () => {
+  const panelOf = (n: number): SyntheticPanel => ({ id: 'p', createdAt: '', modelVersion: 'fixture', modelSnapshot: '', populationId: '', audience: {}, size: n, seed: 1, anchorSources: [],
+    personas: Array.from({ length: n }, (_, i) => ({ ...state(i), pseed: 900 + i })), label: 'SYNTHETIC PERSONAS — NOT REAL PEOPLE' });
+  const iqge = (atten: number, modelVersion = 'fixture') => ({
+    version: 'iqge-1', modelVersion, level: { Καθόλου: 0.2, Λίγο: 0.3, Πολύ: 0.5 }, int80: { Καθόλου: [10, 30], Λίγο: [20, 40], Πολύ: [40, 60] } as Record<string, [number, number]>,
+    rank: [{ itemId: 'f2024::A', weight: 1, sign: 1 as const, mean: 0.1, sd: 1.2 }], scoreSd: 1, atten, tier: 'related' as const, expectedMAE: 14.6,
+    evidence: [{ id: 'x::1', sim: 0.7, text: 'συγγενής ερώτηση', weight: 0.3 }]
+  });
+  const run = (atten: number, modelVersion = 'fixture') => {
+    const N = q('N', { kind: 'equivalent', optionMap: {}, iqge: iqge(atten, modelVersion) }, ['Καθόλου', 'Λίγο', 'Πολύ']);
+    const A = q('A', { kind: 'direct', itemId: 'f2024::A', optionMap: MAP, dkOption: 'ΔΞ/ΔΑ' });
+    const pn = prepareQuestion(fixtureModel, N, '2026-10');
+    return { pn, rs: respondPanel(panelOf(3000), [pn, prepareQuestion(fixtureModel, A, '2026-10')], 5) };
+  };
+  it('MODEL_EXTRAPOLATED με προέλευση IQGE· τα περιθώρια ακολουθούν το επίπεδο της ερμηνείας', () => {
+    const { pn, rs } = run(0.8);
+    expect(pn.support).toBe('MODEL_EXTRAPOLATED');
+    expect(pn.provenance.responseModel).toBe('iqge_transfer');
+    expect(pn.provenance.iqge?.tier).toBe('related');
+    const share = (o: string) => rs.filter((r) => (r.answers[0].value as { choice?: string } | null)?.choice === o).length / rs.length;
+    expect(Math.abs(share('Πολύ') - 0.5)).toBeLessThan(0.06);
+    expect(Math.abs(share('Καθόλου') - 0.2)).toBeLessThan(0.06);
+  });
+  it('η σειρά των προσώπων ακολουθεί το τεκμήριο (εξασθένιση > 0)· με εξασθένιση 0 ανεξάρτητη', () => {
+    const idx = (v: unknown, opts: string[]) => opts.indexOf((v as { choice?: string } | null)?.choice || '');
+    const corr = (atten: number) => {
+      const { rs } = run(atten);
+      const xs = rs.map((r) => idx(r.answers[0].value, ['Καθόλου', 'Λίγο', 'Πολύ'])), ys = rs.map((r) => idx(r.answers[1].value, SCALE));
+      const ok = xs.map((x, i) => x >= 0 && ys[i] >= 0 && ys[i] < 3);
+      const X = xs.filter((_, i) => ok[i]), Y = ys.filter((_, i) => ok[i]);
+      const mx = X.reduce((s, v) => s + v, 0) / X.length, my = Y.reduce((s, v) => s + v, 0) / Y.length;
+      const c = X.reduce((s, v, i) => s + (v - mx) * (Y[i] - my), 0), vx = X.reduce((s, v) => s + (v - mx) ** 2, 0), vy = Y.reduce((s, v) => s + (v - my) ** 2, 0);
+      return c / Math.sqrt(vx * vy);
+    };
+    expect(corr(0.9)).toBeGreaterThan(0.15);
+    expect(Math.abs(corr(0))).toBeLessThan(0.06);
+  });
+  it('πηγές σειράς άλλου μοντέλου αγνοούνται (ανεξάρτητη απάντηση, ρητή σημείωση)', () => {
+    const { pn } = run(0.8, 'pie-x');
+    expect(pn.iqge?.rank.length).toBe(0);
+    expect(pn.reason).toMatch(/αγνοούνται/);
+  });
+});
+
 describe('PIE — μητρώο εκδόσεων', () => {
   it('καμία έκδοση δεν είναι εγκεκριμένη χωρίς όνομα εγκρίνοντος και αξιολόγηση', () => {
     for (const v of readRegistry()) if (v.status === 'approved') expect(v.approvedBy && v.evaluation).toBeTruthy();

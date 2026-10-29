@@ -37,7 +37,7 @@ export interface PreparedPersonaQuestion {
   /** PHASE3 E2: κοινό λανθάνον της έννοιας για το item (αν το μοντέλο το έχει). */
   construct?: { key: string; g: number } | null;
   /** PHASE4 IQGE: νέα ερώτηση χωρίς ίδιο item· επίπεδο από τεκμήρια, σειρά από λανθάνοντα items του μοντέλου. */
-  iqge?: { options: string[]; cuts: number[]; rank: { item: PersonaItem; weight: number; sign: number; mean: number; sd: number }[]; scoreSd: number; atten: number } | null;
+  iqge?: { options: string[]; cuts: number[]; rank: { item: PersonaItem; weight: number; sign: number; mean: number; sd: number; construct: { key: string; g: number } | null }[]; scoreSd: number; atten: number } | null;
   provenance: PersonaQuestionProvenance;
 }
 
@@ -253,7 +253,8 @@ function prepareIqge(model: PersonaModel, q: Question, g: NonNullable<PersonaLin
   if (g.modelVersion === model.version) {
     for (const r of g.rank) {
       const it = model.items.find((i) => i.id === r.itemId);
-      if (it && it.model.kind === 'ordinal' && it.wave <= referenceMonth && r.sd > 0) rank.push({ item: it, weight: r.weight, sign: r.sign, mean: r.mean, sd: r.sd });
+      if (it && it.model.kind === 'ordinal' && it.wave <= referenceMonth && r.sd > 0)
+        rank.push({ item: it, weight: r.weight, sign: r.sign, mean: r.mean, sd: r.sd, construct: model.constructLatent?.units?.[it.factorKey || it.id] || null });
     }
   }
   let c = 0;
@@ -309,7 +310,15 @@ export function answerPersona(pq: PreparedPersonaQuestion, ps: PersonaState, see
         const it = r.item;
         const eta = it.model.kind === 'ordinal' ? linear(it.feats, it.means, it.model.b, fv0) : 0;
         const lam = it.factorKey ? it.lambda : 0;
-        const e = lam ? lam * theta(ps.pseed, it.factorKey!) + Math.sqrt(Math.max(1 - lam * lam, 0)) * rng.normal() : rng.normal();
+        const ck = r.construct;
+        let e: number;
+        if (lam) {
+          let th = theta(ps.pseed, it.factorKey!);
+          if (ck) th = ck.g * theta(ps.pseed, ck.key) + Math.sqrt(Math.max(1 - ck.g * ck.g, 0)) * th;
+          e = lam * th + Math.sqrt(Math.max(1 - lam * lam, 0)) * rng.normal();
+        } else {
+          e = ck ? ck.g * theta(ps.pseed, ck.key) + Math.sqrt(Math.max(1 - ck.g * ck.g, 0)) * rng.normal() : rng.normal();
+        }
         s += (r.weight * r.sign * (eta + e - r.mean)) / r.sd;
       }
       z = g.atten * (s / g.scoreSd) + Math.sqrt(1 - g.atten * g.atten) * rng.normal();

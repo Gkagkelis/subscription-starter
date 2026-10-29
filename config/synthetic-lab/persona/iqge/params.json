@@ -1,0 +1,87 @@
+{
+ "version": "iqge-1",
+ "createdAt": "2026-10-29T02:40:24Z",
+ "l2": 0.1,
+ "card": [
+  -2.7359196758438413,
+  0.00495099944642914,
+  0.2789514616283064,
+  -0.15234969177204305,
+  0.14986386121610948,
+  0.4367697349431261,
+  0.08544029192038763,
+  -0.3845023508412769,
+  -0.05795501035326868,
+  0.9243100000609112,
+  0.34046014144157627,
+  -1.0964729770735397,
+  0.7147216874610878,
+  0.762687379241067
+ ],
+ "cardFeatures": [
+  "bias",
+  "sim",
+  "simQ",
+  "simSpec",
+  "specGap",
+  "cover",
+  "scaleSim",
+  "age",
+  "sameSeries",
+  "sameType",
+  "base",
+  "unif",
+  "lex0",
+  "lexConf"
+ ],
+ "q80": {
+  "paraphrase": 14.25,
+  "related": 22.61,
+  "weak": 23.21
+ },
+ "alpha": {
+  "paraphrase": 1.0,
+  "related": 0.5,
+  "weak": 0.2
+ },
+ "tiers": {
+  "paraphrase": {
+   "cardFitMAE": 10.72,
+   "baseMAE": 12.1,
+   "n": 161
+  },
+  "related": {
+   "cardFitMAE": 16.08,
+   "baseMAE": 15.78,
+   "n": 225
+  },
+  "weak": {
+   "cardFitMAE": 15.76,
+   "baseMAE": 16.98,
+   "n": 99
+  }
+ },
+ "tierThresholds": {
+  "paraphrase": 0.85,
+  "related": 0.65
+ },
+ "cv": {
+  "0.03": 14.84,
+  "0.1": 14.237,
+  "0.3": 14.703
+ },
+ "trainedOn": [
+  "dn2022a",
+  "dn2022b",
+  "dn2022s",
+  "dn2024a",
+  "dn2024b",
+  "dn2024c"
+ ],
+ "protocol": "leave-one-family-out + αποκλεισμός αρχείου-στόχου",
+ "devInputsSha256": {
+  "dev22_v4.json": "61fc8e968ab6b9973e442d674f9c34e74cfff68bfe91602e20ddd11f0395ffd9",
+  "dev24_v4.json": "48633525b6de7b7bc467ba834d738ab6ff70a1e1b36f7e26368a67d6e5513384"
+ },
+ "note": "Μόνο αριθμητικές παράμετροι· κανένα ιδιωτικό δεδομένο. cardFitMAE = αναμενόμενο MAE εκτός δείγματος (διασταυρωμένο)."
+}

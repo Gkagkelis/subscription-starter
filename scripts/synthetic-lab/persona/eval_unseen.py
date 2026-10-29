@@ -77,17 +77,25 @@ def wspear(a, b, w):
 
 
 # ------------------------------------------------------------------ λανθάνουσα βαθμολογία ενός τεκμηρίου για κάθε πρόσωπο
+CONCEPTS = {}
+
+
 def latent_score(item, P, X, rng, model):
-    """y* = η + e (ordinal, ίδια λογική με pie.answer_item)· για nominal: None."""
+    """y* = η + e (ordinal, ίδια λογική με pie.answer_item)· για nominal: None. Με G4 (CONCEPTS): κοινό λανθάνον μεταξύ ερευνών."""
     if item["model"]["kind"] != "ordinal":
         return None
     Z, _ = pie.design(X, item["feats"], np.array(item["means"]))
     eta = Z @ np.array(item["model"]["b"])
     lam = float(item.get("lambda", 0.0))
     n = len(P)
+    ck = CONCEPTS.get(item.get("factorKey") or item["id"])
     if item.get("factorKey") and lam != 0:
         th = pie.theta(P, item["factorKey"])
+        if ck:
+            th = ck["g"] * pie.theta(P, ck["key"]) + math.sqrt(max(1 - ck["g"] ** 2, 0.0)) * th
         e = lam * th + math.sqrt(max(1 - lam * lam, 0.0)) * rng.standard_normal(n)
+    elif ck:
+        e = ck["g"] * pie.theta(P, ck["key"]) + math.sqrt(max(1 - ck["g"] ** 2, 0.0)) * rng.standard_normal(n)
     else:
         e = rng.standard_normal(n)
     return eta + e
@@ -218,10 +226,14 @@ def main():
     ap.add_argument("--lex", default=None, help="JSON αποφάσεων autolink (TS) για τις ερωτήσεις-στόχους")
     ap.add_argument("--seeds", type=int, default=2)
     ap.add_argument("--out", required=True)
+    ap.add_argument("--concepts", default=None, help="G4: concepts.json (concept_graph.py)")
+    ap.add_argument("--assoc-only", action="store_true", help="μόνο σειρά προσώπων/συσχετίσεις (χωρίς επίπεδα και βάσεις σύγκρισης)")
     ap.add_argument("--p4-lake", action="store_true", help="πρόσθετη βάση τεκμηρίων της φάσης 4 (Τροποποίηση Α)")
     ap.add_argument("--save-latent", default=None, help="npz με τα λανθάνοντα σειράς ανά στόχο + πραγματικές απαντήσεις (για εξασθένιση εκτός γραμμής)")
     a = ap.parse_args()
     LAT = {}
+    if a.concepts:
+        CONCEPTS.update(json.load(open(a.concepts))["units"])
     root = os.path.abspath(a.root)
     global HZ
     HZ = os.path.join(root, ".synthetic-lab-data", "persona", "harmonized")
@@ -310,7 +322,7 @@ def main():
             ex = [np.array(marg[lake[j]["id"]]["dist"]) for j in np.where(lmask)[0] if lake_lk[j] == lk]
             lev["scale"] = np.mean(ex, axis=0).tolist() if ex else None
             soft = []
-            for j in np.where(lmask & (lake_K == K))[0]:
+            for j in (np.where(lmask & (lake_K == K))[0] if not a.assoc_only else []):
                 ss, sg = scale_sim(At, OV(lake[j]))
                 if ss >= 0.85:
                     d = np.array(marg[lake[j]["id"]]["dist"])
@@ -319,7 +331,7 @@ def main():
             row["nSoft"] = len(soft)
             # γείτονες ίδιου Κ (προσανατολισμένα περιθώρια) + ευθυγράμμιση επιλογών για οποιοδήποτε Κ
             nb = []
-            for j in ltop:
+            for j in (ltop if not a.assoc_only else []):
                 if lsims[j] < 0.4:
                     break
                 As = OV(lake[j])
@@ -359,7 +371,7 @@ def main():
                 lev["src1"] = (pr if sg > 0 else pr[::-1]).tolist()
             # crude (B_crude) με κρυμμένη οικογένεια
             cp = [p for p, m in zip(pool, pmask) if m]
-            mt = ep.match_items([t], cp)
+            mt = ep.match_items([t], cp) if not a.assoc_only else []
             mt = mt[0] if mt else None
             if mt and mt["kind"] != "not_estimable" and mt["train"]["model"]["kind"] == "ordinal":
                 src = mt["train"]

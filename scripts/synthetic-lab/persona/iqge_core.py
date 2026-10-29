@@ -29,16 +29,21 @@ IQGE_VERSION = "iqge-1"
 SKEL = ["age_band", "gender", "edu3", "nuts1", "urban", "weight"]
 
 
+# Αρχεία της βάσης φάσης 4 που ΔΕΝ επιτρέπονται ως τεκμήριο: πιθανή ταύτιση με τελικό holdout (H7 Dinas–Fouka–Schläpfer).
+P4_EXCLUDE = {"p4_owt_dinas"}
+
+
 def p4_lake(root):
     """Πρόσθετη βάση τεκμηρίων της φάσης 4 (Τροποποίηση Α): items + σταθμισμένα περιθώρια· κενή αν δεν υπάρχει."""
     d = os.path.join(root, ".synthetic-lab-data", "persona", "phase4")
     bp = os.path.join(d, "lake_bank.json")
     if not os.path.exists(bp):
         return [], {}
-    bank = json.load(open(bp))
+    bank = [b for b in json.load(open(bp)) if b["file"] not in P4_EXCLUDE and isinstance(b.get("wave"), str) and len(b["wave"]) >= 7]
     mp = os.path.join(d, "lake_marginals_p4.json")
     if os.path.exists(mp):
-        return bank, json.load(open(mp))
+        m = json.load(open(mp))
+        return bank, {k: v for k, v in m.items() if k.split("::")[0] not in P4_EXCLUDE}
     out, by_file = {}, {}
     for b in bank:
         by_file.setdefault(b["file"], []).append(b)
@@ -63,7 +68,7 @@ def p4_lake(root):
 
 
 class IQGE:
-    def __init__(self, root, model_dir, params, use_p4_lake=True, ref_skeleton="dn2024a"):
+    def __init__(self, root, model_dir, params, use_p4_lake=False, ref_skeleton="dn2024a"):
         import embed
 
         import eval_unseen as eu
