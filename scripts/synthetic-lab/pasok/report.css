@@ -1,0 +1,179 @@
+:root {
+  --ink: #15191e; --ink-2: #4a5059; --muted: #8a9099; --line: #e3e5e8; --soft: #f5f6f7;
+  --accent: #24507e; --green: #0b8a3e; --green-soft: #e8f4ec;
+  --cA: #1d5f9e; --cB: #8a5a00; --cC: #9b2c5c;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html { background: #eceef1; }
+body { margin: 0; background: #eceef1; color: var(--ink); font: 13.5px/1.5 "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; counter-reset: pg; }
+main { padding: 18px 0 40px; }
+.page { counter-increment: pg; width: 210mm; min-height: 297mm; margin: 0 auto 18px; background: #fff; padding: 15mm 15mm 18mm; position: relative; box-shadow: 0 1px 3px rgba(0,0,0,.08), 0 6px 24px rgba(0,0,0,.06); overflow: hidden; }
+.page::before { content: "ΠΑΣΟΚ — Πανελλαδική Πολιτική Έρευνα · Προσομοίωση"; position: absolute; top: 7mm; left: 15mm; font-size: 9.5px; letter-spacing: .04em; color: var(--muted); text-transform: uppercase; }
+.page::after { content: counter(pg); position: absolute; bottom: 8mm; right: 15mm; font-size: 10px; color: var(--muted); }
+.page.cover::before, .page.cover::after { content: none; }
+.page.pasok { border-top: 5px solid var(--green); }
+
+/* ---------- εξώφυλλο */
+.cover { display: flex; flex-direction: column; padding: 20mm 18mm; background: linear-gradient(180deg, #fff 0%, #fff 62%, #f3f8f5 100%); }
+.cover-top { display: flex; align-items: center; gap: 14px; }
+.brandline { width: 64px; height: 6px; background: var(--green); border-radius: 3px; }
+.cover-kicker { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); }
+.sim-banner { margin-top: 22mm; align-self: flex-start; font-weight: 800; letter-spacing: .14em; font-size: 15px; color: #fff; background: #1a1d21; padding: 8px 14px; border-radius: 4px; }
+.cover-title { font-size: 44px; line-height: 1.08; margin: 12mm 0 6mm; letter-spacing: -.02em; font-weight: 800; }
+.cover-sub { font-size: 14px; color: var(--ink-2); max-width: 150mm; margin: 0; }
+.cover-statement { margin-top: 14mm; border-left: 4px solid var(--green); padding: 10px 0 10px 18px; max-width: 160mm; }
+.cover-statement p { margin: 0; font-size: 16.5px; line-height: 1.5; font-weight: 500; }
+.cover-flag { margin-top: 9mm; align-self: flex-start; border: 2px solid #9b2c5c; color: #9b2c5c; font-weight: 700; padding: 8px 14px; border-radius: 4px; font-size: 14px; }
+.cover-grid { margin-top: auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; border-top: 1px solid var(--line); padding-top: 9mm; }
+.cover-grid span { display: block; font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.cover-grid b { font-size: 15px; }
+.cover-foot { margin-top: 8mm; font-size: 11px; color: var(--ink-2); }
+.cover-foot p { margin: 0; }
+
+/* ---------- κεφαλίδες */
+.sechead { display: flex; gap: 14px; align-items: flex-start; border-bottom: 2px solid var(--ink); padding-bottom: 8px; margin: 2mm 0 7mm; }
+.sechead .num { font-size: 13px; font-weight: 800; color: #fff; background: var(--accent); border-radius: 4px; padding: 4px 8px; margin-top: 4px; }
+.sechead.pasok { border-bottom-color: var(--green); }
+.sechead.pasok .num { background: var(--green); }
+.sechead h2 { margin: 0; font-size: 25px; letter-spacing: -.01em; }
+.sechead p { margin: 2px 0 0; color: var(--ink-2); }
+.pg-h { font-size: 20px; margin: 4mm 0 4mm; }
+.pg-title { font-size: 19px; margin: 2mm 0 1mm; }
+.qhead { margin-bottom: 3mm; }
+.qhead .qid { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: .06em; }
+.qhead h3 { font-size: 19px; margin: 1px 0 3px; letter-spacing: -.005em; }
+.wording { margin: 0 0 6px; color: var(--ink-2); font-style: italic; }
+.badge { display: inline-block; font-size: 10.5px; font-weight: 600; padding: 2px 8px; border-radius: 999px; border: 1px solid currentColor; line-height: 1.5; white-space: nowrap; }
+.badge.cA { color: var(--cA); background: #eef4fb; }
+.badge.cB { color: var(--cB); background: #fbf5e9; }
+.badge.cC { color: var(--cC); background: #fbeff4; }
+
+/* ---------- δείκτες */
+.kpis { display: flex; gap: 10px; margin: 1.5mm 0 3mm; flex-wrap: wrap; }
+.kpi { flex: 1 1 0; min-width: 110px; border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; }
+.kpi .v { font-size: 27px; font-weight: 800; letter-spacing: -.02em; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.kpi .l { font-size: 11.5px; color: var(--ink-2); }
+
+/* ---------- γραφήματα */
+.chart { width: 100%; height: auto; display: block; margin: 1mm 0; }
+.chart .lbl { font-size: 12.5px; fill: var(--ink); }
+.chart .val { font-size: 12.5px; fill: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.chart .valbig { font-size: 15px; fill: var(--ink); font-weight: 800; font-variant-numeric: tabular-nums; }
+.chart .seg { font-size: 11.5px; font-weight: 700; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 11.5px; color: var(--ink-2); margin: 1mm 0; }
+.legend span { display: inline-flex; align-items: center; gap: 5px; }
+.legend i { width: 11px; height: 11px; border-radius: 2px; display: inline-block; }
+.legend i.tick { width: 2px; height: 13px; background: #111; border-radius: 0; }
+.figcap { display: flex; justify-content: space-between; gap: 10px; font-size: 10.5px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 3px; margin: 2mm 0 3mm; flex-wrap: wrap; }
+.figcap .synth { font-weight: 600; color: #6b7079; }
+.sub { font-weight: 700; font-size: 12.5px; margin: 4mm 0 1mm; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.analysis { margin: 1.5mm 0; font-size: 13px; line-height: 1.45; }
+.note { font-size: 11.5px; color: var(--ink-2); margin: 2mm 0; }
+.scenario-box { background: #fbeff4; border-left: 4px solid var(--cC); padding: 8px 12px; font-size: 12px; margin: 0 0 4mm; border-radius: 0 6px 6px 0; }
+
+/* ---------- πίνακες */
+.cthead { font-size: 11.5px; color: var(--ink-2); margin: 3mm 0 1mm; }
+.ctwrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+.ctwrap table.ct { table-layout: fixed; }
+.ctwrap table.ct th.g, .ctwrap table.ct td.g { width: 34%; overflow: hidden; text-overflow: ellipsis; }
+.ctwrap table.ct th.n, .ctwrap table.ct td.n { width: 9%; }
+.ctwrap table.ct th { white-space: normal; overflow-wrap: anywhere; }
+table.ct { width: 100%; border-collapse: collapse; font-size: 10.5px; font-variant-numeric: tabular-nums; }
+table.ct th, table.ct td { padding: 1.5px 5px; border-bottom: 1px solid var(--line); text-align: right; }
+table.ct th { font-weight: 700; color: var(--ink-2); border-bottom: 1.5px solid var(--ink); font-size: 10px; }
+table.ct .g { text-align: left; white-space: nowrap; }
+table.evmap .g, table.evmap td { white-space: normal; }
+table.ct .n { color: var(--muted); }
+table.ct tr.dim td { background: var(--soft); font-weight: 700; text-align: left; font-size: 10px; color: var(--ink-2); }
+table.ct tr.small td { color: var(--muted); }
+table.ct tr.tot td { font-weight: 700; border-bottom: 1.5px solid var(--ink-2); }
+table.mat { font-size: 11.5px; margin: 1mm 0 2mm; }
+table.mat td, table.mat th { padding: 4px 6px; }
+table.mat.big td { padding: 2.5px 6px; }
+table.evmap { font-size: 10px; }
+table.evmap td, table.evmap th { padding: 2px 4px; text-align: left; }
+.ctnote { font-size: 10px; color: var(--muted); margin-top: 1mm; }
+.tw { overflow-x: auto; }
+
+/* ---------- πλήρεις διασταυρώσεις (οθόνη) */
+details.xt { margin-top: 3mm; border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px; }
+details.xt summary { cursor: pointer; font-size: 12px; font-weight: 600; color: var(--accent); padding: 4px 0; }
+.tabs { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0; }
+.tabs button { font: inherit; font-size: 11.5px; border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 3px 10px; cursor: pointer; color: var(--ink-2); }
+.tabs button[aria-pressed="true"] { background: var(--ink); color: #fff; border-color: var(--ink); }
+table.full { border-collapse: collapse; font-size: 11px; width: 100%; font-variant-numeric: tabular-nums; }
+table.full th, table.full td { border-bottom: 1px solid var(--line); padding: 3px 6px; text-align: right; white-space: nowrap; }
+table.full th { font-size: 10px; color: var(--ink-2); vertical-align: bottom; white-space: normal; min-width: 52px; }
+table.full .g { text-align: left; }
+table.full tr.tot td { border-bottom: 1.5px solid var(--ink-2); }
+
+/* ---------- executive summary */
+.exec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 5mm; }
+.exec-card { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; border-top: 4px solid var(--cA); }
+.exec-card .ec-k { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.exec-card .ec-v { font-size: 38px; font-weight: 800; letter-spacing: -.02em; line-height: 1.1; }
+.exec-card .ec-t { font-size: 12.5px; color: var(--ink-2); }
+.exec-h { font-size: 14px; margin: 5mm 0 2mm; padding-left: 10px; border-left: 4px solid; }
+.exec-h.cA { border-color: var(--cA); } .exec-h.cB { border-color: var(--cB); } .exec-h.cC { border-color: var(--cC); }
+.exec-list { margin: 0; padding-left: 18px; }
+.exec-list li { margin: 0 0 2.5mm; }
+.exec-note { font-size: 11.5px; color: var(--ink-2); background: #fbeff4; padding: 6px 10px; border-radius: 6px; }
+.exec-concl { margin-top: 5mm; background: var(--soft); border-radius: 10px; padding: 12px 14px; font-size: 13px; }
+.concl ol { padding-left: 18px; } .concl li { margin-bottom: 3mm; }
+
+/* ---------- ταυτότητα / παράρτημα */
+table.ident { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-bottom: 5mm; }
+table.ident td { border-bottom: 1px solid var(--line); padding: 4px 8px; vertical-align: top; }
+table.ident td:first-child { width: 42mm; color: var(--ink-2); font-weight: 600; }
+.legend-box { border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; font-size: 12px; display: grid; gap: 5px; }
+ol.toc { list-style: none; padding: 0; margin: 0; columns: 1; }
+ol.toc li a { display: flex; gap: 8px; text-decoration: none; color: var(--ink); padding: 2.5px 0; border-bottom: 1px dotted var(--line); font-size: 13px; }
+ol.toc .dots { flex: 1; }
+.appx h4 { font-size: 14px; margin: 4mm 0 1.5mm; }
+.appx p, .appx li { font-size: 12px; }
+.appx ol, .appx ul { padding-left: 18px; margin: 1mm 0; }
+code { font-size: 11px; background: var(--soft); padding: 0 4px; border-radius: 3px; }
+
+/* ---------- topbar (οθόνη) */
+.topbar { position: sticky; top: 0; z-index: 5; background: rgba(255,255,255,.96); border-bottom: 1px solid var(--line); backdrop-filter: blur(6px); }
+.tb-in { max-width: 1180px; margin: 0 auto; padding: 8px 16px; display: flex; gap: 14px; align-items: center; font-size: 12.5px; }
+.tb-in > b { white-space: nowrap; }
+.tb-sim { font-size: 10.5px; font-weight: 700; letter-spacing: .08em; color: #9b2c5c; border: 1px solid #9b2c5c; border-radius: 4px; padding: 1px 6px; }
+.tb-in nav { display: flex; gap: 12px; flex: 1; overflow-x: auto; white-space: nowrap; scrollbar-width: thin; }
+.tb-in nav a { color: var(--ink-2); text-decoration: none; }
+.tb-in nav a:hover { color: var(--accent); text-decoration: underline; }
+.tb-in button { font: inherit; font-size: 12px; border: 1px solid var(--ink); background: var(--ink); color: #fff; border-radius: 6px; padding: 4px 10px; cursor: pointer; }
+
+/* ---------- κινητό */
+@media (max-width: 860px) {
+  .page { width: auto; min-height: 0; margin: 0 0 12px; padding: 34px 16px 34px; box-shadow: none; }
+  .page::before { left: 16px; top: 12px; }
+  .page::after { right: 16px; bottom: 10px; }
+  .cover { padding: 28px 16px; }
+  .cover-title { font-size: 32px; }
+  .cover-grid { grid-template-columns: 1fr 1fr; }
+  .ctwrap, .exec-grid { grid-template-columns: 1fr; }
+  .kpi .v { font-size: 24px; }
+  .tb-in nav { display: none; }
+  .tb-in { flex-wrap: wrap; gap: 6px 10px; }
+  .tb-in > b { white-space: normal; }
+  .ctwrap > table, table.mat, table.ident { display: block; overflow-x: auto; }
+  .tw { max-width: 100%; }
+  main { padding-top: 8px; }
+}
+
+/* ---------- εκτύπωση */
+@page { size: A4; margin: 0; }
+@media print {
+  html, body { background: #fff; }
+  main { padding: 0; }
+  .noprint, .topbar { display: none !important; }
+  .page { margin: 0; box-shadow: none; width: 210mm; height: 297mm; min-height: 297mm; break-after: page; page-break-after: always; }
+  .page:last-child { break-after: auto; page-break-after: auto; }
+  a { color: inherit; text-decoration: none; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+
+.ctwrap table.comp th.g, .ctwrap table.comp td.g { width: 46%; }
+.appx table.mat td, .appx table.mat th { text-align: left; }
