@@ -255,6 +255,35 @@ export interface PersonaLink {
   anchor?: { name: 'emp' | 'inc6' | 'econ4' | 'class3' | 'lr7' | 'pv' | 'believer' | 'polint4' | 'incq5' | 'hhsize5'; optionMap: Record<string, string[]> } | null;
   /** Πρόθεση ψήφου: μοντέλο εκλογικής επιλογής με σενάριο κομμάτων (χωρίς δημοσκοπήσεις). */
   vote?: { scenario: string; optionParty: Record<string, string>; abstainOption?: string | null; undecidedOption?: string | null } | null;
+  /** PHASE4 IQGE: προϋπολογισμένη ερμηνεία νέας ερώτησης (scripts/synthetic-lab/persona/iqge.py)· βλ. IqgeLink. */
+  iqge?: IqgeLink | null;
+}
+
+/**
+ * PHASE4 IQGE (Intelligent Question Generalization Engine) — αποτέλεσμα της εκτός σύνδεσης ερμηνείας μιας νέας ερώτησης.
+ * Η «κατανόηση» (πολυγλωσσικά embeddings, ανάκτηση τεκμηρίων) γίνεται ΕΚΤΟΣ runtime· εδώ υπάρχουν μόνο στατιστικές ποσότητες:
+ * επίπεδο από τεκμήρια της βάσης (μαθημένη «κάρτα ταιριάσματος»), σειρά προσώπων από λανθάνοντα items του μοντέλου, εξασθένιση.
+ * Κανένα ποσοστό δεν παράγεται από γλωσσικό μοντέλο.
+ */
+export interface IqgeLink {
+  version: string;
+  /** Μοντέλο PIE για το οποίο υπολογίστηκαν οι πηγές σειράς (mean/sd). */
+  modelVersion: string;
+  /** Μερίδιο ανά ουσιαστική επιλογή (άθροισμα 1). */
+  level: Record<string, number>;
+  /** Εμπειρικό 80% διάστημα ανά επιλογή (π.μ.), από τα σφάλματα της ανάπτυξης για τη βαθμίδα τεκμηρίου. */
+  int80?: Record<string, [number, number]> | null;
+  /** Πηγές σειράς προσώπων: ordinal items του μοντέλου, πρόσημο από σημασιολογική σύγκριση άκρων, βάρος από ομοιότητα. */
+  rank: { itemId: string; weight: number; sign: 1 | -1; mean: number; sd: number }[];
+  /** Τυπική απόκλιση του σταθμισμένου αθροίσματος σε πληθυσμό αναφοράς. */
+  scoreSd: number;
+  /** Εξασθένιση της σχέσης με τις πηγές (0 = ανεξάρτητη απάντηση, 1 = πλήρης). */
+  atten: number;
+  tier: 'paraphrase' | 'related' | 'weak';
+  /** Αναμενόμενο MAE περιθωρίων (π.μ.) της βαθμίδας στην ανάπτυξη (leave-one-family-out). */
+  expectedMAE: number;
+  /** Τεκμήρια που χρησιμοποιήθηκαν (για την αναφορά προέλευσης). */
+  evidence: { id: string; sim: number; text: string; weight: number }[];
 }
 
 /** Κατηγορία υποστήριξης μιας ερώτησης στον μηχανισμό PIE. */

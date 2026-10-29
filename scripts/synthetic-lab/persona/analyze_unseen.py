@@ -238,7 +238,7 @@ def main():
     ap.add_argument("--l2", type=float, default=0.01)
     ap.add_argument("--subset", choices=["all", "full", "stemless"], default="all", help="ανάλυση ευαισθησίας: στόχοι με πλήρη/ελλιπή διατύπωση")
     a = ap.parse_args()
-    fr = [r for r in json.load(open(a.fit)) if "lev" in r]
+    fr = [r for f in a.fit.split(",") for r in json.load(open(f)) if "lev" in r]
     er = [r for r in json.load(open(a.eval)) if "lev" in r]
     if a.subset != "all":
         er = [r for r in er if stemless(r) == (a.subset == "stemless")]
@@ -248,6 +248,20 @@ def main():
         prm["main"] = "card"
         print("θ κάρτας:", dict(zip(list(FEATS) + ["base", "unif", "lex0", "lexConf"], np.round(prm["card"], 2))))
     print("παράμετροι (μάθηση στο fit):", json.dumps(prm, ensure_ascii=False))
+    if a.card:
+        # G5: εμπειρικό 80% διάστημα ανά επιλογή (ποσοστημόριο |σφάλματος| ανά βαθμίδα στο fit) και κάλυψη στο eval
+        th = np.array(prm["card"])
+        prm["q80"] = {}
+        for tier in TIERS:
+            e = [abs(x) for r in fr if r["tier"] == tier for x in (card_level(r, th) * 100 - np.array(r["truth"]))]
+            prm["q80"][tier] = round(float(np.quantile(e, 0.8)), 2) if e else None
+            prm["tiers"][tier]["cardFitMAE"] = round(float(np.mean([mae(card_level(r, th), r["truth"]) for r in fr if r["tier"] == tier])), 2)
+        cov = {}
+        for tier in TIERS:
+            e = [abs(x) for r in er if r["tier"] == tier for x in (card_level(r, th) * 100 - np.array(r["truth"]))]
+            cov[tier] = round(float(np.mean([x <= prm["q80"][tier] for x in e])) * 100, 1) if e else None
+        prm["coverage80_eval"] = cov
+        print("G5 q80 (fit):", prm["q80"], "κάλυψη 80% στο eval:", cov)
     t1 = report(fr, prm, "FIT (in-sample)")
     t2 = report(er, prm, "EVAL (εκτός δείγματος)")
     for name, rs in (("fit", json.load(open(a.fit))), ("eval", json.load(open(a.eval)))):

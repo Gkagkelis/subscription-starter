@@ -158,6 +158,12 @@ export function runPersonaSurvey(o: PersonaSurveyOptions): StudyRun {
     warnings.push(
       `ΧΑΜΗΛΗ ΕΜΠΙΣΤΟΣΥΝΗ ΕΠΙΠΕΔΟΥ (${lowConf.join(', ')}): απαντώνται από συγγενική —όχι ίδια— ερώτηση πραγματικών δεδομένων. Στην τυφλή αξιολόγηση τα ποσοστά τέτοιων ερωτήσεων απείχαν συχνά περισσότερο από μια ομοιόμορφη κατανομή· να διαβάζονται ως ενδεικτικά (οι σχέσεις με τις άλλες απαντήσεις είναι πιο αξιόπιστες από το επίπεδο).`
     );
+  const iq = prepared.filter((p) => p.iqge && p.support === 'MODEL_EXTRAPOLATED');
+  if (iq.length)
+    warnings.push(
+      `IQGE (νέες ερωτήσεις, ${iq.map((p) => `${p.q.id}: βαθμίδα ${p.provenance.iqge?.tier}, αναμ. σφάλμα ~${p.provenance.iqge?.expectedMAE.toFixed(1)} π.μ.`).join('· ')}): ` +
+        'το επίπεδο προέρχεται από πραγματικά περιθώρια συγγενών ερωτήσεων και τύπου κλίμακας (όχι από γλωσσικό μοντέλο)· να διαβάζονται με τα 80% διαστήματα της προέλευσης.'
+    );
   const respondents = respondPanel(panel, prepared, seed);
   const ne = prepared.filter((p) => p.support === 'NOT_RELIABLY_ESTIMABLE').map((p) => p.q.id);
   const ex = prepared.filter((p) => p.support === 'MODEL_EXTRAPOLATED').map((p) => p.q.id);

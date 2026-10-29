@@ -218,7 +218,10 @@ def main():
     ap.add_argument("--lex", default=None, help="JSON αποφάσεων autolink (TS) για τις ερωτήσεις-στόχους")
     ap.add_argument("--seeds", type=int, default=2)
     ap.add_argument("--out", required=True)
+    ap.add_argument("--p4-lake", action="store_true", help="πρόσθετη βάση τεκμηρίων της φάσης 4 (Τροποποίηση Α)")
+    ap.add_argument("--save-latent", default=None, help="npz με τα λανθάνοντα σειράς ανά στόχο + πραγματικές απαντήσεις (για εξασθένιση εκτός γραμμής)")
     a = ap.parse_args()
+    LAT = {}
     root = os.path.abspath(a.root)
     global HZ
     HZ = os.path.join(root, ".synthetic-lab-data", "persona", "harmonized")
@@ -226,10 +229,18 @@ def main():
     model = json.load(open(os.path.join(md, "model.json")))
     pool = [t for t in json.load(open(os.path.join(md, "items.json"))) if t["wave"] <= a.ref]
     bank = json.load(open(os.path.join(HZ, "item_bank.json")))
-    marg = lake_marginals(root, bank)
+    marg = dict(lake_marginals(root, bank))
     files = a.files.split(",")
+    lake_bank = bank
+    if a.p4_lake:
+        from iqge_core import p4_lake  # noqa: E402
+
+        b4, m4 = p4_lake(root)
+        lake_bank = bank + b4
+        marg.update(m4)
+        print(f"p4 lake: {len(b4)} items, {len(m4)} με περιθώρια")
     targets = [b for b in bank if b["file"] in files and b["type"] in ("ordinal", "binary", "nominal") and 2 <= len(b["options"]) <= 11 and not is_demo(b)]
-    lake = [b for b in bank if b["wave"] <= a.ref and b["id"] in marg and 2 <= len(b["options"]) <= 11 and not is_demo(b)]
+    lake = [b for b in lake_bank if b["wave"] <= a.ref and b["id"] in marg and 2 <= len(b["options"]) <= 11 and not is_demo(b)]
     import embed  # noqa: E402
 
     E = embed.Embedder(root)
@@ -392,6 +403,12 @@ def main():
                     total += wt * orientation(At, OV(pool[j])) * (sc - sc.mean()) / (sc.std() + 1e-9)
                     used += 1
                 if used:
+                    if a.save_latent:
+                        LAT[f"{t['id']}|lat"] = total.astype(np.float32)
+                        LAT[f"{t['id']}|real"] = np.array([codes.index(v) if v in codes else -1 for v in rc.values], dtype=np.int8)
+                        LAT[f"{t['id']}|w"] = w.astype(np.float32)
+                        LAT[f"{t['id']}|pw"] = P["weight"].values.astype(np.float32)
+                        LAT[f"{t['id']}|base"] = np.array(lev.get("scale") or lev.get("scalesoft") or np.full(K, 1 / K), dtype=np.float32)
                     base = np.array(lev.get("scale") or lev.get("scalesoft") or np.full(K, 1 / K))
                     xs = rank_assign(total, P["weight"].values, base / base.sum()).astype(float)
                     xr = np.array([codes.index(v) if v in codes else np.nan for v in rc.values], dtype=float)
@@ -435,6 +452,8 @@ def main():
                     "R1_strong_indep": round(float(np.mean([e[1] for e in strong])), 4) if strong else None,
                     "signAgreeStrong": round(float(np.mean([e[2] for e in strong])), 3) if strong else None})
     json.dump(res, open(a.out, "w"), ensure_ascii=False, indent=1, default=float)
+    if a.save_latent:
+        np.savez_compressed(a.save_latent, **LAT)
     summarize(res)
 
 

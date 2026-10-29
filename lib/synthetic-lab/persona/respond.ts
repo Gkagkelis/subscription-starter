@@ -36,6 +36,8 @@ export interface PreparedPersonaQuestion {
   multi: { option: string; item: PersonaItem; yesCode: string }[] | null;
   /** PHASE3 E2: κοινό λανθάνον της έννοιας για το item (αν το μοντέλο το έχει). */
   construct?: { key: string; g: number } | null;
+  /** PHASE4 IQGE: νέα ερώτηση χωρίς ίδιο item· επίπεδο από τεκμήρια, σειρά από λανθάνοντα items του μοντέλου. */
+  iqge?: { options: string[]; cuts: number[]; rank: { item: PersonaItem; weight: number; sign: number; mean: number; sd: number }[]; scoreSd: number; atten: number } | null;
   provenance: PersonaQuestionProvenance;
 }
 
@@ -56,7 +58,9 @@ export interface PersonaQuestionProvenance {
   features: string[];
   latentTrait: { key: string; loading: number } | null;
   assumption: string | null;
-  responseModel: 'ordinal_probit' | 'multinomial_logit' | 'electoral_choice' | 'persona_anchor' | 'none';
+  responseModel: 'ordinal_probit' | 'multinomial_logit' | 'electoral_choice' | 'persona_anchor' | 'iqge_transfer' | 'none';
+  /** PHASE4 IQGE: τεκμήρια, βαθμίδα, αναμενόμενο σφάλμα και 80% διαστήματα. */
+  iqge?: { version: string; tier: string; expectedMAE: number; evidence: { id: string; sim: number; text: string; weight: number }[]; int80: Record<string, [number, number]> | null } | null;
   anchorSource?: { node: string; trainFiles: string[]; wave: string; n: number; observed: Record<string, number> } | null;
   generatedBy: 'statistical_model';
   /** Αυτόματη ερμηνεία (C6): πρόταση/αποδοχή σύνδεσης για ερώτηση χωρίς χειροκίνητη σύνδεση. */
@@ -119,7 +123,10 @@ export function prepareQuestion(model: PersonaModel, q: Question, referenceMonth
         features: item?.feats || extra.vote?.features || [],
         latentTrait: item?.factorKey && item.lambda ? { key: item.factorKey, loading: item.lambda } : null,
         assumption: extra.assumption || null,
-        responseModel: extra.vote ? 'electoral_choice' : extra.anchor ? 'persona_anchor' : item ? (item.model.kind === 'ordinal' ? 'ordinal_probit' : 'multinomial_logit') : 'none',
+        responseModel: extra.vote ? 'electoral_choice' : extra.anchor ? 'persona_anchor' : extra.iqge ? 'iqge_transfer' : item ? (item.model.kind === 'ordinal' ? 'ordinal_probit' : 'multinomial_logit') : 'none',
+        iqge: extra.iqge && q.personaLink?.iqge
+          ? { version: q.personaLink.iqge.version, tier: q.personaLink.iqge.tier, expectedMAE: q.personaLink.iqge.expectedMAE, evidence: q.personaLink.iqge.evidence, int80: q.personaLink.iqge.int80 || null }
+          : null,
         anchorSource: extra.anchor ? (() => {
           const n = model.anchorNodes.find((x) => x.node === extra.anchor!.name);
           return n ? { node: n.node, trainFiles: n.trainFiles, wave: n.wave, n: n.n, observed: n.observed } : null;
@@ -173,6 +180,7 @@ export function prepareQuestion(model: PersonaModel, q: Question, referenceMonth
       { multi, item: first, assumption: extrap ? link.assumption || `Σταθερότητα σχέσεων από το ${oldest}.` : null }
     );
   }
+  if (link.iqge && !link.itemId && !link.family) return prepareIqge(model, q, link.iqge, referenceMonth, base);
   let item: PersonaItem | undefined;
   if (link.itemId) item = model.items.find((i) => i.id === link.itemId);
   if (!item && link.family) {
@@ -216,6 +224,52 @@ export function prepareQuestion(model: PersonaModel, q: Question, referenceMonth
   return base(support, reason, { item, codeToOption, dkOption: link.dkOption || null, assumption: assumptions.join(' · ') || null });
 }
 
+/** Αντίστροφη τυπική κανονική (Acklam). */
+export function invNorm(p: number): number {
+  const a = [-39.69683028665376, 220.9460984245205, -275.9285104469687, 138.357751867269, -30.66479806614716, 2.506628277459239];
+  const b = [-54.47609879822406, 161.5858368580409, -155.6989798598866, 66.80131188771972, -13.28068155288572];
+  const c = [-0.007784894002430293, -0.3223964580411365, -2.400758277161838, -2.549732539343734, 4.374664141464968, 2.938163982698783];
+  const d = [0.007784695709041462, 0.3224671290700398, 2.445134137142996, 3.754408661907416];
+  const q = Math.min(Math.max(p, 1e-12), 1 - 1e-12);
+  if (q < 0.02425) {
+    const r = Math.sqrt(-2 * Math.log(q));
+    return (((((c[0] * r + c[1]) * r + c[2]) * r + c[3]) * r + c[4]) * r + c[5]) / ((((d[0] * r + d[1]) * r + d[2]) * r + d[3]) * r + 1);
+  }
+  if (q > 1 - 0.02425) return -invNorm(1 - q);
+  const r = (q - 0.5) * (q - 0.5);
+  return ((((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5]) * (q - 0.5)) / (((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1);
+}
+
+type BaseFn = (support: PersonaSupport, reason: string, extra?: Partial<PreparedPersonaQuestion>) => PreparedPersonaQuestion;
+
+/** PHASE4 IQGE: έλεγχος και προετοιμασία προϋπολογισμένης ερμηνείας νέας ερώτησης. */
+function prepareIqge(model: PersonaModel, q: Question, g: NonNullable<PersonaLink['iqge']>, referenceMonth: string, base: BaseFn): PreparedPersonaQuestion {
+  const opts = questionOptions(q);
+  const lvOpts = Object.keys(g.level);
+  if (!lvOpts.length || lvOpts.some((o) => !opts.includes(o))) return base('NOT_RELIABLY_ESTIMABLE', 'IQGE: οι επιλογές της ερμηνείας δεν ταιριάζουν με την ερώτηση.');
+  const tot = lvOpts.reduce((s, o) => s + Math.max(g.level[o], 0), 0);
+  if (!(tot > 0)) return base('NOT_RELIABLY_ESTIMABLE', 'IQGE: κενό επίπεδο.');
+  const rank: NonNullable<PreparedPersonaQuestion['iqge']>['rank'] = [];
+  if (g.modelVersion === model.version) {
+    for (const r of g.rank) {
+      const it = model.items.find((i) => i.id === r.itemId);
+      if (it && it.model.kind === 'ordinal' && it.wave <= referenceMonth && r.sd > 0) rank.push({ item: it, weight: r.weight, sign: r.sign, mean: r.mean, sd: r.sd });
+    }
+  }
+  let c = 0;
+  const cuts = lvOpts.slice(0, -1).map((o) => invNorm((c += Math.max(g.level[o], 0) / tot)));
+  const ev = g.evidence.slice(0, 3).map((e) => `«${e.text.slice(0, 70)}» (${e.id}, ομοιότητα ${e.sim.toFixed(2)})`).join('· ');
+  const reason =
+    `Νέα ερώτηση χωρίς ίδιο item· ερμηνεία IQGE (${g.version}, βαθμίδα τεκμηρίου «${g.tier}»). Επίπεδο από πραγματικά περιθώρια συγγενών ερωτήσεων της βάσης (${ev || 'μόνο τύπος κλίμακας'}), ` +
+    `σταθμισμένα με μαθημένη κάρτα ταιριάσματος· αναμενόμενο σφάλμα περιθωρίων ~${g.expectedMAE.toFixed(1)} π.μ. (ανάπτυξη, leave-one-family-out). ` +
+    (rank.length ? `Η σειρά των προσώπων ακολουθεί ${rank.length} λανθάνοντα items του μοντέλου με εξασθένιση ${g.atten.toFixed(2)}.` : 'Καμία σχέση με τα χαρακτηριστικά του προσώπου (ανεξάρτητη απάντηση).') +
+    (g.modelVersion !== model.version ? ` Οι πηγές σειράς υπολογίστηκαν για το ${g.modelVersion}, όχι για το ${model.version}· αγνοούνται.` : '');
+  return base('MODEL_EXTRAPOLATED', reason, {
+    iqge: { options: lvOpts, cuts, rank, scoreSd: g.scoreSd > 0 ? g.scoreSd : 1, atten: rank.length ? Math.min(Math.max(g.atten, 0), 1) : 0 },
+    assumption: 'IQGE: τα περιθώρια συγγενών ερωτήσεων και η σειρά από συγγενή λανθάνοντα θεωρούνται μεταφέρσιμα (εμπειρικά βαθμονομημένη παραδοχή).'
+  });
+}
+
 /** Ατομική απάντηση ενός προσώπου σε μια προετοιμασμένη ερώτηση. */
 export function answerPersona(pq: PreparedPersonaQuestion, ps: PersonaState, seed: number): SyntheticAnswer {
   const qid = pq.q.id;
@@ -244,6 +298,26 @@ export function answerPersona(pq: PreparedPersonaQuestion, ps: PersonaState, see
     const max = pq.q.maxSelections || picked.length;
     const choices = picked.sort((a, b) => b.p - a.p).slice(0, max).map((x) => x.option);
     return { questionId: qid, value: { choices }, skipped: false, basis };
+  }
+  if (pq.iqge) {
+    const g = pq.iqge;
+    let z = 0;
+    if (g.rank.length && g.atten > 0) {
+      const fv0 = featureVector(ps.demographics, ps.anchors);
+      let s = 0;
+      for (const r of g.rank) {
+        const it = r.item;
+        const eta = it.model.kind === 'ordinal' ? linear(it.feats, it.means, it.model.b, fv0) : 0;
+        const lam = it.factorKey ? it.lambda : 0;
+        const e = lam ? lam * theta(ps.pseed, it.factorKey!) + Math.sqrt(Math.max(1 - lam * lam, 0)) * rng.normal() : rng.normal();
+        s += (r.weight * r.sign * (eta + e - r.mean)) / r.sd;
+      }
+      z = g.atten * (s / g.scoreSd) + Math.sqrt(1 - g.atten * g.atten) * rng.normal();
+    } else {
+      z = rng.normal();
+    }
+    const opt = g.options[g.cuts.filter((cut) => cut < z).length];
+    return { questionId: qid, value: toValue(pq.q, opt), skipped: false, basis };
   }
   const item = pq.item!;
   const fv = featureVector(ps.demographics, ps.anchors);

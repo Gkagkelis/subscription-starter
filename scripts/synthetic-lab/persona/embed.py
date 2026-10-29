@@ -26,25 +26,34 @@ class Embedder:
         d = os.path.join(root, ".synthetic-lab-data", "persona", "embed", name)
         self.tok = Tokenizer.from_file(os.path.join(d, "tokenizer.json"))
         self.tok.enable_truncation(MAX_LEN)
-        self.tok.enable_padding(length=None)
+        self.tok.no_padding()
         so = ort.SessionOptions()
         so.intra_op_num_threads = 2
         self.sess = ort.InferenceSession(os.path.join(d, "onnx", "model_quantized.onnx"), so, providers=["CPUExecutionProvider"])
         self.inputs = {i.name for i in self.sess.get_inputs()}
 
     def encode(self, texts, prefix="", batch=64):
-        out = []
-        for i in range(0, len(texts), batch):
-            enc = self.tok.encode_batch([prefix + clean(t) for t in texts[i:i + batch]])
-            ids = np.array([e.ids for e in enc], dtype=np.int64)
-            mask = np.array([e.attention_mask for e in enc], dtype=np.int64)
-            feed = {"input_ids": ids, "attention_mask": mask}
-            if "token_type_ids" in self.inputs:
-                feed["token_type_ids"] = np.zeros_like(ids)
-            h = self.sess.run(None, feed)[0]
-            v = (h * mask[:, :, None]).sum(1) / np.maximum(mask.sum(1, keepdims=True), 1)
-            out.append(v / np.linalg.norm(v, axis=1, keepdims=True))
-        return np.vstack(out) if out else np.zeros((0, 384))
+        """Χωρίς padding: ομαδοποίηση κατά ακριβές μήκος tokens, ώστε η αναπαράσταση να μην εξαρτάται από την παρτίδα
+        (το κβαντισμένο ONNX δίνει διαφορές ~0,02 στην ομοιότητα με padding)."""
+        if not texts:
+            return np.zeros((0, 384))
+        enc = self.tok.encode_batch([prefix + clean(t) for t in texts])
+        out = np.zeros((len(texts), 384), dtype=np.float64)
+        groups = {}
+        for i, e in enumerate(enc):
+            groups.setdefault(len(e.ids), []).append(i)
+        for _, idx in groups.items():
+            for k in range(0, len(idx), batch):
+                part = idx[k:k + batch]
+                ids = np.array([enc[i].ids for i in part], dtype=np.int64)
+                mask = np.ones_like(ids)
+                feed = {"input_ids": ids, "attention_mask": mask}
+                if "token_type_ids" in self.inputs:
+                    feed["token_type_ids"] = np.zeros_like(ids)
+                h = self.sess.run(None, feed)[0]
+                v = h.mean(1)
+                out[part] = v / np.linalg.norm(v, axis=1, keepdims=True)
+        return out
 
 
 def clean(t):
