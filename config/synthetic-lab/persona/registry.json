@@ -417,6 +417,61 @@
    "approvedAt": null,
    "notes": "Phase 5 (Global Behavior Transfer): pie-0.5 + διεθνής μεταφορά στο IQGE (gbt-1). S1 τελικό: B5 5,95 έναντι μέσου χωρών 7,19 και Greek-only 23,4 π.μ. (2.567 στόχοι, 18 έρευνες)· S2 τελικό: C 14,01 έναντι A 20,03 (443 στόχοι, C ≤ A−1 σε 7/10 holdouts· αρνητική μεταφορά σε Wellcome 2018 και EB 75.3). Staged — απαιτεί έγκριση· η pie-0.2 μένει στην παραγωγή.",
    "scope": "general"
+  },
+  {
+   "version": "pie-0.7",
+   "status": "staged",
+   "licencePolicy": "research",
+   "cutoff": "2026-10",
+   "dataSnapshot": "6691d76b09a8f5457dd1dbfe604dc52d784fa2256f08bfe21d410a8cac25fd84",
+   "createdAt": "2026-10-29T18:35:33Z",
+   "codeCommit": "6bafd03",
+   "nItems": 1696,
+   "sources": [
+    "dn2015a",
+    "dn2015n",
+    "dn2017",
+    "dn2018a",
+    "dn2018b",
+    "dn2020a",
+    "dn2020b",
+    "dn2022a",
+    "dn2022b",
+    "dn2022s",
+    "dn2024a",
+    "dn2024b",
+    "dn2024c",
+    "cses2009",
+    "cses2012",
+    "cses2015a",
+    "cses2015b",
+    "cses2019",
+    "undpolar2022",
+    "maple2019pre",
+    "maple2019post",
+    "maple2019feb"
+   ],
+   "evaluation": ".synthetic-lab-data/gpm/holdout-h6/scores.json",
+   "evaluationSummary": {
+    "M1_marginal_MAE_pp": null,
+    "M3_assoc_abs_err": null,
+    "split": "final_H6",
+    "lock": "3cf1f3a5d5325cfc86b270c892c1bdb06dd8ed7c0f0f26fcb853b8eeb2dc2231",
+    "phase6": {
+     "H6_B5_MAE_pp": 4.39,
+     "H6_POOL_MAE_pp": 5.05,
+     "H6_UNIF_MAE_pp": 11.74,
+     "H6_IQGE_MAE_pp": 12.27,
+     "H6_IQGE_C_MAE_pp": 10.15,
+     "H6_cover80": 0.828,
+     "n": 143,
+     "note": "Όχι συγκρίσιμο με τα M1/M3 της pie-0.2: H6 = περιθώρια ευρωπαϊκών τυποποιημένων ερωτήσεων· το Πρόβλημα 2 δεν ελέγχεται στο H6."
+    }
+   },
+   "approvedBy": null,
+   "approvedAt": null,
+   "notes": "Phase 6: pie-0.6 + δρομολόγηση μικτού ερωτηματολογίου, βαθμίδες τεκμηρίωσης Tier 1–5 και αποχή (evidence-1). Παράμετροι μοντέλου ίδιες. Τυφλό H6 (9 Eurobarometer 2025–26, 143 κύριες ερωτήσεις): Tier 3 (B5) 4,39 π.μ. MAE, κάλυψη 80% = 83%· ελληνικά-μόνο IQGE χειρότερο από ομοιόμορφη (αποχή δικαιολογημένη). Το GPM δεν υιοθετήθηκε. Staged — απαιτεί έγκριση· η pie-0.2 μένει προεπιλογή.",
+   "scope": "general"
   }
  ]
 }

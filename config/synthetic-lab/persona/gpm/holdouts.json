@@ -17,7 +17,7 @@
     "sha256": "f426ca1eb44e12c7eecde79f6f38106fcf2ad067269230379176e3d15f8a0b76"
    },
    "role": "final_H6",
-   "status": "sealed"
+   "status": "scored_once"
   },
   {
    "surveyId": "fl574",
@@ -30,7 +30,7 @@
    "lockedSha256": "743e1a73e30c1ffa0d220a967f2d207e51dc28cfe8003f2d962eeeacecc1ce3b",
    "volumeC_EL": null,
    "role": "final_H6",
-   "status": "sealed"
+   "status": "scored_once"
   },
   {
    "surveyId": "eb050ep",
@@ -43,7 +43,7 @@
    "lockedSha256": "f274cd491906f7e89c80eb2580b9e8653c394905451f6540c9136b303c95e930",
    "volumeC_EL": null,
    "role": "final_H6",
-   "status": "sealed"
+   "status": "scored_once"
   },
   {
    "surveyId": "eb049ep",
@@ -56,7 +56,7 @@
    "lockedSha256": "0e86230d123144f75360645afcdb6cbd28daa32101efd52af70a8086ce0f38f6",
    "volumeC_EL": null,
    "role": "final_H6",
-   "status": "sealed"
+   "status": "scored_once"
   },
   {
    "surveyId": "sp564",
@@ -69,7 +69,7 @@
    "lockedSha256": "8f6af4a9caa8f0458a410a74b9ea402f78055b89422566beb28112b227971838",
    "volumeC_EL": null,
    "role": "final_H6",
-   "status": "sealed"
+   "status": "scored_once"
   },
   {
    "surveyId": "fl563",
@@ -82,7 +82,7 @@
    "lockedSha256": "d122fbe5f89abc3a14875d148d820de90a61dff7469417f804cb3a54dd02379b",
    "volumeC_EL": null,
    "role": "final_H6",
-   "status": "sealed"
+   "status": "scored_once"
   },
   {
    "surveyId": "eb048ep",
@@ -95,7 +95,7 @@
    "lockedSha256": "d2959ae27d0b6a935012b52ac3fc07e205905047e60d203bf38534c2817ccd24",
    "volumeC_EL": null,
    "role": "final_H6",
-   "status": "sealed"
+   "status": "scored_once"
   },
   {
    "surveyId": "eb047ep",
@@ -111,7 +111,7 @@
     "sha256": "e2af9e9e4bae5d7b5b4ea04970e4c38bce7e1893d57def548d21817b128f6db1"
    },
    "role": "final_H6",
-   "status": "sealed"
+   "status": "scored_once"
   },
   {
    "surveyId": "fl570",
@@ -124,7 +124,7 @@
    "lockedSha256": "5bd38225aaacbcf147ba8f219b9e9fd28a6d97305d65fa2b2dedfa4d37879708",
    "volumeC_EL": null,
    "role": "final_H6",
-   "status": "sealed"
+   "status": "scored_once"
   }
  ],
  "excludedCandidates": {
@@ -175,6 +175,7 @@
   "createdAt": "2026-10-29T18:29:42Z",
   "nItems": 506,
   "script": "scripts/synthetic-lab/persona/gpm_h6_predict.py",
-  "scored": false
+  "scored": true,
+  "scoredAt": "2026-10-29T18:40:02Z"
  }
 }
