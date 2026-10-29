@@ -939,8 +939,8 @@ def harmonize_ess(files_meta, bank):
         write_file(file_id, out)
         bank.extend(items)
         files_meta.append({
-            "fileId": file_id, "family": "ess", "source": f"European Social Survey {file_id.upper()}, Ελλάδα (αντίγραφο Harvard Dataverse, CC0· ESS: CC BY 4.0)",
-            "url": "https://www.europeansocialsurvey.org/", "wave": wave, "waveApprox": True, "n": int(len(g)), "weightVar": "anweight", "licence": "CC BY 4.0 (ESS ERIC)",
+            "fileId": file_id, "family": "ess", "source": f"European Social Survey {file_id.upper()}, Ελλάδα (αντίγραφο Harvard Dataverse, CC0· όροι ESS ERIC: CC BY-NC-SA 4.0)",
+            "url": "https://www.europeansocialsurvey.org/", "wave": wave, "waveApprox": True, "n": int(len(g)), "weightVar": "anweight", "licence": "CC BY-NC-SA 4.0 (ESS ERIC· εμπορική χρήση μόνο με αναφορά στο ESS ERIC, δήλωση ελεύθερης διάθεσης από το ESS Data Portal και χωρίς υπονοούμενη έγκριση)",
             "tier": "open", "commercialUse": "allowed_with_attribution", "mode": "προσωπική συνέντευξη (CAPI)", "population": "Ελλάδα 15+",
             "anchors": sorted(c for c in ANCHORS + DEMO if c in out and out[c].notna().any()), "pvElection": election, "nItems": len(items),
             "role": role, "realRespondents": True,

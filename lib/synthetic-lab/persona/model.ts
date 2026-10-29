@@ -111,6 +111,11 @@ export interface VoteModel {
   abstain: { a: number; feats: string[]; means: number[]; b: number[] } | null;
   undecided: { a: number; feats: string[]; means: number[]; b: number[] } | null;
   notes: string[];
+  /**
+   * PHASE4 (P4.5): χρονικά μεταβλητή προτίμηση. Μηνιαία αυτοσυσχέτιση ρ της λανθάνουσας απόφασης ψήφου του προσώπου
+   * (βαθμονομημένη σε πραγματικό panel). Χωρίς αυτό το πεδίο (pie-0.2/0.3/0.4) η συμπεριφορά μένει ίδια με το pie-runtime-2.
+   */
+  dynamics?: { monthlyRho: number; stayerShare: number; source: string; notes: string[] };
 }
 
 // ------------------------------------------------------------ χαρακτηριστικά (ίδια σειρά/ορισμοί με το pie.py)

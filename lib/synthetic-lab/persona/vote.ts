@@ -143,6 +143,31 @@ export function partyUtilities(prep: PreparedVote, prev: string | null, lr: numb
   });
 }
 
+function monthIndex(ym: string): number {
+  const [y, m] = ym.split('-').map(Number);
+  return y * 12 + ((m || 1) - 1);
+}
+
+function normCdf(x: number): number {
+  // Abramowitz–Stegun 7.1.26
+  const t = 1 / (1 + 0.3275911 * Math.abs(x) / Math.SQRT2);
+  const y = 1 - ((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-(x * x) / 2);
+  return x >= 0 ? (1 + y) / 2 : (1 - y) / 2;
+}
+
+/**
+ * PHASE4 (P4.5): χρονικά μεταβλητή προτίμηση. Λανθάνουσα AR(1) ανά πρόσωπο και απόφαση: z_t = ρ·z_{t−1} + √(1−ρ²)·ε_t (μηνιαία),
+ * u_t = Φ(z_t). Ίδιος μήνας → ίδια απάντηση· διαδοχικοί μήνες → μικρές, τοπικές μετακινήσεις (τα κόμματα είναι ταξινομημένα
+ * κατά θέση, άρα η αλλαγή πάει κυρίως σε ιδεολογικά γειτονικό κόμμα)· τα περιθώρια δεν αλλάζουν χωρίς αλλαγή σεναρίου.
+ */
+export function arUniform(pseed: number, key: string, referenceMonth: string, rho: number): number {
+  const t = monthIndex(referenceMonth);
+  const s = Math.sqrt(1 - rho * rho);
+  let z = createRng(hashString(`vote-ar0|${pseed}|${key}`)).normal();
+  for (let k = monthIndex('2000-01') + 1; k <= t; k++) z = rho * z + s * createRng(hashString(`vote-ar|${pseed}|${key}|${k}`)).normal();
+  return Math.min(Math.max(normCdf(z), 1e-12), 1 - 1e-12);
+}
+
 /**
  * Ψήφος ως χαρακτηριστικό του προσώπου (pie-runtime-2): οι τυχαίοι αριθμοί προέρχονται από τον σπόρο του ΠΡΟΣΩΠΟΥ
  * (κοινοί σε όλες τις εκτελέσεις), όχι της εκτέλεσης. Η κατανομή μένει ίδια· το ίδιο πρόσωπο σε μόνιμο panel δίνει την ίδια
@@ -151,21 +176,25 @@ export function partyUtilities(prep: PreparedVote, prev: string | null, lr: numb
  */
 export function answerVote(prep: PreparedVote, ps: PersonaState, _rng: Rng): string | null {
   const rng = createRng(hashString(`vote|${ps.pseed}`));
+  const dyn = prep.model.dynamics;
+  // σταθεροί ψηφοφόροι (μερίδιο από panel): κρατούν την απόφασή τους· οι υπόλοιποι εξελίσσονται μήνα με μήνα
+  const mover = !!dyn && createRng(hashString(`vote-stayer|${ps.pseed}`)).next() >= dyn.stayerShare;
+  const U = (key: string) => (mover ? arUniform(ps.pseed, key, prep.scenario.referenceMonth, dyn!.monthlyRho) : rng.next());
   const fv = featureVector(ps.demographics, ps.anchors);
   const m = prep.model;
   if (m.abstain) {
     const pa = 1 / (1 + Math.exp(-(m.abstain.a + linear(m.abstain.feats, m.abstain.means, m.abstain.b, fv))));
-    if (rng.next() < pa) return prep.abstainOption;
+    if (U('abstain') < pa) return prep.abstainOption;
   }
   if (m.undecided) {
     const pu = 1 / (1 + Math.exp(-(m.undecided.a + linear(m.undecided.feats, m.undecided.means, m.undecided.b, fv))));
-    if (rng.next() < pu) return prep.undecidedOption;
+    if (U('undecided') < pu) return prep.undecidedOption;
   }
   const lr = ps.anchors.lr_none === 1 ? null : ps.anchors.lr7;
   const prev = resolvePrev(ps.anchors.pv, lr, prep.scenario, prep.beta, rng);
   const p = softmax(partyUtilities(prep, prev, lr));
   const order = p.map((_, i) => i).sort((a, b) => prep.scenario.parties[a].position - prep.scenario.parties[b].position || a - b);
-  const u = rng.next();
+  const u = U('party');
   let c = 0;
   let k = order[order.length - 1];
   for (const i of order) {

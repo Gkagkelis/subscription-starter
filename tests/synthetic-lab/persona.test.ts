@@ -9,7 +9,8 @@ import { PIE_MIN_AGE, adultAudience, buildPanel, generateAnchors, theta, type Pe
 import { respondPanel } from '@/lib/synthetic-lab/persona/survey';
 import { incumbencyMismatch } from '@/lib/synthetic-lab/persona/incumbency';
 import { PIE_TEMPORAL_LIMIT_YEARS, answerPersona, prepareQuestion } from '@/lib/synthetic-lab/persona/respond';
-import { loadScenario } from '@/lib/synthetic-lab/persona/vote';
+import { answerVote, arUniform, loadScenario, type PreparedVote } from '@/lib/synthetic-lab/persona/vote';
+import { createRng } from '@/lib/synthetic-lab/rng';
 import { runSurvey } from '@/lib/synthetic-lab/engine/survey';
 import { CALIBRATED_POPULATION_ID } from '@/lib/synthetic-lab/population/store';
 import { dataRoot } from '@/lib/synthetic-lab/storage/paths';
@@ -173,6 +174,37 @@ describe('PIE — pie-runtime-2 (Phase 3)', () => {
     expect(incumbencyMismatch('Εμπιστοσύνη στην κυβέρνηση', '2017-12', '2026-10')).not.toBeNull();
     expect(incumbencyMismatch('Εμπιστοσύνη στην κυβέρνηση', '2023-12', '2026-10')).toBeNull();
     expect(incumbencyMismatch('Εμπιστοσύνη στη Δικαιοσύνη', '2017-12', '2026-10')).toBeNull();
+  });
+});
+
+describe('PIE — χρονικά μεταβλητή πρόθεση ψήφου (Phase 4, P4.5)', () => {
+  const parties = ['a', 'b', 'c', 'd'].map((key, i) => ({ key, label: key, position: 1 + i * 2, positionSource: 't', lineage: [], lineageSource: 't', isNew: false, prevShare: 25, prevShareSource: 't', incumbent: false }));
+  const prep = (month: string, dynamics?: { monthlyRho: number; stayerShare: number }): PreparedVote => ({
+    scenario: { id: 't', referenceMonth: month, previousElection: '2023-06', facts: [], parties, otherSplit: {}, newPartyPrevShare: 1 },
+    beta: { loyal: 1.5, dist: -0.3 }, optionOf: new Map(parties.map((p) => [p.key, p.label])), abstainOption: null, undecidedOption: null,
+    model: { version: 't', trainedOn: [], beta: {}, abstain: null, undecided: null, notes: [], dynamics: dynamics ? { ...dynamics, source: 't', notes: [] } : undefined },
+    features: [], assumptions: []
+  });
+  const people = Array.from({ length: 3000 }, (_, i) => ({ ...state(i % 50), pseed: 5000 + i, anchors: { ...state(i % 50).anchors, pv: ['a', 'b', 'c', 'd'][i % 4], lr7: 1 + (i % 7), lr_none: 0 } }));
+  const votes = (p: PreparedVote) => people.map((ps) => answerVote(p, ps as PersonaState, createRng(1)));
+  it('χωρίς δυναμική (pie-0.2/0.3/0.4): ίδιο πρόσωπο → ίδια ψήφος σε κάθε μήνα (συμπεριφορά pie-runtime-2)', () => {
+    expect(votes(prep('2026-10'))).toEqual(votes(prep('2026-11')));
+  });
+  it('με δυναμική: ίδιος μήνας → ίδια απάντηση· επόμενος μήνας → μικρή ακαθάριστη, σχεδόν μηδενική καθαρή μεταβολή', () => {
+    const dyn = { monthlyRho: 0.997, stayerShare: 0.256 };
+    const a = votes(prep('2026-10', dyn)), a2 = votes(prep('2026-10', dyn)), b = votes(prep('2026-11', dyn)), c = votes(prep('2027-10', dyn));
+    expect(a).toEqual(a2);
+    const gross = (x: (string | null)[], y: (string | null)[]) => x.filter((v, i) => v !== y[i]).length / x.length;
+    expect(gross(a, b)).toBeGreaterThan(0.01);
+    expect(gross(a, b)).toBeLessThan(0.2);
+    expect(gross(a, c)).toBeGreaterThan(gross(a, b));
+    const share = (x: (string | null)[], k: string) => x.filter((v) => v === k).length / x.length;
+    for (const k of ['a', 'b', 'c', 'd']) expect(Math.abs(share(a, k) - share(b, k))).toBeLessThan(0.03);
+  });
+  it('η λανθάνουσα AR(1) είναι ομοιόμορφη στο (0,1)', () => {
+    const u = Array.from({ length: 4000 }, (_, i) => arUniform(i, 'party', '2026-10', 0.997));
+    expect(Math.abs(u.reduce((s, x) => s + x, 0) / u.length - 0.5)).toBeLessThan(0.02);
+    expect(u.filter((x) => x < 0.1).length / u.length).toBeGreaterThan(0.08);
   });
 });
 
