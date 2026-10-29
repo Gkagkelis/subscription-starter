@@ -169,5 +169,12 @@
    "surveyId": "std106",
    "expected": "2026-12"
   }
- ]
+ ],
+ "h6Predictions": {
+  "lockSha256": "3cf1f3a5d5325cfc86b270c892c1bdb06dd8ed7c0f0f26fcb853b8eeb2dc2231",
+  "createdAt": "2026-10-29T18:29:42Z",
+  "nItems": 506,
+  "script": "scripts/synthetic-lab/persona/gpm_h6_predict.py",
+  "scored": false
+ }
 }
