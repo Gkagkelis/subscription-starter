@@ -1,8 +1,9 @@
 """
 PHASE4 IQGE: πολυγλωσσικές σημασιολογικές αναπαραστάσεις ερωτήσεων (εκτός σύνδεσης).
 
-Μοντέλο: intfloat/multilingual-e5-small (MIT), ONNX quantized (Xenova), στο ιδιωτικό
-.synthetic-lab-data/persona/embed/e5-small/ — δεν χρειάζεται διαδίκτυο στην εκτέλεση.
+Μοντέλο: sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2 (Apache-2.0), ONNX quantized (Xenova), στο ιδιωτικό
+.synthetic-lab-data/persona/embed/pmini/ — δεν χρειάζεται διαδίκτυο στην εκτέλεση. (Το multilingual-e5-small δοκιμάστηκε και
+απορρίφθηκε: δεν ξεχώριζε έννοιες — «εμπιστοσύνη στη Βουλή» ~ «καπνίζετε» 0,83.)
 Η ομοιότητα χρησιμοποιείται ΜΟΝΟ για ανάκτηση υποψήφιων τεκμηρίων· δεν θεωρείται απόδειξη ίδιας κατανομής απαντήσεων.
 
   python3 scripts/synthetic-lab/persona/embed.py --root . items --model pie-0.4   # embeddings όλων των items του μοντέλου
@@ -18,11 +19,11 @@ MAX_LEN = 128
 
 
 class Embedder:
-    def __init__(self, root):
+    def __init__(self, root, name="pmini"):
         import onnxruntime as ort
         from tokenizers import Tokenizer
 
-        d = os.path.join(root, ".synthetic-lab-data", "persona", "embed", "e5-small")
+        d = os.path.join(root, ".synthetic-lab-data", "persona", "embed", name)
         self.tok = Tokenizer.from_file(os.path.join(d, "tokenizer.json"))
         self.tok.enable_truncation(MAX_LEN)
         self.tok.enable_padding(length=None)
@@ -31,7 +32,7 @@ class Embedder:
         self.sess = ort.InferenceSession(os.path.join(d, "onnx", "model_quantized.onnx"), so, providers=["CPUExecutionProvider"])
         self.inputs = {i.name for i in self.sess.get_inputs()}
 
-    def encode(self, texts, prefix="query: ", batch=64):
+    def encode(self, texts, prefix="", batch=64):
         out = []
         for i in range(0, len(texts), batch):
             enc = self.tok.encode_batch([prefix + clean(t) for t in texts[i:i + batch]])
