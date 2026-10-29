@@ -11,6 +11,7 @@
 
 import type { PersonaLink, Question } from '../types';
 import type { PersonaItem, PersonaModel } from './model';
+import { incumbencyMismatch } from './incumbency';
 
 export const AUTOLINK_VERSION = 'autolink-1';
 export const AUTOLINK_ACCEPT = 0.55;
@@ -265,7 +266,8 @@ export function suggestLink(model: PersonaModel, q: Question, referenceMonth: st
     });
     const cover = tot ? hit / tot : 0;
     const age = yearsBetween(it.wave, referenceMonth);
-    const score = (0.45 * s1 + 0.2 * s2 + 0.35 * cover) * Math.exp(-Math.max(age - 2, 0) / 8) * (cover < 0.45 ? 0.5 : 1);
+    const govPenalty = incumbencyMismatch(`${q.text} ${it.text}`, it.wave, referenceMonth) ? 0.6 : 1; // E3: προτίμηση ίδιας κυβερνητικής περιόδου
+    const score = (0.45 * s1 + 0.2 * s2 + 0.35 * cover) * Math.exp(-Math.max(age - 2, 0) / 8) * (cover < 0.45 ? 0.5 : 1) * govPenalty;
     if (!best || score > best.score) best = { it, score, reverse: it.type !== 'nominal' && qPol !== 0 && itPol !== 0 && qPol !== itPol };
   }
   if (!best) return none('Κανένα item του μοντέλου με ίδιο αριθμό επιλογών.');

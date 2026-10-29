@@ -17,6 +17,7 @@ import type { PersonaLink, PersonaSupport, Question, SyntheticAnswer } from '../
 import { dkProb, featureVector, itemProbs, linear, type PersonaItem, type PersonaModel } from './model';
 import { theta, type PersonaState } from './panel';
 import { answerVote, prepareVote, type PreparedVote } from './vote';
+import { incumbencyMismatch } from './incumbency';
 
 export const PIE_TEMPORAL_LIMIT_YEARS = 4;
 
@@ -33,6 +34,8 @@ export interface PreparedPersonaQuestion {
   anchor: { name: string; valueToOption: Map<string, string> } | null;
   /** Πολλαπλή επιλογή: ένα δυαδικό item ανά επιλογή. */
   multi: { option: string; item: PersonaItem; yesCode: string }[] | null;
+  /** PHASE3 E2: κοινό λανθάνον της έννοιας για το item (αν το μοντέλο το έχει). */
+  construct?: { key: string; g: number } | null;
   provenance: PersonaQuestionProvenance;
 }
 
@@ -97,6 +100,7 @@ export function prepareQuestion(model: PersonaModel, q: Question, referenceMonth
       vote: null,
       multi: null,
       anchor: null,
+      construct: item ? model.constructLatent?.units?.[item.factorKey || item.id] || null : null,
       ...extra,
       provenance: {
         questionId: q.id,
@@ -203,6 +207,12 @@ export function prepareQuestion(model: PersonaModel, q: Question, referenceMonth
     reason += ` Χρονική μεταφορά ${age.toFixed(1)} ετών (> ${PIE_TEMPORAL_LIMIT_YEARS}): οι σχέσεις θεωρούνται σταθερές, το επίπεδο μπορεί να έχει αλλάξει.`;
     assumptions.push(`Σταθερότητα σχέσεων από το ${item.wave} έως το ${referenceMonth}.`);
   }
+  const inc = incumbencyMismatch(item.text, item.wave, referenceMonth);
+  if (inc) {
+    support = 'MODEL_EXTRAPOLATED';
+    reason += ` Προσοχή: ερώτηση αξιολόγησης κυβέρνησης μετρημένη υπό άλλο κυβερνών κόμμα (${inc.itemParty || 'μεταβατική κυβέρνηση'} → ${inc.refParty || 'μεταβατική κυβέρνηση'}): η σχέση με κόμμα/ιδεολογία δεν μεταφέρεται αξιόπιστα.`;
+    assumptions.push('Η σχέση με την ψήφο/ιδεολογία της πηγής θεωρείται ότι ισχύει και υπό το σημερινό κυβερνών κόμμα (αβέβαιη παραδοχή).');
+  }
   return base(support, reason, { item, codeToOption, dkOption: link.dkOption || null, assumption: assumptions.join(' · ') || null });
 }
 
@@ -250,7 +260,16 @@ export function answerPersona(pq: PreparedPersonaQuestion, ps: PersonaState, see
       e = item.latentRow.reduce((s, l, k) => (l ? s + l * theta(ps.pseed, `${item.factorKey}#${k}`) : s), 0);
     } else {
       const lam = item.factorKey ? item.lambda : 0;
-      e = lam * (lam ? theta(ps.pseed, item.factorKey!) : 0) + Math.sqrt(Math.max(1 - lam * lam, 0)) * rng.normal();
+      const ck = pq.construct;
+      if (lam) {
+        let th = theta(ps.pseed, item.factorKey!);
+        if (ck) th = ck.g * theta(ps.pseed, ck.key) + Math.sqrt(Math.max(1 - ck.g * ck.g, 0)) * th; // θ_b = g·C + √(1−g²)·u_b
+        e = lam * th + Math.sqrt(Math.max(1 - lam * lam, 0)) * rng.normal();
+      } else if (ck) {
+        e = ck.g * theta(ps.pseed, ck.key) + Math.sqrt(Math.max(1 - ck.g * ck.g, 0)) * rng.normal(); // μεμονωμένο item
+      } else {
+        e = rng.normal();
+      }
     }
     const y = eta + e;
     k = item.model.tau.filter((t) => t < y).length;

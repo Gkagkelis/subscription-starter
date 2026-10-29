@@ -85,7 +85,7 @@ def wspearman(x, y, w):
     return cov / (sx * sy) if sx > 0 and sy > 0 else np.nan
 
 
-def train(root, split, lam, factors, tag, battery_cov=False, families=""):
+def train(root, split, lam, factors, tag, battery_cov=False, families="", latent="pit"):
     ver = f"eval-{split}-{tag}"
     out = os.path.join(root, ".synthetic-lab-data", "persona", "models", "eval", ver)
     cmd = [sys.executable, os.path.join(os.path.dirname(__file__), "train.py"), "--root", root, "--cutoff", SPLITS[split]["cutoff"],
@@ -94,6 +94,8 @@ def train(root, split, lam, factors, tag, battery_cov=False, families=""):
         cmd.append("--no-factors")
     if battery_cov:
         cmd.append("--battery-cov")
+    if latent != "pit":
+        cmd += ["--latent", latent]
     if families or SPLITS[split].get("families"):
         cmd += ["--families", families or SPLITS[split]["families"]]
     subprocess.run(cmd, check=True, capture_output=True)
@@ -172,7 +174,7 @@ def run(a):
     hz = os.path.join(root, ".synthetic-lab-data", "persona", "harmonized")
     bank = json.load(open(os.path.join(hz, "item_bank.json")))
     t0 = time.time()
-    model, titems, mdir = train(root, a.split, a.lam, not a.no_factors, a.tag, a.battery_cov, a.families)
+    model, titems, mdir = train(root, a.split, a.lam, not a.no_factors, a.tag, a.battery_cov, a.families, a.latent)
     tby = {t["id"]: t for t in titems}
     results = {"split": a.split, "cutoff": split["cutoff"], "holdout": split["holdout"], "lam": a.lam, "factors": not a.no_factors,
                "seeds": a.seeds, "modelSnapshot": model["dataSnapshot"], "trainFiles": [s["fileId"] for s in model["sources"]], "files": {}}
@@ -195,7 +197,7 @@ def run(a):
                 if mt["train"] is None:
                     continue
                 t = mt["train"]
-                ans[mt["hold"]["id"]] = pie.answer_item(t, P, np.random.default_rng(stable_seed(s, t["id"], 0)), factors=True)
+                ans[mt["hold"]["id"]] = pie.answer_item(t, P, np.random.default_rng(stable_seed(s, t["id"], 0)), factors=True, model=model)
                 ans_noth[mt["hold"]["id"]] = pie.answer_item(t, P, np.random.default_rng(stable_seed(s, t["id"], 1)), factors=False)
             syn[s] = {"personas": P[[c for c in ("lr7", "lr_none", "pv", "incq5", "hhsize5") if c in P]].copy(), "ans": ans, "ans_noth": ans_noth}
             if s == 0:
@@ -449,6 +451,7 @@ if __name__ == "__main__":
     ap.add_argument("--lam", type=float, default=1.0)
     ap.add_argument("--no-factors", action="store_true")
     ap.add_argument("--battery-cov", action="store_true")
+    ap.add_argument("--latent", default="pit", choices=["pit", "e1", "e2"])
     ap.add_argument("--families", default="", help="οικογένειες πηγών του γενικού μοντέλου (π.χ. dianeosis_tpe,cses,maple,undpolar)")
     ap.add_argument("--seeds", type=int, default=5)
     ap.add_argument("--tag", default="default")

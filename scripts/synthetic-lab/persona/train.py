@@ -156,7 +156,7 @@ def fit_anchor_nodes(files, hz, lam, log):
     return nodes
 
 
-def fit_items(files, bank, hz, lam, log, factors=True, seed=7, battery_cov=False):
+def fit_items(files, bank, hz, lam, log, factors=True, seed=7, battery_cov=False, latent="pit", construct_out=None):
     by_file = {}
     for it in bank:
         by_file.setdefault(it["file"], []).append(it)
@@ -169,6 +169,7 @@ def fit_items(files, bank, hz, lam, log, factors=True, seed=7, battery_cov=False
         Zall, means = pie.design(X, feats)
         w_all = df["weight"].values.astype(float)
         scores = {}
+        bounds = {}
         for it in by_file.get(f["fileId"], []):
             if it["id"] not in df:
                 continue
@@ -205,6 +206,11 @@ def fit_items(files, bank, hz, lam, log, factors=True, seed=7, battery_cov=False
                     s = np.full(len(df), np.nan)
                     s[sub] = pie.pit_normal_scores(Zall[sub], y, m, rng)
                     scores[it["id"]] = s
+                    if latent in ("e1", "e2"):  # PHASE3 E1: όρια υπολοίπου για πολυχορική εκτίμηση υπό συνθήκη
+                        lo, hi = pie.ordinal_bounds(Zall[sub] @ np.asarray(m["b"]), m["tau"], y)
+                        LO, HI = np.full(len(df), np.nan), np.full(len(df), np.nan)
+                        LO[sub], HI[sub] = lo, hi
+                        bounds[it["id"]] = (LO, HI)
             else:
                 m = pie.fit_mnl(Zall[sub], y, K, w_all[sub], lam=lam)
                 rec["model"] = {"kind": "nominal", "a": np.round(m["a"], 6).tolist(), "B": np.round(m["B"], 6).tolist()}
@@ -235,14 +241,110 @@ def fit_items(files, bank, hz, lam, log, factors=True, seed=7, battery_cov=False
             for bi, recs in enumerate(runs):
                 S = np.column_stack([scores[r["id"]] for r in recs])
                 lam_b, R_b = pie.one_factor(S)
+                if latent in ("e1", "e2") and all(r["id"] in bounds for r in recs):
+                    R_b = polychoric_matrix([bounds[r["id"]] for r in recs], w_all)
+                    lam_b = pie.one_factor_R(R_b)
                 L = pie.battery_cholesky(R_b, lam_b) if battery_cov else None
                 for i, (l, r) in enumerate(zip(lam_b, recs)):
                     r["lambda"] = round(float(l), 4)
                     r["factorKey"] = f"{f['fileId']}:b{bi}"
                     if L is not None:
                         r["latentRow"] = [round(float(v), 5) for v in L[i, : i + 1]]
+        if latent == "e2" and construct_out is not None:
+            construct_units(f["fileId"], [r for r in out if r["file"] == f["fileId"]], bounds, w_all, construct_out, np.random.default_rng(seed + 1))
         log.append(f"items {f['fileId']}: {sum(1 for r in out if r['file'] == f['fileId'])}")
     return out
+
+
+def polychoric_matrix(blist, w, min_n=150):
+    """Πίνακας πολυχορικών συσχετίσεων υπολοίπων υπό συνθήκη (E1)· ζεύγη με < min_n κοινές απαντήσεις → 0."""
+    m = len(blist)
+    R = np.eye(m)
+    for i in range(m):
+        for j in range(i + 1, m):
+            ok = ~np.isnan(blist[i][0]) & ~np.isnan(blist[j][0])
+            if ok.sum() < min_n:
+                continue
+            R[i, j] = R[j, i] = pie.polychoric_cond((blist[i][0][ok], blist[i][1][ok]), (blist[j][0][ok], blist[j][1][ok]), w[ok] / w[ok].mean())
+    return R
+
+
+def construct_units(file_id, recs, bounds, w, acc, rng, max_pairs=3, min_n=150):
+    """E2: ανά έννοια, μονάδες = μπαταρίες (factorKey) και μεμονωμένα ordinal items· φορτίσεις μονάδων στο κοινό λανθάνον
+    από πολυχορικές συσχετίσεις ζευγών ΔΙΑΦΟΡΕΤΙΚΩΝ μονάδων του ίδιου αρχείου (ένας παράγοντας στον πίνακα μονάδων)."""
+    by_c = {}
+    for r in recs:
+        c = r.get("construct")
+        if not c or c == "other" or r["id"] not in bounds:
+            continue
+        key = r.get("factorKey") or r["id"]
+        by_c.setdefault(c, {}).setdefault(key, []).append(r)
+    for c, units in by_c.items():
+        keys = list(units)
+        if len(keys) < 2:
+            continue
+        U = np.eye(len(keys))
+        seen = np.zeros_like(U, dtype=bool)
+        for a in range(len(keys)):
+            for b in range(a + 1, len(keys)):
+                ia, ib = units[keys[a]], units[keys[b]]
+                ests = []
+                for _ in range(max_pairs):
+                    x, y = ia[rng.integers(len(ia))], ib[rng.integers(len(ib))]
+                    lx = x["lambda"] if x.get("factorKey") else 1.0
+                    ly = y["lambda"] if y.get("factorKey") else 1.0
+                    if abs(lx) < 0.2 or abs(ly) < 0.2:
+                        continue
+                    ok = ~np.isnan(bounds[x["id"]][0]) & ~np.isnan(bounds[y["id"]][0])
+                    if ok.sum() < min_n:
+                        continue
+                    rho = pie.polychoric_cond((bounds[x["id"]][0][ok], bounds[x["id"]][1][ok]), (bounds[y["id"]][0][ok], bounds[y["id"]][1][ok]), w[ok] / w[ok].mean())
+                    ests.append(rho / (lx * ly))
+                if ests:
+                    U[a, b] = U[b, a] = float(np.clip(np.mean(ests), -0.95, 0.95))
+                    seen[a, b] = seen[b, a] = True
+        if not seen.any():
+            continue
+        g = pie.one_factor_R(U)
+        for k, gk in zip(keys, g):
+            if seen[keys.index(k)].any():
+                acc.setdefault(c, {}).setdefault(file_id, {})[k] = {"g": float(gk), "families": sorted({r.get("family") for r in units[k] if r.get("family")}),
+                                                                   "loads": {r.get("family"): float(gk) * (r["lambda"] if r.get("factorKey") else 1.0) for r in units[k] if r.get("family")}}
+
+
+def align_constructs(acc):
+    """Ευθυγράμμιση κατεύθυνσης του κοινού λανθάνοντος ανά έννοια ΜΟΝΟ μέσω ίδιων ερωτήσεων (family) σε διαφορετικά αρχεία.
+    Αρχεία χωρίς τέτοια επικάλυψη παίρνουν ξεχωριστό λανθάνον (καμία επινοημένη σχέση μεταξύ ερευνών)."""
+    units = {}
+    stats = {}
+    for c, files in acc.items():
+        fids = sorted(files)
+        sign = {}
+        comp = {}
+        for root_f in fids:
+            if root_f in sign:
+                continue
+            sign[root_f], comp[root_f] = 1.0, root_f
+            queue = [root_f]
+            while queue:
+                f = queue.pop()
+                lf = {fam: v * sign[f] for u in files[f].values() for fam, v in u["loads"].items()}
+                for g in fids:
+                    if g in sign:
+                        continue
+                    lg = {fam: v for u in files[g].values() for fam, v in u["loads"].items()}
+                    common = [fam for fam in lf if fam in lg and abs(lf[fam]) > 0.05 and abs(lg[fam]) > 0.05]
+                    if not common:
+                        continue
+                    votes = sum(np.sign(lf[fam]) * np.sign(lg[fam]) for fam in common)
+                    sign[g] = 1.0 if votes >= 0 else -1.0
+                    comp[g] = comp[f]
+                    queue.append(g)
+        for f in fids:
+            for k, u in files[f].items():
+                units[k] = {"key": f"C:{c}:{comp[f]}", "g": round(u["g"] * sign[f], 4)}
+        stats[c] = {"files": len(fids), "components": len(set(comp.values())), "units": sum(len(v) for v in files.values())}
+    return {"units": units, "stats": stats}
 
 
 def main():
@@ -255,6 +357,7 @@ def main():
     ap.add_argument("--lam", type=float, default=1.0)
     ap.add_argument("--no-factors", action="store_true")
     ap.add_argument("--battery-cov", action="store_true", help="C7: πλήρης συσχέτιση ανά μπαταρία (Cholesky) αντί για έναν παράγοντα")
+    ap.add_argument("--latent", choices=["pit", "e1", "e2"], default="pit", help="PHASE3: pit (pie-0.3) · e1 πολυχορικός εκτιμητής · e2 + ιεραρχικό λανθάνον ανά έννοια")
     ap.add_argument("--out", default=None)
     ap.add_argument("--families", default="", help="περιορισμός σε οικογένειες πηγών (π.χ. hbs)")
     a = ap.parse_args()
@@ -269,7 +372,8 @@ def main():
     log = []
     t0 = time.time()
     nodes = fit_anchor_nodes(files, hz, a.lam, log)
-    items = fit_items(files, bank, hz, a.lam, log, factors=not a.no_factors, battery_cov=a.battery_cov)
+    construct_acc = {}
+    items = fit_items(files, bank, hz, a.lam, log, factors=not a.no_factors, battery_cov=a.battery_cov, latent=a.latent, construct_out=construct_acc)
     out = a.out or os.path.join(root, ".synthetic-lab-data", "persona", "models", a.version)
     os.makedirs(out, exist_ok=True)
     try:
@@ -279,13 +383,15 @@ def main():
     constructs = sorted({r["construct"] for r in items if r.get("construct")})
     model = {
         "version": a.version, "engine": "pie", "createdAt": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "codeCommit": commit,
-        "cutoff": a.cutoff, "licencePolicy": a.policy, "holdout": sorted(hold), "l2": a.lam, "factors": not a.no_factors, "batteryCov": a.battery_cov,
+        "cutoff": a.cutoff, "licencePolicy": a.policy, "holdout": sorted(hold), "l2": a.lam, "factors": not a.no_factors, "batteryCov": a.battery_cov, "latent": a.latent,
         "dataSnapshot": snapshot_hash(hz, [f["fileId"] for f in files]),
         "sources": [{k: f.get(k) for k in ("fileId", "family", "source", "url", "wave", "waveApprox", "n", "licence", "tier", "commercialUse", "mode", "population", "pvElection")} for f in files],
         "features": pie.FEATURES, "featureSource": pie.FEATURE_SOURCE, "pvFamily": pie.PV_FAMILY,
         "anchorNodes": nodes, "constructs": constructs, "nItems": len(items), "trainingSeconds": round(time.time() - t0, 1), "log": log,
         "syntheticInputs": False,
     }
+    if a.latent == "e2":
+        model["constructLatent"] = align_constructs(construct_acc)
     json.dump(model, open(os.path.join(out, "model.json"), "w"), ensure_ascii=False)
     json.dump(items, open(os.path.join(out, "items.json"), "w"), ensure_ascii=False)
     print(f"{a.version}: {len(files)} αρχεία, {len(nodes)} κόμβοι, {len(items)} items, {time.time() - t0:.0f}s → {out}")

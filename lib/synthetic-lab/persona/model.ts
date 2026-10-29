@@ -95,6 +95,12 @@ export interface PersonaModel {
   syntheticInputs: false;
   items: PersonaItem[];
   vote?: VoteModel | null;
+  /**
+   * PHASE3 E2: ιεραρχικό λανθάνον ανά έννοια — μονάδα (μπαταρία factorKey ή μεμονωμένο item id) → (κλειδί κοινού λανθάνοντος,
+   * φόρτιση g). Μπαταρία: θ_b = g·C + √(1−g²)·u_b· μεμονωμένο item: e = g·C + √(1−g²)·ε. Ευθυγράμμιση μεταξύ ερευνών μόνο μέσω
+   * ίδιων ερωτήσεων (family)· αλλιώς ξεχωριστό κλειδί (καμία επινοημένη σχέση).
+   */
+  constructLatent?: { units: Record<string, { key: string; g: number }>; stats?: Record<string, unknown> } | null;
 }
 
 /** Μοντέλο εκλογικής επιλογής (conditional logit χωρίς σταθερές ανά κόμμα· βλ. scripts/synthetic-lab/persona/vote_model.py). */

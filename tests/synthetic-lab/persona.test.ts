@@ -5,7 +5,9 @@ import path from 'path';
 import { beforeAll, describe, expect, it } from 'vitest';
 import fixture from './fixtures/pie-feature-parity.json';
 import { FEATURES, clearPersonaModelCache, defaultModelVersion, featureVector, loadPersonaModel, readRegistry, type PersonaAnchors, type PersonaDemographics, type PersonaModel } from '@/lib/synthetic-lab/persona/model';
-import { buildPanel, generateAnchors, theta, type PersonaState } from '@/lib/synthetic-lab/persona/panel';
+import { PIE_MIN_AGE, adultAudience, buildPanel, generateAnchors, theta, type PersonaState, type SyntheticPanel } from '@/lib/synthetic-lab/persona/panel';
+import { respondPanel } from '@/lib/synthetic-lab/persona/survey';
+import { incumbencyMismatch } from '@/lib/synthetic-lab/persona/incumbency';
 import { PIE_TEMPORAL_LIMIT_YEARS, answerPersona, prepareQuestion } from '@/lib/synthetic-lab/persona/respond';
 import { loadScenario } from '@/lib/synthetic-lab/persona/vote';
 import { runSurvey } from '@/lib/synthetic-lab/engine/survey';
@@ -132,6 +134,48 @@ describe('PIE — C7: πλήρης συσχέτιση μπαταρίας (latent
   });
 });
 
+describe('PIE — pie-runtime-2 (Phase 3)', () => {
+  const panelOf = (n: number): SyntheticPanel => ({ id: 'p', createdAt: '', modelVersion: 'fixture', modelSnapshot: '', populationId: '', audience: {}, size: n, seed: 1, anchorSources: [],
+    personas: Array.from({ length: n }, (_, i) => state(i)), label: 'SYNTHETIC PERSONAS — NOT REAL PEOPLE' });
+  it('κανόνας παράλειψης: η ερώτηση συνέχειας τίθεται μόνο όταν ισχύει η συνθήκη', () => {
+    const A = q('A', { kind: 'direct', itemId: 'f2024::A', optionMap: MAP, dkOption: 'ΔΞ/ΔΑ' });
+    const FU = { ...q('FU', { kind: 'direct', itemId: 'f2024::A', optionMap: MAP, dkOption: 'ΔΞ/ΔΑ' }), followUpOf: { questionId: 'A', whenAnswerIn: ['Πολύ'] } } as Question;
+    const rs = respondPanel(panelOf(300), [A, FU].map((x) => prepareQuestion(fixtureModel, x, '2026-10')), 7);
+    let asked = 0;
+    for (const r of rs) {
+      const a = r.answers[0], f = r.answers[1];
+      const eligible = (a.value as { choice?: string } | null)?.choice === 'Πολύ';
+      expect(f.skipped).toBe(!eligible);
+      if (eligible) asked++;
+    }
+    expect(asked).toBeGreaterThan(20);
+    expect(asked).toBeLessThan(300);
+  });
+  it('ελάχιστη ηλικία: κοινό χωρίς όριο ή με όριο < 17 γίνεται 17+', () => {
+    expect(adultAudience(undefined).minAge).toBe(PIE_MIN_AGE);
+    expect(adultAudience({ minAge: 15 }).minAge).toBe(PIE_MIN_AGE);
+    expect(adultAudience({ minAge: 30 }).minAge).toBe(30);
+  });
+  it('E2: κοινό λανθάνον έννοιας συνδέει μεμονωμένα items· χωρίς αυτό είναι ανεξάρτητα', () => {
+    const mk = (id: string) => ({ ...fixtureModel.items[0], id, factorKey: undefined, lambda: 0, model: { kind: 'ordinal' as const, b: [0, 0], tau: [0, 1e9] }, dk: undefined, options: fixtureModel.items[0].options });
+    const base = { ...fixtureModel, items: [...fixtureModel.items, mk('f2024::P'), mk('f2024::R')] as PersonaModel['items'] };
+    const withC = { ...base, constructLatent: { units: { 'f2024::P': { key: 'C:x:1', g: 0.95 }, 'f2024::R': { key: 'C:x:1', g: 0.95 } } } };
+    const agree = (m: PersonaModel) => {
+      const P = prepareQuestion(m, q('P', { kind: 'direct', itemId: 'f2024::P', optionMap: MAP }), '2026-10');
+      const R = prepareQuestion(m, q('R', { kind: 'direct', itemId: 'f2024::R', optionMap: MAP }), '2026-10');
+      const rs = respondPanel(panelOf(400), [P, R], 3);
+      return rs.filter((r) => JSON.stringify(r.answers[0].value) === JSON.stringify(r.answers[1].value)).length / rs.length;
+    };
+    expect(agree(withC)).toBeGreaterThan(0.85);
+    expect(Math.abs(agree(base) - 0.5)).toBeLessThan(0.1);
+  });
+  it('E3: ερώτηση κυβέρνησης υπό άλλο κυβερνών κόμμα → ασυμφωνία· μη κυβερνητική ή ίδια περίοδος → καμία', () => {
+    expect(incumbencyMismatch('Εμπιστοσύνη στην κυβέρνηση', '2017-12', '2026-10')).not.toBeNull();
+    expect(incumbencyMismatch('Εμπιστοσύνη στην κυβέρνηση', '2023-12', '2026-10')).toBeNull();
+    expect(incumbencyMismatch('Εμπιστοσύνη στη Δικαιοσύνη', '2017-12', '2026-10')).toBeNull();
+  });
+});
+
 describe('PIE — μητρώο εκδόσεων', () => {
   it('καμία έκδοση δεν είναι εγκεκριμένη χωρίς όνομα εγκρίνοντος και αξιολόγηση', () => {
     for (const v of readRegistry()) if (v.status === 'approved') expect(v.approvedBy && v.evaluation).toBeTruthy();
@@ -189,6 +233,18 @@ describe.skipIf(!realOk)('PIE — πραγματικό μοντέλο (ιδιω�
     const partial = prepareQuestion(loadPersonaModel(MODEL)!, { ...plan.questions[2], options: [...opts.slice(0, 3), ...opts.slice(-2)] } as Question, '2026-10');
     expect(partial.support).toBe('NOT_RELIABLY_ESTIMABLE');
     await expect(runSurvey({ plan, populationId: CALIBRATED_POPULATION_ID, seed: 5, save: false, mode: 'live' })).rejects.toThrow();
+  });
+  it('pie-runtime-2: δείγμα PPS ακριβούς μεγέθους· ψήφος σταθερή για το ίδιο πρόσωπο (μόνιμο panel)', () => {
+    const m = loadPersonaModel(MODEL)!;
+    const p = buildPanel({ modelVersion: MODEL, populationId: CALIBRATED_POPULATION_ID, size: 200, seed: 3, audience: {}, save: false });
+    expect(p.personas.length).toBe(200);
+    expect(p.sampling).toBe('pps');
+    expect(p.audience.minAge).toBe(PIE_MIN_AGE);
+    const parties = loadScenario('2026-10')!.parties;
+    const V = prepareQuestion(m, q('V', { kind: 'equivalent', optionMap: {}, vote: { scenario: '2026-10', optionParty: Object.fromEntries(parties.map((x) => [x.label, x.key])), abstainOption: 'Α', undecidedOption: 'Β' } },
+      [...parties.map((x) => x.label), 'Α', 'Β']), '2026-10');
+    const r1 = respondPanel(p, [V], 1), r2 = respondPanel(p, [V], 2);
+    expect(r1.map((r) => JSON.stringify(r.answers[0].value))).toEqual(r2.map((r) => JSON.stringify(r.answers[0].value)));
   });
   it('το μοντέλο δεν περιέχει ατομικές εγγραφές (μόνο παραμέτρους και περιθώρια)', () => {
     const raw = readFileSync(path.join(REAL_MODELS, MODEL, 'items.json'), 'utf8');

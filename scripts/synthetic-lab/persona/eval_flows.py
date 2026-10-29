@@ -123,6 +123,7 @@ def choice_probs(beta, parties, prev, lr, tm, extra):
         U[:, j] = (beta["loyal"] * loyal + lin_b * lin + beta["dist"] * d + beta["dist2"] * d * d + beta["logprev"] * math.log(max(share, 0.1))
                    + beta["new"] * float(p["isNew"]) + beta["incumbent"] * inc + beta["incumbent_loyal"] * inc * loyal
                    + beta.get("loyal_ext", 0.0) * loyal * abs(p["position"] - 4.0) / 3.0
+                   + (beta.get("loyal_party") or {}).get(p["key"], 0.0) * loyal
                    + extra.get("loyal_t", 0.0) * loyal * tlog + extra.get("incloyal_t", 0.0) * inc * loyal * tlog)
     U -= U.max(axis=1, keepdims=True)
     E = np.exp(U)
@@ -337,6 +338,79 @@ def fit_c4d(root, vote):
     return v
 
 
+def cses_data_keys(root):
+    """CSES: (U [J×8], κλειδιά κομμάτων, επιλογή, βάρος, προηγούμενη ψήφος, εκλογές) — για τις τυχαίες επιδράσεις πίστης (E4)."""
+    results, ches = vm.load_results(root), vm.load_ches(root)
+    data = []
+    for eid in vm.CSES_FILES:
+        sc = vm.scenario_for(eid, results, ches, keys=vm.CSES_KEYS)
+        keys = [p["key"] for p in sc["parties"]]
+        df = pd.read_csv(os.path.join(root, ".synthetic-lab-data/persona/harmonized/resp", f"{vm.CSES_FILES[eid]}.csv.gz"), low_memory=False)
+        for v, pv, lr, lrn, w in zip(df.pv, df.prev_vote, df.lr7, df.lr_none, df.weight):
+            if v not in keys:
+                continue
+            lrv = None if (lrn == 1 or lr != lr) else float(lr)
+            prev = pv if isinstance(pv, str) else None
+            data.append((vm.utilities(None, sc["parties"], prev, lrv), keys, keys.index(v), float(w), prev, eid))
+    return data
+
+
+def fit_choice_re(data, tau, lam=0.1):
+    """Conditional logit με β (κοινά) + δ_p (πίστη ανά κόμμα, ποινή τ/2·Σδ² — μερική συγκέντρωση προς το 0)."""
+    parties = sorted({k for d in data for k in d[1]})
+    P = len(parties)
+    pidx = {k: i for i, k in enumerate(parties)}
+    nb = len(vm.BETAS)
+
+    def f(th):
+        b, dlt = th[:nb], th[nb:]
+        nll, g = 0.0, np.zeros(len(th))
+        for U, keys, y, w, prev, _ in data:
+            D = np.zeros((len(keys), P))
+            for j, k in enumerate(keys):
+                if prev == k:
+                    D[j, pidx[k]] = 1.0
+            X = np.column_stack([U, D])
+            e = X @ th
+            e -= e.max()
+            pr = np.exp(e)
+            pr /= pr.sum()
+            nll -= w * math.log(max(pr[y], 1e-12))
+            g -= w * (X[y] - pr @ X)
+        pen = 0.5 * lam * b @ b + 0.5 * tau * dlt @ dlt
+        gp = np.concatenate([lam * b, tau * dlt])
+        return nll + pen, g + gp
+    res = minimize(f, np.zeros(nb + P), jac=True, method="L-BFGS-B")
+    beta = dict(zip(vm.BETAS, [round(float(x), 5) for x in res.x[:nb]]))
+    beta["loyal_party"] = {k: round(float(x), 4) for k, x in zip(parties, res.x[nb:])}
+    return beta
+
+
+def loglik(data, beta):
+    ll = 0.0
+    for U, keys, y, w, prev, _ in data:
+        e = U @ np.array([beta[k] for k in vm.BETAS]) + np.array([(beta.get("loyal_party") or {}).get(k, 0.0) * (1.0 if prev == k else 0.0) for k in keys])
+        e -= e.max()
+        p = np.exp(e) / np.exp(e).sum()
+        ll += w * math.log(max(p[y], 1e-12))
+    return ll
+
+
+def fit_e4(root, vote):
+    """E4: τ από leave-one-election-out στο CSES (μόνο εκπαίδευση), μετά εκτίμηση σε όλες τις εκλογές."""
+    data = cses_data_keys(root)
+    eids = sorted({d[5] for d in data})
+    cv = {}
+    for tau in (0.3, 1.0, 3.0, 10.0, 30.0):
+        cv[tau] = sum(loglik([d for d in data if d[5] == e], fit_choice_re([d for d in data if d[5] != e], tau)) for e in eids)
+    best = max(cv, key=cv.get)
+    v = copy.deepcopy(vote)
+    v["beta"] = fit_choice_re(data, best)
+    v["version"] = v["version"] + "+e4"
+    v["e4"] = {"tauCV": {str(k): round(x, 1) for k, x in cv.items()}, "tau": best}
+    return v
+
+
 def fit_c4b(vote, P, X, groups, results, ches, lam=0.5):
     """Εκτίμηση loyal_t, incloyal_t στις ροές ΕΚΠΑΙΔΕΥΣΗΣ (ελαχιστοποίηση σταθμισμένου F4², ridge προς 0)."""
     tr = [g for g in groups if g["split"] == "train"]
@@ -358,7 +432,7 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--root", default=".")
     ap.add_argument("--model", default="pie-0.2")
-    ap.add_argument("--variant", default="v0", choices=["v0", "c4a", "c4ab", "c4ae", "c4ad", "c4ade"])
+    ap.add_argument("--variant", default="v0", choices=["v0", "c4a", "c4ab", "c4ae", "c4ad", "c4ade", "c4a_e4"])
     ap.add_argument("--seeds", type=int, default=3)
     a = ap.parse_args()
     root = os.path.abspath(a.root)
@@ -370,9 +444,12 @@ if __name__ == "__main__":
     vote, extra = base_vote, {}
     if a.variant.startswith("c4a"):
         vote = fit_c4a(root, base_vote)
-    if "e" in a.variant[3:]:
+    if "e" in a.variant[3:] and a.variant != "c4a_e4":
         vote = fit_c4e(root, vote)
-    if "d" in a.variant[3:]:
+    if a.variant == "c4a_e4":
+        vote = fit_e4(root, vote)
+        print("E4", vote["e4"], vote["beta"]["loyal_party"])
+    if "d" in a.variant[3:] and a.variant != "c4a_e4":
         vote = fit_c4d(root, vote)
         print("C4d beta", vote["beta"])
     if a.variant == "c4ab":

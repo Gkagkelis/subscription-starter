@@ -15,7 +15,7 @@
 
 import { existsSync, readFileSync } from 'fs';
 import path from 'path';
-import type { Rng } from '../rng';
+import { createRng, hashString, type Rng } from '../rng';
 import type { PersonaLink, Question } from '../types';
 import { featureVector, linear, softmax, type PersonaModel, type VoteModel } from './model';
 import type { PersonaState } from './panel';
@@ -143,7 +143,14 @@ export function partyUtilities(prep: PreparedVote, prev: string | null, lr: numb
   });
 }
 
-export function answerVote(prep: PreparedVote, ps: PersonaState, rng: Rng): string | null {
+/**
+ * Ψήφος ως χαρακτηριστικό του προσώπου (pie-runtime-2): οι τυχαίοι αριθμοί προέρχονται από τον σπόρο του ΠΡΟΣΩΠΟΥ
+ * (κοινοί σε όλες τις εκτελέσεις), όχι της εκτέλεσης. Η κατανομή μένει ίδια· το ίδιο πρόσωπο σε μόνιμο panel δίνει την ίδια
+ * ψήφο όσο δεν αλλάζει το σενάριο, και όταν αλλάζει, μετακινείται συνεκτικά (αντίστροφη συνάρτηση κατανομής με κόμματα
+ * ταξινομημένα κατά θέση αριστερά→δεξιά). pie-runtime-1: νέα κλήρωση σε κάθε εκτέλεση (επανάληψη ίδιας ψήφου ~29%).
+ */
+export function answerVote(prep: PreparedVote, ps: PersonaState, _rng: Rng): string | null {
+  const rng = createRng(hashString(`vote|${ps.pseed}`));
   const fv = featureVector(ps.demographics, ps.anchors);
   const m = prep.model;
   if (m.abstain) {
@@ -157,10 +164,11 @@ export function answerVote(prep: PreparedVote, ps: PersonaState, rng: Rng): stri
   const lr = ps.anchors.lr_none === 1 ? null : ps.anchors.lr7;
   const prev = resolvePrev(ps.anchors.pv, lr, prep.scenario, prep.beta, rng);
   const p = softmax(partyUtilities(prep, prev, lr));
+  const order = p.map((_, i) => i).sort((a, b) => prep.scenario.parties[a].position - prep.scenario.parties[b].position || a - b);
   const u = rng.next();
   let c = 0;
-  let k = p.length - 1;
-  for (let i = 0; i < p.length; i++) {
+  let k = order[order.length - 1];
+  for (const i of order) {
     c += p[i];
     if (u < c) {
       k = i;

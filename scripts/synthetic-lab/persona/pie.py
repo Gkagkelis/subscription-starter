@@ -303,6 +303,67 @@ def one_factor(Zs):
     return lam.tolist(), R
 
 
+# ------------------------------------------------------------------ PHASE3 E1: πολυχορική συσχέτιση υπολοίπων υπό συνθήκη
+_GL_T, _GL_W = np.polynomial.legendre.leggauss(20)
+_GL_T, _GL_W = (_GL_T + 1) / 2, _GL_W / 2
+
+
+def bvn_cdf(h, k, rho):
+    """Φ2(h, k; ρ) διανυσματικά: Φ(h)Φ(k) + ρ/(2π) ∫_0^1 exp(−(h²−2ρthk+k²)/(2(1−ρ²t²))) / √(1−ρ²t²) dt."""
+    from scipy.special import ndtr
+
+    h = np.clip(h, -8, 8)[:, None]
+    k = np.clip(k, -8, 8)[:, None]
+    r = rho * _GL_T[None, :]
+    one = 1 - r * r
+    f = np.exp(-(h * h - 2 * r * h * k + k * k) / (2 * one)) / np.sqrt(one)
+    return ndtr(h[:, 0]) * ndtr(k[:, 0]) + rho / (2 * math.pi) * (f @ _GL_W)
+
+
+def ordinal_bounds(eta, tau, y):
+    """Όρια του υπολοίπου e = y* − η για την παρατηρούμενη κατηγορία (±8 στα άκρα)."""
+    tau = np.asarray(tau, dtype=float)
+    lo = np.where(y > 0, tau[np.maximum(y - 1, 0)], 8.0 * -1) - eta
+    hi = np.where(y < len(tau), tau[np.minimum(y, len(tau) - 1)], 8.0) - eta
+    lo = np.where(y > 0, lo, -8.0)
+    hi = np.where(y < len(tau), hi, 8.0)
+    return lo, hi
+
+
+def polychoric_cond(b1, b2, w):
+    """ρ μέγιστης πιθανοφάνειας για δύο ordinal υπόλοιπα (διμεταβλητό probit με τα δικά τους η, τ). b = (lo, hi)."""
+    from scipy.optimize import minimize_scalar
+
+    (l1, h1), (l2, h2) = b1, b2
+
+    def nll(rho):
+        p = bvn_cdf(h1, h2, rho) - bvn_cdf(l1, h2, rho) - bvn_cdf(h1, l2, rho) + bvn_cdf(l1, l2, rho)
+        return -float(np.sum(w * np.log(np.maximum(p, 1e-12))))
+    r = minimize_scalar(nll, bounds=(-0.95, 0.95), method="bounded", options={"xatol": 2e-3})
+    return float(r.x)
+
+
+def one_factor_R(R):
+    """Φορτίσεις ενός παράγοντα από ΔΕΔΟΜΕΝΟ πίνακα συσχετίσεων (principal axis)."""
+    m = R.shape[0]
+    if m == 2:
+        r = R[0, 1]
+        l = math.sqrt(min(abs(r), 0.9))
+        return [l, l if r >= 0 else -l]
+    h = np.clip(np.abs(R - np.eye(m)).max(axis=1), 0.05, 0.9)
+    lam = np.zeros(m)
+    for _ in range(50):
+        Rh = R.copy()
+        np.fill_diagonal(Rh, h)
+        vals, vecs = np.linalg.eigh(Rh)
+        lam = vecs[:, -1] * math.sqrt(max(vals[-1], 1e-6))
+        h_new = np.clip(lam ** 2, 0.01, 0.9)
+        if np.max(np.abs(h_new - h)) < 1e-4:
+            break
+        h = h_new
+    return np.clip(lam, -0.95, 0.95).tolist()
+
+
 def battery_cholesky(R, lam, shrink=0.2, min_eig=0.05):
     """C7: πίνακας συσχετίσεων μπαταρίας (συρρίκνωση προς λλᵀ, θετικά ορισμένος, διαγώνιος 1) → κάτω τριγωνικός Cholesky."""
     lam = np.asarray(lam, dtype=float)
@@ -358,7 +419,16 @@ def theta(personas, key):
     return out
 
 
-def answer_item(item, personas, rng, factors=True, theta_override=None):
+def construct_load(item, model):
+    """E2: (κλειδί κοινού λανθάνοντος έννοιας, φόρτιση) για το item, αν το μοντέλο έχει ιεραρχικό λανθάνον."""
+    cl = (model or {}).get("constructLatent") or {}
+    u = cl.get("units", {}).get(item.get("factorKey") or item["id"])
+    if not u:
+        return None, 0.0
+    return u["key"], float(u["g"])
+
+
+def answer_item(item, personas, rng, factors=True, theta_override=None, model=None):
     """Στάδιο Β για ένα item: επιστρέφει πίνακα κωδικών (str) ανά πρόσωπο, με 'dk' όπου ο ερωτώμενος δεν απαντά."""
     X = feature_columns(personas)
     Z, _ = design(X, item["feats"], np.array(item["means"]))
@@ -382,8 +452,16 @@ def answer_item(item, personas, rng, factors=True, theta_override=None):
                 if l:
                     e += l * theta(personas, f"{item['factorKey']}#{k}")
         else:
-            th = theta_override if theta_override is not None else (theta(personas, item["factorKey"]) if item.get("factorKey") and lam != 0 else np.zeros(n))
-            e = lam * th + math.sqrt(max(1 - lam * lam, 0.0)) * rng.standard_normal(n)
+            ckey, g = construct_load(item, model) if factors else (None, 0.0)
+            if item.get("factorKey") and lam != 0:
+                th = theta_override if theta_override is not None else theta(personas, item["factorKey"])
+                if ckey and theta_override is None:  # θ_b = g·C + √(1−g²)·u_b
+                    th = g * theta(personas, ckey) + math.sqrt(max(1 - g * g, 0.0)) * th
+                e = lam * th + math.sqrt(max(1 - lam * lam, 0.0)) * rng.standard_normal(n)
+            elif ckey:  # μεμονωμένο item: e = κ·C + √(1−κ²)·ε
+                e = g * theta(personas, ckey) + math.sqrt(max(1 - g * g, 0.0)) * rng.standard_normal(n)
+            else:
+                e = rng.standard_normal(n) if theta_override is None else lam * theta_override + math.sqrt(max(1 - lam * lam, 0.0)) * rng.standard_normal(n)
         y = np.searchsorted(tau, eta + e)
     else:
         P = mnl_probs(Z, m)
