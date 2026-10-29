@@ -100,7 +100,7 @@ def ridit_scores(x_idx, w, K):
 
 def survey_stats(root, sid, gr_cells):
     items = load_items(root, sid)
-    df = pd.read_csv(os.path.join(root_dir(root), "resp", f"{sid}.csv.gz"), dtype=str, low_memory=False)
+    df = pd.read_csv(os.path.join(root_dir(root), "resp", f"{sid}.csv.gz"), dtype=str, low_memory=False, keep_default_na=False, na_values=[""])
     df["weight"] = pd.to_numeric(df["weight"], errors="coerce").fillna(1.0)
     df["a3"] = df["age_band"].map(AGE3) if "age_band" in df else None
     out = {"surveyId": sid, "items": {}, "countries": {}, "corr": {}}

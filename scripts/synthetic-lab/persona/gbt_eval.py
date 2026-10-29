@@ -26,6 +26,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import gbt  # noqa: E402
 
 N_CAL = 20
+# έρευνες με κοινούς ερωτώμενους: όταν η μία είναι στόχος, οι ελληνικές στήλες της άλλης κρύβονται επίσης
+OVERLAP = {"efsa2025": {"eb1033"}, "eb1033": {"efsa2025"}, "maple_w12": {"maple_w34"}, "maple_w34": {"maple_w12"}}
 M_GRID = (5, 10, 20)
 RANKS = (0, 1, 2, 3, 5, 8)
 LAMS = (1.0, 10.0)
@@ -161,7 +163,8 @@ def evaluate(root, out_path):
             hide = set()
             for t in tids:
                 hide |= set(fams[t]["famGlobal"])
-            gr_other = [j for j in range(len(cols)) if gr is not None and mask_all[gr, j] and cols[j]["survey"] != sid and cols[j]["item"] not in hide]
+            blocked = {sid} | OVERLAP.get(sid, set())
+            gr_other = [j for j in range(len(cols)) if gr is not None and mask_all[gr, j] and cols[j]["survey"] not in blocked and cols[j]["item"] not in hide]
             regimes = {"Rminus": []}
             regimes["R0"] = gr_other
             for m in M_GRID:
