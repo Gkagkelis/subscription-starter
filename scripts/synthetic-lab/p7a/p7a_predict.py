@@ -170,7 +170,7 @@ def main():
     env = dict(os.environ)
     tsx = os.path.join(ROOT, "node_modules", ".bin", "tsx")
     out = {"createdAt": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "n": N, "seed": SEED, "user": os.getuid(), "surveys": {}}
-    out["codeCommit"] = sh(["git", "-C", ROOT, "rev-parse", "HEAD"]).strip() if os.path.exists(os.path.join(ROOT, ".git")) else None
+    out["codeCommit"] = os.environ.get("P7A_CODE_COMMIT")  # ο χρήστης p7apred δεν εκτελεί git στο αποθετήριο του root
     out["modelHashes"] = {m: hashlib.sha256(open(os.path.join(ROOT, ".synthetic-lab-data", "persona", "models", m, "model.json"), "rb").read()).hexdigest()
                           for m in ("pie-0.2", "pie-0.5", "pie-0.6", "pie-0.7")}
     out["policySha256"] = hashlib.sha256(open(os.path.join(ROOT, "config", "synthetic-lab", "persona", "gpm", "evidence-tiers.json"), "rb").read()).hexdigest()
