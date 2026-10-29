@@ -29,7 +29,37 @@ import p7a_seal  # noqa: E402
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 P = os.path.join(ROOT, ".synthetic-lab-data", "p7a")
 DK_RE = re.compile(r"(δεν ξέρω|δε ξέρω|δξ|δα|δεν απαντ|αρνησ|ξ/ΔΑ|don.?t know|no answer)", re.I)
-METHODS = ["pie-0.2", "pie-0.6", "pie-0.7", "pie-0.7x", "IQGE", "UNIF", "B5", "POOL", "POLL_AVG", "PREV_POLLSTER", "PREV_SAME"]
+METHODS = ["pie-0.2", "pie-0.6", "pie-0.7", "pie-0.7x", "SYSTEM07", "SYSTEM07x", "IQGE", "UNIF", "B5", "POOL", "POLL_AVG", "PREV_POLLSTER", "PREV_SAME"]
+
+
+def add_composites(items):
+    """ΣΥΣΤΗΜΑ pie-0.7 (προκαθορισμένος κανόνας): B5 (Tier 3) όπου υπάρχουν τιμές άλλων χωρών της ίδιας ερώτησης· αλλιώς η
+    απάντηση της pie-0.7 (ή αποχή). SYSTEM07x: ίδιο με pie-0.7x (πειραματικό Tier 4 επιτρέπεται)."""
+    for it in items:
+        P_ = it["predictions"]
+        for comp, base_ in (("SYSTEM07", "pie-0.7"), ("SYSTEM07x", "pie-0.7x")):
+            if "B5" in P_:
+                P_[comp] = dict(P_["B5"], tier=3, expectedMAE=4.39)
+            elif base_ in P_:
+                P_[comp] = P_[base_]
+
+
+def add_derived(items, mp):
+    """Παράγωγες ερωτήσεις (π.χ. «Πολύ & Αρκετά» σε όσους έχουν το έξοδο) από την πρόβλεψη της ερώτησης-πηγής."""
+    by = {it["qid"]: it for it in items}
+    for qid, rule in mp.get("derived", {}).items():
+        src = by.get(rule["from"])
+        if not src:
+            continue
+        rec = {"qid": qid, "type": "single_choice", "options": [rule["option"]], "predictions": {}, "derivedFrom": rule["from"]}
+        for m, pm in src["predictions"].items():
+            if not pm.get("answered") or not pm.get("shares"):
+                rec["predictions"][m] = {"answered": False}
+                continue
+            num = sum(pm["shares"].get(o, 0.0) for o in rule["num"])
+            den = sum(v for o, v in pm["shares"].items() if o not in rule["denExclude"])
+            rec["predictions"][m] = dict(pm, shares={rule["option"]: 100 * num / den if den > 0 else 0.0})
+        items.append(rec)
 Z = {"80": 1.2816, "90": 1.6449, "95": 1.96}
 
 
@@ -73,15 +103,19 @@ def main():
         Q = Qs[sid]
         qmeta = {q["qid"]: q for q in Q["questions"]}
         mp = mappings.get(sid, {})
+        add_derived(S["items"], mp)
+        add_composites(S["items"])
         for it in S["items"]:
             t = tq.get(it["qid"])
-            meta = qmeta[it["qid"]]
-            if not t or not t.get("shares"):
+            meta = qmeta.get(it["qid"], {})
+            if not t or not t.get("shares") or meta.get("excluded"):
                 rows.append({"survey": sid, "qid": it["qid"], "status": "no_ground_truth"})
                 continue
             opts = it["options"]
             scope = mp.get("scoringScope", {}).get(it["qid"], "substantive")
-            keep = opts if scope == "as_published" else [o for o in opts if not DK_RE.search(o)]
+            multi = it["type"] == "multiple_choice"
+            single_share = len(opts) == 1
+            keep = opts if (scope == "as_published" or multi or single_share) else [o for o in opts if not DK_RE.search(o)]
             y = np.array([float(t["shares"].get(o, np.nan)) for o in keep])
             for o in opts:
                 gt_rows.append({"survey": sid, "qid": it["qid"], "option": o, "observed_pct": t["shares"].get(o), "base_n": t.get("base_n"), "denominator": t.get("denominator"),
@@ -89,11 +123,12 @@ def main():
             if np.isnan(y).any() or y.sum() <= 0:
                 rows.append({"survey": sid, "qid": it["qid"], "status": "incomplete_ground_truth"})
                 continue
-            y = y / y.sum() * 100
+            if not (multi or single_share):
+                y = y / y.sum() * 100
             n = float(t.get("base_n") or 1000)
             se = np.sqrt(np.clip(y / 100 * (1 - y / 100), 1e-4, None) / (n / 1.5)) * 100
-            sims = rng.multinomial(int(n / 1.5), y / 100, size=300) / int(n / 1.5) * 100
-            floor = float(np.mean(np.abs(np.round(sims) - y)))
+            ne = int(n / 1.5)
+            floor = float(np.mean(np.abs(np.round(rng.binomial(ne, np.clip(y / 100, 0, 1), size=(300, len(y))) / ne * 100) - y)))
             base = {"survey": sid, "qid": it["qid"], "category": Q.get("category"), "domain": meta.get("domain") or Q.get("category"), "type": it["type"],
                     "measure": meta.get("measure"), "K": len(keep), "n": n, "floor": round(floor, 3), "status": "scored"}
             for m in METHODS:
@@ -105,7 +140,8 @@ def main():
                 if p.sum() <= 0:
                     base[f"{m}_answered"] = False
                     continue
-                p = p / p.sum() * 100
+                if not (multi or single_share):
+                    p = p / p.sum() * 100
                 base[f"{m}_answered"] = True
                 base[f"{m}_mae"] = float(np.mean(np.abs(p - y)))
                 base[f"{m}_bias_first"] = float(p[0] - y[0])

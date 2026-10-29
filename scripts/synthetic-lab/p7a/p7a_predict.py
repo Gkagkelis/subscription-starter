@@ -165,6 +165,7 @@ def main():
         except PermissionError:
             pass
     mappings = json.load(open(os.path.join(ROOT, "config", "synthetic-lab", "p7a", "mappings.json")))
+    prev_manual = json.load(open(os.path.join(ROOT, "config", "synthetic-lab", "p7a", "prev_same.json")))
     W = os.path.join(P, "work")
     env = dict(os.environ)
     tsx = os.path.join(ROOT, "node_modules", ".bin", "tsx")
@@ -188,15 +189,15 @@ def main():
         y, m = map(int, fw.split("-"))
         qs = []
         for it in Q["questions"]:
-            if it.get("excluded"):
+            if it.get("excluded") or it["qid"] in mp.get("skipRuntime", []):
                 continue
             q = {"id": it["qid"], "type": it["type"], "text": it["text"]}
             if it["type"] == "likert":
                 q["scale"] = it["options"]
             else:
                 q["options"] = it["options"]
-            if it.get("followUpOf"):
-                q["followUpOf"] = it["followUpOf"]
+            if it["qid"] in mp.get("followUps", {}):
+                q["followUpOf"] = mp["followUps"][it["qid"]]
             qs.append(q)
         base = {"title": Q.get("title"), "referenceYear": y, "referenceMonth": m, "questions": qs}
         if mp.get("audience"):
@@ -237,11 +238,13 @@ def main():
                 rec["predictions"]["IQGE"] = {"answered": True, "shares": {o: 100 * lv.get(o, 0.0) for o in opts if o in lv}, "tier": g["iqge"]["tier"],
                                               "expectedMAE": g["iqge"]["expectedMAE"], "int80": g["iqge"].get("int80")}
             sub = subst(opts)
-            rec["predictions"]["UNIF"] = {"answered": True, "shares": {o: (100 / len(sub) if o in sub else 0.0) for o in opts}}
+            if q["type"] != "multiple_choice":
+                rec["predictions"]["UNIF"] = {"answered": True, "shares": {o: (100 / len(sub) if o in sub else 0.0) for o in opts}}
             if q["id"] in mp.get("pollBaselines", {}):
                 for k, v in poll_baselines(Q, q, mp["pollBaselines"][q["id"]]).items():
                     rec["predictions"][k] = {"answered": True, "shares": v["dist"], "meta": {kk: vv for kk, vv in v.items() if kk != "dist"}}
-            ps = prev_same(Q, q, E, embed)
+            man = prev_manual.get(sid, {}).get(q["id"])
+            ps = {"dist": {k: float(v) for k, v in man["shares"].items()}, "source": man["source"], "manual": True} if man else prev_same(Q, q, E, embed)
             if ps:
                 rec["predictions"]["PREV_SAME"] = {"answered": True, "shares": ps["dist"], "meta": {k: v for k, v in ps.items() if k != "dist"}}
             src_it = next(z for z in Q["questions"] if z["qid"] == q["id"])
