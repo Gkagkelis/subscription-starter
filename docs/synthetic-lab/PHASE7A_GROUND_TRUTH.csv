@@ -1,0 +1,402 @@
+survey,qid,option,observed_pct,base_n,denominator,weighted,precision,source_page
+P7A-CON-01,Q2,Δεν μπορούμε να καλύψουμε ούτε τις βασικές μας ανάγκες,5.9,1000,"all respondents (weighted), n=1000",True,1 decimal,5
+P7A-CON-01,Q2,"Δεν μπορούμε να καλύψουμε όλες τις ανάγκες μας, δυσκολευόμαστε πολύ",18.6,1000,"all respondents (weighted), n=1000",True,1 decimal,5
+P7A-CON-01,Q2,Καταφέρνουμε να καλύπτουμε τις ανάγκες μας με δυσκολία,41.5,1000,"all respondents (weighted), n=1000",True,1 decimal,5
+P7A-CON-01,Q2,Ζούμε άνετα αλλά δεν έχουμε δυνατότητα αποταμίευσης,26.7,1000,"all respondents (weighted), n=1000",True,1 decimal,5
+P7A-CON-01,Q2,Ζούμε άνετα και μπορούμε να αποταμιεύουμε,7.1,1000,"all respondents (weighted), n=1000",True,1 decimal,5
+P7A-CON-01,Q2,Δεν ξέρω / Δεν απαντώ,0.2,1000,"all respondents (weighted), n=1000",True,1 decimal,5
+P7A-CON-01,Q3,Εισαγόμενη εξαιτίας των διεθνών συνθηκών ή,20,1000,"all respondents (weighted), n=1000",True,1 decimal,6
+P7A-CON-01,Q3,Οφείλεται στην πολιτική της κυβέρνησης,34.2,1000,"all respondents (weighted), n=1000",True,1 decimal,6
+P7A-CON-01,Q3,Εξίσου και στα δυο (αυθόρμητα),45.2,1000,"all respondents (weighted), n=1000",True,1 decimal,6
+P7A-CON-01,Q3,Δεν ξέρω / Δεν απαντώ,0.6,1000,"all respondents (weighted), n=1000",True,1 decimal,6
+P7A-CON-01,Q4_1,Πολύ,15.4,1000,"all respondents (weighted), n=1000",True,1 decimal,7
+P7A-CON-01,Q4_1,Αρκετά,37.8,1000,"all respondents (weighted), n=1000",True,1 decimal,7
+P7A-CON-01,Q4_1,Λίγο,29.3,1000,"all respondents (weighted), n=1000",True,1 decimal,7
+P7A-CON-01,Q4_1,Καθόλου,17.4,1000,"all respondents (weighted), n=1000",True,1 decimal,7
+P7A-CON-01,Q4_1,Δεν έχω αυτό το έξοδο,0,1000,"all respondents (weighted), n=1000",True,1 decimal,7
+P7A-CON-01,Q4_1,Δεν ξέρω / Δεν απαντώ,0.1,1000,"all respondents (weighted), n=1000",True,1 decimal,7
+P7A-CON-01,Q4_2,Πολύ,21.7,1000,"all respondents (weighted), n=1000",True,1 decimal,7
+P7A-CON-01,Q4_2,Αρκετά,34.1,1000,"all respondents (weighted), n=1000",True,1 decimal,7
+P7A-CON-01,Q4_2,Λίγο,29.1,1000,"all respondents (weighted), n=1000",True,1 decimal,7
+P7A-CON-01,Q4_2,Καθόλου,14.8,1000,"all respondents (weighted), n=1000",True,1 decimal,7
+P7A-CON-01,Q4_2,Δεν έχω αυτό το έξοδο,0.3,1000,"all respondents (weighted), n=1000",True,1 decimal,7
+P7A-CON-01,Q4_2,Δεν ξέρω / Δεν απαντώ,0,1000,"all respondents (weighted), n=1000",True,1 decimal,7
+P7A-CON-01,Q4_3,Πολύ,11.6,1000,"all respondents (weighted), n=1000",True,1 decimal,8
+P7A-CON-01,Q4_3,Αρκετά,20.8,1000,"all respondents (weighted), n=1000",True,1 decimal,8
+P7A-CON-01,Q4_3,Λίγο,18.2,1000,"all respondents (weighted), n=1000",True,1 decimal,8
+P7A-CON-01,Q4_3,Καθόλου,11.7,1000,"all respondents (weighted), n=1000",True,1 decimal,8
+P7A-CON-01,Q4_3,Δεν έχω αυτό το έξοδο,37.3,1000,"all respondents (weighted), n=1000",True,1 decimal,8
+P7A-CON-01,Q4_3,Δεν ξέρω / Δεν απαντώ,0.4,1000,"all respondents (weighted), n=1000",True,1 decimal,8
+P7A-CON-01,Q4_4,Πολύ,18.0,1000,"all respondents (weighted), n=1000",True,1 decimal,8
+P7A-CON-01,Q4_4,Αρκετά,26.8,1000,"all respondents (weighted), n=1000",True,1 decimal,8
+P7A-CON-01,Q4_4,Λίγο,28.6,1000,"all respondents (weighted), n=1000",True,1 decimal,8
+P7A-CON-01,Q4_4,Καθόλου,17.8,1000,"all respondents (weighted), n=1000",True,1 decimal,8
+P7A-CON-01,Q4_4,Δεν έχω αυτό το έξοδο,8.8,1000,"all respondents (weighted), n=1000",True,1 decimal,8
+P7A-CON-01,Q4_4,Δεν ξέρω / Δεν απαντώ,0,1000,"all respondents (weighted), n=1000",True,1 decimal,8
+P7A-CON-01,Q4_5,Πολύ,11.7,1000,"all respondents (weighted), n=1000",True,1 decimal,9
+P7A-CON-01,Q4_5,Αρκετά,13.5,1000,"all respondents (weighted), n=1000",True,1 decimal,9
+P7A-CON-01,Q4_5,Λίγο,12.0,1000,"all respondents (weighted), n=1000",True,1 decimal,9
+P7A-CON-01,Q4_5,Καθόλου,7.8,1000,"all respondents (weighted), n=1000",True,1 decimal,9
+P7A-CON-01,Q4_5,Δεν έχω αυτό το έξοδο,54.5,1000,"all respondents (weighted), n=1000",True,1 decimal,9
+P7A-CON-01,Q4_5,Δεν ξέρω / Δεν απαντώ,0.5,1000,"all respondents (weighted), n=1000",True,1 decimal,9
+P7A-CON-01,Q4_6,Πολύ,26.4,1000,"all respondents (weighted), n=1000",True,1 decimal,9
+P7A-CON-01,Q4_6,Αρκετά,27.4,1000,"all respondents (weighted), n=1000",True,1 decimal,9
+P7A-CON-01,Q4_6,Λίγο,21.6,1000,"all respondents (weighted), n=1000",True,1 decimal,9
+P7A-CON-01,Q4_6,Καθόλου,13.2,1000,"all respondents (weighted), n=1000",True,1 decimal,9
+P7A-CON-01,Q4_6,Δεν έχω αυτό το έξοδο,11.4,1000,"all respondents (weighted), n=1000",True,1 decimal,9
+P7A-CON-01,Q4_6,Δεν ξέρω / Δεν απαντώ,0,1000,"all respondents (weighted), n=1000",True,1 decimal,9
+P7A-CON-01,Q4_7,Πολύ,21.3,1000,"all respondents (weighted), n=1000",True,1 decimal,10
+P7A-CON-01,Q4_7,Αρκετά,29.8,1000,"all respondents (weighted), n=1000",True,1 decimal,10
+P7A-CON-01,Q4_7,Λίγο,28.5,1000,"all respondents (weighted), n=1000",True,1 decimal,10
+P7A-CON-01,Q4_7,Καθόλου,16.4,1000,"all respondents (weighted), n=1000",True,1 decimal,10
+P7A-CON-01,Q4_7,Δεν έχω αυτό το έξοδο,3.8,1000,"all respondents (weighted), n=1000",True,1 decimal,10
+P7A-CON-01,Q4_7,Δεν ξέρω / Δεν απαντώ,0.2,1000,"all respondents (weighted), n=1000",True,1 decimal,10
+P7A-CON-01,Q4_8,Πολύ,36.9,1000,"all respondents (weighted), n=1000",True,1 decimal,10
+P7A-CON-01,Q4_8,Αρκετά,23.0,1000,"all respondents (weighted), n=1000",True,1 decimal,10
+P7A-CON-01,Q4_8,Λίγο,14.6,1000,"all respondents (weighted), n=1000",True,1 decimal,10
+P7A-CON-01,Q4_8,Καθόλου,10.9,1000,"all respondents (weighted), n=1000",True,1 decimal,10
+P7A-CON-01,Q4_8,Δεν έχω αυτό το έξοδο,14.0,1000,"all respondents (weighted), n=1000",True,1 decimal,10
+P7A-CON-01,Q4_8,Δεν ξέρω / Δεν απαντώ,0.6,1000,"all respondents (weighted), n=1000",True,1 decimal,10
+P7A-CON-01,Q4_9,Πολύ,11.1,1000,"all respondents (weighted), n=1000",True,1 decimal,11
+P7A-CON-01,Q4_9,Αρκετά,11.9,1000,"all respondents (weighted), n=1000",True,1 decimal,11
+P7A-CON-01,Q4_9,Λίγο,11.0,1000,"all respondents (weighted), n=1000",True,1 decimal,11
+P7A-CON-01,Q4_9,Καθόλου,6.8,1000,"all respondents (weighted), n=1000",True,1 decimal,11
+P7A-CON-01,Q4_9,Δεν έχω αυτό το έξοδο,59.0,1000,"all respondents (weighted), n=1000",True,1 decimal,11
+P7A-CON-01,Q4_9,Δεν ξέρω / Δεν απαντώ,0.2,1000,"all respondents (weighted), n=1000",True,1 decimal,11
+P7A-CON-01,Q4_10,Πολύ,38.3,1000,"all respondents (weighted), n=1000",True,1 decimal,11
+P7A-CON-01,Q4_10,Αρκετά,27.8,1000,"all respondents (weighted), n=1000",True,1 decimal,11
+P7A-CON-01,Q4_10,Λίγο,19.0,1000,"all respondents (weighted), n=1000",True,1 decimal,11
+P7A-CON-01,Q4_10,Καθόλου,10.1,1000,"all respondents (weighted), n=1000",True,1 decimal,11
+P7A-CON-01,Q4_10,Δεν έχω αυτό το έξοδο,4.6,1000,"all respondents (weighted), n=1000",True,1 decimal,11
+P7A-CON-01,Q4_10,Δεν ξέρω / Δεν απαντώ,0.2,1000,"all respondents (weighted), n=1000",True,1 decimal,11
+P7A-CON-01,Q4_11,Πολύ,16.2,1000,"all respondents (weighted), n=1000",True,1 decimal,12
+P7A-CON-01,Q4_11,Αρκετά,25.2,1000,"all respondents (weighted), n=1000",True,1 decimal,12
+P7A-CON-01,Q4_11,Λίγο,34.7,1000,"all respondents (weighted), n=1000",True,1 decimal,12
+P7A-CON-01,Q4_11,Καθόλου,23.0,1000,"all respondents (weighted), n=1000",True,1 decimal,12
+P7A-CON-01,Q4_11,Δεν έχω αυτό το έξοδο,0.7,1000,"all respondents (weighted), n=1000",True,1 decimal,12
+P7A-CON-01,Q4_11,Δεν ξέρω / Δεν απαντώ,0.2,1000,"all respondents (weighted), n=1000",True,1 decimal,12
+P7A-CON-01,Q4R_1,Πολύ & Αρκετά,53.2,1000,respondents who have the expense (weighted); unweighted base not published,True,1 decimal,13
+P7A-CON-01,Q4R_2,Πολύ & Αρκετά,56.0,1000,respondents who have the expense (weighted); unweighted base not published,True,1 decimal,13
+P7A-CON-01,Q4R_3,Πολύ & Αρκετά,51.7,1000,respondents who have the expense (weighted); unweighted base not published,True,1 decimal,13
+P7A-CON-01,Q4R_4,Πολύ & Αρκετά,49.1,1000,respondents who have the expense (weighted); unweighted base not published,True,1 decimal,13
+P7A-CON-01,Q4R_5,Πολύ & Αρκετά,55.4,1000,respondents who have the expense (weighted); unweighted base not published,True,1 decimal,13
+P7A-CON-01,Q4R_6,Πολύ & Αρκετά,60.5,1000,respondents who have the expense (weighted); unweighted base not published,True,1 decimal,13
+P7A-CON-01,Q4R_7,Πολύ & Αρκετά,53.1,1000,respondents who have the expense (weighted); unweighted base not published,True,1 decimal,13
+P7A-CON-01,Q4R_8,Πολύ & Αρκετά,69.7,1000,respondents who have the expense (weighted); unweighted base not published,True,1 decimal,13
+P7A-CON-01,Q4R_9,Πολύ & Αρκετά,56.1,1000,respondents who have the expense (weighted); unweighted base not published,True,1 decimal,13
+P7A-CON-01,Q4R_10,Πολύ & Αρκετά,69.3,1000,respondents who have the expense (weighted); unweighted base not published,True,1 decimal,13
+P7A-CON-01,Q4R_11,Πολύ & Αρκετά,41.7,1000,respondents who have the expense (weighted); unweighted base not published,True,1 decimal,13
+P7A-POL-01,Q1,Προς τη σωστή,30,1300,"all respondents (weighted), n=1300",True,integer %,5
+P7A-POL-01,Q1,Προς τη λάθος,65,1300,"all respondents (weighted), n=1300",True,integer %,5
+P7A-POL-01,Q1,Ούτε-ούτε (αυθ.),4,1300,"all respondents (weighted), n=1300",True,integer %,5
+P7A-POL-01,Q1,ΔΓ/ΔΑ (αυθ.),1,1300,"all respondents (weighted), n=1300",True,integer %,5
+P7A-POL-01,Q2,Σε καλύτερη,15,1300,"all respondents (weighted), n=1300",True,integer %,6
+P7A-POL-01,Q2,Στην ίδια,36,1300,"all respondents (weighted), n=1300",True,integer %,6
+P7A-POL-01,Q2,Σε χειρότερη,49,1300,"all respondents (weighted), n=1300",True,integer %,6
+P7A-POL-01,Q4_1,Μάλλον θετικές,36,1300,"all respondents (weighted), n=1300",True,integer %,8
+P7A-POL-01,Q4_1,Ούτε-ούτε (αυθ.),15,1300,"all respondents (weighted), n=1300",True,integer %,8
+P7A-POL-01,Q4_1,Μάλλον αρνητικές,47,1300,"all respondents (weighted), n=1300",True,integer %,8
+P7A-POL-01,Q4_1,ΔΓ/ΔΑ (αυθ.),2,1300,"all respondents (weighted), n=1300",True,integer %,8
+P7A-POL-01,Q4_2,Μάλλον θετικές,19,1300,"all respondents (weighted), n=1300",True,integer %,8
+P7A-POL-01,Q4_2,Ούτε-ούτε (αυθ.),10,1300,"all respondents (weighted), n=1300",True,integer %,8
+P7A-POL-01,Q4_2,Μάλλον αρνητικές,71,1300,"all respondents (weighted), n=1300",True,integer %,8
+P7A-POL-01,Q4_2,ΔΓ/ΔΑ (αυθ.),0,1300,"all respondents (weighted), n=1300",True,integer %,8
+P7A-POL-01,Q4_3,Μάλλον θετικές,15,1300,"all respondents (weighted), n=1300",True,integer %,8
+P7A-POL-01,Q4_3,Ούτε-ούτε (αυθ.),8,1300,"all respondents (weighted), n=1300",True,integer %,8
+P7A-POL-01,Q4_3,Μάλλον αρνητικές,77,1300,"all respondents (weighted), n=1300",True,integer %,8
+P7A-POL-01,Q4_3,ΔΓ/ΔΑ (αυθ.),0,1300,"all respondents (weighted), n=1300",True,integer %,8
+P7A-POL-01,Q4_4,Μάλλον θετικές,23,1300,"all respondents (weighted), n=1300",True,integer %,8
+P7A-POL-01,Q4_4,Ούτε-ούτε (αυθ.),13,1300,"all respondents (weighted), n=1300",True,integer %,8
+P7A-POL-01,Q4_4,Μάλλον αρνητικές,64,1300,"all respondents (weighted), n=1300",True,integer %,8
+P7A-POL-01,Q4_4,ΔΓ/ΔΑ (αυθ.),0,1300,"all respondents (weighted), n=1300",True,integer %,8
+P7A-POL-01,Q5,Θετική,28,1300,"all respondents (weighted), n=1300",True,integer %,9
+P7A-POL-01,Q5,Ούτε-ούτε (αυθ.),4,1300,"all respondents (weighted), n=1300",True,integer %,9
+P7A-POL-01,Q5,Αρνητική,67,1300,"all respondents (weighted), n=1300",True,integer %,9
+P7A-POL-01,Q5,ΔΓ/ΔΑ (αυθ.),1,1300,"all respondents (weighted), n=1300",True,integer %,9
+P7A-POL-01,Q6,Θετική,31,1300,"all respondents (weighted), n=1300",True,integer %,10
+P7A-POL-01,Q6,Ούτε-ούτε (αυθ.),3,1300,"all respondents (weighted), n=1300",True,integer %,10
+P7A-POL-01,Q6,Αρνητική,65,1300,"all respondents (weighted), n=1300",True,integer %,10
+P7A-POL-01,Q6,ΔΓ/ΔΑ (αυθ.),1,1300,"all respondents (weighted), n=1300",True,integer %,10
+P7A-POL-01,Q7,Θετική,16,1300,"all respondents (weighted), n=1300",True,integer %,11
+P7A-POL-01,Q7,Ούτε-ούτε (αυθ.),5,1300,"all respondents (weighted), n=1300",True,integer %,11
+P7A-POL-01,Q7,Αρνητική,76,1300,"all respondents (weighted), n=1300",True,integer %,11
+P7A-POL-01,Q7,ΔΓ/ΔΑ (αυθ.),3,1300,"all respondents (weighted), n=1300",True,integer %,11
+P7A-POL-01,Q8,Θετική,18,1300,"all respondents (weighted), n=1300",True,integer %,12
+P7A-POL-01,Q8,Ούτε-ούτε (αυθ.),5,1300,"all respondents (weighted), n=1300",True,integer %,12
+P7A-POL-01,Q8,Αρνητική,74,1300,"all respondents (weighted), n=1300",True,integer %,12
+P7A-POL-01,Q8,ΔΓ/ΔΑ (αυθ.),3,1300,"all respondents (weighted), n=1300",True,integer %,12
+P7A-POL-01,Q10,Θετική,14,1300,"all respondents (weighted), n=1300",True,integer %,15
+P7A-POL-01,Q10,Ούτε-ούτε (αυθ.),2,1300,"all respondents (weighted), n=1300",True,integer %,15
+P7A-POL-01,Q10,Αρνητική,81,1300,"all respondents (weighted), n=1300",True,integer %,15
+P7A-POL-01,Q10,ΔΓ/ΔΑ (αυθ.),3,1300,"all respondents (weighted), n=1300",True,integer %,15
+P7A-POL-01,Q11,Θετική,30,1300,"all respondents (weighted), n=1300",True,integer %,16
+P7A-POL-01,Q11,Ουδέτερη (αυθ.),6,1300,"all respondents (weighted), n=1300",True,integer %,16
+P7A-POL-01,Q11,Αρνητική,63,1300,"all respondents (weighted), n=1300",True,integer %,16
+P7A-POL-01,Q11,ΔΓ/ΔΑ (αυθ.),1,1300,"all respondents (weighted), n=1300",True,integer %,16
+P7A-POL-01,Q13,Ανδρουλάκης Νίκος,6,1300,"all respondents (weighted), n=1300",True,integer %,19
+P7A-POL-01,Q13,Βαρουφάκης Γιάνης,1,1300,"all respondents (weighted), n=1300",True,integer %,19
+P7A-POL-01,Q13,Βελόπουλος Κυριάκος,4,1300,"all respondents (weighted), n=1300",True,integer %,19
+P7A-POL-01,Q13,Καρυστιανού Μαρία,3,1300,"all respondents (weighted), n=1300",True,integer %,19
+P7A-POL-01,Q13,Κασιδιάρης Ηλίας,2,1300,"all respondents (weighted), n=1300",True,integer %,19
+P7A-POL-01,Q13,Κασσελάκης Στέφανος,1,1300,"all respondents (weighted), n=1300",True,integer %,19
+P7A-POL-01,Q13,Κουτσούμπας Δημήτρης,2,1300,"all respondents (weighted), n=1300",True,integer %,19
+P7A-POL-01,Q13,Κωνσταντοπούλου Ζωή,5,1300,"all respondents (weighted), n=1300",True,integer %,19
+P7A-POL-01,Q13,Λατινοπούλου Αφροδίτη,2,1300,"all respondents (weighted), n=1300",True,integer %,19
+P7A-POL-01,Q13,Μητσοτάκης Κυριάκος,28,1300,"all respondents (weighted), n=1300",True,integer %,19
+P7A-POL-01,Q13,Σαμαράς Αντώνης,2,1300,"all respondents (weighted), n=1300",True,integer %,19
+P7A-POL-01,Q13,Τσίπρας Αλέξης,12,1300,"all respondents (weighted), n=1300",True,integer %,19
+P7A-POL-01,Q13,Άλλος,1,1300,"all respondents (weighted), n=1300",True,integer %,19
+P7A-POL-01,Q13,Κανένας,26,1300,"all respondents (weighted), n=1300",True,integer %,19
+P7A-POL-01,Q13,ΔΓ/ΔΑ,5,1300,"all respondents (weighted), n=1300",True,integer %,19
+P7A-POL-01,Q16,Θα σχηματιστεί Κυβέρνηση,28,1300,"all respondents (weighted), n=1300",True,integer %,29
+P7A-POL-01,Q16,Θα χρειαστεί να ξαναγίνουν εκλογές,69,1300,"all respondents (weighted), n=1300",True,integer %,29
+P7A-POL-01,Q16,ΔΓ/ΔΑ (αυθ.),3,1300,"all respondents (weighted), n=1300",True,integer %,29
+P7A-POL-01,Q17,Θα είναι αυτοδύναμη,59,1300,filtered base: the 28% (weighted) who said a government will be formed; unweighted n not published (base_n given is total sample),True,integer %,31
+P7A-POL-01,Q17,Θα είναι Κυβέρνηση συνεργασίας,40,1300,filtered base: the 28% (weighted) who said a government will be formed; unweighted n not published (base_n given is total sample),True,integer %,31
+P7A-POL-01,Q17,ΔΓ/ΔΑ (αυθ.),1,1300,filtered base: the 28% (weighted) who said a government will be formed; unweighted n not published (base_n given is total sample),True,integer %,31
+P7A-POL-01,Q18,Υπέρ των αυτοδύναμων κυβερνήσεων,49,1300,"all respondents (weighted), n=1300",True,integer %,32
+P7A-POL-01,Q18,Υπέρ των κυβερνήσεων συνεργασίας,48,1300,"all respondents (weighted), n=1300",True,integer %,32
+P7A-POL-01,Q18,ΔΓ/ΔΑ (αυθ.),3,1300,"all respondents (weighted), n=1300",True,integer %,32
+P7A-POL-01,Q19,Πολιτική σταθερότητα,38,1300,"all respondents (weighted), n=1300",True,integer %,34
+P7A-POL-01,Q19,Πολιτική αλλαγή,61,1300,"all respondents (weighted), n=1300",True,integer %,34
+P7A-POL-01,Q19,ΔΓ/ΔΑ (αυθ.),1,1300,"all respondents (weighted), n=1300",True,integer %,34
+P7A-POL-01,Q20,Πολύ πιθανό,5,1300,"all respondents (weighted), n=1300",True,integer %,36
+P7A-POL-01,Q20,Αρκετά πιθανό,10,1300,"all respondents (weighted), n=1300",True,integer %,36
+P7A-POL-01,Q20,Όχι και τόσο πιθανό,18,1300,"all respondents (weighted), n=1300",True,integer %,36
+P7A-POL-01,Q20,Απίθανο,67,1300,"all respondents (weighted), n=1300",True,integer %,36
+P7A-POL-01,Q21,Μέσα στο κάστρο,47,1300,"all respondents (weighted), n=1300",True,integer %,37
+P7A-POL-01,Q21,Έξω από το κάστρο,51,1300,"all respondents (weighted), n=1300",True,integer %,37
+P7A-POL-01,Q21,ΔΓ/ΔΑ (αυθ.),2,1300,"all respondents (weighted), n=1300",True,integer %,37
+P7A-POL-02,Q5_1,ΕΛΑΣ,16.6,1000,"all respondents (weighted), n=1000",True,1 decimal,14
+P7A-POL-02,Q5_1,ΝΔ,23.4,1000,"all respondents (weighted), n=1000",True,1 decimal,14
+P7A-POL-02,Q5_1,ΠΑΣΟΚ,14.5,1000,"all respondents (weighted), n=1000",True,1 decimal,14
+P7A-POL-02,Q5_1,Κανένα από αυτά (αυθόρμητα),42.0,1000,"all respondents (weighted), n=1000",True,1 decimal,14
+P7A-POL-02,Q5_1,Δεν ξέρω / Δεν απαντώ,3.5,1000,"all respondents (weighted), n=1000",True,1 decimal,14
+P7A-POL-02,Q5_2,ΕΛΑΣ,16.5,1000,"all respondents (weighted), n=1000",True,1 decimal,15
+P7A-POL-02,Q5_2,ΝΔ,27.0,1000,"all respondents (weighted), n=1000",True,1 decimal,15
+P7A-POL-02,Q5_2,ΠΑΣΟΚ,13.7,1000,"all respondents (weighted), n=1000",True,1 decimal,15
+P7A-POL-02,Q5_2,Κανένα από αυτά (αυθόρμητα),39.2,1000,"all respondents (weighted), n=1000",True,1 decimal,15
+P7A-POL-02,Q5_2,Δεν ξέρω / Δεν απαντώ,3.6,1000,"all respondents (weighted), n=1000",True,1 decimal,15
+P7A-POL-02,Q5_3,ΕΛΑΣ,22.5,1000,"all respondents (weighted), n=1000",True,1 decimal,16
+P7A-POL-02,Q5_3,ΝΔ,22.9,1000,"all respondents (weighted), n=1000",True,1 decimal,16
+P7A-POL-02,Q5_3,ΠΑΣΟΚ,16.3,1000,"all respondents (weighted), n=1000",True,1 decimal,16
+P7A-POL-02,Q5_3,Κανένα από αυτά (αυθόρμητα),35.6,1000,"all respondents (weighted), n=1000",True,1 decimal,16
+P7A-POL-02,Q5_3,Δεν ξέρω / Δεν απαντώ,2.7,1000,"all respondents (weighted), n=1000",True,1 decimal,16
+P7A-POL-02,Q5_4,ΕΛΑΣ,22,1000,"all respondents (weighted), n=1000",True,1 decimal,17
+P7A-POL-02,Q5_4,ΝΔ,22.3,1000,"all respondents (weighted), n=1000",True,1 decimal,17
+P7A-POL-02,Q5_4,ΠΑΣΟΚ,16.2,1000,"all respondents (weighted), n=1000",True,1 decimal,17
+P7A-POL-02,Q5_4,Κανένα από αυτά (αυθόρμητα),36.7,1000,"all respondents (weighted), n=1000",True,1 decimal,17
+P7A-POL-02,Q5_4,Δεν ξέρω / Δεν απαντώ,2.8,1000,"all respondents (weighted), n=1000",True,1 decimal,17
+P7A-POL-02,Q6,Η ΝΔ να συνεχίσει να είναι κυβέρνηση και ο Κ. Μητσοτάκης Πρωθυπουργός ή,27.8,1000,"all respondents (weighted), n=1000",True,1 decimal,18
+P7A-POL-02,Q6,Να εκλεγεί κάποια άλλη κυβέρνηση,68.5,1000,"all respondents (weighted), n=1000",True,1 decimal,18
+P7A-POL-02,Q6,Δεν ξέρω / Δεν απαντώ,3.7,1000,"all respondents (weighted), n=1000",True,1 decimal,18
+P7A-POL-02,Q7,Μία κυβέρνηση συνεργασίας ή,42.8,1000,"all respondents (weighted), n=1000",True,1 decimal,19
+P7A-POL-02,Q7,Αυτοδύναμη κυβέρνηση ακόμη κι αν χρειαστεί να γίνουν επαναλαμβανόμενες εκλογές,52.7,1000,"all respondents (weighted), n=1000",True,1 decimal,19
+P7A-POL-02,Q7,Δεν ξέρω / Δεν απαντώ,4.5,1000,"all respondents (weighted), n=1000",True,1 decimal,19
+P7A-POL-02,Q8,ο αρχηγός του πρώτου κόμματος ή,46.3,1000,"all respondents (weighted), n=1000",True,1 decimal,20
+P7A-POL-02,Q8,κάποιο άλλο πρόσωπο κοινής αποδοχής,45.7,1000,"all respondents (weighted), n=1000",True,1 decimal,20
+P7A-POL-02,Q8,Δεν ξέρω / Δεν απαντώ,8,1000,"all respondents (weighted), n=1000",True,1 decimal,20
+P7A-POL-02,Q9,τον Πρόεδρο του ΠΑΣΟΚ ΚΙΝΑΛ Νίκο Ανδρουλάκη,9.4,1000,"all respondents (weighted), n=1000",True,1 decimal,21
+P7A-POL-02,Q9,τον επικεφαλής του ΜΕΡΑ 25 Γιάννη Βαρουφάκη,2.7,1000,"all respondents (weighted), n=1000",True,1 decimal,21
+P7A-POL-02,Q9,τον Πρόεδρο της Ελληνικής Λύσης Κυριάκο Βελόπουλο,5.1,1000,"all respondents (weighted), n=1000",True,1 decimal,21
+P7A-POL-02,Q9,την Πρόεδρο του ΣΥΡΙΖΑ Ρένα Δούρου,0.6,1000,"all respondents (weighted), n=1000",True,1 decimal,21
+P7A-POL-02,Q9,την πρόεδρο της ΕΛΠΙΔΑΣ Μαρία Καρυστιανού,2.3,1000,"all respondents (weighted), n=1000",True,1 decimal,21
+P7A-POL-02,Q9,τον Πρόεδρο του Κινήματος Δημοκρατίας Στέφανο Κασσελάκη,0.8,1000,"all respondents (weighted), n=1000",True,1 decimal,21
+P7A-POL-02,Q9,τον Γενικό Γραμματέα του ΚΚΕ Δημήτρη Κουτσούμπα,5.2,1000,"all respondents (weighted), n=1000",True,1 decimal,21
+P7A-POL-02,Q9,την Πρόεδρο της Πλεύσης Ελευθερίας Ζωή Κωνσταντοπούλου,4.8,1000,"all respondents (weighted), n=1000",True,1 decimal,21
+P7A-POL-02,Q9,την Πρόεδρο της Φωνής Λογικής Αφροδίτη Λατινοπούλου,3.2,1000,"all respondents (weighted), n=1000",True,1 decimal,21
+P7A-POL-02,Q9,τον Πρόεδρο της ΝΔ Κυριάκο Μητσοτάκη,28.5,1000,"all respondents (weighted), n=1000",True,1 decimal,21
+P7A-POL-02,Q9,τον Πρόεδρο της Νίκης Δημήτρη Νατσιό,1.3,1000,"all respondents (weighted), n=1000",True,1 decimal,21
+P7A-POL-02,Q9,τον Πρόεδρο της Νέας Αριστεράς Γαβριήλ Σακελλαρίδη,0.4,1000,"all respondents (weighted), n=1000",True,1 decimal,21
+P7A-POL-02,Q9,τον πρόεδρο της ΕΛΑΣ Αλέξη Τσίπρα,14.8,1000,"all respondents (weighted), n=1000",True,1 decimal,21
+P7A-POL-02,Q9,Κανέναν από αυτούς (αυθόρμητα),18.6,1000,"all respondents (weighted), n=1000",True,1 decimal,21
+P7A-POL-02,Q9,Δεν ξέρω / Δεν απαντώ,2.3,1000,"all respondents (weighted), n=1000",True,1 decimal,21
+P7A-POL-02,Q10,Πολύ,3.2,1000,"all respondents (weighted), n=1000",True,1 decimal,22
+P7A-POL-02,Q10,Αρκετά,7.3,1000,"all respondents (weighted), n=1000",True,1 decimal,22
+P7A-POL-02,Q10,Λίγο,11.9,1000,"all respondents (weighted), n=1000",True,1 decimal,22
+P7A-POL-02,Q10,Καθόλου,74.5,1000,"all respondents (weighted), n=1000",True,1 decimal,22
+P7A-POL-02,Q10,Δεν ξέρω / Δεν απαντώ,3.1,1000,"all respondents (weighted), n=1000",True,1 decimal,22
+P7A-SOC-01,Q1,Goals that address the real issues faced by young people,44,1007,respondents aged 15-30 in Greece (weighted),True,integer %,4
+P7A-SOC-01,Q1,"Working together across all levels - local, regional, national, and EU",23,1007,respondents aged 15-30 in Greece (weighted),True,integer %,4
+P7A-SOC-01,Q1,Making sure young people and youth organisations have a say in decisions,34,1007,respondents aged 15-30 in Greece (weighted),True,integer %,4
+P7A-SOC-01,Q1,Ensuring young people know about policies and opportunities,24,1007,respondents aged 15-30 in Greece (weighted),True,integer %,4
+P7A-SOC-01,Q1,Providing financial support for youth programmes and initiatives,46,1007,respondents aged 15-30 in Greece (weighted),True,integer %,4
+P7A-SOC-01,Q1,Making decisions using facts and research,23,1007,respondents aged 15-30 in Greece (weighted),True,integer %,4
+P7A-SOC-01,Q1,Ensuring policies are actually carried out and reviewed properly,24,1007,respondents aged 15-30 in Greece (weighted),True,integer %,4
+P7A-SOC-01,Q1,Connecting different areas of policy that affect young people,16,1007,respondents aged 15-30 in Greece (weighted),True,integer %,4
+P7A-SOC-01,Q1,None of these,3,1007,respondents aged 15-30 in Greece (weighted),True,integer %,4
+P7A-SOC-01,Q1,Don’t know,2,1007,respondents aged 15-30 in Greece (weighted),True,integer %,4
+P7A-SOC-01,Q2,"Democratic processes, political participation and institutions",30,1007,respondents aged 15-30 in Greece (weighted),True,integer %,6
+P7A-SOC-01,Q2,Human rights and social justice,48,1007,respondents aged 15-30 in Greece (weighted),True,integer %,6
+P7A-SOC-01,Q2,"Equality, diversity and anti-discrimination",41,1007,respondents aged 15-30 in Greece (weighted),True,integer %,6
+P7A-SOC-01,Q2,Environmental sustainability,30,1007,respondents aged 15-30 in Greece (weighted),True,integer %,6
+P7A-SOC-01,Q2,Media and digital literacy and recognising disinformation,33,1007,respondents aged 15-30 in Greece (weighted),True,integer %,6
+P7A-SOC-01,Q2,None of the above,14,1007,respondents aged 15-30 in Greece (weighted),True,integer %,6
+P7A-SOC-01,Q2,Don’t know,3,1007,respondents aged 15-30 in Greece (weighted),True,integer %,6
+P7A-SOC-01,Q3,"In a school or university (courses, extracurricular activities)",34,1007,"filtered: respondents who learned something new about at least one topic (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,7
+P7A-SOC-01,Q3,"By participating in youth clubs, civil society organisations, volunteering",17,1007,"filtered: respondents who learned something new about at least one topic (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,7
+P7A-SOC-01,Q3,"Via traditional media (e.g. TV, radio, newspapers), digital media (e.g. social media, podcasts, blogs)",43,1007,"filtered: respondents who learned something new about at least one topic (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,7
+P7A-SOC-01,Q3,Through self-directed reading or research,40,1007,"filtered: respondents who learned something new about at least one topic (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,7
+P7A-SOC-01,Q3,Through discussions with your family or friends,49,1007,"filtered: respondents who learned something new about at least one topic (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,7
+P7A-SOC-01,Q3,At public events or awareness raising campaigns,21,1007,"filtered: respondents who learned something new about at least one topic (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,7
+P7A-SOC-01,Q3,None of the above,1,1007,"filtered: respondents who learned something new about at least one topic (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,7
+P7A-SOC-01,Q3,Don’t know,0,1007,"filtered: respondents who learned something new about at least one topic (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,7
+P7A-SOC-01,Q4,"Voting in local, national or European elections",37,1007,respondents aged 15-30 in Greece (weighted),True,integer %,9
+P7A-SOC-01,Q4,"Participating in political movements, parties or unions",23,1007,respondents aged 15-30 in Greece (weighted),True,integer %,9
+P7A-SOC-01,Q4,Contacting a politician about an issue,21,1007,respondents aged 15-30 in Greece (weighted),True,integer %,9
+P7A-SOC-01,Q4,Volunteering for a charity/campaign organisation,25,1007,respondents aged 15-30 in Greece (weighted),True,integer %,9
+P7A-SOC-01,Q4,"Boycotting or buying certain products for political, ethical or environmental reasons",17,1007,respondents aged 15-30 in Greece (weighted),True,integer %,9
+P7A-SOC-01,Q4,Participating in student or youth organisations,22,1007,respondents aged 15-30 in Greece (weighted),True,integer %,9
+P7A-SOC-01,Q4,"Taking part in a public consultation on proposed political initiatives (online or offline), including in the EU Youth Dialogue or the European Citizens Panels",35,1007,respondents aged 15-30 in Greece (weighted),True,integer %,9
+P7A-SOC-01,Q4,"Engaging in social media by expressing my opinion, using hashtags or changing my profile picture for example",31,1007,respondents aged 15-30 in Greece (weighted),True,integer %,9
+P7A-SOC-01,Q4,Other,1,1007,respondents aged 15-30 in Greece (weighted),True,integer %,9
+P7A-SOC-01,Q4,None of these are effective,4,1007,respondents aged 15-30 in Greece (weighted),True,integer %,9
+P7A-SOC-01,Q4,Don’t know,2,1007,respondents aged 15-30 in Greece (weighted),True,integer %,9
+P7A-SOC-01,Q5,A sports club,22,1007,respondents aged 15-30 in Greece (weighted),True,integer %,11
+P7A-SOC-01,Q5,"A youth club, leisure-time club or any kind of youth organisation",13,1007,respondents aged 15-30 in Greece (weighted),True,integer %,11
+P7A-SOC-01,Q5,A cultural organisation,11,1007,respondents aged 15-30 in Greece (weighted),True,integer %,11
+P7A-SOC-01,Q5,A political organisation or a political party,9,1007,respondents aged 15-30 in Greece (weighted),True,integer %,11
+P7A-SOC-01,Q5,An organisation with volunteering activities,20,1007,respondents aged 15-30 in Greece (weighted),True,integer %,11
+P7A-SOC-01,Q5,An organisation active in the domain of climate change/environmental issues,15,1007,respondents aged 15-30 in Greece (weighted),True,integer %,11
+P7A-SOC-01,Q5,An organisation promoting human rights or global development,15,1007,respondents aged 15-30 in Greece (weighted),True,integer %,11
+P7A-SOC-01,Q5,"Any other youth organisation, club, non-governmental organisation, etc.",16,1007,respondents aged 15-30 in Greece (weighted),True,integer %,11
+P7A-SOC-01,Q5,None of these,31,1007,respondents aged 15-30 in Greece (weighted),True,integer %,11
+P7A-SOC-01,Q5,Don’t know,2,1007,respondents aged 15-30 in Greece (weighted),True,integer %,11
+P7A-SOC-01,Q6,I don’t have time,48,1007,"filtered: respondents who did not participate in any listed organisations (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,13
+P7A-SOC-01,Q6,I’m not interested,21,1007,"filtered: respondents who did not participate in any listed organisations (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,13
+P7A-SOC-01,Q6,I cannot afford it,17,1007,"filtered: respondents who did not participate in any listed organisations (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,13
+P7A-SOC-01,Q6,I have not yet thought about it,22,1007,"filtered: respondents who did not participate in any listed organisations (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,13
+P7A-SOC-01,Q6,I don’t know how to do this,17,1007,"filtered: respondents who did not participate in any listed organisations (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,13
+P7A-SOC-01,Q6,I don’t understand the issues enough,6,1007,"filtered: respondents who did not participate in any listed organisations (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,13
+P7A-SOC-01,Q6,Nobody has ever asked or invited me to take part,17,1007,"filtered: respondents who did not participate in any listed organisations (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,13
+P7A-SOC-01,Q6,I did not know that I could do this,4,1007,"filtered: respondents who did not participate in any listed organisations (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,13
+P7A-SOC-01,Q6,These activities are too far away. It is difficult to get there (e.g. by public transport) from my home,12,1007,"filtered: respondents who did not participate in any listed organisations (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,13
+P7A-SOC-01,Q6,Other,3,1007,"filtered: respondents who did not participate in any listed organisations (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,13
+P7A-SOC-01,Q6,Don’t know,6,1007,"filtered: respondents who did not participate in any listed organisations (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,13
+P7A-SOC-01,Q7a,Yes,50,1007,respondents aged 15-30 in Greece (weighted),True,integer %,15
+P7A-SOC-01,Q7a,No,46,1007,respondents aged 15-30 in Greece (weighted),True,integer %,15
+P7A-SOC-01,Q7a,Don’t know,4,1007,respondents aged 15-30 in Greece (weighted),True,integer %,15
+P7A-SOC-01,Q7b,Climate change and environmental protection,26,1007,"filtered: respondents who have taken actions to change society (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,16
+P7A-SOC-01,Q7b,Health and well-being,28,1007,"filtered: respondents who have taken actions to change society (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,16
+P7A-SOC-01,Q7b,Economic inequality and welfare expenditure,31,1007,"filtered: respondents who have taken actions to change society (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,16
+P7A-SOC-01,Q7b,"Equal rights regardless of gender, race or sexuality",26,1007,"filtered: respondents who have taken actions to change society (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,16
+P7A-SOC-01,Q7b,Human rights,43,1007,"filtered: respondents who have taken actions to change society (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,16
+P7A-SOC-01,Q7b,Wars and conflicts,28,1007,"filtered: respondents who have taken actions to change society (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,16
+P7A-SOC-01,Q7b,Democracy and rule of law,37,1007,"filtered: respondents who have taken actions to change society (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,16
+P7A-SOC-01,Q7b,Other,2,1007,"filtered: respondents who have taken actions to change society (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,16
+P7A-SOC-01,Q7b,Don’t know,0,1007,"filtered: respondents who have taken actions to change society (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,16
+P7A-SOC-01,Q8,EU Youth Dialogue or EU Youth Conference,17,1007,respondents aged 15-30 in Greece (weighted),True,integer %,18
+P7A-SOC-01,Q8,European Citizens’ Panels,15,1007,respondents aged 15-30 in Greece (weighted),True,integer %,18
+P7A-SOC-01,Q8,Public consultations,12,1007,respondents aged 15-30 in Greece (weighted),True,integer %,18
+P7A-SOC-01,Q8,European elections,50,1007,respondents aged 15-30 in Greece (weighted),True,integer %,18
+P7A-SOC-01,Q8,EU social media channels and websites (i.e. European Youth Portal),28,1007,respondents aged 15-30 in Greece (weighted),True,integer %,18
+P7A-SOC-01,Q8,Visit of the EU institutions,17,1007,respondents aged 15-30 in Greece (weighted),True,integer %,18
+P7A-SOC-01,Q8,The European Youth Week or the European Youth Event,17,1007,respondents aged 15-30 in Greece (weighted),True,integer %,18
+P7A-SOC-01,Q8,Contacting a Commissioner or an MEP,14,1007,respondents aged 15-30 in Greece (weighted),True,integer %,18
+P7A-SOC-01,Q8,Participation in events organised by the EU in your country,19,1007,respondents aged 15-30 in Greece (weighted),True,integer %,18
+P7A-SOC-01,Q8,European Citizens’ Initiative,13,1007,respondents aged 15-30 in Greece (weighted),True,integer %,18
+P7A-SOC-01,Q8,None of these,9,1007,respondents aged 15-30 in Greece (weighted),True,integer %,18
+P7A-SOC-01,Q8,Don’t know,6,1007,respondents aged 15-30 in Greece (weighted),True,integer %,18
+P7A-SOC-01,Q9,Social media,58,1007,respondents aged 15-30 in Greece (weighted),True,integer %,20
+P7A-SOC-01,Q9,"Online press, podcasts and/or news platforms",33,1007,respondents aged 15-30 in Greece (weighted),True,integer %,20
+P7A-SOC-01,Q9,"Written (printed) press (e.g. newspapers, weekly or monthly magazine, etc.)",12,1007,respondents aged 15-30 in Greece (weighted),True,integer %,20
+P7A-SOC-01,Q9,TV,36,1007,respondents aged 15-30 in Greece (weighted),True,integer %,20
+P7A-SOC-01,Q9,Radio,10,1007,respondents aged 15-30 in Greece (weighted),True,integer %,20
+P7A-SOC-01,Q9,"Conversations with friends, family, or colleagues",40,1007,respondents aged 15-30 in Greece (weighted),True,integer %,20
+P7A-SOC-01,Q9,School or university,23,1007,respondents aged 15-30 in Greece (weighted),True,integer %,20
+P7A-SOC-01,Q9,Other,2,1007,respondents aged 15-30 in Greece (weighted),True,integer %,20
+P7A-SOC-01,Q9,"None, I don’t stay informed about the EU",7,1007,respondents aged 15-30 in Greece (weighted),True,integer %,20
+P7A-SOC-01,Q9,Don’t know,1,1007,respondents aged 15-30 in Greece (weighted),True,integer %,20
+P7A-SOC-01,Q10,"Studying, training or apprenticeship in another EU country",18,1007,respondents aged 15-30 in Greece (weighted),True,integer %,22
+P7A-SOC-01,Q10,Being involved in any cultural/sports activities in another EU country,20,1007,respondents aged 15-30 in Greece (weighted),True,integer %,22
+P7A-SOC-01,Q10,Being involved in any political activities in another EU country,15,1007,respondents aged 15-30 in Greece (weighted),True,integer %,22
+P7A-SOC-01,Q10,Volunteering or similar activities in another EU country,19,1007,respondents aged 15-30 in Greece (weighted),True,integer %,22
+P7A-SOC-01,Q10,Working in another EU country,13,1007,respondents aged 15-30 in Greece (weighted),True,integer %,22
+P7A-SOC-01,Q10,None of these,45,1007,respondents aged 15-30 in Greece (weighted),True,integer %,22
+P7A-SOC-01,Q10,Don’t know,1,1007,respondents aged 15-30 in Greece (weighted),True,integer %,22
+P7A-SOC-01,Q11,Not interested,21,1007,"filtered: respondents who have not taken part in any of the listed activities (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,23
+P7A-SOC-01,Q11,Insufficient foreign language skills,11,1007,"filtered: respondents who have not taken part in any of the listed activities (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,23
+P7A-SOC-01,Q11,I am a caretaker of another person at home and can therefore not leave the country,6,1007,"filtered: respondents who have not taken part in any of the listed activities (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,23
+P7A-SOC-01,Q11,My parents/family/partner/friends are discouraging me to go abroad,9,1007,"filtered: respondents who have not taken part in any of the listed activities (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,23
+P7A-SOC-01,Q11,I do not feel sufficiently independent to go abroad for a longer period,18,1007,"filtered: respondents who have not taken part in any of the listed activities (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,23
+P7A-SOC-01,Q11,Lack of financial means,50,1007,"filtered: respondents who have not taken part in any of the listed activities (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,23
+P7A-SOC-01,Q11,Lack of information on possibilities to go abroad,28,1007,"filtered: respondents who have not taken part in any of the listed activities (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,23
+P7A-SOC-01,Q11,Lack of opportunities abroad that would match my interests,15,1007,"filtered: respondents who have not taken part in any of the listed activities (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,23
+P7A-SOC-01,Q11,The experience would not be recognised at home,6,1007,"filtered: respondents who have not taken part in any of the listed activities (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,23
+P7A-SOC-01,Q11,Other,3,1007,"filtered: respondents who have not taken part in any of the listed activities (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,23
+P7A-SOC-01,Q11,Don’t know,6,1007,"filtered: respondents who have not taken part in any of the listed activities (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,23
+P7A-SOC-01,Q12,Increased my knowledge of other European countries,30,1007,"filtered: respondents who have taken part in at least one of the listed activities (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,25
+P7A-SOC-01,Q12,Made me feel more European,24,1007,"filtered: respondents who have taken part in at least one of the listed activities (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,25
+P7A-SOC-01,Q12,Increased my interest in living in another European country later on (for work or education),34,1007,"filtered: respondents who have taken part in at least one of the listed activities (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,25
+P7A-SOC-01,Q12,Made me more interested in European topics,28,1007,"filtered: respondents who have taken part in at least one of the listed activities (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,25
+P7A-SOC-01,Q12,Increased my interest in foreign languages,32,1007,"filtered: respondents who have taken part in at least one of the listed activities (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,25
+P7A-SOC-01,Q12,Made me more aware of other cultures and values,37,1007,"filtered: respondents who have taken part in at least one of the listed activities (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,25
+P7A-SOC-01,Q12,Increased my self-confidence,32,1007,"filtered: respondents who have taken part in at least one of the listed activities (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,25
+P7A-SOC-01,Q12,Will allow me to adapt better to new situations in the future,35,1007,"filtered: respondents who have taken part in at least one of the listed activities (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,25
+P7A-SOC-01,Q12,Will allow me to make friends more easily,27,1007,"filtered: respondents who have taken part in at least one of the listed activities (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,25
+P7A-SOC-01,Q12,Other,1,1007,"filtered: respondents who have taken part in at least one of the listed activities (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,25
+P7A-SOC-01,Q12,None of these,1,1007,"filtered: respondents who have taken part in at least one of the listed activities (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,25
+P7A-SOC-01,Q12,Don’t know,1,1007,"filtered: respondents who have taken part in at least one of the listed activities (Greece, weighted); unweighted filtered n not published, base_n is total EL sample",True,integer %,25
+P7A-SOC-01,Q13,Erasmus+ for students (18+ year-olds),57,1007,respondents aged 15-30 in Greece (weighted),True,integer %,27
+P7A-SOC-01,Q13,Erasmus+ for pupils (11-18 year-olds),45,1007,respondents aged 15-30 in Greece (weighted),True,integer %,27
+P7A-SOC-01,Q13,Erasmus+ for apprentices,38,1007,respondents aged 15-30 in Greece (weighted),True,integer %,27
+P7A-SOC-01,Q13,Erasmus+ youth exchanges,42,1007,respondents aged 15-30 in Greece (weighted),True,integer %,27
+P7A-SOC-01,Q13,Erasmus+ for young entrepreneurs,17,1007,respondents aged 15-30 in Greece (weighted),True,integer %,27
+P7A-SOC-01,Q13,DiscoverEU,16,1007,respondents aged 15-30 in Greece (weighted),True,integer %,27
+P7A-SOC-01,Q13,European Solidarity Corps,9,1007,respondents aged 15-30 in Greece (weighted),True,integer %,27
+P7A-SOC-01,Q13,None of these,6,1007,respondents aged 15-30 in Greece (weighted),True,integer %,27
+P7A-SOC-01,Q13,Don’t know,3,1007,respondents aged 15-30 in Greece (weighted),True,integer %,27
+P7A-SOC-01,Q14,"Yes, very much",23,1007,respondents aged 15-30 in Greece (weighted),True,integer %,29
+P7A-SOC-01,Q14,"Yes, to some extent",49,1007,respondents aged 15-30 in Greece (weighted),True,integer %,29
+P7A-SOC-01,Q14,"No, not much",19,1007,respondents aged 15-30 in Greece (weighted),True,integer %,29
+P7A-SOC-01,Q14,"No, not at all",4,1007,respondents aged 15-30 in Greece (weighted),True,integer %,29
+P7A-SOC-01,Q14,Don’t know,5,1007,respondents aged 15-30 in Greece (weighted),True,integer %,29
+P7A-SOC-01,Q15,Promoting environmentally friendly policy and fight climate change,17,1007,respondents aged 15-30 in Greece (weighted),True,integer %,30
+P7A-SOC-01,Q15,Increasing job opportunities for young people,37,1007,respondents aged 15-30 in Greece (weighted),True,integer %,30
+P7A-SOC-01,Q15,Fighting poverty and economic and social inequalities,39,1007,respondents aged 15-30 in Greece (weighted),True,integer %,30
+P7A-SOC-01,Q15,Playing a strong role in dealing with health challenges,16,1007,respondents aged 15-30 in Greece (weighted),True,integer %,30
+P7A-SOC-01,Q15,"Preserving peace, reinforcing international security and promoting international cooperation",38,1007,respondents aged 15-30 in Greece (weighted),True,integer %,30
+P7A-SOC-01,Q15,"Promoting Human Rights, democracy and common European values",29,1007,respondents aged 15-30 in Greece (weighted),True,integer %,30
+P7A-SOC-01,Q15,Promoting the digitalisation of society,12,1007,respondents aged 15-30 in Greece (weighted),True,integer %,30
+P7A-SOC-01,Q15,"Promoting inclusive societies, including gender equality and anti-discrimination",18,1007,respondents aged 15-30 in Greece (weighted),True,integer %,30
+P7A-SOC-01,Q15,Bringing young people from different parts of the EU together,12,1007,respondents aged 15-30 in Greece (weighted),True,integer %,30
+P7A-SOC-01,Q15,Other,1,1007,respondents aged 15-30 in Greece (weighted),True,integer %,30
+P7A-SOC-01,Q15,Don’t know,4,1007,respondents aged 15-30 in Greece (weighted),True,integer %,30
+P7A-SOC-01,Q16_a,Totally agree,37,1007,respondents aged 15-30 in Greece (weighted),True,integer %,32
+P7A-SOC-01,Q16_a,Tend to agree,36,1007,respondents aged 15-30 in Greece (weighted),True,integer %,32
+P7A-SOC-01,Q16_a,Tend to disagree,15,1007,respondents aged 15-30 in Greece (weighted),True,integer %,32
+P7A-SOC-01,Q16_a,Totally disagree,8,1007,respondents aged 15-30 in Greece (weighted),True,integer %,32
+P7A-SOC-01,Q16_a,Don’t know,4,1007,respondents aged 15-30 in Greece (weighted),True,integer %,32
+P7A-SOC-01,Q16_b,Totally agree,26,1007,respondents aged 15-30 in Greece (weighted),True,integer %,33
+P7A-SOC-01,Q16_b,Tend to agree,37,1007,respondents aged 15-30 in Greece (weighted),True,integer %,33
+P7A-SOC-01,Q16_b,Tend to disagree,17,1007,respondents aged 15-30 in Greece (weighted),True,integer %,33
+P7A-SOC-01,Q16_b,Totally disagree,11,1007,respondents aged 15-30 in Greece (weighted),True,integer %,33
+P7A-SOC-01,Q16_b,Don’t know,9,1007,respondents aged 15-30 in Greece (weighted),True,integer %,33
+P7A-SOC-01,Q17,"In school or university (e.g. classes, courses, extracurricular activities)",30,1007,respondents aged 15-30 in Greece (weighted),True,integer %,34
+P7A-SOC-01,Q17,"In a community or voluntary setting (e.g. youth clubs, NGOs, volunteering, workshops)",14,1007,respondents aged 15-30 in Greece (weighted),True,integer %,34
+P7A-SOC-01,Q17,"Via media or online content (e.g. social media, podcasts, blogs, news)",35,1007,respondents aged 15-30 in Greece (weighted),True,integer %,34
+P7A-SOC-01,Q17,"Through self-directed reading, research or practice",40,1007,respondents aged 15-30 in Greece (weighted),True,integer %,34
+P7A-SOC-01,Q17,Through discussions with family or friends,30,1007,respondents aged 15-30 in Greece (weighted),True,integer %,34
+P7A-SOC-01,Q17,At public events or awareness-raising campaigns,12,1007,respondents aged 15-30 in Greece (weighted),True,integer %,34
+P7A-SOC-01,Q17,None of the above,9,1007,respondents aged 15-30 in Greece (weighted),True,integer %,34
+P7A-SOC-01,Q17,Don’t know,3,1007,respondents aged 15-30 in Greece (weighted),True,integer %,34
+P7A-SOC-01,Q18_a,Totally agree,13,1007,respondents aged 15-30 in Greece (weighted),True,integer %,36
+P7A-SOC-01,Q18_a,Tend to agree,22,1007,respondents aged 15-30 in Greece (weighted),True,integer %,36
+P7A-SOC-01,Q18_a,Tend to disagree,27,1007,respondents aged 15-30 in Greece (weighted),True,integer %,36
+P7A-SOC-01,Q18_a,Totally disagree,30,1007,respondents aged 15-30 in Greece (weighted),True,integer %,36
+P7A-SOC-01,Q18_a,Don’t know,8,1007,respondents aged 15-30 in Greece (weighted),True,integer %,36
+P7A-SOC-01,Q18_b,Totally agree,13,1007,respondents aged 15-30 in Greece (weighted),True,integer %,37
+P7A-SOC-01,Q18_b,Tend to agree,25,1007,respondents aged 15-30 in Greece (weighted),True,integer %,37
+P7A-SOC-01,Q18_b,Tend to disagree,31,1007,respondents aged 15-30 in Greece (weighted),True,integer %,37
+P7A-SOC-01,Q18_b,Totally disagree,22,1007,respondents aged 15-30 in Greece (weighted),True,integer %,37
+P7A-SOC-01,Q18_b,Don’t know,9,1007,respondents aged 15-30 in Greece (weighted),True,integer %,37
+P7A-SOC-01,Q18_c,Totally agree,12,1007,respondents aged 15-30 in Greece (weighted),True,integer %,38
+P7A-SOC-01,Q18_c,Tend to agree,18,1007,respondents aged 15-30 in Greece (weighted),True,integer %,38
+P7A-SOC-01,Q18_c,Tend to disagree,25,1007,respondents aged 15-30 in Greece (weighted),True,integer %,38
+P7A-SOC-01,Q18_c,Totally disagree,36,1007,respondents aged 15-30 in Greece (weighted),True,integer %,38
+P7A-SOC-01,Q18_c,Don’t know,9,1007,respondents aged 15-30 in Greece (weighted),True,integer %,38
+P7A-SOC-01,Q18_d,Totally agree,13,1007,respondents aged 15-30 in Greece (weighted),True,integer %,39
+P7A-SOC-01,Q18_d,Tend to agree,22,1007,respondents aged 15-30 in Greece (weighted),True,integer %,39
+P7A-SOC-01,Q18_d,Tend to disagree,29,1007,respondents aged 15-30 in Greece (weighted),True,integer %,39
+P7A-SOC-01,Q18_d,Totally disagree,24,1007,respondents aged 15-30 in Greece (weighted),True,integer %,39
+P7A-SOC-01,Q18_d,Don’t know,12,1007,respondents aged 15-30 in Greece (weighted),True,integer %,39
