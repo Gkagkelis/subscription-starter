@@ -37,7 +37,7 @@ export interface PreparedPersonaQuestion {
   /** PHASE3 E2: κοινό λανθάνον της έννοιας για το item (αν το μοντέλο το έχει). */
   construct?: { key: string; g: number } | null;
   /** PHASE4 IQGE: νέα ερώτηση χωρίς ίδιο item· επίπεδο από τεκμήρια, σειρά από λανθάνοντα items του μοντέλου. */
-  iqge?: { options: string[]; cuts: number[]; rank: { item: PersonaItem; weight: number; sign: number; mean: number; sd: number; construct: { key: string; g: number } | null }[]; scoreSd: number; atten: number } | null;
+  iqge?: { options: string[]; cuts: number[]; rank: { item: PersonaItem; weight: number; sign: number; mean: number; sd: number; construct: { key: string; g: number } | null }[]; scoreSd: number; atten: number; groupShift: Record<string, number> | null } | null;
   provenance: PersonaQuestionProvenance;
 }
 
@@ -260,13 +260,20 @@ function prepareIqge(model: PersonaModel, q: Question, g: NonNullable<PersonaLin
   let c = 0;
   const cuts = lvOpts.slice(0, -1).map((o) => invNorm((c += Math.max(g.level[o], 0) / tot)));
   const ev = g.evidence.slice(0, 3).map((e) => `«${e.text.slice(0, 70)}» (${e.id}, ομοιότητα ${e.sim.toFixed(2)})`).join('· ');
+  const intl = g.international
+    ? ` Διεθνές τεκμήριο (${g.international.basis === 'greek_observed' ? 'πραγματικές ελληνικές απαντήσεις σε διεθνή έρευνα' : `μεταφορά από εμπειρικά κοντινές χώρες: ${g.international.countries.join(', ')}`}· ${g.international.itemId}).`
+    : '';
   const reason =
-    `Νέα ερώτηση χωρίς ίδιο item· ερμηνεία IQGE (${g.version}, βαθμίδα τεκμηρίου «${g.tier}»). Επίπεδο από πραγματικά περιθώρια συγγενών ερωτήσεων της βάσης (${ev || 'μόνο τύπος κλίμακας'}), ` +
-    `σταθμισμένα με μαθημένη κάρτα ταιριάσματος· αναμενόμενο σφάλμα περιθωρίων ~${g.expectedMAE.toFixed(1)} π.μ. (ανάπτυξη, leave-one-family-out). ` +
+    `Νέα ερώτηση χωρίς ίδιο item· ερμηνεία IQGE (${g.version}, βαθμίδα τεκμηρίου «${g.tier}»).` +
+    (g.international
+      ? `${intl} Αναμενόμενο σφάλμα περιθωρίων ~${g.expectedMAE.toFixed(1)} π.μ. (ανάπτυξη και τελικό holdout Phase 5).` +
+        (g.groupShift ? ' Οι διαφορές ηλικίας/φύλου/μόρφωσης ακολουθούν τις διεθνείς δεσμευμένες κατανομές της ίδιας ερώτησης.' : '') + ' '
+      : ` Επίπεδο από πραγματικά περιθώρια συγγενών ερωτήσεων της βάσης (${ev || 'μόνο τύπος κλίμακας'}), ` +
+        `σταθμισμένα με μαθημένη κάρτα ταιριάσματος· αναμενόμενο σφάλμα περιθωρίων ~${g.expectedMAE.toFixed(1)} π.μ. (ανάπτυξη, leave-one-family-out). `) +
     (rank.length ? `Η σειρά των προσώπων ακολουθεί ${rank.length} λανθάνοντα items του μοντέλου με εξασθένιση ${g.atten.toFixed(2)}.` : 'Καμία σχέση με τα χαρακτηριστικά του προσώπου (ανεξάρτητη απάντηση).') +
     (g.modelVersion !== model.version ? ` Οι πηγές σειράς υπολογίστηκαν για το ${g.modelVersion}, όχι για το ${model.version}· αγνοούνται.` : '');
   return base('MODEL_EXTRAPOLATED', reason, {
-    iqge: { options: lvOpts, cuts, rank, scoreSd: g.scoreSd > 0 ? g.scoreSd : 1, atten: rank.length ? Math.min(Math.max(g.atten, 0), 1) : 0 },
+    iqge: { options: lvOpts, cuts, rank, scoreSd: g.scoreSd > 0 ? g.scoreSd : 1, atten: rank.length ? Math.min(Math.max(g.atten, 0), 1) : 0, groupShift: g.groupShift || null },
     assumption: 'IQGE: τα περιθώρια συγγενών ερωτήσεων και η σειρά από συγγενή λανθάνοντα θεωρούνται μεταφέρσιμα (εμπειρικά βαθμονομημένη παραδοχή).'
   });
 }
@@ -324,6 +331,13 @@ export function answerPersona(pq: PreparedPersonaQuestion, ps: PersonaState, see
       z = g.atten * (s / g.scoreSd) + Math.sqrt(1 - g.atten * g.atten) * rng.normal();
     } else {
       z = rng.normal();
+    }
+    if (g.groupShift) {
+      const dm = ps.demographics as unknown as Record<string, string | null | undefined>;
+      for (const dim of ['age_band', 'gender', 'edu3']) {
+        const v = dm[dim];
+        if (v != null) z += g.groupShift[`${dim}:${v}`] || 0;
+      }
     }
     const opt = g.options[g.cuts.filter((cut) => cut < z).length];
     return { questionId: qid, value: toValue(pq.q, opt), skipped: false, basis };

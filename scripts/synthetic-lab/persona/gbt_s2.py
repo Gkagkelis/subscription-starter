@@ -56,6 +56,8 @@ def main():
     ap.add_argument("--rank", type=int, required=True)
     ap.add_argument("--lam", type=float, required=True)
     ap.add_argument("--out", default=None)
+    ap.add_argument("--per-survey", type=int, default=0)
+    ap.add_argument("--surveys", default=None)
     a = ap.parse_args()
     root = os.path.abspath(a.root)
     gd = gbt.root_dir(root)
@@ -88,20 +90,32 @@ def main():
             (gr_obs if "GR" in rec else foreign_only).add(it["id"])
     marg0 = {}
     for sid in items:
+        if sid in BANK_FILE:
+            continue  # ίδια ids με την ελληνική βάση (άλλη κωδικοποίηση επιλογών)· η βάση κρατά τα δικά της
         for it in items[sid]:
             rec = stats[sid]["items"].get(it["id"], {})
             if "GR" in rec:
                 marg0[it["id"]] = {"n": rec["GR"]["n"], "dist": rec["GR"]["p"]}
+    # μόνο items με διεθνείς στήλες (μόνο-ξένα) ή με ελληνικό περιθώριο (ελληνικά παρατηρημένα)
+    gitems = [g for g in gitems if (g["id"] in gr_obs and g["id"] in marg0) or (g["id"] in foreign_only and g["id"] in col_of)]
+    gr_obs &= {g["id"] for g in gitems}
+    foreign_only &= {g["id"] for g in gitems}
     gids = extend_lake(G, gitems, marg0)
     gid_set = set(gids)
     meta = {it["id"]: it for it in gitems}
     by_s = {}
     for tid, f in fams.items():
         by_s.setdefault(f["survey"], []).append(tid)
+    # σταθερό δείγμα στόχων ανά έρευνα (σειρά hash· καθορίζεται πριν από κάθε αποτέλεσμα S2)
+    if a.per_survey:
+        by_s = {sid: sorted(t, key=GE.hord)[GE.N_CAL:GE.N_CAL + a.per_survey] for sid, t in by_s.items()}
+    if a.surveys:
+        keep = set(a.surveys.split(","))
+        by_s = {k: v for k, v in by_s.items() if k in keep}
     out = {}
     for sid, tids in by_s.items():
         hide = set()
-        for t in tids:
+        for t in [x for x, f_ in fams.items() if f_["survey"] == sid]:
             hide |= set(fams[t]["famGlobal"])
         blocked = {sid} | GE.OVERLAP.get(sid, set())
         vis = np.array([j for j in range(len(cols)) if mask_all[gr, j] and cols[j]["survey"] not in blocked and cols[j]["item"] not in hide], dtype=int)
@@ -114,6 +128,9 @@ def main():
             it = meta[iid]
             p = gbt.from_cols(m_[js] + V[js] @ u, it["type"], len(it["options"]))
             G.marg[iid] = {"n": 0, "dist": p.tolist()}
+        hide_all = set()
+        for t in [x for x, f_ in fams.items() if f_["survey"] == sid]:
+            hide_all |= set(fams[t]["famGlobal"])
         for t in tids:
             f = fams[t]
             it = next(x for x in items[sid] if x["id"] == t)

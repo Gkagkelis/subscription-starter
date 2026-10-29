@@ -279,11 +279,19 @@ export interface IqgeLink {
   scoreSd: number;
   /** Εξασθένιση της σχέσης με τις πηγές (0 = ανεξάρτητη απάντηση, 1 = πλήρης). */
   atten: number;
-  tier: 'paraphrase' | 'related' | 'weak';
+  /** 'international' (PHASE5): ισοδύναμη ερώτηση σε διεθνή έρευνα — ελληνικό επίπεδο πραγματικό ή μεταφερμένο από εμπειρικά κοντινές χώρες. */
+  tier: 'paraphrase' | 'related' | 'weak' | 'international';
   /** Αναμενόμενο MAE περιθωρίων (π.μ.) της βαθμίδας στην ανάπτυξη (leave-one-family-out). */
   expectedMAE: number;
   /** Τεκμήρια που χρησιμοποιήθηκαν (για την αναφορά προέλευσης). */
   evidence: { id: string; sim: number; text: string; weight: number }[];
+  /**
+   * PHASE5: μετατόπιση της λανθάνουσας κλίμακας ανά υποομάδα (κλειδιά «age_band:65+», «gender:female», «edu3:low»),
+   * από τις δεσμευμένες αποκλίσεις (ridit) της ίδιας ερώτησης σε άλλες χώρες (επικυρωμένο: −30% σφάλμα υποομάδων).
+   */
+  groupShift?: Record<string, number> | null;
+  /** PHASE5: διεθνής βάση — χώρες-πηγές και τρόπος (greek_observed | international_transfer). */
+  international?: { basis: string; countries: string[]; survey: string; itemId: string } | null;
 }
 
 /** Κατηγορία υποστήριξης μιας ερώτησης στον μηχανισμό PIE. */

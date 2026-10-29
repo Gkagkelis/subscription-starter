@@ -47,11 +47,17 @@ def main():
     ap.add_argument("--params", default="config/synthetic-lab/persona/iqge/params.json")
     ap.add_argument("--in", dest="inp", required=True)
     ap.add_argument("--out", required=True)
+    ap.add_argument("--no-international", action="store_true", help="χωρίς τη διεθνή βάση (Phase 5)")
     ap.add_argument("--p4-lake", action="store_true", help="πρόσθετη βάση φάσης 4 (δεν βελτίωσε την ανάπτυξη· εκτός προεπιλογής)")
     a = ap.parse_args()
     root = os.path.abspath(a.root)
     params = json.load(open(os.path.join(root, a.params)))
     G = IQGE(root, os.path.join(root, ".synthetic-lab-data", "persona", "models", a.model), params, use_p4_lake=a.p4_lake)
+    gm = None
+    if not a.no_international:
+        from gbt_runtime import GlobalMatcher
+
+        gm = GlobalMatcher(root, G.E)
     doc = json.load(open(a.inp))
     qs = doc["questions"] if isinstance(doc, dict) else doc
     report = []
@@ -71,9 +77,15 @@ def main():
              "type": item_type(q, subst), "wave": a.ref}
         r = G.interpret(t, a.ref)
         link = G.link(r, subst)
+        m = gm.match(t) if gm else None
+        if m and t["type"] != "nominal":
+            # PHASE5 S1: ισοδύναμη ερώτηση σε διεθνή έρευνα (πραγματικό ελληνικό περιθώριο ή μεταφορά από κοντινές χώρες)
+            link.update(gm.link_parts(m, subst))
+            link["tier"] = "international"
+            r["tier"] = "international"
         q["personaLink"] = {"kind": "equivalent", "optionMap": {}, "dkOption": dk[0] if dk else None, "iqge": link,
                             "assumption": f"{IQGE_VERSION}: επίπεδο από πραγματικά περιθώρια συγγενών ερωτήσεων (βαθμίδα {r['tier']}), σειρά από λανθάνοντα του {a.model}."}
-        report.append({"id": q["id"], "status": "interpreted", "tier": r["tier"], "sim1": r["sim1"], "type": t["type"], "expectedMAE": link["expectedMAE"],
+        report.append({"id": q["id"], "status": "interpreted", "tier": r["tier"], "international": link.get("international"), "sim1": r["sim1"], "type": t["type"], "expectedMAE": link["expectedMAE"],
                        "level": link["level"], "evidence": r["evidence"][:3], "baseKind": r["baseKind"], "baseWeight": r["baseWeight"], "rank": r["rank"]})
     if isinstance(doc, dict):
         doc["iqgeReport"] = {"version": IQGE_VERSION, "model": a.model, "ref": a.ref, "questions": report,

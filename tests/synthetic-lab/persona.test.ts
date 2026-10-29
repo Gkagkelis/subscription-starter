@@ -245,6 +245,20 @@ describe('PIE — IQGE (Phase 4): προϋπολογισμένη ερμηνεί�
     expect(corr(0.9)).toBeGreaterThan(0.15);
     expect(Math.abs(corr(0))).toBeLessThan(0.06);
   });
+  it('PHASE5: μετατόπιση υποομάδας (διεθνείς δεσμευμένες κατανομές) μετακινεί μόνο την αντίστοιχη ομάδα', () => {
+    const mk = (shift: Record<string, number> | null) => {
+      const N = q('N', { kind: 'equivalent', optionMap: {}, iqge: { ...iqge(0), tier: 'international' as const, groupShift: shift, international: { basis: 'international_transfer', countries: ['IT', 'CY'], survey: 's', itemId: 's::x' } } }, ['Καθόλου', 'Λίγο', 'Πολύ']);
+      return prepareQuestion(fixtureModel, N, '2026-10');
+    };
+    const shareTop = (pn: ReturnType<typeof mk>, ab: string) => {
+      const people = Array.from({ length: 3000 }, (_, i) => ({ ...state(i), pseed: 4000 + i, demographics: { ...demo, age_band: ab } }));
+      return people.filter((ps, i) => (answerPersona(pn, ps as PersonaState, 1000 + i).value as { choice?: string } | null)?.choice === 'Πολύ').length / people.length;
+    };
+    const pn = mk({ 'age_band:65+': 0.8 });
+    expect(shareTop(pn, '65+')).toBeGreaterThan(shareTop(pn, '35-44') + 0.15);
+    expect(Math.abs(shareTop(pn, '35-44') - 0.5)).toBeLessThan(0.05);
+    expect(pn.reason).toMatch(/Διεθνές τεκμήριο/);
+  });
   it('πηγές σειράς άλλου μοντέλου αγνοούνται (ανεξάρτητη απάντηση, ρητή σημείωση)', () => {
     const { pn } = run(0.8, 'pie-x');
     expect(pn.iqge?.rank.length).toBe(0);
