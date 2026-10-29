@@ -84,6 +84,75 @@ def poll_baselines(q, qn, mp):
     return out
 
 
+def norm(s):
+    import unicodedata
+
+    s = unicodedata.normalize("NFD", str(s).lower())
+    s = "".join(c for c in s if unicodedata.category(c) != "Mn")
+    return " ".join(re.sub(r"[^a-zα-ω0-9 ]+", " ", s).split())
+
+
+_TABLES = None
+
+
+def prev_same(Q, q, E, embed):
+    """PREV_SAME: τελευταία ΠΡΟΗΓΟΥΜΕΝΗ μέτρηση της ίδιας ερώτησης από την ίδια εταιρεία στους πίνακες των PDF του Lab
+    (tables_text.jsonl, γραμμή «Σύνολο»), με ημερομηνία < έναρξη πεδίου, ομοιότητα κειμένου ≥ 0,90 και όλες τις ουσιαστικές
+    επιλογές της ερώτησης-στόχου παρούσες με την ίδια (κανονικοποιημένη) ετικέτα."""
+    global _TABLES
+    if _TABLES is None:
+        _TABLES = []
+        with open(os.path.join(ROOT, ".synthetic-lab-data", "persona", "pdf", "tables_text.jsonl")) as f:
+            for line in f:
+                r = json.loads(line)
+                if r.get("question") and r.get("rows") and str(r.get("group") or "Σύνολο") in ("Σύνολο", "ΣΥΝΟΛΟ", "Total", "None"):
+                    _TABLES.append(r)
+    org = norm(Q.get("organisation", "")).split()
+    if not org:
+        return None
+    cands = [r for r in _TABLES if org[0] in norm(r.get("org", "")) and str(r.get("date") or "") < Q["fieldworkStart"]]
+    if not cands:
+        return None
+    opts = q.get("options") or q.get("scale")
+    want = {norm(o): o for o in subst(opts)}
+    tv = E.encode([embed.clean(q["text"])])[0]
+    best = None
+    for r in cands:
+        labs = {norm(x["label"]): x.get("value") for x in r["rows"]}
+        if not all(k in labs and isinstance(labs[k], (int, float)) for k in want):
+            continue
+        sim = float(E.encode([embed.clean(r["question"])])[0] @ tv)
+        if sim < 0.90:
+            continue
+        if best is None or str(r.get("date")) > str(best[0].get("date")):
+            best = (r, sim, labs)
+    if not best:
+        return None
+    r, sim, labs = best
+    return {"dist": {o: float(labs[norm(o)]) for o in opts if norm(o) in labs}, "source": f"{r['docId']} p{r.get('page')} ({r.get('date')})", "sim": round(sim, 3)}
+
+
+def intl_baselines(it, opts, dist):
+    """B5 / POOL για ερωτήσεις με τιμές άλλων χωρών στον ίδιο πίνακα (π.χ. Eurobarometer)· EU27 εξαιρείται (περιέχει την Ελλάδα)."""
+    iv = it.get("intlValues") or {}
+    ctry = {}
+    for c, v in iv.items():
+        if c in ("EU27", "EA", "EL", "GR", "DEW", "DEE") or not v or any(x is None for x in v):
+            continue
+        x = np.array(v, dtype=float)
+        if x.sum() > 0:
+            ctry[c] = x
+    if len(ctry) < 5:
+        return {}
+    pool = np.mean(list(ctry.values()), axis=0)
+    nb = sorted([(dist[c], c) for c in ctry if c in dist])[:5]
+    w = np.array([1 / max(d, 0.05) ** 2 for d, _ in nb])
+    b5 = np.average([ctry[c] for _, c in nb], axis=0, weights=w)
+    sc = 100.0 if max(pool.max(), b5.max()) <= 1.0 else 1.0
+    return {"POOL": {"dist": {o: float(v * sc) for o, v in zip(opts, pool)}, "n": len(ctry)},
+            "B5": {"dist": {o: float(v * sc) for o, v in zip(opts, b5)}, "neighbors": [c for _, c in nb]}}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--root", default=ROOT)
@@ -104,6 +173,13 @@ def main():
     out["modelHashes"] = {m: hashlib.sha256(open(os.path.join(ROOT, ".synthetic-lab-data", "persona", "models", m, "model.json"), "rb").read()).hexdigest()
                           for m in ("pie-0.2", "pie-0.5", "pie-0.6", "pie-0.7")}
     out["policySha256"] = hashlib.sha256(open(os.path.join(ROOT, "config", "synthetic-lab", "persona", "gpm", "evidence-tiers.json"), "rb").read()).hexdigest()
+    sys.path.insert(0, os.path.join(ROOT, "scripts", "synthetic-lab", "persona"))
+    import embed
+    from gpm_h6_predict import country_distances
+
+    E = embed.Embedder(ROOT)
+    dist = country_distances(ROOT)
+    out["countryDistances"] = dist
     for qf in sorted(glob.glob(os.path.join(P, "questionnaires", "*.json"))):
         Q = json.load(open(qf))
         sid = Q["surveyId"]
@@ -123,6 +199,8 @@ def main():
                 q["followUpOf"] = it["followUpOf"]
             qs.append(q)
         base = {"title": Q.get("title"), "referenceYear": y, "referenceMonth": m, "questions": qs}
+        if mp.get("audience"):
+            base["audience"] = mp["audience"]
         f_plain = os.path.join(W, f"{sid}.plain.json")
         json.dump(base, open(f_plain, "w"), ensure_ascii=False)
         # χειροκίνητοι σύνδεσμοι
@@ -163,6 +241,12 @@ def main():
             if q["id"] in mp.get("pollBaselines", {}):
                 for k, v in poll_baselines(Q, q, mp["pollBaselines"][q["id"]]).items():
                     rec["predictions"][k] = {"answered": True, "shares": v["dist"], "meta": {kk: vv for kk, vv in v.items() if kk != "dist"}}
+            ps = prev_same(Q, q, E, embed)
+            if ps:
+                rec["predictions"]["PREV_SAME"] = {"answered": True, "shares": ps["dist"], "meta": {k: v for k, v in ps.items() if k != "dist"}}
+            src_it = next(z for z in Q["questions"] if z["qid"] == q["id"])
+            for k, v in intl_baselines(src_it, opts, dist).items():
+                rec["predictions"][k] = {"answered": True, "shares": v["dist"], "meta": {kk: vv for kk, vv in v.items() if kk != "dist"}}
             rec["iqgeReport"] = iqr.get(q["id"])
             items.append(rec)
         out["surveys"][sid] = {"questionnaireSha256": hashlib.sha256(open(qf, "rb").read()).hexdigest(), "items": items,

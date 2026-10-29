@@ -12,7 +12,7 @@ const doc = JSON.parse(readFileSync(planPath, 'utf8'));
 const QS: Question[] = doc.questions;
 const plan = {
   domain: 'mixed', kind: 'survey', title: doc.title || 'PHASE7A', researchQuestion: 'PHASE7A retrospective blind test', questions: QS, assumptions: [],
-  audience: { minAge: 18 }, sampleSize: Number(nStr), warnings: [], plannerVersion: 'manual', plannerMode: 'rules',
+  audience: doc.audience || { minAge: 18 }, sampleSize: Number(nStr), warnings: [], plannerVersion: 'manual', plannerMode: 'rules',
   referenceYear: doc.referenceYear, referenceMonth: doc.referenceMonth, engine: 'persona', personaModelVersion: model,
   personaAutoLink: auto === '1', allowExperimental: exp === '1'
 } as unknown as StudyPlan;

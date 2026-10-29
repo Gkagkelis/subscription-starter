@@ -29,7 +29,7 @@ import p7a_seal  # noqa: E402
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 P = os.path.join(ROOT, ".synthetic-lab-data", "p7a")
 DK_RE = re.compile(r"(δεν ξέρω|δε ξέρω|δξ|δα|δεν απαντ|αρνησ|ξ/ΔΑ|don.?t know|no answer)", re.I)
-METHODS = ["pie-0.2", "pie-0.6", "pie-0.7", "pie-0.7x", "IQGE", "UNIF", "POLL_AVG", "PREV_POLLSTER", "PREV_SAME"]
+METHODS = ["pie-0.2", "pie-0.6", "pie-0.7", "pie-0.7x", "IQGE", "UNIF", "B5", "POOL", "POLL_AVG", "PREV_POLLSTER", "PREV_SAME"]
 Z = {"80": 1.2816, "90": 1.6449, "95": 1.96}
 
 
