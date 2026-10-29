@@ -74,8 +74,11 @@ def main():
             sc = A[r["item"]]["scale"]
             r["mae"]["scale"] = float(np.mean(np.abs(np.array(sc) - t))) if sc else None
         out = {"n": len(T), "surveys": sorted({r["survey"] for r in T}), "regimes": {}}
+        sel_r0 = {}
         for rg in REGIME_GROUPS:
             sel = loso_select(T, rg)
+            if rg == "R0":
+                sel_r0 = sel
             if not sel:
                 continue
             for r in T:
@@ -101,6 +104,8 @@ def main():
                 line["bestBaseline"] = bb
                 line["vsBest"] = {"diff": round(float(np.mean(diff)), 3), "ci80_cluster": boot(diff, cluster=[r["survey"] for r in rs]),
                                   "beats": round(float(np.mean([x < 0 for x in diff])) * 100, 1)}
+                dP = [r["mae"][key] - r["mae"]["pool"] for r in rs]
+                line["negTransferVsPool"] = round(float(np.mean([x > 1.0 for x in dP])) * 100, 1)
                 dA = [r["mae"][key] - r["mae"]["A"] for r in rs]
                 line["vsA"] = {"diff": round(float(np.mean(dA)), 3), "ci80_cluster": boot(dA, cluster=[r["survey"] for r in rs]),
                                "negTransferRate": round(float(np.mean([x > 1.0 for x in dA])) * 100, 1)}
@@ -127,6 +132,35 @@ def main():
                 if r["mae"].get("B5|R0") is not None:
                     harm[(r["domain"], c)].append(r["mae"]["B5|R0"] - r["mae"]["A"])
         out["neighbors"] = {d: cnt.most_common(10) for d, cnt in use.items()}
+        # χρησιμότητα κάθε χώρας ανά τομέα: MAE αν η Ελλάδα προβλεπόταν ΜΟΝΟ από αυτή τη χώρα (προσαρμοσμένη σύνθεση), έναντι pool
+        ct = defaultdict(list)
+        for r in T:
+            for c, e in (r.get("countryMAE") or {}).items():
+                ct[(r["domain"], c)].append((e, r["mae"]["pool"]))
+        tab = defaultdict(list)
+        for (d, c), v in ct.items():
+            if len(v) >= 50:
+                tab[d].append({"country": c, "n": len(v), "mae": round(float(np.mean([e for e, _ in v])), 2), "vsPool": round(float(np.mean([e - p for e, p in v])), 2)})
+        out["countryTransferability"] = {d: sorted(v, key=lambda x: x["mae"])[:12] + [{"worst": sorted(v, key=lambda x: -x["mae"])[:5]}] for d, v in tab.items()}
+        # αβεβαιότητα: 80% διάστημα ανά τομέα (LOSO ποσοστημόριο |σφάλματος| ανά επιλογή του επιλεγμένου R0) και κάλυψη
+        cov = {}
+        E_by = {(r["item"]): r for r in E["targets"] if r["adj"] == adj}
+        for d in sorted({r["domain"] for r in T}):
+            hits, tot = 0, 0
+            for s_ in sorted({r["survey"] for r in T}):
+                tr = [r for r in T if r["domain"] == d and r["survey"] != s_ and r.get("pred", {}).get(sel_r0.get(r["survey"], "")) is not None]
+                te = [r for r in T if r["domain"] == d and r["survey"] == s_ and r.get("pred", {}).get(sel_r0.get(s_, "")) is not None]
+                if len(tr) < 30 or not te:
+                    continue
+                errs = [abs(x - y) for r in tr for x, y in zip(r["pred"][sel_r0[r["survey"]]], r["truth"])]
+                q = float(np.quantile(errs, 0.8))
+                for r in te:
+                    for x, y in zip(r["pred"][sel_r0[s_]], r["truth"]):
+                        hits += abs(x - y) <= q
+                        tot += 1
+            cov[d] = {"coverage80": round(hits / tot * 100, 1) if tot else None}
+        out["uncertaintyLOSO"] = cov
+        out["dispersionMean"] = round(float(np.mean([np.mean(r["countryDispersion"]) for r in T])), 2)
         out["countryHarm"] = sorted([{"domain": d, "country": c, "n": len(v), "meanDiffVsA": round(float(np.mean(v)), 2)} for (d, c), v in harm.items() if len(v) >= 15],
                                     key=lambda x: -x["meanDiffVsA"])[:25]
         rep["adj" if adj else "raw"] = out

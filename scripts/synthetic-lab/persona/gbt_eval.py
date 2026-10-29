@@ -81,7 +81,7 @@ def families(root):
     sb = [split_spec(b["text"])[1] for b in bank]
     us = sorted({x for x in sg + sb if x})
     SV = dict(zip(us, E.encode(us))) if us else {}
-    P = np.stack([E.encode(v) for v in DOMAIN_PROTOTYPES.values()])  # D × k × 384
+    P = [E.encode(v) for v in DOMAIN_PROTOTYPES.values()]  # ανά τομέα: k × 384
     dnames = list(DOMAIN_PROTOTYPES)
 
     def spec_ok(a, b):
@@ -89,6 +89,10 @@ def families(root):
             return False
         return a is None or float(SV[a] @ SV[b]) >= 0.8
 
+    dom_all = {}
+    for i, it in enumerate(allg):
+        dom_all[it["id"]] = dnames[int(np.argmax([float((Pd @ Vg[i]).max()) for Pd in P]))]
+    json.dump(dom_all, open(os.path.join(gdir(root), "domains_all.json"), "w"))
     out = {}
     targets = [i for i, it in enumerate(allg) if "GR" in stats[it["survey"]]["items"].get(it["id"], {}) and not it.get("excludedFromTransfer")]
     for i in targets:
@@ -108,7 +112,7 @@ def families(root):
         for j in np.where(sb_ >= 0.85)[0]:
             if len(bank[j]["options"]) == K and spec_ok(sg[i], sb[j]):
                 fam_b.add(bank[j]["id"])
-        dsc = (P @ Vg[i]).max(axis=1)
+        dsc = np.array([float((Pd @ Vg[i]).max()) for Pd in P])
         out[it["id"]] = {"survey": it["survey"], "type": it["type"], "K": K, "domain": dnames[int(np.argmax(dsc))], "domainScores": np.round(dsc, 3).tolist(),
                          "famGlobal": sorted(fam_g), "famBank": sorted(fam_b), "text": it["text"][:160]}
     json.dump(out, open(os.path.join(gdir(root), "families.json"), "w"), ensure_ascii=False)
@@ -132,6 +136,7 @@ def ridit_gap_err(pred, truth):
 def evaluate(root, out_path):
     sv, stats, items = load_all(root)
     fams = json.load(open(os.path.join(gdir(root), "families.json")))
+    dom_all = json.load(open(os.path.join(gdir(root), "domains_all.json")))
     itemmeta = {it["id"]: dict(it, survey=sid) for sid in items for it in items[sid]}
     res = {"targets": [], "gaps": [], "corr": [], "config": {"ranks": RANKS, "lams": LAMS, "ks": KS, "m": M_GRID, "nCal": N_CAL}}
     for adj in (True, False):
@@ -171,6 +176,30 @@ def evaluate(root, out_path):
                 calc = [j for t in cal_all[:m] for j in col_of.get(t, []) if mask_all[gr, j]]
                 regimes[f"Rminus+{m}"] = calc
                 regimes[f"R0+{m}"] = gr_other + calc
+            # αποστάσεις Ελλάδας–χωρών ανά καθεστώς (μία φορά ανά έρευνα)
+            dist_cache, dist_dom = {}, {}
+            for rg in ("R0",):
+                vis = np.array(regimes[rg], dtype=int)
+                for dname in DOMAIN_PROTOTYPES:
+                    vd = vis[np.array([dom_all.get(cols[j]["item"]) == dname for j in vis], dtype=bool)] if len(vis) else vis
+                    d = []
+                    if len(vd) >= 10:
+                        for i in foreign:
+                            o = vd[mask_all[i, vd]]
+                            if len(o) >= 10:
+                                d.append((float(np.sqrt(np.mean((Z[i, o] - Z[gr, o]) ** 2))), i))
+                    d.sort()
+                    dist_dom[dname] = d
+            for rg, vis in regimes.items():
+                vis = np.array(vis, dtype=int)
+                d = []
+                if len(vis) >= 10 and gr is not None:
+                    for i in foreign:
+                        o = vis[mask_all[i, vis]]
+                        if len(o) >= 10:
+                            d.append((float(np.sqrt(np.mean((Z[i, o] - Z[gr, o]) ** 2))), i))
+                d.sort()
+                dist_cache[rg] = d
             for t in tgt:
                 js = col_of.get(t)
                 if not js or gr is None:
@@ -188,6 +217,7 @@ def evaluate(root, out_path):
                 rec["pred"]["pool"] = pool
                 disp = np.std([gbt.from_cols(Z[i, js], meta["type"], K) for i in have], axis=0)
                 rec["countryDispersion"] = np.round(disp * 100, 2).tolist()
+                hset = set(have)
                 for rg, vis in regimes.items():
                     vis = np.array(vis, dtype=int)
                     for (r, lam), (m_, U, V) in fits.items():
@@ -198,12 +228,7 @@ def evaluate(root, out_path):
                         rec["pred"][f"C{r}_{int(lam)}|{rg}"] = gbt.from_cols(z, meta["type"], K)
                     # B: k-NN χωρών με απόσταση στις ορατές ελληνικές στήλες
                     if len(vis) >= 10:
-                        d = []
-                        for i in have:
-                            o = vis[mask_all[i, vis]]
-                            if len(o) >= 10:
-                                d.append((float(np.sqrt(np.mean((Z[i, o] - Z[gr, o]) ** 2))), i))
-                        d.sort()
+                        d = [x for x in dist_cache[rg] if x[1] in hset]
                         for k in KS:
                             nb = d[:k]
                             if len(nb) < 2:
@@ -213,7 +238,33 @@ def evaluate(root, out_path):
                             rec["pred"][f"B{k}|{rg}"] = gbt.from_cols(z, meta["type"], K)
                             if k == 5 and rg == "R0":
                                 rec["neighbors"] = [countries[i] for _, i in nb]
+                            if k == 5 and rg.startswith("R0+"):
+                                # διόρθωση από τα m ελληνικά items βαθμονόμησης (συρρίκνωση m/(m+5))
+                                mm = int(rg.split("+")[1])
+                                calc = [j for t2 in cal_all[:mm] for j in col_of.get(t2, []) if mask_all[gr, j]]
+                                nbi = [i for _, i in nb]
+                                res_ = [Z[gr, j] - np.nanmean([Z[i, j] for i in nbi if mask_all[i, j]]) for j in calc
+                                        if any(mask_all[i, j] for i in nbi)]
+                                if res_:
+                                    off = float(np.mean(res_)) * mm / (mm + 5)
+                                    rec["pred"][f"B5off|{rg}"] = gbt.from_cols(z + off, meta["type"], K)
+                    if rg == "R0":
+                        dd = [x for x in dist_dom.get(fams[t]["domain"], []) if x[1] in hset]
+                        for k in (5, 10):
+                            nb = dd[:k]
+                            if len(nb) >= 2:
+                                w = np.array([1 / max(x, 0.05) ** 2 for x, _ in nb])
+                                z = np.average(Z[np.ix_([i for _, i in nb], js)], axis=0, weights=w)
+                                rec["pred"][f"Bdom{k}|R0"] = gbt.from_cols(z, meta["type"], K)
+                    # συνδυασμοί B5 + C
+                    for r in (1, 2, 3):
+                        cb = rec["pred"].get(f"B5|{rg}")
+                        cc = rec["pred"].get(f"C{r}_10|{rg}")
+                        if cb is not None and cc is not None:
+                            rec["pred"][f"E{r}|{rg}"] = (np.asarray(cb) + np.asarray(cc)) / 2
                 rec["mae"] = {k: round(float(np.mean(np.abs(np.asarray(v) * 100 - truth * 100))), 3) for k, v in rec["pred"].items()}
+                if adj:
+                    rec["countryMAE"] = {countries[i]: round(float(np.mean(np.abs(gbt.from_cols(Z[i, js], meta["type"], K) * 100 - truth * 100))), 2) for i in have}
                 rec["pred"] = {k: np.round(np.asarray(v) * 100, 2).tolist() for k, v in rec["pred"].items() if k in ("pool",) or k.endswith("|R0")}
                 res["targets"].append(rec)
                 # δεσμευμένες αποκλίσεις (μόνο σε μία διαδρομή: adj=True)
