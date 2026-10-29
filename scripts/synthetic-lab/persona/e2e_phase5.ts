@@ -22,7 +22,10 @@ for (const n of [100, 200, 500, 1000]) for (const s of [11, 22, 33]) {
     const g = q.personaLink?.iqge;
     if (!g) continue;
     const opts = Object.keys(g.level);
-    const idx = (r: (typeof rs)[0]) => opts.indexOf(((r.answers.find((a) => a.questionId === q.id)?.value as { choice?: string } | null)?.choice) || '');
+    const idx = (r: (typeof rs)[0]) => {
+      const v = r.answers.find((a) => a.questionId === q.id)?.value as { choice?: string; scaleIndex?: number } | null;
+      return opts.indexOf((v?.scaleIndex != null ? (q.scale || [])[v.scaleIndex] : v?.choice) || '');
+    };
     let W = 0;
     const c = new Array(opts.length).fill(0);
     const byAge: Record<string, [number, number]> = {};

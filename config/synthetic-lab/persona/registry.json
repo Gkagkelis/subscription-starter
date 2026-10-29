@@ -363,6 +363,60 @@
    "approvedAt": null,
    "notes": "Phase 4 (10/2026). pie-0.4 + χρονικά μεταβλητή πρόθεση ψήφου (mover–stayer AR(1), MAPLE panel: 1 μήνας 9%) + IQGE iqge-1 για νέες ερωτήσεις. Ανάπτυξη (διαΝΕΟσις 2022/2024, εκτός δείγματος): MAE 13,6/15,2 έναντι βάσης κλίμακας 14,2/15,6 και λεξικής pie-0.4 −0,7/−0,9 π.μ.· κάλυψη 100%. ΤΕΛΙΚΑ holdouts H1–H7 (423 ερωτήσεις, μία εκτέλεση): IQGE 13,6 έναντι ομοιόμορφης 13,8 (−0,17 [−0,50, 0,16]) και βάσης κλίμακας +0,50 — το κριτήριο ακρίβειας ΔΕΝ πληρούται· κάλυψη 80% διαστήματος 79,5%. Πολιτικά: ΚΚΕ/ΣΥΡΙΖΑ/νέα κόμματα αδιόρθωτα. STAGED: ενεργοποίηση μόνο με ρητή έγκριση.",
    "scope": "general"
+  },
+  {
+   "version": "pie-0.6",
+   "status": "staged",
+   "licencePolicy": "research",
+   "cutoff": "2026-10",
+   "dataSnapshot": "6691d76b09a8f5457dd1dbfe604dc52d784fa2256f08bfe21d410a8cac25fd84",
+   "createdAt": "2026-10-29T16:00:00Z",
+   "codeCommit": "9a1446e",
+   "nItems": 1696,
+   "sources": [
+    "dn2015a",
+    "dn2015n",
+    "dn2017",
+    "dn2018a",
+    "dn2018b",
+    "dn2020a",
+    "dn2020b",
+    "dn2022a",
+    "dn2022b",
+    "dn2022s",
+    "dn2024a",
+    "dn2024b",
+    "dn2024c",
+    "cses2009",
+    "cses2012",
+    "cses2015a",
+    "cses2015b",
+    "cses2019",
+    "undpolar2022",
+    "maple2019pre",
+    "maple2019post",
+    "maple2019feb"
+   ],
+   "evaluation": ".synthetic-lab-data/global-behavior-evidence/v1/scores-final.json",
+   "evaluationSummary": {
+    "M1_marginal_MAE_pp": null,
+    "M3_assoc_abs_err": null,
+    "split": "final",
+    "lock": "cafe751aa570c46c362b142732d1c13f6504f539cdae5b1e41222c39fe79425e",
+    "phase5": {
+     "S1_B5_MAE_pp": 5.95,
+     "S1_countryMean_MAE_pp": 7.19,
+     "S1_greekOnly_MAE_pp": 23.4,
+     "S2_C_MAE_pp": 14.01,
+     "S2_A_MAE_pp": 20.03,
+     "S2_lock": "614ac5af1c503cf533f0cc5ff49f503910f116e54fbf6ba60da9fd9b3d6e853d",
+     "note": "Όχι συγκρίσιμο με τα M1/M3 της pie-0.2 (διαφορετικοί στόχοι: διεθνείς τυποποιημένες ερωτήσεις)."
+    }
+   },
+   "approvedBy": null,
+   "approvedAt": null,
+   "notes": "Phase 5 (Global Behavior Transfer): pie-0.5 + διεθνής μεταφορά στο IQGE (gbt-1). S1 τελικό: B5 5,95 έναντι μέσου χωρών 7,19 και Greek-only 23,4 π.μ. (2.567 στόχοι, 18 έρευνες)· S2 τελικό: C 14,01 έναντι A 20,03 (443 στόχοι, C ≤ A−1 σε 7/10 holdouts· αρνητική μεταφορά σε Wellcome 2018 και EB 75.3). Staged — απαιτεί έγκριση· η pie-0.2 μένει στην παραγωγή.",
+   "scope": "general"
   }
  ]
 }

@@ -76,3 +76,19 @@ class GlobalMatcher:
                 "groupShift": shift or None, "expectedMAE": exp,
                 "international": {"basis": it["basis"], "countries": it["countries"], "survey": it["survey"], "itemId": it["id"]},
                 "evidence": [{"id": it["id"], "sim": round(sim, 3), "text": it["text"][:120], "weight": 1.0}]}
+
+
+def extend_iqge(G, root):
+    """PHASE5 S2 (staged): προσθήκη των διεθνών items στη βάση τεκμηρίων του IQGE, όπως στην κλειδωμένη παραλλαγή C
+    (ελληνικό επίπεδο: πραγματικό περιθώριο ή levelC). Οι έρευνες που ήδη υπάρχουν στην ελληνική βάση (ESS10/11) παραλείπονται."""
+    from gbt_s2 import BANK_FILE, extend_lake
+
+    pkg = json.load(open(os.path.join(root, ".synthetic-lab-data", "global-behavior-evidence", "v1", "runtime", "gbt-items.json")))
+    have = set(G.lake_ids.tolist())
+    items, marg = [], {}
+    for x in pkg["items"]:
+        if x["survey"] in BANK_FILE or x["id"] in have or "levelC" not in x:
+            continue
+        items.append({"id": x["id"], "var": x.get("var") or x["id"].split("::")[-1], "text": x["text"], "options": x["options"], "type": x["type"], "file": x["survey"], "wave": x["wave"], "family": f"g:{x['id']}"})
+        marg[x["id"]] = {"n": x.get("nGR", 0), "dist": x["levelC"]}
+    return len(extend_lake(G, items, marg))

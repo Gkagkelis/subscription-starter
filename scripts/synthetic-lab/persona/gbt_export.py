@@ -5,7 +5,9 @@ PHASE5 — πακέτο διεθνούς μεταφοράς για το IQGE (ε
   - ελληνικό περιθώριο: ΠΡΑΓΜΑΤΙΚΟ αν η Ελλάδα απάντησε (ελληνικές γραμμές ανάπτυξης), αλλιώς πρόβλεψη με την κλειδωμένη
     διαμόρφωση gbt-1 (B5|R0: 5 πλησιέστερες χώρες ως προς ΟΛΕΣ τις ορατές ελληνικές απαντήσεις, χωρίς προσαρμογή σύνθεσης)·
   - δεσμευμένες αποκλίσεις υποομάδων (ridit) ως μέσος όλων των χωρών (καλύτερο στο τελικό holdout: −30% σφάλμα έναντι μηδενικών)·
-  - 80% διάστημα και αναμενόμενο MAE ανά τομέα (από την ανάπτυξη)· χώρες-πηγές.
+  - 80% διάστημα και αναμενόμενο MAE ανά τομέα (από την ανάπτυξη)· χώρες-πηγές·
+  - levelC: ελληνικό επίπεδο της κλειδωμένης παραλλαγής C του S2 (ALS rank 1, λ 10, με προσαρμογή σύνθεσης, fold-in της Ελλάδας
+    σε όλες τις ορατές στήλες) — χρησιμοποιείται ΜΟΝΟ ως τεκμήριο συγγενών ερωτήσεων (iqge.py --international-lake).
 Οι κλειδωμένες ελληνικές γραμμές ΔΕΝ χρησιμοποιούνται.
 
   python3 -I scripts/synthetic-lab/persona/gbt_export.py --root .
@@ -47,6 +49,18 @@ def main():
     col_of = {}
     for j, c in enumerate(cols):
         col_of.setdefault(c["item"], []).append(j)
+    # παραλλαγή C (S2, Τροπ. Γ): διεθνές μοντέλο χωρίς ελληνικές απαντήσεις + fold-in της Ελλάδας
+    cC, colsC, ZC, _ = gbt.build_matrix(stats, items, use_adj=True)
+    grC = cC.index("GR")
+    maskC = ~np.isnan(ZC)
+    mf = maskC.copy()
+    mf[grC] = False
+    mC, _, VC = gbt.als(ZC, mf, cfg["s2"]["rank"], cfg["s2"]["lam"])
+    visC = np.where(maskC[grC])[0]
+    uC = gbt.fold_in(ZC[grC, visC], VC[visC], mC[visC], cfg["s2"]["lam"])
+    colC = {}
+    for j, c in enumerate(colsC):
+        colC.setdefault(c["item"], []).append(j)
     out = []
     for sid in items:
         for it in items[sid]:
@@ -62,21 +76,24 @@ def main():
             if "GR" in st:
                 level, basis, nb = np.array(st["GR"]["p"]), "greek_observed", []
                 exp_mae = None
+                levelC = level
             else:
                 nb = [x for x in d if x[1] in have][: cfg["k"]]
                 w = np.array([1 / max(x, 0.05) ** 2 for x, _ in nb])
                 level = gbt.from_cols(np.average(Z[np.ix_([i for _, i in nb], js)], axis=0, weights=w), it["type"], K)
                 basis = "international_transfer"
                 exp_mae = cfg["expectedMAE"].get(dom, cfg["expectedMAE"]["ALL"])
+                jc = colC[it["id"]]
+                levelC = gbt.from_cols(mC[jc] + VC[jc] @ uC, it["type"], K)
             gaps = {}
             for c, r in st.items():
                 if c == "GR":
                     continue
                 for k, v in r["gaps"].items():
                     gaps.setdefault(k, []).append(v)
-            out.append({"id": it["id"], "survey": sid, "wave": (sv[sid].get("countries", {}).get("GR") or {}).get("wave") or sv[sid].get("wave"),
+            out.append({"id": it["id"], "var": it["var"], "survey": sid, "wave": (sv[sid].get("countries", {}).get("GR") or {}).get("wave") or sv[sid].get("wave"),
                         "text": it["text"], "options": it["options"], "type": it["type"], "domain": dom, "basis": basis,
-                        "level": np.round(level, 5).tolist(), "q80": cfg["q80"].get(dom, cfg["q80"]["ALL"]), "expectedMAE": exp_mae,
+                        "level": np.round(level, 5).tolist(), "levelC": np.round(levelC, 5).tolist(), "nGR": int(st["GR"]["n"]) if "GR" in st else 0, "q80": cfg["q80"].get(dom, cfg["q80"]["ALL"]), "expectedMAE": exp_mae,
                         "countries": [countries[i] for _, i in nb], "nCountries": len(have),
                         "gaps": {k: round(float(np.mean(v)), 4) for k, v in gaps.items() if len(v) >= 3},
                         "licence": sv[sid].get("licence"), "commercialUse": sv[sid].get("commercialUse")})

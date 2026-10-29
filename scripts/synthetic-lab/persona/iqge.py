@@ -48,6 +48,8 @@ def main():
     ap.add_argument("--in", dest="inp", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--no-international", action="store_true", help="χωρίς τη διεθνή βάση (Phase 5)")
+    ap.add_argument("--international-lake", action="store_true",
+                    help="PHASE5 S2 (staged): διεθνή items ως τεκμήριο συγγενών ερωτήσεων· ελληνικό επίπεδο πραγματικό ή από την παραλλαγή C")
     ap.add_argument("--p4-lake", action="store_true", help="πρόσθετη βάση φάσης 4 (δεν βελτίωσε την ανάπτυξη· εκτός προεπιλογής)")
     a = ap.parse_args()
     root = os.path.abspath(a.root)
@@ -58,6 +60,10 @@ def main():
         from gbt_runtime import GlobalMatcher
 
         gm = GlobalMatcher(root, G.E)
+    if a.international_lake:
+        from gbt_runtime import extend_iqge
+
+        print("διεθνής βάση IQGE:", extend_iqge(G, root), "items")
     doc = json.load(open(a.inp))
     qs = doc["questions"] if isinstance(doc, dict) else doc
     report = []
@@ -88,7 +94,7 @@ def main():
         report.append({"id": q["id"], "status": "interpreted", "tier": r["tier"], "international": link.get("international"), "sim1": r["sim1"], "type": t["type"], "expectedMAE": link["expectedMAE"],
                        "level": link["level"], "evidence": r["evidence"][:3], "baseKind": r["baseKind"], "baseWeight": r["baseWeight"], "rank": r["rank"]})
     if isinstance(doc, dict):
-        doc["iqgeReport"] = {"version": IQGE_VERSION, "model": a.model, "ref": a.ref, "questions": report,
+        doc["iqgeReport"] = {"version": IQGE_VERSION, "model": a.model, "ref": a.ref, "internationalLake": a.international_lake, "questions": report,
                              "note": "AI-generated synthetic research: τα επίπεδα προέρχονται από πραγματικά δεδομένα συγγενών ερωτήσεων, όχι από γλωσσικό μοντέλο."}
     json.dump(doc, open(a.out, "w"), ensure_ascii=False, indent=1)
     for x in report:
