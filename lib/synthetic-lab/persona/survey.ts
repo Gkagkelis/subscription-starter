@@ -148,6 +148,16 @@ export function runPersonaSurvey(o: PersonaSurveyOptions): StudyRun {
   });
   const auto = prepared.filter((p) => p.provenance.autoLink?.accepted).map((p) => p.q.id);
   if (auto.length) warnings.push(`Αυτόματη ερμηνεία (${AUTOLINK_VERSION}): ${auto.join(', ')} συνδέθηκαν αυτόματα με πραγματικά δεδομένα (MODEL-EXTRAPOLATED, η αντιστοίχιση καταγράφεται στην προέλευση).`);
+  // Συγγενικές (όχι ίδιες) ερωτήσεις: τυφλή αξιολόγηση (διαΝΕΟσις 2022/2024, Phase 3) — απόκλιση περιθωρίων συχνά ΜΕΓΑΛΥΤΕΡΗ
+  // από ομοιόμορφη κατανομή (validation 27,0 έναντι 22,1 π.μ.· holdout 18,5 έναντι 17,1). Οι σχέσεις με άλλες απαντήσεις
+  // διατηρούνται, το επίπεδο όχι: ρητή προειδοποίηση χαμηλής εμπιστοσύνης (καμία τεχνητή διόρθωση των απαντήσεων).
+  const transfer = prepared.filter((p) => p.item && p.support === 'MODEL_EXTRAPOLATED' && p.q.personaLink?.kind === 'equivalent').map((p) => p.q.id);
+  const auto2 = prepared.filter((p) => p.item && p.support === 'MODEL_EXTRAPOLATED' && p.provenance.autoLink?.accepted).map((p) => p.q.id);
+  const lowConf = Array.from(new Set([...transfer, ...auto2]));
+  if (lowConf.length)
+    warnings.push(
+      `ΧΑΜΗΛΗ ΕΜΠΙΣΤΟΣΥΝΗ ΕΠΙΠΕΔΟΥ (${lowConf.join(', ')}): απαντώνται από συγγενική —όχι ίδια— ερώτηση πραγματικών δεδομένων. Στην τυφλή αξιολόγηση τα ποσοστά τέτοιων ερωτήσεων απείχαν συχνά περισσότερο από μια ομοιόμορφη κατανομή· να διαβάζονται ως ενδεικτικά (οι σχέσεις με τις άλλες απαντήσεις είναι πιο αξιόπιστες από το επίπεδο).`
+    );
   const respondents = respondPanel(panel, prepared, seed);
   const ne = prepared.filter((p) => p.support === 'NOT_RELIABLY_ESTIMABLE').map((p) => p.q.id);
   const ex = prepared.filter((p) => p.support === 'MODEL_EXTRAPOLATED').map((p) => p.q.id);
