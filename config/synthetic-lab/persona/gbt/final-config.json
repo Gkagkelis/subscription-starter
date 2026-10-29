@@ -1,0 +1,27 @@
+{
+ "version": "gbt-1",
+ "model": "B5",
+ "k": 5,
+ "adj": false,
+ "rank": 0,
+ "lam": 10.0,
+ "regime": "R0",
+ "q80": {
+  "CONSUMER": 8.77,
+  "ECONOMIC": 8.5,
+  "MEDIA_TECH": 7.2,
+  "POLITICAL": 7.28,
+  "SOCIAL": 7.74,
+  "ALL": 7.79
+ },
+ "expectedMAE": {
+  "CONSUMER": 6.05,
+  "ECONOMIC": 5.85,
+  "MEDIA_TECH": 5.82,
+  "POLITICAL": 5.62,
+  "SOCIAL": 5.37,
+  "ALL": 5.68
+ },
+ "selection": "Ανάπτυξη 3.303 ελληνικών στόχων (26 έρευνες): B5|R0 χωρίς προσαρμογή σύνθεσης MAE 5,68 (με προσαρμογή 5,72· pool 6,82· Greek-only IQGE 18,37). LOSO επιλέγει B5 σε 16/26, B3 σε 6, E3 σε 4· B5 κλειδώνεται ως απλούστερο με το καλύτερο συνολικό MAE.",
+ "devSha256": "ecfa2d7192c2c98357b67688562bcb75d6b0f3541666df5f9e55511c46cc503f"
+}
