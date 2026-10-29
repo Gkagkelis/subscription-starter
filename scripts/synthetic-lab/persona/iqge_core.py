@@ -115,6 +115,8 @@ class IQGE:
         self.lake_wave = np.array([b["wave"] for b in self.lake_all])
         self.lake_lk = [label_key(b["options"]) for b in self.lake_all]
         self.pool_fam = np.array([p.get("family") or "" for p in self.pool_all])
+        self.pool_ids = np.array([p["id"] for p in self.pool_all])
+        self.lake_ids = np.array([b["id"] for b in self.lake_all])
         self.pool_wave = np.array([p["wave"] for p in self.pool_all])
         # πληθυσμός αναφοράς για ροπές λανθανόντων (πραγματικός δημογραφικός σκελετός)
         real = pie.read_resp(os.path.join(self.HZ, "resp", f"{ref_skeleton}.csv.gz"))
@@ -128,7 +130,7 @@ class IQGE:
             for x, v in zip(miss, self.E.encode(miss)):
                 self.SV[x] = v
 
-    def interpret(self, t, ref, exclude_file=None, exclude_family=None):
+    def interpret(self, t, ref, exclude_file=None, exclude_family=None, exclude_ids=None, exclude_files=None):
         """t: {id, text, options:[{code,label}], type, wave}. Επιστρέφει ερμηνεία χωρίς καμία πραγματική απάντηση του στόχου."""
         E, OV, embed = self.E, self.OV, self.embed
         K = len(t["options"])
@@ -140,6 +142,10 @@ class IQGE:
         At = OV(t)
         fam = exclude_family or "__none__"
         lmask = (self.lake_wave <= ref) & (self.lake_file != (exclude_file or "__none__")) & (self.lake_fam != fam)
+        if exclude_ids:
+            lmask &= ~np.isin(self.lake_ids, list(exclude_ids))
+        if exclude_files:
+            lmask &= ~np.isin(self.lake_file, list(exclude_files))
         lsims = np.where(lmask, self.lv @ tv, -1.0)
         ltop = np.argsort(-lsims)[:30]
         s1 = float(lsims[ltop[0]])
@@ -208,6 +214,10 @@ class IQGE:
         r["expectedMAE"] = self.params["tiers"][tier].get("cardFitMAE")
         # σειρά προσώπων: έως 3 ordinal items του μοντέλου
         pmask = (self.pool_wave <= ref) & (self.pool_fam != fam)
+        if exclude_ids:
+            pmask &= ~np.isin(self.pool_ids, list(exclude_ids))
+        if exclude_files:
+            pmask &= ~np.isin(np.array([p["file"] for p in self.pool_all]), list(exclude_files))
         psims = np.where(pmask, self.pv @ tv, -1.0)
         ptop = [j for j in np.argsort(-psims)[:40] if self.pool_all[j]["model"]["kind"] == "ordinal" and psims[j] > 0.3][:3]
         r["rank"] = []
