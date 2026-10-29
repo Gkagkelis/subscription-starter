@@ -1,0 +1,7836 @@
+{
+ "note": "Ερωτηματολόγια χωρίς αποτελέσματα (το FL585 περιλαμβάνει τιμές ΑΛΛΩΝ χωρών, όχι της Ελλάδας)",
+ "surveys": [
+  {
+   "organisation": "GPO (G.P.O. Έρευνα Επικοινωνία ΑΕ) for iefimerida.gr",
+   "fieldworkStart": "2026-10-16",
+   "fieldworkEnd": "2026-10-19",
+   "publicationDate": "2026-10-21",
+   "population": "Σύνολο πληθυσμού 17 ετών και άνω, πανελλαδικά",
+   "ageRange": [
+    17,
+    null
+   ],
+   "mode": "mixed: CATI (approx. two thirds) + CAWI online panel (approx. one third)",
+   "sampleSize": 1000,
+   "reportUrl": "https://www.iefimerida.gr/sites/default/files/2026-10/dimoskopisi-gpo-iefimerida-oktobrios-2026.pdf",
+   "retrievedAt": "2026-10-29",
+   "weighting": "composite weighting by sex, age and party preference",
+   "surveyId": "P7A-CON-01",
+   "title": "Household cost-of-living hardship module within GPO/iefimerida October 2026 poll (report questions 2–4)",
+   "category": "consumer",
+   "questions": [
+    {
+     "qid": "Q2",
+     "text": "Ποια από τις παρακάτω φράσεις περιγράφει καλύτερα την οικονομική σας κατάσταση:",
+     "type": "likert",
+     "options": [
+      "Δεν μπορούμε να καλύψουμε ούτε τις βασικές μας ανάγκες",
+      "Δεν μπορούμε να καλύψουμε όλες τις ανάγκες μας, δυσκολευόμαστε πολύ",
+      "Καταφέρνουμε να καλύπτουμε τις ανάγκες μας με δυσκολία",
+      "Ζούμε άνετα αλλά δεν έχουμε δυνατότητα αποταμίευσης",
+      "Ζούμε άνετα και μπορούμε να αποταμιεύουμε",
+      "Δεν ξέρω / Δεν απαντώ"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "consumer",
+     "followUpOf": null,
+     "sourcePage": 5,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Report question number 2. Ordered self-assessment of household financial situation (worst to best) plus DK/NA."
+    },
+    {
+     "qid": "Q3",
+     "text": "Πιστεύετε ότι η ακρίβεια κυρίως είναι:",
+     "type": "single_choice",
+     "options": [
+      "Εισαγόμενη εξαιτίας των διεθνών συνθηκών ή",
+      "Οφείλεται στην πολιτική της κυβέρνησης",
+      "Εξίσου και στα δυο (αυθόρμητα)",
+      "Δεν ξέρω / Δεν απαντώ"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "economic",
+     "followUpOf": null,
+     "sourcePage": 6,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Report question number 3. Option 3 recorded only if given spontaneously (αυθόρμητα). Option 1 label ends with the connective 'ή' as printed."
+    },
+    {
+     "qid": "Q4_1",
+     "text": "Πόσο δυσκολεύεστε να καλύψετε τις παρακάτω ανάγκες: — Τρόφιμα, αγορές σούπερ μάρκετ",
+     "type": "likert",
+     "options": [
+      "Πολύ",
+      "Αρκετά",
+      "Λίγο",
+      "Καθόλου",
+      "Δεν έχω αυτό το έξοδο",
+      "Δεν ξέρω / Δεν απαντώ"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "consumer",
+     "followUpOf": null,
+     "sourcePage": 7,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Report question 4 (battery of 11 expense types, one chart per item). The report prints the full 4-point scale (Πολύ / Αρκετά / Λίγο / Καθόλου) plus 'Δεν έχω αυτό το έξοδο' and DK/NA, and also the collapsed totals 'Πολύ & Αρκετά' / 'Λίγο & Καθόλου'; the full scale is used here (collapsed totals are derivable). Some charts omit a non-substantive category; the option set is kept uniform across items. Long DK labels are truncated in some charts ('Δεν ξέρω / Δεν απ...')."
+    },
+    {
+     "qid": "Q4_2",
+     "text": "Πόσο δυσκολεύεστε να καλύψετε τις παρακάτω ανάγκες: — Πληρωμή λογαριασμών ενέργειας",
+     "type": "likert",
+     "options": [
+      "Πολύ",
+      "Αρκετά",
+      "Λίγο",
+      "Καθόλου",
+      "Δεν έχω αυτό το έξοδο",
+      "Δεν ξέρω / Δεν απαντώ"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "consumer",
+     "followUpOf": null,
+     "sourcePage": 7,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Report question 4 (battery of 11 expense types, one chart per item). The report prints the full 4-point scale (Πολύ / Αρκετά / Λίγο / Καθόλου) plus 'Δεν έχω αυτό το έξοδο' and DK/NA, and also the collapsed totals 'Πολύ & Αρκετά' / 'Λίγο & Καθόλου'; the full scale is used here (collapsed totals are derivable). Some charts omit a non-substantive category; the option set is kept uniform across items. Long DK labels are truncated in some charts ('Δεν ξέρω / Δεν απ...')."
+    },
+    {
+     "qid": "Q4_3",
+     "text": "Πόσο δυσκολεύεστε να καλύψετε τις παρακάτω ανάγκες: — Τραπεζικές υποχρεώσεις",
+     "type": "likert",
+     "options": [
+      "Πολύ",
+      "Αρκετά",
+      "Λίγο",
+      "Καθόλου",
+      "Δεν έχω αυτό το έξοδο",
+      "Δεν ξέρω / Δεν απαντώ"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "consumer",
+     "followUpOf": null,
+     "sourcePage": 8,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Report question 4 (battery of 11 expense types, one chart per item). The report prints the full 4-point scale (Πολύ / Αρκετά / Λίγο / Καθόλου) plus 'Δεν έχω αυτό το έξοδο' and DK/NA, and also the collapsed totals 'Πολύ & Αρκετά' / 'Λίγο & Καθόλου'; the full scale is used here (collapsed totals are derivable). Some charts omit a non-substantive category; the option set is kept uniform across items. Long DK labels are truncated in some charts ('Δεν ξέρω / Δεν απ...')."
+    },
+    {
+     "qid": "Q4_4",
+     "text": "Πόσο δυσκολεύεστε να καλύψετε τις παρακάτω ανάγκες: — Ιατρικά έξοδα",
+     "type": "likert",
+     "options": [
+      "Πολύ",
+      "Αρκετά",
+      "Λίγο",
+      "Καθόλου",
+      "Δεν έχω αυτό το έξοδο",
+      "Δεν ξέρω / Δεν απαντώ"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "consumer",
+     "followUpOf": null,
+     "sourcePage": 8,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Report question 4 (battery of 11 expense types, one chart per item). The report prints the full 4-point scale (Πολύ / Αρκετά / Λίγο / Καθόλου) plus 'Δεν έχω αυτό το έξοδο' and DK/NA, and also the collapsed totals 'Πολύ & Αρκετά' / 'Λίγο & Καθόλου'; the full scale is used here (collapsed totals are derivable). Some charts omit a non-substantive category; the option set is kept uniform across items. Long DK labels are truncated in some charts ('Δεν ξέρω / Δεν απ...')."
+    },
+    {
+     "qid": "Q4_5",
+     "text": "Πόσο δυσκολεύεστε να καλύψετε τις παρακάτω ανάγκες: — Πληρωμή φροντιστηρίων / Eκπαιδευτικών αναγκών",
+     "type": "likert",
+     "options": [
+      "Πολύ",
+      "Αρκετά",
+      "Λίγο",
+      "Καθόλου",
+      "Δεν έχω αυτό το έξοδο",
+      "Δεν ξέρω / Δεν απαντώ"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "consumer",
+     "followUpOf": null,
+     "sourcePage": 9,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Report question 4 (battery of 11 expense types, one chart per item). The report prints the full 4-point scale (Πολύ / Αρκετά / Λίγο / Καθόλου) plus 'Δεν έχω αυτό το έξοδο' and DK/NA, and also the collapsed totals 'Πολύ & Αρκετά' / 'Λίγο & Καθόλου'; the full scale is used here (collapsed totals are derivable). Some charts omit a non-substantive category; the option set is kept uniform across items. Long DK labels are truncated in some charts ('Δεν ξέρω / Δεν απ...')."
+    },
+    {
+     "qid": "Q4_6",
+     "text": "Πόσο δυσκολεύεστε να καλύψετε τις παρακάτω ανάγκες: — Ψυχαγωγία / Διασκέδαση",
+     "type": "likert",
+     "options": [
+      "Πολύ",
+      "Αρκετά",
+      "Λίγο",
+      "Καθόλου",
+      "Δεν έχω αυτό το έξοδο",
+      "Δεν ξέρω / Δεν απαντώ"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "consumer",
+     "followUpOf": null,
+     "sourcePage": 9,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Report question 4 (battery of 11 expense types, one chart per item). The report prints the full 4-point scale (Πολύ / Αρκετά / Λίγο / Καθόλου) plus 'Δεν έχω αυτό το έξοδο' and DK/NA, and also the collapsed totals 'Πολύ & Αρκετά' / 'Λίγο & Καθόλου'; the full scale is used here (collapsed totals are derivable). Some charts omit a non-substantive category; the option set is kept uniform across items. Long DK labels are truncated in some charts ('Δεν ξέρω / Δεν απ...')."
+    },
+    {
+     "qid": "Q4_7",
+     "text": "Πόσο δυσκολεύεστε να καλύψετε τις παρακάτω ανάγκες: — Ένδυση / Υπόδηση",
+     "type": "likert",
+     "options": [
+      "Πολύ",
+      "Αρκετά",
+      "Λίγο",
+      "Καθόλου",
+      "Δεν έχω αυτό το έξοδο",
+      "Δεν ξέρω / Δεν απαντώ"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "consumer",
+     "followUpOf": null,
+     "sourcePage": 10,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Report question 4 (battery of 11 expense types, one chart per item). The report prints the full 4-point scale (Πολύ / Αρκετά / Λίγο / Καθόλου) plus 'Δεν έχω αυτό το έξοδο' and DK/NA, and also the collapsed totals 'Πολύ & Αρκετά' / 'Λίγο & Καθόλου'; the full scale is used here (collapsed totals are derivable). Some charts omit a non-substantive category; the option set is kept uniform across items. Long DK labels are truncated in some charts ('Δεν ξέρω / Δεν απ...')."
+    },
+    {
+     "qid": "Q4_8",
+     "text": "Πόσο δυσκολεύεστε να καλύψετε τις παρακάτω ανάγκες: — Ταξίδια / Εκδρομές",
+     "type": "likert",
+     "options": [
+      "Πολύ",
+      "Αρκετά",
+      "Λίγο",
+      "Καθόλου",
+      "Δεν έχω αυτό το έξοδο",
+      "Δεν ξέρω / Δεν απαντώ"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "consumer",
+     "followUpOf": null,
+     "sourcePage": 10,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Report question 4 (battery of 11 expense types, one chart per item). The report prints the full 4-point scale (Πολύ / Αρκετά / Λίγο / Καθόλου) plus 'Δεν έχω αυτό το έξοδο' and DK/NA, and also the collapsed totals 'Πολύ & Αρκετά' / 'Λίγο & Καθόλου'; the full scale is used here (collapsed totals are derivable). Some charts omit a non-substantive category; the option set is kept uniform across items. Long DK labels are truncated in some charts ('Δεν ξέρω / Δεν απ...')."
+    },
+    {
+     "qid": "Q4_9",
+     "text": "Πόσο δυσκολεύεστε να καλύψετε τις παρακάτω ανάγκες: — Πληρωμή ενοικίου",
+     "type": "likert",
+     "options": [
+      "Πολύ",
+      "Αρκετά",
+      "Λίγο",
+      "Καθόλου",
+      "Δεν έχω αυτό το έξοδο",
+      "Δεν ξέρω / Δεν απαντώ"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "consumer",
+     "followUpOf": null,
+     "sourcePage": 11,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Report question 4 (battery of 11 expense types, one chart per item). The report prints the full 4-point scale (Πολύ / Αρκετά / Λίγο / Καθόλου) plus 'Δεν έχω αυτό το έξοδο' and DK/NA, and also the collapsed totals 'Πολύ & Αρκετά' / 'Λίγο & Καθόλου'; the full scale is used here (collapsed totals are derivable). Some charts omit a non-substantive category; the option set is kept uniform across items. Long DK labels are truncated in some charts ('Δεν ξέρω / Δεν απ...')."
+    },
+    {
+     "qid": "Q4_10",
+     "text": "Πόσο δυσκολεύεστε να καλύψετε τις παρακάτω ανάγκες: — Καύσιμα / Πετρέλαιο θέρμανσης",
+     "type": "likert",
+     "options": [
+      "Πολύ",
+      "Αρκετά",
+      "Λίγο",
+      "Καθόλου",
+      "Δεν έχω αυτό το έξοδο",
+      "Δεν ξέρω / Δεν απαντώ"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "consumer",
+     "followUpOf": null,
+     "sourcePage": 11,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Report question 4 (battery of 11 expense types, one chart per item). The report prints the full 4-point scale (Πολύ / Αρκετά / Λίγο / Καθόλου) plus 'Δεν έχω αυτό το έξοδο' and DK/NA, and also the collapsed totals 'Πολύ & Αρκετά' / 'Λίγο & Καθόλου'; the full scale is used here (collapsed totals are derivable). Some charts omit a non-substantive category; the option set is kept uniform across items. Long DK labels are truncated in some charts ('Δεν ξέρω / Δεν απ...')."
+    },
+    {
+     "qid": "Q4_11",
+     "text": "Πόσο δυσκολεύεστε να καλύψετε τις παρακάτω ανάγκες: — Πληρωμή λογαριασμών τηλεφωνίας / Ίντερνετ",
+     "type": "likert",
+     "options": [
+      "Πολύ",
+      "Αρκετά",
+      "Λίγο",
+      "Καθόλου",
+      "Δεν έχω αυτό το έξοδο",
+      "Δεν ξέρω / Δεν απαντώ"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "consumer",
+     "followUpOf": null,
+     "sourcePage": 12,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Report question 4 (battery of 11 expense types, one chart per item). The report prints the full 4-point scale (Πολύ / Αρκετά / Λίγο / Καθόλου) plus 'Δεν έχω αυτό το έξοδο' and DK/NA, and also the collapsed totals 'Πολύ & Αρκετά' / 'Λίγο & Καθόλου'; the full scale is used here (collapsed totals are derivable). Some charts omit a non-substantive category; the option set is kept uniform across items. Long DK labels are truncated in some charts ('Δεν ξέρω / Δεν απ...')."
+    },
+    {
+     "qid": "Q4R_1",
+     "text": "Πόσο δυσκολεύεστε να καλύψετε τις παρακάτω ανάγκες: — Τρόφιμα, αγορές σούπερ μάρκετ (ανάλυση του «Πολύ & Αρκετά» σε όσους έχουν το αντίστοιχο έξοδο)",
+     "type": "single_choice",
+     "options": [
+      "Πολύ & Αρκετά"
+     ],
+     "base": "respondents who have this expense (excludes 'Δεν έχω αυτό το έξοδο')",
+     "measure": "single_category_share_of_base",
+     "domain": "consumer",
+     "followUpOf": "Q4_1",
+     "sourcePage": 13,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Re-based summary on report p.13: only the combined 'Πολύ & Αρκετά' share among those who have the expense is published (complement = Λίγο & Καθόλου plus DK/NA, not separately published). Derivable from Q4 item distribution; included as a separately published statistic."
+    },
+    {
+     "qid": "Q4R_2",
+     "text": "Πόσο δυσκολεύεστε να καλύψετε τις παρακάτω ανάγκες: — Πληρωμή λογαριασμών ενέργειας (ανάλυση του «Πολύ & Αρκετά» σε όσους έχουν το αντίστοιχο έξοδο)",
+     "type": "single_choice",
+     "options": [
+      "Πολύ & Αρκετά"
+     ],
+     "base": "respondents who have this expense (excludes 'Δεν έχω αυτό το έξοδο')",
+     "measure": "single_category_share_of_base",
+     "domain": "consumer",
+     "followUpOf": "Q4_2",
+     "sourcePage": 13,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Re-based summary on report p.13: only the combined 'Πολύ & Αρκετά' share among those who have the expense is published (complement = Λίγο & Καθόλου plus DK/NA, not separately published). Derivable from Q4 item distribution; included as a separately published statistic."
+    },
+    {
+     "qid": "Q4R_3",
+     "text": "Πόσο δυσκολεύεστε να καλύψετε τις παρακάτω ανάγκες: — Τραπεζικές υποχρεώσεις (ανάλυση του «Πολύ & Αρκετά» σε όσους έχουν το αντίστοιχο έξοδο)",
+     "type": "single_choice",
+     "options": [
+      "Πολύ & Αρκετά"
+     ],
+     "base": "respondents who have this expense (excludes 'Δεν έχω αυτό το έξοδο')",
+     "measure": "single_category_share_of_base",
+     "domain": "consumer",
+     "followUpOf": "Q4_3",
+     "sourcePage": 13,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Re-based summary on report p.13: only the combined 'Πολύ & Αρκετά' share among those who have the expense is published (complement = Λίγο & Καθόλου plus DK/NA, not separately published). Derivable from Q4 item distribution; included as a separately published statistic."
+    },
+    {
+     "qid": "Q4R_4",
+     "text": "Πόσο δυσκολεύεστε να καλύψετε τις παρακάτω ανάγκες: — Ιατρικά έξοδα (ανάλυση του «Πολύ & Αρκετά» σε όσους έχουν το αντίστοιχο έξοδο)",
+     "type": "single_choice",
+     "options": [
+      "Πολύ & Αρκετά"
+     ],
+     "base": "respondents who have this expense (excludes 'Δεν έχω αυτό το έξοδο')",
+     "measure": "single_category_share_of_base",
+     "domain": "consumer",
+     "followUpOf": "Q4_4",
+     "sourcePage": 13,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Re-based summary on report p.13: only the combined 'Πολύ & Αρκετά' share among those who have the expense is published (complement = Λίγο & Καθόλου plus DK/NA, not separately published). Derivable from Q4 item distribution; included as a separately published statistic."
+    },
+    {
+     "qid": "Q4R_5",
+     "text": "Πόσο δυσκολεύεστε να καλύψετε τις παρακάτω ανάγκες: — Πληρωμή φροντιστηρίων / Eκπαιδευτικών αναγκών (ανάλυση του «Πολύ & Αρκετά» σε όσους έχουν το αντίστοιχο έξοδο)",
+     "type": "single_choice",
+     "options": [
+      "Πολύ & Αρκετά"
+     ],
+     "base": "respondents who have this expense (excludes 'Δεν έχω αυτό το έξοδο')",
+     "measure": "single_category_share_of_base",
+     "domain": "consumer",
+     "followUpOf": "Q4_5",
+     "sourcePage": 13,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Re-based summary on report p.13: only the combined 'Πολύ & Αρκετά' share among those who have the expense is published (complement = Λίγο & Καθόλου plus DK/NA, not separately published). Derivable from Q4 item distribution; included as a separately published statistic."
+    },
+    {
+     "qid": "Q4R_6",
+     "text": "Πόσο δυσκολεύεστε να καλύψετε τις παρακάτω ανάγκες: — Ψυχαγωγία / Διασκέδαση (ανάλυση του «Πολύ & Αρκετά» σε όσους έχουν το αντίστοιχο έξοδο)",
+     "type": "single_choice",
+     "options": [
+      "Πολύ & Αρκετά"
+     ],
+     "base": "respondents who have this expense (excludes 'Δεν έχω αυτό το έξοδο')",
+     "measure": "single_category_share_of_base",
+     "domain": "consumer",
+     "followUpOf": "Q4_6",
+     "sourcePage": 13,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Re-based summary on report p.13: only the combined 'Πολύ & Αρκετά' share among those who have the expense is published (complement = Λίγο & Καθόλου plus DK/NA, not separately published). Derivable from Q4 item distribution; included as a separately published statistic."
+    },
+    {
+     "qid": "Q4R_7",
+     "text": "Πόσο δυσκολεύεστε να καλύψετε τις παρακάτω ανάγκες: — Ένδυση / Υπόδηση (ανάλυση του «Πολύ & Αρκετά» σε όσους έχουν το αντίστοιχο έξοδο)",
+     "type": "single_choice",
+     "options": [
+      "Πολύ & Αρκετά"
+     ],
+     "base": "respondents who have this expense (excludes 'Δεν έχω αυτό το έξοδο')",
+     "measure": "single_category_share_of_base",
+     "domain": "consumer",
+     "followUpOf": "Q4_7",
+     "sourcePage": 13,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Re-based summary on report p.13: only the combined 'Πολύ & Αρκετά' share among those who have the expense is published (complement = Λίγο & Καθόλου plus DK/NA, not separately published). Derivable from Q4 item distribution; included as a separately published statistic."
+    },
+    {
+     "qid": "Q4R_8",
+     "text": "Πόσο δυσκολεύεστε να καλύψετε τις παρακάτω ανάγκες: — Ταξίδια / Εκδρομές (ανάλυση του «Πολύ & Αρκετά» σε όσους έχουν το αντίστοιχο έξοδο)",
+     "type": "single_choice",
+     "options": [
+      "Πολύ & Αρκετά"
+     ],
+     "base": "respondents who have this expense (excludes 'Δεν έχω αυτό το έξοδο')",
+     "measure": "single_category_share_of_base",
+     "domain": "consumer",
+     "followUpOf": "Q4_8",
+     "sourcePage": 13,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Re-based summary on report p.13: only the combined 'Πολύ & Αρκετά' share among those who have the expense is published (complement = Λίγο & Καθόλου plus DK/NA, not separately published). Derivable from Q4 item distribution; included as a separately published statistic."
+    },
+    {
+     "qid": "Q4R_9",
+     "text": "Πόσο δυσκολεύεστε να καλύψετε τις παρακάτω ανάγκες: — Πληρωμή ενοικίου (ανάλυση του «Πολύ & Αρκετά» σε όσους έχουν το αντίστοιχο έξοδο)",
+     "type": "single_choice",
+     "options": [
+      "Πολύ & Αρκετά"
+     ],
+     "base": "respondents who have this expense (excludes 'Δεν έχω αυτό το έξοδο')",
+     "measure": "single_category_share_of_base",
+     "domain": "consumer",
+     "followUpOf": "Q4_9",
+     "sourcePage": 13,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Re-based summary on report p.13: only the combined 'Πολύ & Αρκετά' share among those who have the expense is published (complement = Λίγο & Καθόλου plus DK/NA, not separately published). Derivable from Q4 item distribution; included as a separately published statistic."
+    },
+    {
+     "qid": "Q4R_10",
+     "text": "Πόσο δυσκολεύεστε να καλύψετε τις παρακάτω ανάγκες: — Καύσιμα / Πετρέλαιο θέρμανσης (ανάλυση του «Πολύ & Αρκετά» σε όσους έχουν το αντίστοιχο έξοδο)",
+     "type": "single_choice",
+     "options": [
+      "Πολύ & Αρκετά"
+     ],
+     "base": "respondents who have this expense (excludes 'Δεν έχω αυτό το έξοδο')",
+     "measure": "single_category_share_of_base",
+     "domain": "consumer",
+     "followUpOf": "Q4_10",
+     "sourcePage": 13,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Re-based summary on report p.13: only the combined 'Πολύ & Αρκετά' share among those who have the expense is published (complement = Λίγο & Καθόλου plus DK/NA, not separately published). Derivable from Q4 item distribution; included as a separately published statistic."
+    },
+    {
+     "qid": "Q4R_11",
+     "text": "Πόσο δυσκολεύεστε να καλύψετε τις παρακάτω ανάγκες: — Πληρωμή λογαριασμών τηλεφωνίας / Ίντερνετ (ανάλυση του «Πολύ & Αρκετά» σε όσους έχουν το αντίστοιχο έξοδο)",
+     "type": "single_choice",
+     "options": [
+      "Πολύ & Αρκετά"
+     ],
+     "base": "respondents who have this expense (excludes 'Δεν έχω αυτό το έξοδο')",
+     "measure": "single_category_share_of_base",
+     "domain": "consumer",
+     "followUpOf": "Q4_11",
+     "sourcePage": 13,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Re-based summary on report p.13: only the combined 'Πολύ & Αρκετά' share among those who have the expense is published (complement = Λίγο & Καθόλου plus DK/NA, not separately published). Derivable from Q4 item distribution; included as a separately published statistic."
+    }
+   ]
+  },
+  {
+   "surveyId": "P7A-POL-01",
+   "organisation": "Metron Analysis (report prepared for MEGA; subscription survey)",
+   "title": "Metron Forum – Οκτώβριος 2026",
+   "category": "political",
+   "fieldworkStart": "2026-10-14",
+   "fieldworkEnd": "2026-10-20",
+   "publicationDate": "2026-10-22",
+   "population": "Γενικός πληθυσμός 17+ ετών, πανελλαδικά",
+   "ageRange": [
+    17,
+    null
+   ],
+   "mode": "mixed: CATI (885: 429 landline + 456 mobile, RDD) + online panel (415)",
+   "sampleSize": 1300,
+   "reportUrl": "https://metronanalysis.gr/download/28723/",
+   "retrievedAt": "2026-10-29",
+   "weighting": "sex, age and 2023 parliamentary vote",
+   "questions": [
+    {
+     "qid": "Q1",
+     "text": "Κατά τη γνώμη σας η χώρα μας αυτή την περίοδο κινείται προς τη σωστή ή προς τη λάθος κατεύθυνση;",
+     "type": "single_choice",
+     "options": [
+      "Προς τη σωστή",
+      "Προς τη λάθος",
+      "Ούτε-ούτε (αυθ.)",
+      "ΔΓ/ΔΑ (αυθ.)"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "political",
+     "followUpOf": null,
+     "sourcePage": 5,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Current-wave pie chart; report also shows trend lines (not included)."
+    },
+    {
+     "qid": "Q2",
+     "text": "Εσείς προσωπικά σε σύγκριση με ένα χρόνο πριν, θα λέγατε ότι είστε σε καλύτερη, στην ίδια ή σε χειρότερη θέση;",
+     "type": "likert",
+     "options": [
+      "Σε καλύτερη",
+      "Στην ίδια",
+      "Σε χειρότερη"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "economic",
+     "followUpOf": null,
+     "sourcePage": 6,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "No DK/NA category published for this item (published categories sum to 100)."
+    },
+    {
+     "qid": "Q3",
+     "text": "Ποιο νομίζετε ότι είναι το σημαντικότερο πρόβλημα που αντιμετωπίζει σήμερα η χώρα μας; Και ποιο άλλο;",
+     "type": "multiple_choice",
+     "options": [],
+     "base": "all respondents",
+     "measure": "mentions_pct_of_respondents",
+     "domain": "political",
+     "followUpOf": null,
+     "sourcePage": 7,
+     "excluded": true,
+     "excludeReason": "open-ended (spontaneous 1st+2nd mention); only the five most-mentioned codes are published, full code list not published",
+     "notes": "Options left empty (published list is a top-5 sorted by result)."
+    },
+    {
+     "qid": "Q4_1",
+     "text": "Θα ήθελα να μου πείτε τώρα ποιες είναι οι εντυπώσεις σας από το έργο της Κυβέρνησης σε συγκεκριμένους τομείς — Στα γεωπολιτικά θέματα και θέματα διεθνών σχέσεων (Ελληνοτουρκικά, σχέσεις με ΗΠΑ, Ρωσία, Ισραήλ Ε.Ε. κλπ)",
+     "type": "likert",
+     "options": [
+      "Μάλλον θετικές",
+      "Ούτε-ούτε (αυθ.)",
+      "Μάλλον αρνητικές",
+      "ΔΓ/ΔΑ (αυθ.)"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "political",
+     "followUpOf": null,
+     "sourcePage": 8,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Battery of 4 policy areas, same scale. Items listed in neutral (alphabetical) order, not report order. Report also prints a net balance and a positive-opinion trend table (not included)."
+    },
+    {
+     "qid": "Q4_2",
+     "text": "Θα ήθελα να μου πείτε τώρα ποιες είναι οι εντυπώσεις σας από το έργο της Κυβέρνησης σε συγκεκριμένους τομείς — Στα θέματα Δημοκρατίας και Θεσμών (Δικαιοσύνη, λογοδοσία, διαφάνεια κλπ)",
+     "type": "likert",
+     "options": [
+      "Μάλλον θετικές",
+      "Ούτε-ούτε (αυθ.)",
+      "Μάλλον αρνητικές",
+      "ΔΓ/ΔΑ (αυθ.)"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "political",
+     "followUpOf": null,
+     "sourcePage": 8,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Battery of 4 policy areas, same scale. Items listed in neutral (alphabetical) order, not report order. Report also prints a net balance and a positive-opinion trend table (not included)."
+    },
+    {
+     "qid": "Q4_3",
+     "text": "Θα ήθελα να μου πείτε τώρα ποιες είναι οι εντυπώσεις σας από το έργο της Κυβέρνησης σε συγκεκριμένους τομείς — Στα θέματα της Οικονομίας (μισθοί ακρίβεια, φορολογία κλπ)",
+     "type": "likert",
+     "options": [
+      "Μάλλον θετικές",
+      "Ούτε-ούτε (αυθ.)",
+      "Μάλλον αρνητικές",
+      "ΔΓ/ΔΑ (αυθ.)"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "political",
+     "followUpOf": null,
+     "sourcePage": 8,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Battery of 4 policy areas, same scale. Items listed in neutral (alphabetical) order, not report order. Report also prints a net balance and a positive-opinion trend table (not included)."
+    },
+    {
+     "qid": "Q4_4",
+     "text": "Θα ήθελα να μου πείτε τώρα ποιες είναι οι εντυπώσεις σας από το έργο της Κυβέρνησης σε συγκεκριμένους τομείς — Στα θέματα της καθημερινότητας (σχέσεις κράτους – πολίτη, κράτος πρόνοιας, ασφάλεια κλπ)",
+     "type": "likert",
+     "options": [
+      "Μάλλον θετικές",
+      "Ούτε-ούτε (αυθ.)",
+      "Μάλλον αρνητικές",
+      "ΔΓ/ΔΑ (αυθ.)"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "political",
+     "followUpOf": null,
+     "sourcePage": 8,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Battery of 4 policy areas, same scale. Items listed in neutral (alphabetical) order, not report order. Report also prints a net balance and a positive-opinion trend table (not included)."
+    },
+    {
+     "qid": "Q5",
+     "text": "Ποια είναι η εντύπωση σας για το έργο της Κυβέρνησης συνολικά, θετική ή αρνητική;",
+     "type": "single_choice",
+     "options": [
+      "Θετική",
+      "Ούτε-ούτε (αυθ.)",
+      "Αρνητική",
+      "ΔΓ/ΔΑ (αυθ.)"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "political",
+     "followUpOf": null,
+     "sourcePage": 9,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": ""
+    },
+    {
+     "qid": "Q6",
+     "text": "Ποια είναι η γνώμη σας για τον τρόπο με τον οποίο ασκεί τα καθήκοντά του μέχρι στιγμής ο Πρωθυπουργός κ. Μητσοτάκης; Θετική ή αρνητική ;",
+     "type": "single_choice",
+     "options": [
+      "Θετική",
+      "Ούτε-ούτε (αυθ.)",
+      "Αρνητική",
+      "ΔΓ/ΔΑ (αυθ.)"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "political",
+     "followUpOf": null,
+     "sourcePage": 10,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": ""
+    },
+    {
+     "qid": "Q7",
+     "text": "Ποια είναι η μέχρι τώρα εντύπωσή σας για την αξιωματική αντιπολίτευση του ΠΑΣΟΚ; Θετική ή αρνητική;",
+     "type": "single_choice",
+     "options": [
+      "Θετική",
+      "Ούτε-ούτε (αυθ.)",
+      "Αρνητική",
+      "ΔΓ/ΔΑ (αυθ.)"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "political",
+     "followUpOf": null,
+     "sourcePage": 11,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": ""
+    },
+    {
+     "qid": "Q8",
+     "text": "Και ποια είναι η γνώμη σας για τον τρόπο με τον οποίο ασκεί τα καθήκοντά του μέχρι στιγμής ο αρχηγός της Αξ Αντιπολίτευσης κ. Νίκος Ανδρουλάκης; Θετική ή αρνητική;",
+     "type": "single_choice",
+     "options": [
+      "Θετική",
+      "Ούτε-ούτε (αυθ.)",
+      "Αρνητική",
+      "ΔΓ/ΔΑ (αυθ.)"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "political",
+     "followUpOf": null,
+     "sourcePage": 12,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": ""
+    },
+    {
+     "qid": "Q9",
+     "text": "Δείκτης οικονομικής εμπιστοσύνης",
+     "type": "single_choice",
+     "options": [],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "economic",
+     "followUpOf": null,
+     "sourcePage": 13,
+     "excluded": true,
+     "excludeReason": "composite index (average of two balances) published only as index/trend; underlying question distributions not published",
+     "notes": ""
+    },
+    {
+     "qid": "Q10",
+     "text": "Ποια είναι η γνώμη σας για τον τρόπο με τον οποίο ασκεί τα καθήκοντά του μέχρι στιγμής ο Πρόεδρος των ΗΠΑ Ντόναλτ Τραμπ; Θετική ή αρνητική;",
+     "type": "single_choice",
+     "options": [
+      "Θετική",
+      "Ούτε-ούτε (αυθ.)",
+      "Αρνητική",
+      "ΔΓ/ΔΑ (αυθ.)"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "political",
+     "followUpOf": null,
+     "sourcePage": 15,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": ""
+    },
+    {
+     "qid": "Q11",
+     "text": "Ποια είναι η γνώμη σας για την Ευρωπαϊκή Ένωση; Θετική ή αρνητική;",
+     "type": "single_choice",
+     "options": [
+      "Θετική",
+      "Ουδέτερη (αυθ.)",
+      "Αρνητική",
+      "ΔΓ/ΔΑ (αυθ.)"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "political",
+     "followUpOf": null,
+     "sourcePage": 16,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": ""
+    },
+    {
+     "qid": "Q12",
+     "text": "Δημοτικότητες πολιτικών αρχηγών (Θετικές/Μάλλον θετικές γνώμες)",
+     "type": "single_choice",
+     "options": [],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "political",
+     "followUpOf": null,
+     "sourcePage": 18,
+     "excluded": true,
+     "excludeReason": "only the positive-opinion share per leader is published (trend table); full distribution not published",
+     "notes": ""
+    },
+    {
+     "qid": "Q13",
+     "text": "Μεταξύ των πολιτικών αρχηγών ποια/ος νομίζετε ότι είναι καταλληλότερη/ος για πρωθυπουργός της χώρας;",
+     "type": "single_choice",
+     "options": [
+      "Ανδρουλάκης Νίκος",
+      "Βαρουφάκης Γιάνης",
+      "Βελόπουλος Κυριάκος",
+      "Καρυστιανού Μαρία",
+      "Κασιδιάρης Ηλίας",
+      "Κασσελάκης Στέφανος",
+      "Κουτσούμπας Δημήτρης",
+      "Κωνσταντοπούλου Ζωή",
+      "Λατινοπούλου Αφροδίτη",
+      "Μητσοτάκης Κυριάκος",
+      "Σαμαράς Αντώνης",
+      "Τσίπρας Αλέξης",
+      "Άλλος",
+      "Κανένας",
+      "ΔΓ/ΔΑ"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "political",
+     "followUpOf": null,
+     "sourcePage": 19,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Spontaneous (αυθόρμητα) answers, coded. Named options re-ordered alphabetically (report order is sorted by result); 'Άλλος', 'Κανένας', 'ΔΓ/ΔΑ' kept last. Option wording verbatim."
+    },
+    {
+     "qid": "Q14",
+     "text": "Και αν είχαμε την επόμενη Κυριακή Βουλευτικές εκλογές τι θα ψηφίζατε;",
+     "type": "single_choice",
+     "options": [],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "political",
+     "followUpOf": null,
+     "sourcePage": 21,
+     "excluded": true,
+     "excludeReason": "vote intention already in lab polls archive",
+     "notes": "Vote-intention cross-tabs (pp.22–26, 30, 33, 35, 38) also skipped."
+    },
+    {
+     "qid": "Q15",
+     "text": "Εκτίμηση ψήφου",
+     "type": "single_choice",
+     "options": [],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "political",
+     "followUpOf": null,
+     "sourcePage": 27,
+     "excluded": true,
+     "excludeReason": "vote intention already in lab polls archive",
+     "notes": "vote estimate and seat projection pp.27–28"
+    },
+    {
+     "qid": "Q16",
+     "text": "Κατά τη γνώμη σας θα σχηματιστεί Κυβέρνηση μετά τις επόμενες εκλογές ή θα χρειαστεί να ξαναγίνουν εκλογές;",
+     "type": "single_choice",
+     "options": [
+      "Θα σχηματιστεί Κυβέρνηση",
+      "Θα χρειαστεί να ξαναγίνουν εκλογές",
+      "ΔΓ/ΔΑ (αυθ.)"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "political",
+     "followUpOf": null,
+     "sourcePage": 29,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Report also shows breakdown by left-right self-placement (cross-tab, not included)."
+    },
+    {
+     "qid": "Q17",
+     "text": "Και η Κυβέρνηση που θα σχηματιστεί νομίζετε θα είναι αυτοδύναμη ή κυβέρνηση συνεργασίας;",
+     "type": "single_choice",
+     "options": [
+      "Θα είναι αυτοδύναμη",
+      "Θα είναι Κυβέρνηση συνεργασίας",
+      "ΔΓ/ΔΑ (αυθ.)"
+     ],
+     "base": "respondents who answered Q16 'Θα σχηματιστεί Κυβέρνηση'",
+     "measure": "share",
+     "domain": "political",
+     "followUpOf": "Q16",
+     "sourcePage": 31,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Filtered follow-up; percentages are of the filtered base."
+    },
+    {
+     "qid": "Q18",
+     "text": "Είστε υπέρ των αυτοδύναμων Κυβερνήσεων ή υπέρ των Κυβερνήσεων συνεργασίας;",
+     "type": "single_choice",
+     "options": [
+      "Υπέρ των αυτοδύναμων κυβερνήσεων",
+      "Υπέρ των κυβερνήσεων συνεργασίας",
+      "ΔΓ/ΔΑ (αυθ.)"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "political",
+     "followUpOf": null,
+     "sourcePage": 32,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": ""
+    },
+    {
+     "qid": "Q19",
+     "text": "Τι θα λέγατε ότι χρειάζεται περισσότερο η διακυβέρνηση της χώρας σήμερα; Πολιτική σταθερότητα ή πολιτική αλλαγή;",
+     "type": "single_choice",
+     "options": [
+      "Πολιτική σταθερότητα",
+      "Πολιτική αλλαγή",
+      "ΔΓ/ΔΑ (αυθ.)"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "political",
+     "followUpOf": null,
+     "sourcePage": 34,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": ""
+    },
+    {
+     "qid": "Q20",
+     "text": "Και πόσο πιθανό είναι στις επόμενες εκλογές να ψηφίζατε ένα κόμμα με επικεφαλής τον Αντώνη Σαμαρά;",
+     "type": "likert",
+     "options": [
+      "Πολύ πιθανό",
+      "Αρκετά πιθανό",
+      "Όχι και τόσο πιθανό",
+      "Απίθανο"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "political",
+     "followUpOf": null,
+     "sourcePage": 36,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Vote-propensity item for a hypothetical party (not the vote-intention question). No DK/NA category published (published categories sum to 100)."
+    },
+    {
+     "qid": "Q21",
+     "text": "Ας φανταστούμε τον κόσμο σαν μία πόλη προστατευμένη από ένα κάστρο που περικλείεται από μία έρημο. Υπάρχουν άνθρωποι προστατευμένοι μέσα στο κάστρο και άνθρωποι απροστάτευτοι έξω από αυτό. Εσείς που θα λέγατε ότι βρίσκεστε; Μέσα ή έξω από το κάστρο ;",
+     "type": "single_choice",
+     "options": [
+      "Μέσα στο κάστρο",
+      "Έξω από το κάστρο",
+      "ΔΓ/ΔΑ (αυθ.)"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "social",
+     "followUpOf": null,
+     "sourcePage": 37,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": ""
+    }
+   ]
+  },
+  {
+   "organisation": "GPO (G.P.O. Έρευνα Επικοινωνία ΑΕ) for iefimerida.gr",
+   "fieldworkStart": "2026-10-16",
+   "fieldworkEnd": "2026-10-19",
+   "publicationDate": "2026-10-21",
+   "population": "Σύνολο πληθυσμού 17 ετών και άνω, πανελλαδικά",
+   "ageRange": [
+    17,
+    null
+   ],
+   "mode": "mixed: CATI (approx. two thirds) + CAWI online panel (approx. one third)",
+   "sampleSize": 1000,
+   "reportUrl": "https://www.iefimerida.gr/sites/default/files/2026-10/dimoskopisi-gpo-iefimerida-oktobrios-2026.pdf",
+   "retrievedAt": "2026-10-29",
+   "weighting": "composite weighting by sex, age and party preference",
+   "surveyId": "P7A-POL-02",
+   "title": "Πανελλαδική Πολιτική Έρευνα – Οκτώβριος 2026 (GPO για iefimerida), excluding cost-of-living module (see P7A-CON-01)",
+   "category": "political",
+   "questions": [
+    {
+     "qid": "Q1",
+     "text": "Ποιο από τα παρακάτω θεωρείτε το σημαντικότερο πρόβλημα αυτή τη στιγμή στην Ελλάδα;",
+     "type": "single_choice",
+     "options": [],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "political",
+     "followUpOf": null,
+     "sourcePage": 4,
+     "excluded": true,
+     "excludeReason": "option labels incomplete in published PDF: the chart renders labels for only 6 of 11 bars, so exact option wording for 5 categories is not published (one is not identifiable even from secondary press coverage)",
+     "notes": "Options intentionally left empty (published order is sorted by result)."
+    },
+    {
+     "qid": "Q5_1",
+     "text": "Με βάση αυτά που έχετε ακούσει, ποιο κόμμα πιστεύετε ότι διαθέτει ρεαλιστικό σχέδιο; — Για την αντιμετώπιση της ακρίβειας",
+     "type": "single_choice",
+     "options": [
+      "ΕΛΑΣ",
+      "ΝΔ",
+      "ΠΑΣΟΚ",
+      "Κανένα από αυτά (αυθόρμητα)",
+      "Δεν ξέρω / Δεν απαντώ"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "political",
+     "followUpOf": null,
+     "sourcePage": 14,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Report question 5 (4 policy areas). Party options listed alphabetically here (report lists the three parties in a fixed order); 'Κανένα από αυτά' recorded only if spontaneous."
+    },
+    {
+     "qid": "Q5_2",
+     "text": "Με βάση αυτά που έχετε ακούσει, ποιο κόμμα πιστεύετε ότι διαθέτει ρεαλιστικό σχέδιο; — Για την ανάπτυξη της οικονομίας",
+     "type": "single_choice",
+     "options": [
+      "ΕΛΑΣ",
+      "ΝΔ",
+      "ΠΑΣΟΚ",
+      "Κανένα από αυτά (αυθόρμητα)",
+      "Δεν ξέρω / Δεν απαντώ"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "political",
+     "followUpOf": null,
+     "sourcePage": 15,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Report question 5 (4 policy areas). Party options listed alphabetically here (report lists the three parties in a fixed order); 'Κανένα από αυτά' recorded only if spontaneous."
+    },
+    {
+     "qid": "Q5_3",
+     "text": "Με βάση αυτά που έχετε ακούσει, ποιο κόμμα πιστεύετε ότι διαθέτει ρεαλιστικό σχέδιο; — Για την ενίσχυση των εργαζόμενων",
+     "type": "single_choice",
+     "options": [
+      "ΕΛΑΣ",
+      "ΝΔ",
+      "ΠΑΣΟΚ",
+      "Κανένα από αυτά (αυθόρμητα)",
+      "Δεν ξέρω / Δεν απαντώ"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "political",
+     "followUpOf": null,
+     "sourcePage": 16,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Report question 5 (4 policy areas). Party options listed alphabetically here (report lists the three parties in a fixed order); 'Κανένα από αυτά' recorded only if spontaneous."
+    },
+    {
+     "qid": "Q5_4",
+     "text": "Με βάση αυτά που έχετε ακούσει, ποιο κόμμα πιστεύετε ότι διαθέτει ρεαλιστικό σχέδιο; — Για την προστασία της μεσαίας τάξης",
+     "type": "single_choice",
+     "options": [
+      "ΕΛΑΣ",
+      "ΝΔ",
+      "ΠΑΣΟΚ",
+      "Κανένα από αυτά (αυθόρμητα)",
+      "Δεν ξέρω / Δεν απαντώ"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "political",
+     "followUpOf": null,
+     "sourcePage": 17,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Report question 5 (4 policy areas). Party options listed alphabetically here (report lists the three parties in a fixed order); 'Κανένα από αυτά' recorded only if spontaneous."
+    },
+    {
+     "qid": "Q6",
+     "text": "Θα θέλατε στις επόμενες εκλογές, όποτε κι αν αυτές γίνουν;",
+     "type": "single_choice",
+     "options": [
+      "Η ΝΔ να συνεχίσει να είναι κυβέρνηση και ο Κ. Μητσοτάκης Πρωθυπουργός ή",
+      "Να εκλεγεί κάποια άλλη κυβέρνηση",
+      "Δεν ξέρω / Δεν απαντώ"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "political",
+     "followUpOf": null,
+     "sourcePage": 18,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Report also shows previous wave (September 2026) for comparison; not included here."
+    },
+    {
+     "qid": "Q7",
+     "text": "Θα θέλατε η επόμενη κυβέρνηση, όποτε διεξαχθούν οι εκλογές, να είναι;",
+     "type": "single_choice",
+     "options": [
+      "Μία κυβέρνηση συνεργασίας ή",
+      "Αυτοδύναμη κυβέρνηση ακόμη κι αν χρειαστεί να γίνουν επαναλαμβανόμενες εκλογές",
+      "Δεν ξέρω / Δεν απαντώ"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "political",
+     "followUpOf": null,
+     "sourcePage": 19,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Report also shows previous wave (September 2026); not included here."
+    },
+    {
+     "qid": "Q8",
+     "text": "Σε περίπτωση κυβέρνησης συνεργασίας πιστεύετε ότι Πρωθυπουργός πρέπει να είναι;",
+     "type": "single_choice",
+     "options": [
+      "ο αρχηγός του πρώτου κόμματος ή",
+      "κάποιο άλλο πρόσωπο κοινής αποδοχής",
+      "Δεν ξέρω / Δεν απαντώ"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "political",
+     "followUpOf": null,
+     "sourcePage": 20,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Asked of all respondents (hypothetical). Report also shows previous wave (September 2026); not included here."
+    },
+    {
+     "qid": "Q9",
+     "text": "Ποιον/α από τους παρακάτω θεωρείτε καταλληλότερο για Πρωθυπουργό:",
+     "type": "single_choice",
+     "options": [
+      "τον Πρόεδρο του ΠΑΣΟΚ ΚΙΝΑΛ Νίκο Ανδρουλάκη",
+      "τον επικεφαλής του ΜΕΡΑ 25 Γιάννη Βαρουφάκη",
+      "τον Πρόεδρο της Ελληνικής Λύσης Κυριάκο Βελόπουλο",
+      "την Πρόεδρο του ΣΥΡΙΖΑ Ρένα Δούρου",
+      "την πρόεδρο της ΕΛΠΙΔΑΣ Μαρία Καρυστιανού",
+      "τον Πρόεδρο του Κινήματος Δημοκρατίας Στέφανο Κασσελάκη",
+      "τον Γενικό Γραμματέα του ΚΚΕ Δημήτρη Κουτσούμπα",
+      "την Πρόεδρο της Πλεύσης Ελευθερίας Ζωή Κωνσταντοπούλου",
+      "την Πρόεδρο της Φωνής Λογικής Αφροδίτη Λατινοπούλου",
+      "τον Πρόεδρο της ΝΔ Κυριάκο Μητσοτάκη",
+      "τον Πρόεδρο της Νίκης Δημήτρη Νατσιό",
+      "τον Πρόεδρο της Νέας Αριστεράς Γαβριήλ Σακελλαρίδη",
+      "τον πρόεδρο της ΕΛΑΣ Αλέξη Τσίπρα",
+      "Κανέναν από αυτούς (αυθόρμητα)",
+      "Δεν ξέρω / Δεν απαντώ"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "political",
+     "followUpOf": null,
+     "sourcePage": 21,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Leader options re-ordered alphabetically by surname (the report's printed order is sorted by result, which would leak ranking); 'Κανέναν από αυτούς' and DK kept last. Option wording verbatim."
+    },
+    {
+     "qid": "Q10",
+     "text": "Πόσο πιθανό είναι να ψηφίσετε ένα νέο κόμμα του κ. Σαμαρά;",
+     "type": "likert",
+     "options": [
+      "Πολύ",
+      "Αρκετά",
+      "Λίγο",
+      "Καθόλου",
+      "Δεν ξέρω / Δεν απαντώ"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "political",
+     "followUpOf": null,
+     "sourcePage": 22,
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Vote-propensity item for a hypothetical new party (not the vote-intention question). Report also prints collapsed Πολύ & Αρκετά / Λίγο & Καθόλου totals and previous-wave (September 2026) collapsed totals."
+    },
+    {
+     "qid": "Q11",
+     "text": "Αν αύριο είχαμε βουλευτικές εκλογές ποιο κόμμα είναι πιο πιθανό να ψηφίζατε;",
+     "type": "single_choice",
+     "options": [],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "political",
+     "followUpOf": null,
+     "sourcePage": 23,
+     "excluded": true,
+     "excludeReason": "vote intention already in lab polls archive",
+     "notes": ""
+    },
+    {
+     "qid": "Q11E",
+     "text": "Εκτίμηση πρόθεσης ψήφου με αναγωγή στα έγκυρα",
+     "type": "single_choice",
+     "options": [],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "political",
+     "followUpOf": null,
+     "sourcePage": 24,
+     "excluded": true,
+     "excludeReason": "vote intention already in lab polls archive",
+     "notes": "vote estimate (derived from vote intention)"
+    }
+   ]
+  },
+  {
+   "surveyId": "P7A-SOC-01",
+   "organisation": "European Commission (DG EAC; coordinated by DG COMM); fieldwork Demoscopy",
+   "title": "Flash Eurobarometer 585 – Youth and Democracy (Greece / EL column)",
+   "category": "social",
+   "fieldworkStart": "2026-06-19",
+   "fieldworkEnd": "2026-07-01",
+   "publicationDate": "2026-10-28",
+   "population": "Young people aged 15-30 resident in Greece",
+   "ageRange": [
+    15,
+    30
+   ],
+   "mode": "CAWI (Cint online panels)",
+   "sampleSize": 1007,
+   "sampleSizeSource": "report technical specifications (interviews per country); annex states approx. 1000 per larger country",
+   "reportUrl": "https://europa.eu/eurobarometer/api/deliverable/download/file?deliverableId=110393",
+   "retrievedAt": "2026-10-29",
+   "weighting": "rim weighting by age, gender, degree of urbanisation and region",
+   "questions": [
+    {
+     "qid": "Q1",
+     "text": "In your opinion, which of the following are most important for delivering results in policies aimed at young people? Select up to three options.",
+     "type": "multiple_choice",
+     "options": [
+      "Goals that address the real issues faced by young people",
+      "Working together across all levels - local, regional, national, and EU",
+      "Making sure young people and youth organisations have a say in decisions",
+      "Ensuring young people know about policies and opportunities",
+      "Providing financial support for youth programmes and initiatives",
+      "Making decisions using facts and research",
+      "Ensuring policies are actually carried out and reviewed properly",
+      "Connecting different areas of policy that affect young people",
+      "None of these",
+      "Don’t know"
+     ],
+     "base": "all respondents",
+     "measure": "mentions_pct_of_respondents",
+     "domain": "political",
+     "followUpOf": null,
+     "sourcePage": 4,
+     "sourcePages": [
+      4,
+      5
+     ],
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Multiple response: shares are percent of respondents mentioning each option; columns do not sum to 100. Scripting: maximum three answers; items randomised. Population aged 15-30 only (online panel, CAWI). intlValues are other Member States' published values (integers), aligned with options; EU27 average and EL deliberately omitted.",
+     "intlValues": {
+      "BE": [
+       37,
+       21,
+       32,
+       31,
+       33,
+       26,
+       26,
+       17,
+       1,
+       2
+      ],
+      "BG": [
+       41,
+       28,
+       30,
+       28,
+       33,
+       27,
+       27,
+       18,
+       2,
+       1
+      ],
+      "CZ": [
+       45,
+       20,
+       29,
+       26,
+       28,
+       23,
+       12,
+       20,
+       3,
+       4
+      ],
+      "DK": [
+       36,
+       23,
+       37,
+       32,
+       29,
+       30,
+       35,
+       21,
+       1,
+       1
+      ],
+      "DE": [
+       38,
+       24,
+       29,
+       26,
+       23,
+       22,
+       28,
+       16,
+       4,
+       2
+      ],
+      "EE": [
+       38,
+       30,
+       37,
+       36,
+       35,
+       33,
+       29,
+       26,
+       1,
+       1
+      ],
+      "IE": [
+       41,
+       22,
+       39,
+       28,
+       36,
+       22,
+       25,
+       18,
+       1,
+       1
+      ],
+      "ES": [
+       38,
+       17,
+       29,
+       35,
+       31,
+       30,
+       29,
+       20,
+       1,
+       2
+      ],
+      "FR": [
+       40,
+       16,
+       34,
+       31,
+       32,
+       29,
+       20,
+       18,
+       2,
+       2
+      ],
+      "HR": [
+       46,
+       24,
+       30,
+       25,
+       43,
+       27,
+       31,
+       17,
+       1,
+       1
+      ],
+      "IT": [
+       41,
+       22,
+       37,
+       32,
+       39,
+       24,
+       28,
+       14,
+       1,
+       1
+      ],
+      "CY": [
+       54,
+       19,
+       41,
+       25,
+       61,
+       24,
+       26,
+       11,
+       1,
+       1
+      ],
+      "LV": [
+       41,
+       28,
+       33,
+       25,
+       39,
+       33,
+       19,
+       20,
+       2,
+       1
+      ],
+      "LT": [
+       34,
+       26,
+       33,
+       27,
+       36,
+       28,
+       20,
+       18,
+       2,
+       3
+      ],
+      "LU": [
+       44,
+       24,
+       40,
+       33,
+       30,
+       30,
+       36,
+       24,
+       0,
+       1
+      ],
+      "HU": [
+       42,
+       20,
+       25,
+       25,
+       42,
+       24,
+       22,
+       18,
+       2,
+       1
+      ],
+      "MT": [
+       47,
+       16,
+       36,
+       34,
+       33,
+       39,
+       34,
+       29,
+       0,
+       0
+      ],
+      "NL": [
+       39,
+       21,
+       29,
+       30,
+       34,
+       24,
+       27,
+       17,
+       3,
+       2
+      ],
+      "AT": [
+       38,
+       23,
+       28,
+       28,
+       24,
+       23,
+       28,
+       17,
+       2,
+       2
+      ],
+      "PL": [
+       41,
+       23,
+       34,
+       23,
+       33,
+       25,
+       33,
+       18,
+       2,
+       1
+      ],
+      "PT": [
+       42,
+       23,
+       38,
+       35,
+       33,
+       22,
+       29,
+       18,
+       1,
+       2
+      ],
+      "RO": [
+       33,
+       25,
+       32,
+       25,
+       40,
+       20,
+       23,
+       15,
+       3,
+       3
+      ],
+      "SI": [
+       46,
+       27,
+       33,
+       34,
+       35,
+       32,
+       30,
+       26,
+       1,
+       0
+      ],
+      "SK": [
+       44,
+       25,
+       27,
+       27,
+       30,
+       24,
+       18,
+       18,
+       2,
+       1
+      ],
+      "FI": [
+       52,
+       19,
+       38,
+       28,
+       33,
+       24,
+       13,
+       18,
+       1,
+       1
+      ],
+      "SE": [
+       35,
+       20,
+       31,
+       37,
+       30,
+       24,
+       28,
+       20,
+       1,
+       2
+      ]
+     }
+    },
+    {
+     "qid": "Q2",
+     "text": "In the last 12 months, have you learned anything new about the following topics?",
+     "type": "multiple_choice",
+     "options": [
+      "Democratic processes, political participation and institutions",
+      "Human rights and social justice",
+      "Equality, diversity and anti-discrimination",
+      "Environmental sustainability",
+      "Media and digital literacy and recognising disinformation",
+      "None of the above",
+      "Don’t know"
+     ],
+     "base": "all respondents",
+     "measure": "mentions_pct_of_respondents",
+     "domain": "social",
+     "followUpOf": null,
+     "sourcePage": 6,
+     "sourcePages": [
+      6
+     ],
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Multiple response: shares are percent of respondents mentioning each option; columns do not sum to 100. Scripting: items 1-5 randomised. Population aged 15-30 only (online panel, CAWI). intlValues are other Member States' published values (integers), aligned with options; EU27 average and EL deliberately omitted.",
+     "intlValues": {
+      "BE": [
+       34,
+       39,
+       34,
+       37,
+       37,
+       7,
+       3
+      ],
+      "BG": [
+       30,
+       40,
+       34,
+       25,
+       36,
+       17,
+       3
+      ],
+      "CZ": [
+       25,
+       40,
+       29,
+       36,
+       30,
+       15,
+       6
+      ],
+      "DK": [
+       40,
+       43,
+       39,
+       41,
+       35,
+       8,
+       4
+      ],
+      "DE": [
+       33,
+       43,
+       36,
+       25,
+       33,
+       14,
+       4
+      ],
+      "EE": [
+       44,
+       48,
+       48,
+       45,
+       51,
+       5,
+       2
+      ],
+      "IE": [
+       22,
+       45,
+       42,
+       36,
+       35,
+       11,
+       4
+      ],
+      "ES": [
+       33,
+       44,
+       47,
+       32,
+       24,
+       9,
+       3
+      ],
+      "FR": [
+       27,
+       36,
+       42,
+       33,
+       40,
+       12,
+       4
+      ],
+      "HR": [
+       23,
+       46,
+       37,
+       33,
+       40,
+       12,
+       3
+      ],
+      "IT": [
+       32,
+       45,
+       44,
+       43,
+       26,
+       9,
+       2
+      ],
+      "CY": [
+       32,
+       33,
+       31,
+       19,
+       21,
+       27,
+       4
+      ],
+      "LV": [
+       36,
+       45,
+       36,
+       33,
+       42,
+       8,
+       3
+      ],
+      "LT": [
+       29,
+       37,
+       36,
+       32,
+       34,
+       12,
+       4
+      ],
+      "LU": [
+       44,
+       52,
+       53,
+       35,
+       52,
+       2,
+       1
+      ],
+      "HU": [
+       36,
+       37,
+       34,
+       32,
+       34,
+       11,
+       5
+      ],
+      "MT": [
+       38,
+       54,
+       48,
+       48,
+       45,
+       2,
+       0
+      ],
+      "NL": [
+       32,
+       35,
+       40,
+       34,
+       34,
+       13,
+       4
+      ],
+      "AT": [
+       24,
+       41,
+       33,
+       26,
+       34,
+       15,
+       5
+      ],
+      "PL": [
+       27,
+       38,
+       31,
+       26,
+       40,
+       14,
+       3
+      ],
+      "PT": [
+       29,
+       43,
+       47,
+       36,
+       24,
+       10,
+       3
+      ],
+      "RO": [
+       29,
+       40,
+       36,
+       27,
+       28,
+       13,
+       5
+      ],
+      "SI": [
+       44,
+       47,
+       43,
+       40,
+       48,
+       8,
+       2
+      ],
+      "SK": [
+       27,
+       45,
+       29,
+       22,
+       36,
+       12,
+       4
+      ],
+      "FI": [
+       30,
+       44,
+       37,
+       28,
+       39,
+       10,
+       6
+      ],
+      "SE": [
+       36,
+       42,
+       37,
+       28,
+       31,
+       12,
+       6
+      ]
+     }
+    },
+    {
+     "qid": "Q3",
+     "text": "How did you learn about these topics?",
+     "type": "multiple_choice",
+     "options": [
+      "In a school or university (courses, extracurricular activities)",
+      "By participating in youth clubs, civil society organisations, volunteering",
+      "Via traditional media (e.g. TV, radio, newspapers), digital media (e.g. social media, podcasts, blogs)",
+      "Through self-directed reading or research",
+      "Through discussions with your family or friends",
+      "At public events or awareness raising campaigns",
+      "None of the above",
+      "Don’t know"
+     ],
+     "base": "respondents who learned something new about at least one topic",
+     "measure": "mentions_pct_of_respondents",
+     "domain": "social",
+     "followUpOf": "Q2",
+     "sourcePage": 7,
+     "sourcePages": [
+      7,
+      8
+     ],
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Multiple response: shares are percent of respondents mentioning each option; columns do not sum to 100. Scripting: items 1-6 randomised. Filtered base; country base sizes not published in annex. Population aged 15-30 only (online panel, CAWI). intlValues are other Member States' published values (integers), aligned with options; EU27 average and EL deliberately omitted.",
+     "intlValues": {
+      "BE": [
+       43,
+       24,
+       47,
+       26,
+       31,
+       24,
+       1,
+       1
+      ],
+      "BG": [
+       28,
+       17,
+       44,
+       46,
+       34,
+       21,
+       1,
+       0
+      ],
+      "CZ": [
+       34,
+       14,
+       52,
+       25,
+       31,
+       20,
+       1,
+       1
+      ],
+      "DK": [
+       38,
+       28,
+       48,
+       39,
+       39,
+       27,
+       1,
+       0
+      ],
+      "DE": [
+       33,
+       16,
+       43,
+       38,
+       35,
+       24,
+       2,
+       0
+      ],
+      "EE": [
+       44,
+       37,
+       55,
+       43,
+       41,
+       35,
+       0,
+       0
+      ],
+      "IE": [
+       40,
+       17,
+       48,
+       35,
+       36,
+       19,
+       1,
+       0
+      ],
+      "ES": [
+       35,
+       18,
+       46,
+       40,
+       36,
+       20,
+       1,
+       0
+      ],
+      "FR": [
+       42,
+       18,
+       52,
+       27,
+       37,
+       21,
+       1,
+       1
+      ],
+      "HR": [
+       35,
+       14,
+       48,
+       42,
+       36,
+       18,
+       1,
+       0
+      ],
+      "IT": [
+       40,
+       20,
+       53,
+       34,
+       36,
+       18,
+       0,
+       1
+      ],
+      "CY": [
+       32,
+       13,
+       50,
+       32,
+       45,
+       18,
+       2,
+       0
+      ],
+      "LV": [
+       36,
+       29,
+       46,
+       39,
+       37,
+       29,
+       1,
+       0
+      ],
+      "LT": [
+       28,
+       19,
+       51,
+       36,
+       31,
+       22,
+       2,
+       0
+      ],
+      "LU": [
+       40,
+       34,
+       60,
+       40,
+       42,
+       32,
+       0,
+       0
+      ],
+      "HU": [
+       26,
+       15,
+       54,
+       35,
+       34,
+       22,
+       1,
+       0
+      ],
+      "MT": [
+       39,
+       38,
+       50,
+       51,
+       47,
+       35,
+       0,
+       0
+      ],
+      "NL": [
+       35,
+       22,
+       42,
+       34,
+       37,
+       20,
+       2,
+       1
+      ],
+      "AT": [
+       36,
+       17,
+       40,
+       33,
+       37,
+       19,
+       1,
+       0
+      ],
+      "PL": [
+       29,
+       18,
+       47,
+       48,
+       37,
+       19,
+       1,
+       0
+      ],
+      "PT": [
+       34,
+       17,
+       45,
+       35,
+       36,
+       22,
+       1,
+       0
+      ],
+      "RO": [
+       25,
+       16,
+       62,
+       26,
+       32,
+       16,
+       1,
+       0
+      ],
+      "SI": [
+       37,
+       34,
+       58,
+       40,
+       42,
+       32,
+       0,
+       0
+      ],
+      "SK": [
+       30,
+       16,
+       42,
+       32,
+       31,
+       23,
+       2,
+       1
+      ],
+      "FI": [
+       40,
+       16,
+       46,
+       42,
+       34,
+       21,
+       1,
+       0
+      ],
+      "SE": [
+       39,
+       20,
+       43,
+       32,
+       35,
+       19,
+       1,
+       0
+      ]
+     }
+    },
+    {
+     "qid": "Q4",
+     "text": "In your opinion what are the most effective actions for making young people’s voice heard by decision makers? You can select up to three answers.",
+     "type": "multiple_choice",
+     "options": [
+      "Voting in local, national or European elections",
+      "Participating in political movements, parties or unions",
+      "Contacting a politician about an issue",
+      "Volunteering for a charity/campaign organisation",
+      "Boycotting or buying certain products for political, ethical or environmental reasons",
+      "Participating in student or youth organisations",
+      "Taking part in a public consultation on proposed political initiatives (online or offline), including in the EU Youth Dialogue or the European Citizens Panels",
+      "Engaging in social media by expressing my opinion, using hashtags or changing my profile picture for example",
+      "Other",
+      "None of these are effective",
+      "Don’t know"
+     ],
+     "base": "all respondents",
+     "measure": "mentions_pct_of_respondents",
+     "domain": "political",
+     "followUpOf": null,
+     "sourcePage": 9,
+     "sourcePages": [
+      9,
+      10
+     ],
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Multiple response: shares are percent of respondents mentioning each option; columns do not sum to 100. Scripting: up to three answers; items 1-8 randomised. Trend item: modified trend of FL545 (2024) Q1; annex also prints a 2026-2024 change column (not included). Population aged 15-30 only (online panel, CAWI). intlValues are other Member States' published values (integers), aligned with options; EU27 average and EL deliberately omitted.",
+     "intlValues": {
+      "BE": [
+       28,
+       27,
+       17,
+       18,
+       22,
+       28,
+       30,
+       32,
+       4,
+       2,
+       2
+      ],
+      "BG": [
+       40,
+       24,
+       17,
+       22,
+       16,
+       23,
+       34,
+       23,
+       2,
+       4,
+       3
+      ],
+      "CZ": [
+       30,
+       22,
+       16,
+       17,
+       12,
+       27,
+       28,
+       33,
+       3,
+       3,
+       4
+      ],
+      "DK": [
+       34,
+       26,
+       16,
+       22,
+       20,
+       28,
+       35,
+       35,
+       2,
+       3,
+       2
+      ],
+      "DE": [
+       26,
+       28,
+       14,
+       19,
+       15,
+       24,
+       25,
+       35,
+       4,
+       4,
+       2
+      ],
+      "EE": [
+       35,
+       25,
+       24,
+       30,
+       28,
+       32,
+       38,
+       38,
+       1,
+       1,
+       1
+      ],
+      "IE": [
+       32,
+       26,
+       19,
+       23,
+       22,
+       28,
+       27,
+       36,
+       2,
+       2,
+       2
+      ],
+      "ES": [
+       34,
+       25,
+       12,
+       18,
+       12,
+       26,
+       31,
+       34,
+       1,
+       5,
+       2
+      ],
+      "FR": [
+       38,
+       27,
+       14,
+       20,
+       23,
+       28,
+       25,
+       33,
+       2,
+       3,
+       2
+      ],
+      "HR": [
+       32,
+       26,
+       15,
+       23,
+       24,
+       34,
+       28,
+       27,
+       3,
+       4,
+       2
+      ],
+      "IT": [
+       41,
+       28,
+       11,
+       19,
+       16,
+       31,
+       33,
+       27,
+       1,
+       3,
+       2
+      ],
+      "CY": [
+       41,
+       17,
+       22,
+       20,
+       13,
+       25,
+       41,
+       36,
+       2,
+       4,
+       2
+      ],
+      "LV": [
+       28,
+       27,
+       18,
+       27,
+       19,
+       33,
+       36,
+       33,
+       2,
+       2,
+       2
+      ],
+      "LT": [
+       26,
+       26,
+       19,
+       22,
+       19,
+       32,
+       30,
+       28,
+       2,
+       3,
+       3
+      ],
+      "LU": [
+       32,
+       37,
+       21,
+       25,
+       19,
+       39,
+       37,
+       40,
+       1,
+       0,
+       1
+      ],
+      "HU": [
+       29,
+       24,
+       17,
+       19,
+       12,
+       28,
+       33,
+       33,
+       4,
+       2,
+       3
+      ],
+      "MT": [
+       29,
+       25,
+       18,
+       30,
+       21,
+       43,
+       39,
+       39,
+       0,
+       1,
+       0
+      ],
+      "NL": [
+       26,
+       25,
+       15,
+       18,
+       15,
+       27,
+       26,
+       31,
+       3,
+       6,
+       2
+      ],
+      "AT": [
+       25,
+       25,
+       14,
+       15,
+       17,
+       26,
+       24,
+       37,
+       4,
+       3,
+       4
+      ],
+      "PL": [
+       37,
+       23,
+       16,
+       22,
+       15,
+       24,
+       31,
+       34,
+       1,
+       4,
+       2
+      ],
+      "PT": [
+       38,
+       35,
+       11,
+       26,
+       12,
+       36,
+       29,
+       22,
+       2,
+       3,
+       2
+      ],
+      "RO": [
+       32,
+       25,
+       12,
+       24,
+       12,
+       26,
+       32,
+       31,
+       3,
+       3,
+       2
+      ],
+      "SI": [
+       39,
+       25,
+       23,
+       24,
+       19,
+       35,
+       39,
+       36,
+       2,
+       2,
+       1
+      ],
+      "SK": [
+       28,
+       18,
+       20,
+       18,
+       13,
+       27,
+       33,
+       32,
+       4,
+       3,
+       3
+      ],
+      "FI": [
+       34,
+       26,
+       16,
+       19,
+       15,
+       28,
+       26,
+       34,
+       2,
+       3,
+       3
+      ],
+      "SE": [
+       35,
+       30,
+       17,
+       16,
+       17,
+       27,
+       28,
+       29,
+       2,
+       3,
+       4
+      ]
+     }
+    },
+    {
+     "qid": "Q5",
+     "text": "In the last 12 months, have you participated in any activities of the following organisations? Select all that apply.",
+     "type": "multiple_choice",
+     "options": [
+      "A sports club",
+      "A youth club, leisure-time club or any kind of youth organisation",
+      "A cultural organisation",
+      "A political organisation or a political party",
+      "An organisation with volunteering activities",
+      "An organisation active in the domain of climate change/environmental issues",
+      "An organisation promoting human rights or global development",
+      "Any other youth organisation, club, non-governmental organisation, etc.",
+      "None of these",
+      "Don’t know"
+     ],
+     "base": "all respondents",
+     "measure": "mentions_pct_of_respondents",
+     "domain": "social",
+     "followUpOf": null,
+     "sourcePage": 11,
+     "sourcePages": [
+      11,
+      12
+     ],
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Multiple response: shares are percent of respondents mentioning each option; columns do not sum to 100. Scripting: items 1-7 randomised. Trend item: trend FL545 (2024) Q2; annex also prints a 2026-2024 change column (not included). Population aged 15-30 only (online panel, CAWI). intlValues are other Member States' published values (integers), aligned with options; EU27 average and EL deliberately omitted.",
+     "intlValues": {
+      "BE": [
+       28,
+       25,
+       17,
+       13,
+       18,
+       19,
+       18,
+       25,
+       14,
+       2
+      ],
+      "BG": [
+       20,
+       19,
+       15,
+       10,
+       18,
+       12,
+       15,
+       17,
+       30,
+       2
+      ],
+      "CZ": [
+       23,
+       19,
+       17,
+       8,
+       14,
+       12,
+       11,
+       15,
+       27,
+       5
+      ],
+      "DK": [
+       28,
+       27,
+       22,
+       17,
+       23,
+       22,
+       22,
+       16,
+       16,
+       3
+      ],
+      "DE": [
+       26,
+       19,
+       13,
+       11,
+       17,
+       12,
+       13,
+       20,
+       21,
+       3
+      ],
+      "EE": [
+       27,
+       35,
+       30,
+       28,
+       27,
+       31,
+       32,
+       11,
+       11,
+       1
+      ],
+      "IE": [
+       31,
+       23,
+       11,
+       9,
+       20,
+       10,
+       13,
+       20,
+       21,
+       2
+      ],
+      "ES": [
+       24,
+       18,
+       15,
+       11,
+       16,
+       14,
+       14,
+       22,
+       23,
+       2
+      ],
+      "FR": [
+       36,
+       22,
+       17,
+       13,
+       20,
+       13,
+       11,
+       21,
+       17,
+       2
+      ],
+      "HR": [
+       25,
+       18,
+       15,
+       8,
+       21,
+       11,
+       12,
+       16,
+       30,
+       3
+      ],
+      "IT": [
+       22,
+       18,
+       16,
+       10,
+       19,
+       12,
+       14,
+       18,
+       27,
+       2
+      ],
+      "CY": [
+       19,
+       12,
+       10,
+       8,
+       18,
+       5,
+       8,
+       12,
+       46,
+       2
+      ],
+      "LV": [
+       22,
+       31,
+       24,
+       18,
+       26,
+       21,
+       24,
+       14,
+       16,
+       2
+      ],
+      "LT": [
+       31,
+       20,
+       15,
+       11,
+       21,
+       11,
+       13,
+       19,
+       22,
+       3
+      ],
+      "LU": [
+       27,
+       38,
+       38,
+       24,
+       30,
+       29,
+       28,
+       13,
+       6,
+       1
+      ],
+      "HU": [
+       18,
+       15,
+       12,
+       10,
+       16,
+       13,
+       13,
+       18,
+       31,
+       2
+      ],
+      "MT": [
+       28,
+       40,
+       41,
+       24,
+       36,
+       31,
+       33,
+       9,
+       4,
+       0
+      ],
+      "NL": [
+       27,
+       19,
+       13,
+       10,
+       15,
+       12,
+       12,
+       24,
+       21,
+       2
+      ],
+      "AT": [
+       25,
+       18,
+       12,
+       11,
+       11,
+       9,
+       11,
+       18,
+       29,
+       2
+      ],
+      "PL": [
+       22,
+       19,
+       12,
+       10,
+       17,
+       13,
+       14,
+       19,
+       29,
+       3
+      ],
+      "PT": [
+       24,
+       20,
+       14,
+       11,
+       21,
+       10,
+       15,
+       16,
+       26,
+       1
+      ],
+      "RO": [
+       18,
+       20,
+       13,
+       8,
+       22,
+       13,
+       16,
+       16,
+       27,
+       2
+      ],
+      "SI": [
+       29,
+       29,
+       31,
+       19,
+       26,
+       24,
+       27,
+       15,
+       16,
+       1
+      ],
+      "SK": [
+       23,
+       19,
+       16,
+       10,
+       20,
+       12,
+       14,
+       17,
+       24,
+       3
+      ],
+      "FI": [
+       23,
+       21,
+       11,
+       11,
+       18,
+       12,
+       15,
+       15,
+       25,
+       4
+      ],
+      "SE": [
+       22,
+       16,
+       9,
+       11,
+       14,
+       11,
+       12,
+       21,
+       30,
+       3
+      ]
+     }
+    },
+    {
+     "qid": "Q6",
+     "text": "For what reasons have you not taken part in these activities? Please select all that apply.",
+     "type": "multiple_choice",
+     "options": [
+      "I don’t have time",
+      "I’m not interested",
+      "I cannot afford it",
+      "I have not yet thought about it",
+      "I don’t know how to do this",
+      "I don’t understand the issues enough",
+      "Nobody has ever asked or invited me to take part",
+      "I did not know that I could do this",
+      "These activities are too far away. It is difficult to get there (e.g. by public transport) from my home",
+      "Other",
+      "Don’t know"
+     ],
+     "base": "respondents who did not participate in any listed organisations",
+     "measure": "mentions_pct_of_respondents",
+     "domain": "social",
+     "followUpOf": "Q5",
+     "sourcePage": 13,
+     "sourcePages": [
+      13,
+      14
+     ],
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Multiple response: shares are percent of respondents mentioning each option; columns do not sum to 100. Scripting: items 1-6 randomised. Trend item: trend FL545 Q3; annex also prints a 2026-2024 change column (not included). Filtered base; country base sizes not published in annex. Population aged 15-30 only (online panel, CAWI). intlValues are other Member States' published values (integers), aligned with options; EU27 average and EL deliberately omitted.",
+     "intlValues": {
+      "BE": [
+       42,
+       16,
+       24,
+       26,
+       16,
+       7,
+       18,
+       7,
+       12,
+       4,
+       3
+      ],
+      "BG": [
+       31,
+       16,
+       7,
+       29,
+       16,
+       18,
+       14,
+       10,
+       11,
+       11,
+       4
+      ],
+      "CZ": [
+       38,
+       21,
+       9,
+       22,
+       15,
+       21,
+       21,
+       10,
+       15,
+       3,
+       2
+      ],
+      "DK": [
+       43,
+       27,
+       15,
+       21,
+       8,
+       6,
+       13,
+       9,
+       11,
+       7,
+       6
+      ],
+      "DE": [
+       41,
+       21,
+       11,
+       19,
+       9,
+       15,
+       15,
+       9,
+       12,
+       11,
+       3
+      ],
+      "EE": [
+       42,
+       27,
+       14,
+       23,
+       10,
+       7,
+       14,
+       13,
+       15,
+       3,
+       8
+      ],
+      "IE": [
+       43,
+       19,
+       16,
+       16,
+       14,
+       10,
+       16,
+       8,
+       14,
+       3,
+       6
+      ],
+      "ES": [
+       44,
+       21,
+       6,
+       24,
+       15,
+       14,
+       11,
+       6,
+       10,
+       5,
+       3
+      ],
+      "FR": [
+       44,
+       21,
+       22,
+       22,
+       10,
+       4,
+       14,
+       8,
+       12,
+       7,
+       5
+      ],
+      "HR": [
+       46,
+       17,
+       8,
+       25,
+       12,
+       14,
+       18,
+       6,
+       11,
+       7,
+       4
+      ],
+      "IT": [
+       39,
+       17,
+       6,
+       18,
+       19,
+       17,
+       20,
+       6,
+       20,
+       6,
+       4
+      ],
+      "CY": [
+       47,
+       22,
+       12,
+       21,
+       19,
+       20,
+       32,
+       9,
+       6,
+       6,
+       1
+      ],
+      "LV": [
+       34,
+       24,
+       12,
+       23,
+       15,
+       15,
+       19,
+       9,
+       9,
+       9,
+       5
+      ],
+      "LT": [
+       41,
+       18,
+       6,
+       21,
+       13,
+       13,
+       16,
+       8,
+       11,
+       6,
+       3
+      ],
+      "LU": [
+       43,
+       11,
+       14,
+       31,
+       23,
+       3,
+       26,
+       28,
+       3,
+       8,
+       4
+      ],
+      "HU": [
+       46,
+       12,
+       8,
+       24,
+       13,
+       14,
+       25,
+       6,
+       13,
+       5,
+       5
+      ],
+      "MT": [
+       70,
+       36,
+       10,
+       30,
+       4,
+       12,
+       28,
+       10,
+       0,
+       4,
+       0
+      ],
+      "NL": [
+       42,
+       26,
+       6,
+       18,
+       11,
+       5,
+       14,
+       9,
+       8,
+       10,
+       3
+      ],
+      "AT": [
+       42,
+       18,
+       12,
+       19,
+       4,
+       7,
+       11,
+       5,
+       13,
+       11,
+       7
+      ],
+      "PL": [
+       39,
+       23,
+       10,
+       39,
+       13,
+       9,
+       17,
+       10,
+       9,
+       5,
+       3
+      ],
+      "PT": [
+       42,
+       17,
+       17,
+       23,
+       19,
+       21,
+       16,
+       5,
+       10,
+       3,
+       4
+      ],
+      "RO": [
+       29,
+       18,
+       16,
+       20,
+       11,
+       5,
+       17,
+       12,
+       12,
+       7,
+       4
+      ],
+      "SI": [
+       46,
+       27,
+       5,
+       30,
+       13,
+       4,
+       24,
+       15,
+       8,
+       5,
+       2
+      ],
+      "SK": [
+       31,
+       16,
+       7,
+       30,
+       15,
+       13,
+       19,
+       13,
+       14,
+       4,
+       3
+      ],
+      "FI": [
+       42,
+       35,
+       21,
+       19,
+       6,
+       14,
+       17,
+       8,
+       9,
+       4,
+       4
+      ],
+      "SE": [
+       44,
+       26,
+       17,
+       24,
+       11,
+       4,
+       15,
+       8,
+       9,
+       6,
+       4
+      ]
+     }
+    },
+    {
+     "qid": "Q7a",
+     "text": "In the past year, have you taken any action to change society by, for example, signing a petition, participating in a rally, or sending a letter to a politician?",
+     "type": "single_choice",
+     "options": [
+      "Yes",
+      "No",
+      "Don’t know"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "political",
+     "followUpOf": null,
+     "sourcePage": 15,
+     "sourcePages": [
+      15
+     ],
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Trend item: trend FL545 Q4a; annex also prints a 2026-2024 change column (not included). Population aged 15-30 only (online panel, CAWI). intlValues are other Member States' published values (integers), aligned with options; EU27 average and EL deliberately omitted.",
+     "intlValues": {
+      "BE": [
+       64,
+       33,
+       3
+      ],
+      "BG": [
+       57,
+       40,
+       3
+      ],
+      "CZ": [
+       51,
+       46,
+       3
+      ],
+      "DK": [
+       58,
+       40,
+       2
+      ],
+      "DE": [
+       56,
+       40,
+       4
+      ],
+      "EE": [
+       57,
+       41,
+       2
+      ],
+      "IE": [
+       56,
+       41,
+       3
+      ],
+      "ES": [
+       52,
+       44,
+       4
+      ],
+      "FR": [
+       58,
+       40,
+       2
+      ],
+      "HR": [
+       52,
+       43,
+       5
+      ],
+      "IT": [
+       55,
+       41,
+       4
+      ],
+      "CY": [
+       26,
+       73,
+       1
+      ],
+      "LV": [
+       51,
+       47,
+       2
+      ],
+      "LT": [
+       56,
+       41,
+       3
+      ],
+      "LU": [
+       72,
+       27,
+       1
+      ],
+      "HU": [
+       58,
+       39,
+       3
+      ],
+      "MT": [
+       70,
+       30,
+       0
+      ],
+      "NL": [
+       54,
+       43,
+       3
+      ],
+      "AT": [
+       53,
+       42,
+       5
+      ],
+      "PL": [
+       49,
+       49,
+       2
+      ],
+      "PT": [
+       54,
+       43,
+       3
+      ],
+      "RO": [
+       57,
+       39,
+       4
+      ],
+      "SI": [
+       61,
+       37,
+       2
+      ],
+      "SK": [
+       58,
+       38,
+       4
+      ],
+      "FI": [
+       57,
+       39,
+       4
+      ],
+      "SE": [
+       41,
+       54,
+       5
+      ]
+     }
+    },
+    {
+     "qid": "Q7b",
+     "text": "In which areas did you try to change society (by, for example, signing a petition, participating in a rally, or sending a letter to a politician)?",
+     "type": "multiple_choice",
+     "options": [
+      "Climate change and environmental protection",
+      "Health and well-being",
+      "Economic inequality and welfare expenditure",
+      "Equal rights regardless of gender, race or sexuality",
+      "Human rights",
+      "Wars and conflicts",
+      "Democracy and rule of law",
+      "Other",
+      "Don’t know"
+     ],
+     "base": "respondents who have taken actions to change society",
+     "measure": "mentions_pct_of_respondents",
+     "domain": "political",
+     "followUpOf": "Q7a",
+     "sourcePage": 16,
+     "sourcePages": [
+      16,
+      17
+     ],
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Multiple response: shares are percent of respondents mentioning each option; columns do not sum to 100. Scripting: items 1-7 randomised. Trend item: trend FL545 Q4b; annex also prints a 2026-2024 change column (not included). Filtered base; country base sizes not published in annex. Population aged 15-30 only (online panel, CAWI). intlValues are other Member States' published values (integers), aligned with options; EU27 average and EL deliberately omitted.",
+     "intlValues": {
+      "BE": [
+       29,
+       29,
+       32,
+       29,
+       32,
+       28,
+       24,
+       4,
+       0
+      ],
+      "BG": [
+       24,
+       28,
+       33,
+       22,
+       40,
+       15,
+       25,
+       7,
+       1
+      ],
+      "CZ": [
+       28,
+       32,
+       21,
+       27,
+       29,
+       20,
+       23,
+       7,
+       1
+      ],
+      "DK": [
+       34,
+       33,
+       32,
+       34,
+       39,
+       26,
+       30,
+       3,
+       1
+      ],
+      "DE": [
+       28,
+       28,
+       22,
+       30,
+       31,
+       23,
+       29,
+       6,
+       1
+      ],
+      "EE": [
+       40,
+       34,
+       36,
+       40,
+       38,
+       23,
+       31,
+       5,
+       1
+      ],
+      "IE": [
+       30,
+       30,
+       24,
+       34,
+       39,
+       29,
+       20,
+       8,
+       1
+      ],
+      "ES": [
+       27,
+       34,
+       31,
+       35,
+       36,
+       22,
+       25,
+       4,
+       0
+      ],
+      "FR": [
+       30,
+       34,
+       24,
+       39,
+       36,
+       25,
+       21,
+       6,
+       1
+      ],
+      "HR": [
+       28,
+       31,
+       27,
+       27,
+       45,
+       22,
+       26,
+       5,
+       1
+      ],
+      "IT": [
+       28,
+       24,
+       29,
+       38,
+       39,
+       34,
+       23,
+       5,
+       1
+      ],
+      "CY": [
+       22,
+       27,
+       24,
+       31,
+       54,
+       36,
+       37,
+       7,
+       2
+      ],
+      "LV": [
+       29,
+       34,
+       34,
+       35,
+       44,
+       20,
+       29,
+       3,
+       1
+      ],
+      "LT": [
+       23,
+       25,
+       19,
+       31,
+       36,
+       29,
+       26,
+       9,
+       1
+      ],
+      "LU": [
+       40,
+       34,
+       33,
+       44,
+       48,
+       27,
+       37,
+       1,
+       0
+      ],
+      "HU": [
+       21,
+       32,
+       25,
+       25,
+       40,
+       22,
+       32,
+       5,
+       2
+      ],
+      "MT": [
+       45,
+       37,
+       32,
+       36,
+       47,
+       17,
+       33,
+       0,
+       0
+      ],
+      "NL": [
+       28,
+       31,
+       26,
+       34,
+       33,
+       25,
+       22,
+       4,
+       1
+      ],
+      "AT": [
+       26,
+       30,
+       24,
+       29,
+       30,
+       24,
+       20,
+       9,
+       1
+      ],
+      "PL": [
+       25,
+       29,
+       22,
+       27,
+       37,
+       27,
+       26,
+       5,
+       1
+      ],
+      "PT": [
+       22,
+       34,
+       28,
+       39,
+       41,
+       21,
+       22,
+       4,
+       0
+      ],
+      "RO": [
+       22,
+       28,
+       25,
+       34,
+       38,
+       20,
+       27,
+       4,
+       1
+      ],
+      "SI": [
+       41,
+       35,
+       35,
+       39,
+       45,
+       23,
+       34,
+       3,
+       1
+      ],
+      "SK": [
+       24,
+       31,
+       25,
+       24,
+       35,
+       18,
+       28,
+       5,
+       1
+      ],
+      "FI": [
+       23,
+       33,
+       26,
+       28,
+       36,
+       23,
+       19,
+       6,
+       2
+      ],
+      "SE": [
+       29,
+       31,
+       29,
+       33,
+       41,
+       27,
+       28,
+       3,
+       1
+      ]
+     }
+    },
+    {
+     "qid": "Q8",
+     "text": "Are you familiar with any of the following ways to engage with the European Union?",
+     "type": "multiple_choice",
+     "options": [
+      "EU Youth Dialogue or EU Youth Conference",
+      "European Citizens’ Panels",
+      "Public consultations",
+      "European elections",
+      "EU social media channels and websites (i.e. European Youth Portal)",
+      "Visit of the EU institutions",
+      "The European Youth Week or the European Youth Event",
+      "Contacting a Commissioner or an MEP",
+      "Participation in events organised by the EU in your country",
+      "European Citizens’ Initiative",
+      "None of these",
+      "Don’t know"
+     ],
+     "base": "all respondents",
+     "measure": "mentions_pct_of_respondents",
+     "domain": "political",
+     "followUpOf": null,
+     "sourcePage": 18,
+     "sourcePages": [
+      18,
+      19
+     ],
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Multiple response: shares are percent of respondents mentioning each option; columns do not sum to 100. Scripting: items 1-8 randomised. Trend item: modified trend of FL545 Q5; annex also prints a 2026-2024 change column (not included). Population aged 15-30 only (online panel, CAWI). intlValues are other Member States' published values (integers), aligned with options; EU27 average and EL deliberately omitted.",
+     "intlValues": {
+      "BE": [
+       17,
+       12,
+       14,
+       30,
+       24,
+       19,
+       20,
+       16,
+       19,
+       12,
+       8,
+       6
+      ],
+      "BG": [
+       13,
+       10,
+       13,
+       33,
+       21,
+       14,
+       17,
+       10,
+       14,
+       12,
+       18,
+       7
+      ],
+      "CZ": [
+       11,
+       10,
+       18,
+       34,
+       22,
+       15,
+       15,
+       10,
+       14,
+       12,
+       11,
+       10
+      ],
+      "DK": [
+       22,
+       18,
+       18,
+       30,
+       33,
+       18,
+       25,
+       19,
+       13,
+       7,
+       10,
+       7
+      ],
+      "DE": [
+       12,
+       12,
+       12,
+       38,
+       30,
+       13,
+       13,
+       9,
+       17,
+       15,
+       9,
+       4
+      ],
+      "EE": [
+       26,
+       26,
+       24,
+       36,
+       36,
+       25,
+       29,
+       28,
+       16,
+       9,
+       5,
+       2
+      ],
+      "IE": [
+       14,
+       12,
+       13,
+       33,
+       27,
+       17,
+       14,
+       17,
+       13,
+       12,
+       15,
+       5
+      ],
+      "ES": [
+       15,
+       12,
+       16,
+       34,
+       35,
+       16,
+       19,
+       12,
+       15,
+       16,
+       7,
+       3
+      ],
+      "FR": [
+       17,
+       12,
+       13,
+       40,
+       24,
+       19,
+       20,
+       16,
+       18,
+       16,
+       8,
+       8
+      ],
+      "HR": [
+       13,
+       12,
+       11,
+       39,
+       21,
+       18,
+       19,
+       12,
+       15,
+       18,
+       15,
+       4
+      ],
+      "IT": [
+       19,
+       8,
+       13,
+       36,
+       26,
+       16,
+       17,
+       9,
+       16,
+       16,
+       11,
+       5
+      ],
+      "CY": [
+       16,
+       12,
+       14,
+       61,
+       24,
+       19,
+       19,
+       18,
+       17,
+       7,
+       13,
+       7
+      ],
+      "LV": [
+       20,
+       20,
+       19,
+       31,
+       31,
+       22,
+       23,
+       18,
+       13,
+       9,
+       7,
+       4
+      ],
+      "LT": [
+       17,
+       11,
+       13,
+       35,
+       24,
+       15,
+       22,
+       17,
+       15,
+       14,
+       12,
+       6
+      ],
+      "LU": [
+       24,
+       24,
+       22,
+       35,
+       48,
+       27,
+       33,
+       21,
+       19,
+       9,
+       1,
+       2
+      ],
+      "HU": [
+       11,
+       11,
+       18,
+       36,
+       21,
+       16,
+       12,
+       13,
+       15,
+       14,
+       14,
+       6
+      ],
+      "MT": [
+       26,
+       24,
+       26,
+       33,
+       48,
+       25,
+       28,
+       16,
+       15,
+       10,
+       4,
+       0
+      ],
+      "NL": [
+       11,
+       8,
+       10,
+       27,
+       20,
+       13,
+       13,
+       11,
+       13,
+       12,
+       21,
+       5
+      ],
+      "AT": [
+       11,
+       10,
+       11,
+       37,
+       31,
+       15,
+       12,
+       8,
+       19,
+       15,
+       11,
+       5
+      ],
+      "PL": [
+       14,
+       14,
+       20,
+       33,
+       31,
+       17,
+       20,
+       13,
+       13,
+       15,
+       12,
+       4
+      ],
+      "PT": [
+       18,
+       10,
+       12,
+       40,
+       28,
+       16,
+       26,
+       11,
+       16,
+       13,
+       10,
+       4
+      ],
+      "RO": [
+       19,
+       13,
+       16,
+       32,
+       22,
+       17,
+       17,
+       10,
+       16,
+       14,
+       11,
+       7
+      ],
+      "SI": [
+       26,
+       21,
+       20,
+       43,
+       37,
+       24,
+       30,
+       17,
+       22,
+       11,
+       5,
+       2
+      ],
+      "SK": [
+       16,
+       10,
+       30,
+       35,
+       22,
+       13,
+       18,
+       13,
+       16,
+       13,
+       9,
+       5
+      ],
+      "FI": [
+       12,
+       14,
+       18,
+       35,
+       22,
+       13,
+       13,
+       14,
+       14,
+       24,
+       12,
+       5
+      ],
+      "SE": [
+       13,
+       13,
+       14,
+       35,
+       22,
+       14,
+       16,
+       16,
+       12,
+       9,
+       15,
+       6
+      ]
+     }
+    },
+    {
+     "qid": "Q9",
+     "text": "Which of the following sources do you use to keep yourself informed about the EU?",
+     "type": "multiple_choice",
+     "options": [
+      "Social media",
+      "Online press, podcasts and/or news platforms",
+      "Written (printed) press (e.g. newspapers, weekly or monthly magazine, etc.)",
+      "TV",
+      "Radio",
+      "Conversations with friends, family, or colleagues",
+      "School or university",
+      "Other",
+      "None, I don’t stay informed about the EU",
+      "Don’t know"
+     ],
+     "base": "all respondents",
+     "measure": "mentions_pct_of_respondents",
+     "domain": "media_tech",
+     "followUpOf": null,
+     "sourcePage": 20,
+     "sourcePages": [
+      20,
+      21
+     ],
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Multiple response: shares are percent of respondents mentioning each option; columns do not sum to 100. Scripting: items 1-7 randomised. Trend item: trend FL545 Q6; annex also prints a 2026-2024 change column (not included). Population aged 15-30 only (online panel, CAWI). intlValues are other Member States' published values (integers), aligned with options; EU27 average and EL deliberately omitted.",
+     "intlValues": {
+      "BE": [
+       49,
+       29,
+       21,
+       36,
+       23,
+       31,
+       30,
+       6,
+       4,
+       2
+      ],
+      "BG": [
+       56,
+       39,
+       9,
+       40,
+       11,
+       30,
+       15,
+       5,
+       7,
+       3
+      ],
+      "CZ": [
+       56,
+       34,
+       13,
+       38,
+       14,
+       28,
+       22,
+       5,
+       3,
+       3
+      ],
+      "DK": [
+       56,
+       41,
+       24,
+       37,
+       13,
+       40,
+       25,
+       4,
+       4,
+       1
+      ],
+      "DE": [
+       51,
+       27,
+       15,
+       33,
+       18,
+       31,
+       24,
+       8,
+       7,
+       2
+      ],
+      "EE": [
+       58,
+       44,
+       35,
+       38,
+       15,
+       43,
+       32,
+       2,
+       3,
+       1
+      ],
+      "IE": [
+       60,
+       32,
+       15,
+       33,
+       20,
+       34,
+       27,
+       3,
+       5,
+       1
+      ],
+      "ES": [
+       49,
+       29,
+       20,
+       45,
+       15,
+       31,
+       20,
+       3,
+       5,
+       0
+      ],
+      "FR": [
+       54,
+       29,
+       17,
+       42,
+       18,
+       29,
+       28,
+       4,
+       7,
+       2
+      ],
+      "HR": [
+       55,
+       39,
+       18,
+       41,
+       13,
+       32,
+       26,
+       4,
+       7,
+       1
+      ],
+      "IT": [
+       52,
+       33,
+       14,
+       43,
+       12,
+       29,
+       25,
+       4,
+       4,
+       2
+      ],
+      "CY": [
+       74,
+       45,
+       5,
+       28,
+       10,
+       43,
+       20,
+       1,
+       8,
+       1
+      ],
+      "LV": [
+       55,
+       42,
+       26,
+       33,
+       15,
+       36,
+       27,
+       4,
+       3,
+       1
+      ],
+      "LT": [
+       51,
+       41,
+       17,
+       35,
+       17,
+       28,
+       18,
+       4,
+       5,
+       3
+      ],
+      "LU": [
+       64,
+       49,
+       39,
+       31,
+       13,
+       49,
+       38,
+       0,
+       1,
+       0
+      ],
+      "HU": [
+       51,
+       34,
+       12,
+       27,
+       15,
+       33,
+       17,
+       6,
+       5,
+       3
+      ],
+      "MT": [
+       69,
+       51,
+       35,
+       25,
+       8,
+       52,
+       31,
+       1,
+       0,
+       0
+      ],
+      "NL": [
+       47,
+       24,
+       16,
+       32,
+       18,
+       29,
+       22,
+       6,
+       10,
+       2
+      ],
+      "AT": [
+       52,
+       25,
+       17,
+       31,
+       19,
+       31,
+       24,
+       7,
+       8,
+       3
+      ],
+      "PL": [
+       57,
+       36,
+       12,
+       38,
+       20,
+       31,
+       18,
+       2,
+       7,
+       1
+      ],
+      "PT": [
+       54,
+       35,
+       17,
+       51,
+       15,
+       32,
+       20,
+       3,
+       4,
+       2
+      ],
+      "RO": [
+       44,
+       40,
+       17,
+       39,
+       13,
+       28,
+       17,
+       4,
+       7,
+       2
+      ],
+      "SI": [
+       53,
+       45,
+       32,
+       41,
+       16,
+       45,
+       30,
+       4,
+       3,
+       1
+      ],
+      "SK": [
+       56,
+       28,
+       10,
+       39,
+       18,
+       29,
+       23,
+       5,
+       4,
+       3
+      ],
+      "FI": [
+       55,
+       35,
+       16,
+       35,
+       18,
+       30,
+       23,
+       4,
+       6,
+       3
+      ],
+      "SE": [
+       52,
+       27,
+       18,
+       37,
+       16,
+       32,
+       24,
+       5,
+       8,
+       2
+      ]
+     }
+    },
+    {
+     "qid": "Q10",
+     "text": "Have you ever taken part in any of the following activities?",
+     "type": "multiple_choice",
+     "options": [
+      "Studying, training or apprenticeship in another EU country",
+      "Being involved in any cultural/sports activities in another EU country",
+      "Being involved in any political activities in another EU country",
+      "Volunteering or similar activities in another EU country",
+      "Working in another EU country",
+      "None of these",
+      "Don’t know"
+     ],
+     "base": "all respondents",
+     "measure": "mentions_pct_of_respondents",
+     "domain": "social",
+     "followUpOf": null,
+     "sourcePage": 22,
+     "sourcePages": [
+      22
+     ],
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Multiple response: shares are percent of respondents mentioning each option; columns do not sum to 100. Scripting: items 1-5 randomised. Trend item: trend FL545 Q7; annex also prints a 2026-2024 change column (not included). Population aged 15-30 only (online panel, CAWI). intlValues are other Member States' published values (integers), aligned with options; EU27 average and EL deliberately omitted.",
+     "intlValues": {
+      "BE": [
+       25,
+       29,
+       20,
+       24,
+       18,
+       28,
+       3
+      ],
+      "BG": [
+       20,
+       18,
+       12,
+       14,
+       19,
+       42,
+       4
+      ],
+      "CZ": [
+       18,
+       22,
+       12,
+       18,
+       16,
+       36,
+       6
+      ],
+      "DK": [
+       31,
+       28,
+       23,
+       26,
+       16,
+       29,
+       2
+      ],
+      "DE": [
+       23,
+       22,
+       15,
+       19,
+       17,
+       34,
+       2
+      ],
+      "EE": [
+       40,
+       41,
+       31,
+       34,
+       29,
+       19,
+       2
+      ],
+      "IE": [
+       23,
+       21,
+       14,
+       18,
+       15,
+       39,
+       3
+      ],
+      "ES": [
+       28,
+       21,
+       15,
+       16,
+       14,
+       38,
+       2
+      ],
+      "FR": [
+       25,
+       25,
+       13,
+       19,
+       17,
+       36,
+       3
+      ],
+      "HR": [
+       20,
+       19,
+       12,
+       17,
+       16,
+       44,
+       3
+      ],
+      "IT": [
+       26,
+       18,
+       12,
+       17,
+       13,
+       42,
+       3
+      ],
+      "CY": [
+       28,
+       14,
+       9,
+       16,
+       12,
+       50,
+       2
+      ],
+      "LV": [
+       30,
+       29,
+       22,
+       32,
+       21,
+       23,
+       2
+      ],
+      "LT": [
+       22,
+       22,
+       16,
+       21,
+       20,
+       34,
+       4
+      ],
+      "LU": [
+       36,
+       42,
+       31,
+       38,
+       22,
+       12,
+       1
+      ],
+      "HU": [
+       18,
+       18,
+       14,
+       13,
+       15,
+       46,
+       4
+      ],
+      "MT": [
+       39,
+       39,
+       24,
+       37,
+       23,
+       12,
+       0
+      ],
+      "NL": [
+       20,
+       21,
+       16,
+       18,
+       15,
+       39,
+       3
+      ],
+      "AT": [
+       21,
+       20,
+       13,
+       16,
+       17,
+       39,
+       3
+      ],
+      "PL": [
+       21,
+       14,
+       14,
+       18,
+       15,
+       45,
+       2
+      ],
+      "PT": [
+       22,
+       18,
+       13,
+       17,
+       14,
+       46,
+       2
+      ],
+      "RO": [
+       19,
+       23,
+       14,
+       21,
+       19,
+       36,
+       3
+      ],
+      "SI": [
+       29,
+       33,
+       23,
+       32,
+       24,
+       26,
+       3
+      ],
+      "SK": [
+       27,
+       21,
+       16,
+       21,
+       20,
+       30,
+       3
+      ],
+      "FI": [
+       23,
+       21,
+       14,
+       15,
+       14,
+       40,
+       3
+      ],
+      "SE": [
+       13,
+       21,
+       13,
+       16,
+       11,
+       50,
+       3
+      ]
+     }
+    },
+    {
+     "qid": "Q11",
+     "text": "What stopped you from taking part in such activities? Select all that apply.",
+     "type": "multiple_choice",
+     "options": [
+      "Not interested",
+      "Insufficient foreign language skills",
+      "I am a caretaker of another person at home and can therefore not leave the country",
+      "My parents/family/partner/friends are discouraging me to go abroad",
+      "I do not feel sufficiently independent to go abroad for a longer period",
+      "Lack of financial means",
+      "Lack of information on possibilities to go abroad",
+      "Lack of opportunities abroad that would match my interests",
+      "The experience would not be recognised at home",
+      "Other",
+      "Don’t know"
+     ],
+     "base": "respondents who have not taken part in any of the listed activities",
+     "measure": "mentions_pct_of_respondents",
+     "domain": "social",
+     "followUpOf": "Q10",
+     "sourcePage": 23,
+     "sourcePages": [
+      23,
+      24
+     ],
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Multiple response: shares are percent of respondents mentioning each option; columns do not sum to 100. Scripting: items 1-9 randomised. Trend item: trend FL545 Q8; annex also prints a 2026-2024 change column (not included). Filtered base; country base sizes not published in annex. Population aged 15-30 only (online panel, CAWI). intlValues are other Member States' published values (integers), aligned with options; EU27 average and EL deliberately omitted.",
+     "intlValues": {
+      "BE": [
+       25,
+       22,
+       5,
+       12,
+       19,
+       34,
+       26,
+       13,
+       4,
+       4,
+       5
+      ],
+      "BG": [
+       22,
+       15,
+       7,
+       6,
+       17,
+       36,
+       21,
+       15,
+       5,
+       10,
+       5
+      ],
+      "CZ": [
+       22,
+       21,
+       7,
+       9,
+       15,
+       44,
+       21,
+       17,
+       7,
+       7,
+       5
+      ],
+      "DK": [
+       32,
+       11,
+       5,
+       8,
+       19,
+       34,
+       22,
+       12,
+       3,
+       7,
+       5
+      ],
+      "DE": [
+       22,
+       18,
+       7,
+       10,
+       22,
+       43,
+       26,
+       15,
+       5,
+       5,
+       4
+      ],
+      "EE": [
+       29,
+       21,
+       5,
+       17,
+       21,
+       38,
+       18,
+       19,
+       8,
+       7,
+       4
+      ],
+      "IE": [
+       23,
+       20,
+       4,
+       9,
+       21,
+       44,
+       24,
+       20,
+       2,
+       3,
+       3
+      ],
+      "ES": [
+       21,
+       15,
+       7,
+       10,
+       23,
+       38,
+       22,
+       17,
+       5,
+       4,
+       3
+      ],
+      "FR": [
+       21,
+       27,
+       8,
+       11,
+       22,
+       49,
+       18,
+       22,
+       3,
+       5,
+       4
+      ],
+      "HR": [
+       21,
+       12,
+       7,
+       10,
+       23,
+       41,
+       25,
+       25,
+       6,
+       5,
+       5
+      ],
+      "IT": [
+       15,
+       13,
+       6,
+       6,
+       22,
+       46,
+       19,
+       19,
+       3,
+       7,
+       4
+      ],
+      "CY": [
+       19,
+       11,
+       7,
+       4,
+       16,
+       44,
+       35,
+       15,
+       8,
+       6,
+       6
+      ],
+      "LV": [
+       20,
+       21,
+       6,
+       17,
+       22,
+       43,
+       26,
+       9,
+       6,
+       6,
+       3
+      ],
+      "LT": [
+       18,
+       13,
+       6,
+       10,
+       21,
+       42,
+       25,
+       7,
+       4,
+       6,
+       6
+      ],
+      "LU": [
+       20,
+       3,
+       15,
+       15,
+       18,
+       31,
+       28,
+       23,
+       3,
+       10,
+       0
+      ],
+      "HU": [
+       19,
+       21,
+       10,
+       11,
+       20,
+       40,
+       12,
+       7,
+       7,
+       8,
+       4
+      ],
+      "MT": [
+       17,
+       17,
+       14,
+       13,
+       23,
+       33,
+       33,
+       27,
+       1,
+       3,
+       2
+      ],
+      "NL": [
+       31,
+       13,
+       4,
+       7,
+       16,
+       27,
+       16,
+       9,
+       5,
+       12,
+       6
+      ],
+      "AT": [
+       28,
+       10,
+       5,
+       11,
+       15,
+       36,
+       20,
+       14,
+       2,
+       8,
+       5
+      ],
+      "PL": [
+       30,
+       23,
+       9,
+       7,
+       26,
+       35,
+       19,
+       14,
+       5,
+       4,
+       4
+      ],
+      "PT": [
+       17,
+       14,
+       4,
+       13,
+       22,
+       41,
+       22,
+       19,
+       5,
+       6,
+       5
+      ],
+      "RO": [
+       24,
+       8,
+       6,
+       8,
+       19,
+       35,
+       17,
+       18,
+       5,
+       8,
+       4
+      ],
+      "SI": [
+       30,
+       13,
+       7,
+       13,
+       20,
+       32,
+       26,
+       22,
+       5,
+       7,
+       1
+      ],
+      "SK": [
+       19,
+       15,
+       9,
+       10,
+       18,
+       39,
+       17,
+       13,
+       8,
+       9,
+       7
+      ],
+      "FI": [
+       31,
+       21,
+       6,
+       3,
+       18,
+       44,
+       19,
+       8,
+       2,
+       4,
+       8
+      ],
+      "SE": [
+       34,
+       13,
+       5,
+       7,
+       18,
+       27,
+       18,
+       12,
+       3,
+       9,
+       6
+      ]
+     }
+    },
+    {
+     "qid": "Q12",
+     "text": "Do you agree or disagree that taking part in these activities…? Select all that you agree with.",
+     "type": "multiple_choice",
+     "options": [
+      "Increased my knowledge of other European countries",
+      "Made me feel more European",
+      "Increased my interest in living in another European country later on (for work or education)",
+      "Made me more interested in European topics",
+      "Increased my interest in foreign languages",
+      "Made me more aware of other cultures and values",
+      "Increased my self-confidence",
+      "Will allow me to adapt better to new situations in the future",
+      "Will allow me to make friends more easily",
+      "Other",
+      "None of these",
+      "Don’t know"
+     ],
+     "base": "respondents who have taken part in at least one of the listed activities",
+     "measure": "mentions_pct_of_respondents",
+     "domain": "social",
+     "followUpOf": "Q10",
+     "sourcePage": 25,
+     "sourcePages": [
+      25,
+      26
+     ],
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Multiple response: shares are percent of respondents mentioning each option; columns do not sum to 100. Scripting: items 1-9 randomised. Trend item: trend FL545 Q9; annex also prints a 2026-2024 change column (not included). Filtered base; country base sizes not published in annex. Population aged 15-30 only (online panel, CAWI). intlValues are other Member States' published values (integers), aligned with options; EU27 average and EL deliberately omitted.",
+     "intlValues": {
+      "BE": [
+       26,
+       17,
+       30,
+       23,
+       23,
+       24,
+       29,
+       27,
+       23,
+       2,
+       2,
+       0
+      ],
+      "BG": [
+       28,
+       27,
+       28,
+       24,
+       24,
+       32,
+       27,
+       30,
+       25,
+       4,
+       2,
+       1
+      ],
+      "CZ": [
+       26,
+       16,
+       28,
+       21,
+       27,
+       28,
+       25,
+       28,
+       22,
+       2,
+       2,
+       1
+      ],
+      "DK": [
+       31,
+       29,
+       27,
+       28,
+       31,
+       34,
+       26,
+       28,
+       26,
+       1,
+       1,
+       0
+      ],
+      "DE": [
+       22,
+       18,
+       24,
+       24,
+       26,
+       24,
+       25,
+       20,
+       25,
+       4,
+       1,
+       1
+      ],
+      "EE": [
+       37,
+       26,
+       36,
+       32,
+       30,
+       35,
+       33,
+       35,
+       30,
+       0,
+       0,
+       0
+      ],
+      "IE": [
+       29,
+       21,
+       29,
+       22,
+       29,
+       33,
+       33,
+       27,
+       29,
+       1,
+       1,
+       1
+      ],
+      "ES": [
+       28,
+       19,
+       29,
+       22,
+       27,
+       27,
+       26,
+       29,
+       24,
+       1,
+       1,
+       1
+      ],
+      "FR": [
+       34,
+       24,
+       27,
+       28,
+       33,
+       34,
+       31,
+       27,
+       23,
+       2,
+       0,
+       1
+      ],
+      "HR": [
+       34,
+       23,
+       32,
+       24,
+       30,
+       32,
+       34,
+       25,
+       30,
+       2,
+       1,
+       1
+      ],
+      "IT": [
+       33,
+       22,
+       27,
+       23,
+       30,
+       32,
+       26,
+       28,
+       23,
+       1,
+       1,
+       0
+      ],
+      "CY": [
+       51,
+       32,
+       47,
+       27,
+       39,
+       57,
+       45,
+       46,
+       41,
+       0,
+       3,
+       0
+      ],
+      "LV": [
+       31,
+       29,
+       27,
+       26,
+       27,
+       32,
+       30,
+       29,
+       26,
+       2,
+       1,
+       0
+      ],
+      "LT": [
+       30,
+       24,
+       30,
+       26,
+       29,
+       32,
+       25,
+       26,
+       24,
+       1,
+       1,
+       1
+      ],
+      "LU": [
+       34,
+       32,
+       27,
+       28,
+       29,
+       39,
+       40,
+       28,
+       25,
+       0,
+       0,
+       0
+      ],
+      "HU": [
+       28,
+       21,
+       24,
+       20,
+       31,
+       24,
+       23,
+       28,
+       22,
+       2,
+       1,
+       1
+      ],
+      "MT": [
+       28,
+       29,
+       29,
+       26,
+       27,
+       35,
+       35,
+       28,
+       31,
+       0,
+       0,
+       0
+      ],
+      "NL": [
+       27,
+       18,
+       23,
+       22,
+       21,
+       26,
+       27,
+       23,
+       25,
+       1,
+       2,
+       1
+      ],
+      "AT": [
+       28,
+       18,
+       27,
+       19,
+       25,
+       24,
+       26,
+       22,
+       22,
+       3,
+       2,
+       1
+      ],
+      "PL": [
+       26,
+       23,
+       27,
+       26,
+       30,
+       26,
+       26,
+       26,
+       26,
+       2,
+       2,
+       1
+      ],
+      "PT": [
+       36,
+       19,
+       33,
+       23,
+       31,
+       31,
+       27,
+       32,
+       26,
+       3,
+       1,
+       0
+      ],
+      "RO": [
+       32,
+       22,
+       28,
+       23,
+       25,
+       32,
+       25,
+       27,
+       24,
+       2,
+       1,
+       0
+      ],
+      "SI": [
+       34,
+       29,
+       38,
+       29,
+       33,
+       37,
+       31,
+       34,
+       31,
+       1,
+       1,
+       0
+      ],
+      "SK": [
+       30,
+       22,
+       30,
+       21,
+       31,
+       27,
+       25,
+       27,
+       30,
+       3,
+       1,
+       1
+      ],
+      "FI": [
+       25,
+       22,
+       28,
+       24,
+       21,
+       28,
+       24,
+       32,
+       24,
+       1,
+       1,
+       1
+      ],
+      "SE": [
+       25,
+       19,
+       28,
+       24,
+       23,
+       25,
+       23,
+       25,
+       20,
+       1,
+       1,
+       1
+      ]
+     }
+    },
+    {
+     "qid": "Q13",
+     "text": "Below are some EU-funded opportunities for young people to stay in another EU country. Which, if any, have you heard of?",
+     "type": "multiple_choice",
+     "options": [
+      "Erasmus+ for students (18+ year-olds)",
+      "Erasmus+ for pupils (11-18 year-olds)",
+      "Erasmus+ for apprentices",
+      "Erasmus+ youth exchanges",
+      "Erasmus+ for young entrepreneurs",
+      "DiscoverEU",
+      "European Solidarity Corps",
+      "None of these",
+      "Don’t know"
+     ],
+     "base": "all respondents",
+     "measure": "mentions_pct_of_respondents",
+     "domain": "social",
+     "followUpOf": null,
+     "sourcePage": 27,
+     "sourcePages": [
+      27,
+      28
+     ],
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Multiple response: shares are percent of respondents mentioning each option; columns do not sum to 100. Scripting: items randomised, 1-5 kept grouped. Trend item: trend FL545 Q10; annex also prints a 2026-2024 change column (not included). Population aged 15-30 only (online panel, CAWI). intlValues are other Member States' published values (integers), aligned with options; EU27 average and EL deliberately omitted.",
+     "intlValues": {
+      "BE": [
+       42,
+       30,
+       19,
+       31,
+       18,
+       16,
+       13,
+       8,
+       2
+      ],
+      "BG": [
+       46,
+       36,
+       27,
+       34,
+       23,
+       15,
+       11,
+       12,
+       5
+      ],
+      "CZ": [
+       45,
+       33,
+       17,
+       34,
+       12,
+       12,
+       12,
+       11,
+       7
+      ],
+      "DK": [
+       35,
+       25,
+       21,
+       29,
+       22,
+       22,
+       11,
+       19,
+       4
+      ],
+      "DE": [
+       27,
+       24,
+       18,
+       20,
+       14,
+       12,
+       12,
+       19,
+       5
+      ],
+      "EE": [
+       50,
+       35,
+       33,
+       42,
+       28,
+       28,
+       12,
+       6,
+       1
+      ],
+      "IE": [
+       46,
+       27,
+       15,
+       26,
+       16,
+       19,
+       10,
+       15,
+       3
+      ],
+      "ES": [
+       51,
+       31,
+       18,
+       38,
+       19,
+       14,
+       15,
+       7,
+       2
+      ],
+      "FR": [
+       47,
+       33,
+       19,
+       31,
+       16,
+       11,
+       14,
+       10,
+       3
+      ],
+      "HR": [
+       56,
+       46,
+       18,
+       44,
+       19,
+       15,
+       11,
+       9,
+       2
+      ],
+      "IT": [
+       48,
+       40,
+       20,
+       38,
+       17,
+       16,
+       8,
+       10,
+       2
+      ],
+      "CY": [
+       64,
+       59,
+       38,
+       52,
+       18,
+       12,
+       8,
+       6,
+       2
+      ],
+      "LV": [
+       49,
+       36,
+       26,
+       43,
+       26,
+       18,
+       9,
+       5,
+       2
+      ],
+      "LT": [
+       52,
+       38,
+       15,
+       37,
+       19,
+       19,
+       9,
+       11,
+       3
+      ],
+      "LU": [
+       53,
+       35,
+       33,
+       42,
+       33,
+       22,
+       12,
+       3,
+       1
+      ],
+      "HU": [
+       37,
+       31,
+       24,
+       32,
+       15,
+       16,
+       11,
+       18,
+       4
+      ],
+      "MT": [
+       53,
+       29,
+       29,
+       43,
+       37,
+       30,
+       13,
+       1,
+       0
+      ],
+      "NL": [
+       26,
+       16,
+       15,
+       20,
+       13,
+       15,
+       12,
+       28,
+       4
+      ],
+      "AT": [
+       31,
+       28,
+       18,
+       23,
+       12,
+       13,
+       12,
+       17,
+       7
+      ],
+      "PL": [
+       40,
+       38,
+       26,
+       40,
+       16,
+       12,
+       10,
+       13,
+       2
+      ],
+      "PT": [
+       54,
+       41,
+       28,
+       42,
+       22,
+       13,
+       9,
+       8,
+       2
+      ],
+      "RO": [
+       45,
+       39,
+       13,
+       30,
+       18,
+       15,
+       11,
+       11,
+       3
+      ],
+      "SI": [
+       59,
+       41,
+       26,
+       45,
+       28,
+       28,
+       15,
+       3,
+       1
+      ],
+      "SK": [
+       46,
+       35,
+       14,
+       38,
+       17,
+       14,
+       10,
+       9,
+       4
+      ],
+      "FI": [
+       35,
+       31,
+       17,
+       25,
+       16,
+       16,
+       13,
+       17,
+       7
+      ],
+      "SE": [
+       25,
+       19,
+       11,
+       16,
+       13,
+       20,
+       11,
+       29,
+       5
+      ]
+     }
+    },
+    {
+     "qid": "Q14",
+     "text": "Would you say that actions taken by the EU have an impact on your daily life or not?",
+     "type": "likert",
+     "options": [
+      "Yes, very much",
+      "Yes, to some extent",
+      "No, not much",
+      "No, not at all",
+      "Don’t know"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "political",
+     "followUpOf": null,
+     "sourcePage": 29,
+     "sourcePages": [
+      29
+     ],
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Trend item: trend FL545 Q11; annex also prints a 2026-2024 change column (not included). Population aged 15-30 only (online panel, CAWI). intlValues are other Member States' published values (integers), aligned with options; EU27 average and EL deliberately omitted.",
+     "intlValues": {
+      "BE": [
+       30,
+       47,
+       15,
+       4,
+       4
+      ],
+      "BG": [
+       30,
+       46,
+       15,
+       5,
+       4
+      ],
+      "CZ": [
+       31,
+       48,
+       14,
+       4,
+       3
+      ],
+      "DK": [
+       26,
+       49,
+       16,
+       4,
+       5
+      ],
+      "DE": [
+       26,
+       48,
+       17,
+       4,
+       5
+      ],
+      "EE": [
+       32,
+       52,
+       11,
+       3,
+       2
+      ],
+      "IE": [
+       30,
+       47,
+       16,
+       4,
+       3
+      ],
+      "ES": [
+       25,
+       50,
+       17,
+       4,
+       4
+      ],
+      "FR": [
+       26,
+       45,
+       18,
+       6,
+       5
+      ],
+      "HR": [
+       26,
+       45,
+       19,
+       6,
+       4
+      ],
+      "IT": [
+       27,
+       49,
+       16,
+       4,
+       4
+      ],
+      "CY": [
+       18,
+       48,
+       20,
+       6,
+       8
+      ],
+      "LV": [
+       28,
+       53,
+       14,
+       2,
+       3
+      ],
+      "LT": [
+       36,
+       45,
+       13,
+       2,
+       4
+      ],
+      "LU": [
+       36,
+       55,
+       6,
+       1,
+       2
+      ],
+      "HU": [
+       35,
+       50,
+       9,
+       2,
+       4
+      ],
+      "MT": [
+       30,
+       64,
+       5,
+       1,
+       0
+      ],
+      "NL": [
+       21,
+       45,
+       23,
+       5,
+       6
+      ],
+      "AT": [
+       27,
+       47,
+       16,
+       4,
+       6
+      ],
+      "PL": [
+       39,
+       45,
+       10,
+       3,
+       3
+      ],
+      "PT": [
+       31,
+       44,
+       17,
+       4,
+       4
+      ],
+      "RO": [
+       44,
+       38,
+       10,
+       4,
+       4
+      ],
+      "SI": [
+       29,
+       54,
+       15,
+       1,
+       1
+      ],
+      "SK": [
+       31,
+       47,
+       13,
+       4,
+       5
+      ],
+      "FI": [
+       27,
+       50,
+       14,
+       3,
+       6
+      ],
+      "SE": [
+       21,
+       45,
+       19,
+       5,
+       10
+      ]
+     }
+    },
+    {
+     "qid": "Q15",
+     "text": "What do you expect of the European Union for your generation? You can select up to three answers.",
+     "type": "multiple_choice",
+     "options": [
+      "Promoting environmentally friendly policy and fight climate change",
+      "Increasing job opportunities for young people",
+      "Fighting poverty and economic and social inequalities",
+      "Playing a strong role in dealing with health challenges",
+      "Preserving peace, reinforcing international security and promoting international cooperation",
+      "Promoting Human Rights, democracy and common European values",
+      "Promoting the digitalisation of society",
+      "Promoting inclusive societies, including gender equality and anti-discrimination",
+      "Bringing young people from different parts of the EU together",
+      "Other",
+      "Don’t know"
+     ],
+     "base": "all respondents",
+     "measure": "mentions_pct_of_respondents",
+     "domain": "political",
+     "followUpOf": null,
+     "sourcePage": 30,
+     "sourcePages": [
+      30,
+      31
+     ],
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Multiple response: shares are percent of respondents mentioning each option; columns do not sum to 100. Scripting: up to three answers; items 1-9 randomised. Trend item: trend FL545 Q12; annex also prints a 2026-2024 change column (not included). Population aged 15-30 only (online panel, CAWI). intlValues are other Member States' published values (integers), aligned with options; EU27 average and EL deliberately omitted.",
+     "intlValues": {
+      "BE": [
+       26,
+       25,
+       32,
+       18,
+       30,
+       25,
+       15,
+       24,
+       16,
+       1,
+       3
+      ],
+      "BG": [
+       18,
+       39,
+       39,
+       20,
+       33,
+       25,
+       10,
+       17,
+       16,
+       3,
+       3
+      ],
+      "CZ": [
+       17,
+       30,
+       34,
+       12,
+       36,
+       26,
+       14,
+       19,
+       14,
+       2,
+       4
+      ],
+      "DK": [
+       29,
+       25,
+       23,
+       23,
+       36,
+       27,
+       15,
+       26,
+       22,
+       2,
+       4
+      ],
+      "DE": [
+       20,
+       22,
+       30,
+       19,
+       27,
+       28,
+       17,
+       19,
+       18,
+       2,
+       3
+      ],
+      "EE": [
+       27,
+       37,
+       30,
+       24,
+       36,
+       32,
+       24,
+       25,
+       22,
+       1,
+       1
+      ],
+      "IE": [
+       24,
+       39,
+       33,
+       19,
+       26,
+       25,
+       12,
+       23,
+       18,
+       1,
+       3
+      ],
+      "ES": [
+       20,
+       33,
+       35,
+       16,
+       29,
+       31,
+       12,
+       24,
+       14,
+       2,
+       2
+      ],
+      "FR": [
+       24,
+       28,
+       36,
+       18,
+       35,
+       27,
+       11,
+       21,
+       16,
+       2,
+       4
+      ],
+      "HR": [
+       19,
+       40,
+       40,
+       22,
+       35,
+       25,
+       14,
+       17,
+       16,
+       2,
+       3
+      ],
+      "IT": [
+       24,
+       40,
+       30,
+       17,
+       35,
+       26,
+       12,
+       26,
+       14,
+       2,
+       2
+      ],
+      "CY": [
+       15,
+       50,
+       58,
+       15,
+       41,
+       27,
+       9,
+       20,
+       10,
+       3,
+       3
+      ],
+      "LV": [
+       24,
+       30,
+       32,
+       21,
+       35,
+       30,
+       17,
+       23,
+       19,
+       1,
+       2
+      ],
+      "LT": [
+       20,
+       34,
+       30,
+       16,
+       34,
+       27,
+       14,
+       20,
+       13,
+       1,
+       4
+      ],
+      "LU": [
+       30,
+       34,
+       27,
+       21,
+       35,
+       33,
+       26,
+       29,
+       22,
+       1,
+       1
+      ],
+      "HU": [
+       19,
+       38,
+       33,
+       19,
+       34,
+       29,
+       11,
+       20,
+       11,
+       3,
+       3
+      ],
+      "MT": [
+       28,
+       38,
+       25,
+       23,
+       27,
+       35,
+       24,
+       29,
+       26,
+       0,
+       0
+      ],
+      "NL": [
+       20,
+       23,
+       26,
+       19,
+       30,
+       23,
+       16,
+       18,
+       16,
+       5,
+       4
+      ],
+      "AT": [
+       15,
+       27,
+       32,
+       18,
+       29,
+       27,
+       14,
+       22,
+       17,
+       3,
+       3
+      ],
+      "PL": [
+       16,
+       37,
+       30,
+       19,
+       39,
+       27,
+       13,
+       17,
+       16,
+       2,
+       3
+      ],
+      "PT": [
+       19,
+       37,
+       37,
+       18,
+       33,
+       33,
+       14,
+       21,
+       16,
+       2,
+       2
+      ],
+      "RO": [
+       16,
+       33,
+       32,
+       20,
+       33,
+       26,
+       13,
+       21,
+       16,
+       2,
+       3
+      ],
+      "SI": [
+       30,
+       37,
+       29,
+       24,
+       38,
+       32,
+       20,
+       23,
+       21,
+       1,
+       1
+      ],
+      "SK": [
+       19,
+       27,
+       22,
+       22,
+       23,
+       23,
+       13,
+       16,
+       20,
+       4,
+       7
+      ],
+      "FI": [
+       20,
+       31,
+       32,
+       16,
+       40,
+       28,
+       12,
+       17,
+       10,
+       1,
+       4
+      ],
+      "SE": [
+       19,
+       30,
+       32,
+       13,
+       38,
+       40,
+       10,
+       21,
+       13,
+       2,
+       4
+      ]
+     }
+    },
+    {
+     "qid": "Q16_a",
+     "text": "To what extent do you agree or disagree with the following statements about artificial intelligence (AI)? — I feel confident in my ability to use artificial intelligence tools in a safe way.",
+     "type": "likert",
+     "options": [
+      "Totally agree",
+      "Tend to agree",
+      "Tend to disagree",
+      "Totally disagree",
+      "Don’t know"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "media_tech",
+     "followUpOf": null,
+     "sourcePage": 32,
+     "sourcePages": [
+      32
+     ],
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Scripting: exclusive per line, randomise 1 to 4 (as printed in report questionnaire). Population aged 15-30 only (online panel, CAWI). intlValues are other Member States' published values (integers), aligned with options; EU27 average and EL deliberately omitted.",
+     "intlValues": {
+      "BE": [
+       32,
+       34,
+       15,
+       9,
+       10
+      ],
+      "BG": [
+       44,
+       30,
+       13,
+       8,
+       5
+      ],
+      "CZ": [
+       34,
+       40,
+       14,
+       6,
+       6
+      ],
+      "DK": [
+       44,
+       38,
+       11,
+       4,
+       3
+      ],
+      "DE": [
+       43,
+       28,
+       16,
+       9,
+       4
+      ],
+      "EE": [
+       56,
+       33,
+       6,
+       2,
+       3
+      ],
+      "IE": [
+       37,
+       38,
+       12,
+       8,
+       5
+      ],
+      "ES": [
+       41,
+       33,
+       14,
+       8,
+       4
+      ],
+      "FR": [
+       43,
+       28,
+       12,
+       9,
+       8
+      ],
+      "HR": [
+       40,
+       32,
+       15,
+       7,
+       6
+      ],
+      "IT": [
+       37,
+       36,
+       15,
+       6,
+       6
+      ],
+      "CY": [
+       41,
+       38,
+       12,
+       4,
+       5
+      ],
+      "LV": [
+       44,
+       40,
+       11,
+       3,
+       2
+      ],
+      "LT": [
+       47,
+       31,
+       12,
+       6,
+       4
+      ],
+      "LU": [
+       51,
+       39,
+       7,
+       1,
+       2
+      ],
+      "HU": [
+       40,
+       33,
+       15,
+       6,
+       6
+      ],
+      "MT": [
+       46,
+       51,
+       2,
+       1,
+       0
+      ],
+      "NL": [
+       26,
+       31,
+       21,
+       12,
+       10
+      ],
+      "AT": [
+       41,
+       28,
+       18,
+       9,
+       4
+      ],
+      "PL": [
+       44,
+       33,
+       12,
+       7,
+       4
+      ],
+      "PT": [
+       46,
+       32,
+       13,
+       5,
+       4
+      ],
+      "RO": [
+       48,
+       25,
+       12,
+       7,
+       8
+      ],
+      "SI": [
+       41,
+       43,
+       10,
+       4,
+       2
+      ],
+      "SK": [
+       41,
+       34,
+       15,
+       4,
+       6
+      ],
+      "FI": [
+       40,
+       34,
+       13,
+       6,
+       7
+      ],
+      "SE": [
+       40,
+       28,
+       16,
+       9,
+       7
+      ]
+     }
+    },
+    {
+     "qid": "Q16_b",
+     "text": "To what extent do you agree or disagree with the following statements about artificial intelligence (AI)? — I feel confident in my ability to use artificial intelligence tools to achieve the results I am looking for.",
+     "type": "likert",
+     "options": [
+      "Totally agree",
+      "Tend to agree",
+      "Tend to disagree",
+      "Totally disagree",
+      "Don’t know"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "media_tech",
+     "followUpOf": null,
+     "sourcePage": 33,
+     "sourcePages": [
+      33
+     ],
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Scripting: exclusive per line, randomise 1 to 4 (as printed in report questionnaire). Population aged 15-30 only (online panel, CAWI). intlValues are other Member States' published values (integers), aligned with options; EU27 average and EL deliberately omitted.",
+     "intlValues": {
+      "BE": [
+       23,
+       32,
+       17,
+       16,
+       12
+      ],
+      "BG": [
+       31,
+       28,
+       17,
+       13,
+       11
+      ],
+      "CZ": [
+       22,
+       39,
+       17,
+       11,
+       11
+      ],
+      "DK": [
+       35,
+       33,
+       17,
+       8,
+       7
+      ],
+      "DE": [
+       20,
+       28,
+       24,
+       18,
+       10
+      ],
+      "EE": [
+       37,
+       48,
+       8,
+       4,
+       3
+      ],
+      "IE": [
+       23,
+       39,
+       16,
+       12,
+       10
+      ],
+      "ES": [
+       24,
+       34,
+       15,
+       17,
+       10
+      ],
+      "FR": [
+       30,
+       28,
+       12,
+       16,
+       14
+      ],
+      "HR": [
+       22,
+       33,
+       20,
+       15,
+       10
+      ],
+      "IT": [
+       20,
+       39,
+       18,
+       12,
+       11
+      ],
+      "CY": [
+       35,
+       43,
+       12,
+       4,
+       6
+      ],
+      "LV": [
+       34,
+       44,
+       11,
+       6,
+       5
+      ],
+      "LT": [
+       32,
+       31,
+       19,
+       11,
+       7
+      ],
+      "LU": [
+       36,
+       51,
+       8,
+       3,
+       2
+      ],
+      "HU": [
+       25,
+       33,
+       17,
+       13,
+       12
+      ],
+      "MT": [
+       32,
+       63,
+       3,
+       1,
+       1
+      ],
+      "NL": [
+       13,
+       29,
+       23,
+       18,
+       17
+      ],
+      "AT": [
+       17,
+       32,
+       25,
+       15,
+       11
+      ],
+      "PL": [
+       25,
+       34,
+       18,
+       12,
+       11
+      ],
+      "PT": [
+       35,
+       36,
+       14,
+       7,
+       8
+      ],
+      "RO": [
+       29,
+       26,
+       16,
+       15,
+       14
+      ],
+      "SI": [
+       34,
+       43,
+       11,
+       8,
+       4
+      ],
+      "SK": [
+       27,
+       34,
+       18,
+       11,
+       10
+      ],
+      "FI": [
+       23,
+       35,
+       19,
+       12,
+       11
+      ],
+      "SE": [
+       23,
+       29,
+       23,
+       15,
+       10
+      ]
+     }
+    },
+    {
+     "qid": "Q17",
+     "text": "In the last 12 months, where, if anywhere, did you learn skills related to understanding and using AI tools?",
+     "type": "multiple_choice",
+     "options": [
+      "In school or university (e.g. classes, courses, extracurricular activities)",
+      "In a community or voluntary setting (e.g. youth clubs, NGOs, volunteering, workshops)",
+      "Via media or online content (e.g. social media, podcasts, blogs, news)",
+      "Through self-directed reading, research or practice",
+      "Through discussions with family or friends",
+      "At public events or awareness-raising campaigns",
+      "None of the above",
+      "Don’t know"
+     ],
+     "base": "all respondents",
+     "measure": "mentions_pct_of_respondents",
+     "domain": "media_tech",
+     "followUpOf": null,
+     "sourcePage": 34,
+     "sourcePages": [
+      34,
+      35
+     ],
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Multiple response: shares are percent of respondents mentioning each option; columns do not sum to 100. Population aged 15-30 only (online panel, CAWI). intlValues are other Member States' published values (integers), aligned with options; EU27 average and EL deliberately omitted.",
+     "intlValues": {
+      "BE": [
+       38,
+       21,
+       36,
+       26,
+       27,
+       20,
+       5,
+       2
+      ],
+      "BG": [
+       23,
+       14,
+       34,
+       48,
+       23,
+       11,
+       8,
+       1
+      ],
+      "CZ": [
+       32,
+       16,
+       35,
+       29,
+       26,
+       15,
+       8,
+       3
+      ],
+      "DK": [
+       39,
+       25,
+       40,
+       37,
+       33,
+       22,
+       4,
+       3
+      ],
+      "DE": [
+       29,
+       14,
+       38,
+       35,
+       28,
+       16,
+       6,
+       3
+      ],
+      "EE": [
+       44,
+       32,
+       48,
+       45,
+       36,
+       30,
+       2,
+       1
+      ],
+      "IE": [
+       33,
+       13,
+       40,
+       39,
+       26,
+       14,
+       7,
+       1
+      ],
+      "ES": [
+       33,
+       18,
+       34,
+       31,
+       31,
+       13,
+       8,
+       1
+      ],
+      "FR": [
+       36,
+       18,
+       42,
+       27,
+       29,
+       17,
+       8,
+       2
+      ],
+      "HR": [
+       27,
+       15,
+       42,
+       47,
+       25,
+       14,
+       6,
+       2
+      ],
+      "IT": [
+       33,
+       13,
+       45,
+       31,
+       29,
+       13,
+       8,
+       2
+      ],
+      "CY": [
+       29,
+       6,
+       36,
+       50,
+       36,
+       8,
+       10,
+       2
+      ],
+      "LV": [
+       31,
+       26,
+       40,
+       41,
+       30,
+       24,
+       5,
+       2
+      ],
+      "LT": [
+       27,
+       18,
+       33,
+       38,
+       23,
+       16,
+       7,
+       2
+      ],
+      "LU": [
+       44,
+       33,
+       57,
+       39,
+       40,
+       25,
+       1,
+       0
+      ],
+      "HU": [
+       21,
+       19,
+       41,
+       37,
+       25,
+       13,
+       7,
+       3
+      ],
+      "MT": [
+       37,
+       34,
+       55,
+       46,
+       43,
+       33,
+       1,
+       0
+      ],
+      "NL": [
+       29,
+       18,
+       29,
+       34,
+       25,
+       15,
+       9,
+       2
+      ],
+      "AT": [
+       26,
+       16,
+       39,
+       33,
+       27,
+       14,
+       8,
+       3
+      ],
+      "PL": [
+       23,
+       16,
+       35,
+       43,
+       26,
+       12,
+       9,
+       0
+      ],
+      "PT": [
+       34,
+       16,
+       41,
+       31,
+       30,
+       15,
+       7,
+       2
+      ],
+      "RO": [
+       25,
+       16,
+       40,
+       30,
+       23,
+       14,
+       9,
+       2
+      ],
+      "SI": [
+       35,
+       30,
+       48,
+       49,
+       38,
+       25,
+       3,
+       0
+      ],
+      "SK": [
+       28,
+       18,
+       37,
+       35,
+       23,
+       14,
+       8,
+       3
+      ],
+      "FI": [
+       33,
+       15,
+       39,
+       38,
+       28,
+       12,
+       7,
+       3
+      ],
+      "SE": [
+       34,
+       17,
+       38,
+       36,
+       26,
+       12,
+       5,
+       2
+      ]
+     }
+    },
+    {
+     "qid": "Q18_a",
+     "text": "To what extent do you personally agree or disagree with each of the following statements? — In (OUR COUNTRY), policymakers take the long-term consequences of their decisions into account",
+     "type": "likert",
+     "options": [
+      "Totally agree",
+      "Tend to agree",
+      "Tend to disagree",
+      "Totally disagree",
+      "Don’t know"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "political",
+     "followUpOf": null,
+     "sourcePage": 36,
+     "sourcePages": [
+      36
+     ],
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Scripting: items randomised. Population aged 15-30 only (online panel, CAWI). intlValues are other Member States' published values (integers), aligned with options; EU27 average and EL deliberately omitted.",
+     "intlValues": {
+      "BE": [
+       17,
+       26,
+       23,
+       21,
+       13
+      ],
+      "BG": [
+       14,
+       22,
+       25,
+       27,
+       12
+      ],
+      "CZ": [
+       10,
+       24,
+       33,
+       21,
+       12
+      ],
+      "DK": [
+       23,
+       34,
+       23,
+       10,
+       10
+      ],
+      "DE": [
+       16,
+       19,
+       26,
+       25,
+       14
+      ],
+      "EE": [
+       32,
+       40,
+       16,
+       8,
+       4
+      ],
+      "IE": [
+       13,
+       27,
+       27,
+       19,
+       14
+      ],
+      "ES": [
+       14,
+       26,
+       23,
+       26,
+       11
+      ],
+      "FR": [
+       14,
+       17,
+       24,
+       30,
+       15
+      ],
+      "HR": [
+       12,
+       18,
+       30,
+       29,
+       11
+      ],
+      "IT": [
+       10,
+       18,
+       29,
+       29,
+       14
+      ],
+      "CY": [
+       6,
+       13,
+       31,
+       38,
+       12
+      ],
+      "LV": [
+       24,
+       39,
+       20,
+       11,
+       6
+      ],
+      "LT": [
+       17,
+       28,
+       30,
+       15,
+       10
+      ],
+      "LU": [
+       34,
+       45,
+       11,
+       6,
+       4
+      ],
+      "HU": [
+       19,
+       27,
+       27,
+       17,
+       10
+      ],
+      "MT": [
+       29,
+       51,
+       13,
+       5,
+       2
+      ],
+      "NL": [
+       12,
+       20,
+       27,
+       26,
+       15
+      ],
+      "AT": [
+       13,
+       23,
+       30,
+       23,
+       11
+      ],
+      "PL": [
+       13,
+       25,
+       28,
+       20,
+       14
+      ],
+      "PT": [
+       14,
+       23,
+       31,
+       24,
+       8
+      ],
+      "RO": [
+       19,
+       24,
+       24,
+       18,
+       15
+      ],
+      "SI": [
+       22,
+       32,
+       23,
+       16,
+       7
+      ],
+      "SK": [
+       15,
+       21,
+       29,
+       25,
+       10
+      ],
+      "FI": [
+       10,
+       24,
+       28,
+       24,
+       14
+      ],
+      "SE": [
+       12,
+       23,
+       27,
+       20,
+       18
+      ]
+     }
+    },
+    {
+     "qid": "Q18_b",
+     "text": "To what extent do you personally agree or disagree with each of the following statements? — EU policymakers take the long-term consequences of their decisions into account",
+     "type": "likert",
+     "options": [
+      "Totally agree",
+      "Tend to agree",
+      "Tend to disagree",
+      "Totally disagree",
+      "Don’t know"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "political",
+     "followUpOf": null,
+     "sourcePage": 37,
+     "sourcePages": [
+      37
+     ],
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Scripting: items randomised. Population aged 15-30 only (online panel, CAWI). intlValues are other Member States' published values (integers), aligned with options; EU27 average and EL deliberately omitted.",
+     "intlValues": {
+      "BE": [
+       16,
+       26,
+       24,
+       22,
+       12
+      ],
+      "BG": [
+       15,
+       27,
+       27,
+       19,
+       12
+      ],
+      "CZ": [
+       12,
+       26,
+       31,
+       19,
+       12
+      ],
+      "DK": [
+       24,
+       37,
+       19,
+       9,
+       11
+      ],
+      "DE": [
+       15,
+       22,
+       26,
+       24,
+       13
+      ],
+      "EE": [
+       34,
+       41,
+       15,
+       6,
+       4
+      ],
+      "IE": [
+       12,
+       30,
+       26,
+       15,
+       17
+      ],
+      "ES": [
+       14,
+       26,
+       28,
+       20,
+       12
+      ],
+      "FR": [
+       12,
+       21,
+       24,
+       25,
+       18
+      ],
+      "HR": [
+       13,
+       23,
+       30,
+       23,
+       11
+      ],
+      "IT": [
+       9,
+       23,
+       32,
+       21,
+       15
+      ],
+      "CY": [
+       6,
+       20,
+       37,
+       24,
+       13
+      ],
+      "LV": [
+       25,
+       41,
+       19,
+       10,
+       5
+      ],
+      "LT": [
+       18,
+       32,
+       28,
+       13,
+       9
+      ],
+      "LU": [
+       32,
+       46,
+       11,
+       7,
+       4
+      ],
+      "HU": [
+       17,
+       31,
+       24,
+       17,
+       11
+      ],
+      "MT": [
+       33,
+       54,
+       9,
+       3,
+       1
+      ],
+      "NL": [
+       10,
+       22,
+       26,
+       23,
+       19
+      ],
+      "AT": [
+       14,
+       26,
+       25,
+       20,
+       15
+      ],
+      "PL": [
+       14,
+       26,
+       25,
+       20,
+       15
+      ],
+      "PT": [
+       16,
+       28,
+       29,
+       18,
+       9
+      ],
+      "RO": [
+       22,
+       29,
+       21,
+       14,
+       14
+      ],
+      "SI": [
+       23,
+       35,
+       23,
+       14,
+       5
+      ],
+      "SK": [
+       15,
+       25,
+       32,
+       19,
+       9
+      ],
+      "FI": [
+       11,
+       28,
+       27,
+       17,
+       17
+      ],
+      "SE": [
+       13,
+       25,
+       24,
+       19,
+       19
+      ]
+     }
+    },
+    {
+     "qid": "Q18_c",
+     "text": "To what extent do you personally agree or disagree with each of the following statements? — In (OUR COUNTRY), young people have the same chances of succeeding in life as young people of the same age 30 years ago",
+     "type": "likert",
+     "options": [
+      "Totally agree",
+      "Tend to agree",
+      "Tend to disagree",
+      "Totally disagree",
+      "Don’t know"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "social",
+     "followUpOf": null,
+     "sourcePage": 38,
+     "sourcePages": [
+      38
+     ],
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Scripting: items randomised. Population aged 15-30 only (online panel, CAWI). intlValues are other Member States' published values (integers), aligned with options; EU27 average and EL deliberately omitted.",
+     "intlValues": {
+      "BE": [
+       14,
+       24,
+       24,
+       26,
+       12
+      ],
+      "BG": [
+       15,
+       21,
+       25,
+       30,
+       9
+      ],
+      "CZ": [
+       15,
+       21,
+       29,
+       25,
+       10
+      ],
+      "DK": [
+       18,
+       30,
+       28,
+       16,
+       8
+      ],
+      "DE": [
+       15,
+       20,
+       27,
+       24,
+       14
+      ],
+      "EE": [
+       32,
+       34,
+       18,
+       12,
+       4
+      ],
+      "IE": [
+       13,
+       22,
+       24,
+       30,
+       11
+      ],
+      "ES": [
+       14,
+       19,
+       24,
+       35,
+       8
+      ],
+      "FR": [
+       12,
+       17,
+       21,
+       34,
+       16
+      ],
+      "HR": [
+       12,
+       18,
+       26,
+       32,
+       12
+      ],
+      "IT": [
+       9,
+       19,
+       25,
+       32,
+       15
+      ],
+      "CY": [
+       6,
+       14,
+       26,
+       43,
+       11
+      ],
+      "LV": [
+       25,
+       33,
+       21,
+       16,
+       5
+      ],
+      "LT": [
+       18,
+       26,
+       28,
+       20,
+       8
+      ],
+      "LU": [
+       27,
+       36,
+       20,
+       15,
+       2
+      ],
+      "HU": [
+       16,
+       20,
+       28,
+       25,
+       11
+      ],
+      "MT": [
+       24,
+       37,
+       26,
+       11,
+       2
+      ],
+      "NL": [
+       10,
+       21,
+       26,
+       27,
+       16
+      ],
+      "AT": [
+       15,
+       20,
+       28,
+       23,
+       14
+      ],
+      "PL": [
+       14,
+       22,
+       26,
+       26,
+       12
+      ],
+      "PT": [
+       14,
+       18,
+       21,
+       40,
+       7
+      ],
+      "RO": [
+       18,
+       20,
+       25,
+       22,
+       15
+      ],
+      "SI": [
+       16,
+       19,
+       29,
+       31,
+       5
+      ],
+      "SK": [
+       15,
+       22,
+       30,
+       24,
+       9
+      ],
+      "FI": [
+       11,
+       21,
+       26,
+       27,
+       15
+      ],
+      "SE": [
+       13,
+       20,
+       22,
+       28,
+       17
+      ]
+     }
+    },
+    {
+     "qid": "Q18_d",
+     "text": "To what extent do you personally agree or disagree with each of the following statements? — In (OUR COUNTRY), young people in 30 years’ time will have the same chances to succeed as young people of the same age today",
+     "type": "likert",
+     "options": [
+      "Totally agree",
+      "Tend to agree",
+      "Tend to disagree",
+      "Totally disagree",
+      "Don’t know"
+     ],
+     "base": "all respondents",
+     "measure": "share",
+     "domain": "social",
+     "followUpOf": null,
+     "sourcePage": 39,
+     "sourcePages": [
+      39
+     ],
+     "excluded": false,
+     "excludeReason": null,
+     "notes": "Scripting: items randomised. Population aged 15-30 only (online panel, CAWI). intlValues are other Member States' published values (integers), aligned with options; EU27 average and EL deliberately omitted.",
+     "intlValues": {
+      "BE": [
+       14,
+       23,
+       24,
+       24,
+       15
+      ],
+      "BG": [
+       17,
+       21,
+       28,
+       21,
+       13
+      ],
+      "CZ": [
+       12,
+       24,
+       33,
+       20,
+       11
+      ],
+      "DK": [
+       20,
+       33,
+       24,
+       14,
+       9
+      ],
+      "DE": [
+       17,
+       18,
+       29,
+       23,
+       13
+      ],
+      "EE": [
+       32,
+       36,
+       19,
+       8,
+       5
+      ],
+      "IE": [
+       12,
+       25,
+       25,
+       23,
+       15
+      ],
+      "ES": [
+       12,
+       21,
+       28,
+       27,
+       12
+      ],
+      "FR": [
+       12,
+       16,
+       26,
+       31,
+       15
+      ],
+      "HR": [
+       12,
+       17,
+       28,
+       27,
+       16
+      ],
+      "IT": [
+       10,
+       18,
+       29,
+       26,
+       17
+      ],
+      "CY": [
+       6,
+       16,
+       33,
+       29,
+       16
+      ],
+      "LV": [
+       26,
+       33,
+       22,
+       12,
+       7
+      ],
+      "LT": [
+       19,
+       29,
+       27,
+       15,
+       10
+      ],
+      "LU": [
+       26,
+       35,
+       24,
+       12,
+       3
+      ],
+      "HU": [
+       16,
+       24,
+       29,
+       17,
+       14
+      ],
+      "MT": [
+       23,
+       39,
+       26,
+       10,
+       2
+      ],
+      "NL": [
+       10,
+       22,
+       26,
+       23,
+       19
+      ],
+      "AT": [
+       14,
+       23,
+       28,
+       22,
+       13
+      ],
+      "PL": [
+       12,
+       23,
+       26,
+       22,
+       17
+      ],
+      "PT": [
+       12,
+       20,
+       30,
+       30,
+       8
+      ],
+      "RO": [
+       17,
+       22,
+       27,
+       18,
+       16
+      ],
+      "SI": [
+       14,
+       23,
+       30,
+       27,
+       6
+      ],
+      "SK": [
+       14,
+       22,
+       32,
+       21,
+       11
+      ],
+      "FI": [
+       13,
+       23,
+       25,
+       22,
+       17
+      ],
+      "SE": [
+       12,
+       18,
+       25,
+       27,
+       18
+      ]
+     }
+    }
+   ]
+  }
+ ]
+}

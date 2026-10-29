@@ -1,0 +1,1432 @@
+survey,qid,type,method,answered,tier,abstain,expectedMAE,support,modelOrSource,option,predicted_pct
+P7A-CON-01,Q2,likert,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-CON-01,Q2,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Δεν μπορούμε να καλύψουμε ούτε τις βασικές μας ανάγκες,19.846
+P7A-CON-01,Q2,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,"Δεν μπορούμε να καλύψουμε όλες τις ανάγκες μας, δυσκολευόμαστε πολύ",19.452
+P7A-CON-01,Q2,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Καταφέρνουμε να καλύπτουμε τις ανάγκες μας με δυσκολία,19.852
+P7A-CON-01,Q2,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Ζούμε άνετα αλλά δεν έχουμε δυνατότητα αποταμίευσης,21.15
+P7A-CON-01,Q2,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Ζούμε άνετα και μπορούμε να αποταμιεύουμε,19.701
+P7A-CON-01,Q2,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Δεν ξέρω / Δεν απαντώ,0
+P7A-CON-01,Q2,likert,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-CON-01,Q2,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Δεν μπορούμε να καλύψουμε ούτε τις βασικές μας ανάγκες,19.846
+P7A-CON-01,Q2,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,"Δεν μπορούμε να καλύψουμε όλες τις ανάγκες μας, δυσκολευόμαστε πολύ",19.202
+P7A-CON-01,Q2,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Καταφέρνουμε να καλύπτουμε τις ανάγκες μας με δυσκολία,18.401
+P7A-CON-01,Q2,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Ζούμε άνετα αλλά δεν έχουμε δυνατότητα αποταμίευσης,21.648
+P7A-CON-01,Q2,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Ζούμε άνετα και μπορούμε να αποταμιεύουμε,20.902
+P7A-CON-01,Q2,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Δεν ξέρω / Δεν απαντώ,0
+P7A-CON-01,Q2,likert,IQGE,True,weak,,15.76,,IQGE,Δεν μπορούμε να καλύψουμε ούτε τις βασικές μας ανάγκες,20.013
+P7A-CON-01,Q2,likert,IQGE,True,weak,,15.76,,IQGE,"Δεν μπορούμε να καλύψουμε όλες τις ανάγκες μας, δυσκολευόμαστε πολύ",20.511
+P7A-CON-01,Q2,likert,IQGE,True,weak,,15.76,,IQGE,Καταφέρνουμε να καλύπτουμε τις ανάγκες μας με δυσκολία,20.915
+P7A-CON-01,Q2,likert,IQGE,True,weak,,15.76,,IQGE,Ζούμε άνετα αλλά δεν έχουμε δυνατότητα αποταμίευσης,19.449
+P7A-CON-01,Q2,likert,IQGE,True,weak,,15.76,,IQGE,Ζούμε άνετα και μπορούμε να αποταμιεύουμε,19.111
+P7A-CON-01,Q2,likert,UNIF,True,,,,,UNIF,Δεν μπορούμε να καλύψουμε ούτε τις βασικές μας ανάγκες,20.0
+P7A-CON-01,Q2,likert,UNIF,True,,,,,UNIF,"Δεν μπορούμε να καλύψουμε όλες τις ανάγκες μας, δυσκολευόμαστε πολύ",20.0
+P7A-CON-01,Q2,likert,UNIF,True,,,,,UNIF,Καταφέρνουμε να καλύπτουμε τις ανάγκες μας με δυσκολία,20.0
+P7A-CON-01,Q2,likert,UNIF,True,,,,,UNIF,Ζούμε άνετα αλλά δεν έχουμε δυνατότητα αποταμίευσης,20.0
+P7A-CON-01,Q2,likert,UNIF,True,,,,,UNIF,Ζούμε άνετα και μπορούμε να αποταμιεύουμε,20.0
+P7A-CON-01,Q2,likert,UNIF,True,,,,,UNIF,Δεν ξέρω / Δεν απαντώ,0.0
+P7A-CON-01,Q3,single_choice,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-CON-01,Q3,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Εισαγόμενη εξαιτίας των διεθνών συνθηκών ή,35.302
+P7A-CON-01,Q3,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Οφείλεται στην πολιτική της κυβέρνησης,32.501
+P7A-CON-01,Q3,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Εξίσου και στα δυο (αυθόρμητα),32.198
+P7A-CON-01,Q3,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Δεν ξέρω / Δεν απαντώ,0
+P7A-CON-01,Q3,single_choice,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-CON-01,Q3,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Εισαγόμενη εξαιτίας των διεθνών συνθηκών ή,35.302
+P7A-CON-01,Q3,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Οφείλεται στην πολιτική της κυβέρνησης,32.501
+P7A-CON-01,Q3,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Εξίσου και στα δυο (αυθόρμητα),32.198
+P7A-CON-01,Q3,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Δεν ξέρω / Δεν απαντώ,0
+P7A-CON-01,Q3,single_choice,IQGE,True,related,,16.08,,IQGE,Εισαγόμενη εξαιτίας των διεθνών συνθηκών ή,33.333
+P7A-CON-01,Q3,single_choice,IQGE,True,related,,16.08,,IQGE,Οφείλεται στην πολιτική της κυβέρνησης,33.333
+P7A-CON-01,Q3,single_choice,IQGE,True,related,,16.08,,IQGE,Εξίσου και στα δυο (αυθόρμητα),33.333
+P7A-CON-01,Q3,single_choice,UNIF,True,,,,,UNIF,Εισαγόμενη εξαιτίας των διεθνών συνθηκών ή,33.333
+P7A-CON-01,Q3,single_choice,UNIF,True,,,,,UNIF,Οφείλεται στην πολιτική της κυβέρνησης,33.333
+P7A-CON-01,Q3,single_choice,UNIF,True,,,,,UNIF,Εξίσου και στα δυο (αυθόρμητα),33.333
+P7A-CON-01,Q3,single_choice,UNIF,True,,,,,UNIF,Δεν ξέρω / Δεν απαντώ,0.0
+P7A-CON-01,Q4_1,likert,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-CON-01,Q4_1,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Πολύ,25.405
+P7A-CON-01,Q4_1,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Αρκετά,16.999
+P7A-CON-01,Q4_1,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Λίγο,18.748
+P7A-CON-01,Q4_1,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Καθόλου,25.002
+P7A-CON-01,Q4_1,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Δεν έχω αυτό το έξοδο,13.847
+P7A-CON-01,Q4_1,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Δεν ξέρω / Δεν απαντώ,0
+P7A-CON-01,Q4_1,likert,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-CON-01,Q4_1,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Πολύ,22.255
+P7A-CON-01,Q4_1,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Αρκετά,16.198
+P7A-CON-01,Q4_1,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Λίγο,18.5
+P7A-CON-01,Q4_1,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Καθόλου,27.55
+P7A-CON-01,Q4_1,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Δεν έχω αυτό το έξοδο,15.497
+P7A-CON-01,Q4_1,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Δεν ξέρω / Δεν απαντώ,0
+P7A-CON-01,Q4_1,likert,IQGE,True,related,,16.08,,IQGE,Πολύ,26.188
+P7A-CON-01,Q4_1,likert,IQGE,True,related,,16.08,,IQGE,Αρκετά,17.451
+P7A-CON-01,Q4_1,likert,IQGE,True,related,,16.08,,IQGE,Λίγο,18.474
+P7A-CON-01,Q4_1,likert,IQGE,True,related,,16.08,,IQGE,Καθόλου,24.009
+P7A-CON-01,Q4_1,likert,IQGE,True,related,,16.08,,IQGE,Δεν έχω αυτό το έξοδο,13.879
+P7A-CON-01,Q4_1,likert,UNIF,True,,,,,UNIF,Πολύ,20.0
+P7A-CON-01,Q4_1,likert,UNIF,True,,,,,UNIF,Αρκετά,20.0
+P7A-CON-01,Q4_1,likert,UNIF,True,,,,,UNIF,Λίγο,20.0
+P7A-CON-01,Q4_1,likert,UNIF,True,,,,,UNIF,Καθόλου,20.0
+P7A-CON-01,Q4_1,likert,UNIF,True,,,,,UNIF,Δεν έχω αυτό το έξοδο,20.0
+P7A-CON-01,Q4_1,likert,UNIF,True,,,,,UNIF,Δεν ξέρω / Δεν απαντώ,0.0
+P7A-CON-01,Q4_2,likert,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-CON-01,Q4_2,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Πολύ,21.649
+P7A-CON-01,Q4_2,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Αρκετά,17.703
+P7A-CON-01,Q4_2,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Λίγο,28.144
+P7A-CON-01,Q4_2,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Καθόλου,18.951
+P7A-CON-01,Q4_2,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Δεν έχω αυτό το έξοδο,13.552
+P7A-CON-01,Q4_2,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Δεν ξέρω / Δεν απαντώ,0
+P7A-CON-01,Q4_2,likert,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-CON-01,Q4_2,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Πολύ,19.7
+P7A-CON-01,Q4_2,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Αρκετά,19.653
+P7A-CON-01,Q4_2,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Λίγο,22.396
+P7A-CON-01,Q4_2,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Καθόλου,21.75
+P7A-CON-01,Q4_2,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Δεν έχω αυτό το έξοδο,16.502
+P7A-CON-01,Q4_2,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Δεν ξέρω / Δεν απαντώ,0
+P7A-CON-01,Q4_2,likert,IQGE,True,weak,,15.76,,IQGE,Πολύ,20.696
+P7A-CON-01,Q4_2,likert,IQGE,True,weak,,15.76,,IQGE,Αρκετά,18.077
+P7A-CON-01,Q4_2,likert,IQGE,True,weak,,15.76,,IQGE,Λίγο,27.901
+P7A-CON-01,Q4_2,likert,IQGE,True,weak,,15.76,,IQGE,Καθόλου,18.994
+P7A-CON-01,Q4_2,likert,IQGE,True,weak,,15.76,,IQGE,Δεν έχω αυτό το έξοδο,14.331
+P7A-CON-01,Q4_2,likert,UNIF,True,,,,,UNIF,Πολύ,20.0
+P7A-CON-01,Q4_2,likert,UNIF,True,,,,,UNIF,Αρκετά,20.0
+P7A-CON-01,Q4_2,likert,UNIF,True,,,,,UNIF,Λίγο,20.0
+P7A-CON-01,Q4_2,likert,UNIF,True,,,,,UNIF,Καθόλου,20.0
+P7A-CON-01,Q4_2,likert,UNIF,True,,,,,UNIF,Δεν έχω αυτό το έξοδο,20.0
+P7A-CON-01,Q4_2,likert,UNIF,True,,,,,UNIF,Δεν ξέρω / Δεν απαντώ,0.0
+P7A-CON-01,Q4_3,likert,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-CON-01,Q4_3,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Πολύ,22.796
+P7A-CON-01,Q4_3,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Αρκετά,18.453
+P7A-CON-01,Q4_3,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Λίγο,23.6
+P7A-CON-01,Q4_3,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Καθόλου,21.053
+P7A-CON-01,Q4_3,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Δεν έχω αυτό το έξοδο,14.099
+P7A-CON-01,Q4_3,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Δεν ξέρω / Δεν απαντώ,0
+P7A-CON-01,Q4_3,likert,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-CON-01,Q4_3,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Πολύ,21.896
+P7A-CON-01,Q4_3,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Αρκετά,18.553
+P7A-CON-01,Q4_3,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Λίγο,23.349
+P7A-CON-01,Q4_3,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Καθόλου,21.453
+P7A-CON-01,Q4_3,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Δεν έχω αυτό το έξοδο,14.749
+P7A-CON-01,Q4_3,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Δεν ξέρω / Δεν απαντώ,0
+P7A-CON-01,Q4_3,likert,IQGE,True,related,,16.08,,IQGE,Πολύ,22.265
+P7A-CON-01,Q4_3,likert,IQGE,True,related,,16.08,,IQGE,Αρκετά,19.484
+P7A-CON-01,Q4_3,likert,IQGE,True,related,,16.08,,IQGE,Λίγο,22.169
+P7A-CON-01,Q4_3,likert,IQGE,True,related,,16.08,,IQGE,Καθόλου,21.663
+P7A-CON-01,Q4_3,likert,IQGE,True,related,,16.08,,IQGE,Δεν έχω αυτό το έξοδο,14.419
+P7A-CON-01,Q4_3,likert,UNIF,True,,,,,UNIF,Πολύ,20.0
+P7A-CON-01,Q4_3,likert,UNIF,True,,,,,UNIF,Αρκετά,20.0
+P7A-CON-01,Q4_3,likert,UNIF,True,,,,,UNIF,Λίγο,20.0
+P7A-CON-01,Q4_3,likert,UNIF,True,,,,,UNIF,Καθόλου,20.0
+P7A-CON-01,Q4_3,likert,UNIF,True,,,,,UNIF,Δεν έχω αυτό το έξοδο,20.0
+P7A-CON-01,Q4_3,likert,UNIF,True,,,,,UNIF,Δεν ξέρω / Δεν απαντώ,0.0
+P7A-CON-01,Q4_4,likert,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-CON-01,Q4_4,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Πολύ,22.599
+P7A-CON-01,Q4_4,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Αρκετά,19.353
+P7A-CON-01,Q4_4,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Λίγο,22.997
+P7A-CON-01,Q4_4,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Καθόλου,19.748
+P7A-CON-01,Q4_4,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Δεν έχω αυτό το έξοδο,15.303
+P7A-CON-01,Q4_4,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Δεν ξέρω / Δεν απαντώ,0
+P7A-CON-01,Q4_4,likert,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-CON-01,Q4_4,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Πολύ,20.2
+P7A-CON-01,Q4_4,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Αρκετά,18.253
+P7A-CON-01,Q4_4,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Λίγο,22.949
+P7A-CON-01,Q4_4,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Καθόλου,21.696
+P7A-CON-01,Q4_4,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Δεν έχω αυτό το έξοδο,16.902
+P7A-CON-01,Q4_4,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Δεν ξέρω / Δεν απαντώ,0
+P7A-CON-01,Q4_4,likert,IQGE,True,weak,,15.76,,IQGE,Πολύ,23.198
+P7A-CON-01,Q4_4,likert,IQGE,True,weak,,15.76,,IQGE,Αρκετά,19.457
+P7A-CON-01,Q4_4,likert,IQGE,True,weak,,15.76,,IQGE,Λίγο,23.025
+P7A-CON-01,Q4_4,likert,IQGE,True,weak,,15.76,,IQGE,Καθόλου,19.757
+P7A-CON-01,Q4_4,likert,IQGE,True,weak,,15.76,,IQGE,Δεν έχω αυτό το έξοδο,14.563
+P7A-CON-01,Q4_4,likert,UNIF,True,,,,,UNIF,Πολύ,20.0
+P7A-CON-01,Q4_4,likert,UNIF,True,,,,,UNIF,Αρκετά,20.0
+P7A-CON-01,Q4_4,likert,UNIF,True,,,,,UNIF,Λίγο,20.0
+P7A-CON-01,Q4_4,likert,UNIF,True,,,,,UNIF,Καθόλου,20.0
+P7A-CON-01,Q4_4,likert,UNIF,True,,,,,UNIF,Δεν έχω αυτό το έξοδο,20.0
+P7A-CON-01,Q4_4,likert,UNIF,True,,,,,UNIF,Δεν ξέρω / Δεν απαντώ,0.0
+P7A-CON-01,Q4_5,likert,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-CON-01,Q4_5,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Πολύ,25.199
+P7A-CON-01,Q4_5,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Αρκετά,17.899
+P7A-CON-01,Q4_5,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Λίγο,19.849
+P7A-CON-01,Q4_5,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Καθόλου,20.849
+P7A-CON-01,Q4_5,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Δεν έχω αυτό το έξοδο,16.204
+P7A-CON-01,Q4_5,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Δεν ξέρω / Δεν απαντώ,0
+P7A-CON-01,Q4_5,likert,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-CON-01,Q4_5,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Πολύ,19.499
+P7A-CON-01,Q4_5,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Αρκετά,19.199
+P7A-CON-01,Q4_5,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Λίγο,21.449
+P7A-CON-01,Q4_5,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Καθόλου,21.799
+P7A-CON-01,Q4_5,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Δεν έχω αυτό το έξοδο,18.055
+P7A-CON-01,Q4_5,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Δεν ξέρω / Δεν απαντώ,0
+P7A-CON-01,Q4_5,likert,IQGE,True,related,,16.08,,IQGE,Πολύ,24.235
+P7A-CON-01,Q4_5,likert,IQGE,True,related,,16.08,,IQGE,Αρκετά,17.984
+P7A-CON-01,Q4_5,likert,IQGE,True,related,,16.08,,IQGE,Λίγο,22.287
+P7A-CON-01,Q4_5,likert,IQGE,True,related,,16.08,,IQGE,Καθόλου,19.897
+P7A-CON-01,Q4_5,likert,IQGE,True,related,,16.08,,IQGE,Δεν έχω αυτό το έξοδο,15.597
+P7A-CON-01,Q4_5,likert,UNIF,True,,,,,UNIF,Πολύ,20.0
+P7A-CON-01,Q4_5,likert,UNIF,True,,,,,UNIF,Αρκετά,20.0
+P7A-CON-01,Q4_5,likert,UNIF,True,,,,,UNIF,Λίγο,20.0
+P7A-CON-01,Q4_5,likert,UNIF,True,,,,,UNIF,Καθόλου,20.0
+P7A-CON-01,Q4_5,likert,UNIF,True,,,,,UNIF,Δεν έχω αυτό το έξοδο,20.0
+P7A-CON-01,Q4_5,likert,UNIF,True,,,,,UNIF,Δεν ξέρω / Δεν απαντώ,0.0
+P7A-CON-01,Q4_6,likert,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-CON-01,Q4_6,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Πολύ,24.502
+P7A-CON-01,Q4_6,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Αρκετά,18.5
+P7A-CON-01,Q4_6,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Λίγο,22.399
+P7A-CON-01,Q4_6,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Καθόλου,20.85
+P7A-CON-01,Q4_6,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Δεν έχω αυτό το έξοδο,13.75
+P7A-CON-01,Q4_6,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Δεν ξέρω / Δεν απαντώ,0
+P7A-CON-01,Q4_6,likert,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-CON-01,Q4_6,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Πολύ,20.004
+P7A-CON-01,Q4_6,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Αρκετά,20.749
+P7A-CON-01,Q4_6,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Λίγο,21.299
+P7A-CON-01,Q4_6,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Καθόλου,22.649
+P7A-CON-01,Q4_6,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Δεν έχω αυτό το έξοδο,15.3
+P7A-CON-01,Q4_6,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Δεν ξέρω / Δεν απαντώ,0
+P7A-CON-01,Q4_6,likert,IQGE,True,related,,16.08,,IQGE,Πολύ,23.378
+P7A-CON-01,Q4_6,likert,IQGE,True,related,,16.08,,IQGE,Αρκετά,19.8
+P7A-CON-01,Q4_6,likert,IQGE,True,related,,16.08,,IQGE,Λίγο,21.547
+P7A-CON-01,Q4_6,likert,IQGE,True,related,,16.08,,IQGE,Καθόλου,20.995
+P7A-CON-01,Q4_6,likert,IQGE,True,related,,16.08,,IQGE,Δεν έχω αυτό το έξοδο,14.281
+P7A-CON-01,Q4_6,likert,UNIF,True,,,,,UNIF,Πολύ,20.0
+P7A-CON-01,Q4_6,likert,UNIF,True,,,,,UNIF,Αρκετά,20.0
+P7A-CON-01,Q4_6,likert,UNIF,True,,,,,UNIF,Λίγο,20.0
+P7A-CON-01,Q4_6,likert,UNIF,True,,,,,UNIF,Καθόλου,20.0
+P7A-CON-01,Q4_6,likert,UNIF,True,,,,,UNIF,Δεν έχω αυτό το έξοδο,20.0
+P7A-CON-01,Q4_6,likert,UNIF,True,,,,,UNIF,Δεν ξέρω / Δεν απαντώ,0.0
+P7A-CON-01,Q4_7,likert,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-CON-01,Q4_7,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Πολύ,22.351
+P7A-CON-01,Q4_7,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Αρκετά,21.1
+P7A-CON-01,Q4_7,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Λίγο,21.35
+P7A-CON-01,Q4_7,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Καθόλου,19.597
+P7A-CON-01,Q4_7,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Δεν έχω αυτό το έξοδο,15.602
+P7A-CON-01,Q4_7,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Δεν ξέρω / Δεν απαντώ,0
+P7A-CON-01,Q4_7,likert,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-CON-01,Q4_7,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Πολύ,20.901
+P7A-CON-01,Q4_7,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Αρκετά,19.951
+P7A-CON-01,Q4_7,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Λίγο,22.549
+P7A-CON-01,Q4_7,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Καθόλου,20.097
+P7A-CON-01,Q4_7,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Δεν έχω αυτό το έξοδο,16.502
+P7A-CON-01,Q4_7,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Δεν ξέρω / Δεν απαντώ,0
+P7A-CON-01,Q4_7,likert,IQGE,True,related,,16.08,,IQGE,Πολύ,22.007
+P7A-CON-01,Q4_7,likert,IQGE,True,related,,16.08,,IQGE,Αρκετά,22.068
+P7A-CON-01,Q4_7,likert,IQGE,True,related,,16.08,,IQGE,Λίγο,21.295
+P7A-CON-01,Q4_7,likert,IQGE,True,related,,16.08,,IQGE,Καθόλου,20.01
+P7A-CON-01,Q4_7,likert,IQGE,True,related,,16.08,,IQGE,Δεν έχω αυτό το έξοδο,14.62
+P7A-CON-01,Q4_7,likert,UNIF,True,,,,,UNIF,Πολύ,20.0
+P7A-CON-01,Q4_7,likert,UNIF,True,,,,,UNIF,Αρκετά,20.0
+P7A-CON-01,Q4_7,likert,UNIF,True,,,,,UNIF,Λίγο,20.0
+P7A-CON-01,Q4_7,likert,UNIF,True,,,,,UNIF,Καθόλου,20.0
+P7A-CON-01,Q4_7,likert,UNIF,True,,,,,UNIF,Δεν έχω αυτό το έξοδο,20.0
+P7A-CON-01,Q4_7,likert,UNIF,True,,,,,UNIF,Δεν ξέρω / Δεν απαντώ,0.0
+P7A-CON-01,Q4_8,likert,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-CON-01,Q4_8,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Πολύ,21.403
+P7A-CON-01,Q4_8,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Αρκετά,21.097
+P7A-CON-01,Q4_8,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Λίγο,22.299
+P7A-CON-01,Q4_8,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Καθόλου,19.849
+P7A-CON-01,Q4_8,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Δεν έχω αυτό το έξοδο,15.352
+P7A-CON-01,Q4_8,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Δεν ξέρω / Δεν απαντώ,0
+P7A-CON-01,Q4_8,likert,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-CON-01,Q4_8,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Πολύ,20.204
+P7A-CON-01,Q4_8,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Αρκετά,21.046
+P7A-CON-01,Q4_8,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Λίγο,20.549
+P7A-CON-01,Q4_8,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Καθόλου,21.597
+P7A-CON-01,Q4_8,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Δεν έχω αυτό το έξοδο,16.603
+P7A-CON-01,Q4_8,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Δεν ξέρω / Δεν απαντώ,0
+P7A-CON-01,Q4_8,likert,IQGE,True,related,,16.08,,IQGE,Πολύ,20.659
+P7A-CON-01,Q4_8,likert,IQGE,True,related,,16.08,,IQGE,Αρκετά,20.694
+P7A-CON-01,Q4_8,likert,IQGE,True,related,,16.08,,IQGE,Λίγο,24.036
+P7A-CON-01,Q4_8,likert,IQGE,True,related,,16.08,,IQGE,Καθόλου,19.877
+P7A-CON-01,Q4_8,likert,IQGE,True,related,,16.08,,IQGE,Δεν έχω αυτό το έξοδο,14.733
+P7A-CON-01,Q4_8,likert,UNIF,True,,,,,UNIF,Πολύ,20.0
+P7A-CON-01,Q4_8,likert,UNIF,True,,,,,UNIF,Αρκετά,20.0
+P7A-CON-01,Q4_8,likert,UNIF,True,,,,,UNIF,Λίγο,20.0
+P7A-CON-01,Q4_8,likert,UNIF,True,,,,,UNIF,Καθόλου,20.0
+P7A-CON-01,Q4_8,likert,UNIF,True,,,,,UNIF,Δεν έχω αυτό το έξοδο,20.0
+P7A-CON-01,Q4_8,likert,UNIF,True,,,,,UNIF,Δεν ξέρω / Δεν απαντώ,0.0
+P7A-CON-01,Q4_9,likert,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-CON-01,Q4_9,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Πολύ,24.302
+P7A-CON-01,Q4_9,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Αρκετά,21.596
+P7A-CON-01,Q4_9,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Λίγο,20.351
+P7A-CON-01,Q4_9,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Καθόλου,18.651
+P7A-CON-01,Q4_9,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Δεν έχω αυτό το έξοδο,15.1
+P7A-CON-01,Q4_9,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Δεν ξέρω / Δεν απαντώ,0
+P7A-CON-01,Q4_9,likert,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-CON-01,Q4_9,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Πολύ,20.703
+P7A-CON-01,Q4_9,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Αρκετά,20.998
+P7A-CON-01,Q4_9,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Λίγο,20.401
+P7A-CON-01,Q4_9,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Καθόλου,20.499
+P7A-CON-01,Q4_9,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Δεν έχω αυτό το έξοδο,17.4
+P7A-CON-01,Q4_9,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Δεν ξέρω / Δεν απαντώ,0
+P7A-CON-01,Q4_9,likert,IQGE,True,weak,,15.76,,IQGE,Πολύ,23.53
+P7A-CON-01,Q4_9,likert,IQGE,True,weak,,15.76,,IQGE,Αρκετά,20.331
+P7A-CON-01,Q4_9,likert,IQGE,True,weak,,15.76,,IQGE,Λίγο,21.686
+P7A-CON-01,Q4_9,likert,IQGE,True,weak,,15.76,,IQGE,Καθόλου,19.821
+P7A-CON-01,Q4_9,likert,IQGE,True,weak,,15.76,,IQGE,Δεν έχω αυτό το έξοδο,14.631
+P7A-CON-01,Q4_9,likert,UNIF,True,,,,,UNIF,Πολύ,20.0
+P7A-CON-01,Q4_9,likert,UNIF,True,,,,,UNIF,Αρκετά,20.0
+P7A-CON-01,Q4_9,likert,UNIF,True,,,,,UNIF,Λίγο,20.0
+P7A-CON-01,Q4_9,likert,UNIF,True,,,,,UNIF,Καθόλου,20.0
+P7A-CON-01,Q4_9,likert,UNIF,True,,,,,UNIF,Δεν έχω αυτό το έξοδο,20.0
+P7A-CON-01,Q4_9,likert,UNIF,True,,,,,UNIF,Δεν ξέρω / Δεν απαντώ,0.0
+P7A-CON-01,Q4_10,likert,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-CON-01,Q4_10,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Πολύ,18.901
+P7A-CON-01,Q4_10,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Αρκετά,21.249
+P7A-CON-01,Q4_10,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Λίγο,20.946
+P7A-CON-01,Q4_10,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Καθόλου,24.55
+P7A-CON-01,Q4_10,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Δεν έχω αυτό το έξοδο,14.354
+P7A-CON-01,Q4_10,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Δεν ξέρω / Δεν απαντώ,0
+P7A-CON-01,Q4_10,likert,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-CON-01,Q4_10,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Πολύ,18.901
+P7A-CON-01,Q4_10,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Αρκετά,21.249
+P7A-CON-01,Q4_10,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Λίγο,20.946
+P7A-CON-01,Q4_10,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Καθόλου,24.55
+P7A-CON-01,Q4_10,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Δεν έχω αυτό το έξοδο,14.354
+P7A-CON-01,Q4_10,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Δεν ξέρω / Δεν απαντώ,0
+P7A-CON-01,Q4_10,likert,IQGE,True,related,,16.08,,IQGE,Πολύ,19.249
+P7A-CON-01,Q4_10,likert,IQGE,True,related,,16.08,,IQGE,Αρκετά,21.783
+P7A-CON-01,Q4_10,likert,IQGE,True,related,,16.08,,IQGE,Λίγο,20.937
+P7A-CON-01,Q4_10,likert,IQGE,True,related,,16.08,,IQGE,Καθόλου,23.395
+P7A-CON-01,Q4_10,likert,IQGE,True,related,,16.08,,IQGE,Δεν έχω αυτό το έξοδο,14.636
+P7A-CON-01,Q4_10,likert,UNIF,True,,,,,UNIF,Πολύ,20.0
+P7A-CON-01,Q4_10,likert,UNIF,True,,,,,UNIF,Αρκετά,20.0
+P7A-CON-01,Q4_10,likert,UNIF,True,,,,,UNIF,Λίγο,20.0
+P7A-CON-01,Q4_10,likert,UNIF,True,,,,,UNIF,Καθόλου,20.0
+P7A-CON-01,Q4_10,likert,UNIF,True,,,,,UNIF,Δεν έχω αυτό το έξοδο,20.0
+P7A-CON-01,Q4_10,likert,UNIF,True,,,,,UNIF,Δεν ξέρω / Δεν απαντώ,0.0
+P7A-CON-01,Q4_11,likert,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-CON-01,Q4_11,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Πολύ,28.352
+P7A-CON-01,Q4_11,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Αρκετά,16.099
+P7A-CON-01,Q4_11,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Λίγο,20.55
+P7A-CON-01,Q4_11,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Καθόλου,20.597
+P7A-CON-01,Q4_11,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Δεν έχω αυτό το έξοδο,14.401
+P7A-CON-01,Q4_11,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Δεν ξέρω / Δεν απαντώ,0
+P7A-CON-01,Q4_11,likert,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-CON-01,Q4_11,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Πολύ,25.9
+P7A-CON-01,Q4_11,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Αρκετά,17.301
+P7A-CON-01,Q4_11,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Λίγο,19.15
+P7A-CON-01,Q4_11,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Καθόλου,21.147
+P7A-CON-01,Q4_11,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Δεν έχω αυτό το έξοδο,16.502
+P7A-CON-01,Q4_11,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Δεν ξέρω / Δεν απαντώ,0
+P7A-CON-01,Q4_11,likert,IQGE,True,weak,,15.76,,IQGE,Πολύ,27.544
+P7A-CON-01,Q4_11,likert,IQGE,True,weak,,15.76,,IQGE,Αρκετά,16.24
+P7A-CON-01,Q4_11,likert,IQGE,True,weak,,15.76,,IQGE,Λίγο,21.584
+P7A-CON-01,Q4_11,likert,IQGE,True,weak,,15.76,,IQGE,Καθόλου,20.407
+P7A-CON-01,Q4_11,likert,IQGE,True,weak,,15.76,,IQGE,Δεν έχω αυτό το έξοδο,14.225
+P7A-CON-01,Q4_11,likert,UNIF,True,,,,,UNIF,Πολύ,20.0
+P7A-CON-01,Q4_11,likert,UNIF,True,,,,,UNIF,Αρκετά,20.0
+P7A-CON-01,Q4_11,likert,UNIF,True,,,,,UNIF,Λίγο,20.0
+P7A-CON-01,Q4_11,likert,UNIF,True,,,,,UNIF,Καθόλου,20.0
+P7A-CON-01,Q4_11,likert,UNIF,True,,,,,UNIF,Δεν έχω αυτό το έξοδο,20.0
+P7A-CON-01,Q4_11,likert,UNIF,True,,,,,UNIF,Δεν ξέρω / Δεν απαντώ,0.0
+P7A-POL-01,Q1,single_choice,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-POL-01,Q1,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Προς τη σωστή,32.798
+P7A-POL-01,Q1,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Προς τη λάθος,28.302
+P7A-POL-01,Q1,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Ούτε-ούτε (αυθ.),38.9
+P7A-POL-01,Q1,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,ΔΓ/ΔΑ (αυθ.),0
+P7A-POL-01,Q1,single_choice,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-POL-01,Q1,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Προς τη σωστή,32.448
+P7A-POL-01,Q1,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Προς τη λάθος,36.605
+P7A-POL-01,Q1,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Ούτε-ούτε (αυθ.),30.948
+P7A-POL-01,Q1,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,ΔΓ/ΔΑ (αυθ.),0
+P7A-POL-01,Q1,single_choice,IQGE,True,related,,16.08,,IQGE,Προς τη σωστή,32.357
+P7A-POL-01,Q1,single_choice,IQGE,True,related,,16.08,,IQGE,Προς τη λάθος,30.153
+P7A-POL-01,Q1,single_choice,IQGE,True,related,,16.08,,IQGE,Ούτε-ούτε (αυθ.),37.49
+P7A-POL-01,Q1,single_choice,UNIF,True,,,,,UNIF,Προς τη σωστή,33.333
+P7A-POL-01,Q1,single_choice,UNIF,True,,,,,UNIF,Προς τη λάθος,33.333
+P7A-POL-01,Q1,single_choice,UNIF,True,,,,,UNIF,Ούτε-ούτε (αυθ.),33.333
+P7A-POL-01,Q1,single_choice,UNIF,True,,,,,UNIF,ΔΓ/ΔΑ (αυθ.),0.0
+P7A-POL-01,Q1,single_choice,PREV_SAME,True,,,,,"e4a07b5b2ef3 (Metron/MEGA 02.07.2026, πεδίο 6/2026) σελ.1",Προς τη σωστή,30.0
+P7A-POL-01,Q1,single_choice,PREV_SAME,True,,,,,"e4a07b5b2ef3 (Metron/MEGA 02.07.2026, πεδίο 6/2026) σελ.1",Προς τη λάθος,67.0
+P7A-POL-01,Q1,single_choice,PREV_SAME,True,,,,,"e4a07b5b2ef3 (Metron/MEGA 02.07.2026, πεδίο 6/2026) σελ.1",Ούτε-ούτε (αυθ.),2.0
+P7A-POL-01,Q1,single_choice,PREV_SAME,True,,,,,"e4a07b5b2ef3 (Metron/MEGA 02.07.2026, πεδίο 6/2026) σελ.1",ΔΓ/ΔΑ (αυθ.),1.0
+P7A-POL-01,Q2,likert,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-POL-01,Q2,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Σε καλύτερη,36.799
+P7A-POL-01,Q2,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Στην ίδια,28.002
+P7A-POL-01,Q2,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Σε χειρότερη,35.2
+P7A-POL-01,Q2,likert,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-POL-01,Q2,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Σε καλύτερη,32.648
+P7A-POL-01,Q2,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Στην ίδια,31.953
+P7A-POL-01,Q2,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Σε χειρότερη,35.4
+P7A-POL-01,Q2,likert,IQGE,True,related,,16.08,,IQGE,Σε καλύτερη,37.474
+P7A-POL-01,Q2,likert,IQGE,True,related,,16.08,,IQGE,Στην ίδια,29.66
+P7A-POL-01,Q2,likert,IQGE,True,related,,16.08,,IQGE,Σε χειρότερη,32.866
+P7A-POL-01,Q2,likert,UNIF,True,,,,,UNIF,Σε καλύτερη,33.333
+P7A-POL-01,Q2,likert,UNIF,True,,,,,UNIF,Στην ίδια,33.333
+P7A-POL-01,Q2,likert,UNIF,True,,,,,UNIF,Σε χειρότερη,33.333
+P7A-POL-01,Q2,likert,PREV_SAME,True,,,,,a839a1e5848f (Metron/MEGA 17.03.2026),Σε καλύτερη,15.0
+P7A-POL-01,Q2,likert,PREV_SAME,True,,,,,a839a1e5848f (Metron/MEGA 17.03.2026),Στην ίδια,37.0
+P7A-POL-01,Q2,likert,PREV_SAME,True,,,,,a839a1e5848f (Metron/MEGA 17.03.2026),Σε χειρότερη,48.0
+P7A-POL-01,Q4_1,likert,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-POL-01,Q4_1,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Μάλλον θετικές,30.753
+P7A-POL-01,Q4_1,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Ούτε-ούτε (αυθ.),30.449
+P7A-POL-01,Q4_1,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Μάλλον αρνητικές,38.798
+P7A-POL-01,Q4_1,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,ΔΓ/ΔΑ (αυθ.),0
+P7A-POL-01,Q4_1,likert,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-POL-01,Q4_1,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Μάλλον θετικές,31.802
+P7A-POL-01,Q4_1,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Ούτε-ούτε (αυθ.),30.449
+P7A-POL-01,Q4_1,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Μάλλον αρνητικές,37.748
+P7A-POL-01,Q4_1,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,ΔΓ/ΔΑ (αυθ.),0
+P7A-POL-01,Q4_1,likert,IQGE,True,related,,16.08,,IQGE,Μάλλον θετικές,32.243
+P7A-POL-01,Q4_1,likert,IQGE,True,related,,16.08,,IQGE,Ούτε-ούτε (αυθ.),29.931
+P7A-POL-01,Q4_1,likert,IQGE,True,related,,16.08,,IQGE,Μάλλον αρνητικές,37.825
+P7A-POL-01,Q4_1,likert,UNIF,True,,,,,UNIF,Μάλλον θετικές,33.333
+P7A-POL-01,Q4_1,likert,UNIF,True,,,,,UNIF,Ούτε-ούτε (αυθ.),33.333
+P7A-POL-01,Q4_1,likert,UNIF,True,,,,,UNIF,Μάλλον αρνητικές,33.333
+P7A-POL-01,Q4_1,likert,UNIF,True,,,,,UNIF,ΔΓ/ΔΑ (αυθ.),0.0
+P7A-POL-01,Q4_2,likert,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-POL-01,Q4_2,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Μάλλον θετικές,33.251
+P7A-POL-01,Q4_2,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Ούτε-ούτε (αυθ.),29.296
+P7A-POL-01,Q4_2,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Μάλλον αρνητικές,37.452
+P7A-POL-01,Q4_2,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,ΔΓ/ΔΑ (αυθ.),0
+P7A-POL-01,Q4_2,likert,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-POL-01,Q4_2,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Μάλλον θετικές,32.45
+P7A-POL-01,Q4_2,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Ούτε-ούτε (αυθ.),30.447
+P7A-POL-01,Q4_2,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Μάλλον αρνητικές,37.103
+P7A-POL-01,Q4_2,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,ΔΓ/ΔΑ (αυθ.),0
+P7A-POL-01,Q4_2,likert,IQGE,True,related,,16.08,,IQGE,Μάλλον θετικές,32.504
+P7A-POL-01,Q4_2,likert,IQGE,True,related,,16.08,,IQGE,Ούτε-ούτε (αυθ.),28.836
+P7A-POL-01,Q4_2,likert,IQGE,True,related,,16.08,,IQGE,Μάλλον αρνητικές,38.66
+P7A-POL-01,Q4_2,likert,UNIF,True,,,,,UNIF,Μάλλον θετικές,33.333
+P7A-POL-01,Q4_2,likert,UNIF,True,,,,,UNIF,Ούτε-ούτε (αυθ.),33.333
+P7A-POL-01,Q4_2,likert,UNIF,True,,,,,UNIF,Μάλλον αρνητικές,33.333
+P7A-POL-01,Q4_2,likert,UNIF,True,,,,,UNIF,ΔΓ/ΔΑ (αυθ.),0.0
+P7A-POL-01,Q4_3,likert,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-POL-01,Q4_3,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Μάλλον θετικές,31.797
+P7A-POL-01,Q4_3,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Ούτε-ούτε (αυθ.),32.952
+P7A-POL-01,Q4_3,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Μάλλον αρνητικές,35.251
+P7A-POL-01,Q4_3,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,ΔΓ/ΔΑ (αυθ.),0
+P7A-POL-01,Q4_3,likert,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-POL-01,Q4_3,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Μάλλον θετικές,30.996
+P7A-POL-01,Q4_3,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Ούτε-ούτε (αυθ.),32.052
+P7A-POL-01,Q4_3,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Μάλλον αρνητικές,36.952
+P7A-POL-01,Q4_3,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,ΔΓ/ΔΑ (αυθ.),0
+P7A-POL-01,Q4_3,likert,IQGE,True,related,,16.08,,IQGE,Μάλλον θετικές,32.119
+P7A-POL-01,Q4_3,likert,IQGE,True,related,,16.08,,IQGE,Ούτε-ούτε (αυθ.),31.641
+P7A-POL-01,Q4_3,likert,IQGE,True,related,,16.08,,IQGE,Μάλλον αρνητικές,36.24
+P7A-POL-01,Q4_3,likert,UNIF,True,,,,,UNIF,Μάλλον θετικές,33.333
+P7A-POL-01,Q4_3,likert,UNIF,True,,,,,UNIF,Ούτε-ούτε (αυθ.),33.333
+P7A-POL-01,Q4_3,likert,UNIF,True,,,,,UNIF,Μάλλον αρνητικές,33.333
+P7A-POL-01,Q4_3,likert,UNIF,True,,,,,UNIF,ΔΓ/ΔΑ (αυθ.),0.0
+P7A-POL-01,Q4_4,likert,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-POL-01,Q4_4,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Μάλλον θετικές,31.649
+P7A-POL-01,Q4_4,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Ούτε-ούτε (αυθ.),28.852
+P7A-POL-01,Q4_4,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Μάλλον αρνητικές,39.499
+P7A-POL-01,Q4_4,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,ΔΓ/ΔΑ (αυθ.),0
+P7A-POL-01,Q4_4,likert,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-POL-01,Q4_4,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Μάλλον θετικές,27.501
+P7A-POL-01,Q4_4,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Ούτε-ούτε (αυθ.),30.75
+P7A-POL-01,Q4_4,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Μάλλον αρνητικές,41.749
+P7A-POL-01,Q4_4,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,ΔΓ/ΔΑ (αυθ.),0
+P7A-POL-01,Q4_4,likert,IQGE,True,related,,16.08,,IQGE,Μάλλον θετικές,33.179
+P7A-POL-01,Q4_4,likert,IQGE,True,related,,16.08,,IQGE,Ούτε-ούτε (αυθ.),27.317
+P7A-POL-01,Q4_4,likert,IQGE,True,related,,16.08,,IQGE,Μάλλον αρνητικές,39.504
+P7A-POL-01,Q4_4,likert,UNIF,True,,,,,UNIF,Μάλλον θετικές,33.333
+P7A-POL-01,Q4_4,likert,UNIF,True,,,,,UNIF,Ούτε-ούτε (αυθ.),33.333
+P7A-POL-01,Q4_4,likert,UNIF,True,,,,,UNIF,Μάλλον αρνητικές,33.333
+P7A-POL-01,Q4_4,likert,UNIF,True,,,,,UNIF,ΔΓ/ΔΑ (αυθ.),0.0
+P7A-POL-01,Q5,single_choice,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-POL-01,Q5,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Θετική,47.305
+P7A-POL-01,Q5,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Ούτε-ούτε (αυθ.),7.198
+P7A-POL-01,Q5,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Αρνητική,45.496
+P7A-POL-01,Q5,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,ΔΓ/ΔΑ (αυθ.),0
+P7A-POL-01,Q5,single_choice,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-POL-01,Q5,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Θετική,45.654
+P7A-POL-01,Q5,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Ούτε-ούτε (αυθ.),9.299
+P7A-POL-01,Q5,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Αρνητική,45.047
+P7A-POL-01,Q5,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,ΔΓ/ΔΑ (αυθ.),0
+P7A-POL-01,Q5,single_choice,IQGE,True,paraphrase,,10.72,,IQGE,Θετική,46.299
+P7A-POL-01,Q5,single_choice,IQGE,True,paraphrase,,10.72,,IQGE,Ούτε-ούτε (αυθ.),8.404
+P7A-POL-01,Q5,single_choice,IQGE,True,paraphrase,,10.72,,IQGE,Αρνητική,45.297
+P7A-POL-01,Q5,single_choice,UNIF,True,,,,,UNIF,Θετική,33.333
+P7A-POL-01,Q5,single_choice,UNIF,True,,,,,UNIF,Ούτε-ούτε (αυθ.),33.333
+P7A-POL-01,Q5,single_choice,UNIF,True,,,,,UNIF,Αρνητική,33.333
+P7A-POL-01,Q5,single_choice,UNIF,True,,,,,UNIF,ΔΓ/ΔΑ (αυθ.),0.0
+P7A-POL-01,Q5,single_choice,PREV_SAME,True,,,,,e4a07b5b2ef3 σελ.3,Θετική,28.0
+P7A-POL-01,Q5,single_choice,PREV_SAME,True,,,,,e4a07b5b2ef3 σελ.3,Ούτε-ούτε (αυθ.),5.0
+P7A-POL-01,Q5,single_choice,PREV_SAME,True,,,,,e4a07b5b2ef3 σελ.3,Αρνητική,67.0
+P7A-POL-01,Q5,single_choice,PREV_SAME,True,,,,,e4a07b5b2ef3 σελ.3,ΔΓ/ΔΑ (αυθ.),0.0
+P7A-POL-01,Q6,single_choice,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-POL-01,Q6,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Θετική,43.55
+P7A-POL-01,Q6,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Ούτε-ούτε (αυθ.),9.705
+P7A-POL-01,Q6,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Αρνητική,46.745
+P7A-POL-01,Q6,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,ΔΓ/ΔΑ (αυθ.),0
+P7A-POL-01,Q6,single_choice,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-POL-01,Q6,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Θετική,44.201
+P7A-POL-01,Q6,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Ούτε-ούτε (αυθ.),8.855
+P7A-POL-01,Q6,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Αρνητική,46.945
+P7A-POL-01,Q6,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,ΔΓ/ΔΑ (αυθ.),0
+P7A-POL-01,Q6,single_choice,IQGE,True,weak,,15.76,,IQGE,Θετική,44.533
+P7A-POL-01,Q6,single_choice,IQGE,True,weak,,15.76,,IQGE,Ούτε-ούτε (αυθ.),9.865
+P7A-POL-01,Q6,single_choice,IQGE,True,weak,,15.76,,IQGE,Αρνητική,45.602
+P7A-POL-01,Q6,single_choice,UNIF,True,,,,,UNIF,Θετική,33.333
+P7A-POL-01,Q6,single_choice,UNIF,True,,,,,UNIF,Ούτε-ούτε (αυθ.),33.333
+P7A-POL-01,Q6,single_choice,UNIF,True,,,,,UNIF,Αρνητική,33.333
+P7A-POL-01,Q6,single_choice,UNIF,True,,,,,UNIF,ΔΓ/ΔΑ (αυθ.),0.0
+P7A-POL-01,Q6,single_choice,PREV_SAME,True,,,,,e4a07b5b2ef3 σελ.4,Θετική,31.0
+P7A-POL-01,Q6,single_choice,PREV_SAME,True,,,,,e4a07b5b2ef3 σελ.4,Ούτε-ούτε (αυθ.),4.0
+P7A-POL-01,Q6,single_choice,PREV_SAME,True,,,,,e4a07b5b2ef3 σελ.4,Αρνητική,64.0
+P7A-POL-01,Q6,single_choice,PREV_SAME,True,,,,,e4a07b5b2ef3 σελ.4,ΔΓ/ΔΑ (αυθ.),1.0
+P7A-POL-01,Q7,single_choice,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-POL-01,Q7,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Θετική,43.848
+P7A-POL-01,Q7,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Ούτε-ούτε (αυθ.),8.399
+P7A-POL-01,Q7,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Αρνητική,47.752
+P7A-POL-01,Q7,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,ΔΓ/ΔΑ (αυθ.),0
+P7A-POL-01,Q7,single_choice,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-POL-01,Q7,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Θετική,43.848
+P7A-POL-01,Q7,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Ούτε-ούτε (αυθ.),8.399
+P7A-POL-01,Q7,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Αρνητική,47.752
+P7A-POL-01,Q7,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,ΔΓ/ΔΑ (αυθ.),0
+P7A-POL-01,Q7,single_choice,IQGE,True,related,,16.08,,IQGE,Θετική,44.384
+P7A-POL-01,Q7,single_choice,IQGE,True,related,,16.08,,IQGE,Ούτε-ούτε (αυθ.),8.306
+P7A-POL-01,Q7,single_choice,IQGE,True,related,,16.08,,IQGE,Αρνητική,47.31
+P7A-POL-01,Q7,single_choice,UNIF,True,,,,,UNIF,Θετική,33.333
+P7A-POL-01,Q7,single_choice,UNIF,True,,,,,UNIF,Ούτε-ούτε (αυθ.),33.333
+P7A-POL-01,Q7,single_choice,UNIF,True,,,,,UNIF,Αρνητική,33.333
+P7A-POL-01,Q7,single_choice,UNIF,True,,,,,UNIF,ΔΓ/ΔΑ (αυθ.),0.0
+P7A-POL-01,Q7,single_choice,PREV_SAME,True,,,,,e4a07b5b2ef3 σελ.5,Θετική,11.0
+P7A-POL-01,Q7,single_choice,PREV_SAME,True,,,,,e4a07b5b2ef3 σελ.5,Ούτε-ούτε (αυθ.),5.0
+P7A-POL-01,Q7,single_choice,PREV_SAME,True,,,,,e4a07b5b2ef3 σελ.5,Αρνητική,82.0
+P7A-POL-01,Q7,single_choice,PREV_SAME,True,,,,,e4a07b5b2ef3 σελ.5,ΔΓ/ΔΑ (αυθ.),2.0
+P7A-POL-01,Q8,single_choice,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-POL-01,Q8,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Θετική,46.546
+P7A-POL-01,Q8,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Ούτε-ούτε (αυθ.),8.202
+P7A-POL-01,Q8,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Αρνητική,45.252
+P7A-POL-01,Q8,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,ΔΓ/ΔΑ (αυθ.),0
+P7A-POL-01,Q8,single_choice,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-POL-01,Q8,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Θετική,46.546
+P7A-POL-01,Q8,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Ούτε-ούτε (αυθ.),8.202
+P7A-POL-01,Q8,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Αρνητική,45.252
+P7A-POL-01,Q8,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,ΔΓ/ΔΑ (αυθ.),0
+P7A-POL-01,Q8,single_choice,IQGE,True,weak,,15.76,,IQGE,Θετική,47.363
+P7A-POL-01,Q8,single_choice,IQGE,True,weak,,15.76,,IQGE,Ούτε-ούτε (αυθ.),8.174
+P7A-POL-01,Q8,single_choice,IQGE,True,weak,,15.76,,IQGE,Αρνητική,44.463
+P7A-POL-01,Q8,single_choice,UNIF,True,,,,,UNIF,Θετική,33.333
+P7A-POL-01,Q8,single_choice,UNIF,True,,,,,UNIF,Ούτε-ούτε (αυθ.),33.333
+P7A-POL-01,Q8,single_choice,UNIF,True,,,,,UNIF,Αρνητική,33.333
+P7A-POL-01,Q8,single_choice,UNIF,True,,,,,UNIF,ΔΓ/ΔΑ (αυθ.),0.0
+P7A-POL-01,Q8,single_choice,PREV_SAME,True,,,,,e4a07b5b2ef3 σελ.6,Θετική,13.0
+P7A-POL-01,Q8,single_choice,PREV_SAME,True,,,,,e4a07b5b2ef3 σελ.6,Ούτε-ούτε (αυθ.),5.0
+P7A-POL-01,Q8,single_choice,PREV_SAME,True,,,,,e4a07b5b2ef3 σελ.6,Αρνητική,80.0
+P7A-POL-01,Q8,single_choice,PREV_SAME,True,,,,,e4a07b5b2ef3 σελ.6,ΔΓ/ΔΑ (αυθ.),2.0
+P7A-POL-01,Q10,single_choice,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-POL-01,Q10,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Θετική,41.548
+P7A-POL-01,Q10,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Ούτε-ούτε (αυθ.),7.802
+P7A-POL-01,Q10,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Αρνητική,50.65
+P7A-POL-01,Q10,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,ΔΓ/ΔΑ (αυθ.),0
+P7A-POL-01,Q10,single_choice,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-POL-01,Q10,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Θετική,41.548
+P7A-POL-01,Q10,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Ούτε-ούτε (αυθ.),7.802
+P7A-POL-01,Q10,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Αρνητική,50.65
+P7A-POL-01,Q10,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,ΔΓ/ΔΑ (αυθ.),0
+P7A-POL-01,Q10,single_choice,IQGE,True,related,,16.08,,IQGE,Θετική,43.479
+P7A-POL-01,Q10,single_choice,IQGE,True,related,,16.08,,IQGE,Ούτε-ούτε (αυθ.),8.318
+P7A-POL-01,Q10,single_choice,IQGE,True,related,,16.08,,IQGE,Αρνητική,48.204
+P7A-POL-01,Q10,single_choice,UNIF,True,,,,,UNIF,Θετική,33.333
+P7A-POL-01,Q10,single_choice,UNIF,True,,,,,UNIF,Ούτε-ούτε (αυθ.),33.333
+P7A-POL-01,Q10,single_choice,UNIF,True,,,,,UNIF,Αρνητική,33.333
+P7A-POL-01,Q10,single_choice,UNIF,True,,,,,UNIF,ΔΓ/ΔΑ (αυθ.),0.0
+P7A-POL-01,Q10,single_choice,PREV_SAME,True,,,,,a839a1e5848f (Metron/MEGA 17.03.2026),Θετική,10.0
+P7A-POL-01,Q10,single_choice,PREV_SAME,True,,,,,a839a1e5848f (Metron/MEGA 17.03.2026),Ούτε-ούτε (αυθ.),3.0
+P7A-POL-01,Q10,single_choice,PREV_SAME,True,,,,,a839a1e5848f (Metron/MEGA 17.03.2026),Αρνητική,86.0
+P7A-POL-01,Q10,single_choice,PREV_SAME,True,,,,,a839a1e5848f (Metron/MEGA 17.03.2026),ΔΓ/ΔΑ (αυθ.),1.0
+P7A-POL-01,Q11,single_choice,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-POL-01,Q11,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Θετική,49.846
+P7A-POL-01,Q11,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Ουδέτερη (αυθ.),8.25
+P7A-POL-01,Q11,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Αρνητική,41.904
+P7A-POL-01,Q11,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,ΔΓ/ΔΑ (αυθ.),0
+P7A-POL-01,Q11,single_choice,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-POL-01,Q11,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Θετική,48.395
+P7A-POL-01,Q11,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Ουδέτερη (αυθ.),12.751
+P7A-POL-01,Q11,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Αρνητική,38.854
+P7A-POL-01,Q11,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,ΔΓ/ΔΑ (αυθ.),0
+P7A-POL-01,Q11,single_choice,IQGE,True,related,,16.08,,IQGE,Θετική,50.115
+P7A-POL-01,Q11,single_choice,IQGE,True,related,,16.08,,IQGE,Ουδέτερη (αυθ.),7.728
+P7A-POL-01,Q11,single_choice,IQGE,True,related,,16.08,,IQGE,Αρνητική,42.157
+P7A-POL-01,Q11,single_choice,UNIF,True,,,,,UNIF,Θετική,33.333
+P7A-POL-01,Q11,single_choice,UNIF,True,,,,,UNIF,Ουδέτερη (αυθ.),33.333
+P7A-POL-01,Q11,single_choice,UNIF,True,,,,,UNIF,Αρνητική,33.333
+P7A-POL-01,Q11,single_choice,UNIF,True,,,,,UNIF,ΔΓ/ΔΑ (αυθ.),0.0
+P7A-POL-01,Q11,single_choice,PREV_SAME,True,,,,,367d12687385 (Metron 07.06.2024),Θετική,53.0
+P7A-POL-01,Q11,single_choice,PREV_SAME,True,,,,,367d12687385 (Metron 07.06.2024),Ουδέτερη (αυθ.),5.0
+P7A-POL-01,Q11,single_choice,PREV_SAME,True,,,,,367d12687385 (Metron 07.06.2024),Αρνητική,40.0
+P7A-POL-01,Q11,single_choice,PREV_SAME,True,,,,,367d12687385 (Metron 07.06.2024),ΔΓ/ΔΑ (αυθ.),2.0
+P7A-POL-01,Q13,single_choice,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-POL-01,Q13,single_choice,pie-0.6,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.6,,
+P7A-POL-01,Q13,single_choice,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-POL-01,Q13,single_choice,pie-0.7x,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7x,,
+P7A-POL-01,Q13,single_choice,UNIF,True,,,,,UNIF,Ανδρουλάκης Νίκος,7.143
+P7A-POL-01,Q13,single_choice,UNIF,True,,,,,UNIF,Βαρουφάκης Γιάνης,7.143
+P7A-POL-01,Q13,single_choice,UNIF,True,,,,,UNIF,Βελόπουλος Κυριάκος,7.143
+P7A-POL-01,Q13,single_choice,UNIF,True,,,,,UNIF,Καρυστιανού Μαρία,7.143
+P7A-POL-01,Q13,single_choice,UNIF,True,,,,,UNIF,Κασιδιάρης Ηλίας,7.143
+P7A-POL-01,Q13,single_choice,UNIF,True,,,,,UNIF,Κασσελάκης Στέφανος,7.143
+P7A-POL-01,Q13,single_choice,UNIF,True,,,,,UNIF,Κουτσούμπας Δημήτρης,7.143
+P7A-POL-01,Q13,single_choice,UNIF,True,,,,,UNIF,Κωνσταντοπούλου Ζωή,7.143
+P7A-POL-01,Q13,single_choice,UNIF,True,,,,,UNIF,Λατινοπούλου Αφροδίτη,7.143
+P7A-POL-01,Q13,single_choice,UNIF,True,,,,,UNIF,Μητσοτάκης Κυριάκος,7.143
+P7A-POL-01,Q13,single_choice,UNIF,True,,,,,UNIF,Σαμαράς Αντώνης,7.143
+P7A-POL-01,Q13,single_choice,UNIF,True,,,,,UNIF,Τσίπρας Αλέξης,7.143
+P7A-POL-01,Q13,single_choice,UNIF,True,,,,,UNIF,Άλλος,7.143
+P7A-POL-01,Q13,single_choice,UNIF,True,,,,,UNIF,Κανένας,7.143
+P7A-POL-01,Q13,single_choice,UNIF,True,,,,,UNIF,ΔΓ/ΔΑ,0.0
+P7A-POL-01,Q13,single_choice,PREV_SAME,True,,,,,e4a07b5b2ef3 σελ.8,Μητσοτάκης Κυριάκος,29.0
+P7A-POL-01,Q13,single_choice,PREV_SAME,True,,,,,e4a07b5b2ef3 σελ.8,Τσίπρας Αλέξης,15.0
+P7A-POL-01,Q13,single_choice,PREV_SAME,True,,,,,e4a07b5b2ef3 σελ.8,Ανδρουλάκης Νίκος,5.0
+P7A-POL-01,Q13,single_choice,PREV_SAME,True,,,,,e4a07b5b2ef3 σελ.8,Βελόπουλος Κυριάκος,4.0
+P7A-POL-01,Q13,single_choice,PREV_SAME,True,,,,,e4a07b5b2ef3 σελ.8,Κωνσταντοπούλου Ζωή,4.0
+P7A-POL-01,Q13,single_choice,PREV_SAME,True,,,,,e4a07b5b2ef3 σελ.8,Καρυστιανού Μαρία,4.0
+P7A-POL-01,Q13,single_choice,PREV_SAME,True,,,,,e4a07b5b2ef3 σελ.8,Λατινοπούλου Αφροδίτη,2.0
+P7A-POL-01,Q13,single_choice,PREV_SAME,True,,,,,e4a07b5b2ef3 σελ.8,Σαμαράς Αντώνης,2.0
+P7A-POL-01,Q13,single_choice,PREV_SAME,True,,,,,e4a07b5b2ef3 σελ.8,Κουτσούμπας Δημήτρης,2.0
+P7A-POL-01,Q13,single_choice,PREV_SAME,True,,,,,e4a07b5b2ef3 σελ.8,Βαρουφάκης Γιάνης,1.0
+P7A-POL-01,Q13,single_choice,PREV_SAME,True,,,,,e4a07b5b2ef3 σελ.8,Κασιδιάρης Ηλίας,0.0
+P7A-POL-01,Q13,single_choice,PREV_SAME,True,,,,,e4a07b5b2ef3 σελ.8,Κασσελάκης Στέφανος,0.0
+P7A-POL-01,Q13,single_choice,PREV_SAME,True,,,,,e4a07b5b2ef3 σελ.8,Άλλος,3.0
+P7A-POL-01,Q13,single_choice,PREV_SAME,True,,,,,e4a07b5b2ef3 σελ.8,Κανένας,25.0
+P7A-POL-01,Q13,single_choice,PREV_SAME,True,,,,,e4a07b5b2ef3 σελ.8,ΔΓ/ΔΑ,4.0
+P7A-POL-01,Q16,single_choice,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-POL-01,Q16,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Θα σχηματιστεί Κυβέρνηση,50.054
+P7A-POL-01,Q16,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Θα χρειαστεί να ξαναγίνουν εκλογές,49.946
+P7A-POL-01,Q16,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,ΔΓ/ΔΑ (αυθ.),0
+P7A-POL-01,Q16,single_choice,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-POL-01,Q16,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Θα σχηματιστεί Κυβέρνηση,50.054
+P7A-POL-01,Q16,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Θα χρειαστεί να ξαναγίνουν εκλογές,49.946
+P7A-POL-01,Q16,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,ΔΓ/ΔΑ (αυθ.),0
+P7A-POL-01,Q16,single_choice,IQGE,True,related,,16.08,,IQGE,Θα σχηματιστεί Κυβέρνηση,50.0
+P7A-POL-01,Q16,single_choice,IQGE,True,related,,16.08,,IQGE,Θα χρειαστεί να ξαναγίνουν εκλογές,50.0
+P7A-POL-01,Q16,single_choice,UNIF,True,,,,,UNIF,Θα σχηματιστεί Κυβέρνηση,50.0
+P7A-POL-01,Q16,single_choice,UNIF,True,,,,,UNIF,Θα χρειαστεί να ξαναγίνουν εκλογές,50.0
+P7A-POL-01,Q16,single_choice,UNIF,True,,,,,UNIF,ΔΓ/ΔΑ (αυθ.),0.0
+P7A-POL-01,Q17,single_choice,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-POL-01,Q17,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Θα είναι αυτοδύναμη,47.249
+P7A-POL-01,Q17,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Θα είναι Κυβέρνηση συνεργασίας,52.751
+P7A-POL-01,Q17,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,ΔΓ/ΔΑ (αυθ.),0
+P7A-POL-01,Q17,single_choice,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-POL-01,Q17,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Θα είναι αυτοδύναμη,47.249
+P7A-POL-01,Q17,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Θα είναι Κυβέρνηση συνεργασίας,52.751
+P7A-POL-01,Q17,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,ΔΓ/ΔΑ (αυθ.),0
+P7A-POL-01,Q17,single_choice,IQGE,True,weak,,15.76,,IQGE,Θα είναι αυτοδύναμη,50.0
+P7A-POL-01,Q17,single_choice,IQGE,True,weak,,15.76,,IQGE,Θα είναι Κυβέρνηση συνεργασίας,50.0
+P7A-POL-01,Q17,single_choice,UNIF,True,,,,,UNIF,Θα είναι αυτοδύναμη,50.0
+P7A-POL-01,Q17,single_choice,UNIF,True,,,,,UNIF,Θα είναι Κυβέρνηση συνεργασίας,50.0
+P7A-POL-01,Q17,single_choice,UNIF,True,,,,,UNIF,ΔΓ/ΔΑ (αυθ.),0.0
+P7A-POL-01,Q18,single_choice,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-POL-01,Q18,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Υπέρ των αυτοδύναμων κυβερνήσεων,52.95
+P7A-POL-01,Q18,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Υπέρ των κυβερνήσεων συνεργασίας,47.05
+P7A-POL-01,Q18,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,ΔΓ/ΔΑ (αυθ.),0
+P7A-POL-01,Q18,single_choice,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-POL-01,Q18,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Υπέρ των αυτοδύναμων κυβερνήσεων,52.95
+P7A-POL-01,Q18,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Υπέρ των κυβερνήσεων συνεργασίας,47.05
+P7A-POL-01,Q18,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,ΔΓ/ΔΑ (αυθ.),0
+P7A-POL-01,Q18,single_choice,IQGE,True,related,,16.08,,IQGE,Υπέρ των αυτοδύναμων κυβερνήσεων,50.0
+P7A-POL-01,Q18,single_choice,IQGE,True,related,,16.08,,IQGE,Υπέρ των κυβερνήσεων συνεργασίας,50.0
+P7A-POL-01,Q18,single_choice,UNIF,True,,,,,UNIF,Υπέρ των αυτοδύναμων κυβερνήσεων,50.0
+P7A-POL-01,Q18,single_choice,UNIF,True,,,,,UNIF,Υπέρ των κυβερνήσεων συνεργασίας,50.0
+P7A-POL-01,Q18,single_choice,UNIF,True,,,,,UNIF,ΔΓ/ΔΑ (αυθ.),0.0
+P7A-POL-01,Q19,single_choice,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-POL-01,Q19,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Πολιτική σταθερότητα,45.846
+P7A-POL-01,Q19,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Πολιτική αλλαγή,54.154
+P7A-POL-01,Q19,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,ΔΓ/ΔΑ (αυθ.),0
+P7A-POL-01,Q19,single_choice,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-POL-01,Q19,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Πολιτική σταθερότητα,46.646
+P7A-POL-01,Q19,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Πολιτική αλλαγή,53.354
+P7A-POL-01,Q19,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,ΔΓ/ΔΑ (αυθ.),0
+P7A-POL-01,Q19,single_choice,IQGE,True,related,,16.08,,IQGE,Πολιτική σταθερότητα,46.156
+P7A-POL-01,Q19,single_choice,IQGE,True,related,,16.08,,IQGE,Πολιτική αλλαγή,53.844
+P7A-POL-01,Q19,single_choice,UNIF,True,,,,,UNIF,Πολιτική σταθερότητα,50.0
+P7A-POL-01,Q19,single_choice,UNIF,True,,,,,UNIF,Πολιτική αλλαγή,50.0
+P7A-POL-01,Q19,single_choice,UNIF,True,,,,,UNIF,ΔΓ/ΔΑ (αυθ.),0.0
+P7A-POL-01,Q19,single_choice,PREV_SAME,True,,,,,e2aa0ed26554 (Metron/MEGA 04.06.2026),Πολιτική σταθερότητα,38.0
+P7A-POL-01,Q19,single_choice,PREV_SAME,True,,,,,e2aa0ed26554 (Metron/MEGA 04.06.2026),Πολιτική αλλαγή,61.0
+P7A-POL-01,Q19,single_choice,PREV_SAME,True,,,,,e2aa0ed26554 (Metron/MEGA 04.06.2026),ΔΓ/ΔΑ (αυθ.),1.0
+P7A-POL-01,Q20,likert,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-POL-01,Q20,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Πολύ πιθανό,15.702
+P7A-POL-01,Q20,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Αρκετά πιθανό,19.248
+P7A-POL-01,Q20,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Όχι και τόσο πιθανό,33.901
+P7A-POL-01,Q20,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Απίθανο,31.149
+P7A-POL-01,Q20,likert,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-POL-01,Q20,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Πολύ πιθανό,15.702
+P7A-POL-01,Q20,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Αρκετά πιθανό,19.248
+P7A-POL-01,Q20,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Όχι και τόσο πιθανό,33.901
+P7A-POL-01,Q20,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Απίθανο,31.149
+P7A-POL-01,Q20,likert,IQGE,True,related,,16.08,,IQGE,Πολύ πιθανό,16.849
+P7A-POL-01,Q20,likert,IQGE,True,related,,16.08,,IQGE,Αρκετά πιθανό,19.326
+P7A-POL-01,Q20,likert,IQGE,True,related,,16.08,,IQGE,Όχι και τόσο πιθανό,34.603
+P7A-POL-01,Q20,likert,IQGE,True,related,,16.08,,IQGE,Απίθανο,29.222
+P7A-POL-01,Q20,likert,UNIF,True,,,,,UNIF,Πολύ πιθανό,25.0
+P7A-POL-01,Q20,likert,UNIF,True,,,,,UNIF,Αρκετά πιθανό,25.0
+P7A-POL-01,Q20,likert,UNIF,True,,,,,UNIF,Όχι και τόσο πιθανό,25.0
+P7A-POL-01,Q20,likert,UNIF,True,,,,,UNIF,Απίθανο,25.0
+P7A-POL-01,Q20,likert,PREV_SAME,True,,,,,e4a07b5b2ef3 σελ.11 (ΔΓ/ΔΑ 1 εκτός κλίμακας στόχου),Πολύ πιθανό,5.0
+P7A-POL-01,Q20,likert,PREV_SAME,True,,,,,e4a07b5b2ef3 σελ.11 (ΔΓ/ΔΑ 1 εκτός κλίμακας στόχου),Αρκετά πιθανό,8.0
+P7A-POL-01,Q20,likert,PREV_SAME,True,,,,,e4a07b5b2ef3 σελ.11 (ΔΓ/ΔΑ 1 εκτός κλίμακας στόχου),Όχι και τόσο πιθανό,21.0
+P7A-POL-01,Q20,likert,PREV_SAME,True,,,,,e4a07b5b2ef3 σελ.11 (ΔΓ/ΔΑ 1 εκτός κλίμακας στόχου),Απίθανο,65.0
+P7A-POL-01,Q21,single_choice,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-POL-01,Q21,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Μέσα στο κάστρο,50.697
+P7A-POL-01,Q21,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Έξω από το κάστρο,49.303
+P7A-POL-01,Q21,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,ΔΓ/ΔΑ (αυθ.),0
+P7A-POL-01,Q21,single_choice,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-POL-01,Q21,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Μέσα στο κάστρο,50.697
+P7A-POL-01,Q21,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Έξω από το κάστρο,49.303
+P7A-POL-01,Q21,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,ΔΓ/ΔΑ (αυθ.),0
+P7A-POL-01,Q21,single_choice,IQGE,True,weak,,15.76,,IQGE,Μέσα στο κάστρο,50.0
+P7A-POL-01,Q21,single_choice,IQGE,True,weak,,15.76,,IQGE,Έξω από το κάστρο,50.0
+P7A-POL-01,Q21,single_choice,UNIF,True,,,,,UNIF,Μέσα στο κάστρο,50.0
+P7A-POL-01,Q21,single_choice,UNIF,True,,,,,UNIF,Έξω από το κάστρο,50.0
+P7A-POL-01,Q21,single_choice,UNIF,True,,,,,UNIF,ΔΓ/ΔΑ (αυθ.),0.0
+P7A-POL-01,Q21,single_choice,PREV_SAME,True,,,,,a839a1e5848f (Metron/MEGA 17.03.2026),Μέσα στο κάστρο,48.0
+P7A-POL-01,Q21,single_choice,PREV_SAME,True,,,,,a839a1e5848f (Metron/MEGA 17.03.2026),Έξω από το κάστρο,50.0
+P7A-POL-01,Q21,single_choice,PREV_SAME,True,,,,,a839a1e5848f (Metron/MEGA 17.03.2026),ΔΓ/ΔΑ (αυθ.),2.0
+P7A-POL-02,Q5_1,single_choice,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-POL-02,Q5_1,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,ΕΛΑΣ,24.351
+P7A-POL-02,Q5_1,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,ΝΔ,28.898
+P7A-POL-02,Q5_1,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,ΠΑΣΟΚ,23.703
+P7A-POL-02,Q5_1,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Κανένα από αυτά (αυθόρμητα),23.048
+P7A-POL-02,Q5_1,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Δεν ξέρω / Δεν απαντώ,0
+P7A-POL-02,Q5_1,single_choice,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-POL-02,Q5_1,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,ΕΛΑΣ,24.351
+P7A-POL-02,Q5_1,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,ΝΔ,28.898
+P7A-POL-02,Q5_1,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,ΠΑΣΟΚ,23.703
+P7A-POL-02,Q5_1,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Κανένα από αυτά (αυθόρμητα),23.048
+P7A-POL-02,Q5_1,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Δεν ξέρω / Δεν απαντώ,0
+P7A-POL-02,Q5_1,single_choice,IQGE,True,related,,16.08,,IQGE,ΕΛΑΣ,23.877
+P7A-POL-02,Q5_1,single_choice,IQGE,True,related,,16.08,,IQGE,ΝΔ,28.745
+P7A-POL-02,Q5_1,single_choice,IQGE,True,related,,16.08,,IQGE,ΠΑΣΟΚ,23.553
+P7A-POL-02,Q5_1,single_choice,IQGE,True,related,,16.08,,IQGE,Κανένα από αυτά (αυθόρμητα),23.825
+P7A-POL-02,Q5_1,single_choice,UNIF,True,,,,,UNIF,ΕΛΑΣ,25.0
+P7A-POL-02,Q5_1,single_choice,UNIF,True,,,,,UNIF,ΝΔ,25.0
+P7A-POL-02,Q5_1,single_choice,UNIF,True,,,,,UNIF,ΠΑΣΟΚ,25.0
+P7A-POL-02,Q5_1,single_choice,UNIF,True,,,,,UNIF,Κανένα από αυτά (αυθόρμητα),25.0
+P7A-POL-02,Q5_1,single_choice,UNIF,True,,,,,UNIF,Δεν ξέρω / Δεν απαντώ,0.0
+P7A-POL-02,Q5_2,single_choice,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-POL-02,Q5_2,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,ΕΛΑΣ,24.447
+P7A-POL-02,Q5_2,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,ΝΔ,26.799
+P7A-POL-02,Q5_2,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,ΠΑΣΟΚ,23.253
+P7A-POL-02,Q5_2,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Κανένα από αυτά (αυθόρμητα),25.501
+P7A-POL-02,Q5_2,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Δεν ξέρω / Δεν απαντώ,0
+P7A-POL-02,Q5_2,single_choice,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-POL-02,Q5_2,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,ΕΛΑΣ,24.447
+P7A-POL-02,Q5_2,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,ΝΔ,26.799
+P7A-POL-02,Q5_2,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,ΠΑΣΟΚ,23.253
+P7A-POL-02,Q5_2,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Κανένα από αυτά (αυθόρμητα),25.501
+P7A-POL-02,Q5_2,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Δεν ξέρω / Δεν απαντώ,0
+P7A-POL-02,Q5_2,single_choice,IQGE,True,weak,,15.76,,IQGE,ΕΛΑΣ,23.687
+P7A-POL-02,Q5_2,single_choice,IQGE,True,weak,,15.76,,IQGE,ΝΔ,27.329
+P7A-POL-02,Q5_2,single_choice,IQGE,True,weak,,15.76,,IQGE,ΠΑΣΟΚ,23.371
+P7A-POL-02,Q5_2,single_choice,IQGE,True,weak,,15.76,,IQGE,Κανένα από αυτά (αυθόρμητα),25.613
+P7A-POL-02,Q5_2,single_choice,UNIF,True,,,,,UNIF,ΕΛΑΣ,25.0
+P7A-POL-02,Q5_2,single_choice,UNIF,True,,,,,UNIF,ΝΔ,25.0
+P7A-POL-02,Q5_2,single_choice,UNIF,True,,,,,UNIF,ΠΑΣΟΚ,25.0
+P7A-POL-02,Q5_2,single_choice,UNIF,True,,,,,UNIF,Κανένα από αυτά (αυθόρμητα),25.0
+P7A-POL-02,Q5_2,single_choice,UNIF,True,,,,,UNIF,Δεν ξέρω / Δεν απαντώ,0.0
+P7A-POL-02,Q5_3,single_choice,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-POL-02,Q5_3,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,ΕΛΑΣ,21.197
+P7A-POL-02,Q5_3,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,ΝΔ,30.447
+P7A-POL-02,Q5_3,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,ΠΑΣΟΚ,24.253
+P7A-POL-02,Q5_3,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Κανένα από αυτά (αυθόρμητα),24.103
+P7A-POL-02,Q5_3,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Δεν ξέρω / Δεν απαντώ,0
+P7A-POL-02,Q5_3,single_choice,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-POL-02,Q5_3,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,ΕΛΑΣ,21.197
+P7A-POL-02,Q5_3,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,ΝΔ,30.447
+P7A-POL-02,Q5_3,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,ΠΑΣΟΚ,24.253
+P7A-POL-02,Q5_3,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Κανένα από αυτά (αυθόρμητα),24.103
+P7A-POL-02,Q5_3,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Δεν ξέρω / Δεν απαντώ,0
+P7A-POL-02,Q5_3,single_choice,IQGE,True,weak,,15.76,,IQGE,ΕΛΑΣ,22.636
+P7A-POL-02,Q5_3,single_choice,IQGE,True,weak,,15.76,,IQGE,ΝΔ,29.824
+P7A-POL-02,Q5_3,single_choice,IQGE,True,weak,,15.76,,IQGE,ΠΑΣΟΚ,23.627
+P7A-POL-02,Q5_3,single_choice,IQGE,True,weak,,15.76,,IQGE,Κανένα από αυτά (αυθόρμητα),23.913
+P7A-POL-02,Q5_3,single_choice,UNIF,True,,,,,UNIF,ΕΛΑΣ,25.0
+P7A-POL-02,Q5_3,single_choice,UNIF,True,,,,,UNIF,ΝΔ,25.0
+P7A-POL-02,Q5_3,single_choice,UNIF,True,,,,,UNIF,ΠΑΣΟΚ,25.0
+P7A-POL-02,Q5_3,single_choice,UNIF,True,,,,,UNIF,Κανένα από αυτά (αυθόρμητα),25.0
+P7A-POL-02,Q5_3,single_choice,UNIF,True,,,,,UNIF,Δεν ξέρω / Δεν απαντώ,0.0
+P7A-POL-02,Q5_4,single_choice,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-POL-02,Q5_4,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,ΕΛΑΣ,23.4
+P7A-POL-02,Q5_4,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,ΝΔ,28.502
+P7A-POL-02,Q5_4,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,ΠΑΣΟΚ,22.847
+P7A-POL-02,Q5_4,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Κανένα από αυτά (αυθόρμητα),25.251
+P7A-POL-02,Q5_4,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Δεν ξέρω / Δεν απαντώ,0
+P7A-POL-02,Q5_4,single_choice,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-POL-02,Q5_4,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,ΕΛΑΣ,23.4
+P7A-POL-02,Q5_4,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,ΝΔ,28.502
+P7A-POL-02,Q5_4,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,ΠΑΣΟΚ,22.847
+P7A-POL-02,Q5_4,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Κανένα από αυτά (αυθόρμητα),25.251
+P7A-POL-02,Q5_4,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Δεν ξέρω / Δεν απαντώ,0
+P7A-POL-02,Q5_4,single_choice,IQGE,True,related,,16.08,,IQGE,ΕΛΑΣ,23.867
+P7A-POL-02,Q5_4,single_choice,IQGE,True,related,,16.08,,IQGE,ΝΔ,28.756
+P7A-POL-02,Q5_4,single_choice,IQGE,True,related,,16.08,,IQGE,ΠΑΣΟΚ,23.552
+P7A-POL-02,Q5_4,single_choice,IQGE,True,related,,16.08,,IQGE,Κανένα από αυτά (αυθόρμητα),23.825
+P7A-POL-02,Q5_4,single_choice,UNIF,True,,,,,UNIF,ΕΛΑΣ,25.0
+P7A-POL-02,Q5_4,single_choice,UNIF,True,,,,,UNIF,ΝΔ,25.0
+P7A-POL-02,Q5_4,single_choice,UNIF,True,,,,,UNIF,ΠΑΣΟΚ,25.0
+P7A-POL-02,Q5_4,single_choice,UNIF,True,,,,,UNIF,Κανένα από αυτά (αυθόρμητα),25.0
+P7A-POL-02,Q5_4,single_choice,UNIF,True,,,,,UNIF,Δεν ξέρω / Δεν απαντώ,0.0
+P7A-POL-02,Q6,single_choice,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-POL-02,Q6,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Η ΝΔ να συνεχίσει να είναι κυβέρνηση και ο Κ. Μητσοτάκης Πρωθυπουργός ή,49.104
+P7A-POL-02,Q6,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Να εκλεγεί κάποια άλλη κυβέρνηση,50.896
+P7A-POL-02,Q6,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Δεν ξέρω / Δεν απαντώ,0
+P7A-POL-02,Q6,single_choice,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-POL-02,Q6,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Η ΝΔ να συνεχίσει να είναι κυβέρνηση και ο Κ. Μητσοτάκης Πρωθυπουργός ή,49.254
+P7A-POL-02,Q6,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Να εκλεγεί κάποια άλλη κυβέρνηση,50.746
+P7A-POL-02,Q6,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Δεν ξέρω / Δεν απαντώ,0
+P7A-POL-02,Q6,single_choice,IQGE,True,weak,,15.76,,IQGE,Η ΝΔ να συνεχίσει να είναι κυβέρνηση και ο Κ. Μητσοτάκης Πρωθυπουργός ή,49.889
+P7A-POL-02,Q6,single_choice,IQGE,True,weak,,15.76,,IQGE,Να εκλεγεί κάποια άλλη κυβέρνηση,50.111
+P7A-POL-02,Q6,single_choice,UNIF,True,,,,,UNIF,Η ΝΔ να συνεχίσει να είναι κυβέρνηση και ο Κ. Μητσοτάκης Πρωθυπουργός ή,50.0
+P7A-POL-02,Q6,single_choice,UNIF,True,,,,,UNIF,Να εκλεγεί κάποια άλλη κυβέρνηση,50.0
+P7A-POL-02,Q6,single_choice,UNIF,True,,,,,UNIF,Δεν ξέρω / Δεν απαντώ,0.0
+P7A-POL-02,Q7,single_choice,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-POL-02,Q7,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Μία κυβέρνηση συνεργασίας ή,49.349
+P7A-POL-02,Q7,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Αυτοδύναμη κυβέρνηση ακόμη κι αν χρειαστεί να γίνουν επαναλαμβανόμενες εκλογές,50.651
+P7A-POL-02,Q7,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Δεν ξέρω / Δεν απαντώ,0
+P7A-POL-02,Q7,single_choice,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-POL-02,Q7,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Μία κυβέρνηση συνεργασίας ή,47.999
+P7A-POL-02,Q7,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Αυτοδύναμη κυβέρνηση ακόμη κι αν χρειαστεί να γίνουν επαναλαμβανόμενες εκλογές,52.001
+P7A-POL-02,Q7,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Δεν ξέρω / Δεν απαντώ,0
+P7A-POL-02,Q7,single_choice,IQGE,True,weak,,15.76,,IQGE,Μία κυβέρνηση συνεργασίας ή,49.476
+P7A-POL-02,Q7,single_choice,IQGE,True,weak,,15.76,,IQGE,Αυτοδύναμη κυβέρνηση ακόμη κι αν χρειαστεί να γίνουν επαναλαμβανόμενες εκλογές,50.524
+P7A-POL-02,Q7,single_choice,UNIF,True,,,,,UNIF,Μία κυβέρνηση συνεργασίας ή,50.0
+P7A-POL-02,Q7,single_choice,UNIF,True,,,,,UNIF,Αυτοδύναμη κυβέρνηση ακόμη κι αν χρειαστεί να γίνουν επαναλαμβανόμενες εκλογές,50.0
+P7A-POL-02,Q7,single_choice,UNIF,True,,,,,UNIF,Δεν ξέρω / Δεν απαντώ,0.0
+P7A-POL-02,Q8,single_choice,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-POL-02,Q8,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,ο αρχηγός του πρώτου κόμματος ή,48.946
+P7A-POL-02,Q8,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,κάποιο άλλο πρόσωπο κοινής αποδοχής,51.054
+P7A-POL-02,Q8,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Δεν ξέρω / Δεν απαντώ,0
+P7A-POL-02,Q8,single_choice,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-POL-02,Q8,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,ο αρχηγός του πρώτου κόμματος ή,48.946
+P7A-POL-02,Q8,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,κάποιο άλλο πρόσωπο κοινής αποδοχής,51.054
+P7A-POL-02,Q8,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Δεν ξέρω / Δεν απαντώ,0
+P7A-POL-02,Q8,single_choice,IQGE,True,related,,16.08,,IQGE,ο αρχηγός του πρώτου κόμματος ή,49.464
+P7A-POL-02,Q8,single_choice,IQGE,True,related,,16.08,,IQGE,κάποιο άλλο πρόσωπο κοινής αποδοχής,50.536
+P7A-POL-02,Q8,single_choice,UNIF,True,,,,,UNIF,ο αρχηγός του πρώτου κόμματος ή,50.0
+P7A-POL-02,Q8,single_choice,UNIF,True,,,,,UNIF,κάποιο άλλο πρόσωπο κοινής αποδοχής,50.0
+P7A-POL-02,Q8,single_choice,UNIF,True,,,,,UNIF,Δεν ξέρω / Δεν απαντώ,0.0
+P7A-POL-02,Q9,single_choice,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-POL-02,Q9,single_choice,pie-0.6,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.6,,
+P7A-POL-02,Q9,single_choice,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-POL-02,Q9,single_choice,pie-0.7x,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7x,,
+P7A-POL-02,Q9,single_choice,UNIF,True,,,,,UNIF,τον Πρόεδρο του ΠΑΣΟΚ ΚΙΝΑΛ Νίκο Ανδρουλάκη,7.692
+P7A-POL-02,Q9,single_choice,UNIF,True,,,,,UNIF,τον επικεφαλής του ΜΕΡΑ 25 Γιάννη Βαρουφάκη,7.692
+P7A-POL-02,Q9,single_choice,UNIF,True,,,,,UNIF,τον Πρόεδρο της Ελληνικής Λύσης Κυριάκο Βελόπουλο,7.692
+P7A-POL-02,Q9,single_choice,UNIF,True,,,,,UNIF,την Πρόεδρο του ΣΥΡΙΖΑ Ρένα Δούρου,7.692
+P7A-POL-02,Q9,single_choice,UNIF,True,,,,,UNIF,την πρόεδρο της ΕΛΠΙΔΑΣ Μαρία Καρυστιανού,0.0
+P7A-POL-02,Q9,single_choice,UNIF,True,,,,,UNIF,τον Πρόεδρο του Κινήματος Δημοκρατίας Στέφανο Κασσελάκη,7.692
+P7A-POL-02,Q9,single_choice,UNIF,True,,,,,UNIF,τον Γενικό Γραμματέα του ΚΚΕ Δημήτρη Κουτσούμπα,7.692
+P7A-POL-02,Q9,single_choice,UNIF,True,,,,,UNIF,την Πρόεδρο της Πλεύσης Ελευθερίας Ζωή Κωνσταντοπούλου,7.692
+P7A-POL-02,Q9,single_choice,UNIF,True,,,,,UNIF,την Πρόεδρο της Φωνής Λογικής Αφροδίτη Λατινοπούλου,7.692
+P7A-POL-02,Q9,single_choice,UNIF,True,,,,,UNIF,τον Πρόεδρο της ΝΔ Κυριάκο Μητσοτάκη,7.692
+P7A-POL-02,Q9,single_choice,UNIF,True,,,,,UNIF,τον Πρόεδρο της Νίκης Δημήτρη Νατσιό,7.692
+P7A-POL-02,Q9,single_choice,UNIF,True,,,,,UNIF,τον Πρόεδρο της Νέας Αριστεράς Γαβριήλ Σακελλαρίδη,7.692
+P7A-POL-02,Q9,single_choice,UNIF,True,,,,,UNIF,τον πρόεδρο της ΕΛΑΣ Αλέξη Τσίπρα,7.692
+P7A-POL-02,Q9,single_choice,UNIF,True,,,,,UNIF,Κανέναν από αυτούς (αυθόρμητα),7.692
+P7A-POL-02,Q9,single_choice,UNIF,True,,,,,UNIF,Δεν ξέρω / Δεν απαντώ,0.0
+P7A-POL-02,Q10,likert,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-POL-02,Q10,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Πολύ,18.9
+P7A-POL-02,Q10,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Αρκετά,22.948
+P7A-POL-02,Q10,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Λίγο,27.701
+P7A-POL-02,Q10,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Καθόλου,30.45
+P7A-POL-02,Q10,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Δεν ξέρω / Δεν απαντώ,0
+P7A-POL-02,Q10,likert,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-POL-02,Q10,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Πολύ,18.9
+P7A-POL-02,Q10,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Αρκετά,22.948
+P7A-POL-02,Q10,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Λίγο,27.701
+P7A-POL-02,Q10,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Καθόλου,30.45
+P7A-POL-02,Q10,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Δεν ξέρω / Δεν απαντώ,0
+P7A-POL-02,Q10,likert,IQGE,True,related,,16.08,,IQGE,Πολύ,19.35
+P7A-POL-02,Q10,likert,IQGE,True,related,,16.08,,IQGE,Αρκετά,24.481
+P7A-POL-02,Q10,likert,IQGE,True,related,,16.08,,IQGE,Λίγο,26.213
+P7A-POL-02,Q10,likert,IQGE,True,related,,16.08,,IQGE,Καθόλου,29.956
+P7A-POL-02,Q10,likert,UNIF,True,,,,,UNIF,Πολύ,25.0
+P7A-POL-02,Q10,likert,UNIF,True,,,,,UNIF,Αρκετά,25.0
+P7A-POL-02,Q10,likert,UNIF,True,,,,,UNIF,Λίγο,25.0
+P7A-POL-02,Q10,likert,UNIF,True,,,,,UNIF,Καθόλου,25.0
+P7A-POL-02,Q10,likert,UNIF,True,,,,,UNIF,Δεν ξέρω / Δεν απαντώ,0.0
+P7A-SOC-01,Q1,multiple_choice,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-SOC-01,Q1,multiple_choice,pie-0.6,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.6,,
+P7A-SOC-01,Q1,multiple_choice,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-SOC-01,Q1,multiple_choice,pie-0.7x,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7x,,
+P7A-SOC-01,Q1,multiple_choice,POOL,True,,,,,POOL,Goals that address the real issues faced by young people,41.269
+P7A-SOC-01,Q1,multiple_choice,POOL,True,,,,,POOL,"Working together across all levels - local, regional, national, and EU",22.538
+P7A-SOC-01,Q1,multiple_choice,POOL,True,,,,,POOL,Making sure young people and youth organisations have a say in decisions,33.115
+P7A-SOC-01,Q1,multiple_choice,POOL,True,,,,,POOL,Ensuring young people know about policies and opportunities,29.462
+P7A-SOC-01,Q1,multiple_choice,POOL,True,,,,,POOL,Providing financial support for youth programmes and initiatives,34.423
+P7A-SOC-01,Q1,multiple_choice,POOL,True,,,,,POOL,Making decisions using facts and research,26.5
+P7A-SOC-01,Q1,multiple_choice,POOL,True,,,,,POOL,Ensuring policies are actually carried out and reviewed properly,26.0
+P7A-SOC-01,Q1,multiple_choice,POOL,True,,,,,POOL,Connecting different areas of policy that affect young people,18.923
+P7A-SOC-01,Q1,multiple_choice,POOL,True,,,,,POOL,None of these,1.577
+P7A-SOC-01,Q1,multiple_choice,POOL,True,,,,,POOL,Don’t know,1.5
+P7A-SOC-01,Q1,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Goals that address the real issues faced by young people,45.379
+P7A-SOC-01,Q1,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']","Working together across all levels - local, regional, national, and EU",23.313
+P7A-SOC-01,Q1,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Making sure young people and youth organisations have a say in decisions,33.555
+P7A-SOC-01,Q1,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Ensuring young people know about policies and opportunities,27.527
+P7A-SOC-01,Q1,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Providing financial support for youth programmes and initiatives,41.957
+P7A-SOC-01,Q1,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Making decisions using facts and research,25.081
+P7A-SOC-01,Q1,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Ensuring policies are actually carried out and reviewed properly,26.083
+P7A-SOC-01,Q1,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Connecting different areas of policy that affect young people,15.315
+P7A-SOC-01,Q1,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",None of these,1.363
+P7A-SOC-01,Q1,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Don’t know,1.0
+P7A-SOC-01,Q2,multiple_choice,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-SOC-01,Q2,multiple_choice,pie-0.6,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.6,,
+P7A-SOC-01,Q2,multiple_choice,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-SOC-01,Q2,multiple_choice,pie-0.7x,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7x,,
+P7A-SOC-01,Q2,multiple_choice,POOL,True,,,,,POOL,"Democratic processes, political participation and institutions",32.154
+P7A-SOC-01,Q2,multiple_choice,POOL,True,,,,,POOL,Human rights and social justice,42.385
+P7A-SOC-01,Q2,multiple_choice,POOL,True,,,,,POOL,"Equality, diversity and anti-discrimination",38.577
+P7A-SOC-01,Q2,multiple_choice,POOL,True,,,,,POOL,Environmental sustainability,32.769
+P7A-SOC-01,Q2,multiple_choice,POOL,True,,,,,POOL,Media and digital literacy and recognising disinformation,35.731
+P7A-SOC-01,Q2,multiple_choice,POOL,True,,,,,POOL,None of the above,11.077
+P7A-SOC-01,Q2,multiple_choice,POOL,True,,,,,POOL,Don’t know,3.577
+P7A-SOC-01,Q2,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']","Democratic processes, political participation and institutions",29.108
+P7A-SOC-01,Q2,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Human rights and social justice,41.57
+P7A-SOC-01,Q2,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']","Equality, diversity and anti-discrimination",35.266
+P7A-SOC-01,Q2,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Environmental sustainability,28.706
+P7A-SOC-01,Q2,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Media and digital literacy and recognising disinformation,31.02
+P7A-SOC-01,Q2,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",None of the above,15.591
+P7A-SOC-01,Q2,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Don’t know,3.177
+P7A-SOC-01,Q3,multiple_choice,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-SOC-01,Q3,multiple_choice,pie-0.6,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.6,,
+P7A-SOC-01,Q3,multiple_choice,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-SOC-01,Q3,multiple_choice,pie-0.7x,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7x,,
+P7A-SOC-01,Q3,multiple_choice,POOL,True,,,,,POOL,"In a school or university (courses, extracurricular activities)",35.308
+P7A-SOC-01,Q3,multiple_choice,POOL,True,,,,,POOL,"By participating in youth clubs, civil society organisations, volunteering",21.038
+P7A-SOC-01,Q3,multiple_choice,POOL,True,,,,,POOL,"Via traditional media (e.g. TV, radio, newspapers), digital media (e.g. social media, podcasts, blogs)",48.923
+P7A-SOC-01,Q3,multiple_choice,POOL,True,,,,,POOL,Through self-directed reading or research,36.538
+P7A-SOC-01,Q3,multiple_choice,POOL,True,,,,,POOL,Through discussions with your family or friends,36.5
+P7A-SOC-01,Q3,multiple_choice,POOL,True,,,,,POOL,At public events or awareness raising campaigns,22.923
+P7A-SOC-01,Q3,multiple_choice,POOL,True,,,,,POOL,None of the above,1.0
+P7A-SOC-01,Q3,multiple_choice,POOL,True,,,,,POOL,Don’t know,0.231
+P7A-SOC-01,Q3,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']","In a school or university (courses, extracurricular activities)",33.305
+P7A-SOC-01,Q3,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']","By participating in youth clubs, civil society organisations, volunteering",16.07
+P7A-SOC-01,Q3,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']","Via traditional media (e.g. TV, radio, newspapers), digital media (e.g. social media, podcasts, blogs)",47.792
+P7A-SOC-01,Q3,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Through self-directed reading or research,36.789
+P7A-SOC-01,Q3,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Through discussions with your family or friends,36.757
+P7A-SOC-01,Q3,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",At public events or awareness raising campaigns,19.454
+P7A-SOC-01,Q3,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",None of the above,1.177
+P7A-SOC-01,Q3,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Don’t know,0.414
+P7A-SOC-01,Q4,multiple_choice,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-SOC-01,Q4,multiple_choice,pie-0.6,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.6,,
+P7A-SOC-01,Q4,multiple_choice,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-SOC-01,Q4,multiple_choice,pie-0.7x,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7x,,
+P7A-SOC-01,Q4,multiple_choice,POOL,True,,,,,POOL,"Voting in local, national or European elections",32.654
+P7A-SOC-01,Q4,multiple_choice,POOL,True,,,,,POOL,"Participating in political movements, parties or unions",25.846
+P7A-SOC-01,Q4,multiple_choice,POOL,True,,,,,POOL,Contacting a politician about an issue,16.692
+P7A-SOC-01,Q4,multiple_choice,POOL,True,,,,,POOL,Volunteering for a charity/campaign organisation,21.385
+P7A-SOC-01,Q4,multiple_choice,POOL,True,,,,,POOL,"Boycotting or buying certain products for political, ethical or environmental reasons",17.231
+P7A-SOC-01,Q4,multiple_choice,POOL,True,,,,,POOL,Participating in student or youth organisations,29.423
+P7A-SOC-01,Q4,multiple_choice,POOL,True,,,,,POOL,"Taking part in a public consultation on proposed political initiatives (online or offline), including in the EU Youth Dialogue or the European Citizens Panels",31.462
+P7A-SOC-01,Q4,multiple_choice,POOL,True,,,,,POOL,"Engaging in social media by expressing my opinion, using hashtags or changing my profile picture for example",32.615
+P7A-SOC-01,Q4,multiple_choice,POOL,True,,,,,POOL,Other,2.269
+P7A-SOC-01,Q4,multiple_choice,POOL,True,,,,,POOL,None of these are effective,2.923
+P7A-SOC-01,Q4,multiple_choice,POOL,True,,,,,POOL,Don’t know,2.231
+P7A-SOC-01,Q4,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']","Voting in local, national or European elections",36.828
+P7A-SOC-01,Q4,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']","Participating in political movements, parties or unions",22.612
+P7A-SOC-01,Q4,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Contacting a politician about an issue,16.926
+P7A-SOC-01,Q4,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Volunteering for a charity/campaign organisation,20.304
+P7A-SOC-01,Q4,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']","Boycotting or buying certain products for political, ethical or environmental reasons",16.215
+P7A-SOC-01,Q4,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Participating in student or youth organisations,28.012
+P7A-SOC-01,Q4,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']","Taking part in a public consultation on proposed political initiatives (online or offline), including in the EU Youth Dialogue or the European Citizens Panels",34.086
+P7A-SOC-01,Q4,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']","Engaging in social media by expressing my opinion, using hashtags or changing my profile picture for example",29.221
+P7A-SOC-01,Q4,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Other,2.313
+P7A-SOC-01,Q4,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",None of these are effective,3.586
+P7A-SOC-01,Q4,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Don’t know,2.363
+P7A-SOC-01,Q5,multiple_choice,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-SOC-01,Q5,multiple_choice,pie-0.6,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.6,,
+P7A-SOC-01,Q5,multiple_choice,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-SOC-01,Q5,multiple_choice,pie-0.7x,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7x,,
+P7A-SOC-01,Q5,multiple_choice,POOL,True,,,,,POOL,A sports club,24.923
+P7A-SOC-01,Q5,multiple_choice,POOL,True,,,,,POOL,"A youth club, leisure-time club or any kind of youth organisation",22.308
+P7A-SOC-01,Q5,multiple_choice,POOL,True,,,,,POOL,A cultural organisation,17.654
+P7A-SOC-01,Q5,multiple_choice,POOL,True,,,,,POOL,A political organisation or a political party,12.846
+P7A-SOC-01,Q5,multiple_choice,POOL,True,,,,,POOL,An organisation with volunteering activities,20.154
+P7A-SOC-01,Q5,multiple_choice,POOL,True,,,,,POOL,An organisation active in the domain of climate change/environmental issues,15.154
+P7A-SOC-01,Q5,multiple_choice,POOL,True,,,,,POOL,An organisation promoting human rights or global development,16.538
+P7A-SOC-01,Q5,multiple_choice,POOL,True,,,,,POOL,"Any other youth organisation, club, non-governmental organisation, etc.",17.192
+P7A-SOC-01,Q5,multiple_choice,POOL,True,,,,,POOL,None of these,22.654
+P7A-SOC-01,Q5,multiple_choice,POOL,True,,,,,POOL,Don’t know,2.231
+P7A-SOC-01,Q5,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",A sports club,21.684
+P7A-SOC-01,Q5,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']","A youth club, leisure-time club or any kind of youth organisation",17.01
+P7A-SOC-01,Q5,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",A cultural organisation,14.286
+P7A-SOC-01,Q5,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",A political organisation or a political party,9.189
+P7A-SOC-01,Q5,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",An organisation with volunteering activities,19.136
+P7A-SOC-01,Q5,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",An organisation active in the domain of climate change/environmental issues,10.241
+P7A-SOC-01,Q5,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",An organisation promoting human rights or global development,12.467
+P7A-SOC-01,Q5,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']","Any other youth organisation, club, non-governmental organisation, etc.",15.924
+P7A-SOC-01,Q5,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",None of these,31.82
+P7A-SOC-01,Q5,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Don’t know,2.362
+P7A-SOC-01,Q6,multiple_choice,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-SOC-01,Q6,multiple_choice,pie-0.6,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.6,,
+P7A-SOC-01,Q6,multiple_choice,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-SOC-01,Q6,multiple_choice,pie-0.7x,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7x,,
+P7A-SOC-01,Q6,multiple_choice,POOL,True,,,,,POOL,I don’t have time,41.962
+P7A-SOC-01,Q6,multiple_choice,POOL,True,,,,,POOL,I’m not interested,21.231
+P7A-SOC-01,Q6,multiple_choice,POOL,True,,,,,POOL,I cannot afford it,11.962
+P7A-SOC-01,Q6,multiple_choice,POOL,True,,,,,POOL,I have not yet thought about it,23.731
+P7A-SOC-01,Q6,multiple_choice,POOL,True,,,,,POOL,I don’t know how to do this,12.846
+P7A-SOC-01,Q6,multiple_choice,POOL,True,,,,,POOL,I don’t understand the issues enough,11.231
+P7A-SOC-01,Q6,multiple_choice,POOL,True,,,,,POOL,Nobody has ever asked or invited me to take part,18.077
+P7A-SOC-01,Q6,multiple_choice,POOL,True,,,,,POOL,I did not know that I could do this,9.5
+P7A-SOC-01,Q6,multiple_choice,POOL,True,,,,,POOL,These activities are too far away. It is difficult to get there (e.g. by public transport) from my home,10.654
+P7A-SOC-01,Q6,multiple_choice,POOL,True,,,,,POOL,Other,6.154
+P7A-SOC-01,Q6,multiple_choice,POOL,True,,,,,POOL,Don’t know,3.846
+P7A-SOC-01,Q6,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",I don’t have time,39.16
+P7A-SOC-01,Q6,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",I’m not interested,17.765
+P7A-SOC-01,Q6,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",I cannot afford it,8.076
+P7A-SOC-01,Q6,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",I have not yet thought about it,24.111
+P7A-SOC-01,Q6,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",I don’t know how to do this,16.47
+P7A-SOC-01,Q6,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",I don’t understand the issues enough,16.588
+P7A-SOC-01,Q6,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Nobody has ever asked or invited me to take part,21.082
+P7A-SOC-01,Q6,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",I did not know that I could do this,8.676
+P7A-SOC-01,Q6,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",These activities are too far away. It is difficult to get there (e.g. by public transport) from my home,12.504
+P7A-SOC-01,Q6,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Other,6.717
+P7A-SOC-01,Q6,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Don’t know,3.141
+P7A-SOC-01,Q7a,single_choice,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-SOC-01,Q7a,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Yes,30.703
+P7A-SOC-01,Q7a,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,No,69.297
+P7A-SOC-01,Q7a,single_choice,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Don’t know,0
+P7A-SOC-01,Q7a,single_choice,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-SOC-01,Q7a,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Yes,30.11
+P7A-SOC-01,Q7a,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,No,69.89
+P7A-SOC-01,Q7a,single_choice,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Don’t know,0
+P7A-SOC-01,Q7a,single_choice,IQGE,True,weak,,15.76,,IQGE,Yes,31.268
+P7A-SOC-01,Q7a,single_choice,IQGE,True,weak,,15.76,,IQGE,No,68.732
+P7A-SOC-01,Q7a,single_choice,UNIF,True,,,,,UNIF,Yes,50.0
+P7A-SOC-01,Q7a,single_choice,UNIF,True,,,,,UNIF,No,50.0
+P7A-SOC-01,Q7a,single_choice,UNIF,True,,,,,UNIF,Don’t know,0.0
+P7A-SOC-01,Q7a,single_choice,POOL,True,,,,,POOL,Yes,55.115
+P7A-SOC-01,Q7a,single_choice,POOL,True,,,,,POOL,No,41.923
+P7A-SOC-01,Q7a,single_choice,POOL,True,,,,,POOL,Don’t know,2.962
+P7A-SOC-01,Q7a,single_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Yes,48.827
+P7A-SOC-01,Q7a,single_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",No,47.85
+P7A-SOC-01,Q7a,single_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Don’t know,3.323
+P7A-SOC-01,Q7b,multiple_choice,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-SOC-01,Q7b,multiple_choice,pie-0.6,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.6,,
+P7A-SOC-01,Q7b,multiple_choice,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-SOC-01,Q7b,multiple_choice,pie-0.7x,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7x,,
+P7A-SOC-01,Q7b,multiple_choice,POOL,True,,,,,POOL,Climate change and environmental protection,28.692
+P7A-SOC-01,Q7b,multiple_choice,POOL,True,,,,,POOL,Health and well-being,31.077
+P7A-SOC-01,Q7b,multiple_choice,POOL,True,,,,,POOL,Economic inequality and welfare expenditure,27.615
+P7A-SOC-01,Q7b,multiple_choice,POOL,True,,,,,POOL,"Equal rights regardless of gender, race or sexuality",32.462
+P7A-SOC-01,Q7b,multiple_choice,POOL,True,,,,,POOL,Human rights,38.808
+P7A-SOC-01,Q7b,multiple_choice,POOL,True,,,,,POOL,Wars and conflicts,24.077
+P7A-SOC-01,Q7b,multiple_choice,POOL,True,,,,,POOL,Democracy and rule of law,26.808
+P7A-SOC-01,Q7b,multiple_choice,POOL,True,,,,,POOL,Other,4.923
+P7A-SOC-01,Q7b,multiple_choice,POOL,True,,,,,POOL,Don’t know,0.923
+P7A-SOC-01,Q7b,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Climate change and environmental protection,25.195
+P7A-SOC-01,Q7b,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Health and well-being,27.935
+P7A-SOC-01,Q7b,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Economic inequality and welfare expenditure,27.504
+P7A-SOC-01,Q7b,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']","Equal rights regardless of gender, race or sexuality",29.0
+P7A-SOC-01,Q7b,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Human rights,42.913
+P7A-SOC-01,Q7b,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Wars and conflicts,25.943
+P7A-SOC-01,Q7b,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Democracy and rule of law,27.971
+P7A-SOC-01,Q7b,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Other,5.812
+P7A-SOC-01,Q7b,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Don’t know,1.226
+P7A-SOC-01,Q8,multiple_choice,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-SOC-01,Q8,multiple_choice,pie-0.6,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.6,,
+P7A-SOC-01,Q8,multiple_choice,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-SOC-01,Q8,multiple_choice,pie-0.7x,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7x,,
+P7A-SOC-01,Q8,multiple_choice,POOL,True,,,,,POOL,EU Youth Dialogue or EU Youth Conference,16.654
+P7A-SOC-01,Q8,multiple_choice,POOL,True,,,,,POOL,European Citizens’ Panels,13.808
+P7A-SOC-01,Q8,multiple_choice,POOL,True,,,,,POOL,Public consultations,16.462
+P7A-SOC-01,Q8,multiple_choice,POOL,True,,,,,POOL,European elections,35.808
+P7A-SOC-01,Q8,multiple_choice,POOL,True,,,,,POOL,EU social media channels and websites (i.e. European Youth Portal),28.077
+P7A-SOC-01,Q8,multiple_choice,POOL,True,,,,,POOL,Visit of the EU institutions,17.538
+P7A-SOC-01,Q8,multiple_choice,POOL,True,,,,,POOL,The European Youth Week or the European Youth Event,19.615
+P7A-SOC-01,Q8,multiple_choice,POOL,True,,,,,POOL,Contacting a Commissioner or an MEP,14.385
+P7A-SOC-01,Q8,multiple_choice,POOL,True,,,,,POOL,Participation in events organised by the EU in your country,15.577
+P7A-SOC-01,Q8,multiple_choice,POOL,True,,,,,POOL,European Citizens’ Initiative,12.846
+P7A-SOC-01,Q8,multiple_choice,POOL,True,,,,,POOL,None of these,10.538
+P7A-SOC-01,Q8,multiple_choice,POOL,True,,,,,POOL,Don’t know,4.962
+P7A-SOC-01,Q8,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",EU Youth Dialogue or EU Youth Conference,15.614
+P7A-SOC-01,Q8,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",European Citizens’ Panels,10.348
+P7A-SOC-01,Q8,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Public consultations,15.968
+P7A-SOC-01,Q8,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",European elections,41.455
+P7A-SOC-01,Q8,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",EU social media channels and websites (i.e. European Youth Portal),23.017
+P7A-SOC-01,Q8,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Visit of the EU institutions,16.128
+P7A-SOC-01,Q8,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",The European Youth Week or the European Youth Event,17.993
+P7A-SOC-01,Q8,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Contacting a Commissioner or an MEP,12.48
+P7A-SOC-01,Q8,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Participation in events organised by the EU in your country,15.685
+P7A-SOC-01,Q8,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",European Citizens’ Initiative,13.06
+P7A-SOC-01,Q8,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",None of these,13.069
+P7A-SOC-01,Q8,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Don’t know,5.632
+P7A-SOC-01,Q9,multiple_choice,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-SOC-01,Q9,multiple_choice,pie-0.6,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.6,,
+P7A-SOC-01,Q9,multiple_choice,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-SOC-01,Q9,multiple_choice,pie-0.7x,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7x,,
+P7A-SOC-01,Q9,multiple_choice,POOL,True,,,,,POOL,Social media,55.0
+P7A-SOC-01,Q9,multiple_choice,POOL,True,,,,,POOL,"Online press, podcasts and/or news platforms",35.885
+P7A-SOC-01,Q9,multiple_choice,POOL,True,,,,,POOL,"Written (printed) press (e.g. newspapers, weekly or monthly magazine, etc.)",18.846
+P7A-SOC-01,Q9,multiple_choice,POOL,True,,,,,POOL,TV,36.462
+P7A-SOC-01,Q9,multiple_choice,POOL,True,,,,,POOL,Radio,15.5
+P7A-SOC-01,Q9,multiple_choice,POOL,True,,,,,POOL,"Conversations with friends, family, or colleagues",34.077
+P7A-SOC-01,Q9,multiple_choice,POOL,True,,,,,POOL,School or university,24.077
+P7A-SOC-01,Q9,multiple_choice,POOL,True,,,,,POOL,Other,4.0
+P7A-SOC-01,Q9,multiple_choice,POOL,True,,,,,POOL,"None, I don’t stay informed about the EU",5.192
+P7A-SOC-01,Q9,multiple_choice,POOL,True,,,,,POOL,Don’t know,1.731
+P7A-SOC-01,Q9,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Social media,58.954
+P7A-SOC-01,Q9,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']","Online press, podcasts and/or news platforms",36.957
+P7A-SOC-01,Q9,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']","Written (printed) press (e.g. newspapers, weekly or monthly magazine, etc.)",11.057
+P7A-SOC-01,Q9,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",TV,37.985
+P7A-SOC-01,Q9,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Radio,12.643
+P7A-SOC-01,Q9,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']","Conversations with friends, family, or colleagues",32.878
+P7A-SOC-01,Q9,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",School or university,21.882
+P7A-SOC-01,Q9,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Other,3.686
+P7A-SOC-01,Q9,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']","None, I don’t stay informed about the EU",5.983
+P7A-SOC-01,Q9,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Don’t know,1.958
+P7A-SOC-01,Q10,multiple_choice,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-SOC-01,Q10,multiple_choice,pie-0.6,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.6,,
+P7A-SOC-01,Q10,multiple_choice,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-SOC-01,Q10,multiple_choice,pie-0.7x,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7x,,
+P7A-SOC-01,Q10,multiple_choice,POOL,True,,,,,POOL,"Studying, training or apprenticeship in another EU country",24.885
+P7A-SOC-01,Q10,multiple_choice,POOL,True,,,,,POOL,Being involved in any cultural/sports activities in another EU country,23.846
+P7A-SOC-01,Q10,multiple_choice,POOL,True,,,,,POOL,Being involved in any political activities in another EU country,16.577
+P7A-SOC-01,Q10,multiple_choice,POOL,True,,,,,POOL,Volunteering or similar activities in another EU country,21.269
+P7A-SOC-01,Q10,multiple_choice,POOL,True,,,,,POOL,Working in another EU country,17.385
+P7A-SOC-01,Q10,multiple_choice,POOL,True,,,,,POOL,None of these,35.192
+P7A-SOC-01,Q10,multiple_choice,POOL,True,,,,,POOL,Don’t know,2.731
+P7A-SOC-01,Q10,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']","Studying, training or apprenticeship in another EU country",24.472
+P7A-SOC-01,Q10,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Being involved in any cultural/sports activities in another EU country,17.825
+P7A-SOC-01,Q10,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Being involved in any political activities in another EU country,12.053
+P7A-SOC-01,Q10,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Volunteering or similar activities in another EU country,16.963
+P7A-SOC-01,Q10,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Working in another EU country,15.674
+P7A-SOC-01,Q10,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",None of these,41.974
+P7A-SOC-01,Q10,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Don’t know,2.955
+P7A-SOC-01,Q11,multiple_choice,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-SOC-01,Q11,multiple_choice,pie-0.6,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.6,,
+P7A-SOC-01,Q11,multiple_choice,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-SOC-01,Q11,multiple_choice,pie-0.7x,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7x,,
+P7A-SOC-01,Q11,multiple_choice,POOL,True,,,,,POOL,Not interested,23.462
+P7A-SOC-01,Q11,multiple_choice,POOL,True,,,,,POOL,Insufficient foreign language skills,15.808
+P7A-SOC-01,Q11,multiple_choice,POOL,True,,,,,POOL,I am a caretaker of another person at home and can therefore not leave the country,6.962
+P7A-SOC-01,Q11,multiple_choice,POOL,True,,,,,POOL,My parents/family/partner/friends are discouraging me to go abroad,9.885
+P7A-SOC-01,Q11,multiple_choice,POOL,True,,,,,POOL,I do not feel sufficiently independent to go abroad for a longer period,19.846
+P7A-SOC-01,Q11,multiple_choice,POOL,True,,,,,POOL,Lack of financial means,38.308
+P7A-SOC-01,Q11,multiple_choice,POOL,True,,,,,POOL,Lack of information on possibilities to go abroad,22.115
+P7A-SOC-01,Q11,multiple_choice,POOL,True,,,,,POOL,Lack of opportunities abroad that would match my interests,15.808
+P7A-SOC-01,Q11,multiple_choice,POOL,True,,,,,POOL,The experience would not be recognised at home,4.615
+P7A-SOC-01,Q11,multiple_choice,POOL,True,,,,,POOL,Other,6.538
+P7A-SOC-01,Q11,multiple_choice,POOL,True,,,,,POOL,Don’t know,4.385
+P7A-SOC-01,Q11,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Not interested,18.975
+P7A-SOC-01,Q11,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Insufficient foreign language skills,13.095
+P7A-SOC-01,Q11,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",I am a caretaker of another person at home and can therefore not leave the country,7.133
+P7A-SOC-01,Q11,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",My parents/family/partner/friends are discouraging me to go abroad,6.998
+P7A-SOC-01,Q11,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",I do not feel sufficiently independent to go abroad for a longer period,19.194
+P7A-SOC-01,Q11,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Lack of financial means,41.567
+P7A-SOC-01,Q11,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Lack of information on possibilities to go abroad,23.684
+P7A-SOC-01,Q11,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Lack of opportunities abroad that would match my interests,17.36
+P7A-SOC-01,Q11,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",The experience would not be recognised at home,5.941
+P7A-SOC-01,Q11,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Other,7.321
+P7A-SOC-01,Q11,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Don’t know,5.359
+P7A-SOC-01,Q12,multiple_choice,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-SOC-01,Q12,multiple_choice,pie-0.6,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.6,,
+P7A-SOC-01,Q12,multiple_choice,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-SOC-01,Q12,multiple_choice,pie-0.7x,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7x,,
+P7A-SOC-01,Q12,multiple_choice,POOL,True,,,,,POOL,Increased my knowledge of other European countries,30.5
+P7A-SOC-01,Q12,multiple_choice,POOL,True,,,,,POOL,Made me feel more European,23.115
+P7A-SOC-01,Q12,multiple_choice,POOL,True,,,,,POOL,Increased my interest in living in another European country later on (for work or education),29.346
+P7A-SOC-01,Q12,multiple_choice,POOL,True,,,,,POOL,Made me more interested in European topics,24.423
+P7A-SOC-01,Q12,multiple_choice,POOL,True,,,,,POOL,Increased my interest in foreign languages,28.154
+P7A-SOC-01,Q12,multiple_choice,POOL,True,,,,,POOL,Made me more aware of other cultures and values,31.154
+P7A-SOC-01,Q12,multiple_choice,POOL,True,,,,,POOL,Increased my self-confidence,28.731
+P7A-SOC-01,Q12,multiple_choice,POOL,True,,,,,POOL,Will allow me to adapt better to new situations in the future,28.346
+P7A-SOC-01,Q12,multiple_choice,POOL,True,,,,,POOL,Will allow me to make friends more easily,26.038
+P7A-SOC-01,Q12,multiple_choice,POOL,True,,,,,POOL,Other,1.615
+P7A-SOC-01,Q12,multiple_choice,POOL,True,,,,,POOL,None of these,1.154
+P7A-SOC-01,Q12,multiple_choice,POOL,True,,,,,POOL,Don’t know,0.577
+P7A-SOC-01,Q12,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Increased my knowledge of other European countries,35.79
+P7A-SOC-01,Q12,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Made me feel more European,25.338
+P7A-SOC-01,Q12,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Increased my interest in living in another European country later on (for work or education),33.139
+P7A-SOC-01,Q12,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Made me more interested in European topics,23.898
+P7A-SOC-01,Q12,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Increased my interest in foreign languages,31.13
+P7A-SOC-01,Q12,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Made me more aware of other cultures and values,36.727
+P7A-SOC-01,Q12,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Increased my self-confidence,31.723
+P7A-SOC-01,Q12,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Will allow me to adapt better to new situations in the future,31.699
+P7A-SOC-01,Q12,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Will allow me to make friends more easily,29.958
+P7A-SOC-01,Q12,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Other,1.861
+P7A-SOC-01,Q12,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",None of these,1.632
+P7A-SOC-01,Q12,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Don’t know,0.543
+P7A-SOC-01,Q13,multiple_choice,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-SOC-01,Q13,multiple_choice,pie-0.6,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.6,,
+P7A-SOC-01,Q13,multiple_choice,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-SOC-01,Q13,multiple_choice,pie-0.7x,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7x,,
+P7A-SOC-01,Q13,multiple_choice,POOL,True,,,,,POOL,Erasmus+ for students (18+ year-olds),44.692
+P7A-SOC-01,Q13,multiple_choice,POOL,True,,,,,POOL,Erasmus+ for pupils (11-18 year-olds),33.692
+P7A-SOC-01,Q13,multiple_choice,POOL,True,,,,,POOL,Erasmus+ for apprentices,21.462
+P7A-SOC-01,Q13,multiple_choice,POOL,True,,,,,POOL,Erasmus+ youth exchanges,34.423
+P7A-SOC-01,Q13,multiple_choice,POOL,True,,,,,POOL,Erasmus+ for young entrepreneurs,19.5
+P7A-SOC-01,Q13,multiple_choice,POOL,True,,,,,POOL,DiscoverEU,17.038
+P7A-SOC-01,Q13,multiple_choice,POOL,True,,,,,POOL,European Solidarity Corps,11.308
+P7A-SOC-01,Q13,multiple_choice,POOL,True,,,,,POOL,None of these,11.731
+P7A-SOC-01,Q13,multiple_choice,POOL,True,,,,,POOL,Don’t know,3.192
+P7A-SOC-01,Q13,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Erasmus+ for students (18+ year-olds),52.322
+P7A-SOC-01,Q13,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Erasmus+ for pupils (11-18 year-olds),43.731
+P7A-SOC-01,Q13,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Erasmus+ for apprentices,23.869
+P7A-SOC-01,Q13,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Erasmus+ youth exchanges,41.515
+P7A-SOC-01,Q13,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Erasmus+ for young entrepreneurs,18.668
+P7A-SOC-01,Q13,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",DiscoverEU,14.372
+P7A-SOC-01,Q13,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",European Solidarity Corps,9.446
+P7A-SOC-01,Q13,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",None of these,9.096
+P7A-SOC-01,Q13,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Don’t know,2.906
+P7A-SOC-01,Q14,likert,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-SOC-01,Q14,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,"Yes, very much",24.377
+P7A-SOC-01,Q14,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,"Yes, to some extent",25.77
+P7A-SOC-01,Q14,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,"No, not much",23.291
+P7A-SOC-01,Q14,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,"No, not at all",26.563
+P7A-SOC-01,Q14,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Don’t know,0
+P7A-SOC-01,Q14,likert,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-SOC-01,Q14,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,"Yes, very much",24.476
+P7A-SOC-01,Q14,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,"Yes, to some extent",26.066
+P7A-SOC-01,Q14,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,"No, not much",23.29
+P7A-SOC-01,Q14,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,"No, not at all",26.168
+P7A-SOC-01,Q14,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Don’t know,0
+P7A-SOC-01,Q14,likert,IQGE,True,related,,16.08,,IQGE,"Yes, very much",24.909
+P7A-SOC-01,Q14,likert,IQGE,True,related,,16.08,,IQGE,"Yes, to some extent",24.787
+P7A-SOC-01,Q14,likert,IQGE,True,related,,16.08,,IQGE,"No, not much",25.127
+P7A-SOC-01,Q14,likert,IQGE,True,related,,16.08,,IQGE,"No, not at all",25.178
+P7A-SOC-01,Q14,likert,UNIF,True,,,,,UNIF,"Yes, very much",25.0
+P7A-SOC-01,Q14,likert,UNIF,True,,,,,UNIF,"Yes, to some extent",25.0
+P7A-SOC-01,Q14,likert,UNIF,True,,,,,UNIF,"No, not much",25.0
+P7A-SOC-01,Q14,likert,UNIF,True,,,,,UNIF,"No, not at all",25.0
+P7A-SOC-01,Q14,likert,UNIF,True,,,,,UNIF,Don’t know,0.0
+P7A-SOC-01,Q14,likert,POOL,True,,,,,POOL,"Yes, very much",29.308
+P7A-SOC-01,Q14,likert,POOL,True,,,,,POOL,"Yes, to some extent",48.308
+P7A-SOC-01,Q14,likert,POOL,True,,,,,POOL,"No, not much",14.538
+P7A-SOC-01,Q14,likert,POOL,True,,,,,POOL,"No, not at all",3.654
+P7A-SOC-01,Q14,likert,POOL,True,,,,,POOL,Don’t know,4.192
+P7A-SOC-01,Q14,likert,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']","Yes, very much",26.061
+P7A-SOC-01,Q14,likert,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']","Yes, to some extent",47.149
+P7A-SOC-01,Q14,likert,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']","No, not much",16.714
+P7A-SOC-01,Q14,likert,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']","No, not at all",4.991
+P7A-SOC-01,Q14,likert,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Don’t know,5.085
+P7A-SOC-01,Q15,multiple_choice,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-SOC-01,Q15,multiple_choice,pie-0.6,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.6,,
+P7A-SOC-01,Q15,multiple_choice,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-SOC-01,Q15,multiple_choice,pie-0.7x,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7x,,
+P7A-SOC-01,Q15,multiple_choice,POOL,True,,,,,POOL,Promoting environmentally friendly policy and fight climate change,21.462
+P7A-SOC-01,Q15,multiple_choice,POOL,True,,,,,POOL,Increasing job opportunities for young people,33.231
+P7A-SOC-01,Q15,multiple_choice,POOL,True,,,,,POOL,Fighting poverty and economic and social inequalities,32.269
+P7A-SOC-01,Q15,multiple_choice,POOL,True,,,,,POOL,Playing a strong role in dealing with health challenges,18.923
+P7A-SOC-01,Q15,multiple_choice,POOL,True,,,,,POOL,"Preserving peace, reinforcing international security and promoting international cooperation",33.346
+P7A-SOC-01,Q15,multiple_choice,POOL,True,,,,,POOL,"Promoting Human Rights, democracy and common European values",28.346
+P7A-SOC-01,Q15,multiple_choice,POOL,True,,,,,POOL,Promoting the digitalisation of society,14.692
+P7A-SOC-01,Q15,multiple_choice,POOL,True,,,,,POOL,"Promoting inclusive societies, including gender equality and anti-discrimination",21.462
+P7A-SOC-01,Q15,multiple_choice,POOL,True,,,,,POOL,Bringing young people from different parts of the EU together,16.615
+P7A-SOC-01,Q15,multiple_choice,POOL,True,,,,,POOL,Other,1.962
+P7A-SOC-01,Q15,multiple_choice,POOL,True,,,,,POOL,Don’t know,2.923
+P7A-SOC-01,Q15,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Promoting environmentally friendly policy and fight climate change,19.075
+P7A-SOC-01,Q15,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Increasing job opportunities for young people,39.703
+P7A-SOC-01,Q15,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Fighting poverty and economic and social inequalities,38.279
+P7A-SOC-01,Q15,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Playing a strong role in dealing with health challenges,18.902
+P7A-SOC-01,Q15,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']","Preserving peace, reinforcing international security and promoting international cooperation",33.802
+P7A-SOC-01,Q15,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']","Promoting Human Rights, democracy and common European values",25.318
+P7A-SOC-01,Q15,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Promoting the digitalisation of society,11.504
+P7A-SOC-01,Q15,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']","Promoting inclusive societies, including gender equality and anti-discrimination",19.578
+P7A-SOC-01,Q15,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Bringing young people from different parts of the EU together,14.913
+P7A-SOC-01,Q15,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Other,2.771
+P7A-SOC-01,Q15,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Don’t know,3.498
+P7A-SOC-01,Q16_a,likert,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-SOC-01,Q16_a,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Totally agree,16.099
+P7A-SOC-01,Q16_a,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Tend to agree,31.675
+P7A-SOC-01,Q16_a,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Tend to disagree,28.831
+P7A-SOC-01,Q16_a,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Totally disagree,23.394
+P7A-SOC-01,Q16_a,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Don’t know,0
+P7A-SOC-01,Q16_a,likert,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-SOC-01,Q16_a,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Totally agree,24.975
+P7A-SOC-01,Q16_a,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Tend to agree,40.969
+P7A-SOC-01,Q16_a,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Tend to disagree,23.296
+P7A-SOC-01,Q16_a,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Totally disagree,10.761
+P7A-SOC-01,Q16_a,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Don’t know,0
+P7A-SOC-01,Q16_a,likert,IQGE,True,weak,,15.76,,IQGE,Totally agree,17.206
+P7A-SOC-01,Q16_a,likert,IQGE,True,weak,,15.76,,IQGE,Tend to agree,30.263
+P7A-SOC-01,Q16_a,likert,IQGE,True,weak,,15.76,,IQGE,Tend to disagree,28.971
+P7A-SOC-01,Q16_a,likert,IQGE,True,weak,,15.76,,IQGE,Totally disagree,23.559
+P7A-SOC-01,Q16_a,likert,UNIF,True,,,,,UNIF,Totally agree,25.0
+P7A-SOC-01,Q16_a,likert,UNIF,True,,,,,UNIF,Tend to agree,25.0
+P7A-SOC-01,Q16_a,likert,UNIF,True,,,,,UNIF,Tend to disagree,25.0
+P7A-SOC-01,Q16_a,likert,UNIF,True,,,,,UNIF,Totally disagree,25.0
+P7A-SOC-01,Q16_a,likert,UNIF,True,,,,,UNIF,Don’t know,0.0
+P7A-SOC-01,Q16_a,likert,POOL,True,,,,,POOL,Totally agree,41.808
+P7A-SOC-01,Q16_a,likert,POOL,True,,,,,POOL,Tend to agree,34.231
+P7A-SOC-01,Q16_a,likert,POOL,True,,,,,POOL,Tend to disagree,12.769
+P7A-SOC-01,Q16_a,likert,POOL,True,,,,,POOL,Totally disagree,6.154
+P7A-SOC-01,Q16_a,likert,POOL,True,,,,,POOL,Don’t know,5.038
+P7A-SOC-01,Q16_a,likert,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Totally agree,40.435
+P7A-SOC-01,Q16_a,likert,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Tend to agree,34.284
+P7A-SOC-01,Q16_a,likert,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Tend to disagree,13.962
+P7A-SOC-01,Q16_a,likert,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Totally disagree,5.725
+P7A-SOC-01,Q16_a,likert,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Don’t know,5.594
+P7A-SOC-01,Q16_b,likert,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-SOC-01,Q16_b,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Totally agree,16.492
+P7A-SOC-01,Q16_b,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Tend to agree,30.112
+P7A-SOC-01,Q16_b,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Tend to disagree,30.704
+P7A-SOC-01,Q16_b,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Totally disagree,22.692
+P7A-SOC-01,Q16_b,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Don’t know,0
+P7A-SOC-01,Q16_b,likert,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-SOC-01,Q16_b,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Totally agree,26.955
+P7A-SOC-01,Q16_b,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Tend to agree,38.993
+P7A-SOC-01,Q16_b,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Tend to disagree,22.612
+P7A-SOC-01,Q16_b,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Totally disagree,11.44
+P7A-SOC-01,Q16_b,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Don’t know,0
+P7A-SOC-01,Q16_b,likert,IQGE,True,weak,,15.76,,IQGE,Totally agree,16.635
+P7A-SOC-01,Q16_b,likert,IQGE,True,weak,,15.76,,IQGE,Tend to agree,31.142
+P7A-SOC-01,Q16_b,likert,IQGE,True,weak,,15.76,,IQGE,Tend to disagree,29.973
+P7A-SOC-01,Q16_b,likert,IQGE,True,weak,,15.76,,IQGE,Totally disagree,22.25
+P7A-SOC-01,Q16_b,likert,UNIF,True,,,,,UNIF,Totally agree,25.0
+P7A-SOC-01,Q16_b,likert,UNIF,True,,,,,UNIF,Tend to agree,25.0
+P7A-SOC-01,Q16_b,likert,UNIF,True,,,,,UNIF,Tend to disagree,25.0
+P7A-SOC-01,Q16_b,likert,UNIF,True,,,,,UNIF,Totally disagree,25.0
+P7A-SOC-01,Q16_b,likert,UNIF,True,,,,,UNIF,Don’t know,0.0
+P7A-SOC-01,Q16_b,likert,POOL,True,,,,,POOL,Totally agree,27.192
+P7A-SOC-01,Q16_b,likert,POOL,True,,,,,POOL,Tend to agree,36.308
+P7A-SOC-01,Q16_b,likert,POOL,True,,,,,POOL,Tend to disagree,16.077
+P7A-SOC-01,Q16_b,likert,POOL,True,,,,,POOL,Totally disagree,11.269
+P7A-SOC-01,Q16_b,likert,POOL,True,,,,,POOL,Don’t know,9.154
+P7A-SOC-01,Q16_b,likert,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Totally agree,27.006
+P7A-SOC-01,Q16_b,likert,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Tend to agree,35.925
+P7A-SOC-01,Q16_b,likert,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Tend to disagree,16.826
+P7A-SOC-01,Q16_b,likert,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Totally disagree,10.733
+P7A-SOC-01,Q16_b,likert,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Don’t know,9.51
+P7A-SOC-01,Q17,multiple_choice,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-SOC-01,Q17,multiple_choice,pie-0.6,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.6,,
+P7A-SOC-01,Q17,multiple_choice,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-SOC-01,Q17,multiple_choice,pie-0.7x,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7x,,
+P7A-SOC-01,Q17,multiple_choice,POOL,True,,,,,POOL,"In school or university (e.g. classes, courses, extracurricular activities)",31.654
+P7A-SOC-01,Q17,multiple_choice,POOL,True,,,,,POOL,"In a community or voluntary setting (e.g. youth clubs, NGOs, volunteering, workshops)",19.115
+P7A-SOC-01,Q17,multiple_choice,POOL,True,,,,,POOL,"Via media or online content (e.g. social media, podcasts, blogs, news)",40.077
+P7A-SOC-01,Q17,multiple_choice,POOL,True,,,,,POOL,"Through self-directed reading, research or practice",37.5
+P7A-SOC-01,Q17,multiple_choice,POOL,True,,,,,POOL,Through discussions with family or friends,29.077
+P7A-SOC-01,Q17,multiple_choice,POOL,True,,,,,POOL,At public events or awareness-raising campaigns,16.808
+P7A-SOC-01,Q17,multiple_choice,POOL,True,,,,,POOL,None of the above,6.385
+P7A-SOC-01,Q17,multiple_choice,POOL,True,,,,,POOL,Don’t know,1.808
+P7A-SOC-01,Q17,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']","In school or university (e.g. classes, courses, extracurricular activities)",28.301
+P7A-SOC-01,Q17,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']","In a community or voluntary setting (e.g. youth clubs, NGOs, volunteering, workshops)",12.874
+P7A-SOC-01,Q17,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']","Via media or online content (e.g. social media, podcasts, blogs, news)",38.985
+P7A-SOC-01,Q17,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']","Through self-directed reading, research or practice",41.962
+P7A-SOC-01,Q17,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Through discussions with family or friends,27.682
+P7A-SOC-01,Q17,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",At public events or awareness-raising campaigns,11.873
+P7A-SOC-01,Q17,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",None of the above,8.091
+P7A-SOC-01,Q17,multiple_choice,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Don’t know,2.002
+P7A-SOC-01,Q18_a,likert,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-SOC-01,Q18_a,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Totally agree,18.072
+P7A-SOC-01,Q18_a,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Tend to agree,27.656
+P7A-SOC-01,Q18_a,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Tend to disagree,28.608
+P7A-SOC-01,Q18_a,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Totally disagree,25.665
+P7A-SOC-01,Q18_a,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Don’t know,0
+P7A-SOC-01,Q18_a,likert,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-SOC-01,Q18_a,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Totally agree,24.691
+P7A-SOC-01,Q18_a,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Tend to agree,32.191
+P7A-SOC-01,Q18_a,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Tend to disagree,26.142
+P7A-SOC-01,Q18_a,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Totally disagree,16.977
+P7A-SOC-01,Q18_a,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Don’t know,0
+P7A-SOC-01,Q18_a,likert,IQGE,True,related,,16.08,,IQGE,Totally agree,17.897
+P7A-SOC-01,Q18_a,likert,IQGE,True,related,,16.08,,IQGE,Tend to agree,27.857
+P7A-SOC-01,Q18_a,likert,IQGE,True,related,,16.08,,IQGE,Tend to disagree,29.583
+P7A-SOC-01,Q18_a,likert,IQGE,True,related,,16.08,,IQGE,Totally disagree,24.662
+P7A-SOC-01,Q18_a,likert,UNIF,True,,,,,UNIF,Totally agree,25.0
+P7A-SOC-01,Q18_a,likert,UNIF,True,,,,,UNIF,Tend to agree,25.0
+P7A-SOC-01,Q18_a,likert,UNIF,True,,,,,UNIF,Tend to disagree,25.0
+P7A-SOC-01,Q18_a,likert,UNIF,True,,,,,UNIF,Totally disagree,25.0
+P7A-SOC-01,Q18_a,likert,UNIF,True,,,,,UNIF,Don’t know,0.0
+P7A-SOC-01,Q18_a,likert,POOL,True,,,,,POOL,Totally agree,16.692
+P7A-SOC-01,Q18_a,likert,POOL,True,,,,,POOL,Tend to agree,26.5
+P7A-SOC-01,Q18_a,likert,POOL,True,,,,,POOL,Tend to disagree,25.308
+P7A-SOC-01,Q18_a,likert,POOL,True,,,,,POOL,Totally disagree,20.5
+P7A-SOC-01,Q18_a,likert,POOL,True,,,,,POOL,Don’t know,11.0
+P7A-SOC-01,Q18_a,likert,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Totally agree,11.092
+P7A-SOC-01,Q18_a,likert,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Tend to agree,18.142
+P7A-SOC-01,Q18_a,likert,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Tend to disagree,28.909
+P7A-SOC-01,Q18_a,likert,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Totally disagree,29.939
+P7A-SOC-01,Q18_a,likert,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Don’t know,11.918
+P7A-SOC-01,Q18_b,likert,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-SOC-01,Q18_b,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Totally agree,16.681
+P7A-SOC-01,Q18_b,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Tend to agree,40.198
+P7A-SOC-01,Q18_b,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Tend to disagree,28.61
+P7A-SOC-01,Q18_b,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Totally disagree,14.51
+P7A-SOC-01,Q18_b,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Don’t know,0
+P7A-SOC-01,Q18_b,likert,pie-0.7,True,3,False,5.95,MODEL_EXTRAPOLATED,pie-0.7,Totally agree,16.681
+P7A-SOC-01,Q18_b,likert,pie-0.7,True,3,False,5.95,MODEL_EXTRAPOLATED,pie-0.7,Tend to agree,40.198
+P7A-SOC-01,Q18_b,likert,pie-0.7,True,3,False,5.95,MODEL_EXTRAPOLATED,pie-0.7,Tend to disagree,28.61
+P7A-SOC-01,Q18_b,likert,pie-0.7,True,3,False,5.95,MODEL_EXTRAPOLATED,pie-0.7,Totally disagree,14.51
+P7A-SOC-01,Q18_b,likert,pie-0.7,True,3,False,5.95,MODEL_EXTRAPOLATED,pie-0.7,Don’t know,0
+P7A-SOC-01,Q18_b,likert,pie-0.7x,True,3,False,5.95,MODEL_EXTRAPOLATED,pie-0.7x,Totally agree,16.681
+P7A-SOC-01,Q18_b,likert,pie-0.7x,True,3,False,5.95,MODEL_EXTRAPOLATED,pie-0.7x,Tend to agree,40.198
+P7A-SOC-01,Q18_b,likert,pie-0.7x,True,3,False,5.95,MODEL_EXTRAPOLATED,pie-0.7x,Tend to disagree,28.61
+P7A-SOC-01,Q18_b,likert,pie-0.7x,True,3,False,5.95,MODEL_EXTRAPOLATED,pie-0.7x,Totally disagree,14.51
+P7A-SOC-01,Q18_b,likert,pie-0.7x,True,3,False,5.95,MODEL_EXTRAPOLATED,pie-0.7x,Don’t know,0
+P7A-SOC-01,Q18_b,likert,IQGE,True,international,,5.4,,IQGE,Totally agree,14.394
+P7A-SOC-01,Q18_b,likert,IQGE,True,international,,5.4,,IQGE,Tend to agree,38.004
+P7A-SOC-01,Q18_b,likert,IQGE,True,international,,5.4,,IQGE,Tend to disagree,30.492
+P7A-SOC-01,Q18_b,likert,IQGE,True,international,,5.4,,IQGE,Totally disagree,17.111
+P7A-SOC-01,Q18_b,likert,UNIF,True,,,,,UNIF,Totally agree,25.0
+P7A-SOC-01,Q18_b,likert,UNIF,True,,,,,UNIF,Tend to agree,25.0
+P7A-SOC-01,Q18_b,likert,UNIF,True,,,,,UNIF,Tend to disagree,25.0
+P7A-SOC-01,Q18_b,likert,UNIF,True,,,,,UNIF,Totally disagree,25.0
+P7A-SOC-01,Q18_b,likert,UNIF,True,,,,,UNIF,Don’t know,0.0
+P7A-SOC-01,Q18_b,likert,POOL,True,,,,,POOL,Totally agree,17.115
+P7A-SOC-01,Q18_b,likert,POOL,True,,,,,POOL,Tend to agree,29.615
+P7A-SOC-01,Q18_b,likert,POOL,True,,,,,POOL,Tend to disagree,24.692
+P7A-SOC-01,Q18_b,likert,POOL,True,,,,,POOL,Totally disagree,16.962
+P7A-SOC-01,Q18_b,likert,POOL,True,,,,,POOL,Don’t know,11.615
+P7A-SOC-01,Q18_b,likert,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Totally agree,11.221
+P7A-SOC-01,Q18_b,likert,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Tend to agree,23.41
+P7A-SOC-01,Q18_b,likert,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Tend to disagree,31.866
+P7A-SOC-01,Q18_b,likert,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Totally disagree,21.31
+P7A-SOC-01,Q18_b,likert,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Don’t know,12.193
+P7A-SOC-01,Q18_c,likert,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-SOC-01,Q18_c,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Totally agree,17.864
+P7A-SOC-01,Q18_c,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Tend to agree,29.816
+P7A-SOC-01,Q18_c,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Tend to disagree,31.298
+P7A-SOC-01,Q18_c,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Totally disagree,21.022
+P7A-SOC-01,Q18_c,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Don’t know,0
+P7A-SOC-01,Q18_c,likert,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-SOC-01,Q18_c,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Totally agree,22.506
+P7A-SOC-01,Q18_c,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Tend to agree,33.464
+P7A-SOC-01,Q18_c,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Tend to disagree,29.127
+P7A-SOC-01,Q18_c,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Totally disagree,14.903
+P7A-SOC-01,Q18_c,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Don’t know,0
+P7A-SOC-01,Q18_c,likert,IQGE,True,related,,16.08,,IQGE,Totally agree,16.095
+P7A-SOC-01,Q18_c,likert,IQGE,True,related,,16.08,,IQGE,Tend to agree,28.448
+P7A-SOC-01,Q18_c,likert,IQGE,True,related,,16.08,,IQGE,Tend to disagree,30.67
+P7A-SOC-01,Q18_c,likert,IQGE,True,related,,16.08,,IQGE,Totally disagree,24.786
+P7A-SOC-01,Q18_c,likert,UNIF,True,,,,,UNIF,Totally agree,25.0
+P7A-SOC-01,Q18_c,likert,UNIF,True,,,,,UNIF,Tend to agree,25.0
+P7A-SOC-01,Q18_c,likert,UNIF,True,,,,,UNIF,Tend to disagree,25.0
+P7A-SOC-01,Q18_c,likert,UNIF,True,,,,,UNIF,Totally disagree,25.0
+P7A-SOC-01,Q18_c,likert,UNIF,True,,,,,UNIF,Don’t know,0.0
+P7A-SOC-01,Q18_c,likert,POOL,True,,,,,POOL,Totally agree,15.808
+P7A-SOC-01,Q18_c,likert,POOL,True,,,,,POOL,Tend to agree,22.846
+P7A-SOC-01,Q18_c,likert,POOL,True,,,,,POOL,Tend to disagree,25.115
+P7A-SOC-01,Q18_c,likert,POOL,True,,,,,POOL,Totally disagree,25.923
+P7A-SOC-01,Q18_c,likert,POOL,True,,,,,POOL,Don’t know,10.308
+P7A-SOC-01,Q18_c,likert,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Totally agree,11.041
+P7A-SOC-01,Q18_c,likert,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Tend to agree,18.601
+P7A-SOC-01,Q18_c,likert,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Tend to disagree,26.318
+P7A-SOC-01,Q18_c,likert,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Totally disagree,32.66
+P7A-SOC-01,Q18_c,likert,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Don’t know,11.38
+P7A-SOC-01,Q18_d,likert,pie-0.2,False,,,,NOT_RELIABLY_ESTIMABLE,pie-0.2,,
+P7A-SOC-01,Q18_d,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Totally agree,14.52
+P7A-SOC-01,Q18_d,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Tend to agree,28.619
+P7A-SOC-01,Q18_d,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Tend to disagree,30.71
+P7A-SOC-01,Q18_d,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Totally disagree,26.151
+P7A-SOC-01,Q18_d,likert,pie-0.6,True,,,,MODEL_EXTRAPOLATED,pie-0.6,Don’t know,0
+P7A-SOC-01,Q18_d,likert,pie-0.7,False,5,True,,NOT_RELIABLY_ESTIMABLE,pie-0.7,,
+P7A-SOC-01,Q18_d,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Totally agree,19.066
+P7A-SOC-01,Q18_d,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Tend to agree,31.78
+P7A-SOC-01,Q18_d,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Tend to disagree,30.793
+P7A-SOC-01,Q18_d,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Totally disagree,18.361
+P7A-SOC-01,Q18_d,likert,pie-0.7x,True,4,False,14.13,MODEL_EXTRAPOLATED,pie-0.7x,Don’t know,0
+P7A-SOC-01,Q18_d,likert,IQGE,True,related,,16.08,,IQGE,Totally agree,16.08
+P7A-SOC-01,Q18_d,likert,IQGE,True,related,,16.08,,IQGE,Tend to agree,28.437
+P7A-SOC-01,Q18_d,likert,IQGE,True,related,,16.08,,IQGE,Tend to disagree,30.67
+P7A-SOC-01,Q18_d,likert,IQGE,True,related,,16.08,,IQGE,Totally disagree,24.814
+P7A-SOC-01,Q18_d,likert,UNIF,True,,,,,UNIF,Totally agree,25.0
+P7A-SOC-01,Q18_d,likert,UNIF,True,,,,,UNIF,Tend to agree,25.0
+P7A-SOC-01,Q18_d,likert,UNIF,True,,,,,UNIF,Tend to disagree,25.0
+P7A-SOC-01,Q18_d,likert,UNIF,True,,,,,UNIF,Totally disagree,25.0
+P7A-SOC-01,Q18_d,likert,UNIF,True,,,,,UNIF,Don’t know,0.0
+P7A-SOC-01,Q18_d,likert,POOL,True,,,,,POOL,Totally agree,15.538
+P7A-SOC-01,Q18_d,likert,POOL,True,,,,,POOL,Tend to agree,24.0
+P7A-SOC-01,Q18_d,likert,POOL,True,,,,,POOL,Tend to disagree,27.038
+P7A-SOC-01,Q18_d,likert,POOL,True,,,,,POOL,Totally disagree,21.192
+P7A-SOC-01,Q18_d,likert,POOL,True,,,,,POOL,Don’t know,12.231
+P7A-SOC-01,Q18_d,likert,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Totally agree,11.451
+P7A-SOC-01,Q18_d,likert,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Tend to agree,18.64
+P7A-SOC-01,Q18_d,likert,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Tend to disagree,30.089
+P7A-SOC-01,Q18_d,likert,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Totally disagree,25.042
+P7A-SOC-01,Q18_d,likert,B5,True,,,,,"['IT', 'CY', 'SK', 'BG', 'HR']",Don’t know,14.778
