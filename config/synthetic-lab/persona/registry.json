@@ -273,6 +273,51 @@
    "approvedAt": null,
    "notes": "Sprint 10/2026. Περιλαμβάνει: διορθώσεις κλιμάκων, MAPLE 2/2019, μοντέλο ψήφου ecm-0.2a (C4a: αποχή/αναποφάσιστοι με προηγούμενη ψήφο — ροές 2024–4/2026: F4 25,3→17,2), autolink-1 (runtime). Απορρίφθηκαν: C3, C3b, C4b, C4d, C4e, C7. Γενικός κανόνας διαΝΕΟσις 2024 (ήδη ειδωμένο): M1 5,38 έναντι 5,28, M3 0,067 έναντι 0,065 (εντός ορίων). Τελικό holdout ESS11 (μία εκτέλεση): σφάλμα συσχετίσεων 0,156→0,152, 80% CI διαφοράς [−0,006, −0,002]· άγκυρες ίδιες. Lock 8442f2079fe2. STAGED: δεν ενεργοποιείται χωρίς ρητή έγκριση (registry.py approve --by).",
    "scope": "general"
+  },
+  {
+   "version": "pie-0.4",
+   "status": "staged",
+   "licencePolicy": "research",
+   "cutoff": "2026-10",
+   "dataSnapshot": "6691d76b09a8f5457dd1dbfe604dc52d784fa2256f08bfe21d410a8cac25fd84",
+   "createdAt": "2026-10-29T00:39:46Z",
+   "codeCommit": "024fae6",
+   "nItems": 1696,
+   "sources": [
+    "dn2015a",
+    "dn2015n",
+    "dn2017",
+    "dn2018a",
+    "dn2018b",
+    "dn2020a",
+    "dn2020b",
+    "dn2022a",
+    "dn2022b",
+    "dn2022s",
+    "dn2024a",
+    "dn2024b",
+    "dn2024c",
+    "cses2009",
+    "cses2012",
+    "cses2015a",
+    "cses2015b",
+    "cses2019",
+    "undpolar2022",
+    "maple2019pre",
+    "maple2019post",
+    "maple2019feb"
+   ],
+   "evaluation": ".synthetic-lab-data/persona/sprint/regression-dn2024-e1.json",
+   "evaluationSummary": {
+    "M1_marginal_MAE_pp": 5.401,
+    "M3_assoc_abs_err": 0.064,
+    "split": "final",
+    "lock": "5c519e52cd22274c61ae34726d47c522fb962c04916ddd014707086a5a879d39"
+   },
+   "approvedBy": null,
+   "approvedAt": null,
+   "notes": "Phase 3 (10/2026). pie-0.3 + E1 (πολυχορικός εκτιμητής υπολοίπων μπαταρίας). Επιλογή (DEMOTEC/ESS10): σφάλμα συσχετίσεων 0,166→0,131 και 0,184→0,166, περιθώρια ίδια. Γενικός κανόνας διαΝΕΟσις 2024: M1 5,40, M3 0,064. Επιβεβαίωση μία φορά σε ανέγγιχτα LiTS IV + ISSP 2023: σφάλμα συσχετίσεων −0,024 (80% CI [−0,028, −0,020]). Runtime pie-runtime-2 (ισχύει για κάθε έκδοση). STAGED: ενεργοποίηση μόνο με ρητή έγκριση.",
+   "scope": "general"
   }
  ]
 }
