@@ -81,6 +81,30 @@ def selective(d, deltas=(0.0, 1.0, 2.0)):
     return out, curve
 
 
+LABELS = {"1": "Άμεσο ελληνικό τεκμήριο", "2": "Επικυρωμένο σχετικό ελληνικό τεκμήριο", "3": "Επικυρωμένη διεθνής μεταφορά",
+          "4": "Πειραματική συμπερασματολογία", "5": "Ανεπαρκές τεκμήριο"}
+
+
+def export_policy(root, rep):
+    """Πολιτική runtime (config/synthetic-lab/persona/gpm/evidence-tiers.json) από τα βαθμονομημένα σφάλματα."""
+    T = rep["tiers"]
+    src = {"1": "persona final (διαΝΕΟσις 2024, ίδια ερώτηση)", "2": "Phase 4 H1–H7 (IQGE paraphrase/related)", "3": "Phase 5 S1 τελικό (B5)", "4": "Phase 4 weak + Phase 5 S2 C"}
+    tiers = {}
+    for k in ("1", "2", "3", "4"):
+        v = T[k]
+        # επικυρωμένη = σαφές πλεονέκτημα έναντι της ομοιόμορφης (≥ 5 π.μ.) και ≤ 20% χειρότερες από αυτήν
+        valid = v["gainVsUniform"] >= 5 and v["shareWorseThanUniform"] <= 0.2
+        tiers[k] = {"label": LABELS[k], "validated": bool(valid), "expectedMAE": v["MAE"], "medianAE": v["median"], "p90": v["p90"], "cover80": v["cover80"],
+                    "uniformMAE": v["uniformMAE"], "n": v["n"], "source": src[k]}
+    tiers["5"] = {"label": LABELS["5"], "validated": False, "expectedMAE": None, "medianAE": None, "p90": None, "cover80": None, "uniformMAE": None, "n": 0, "source": "—"}
+    pol = {"version": "evidence-1", "calibratedAt": rep["createdAt"][:10], "tiers": tiers,
+           "rules": {"greekRelatedOnly": "abstain" if not tiers["2"]["validated"] else "experimental", "relatedEquivalentLink": "abstain", "driftYears": 4, "voteCurrentMonths": 3},
+           "note": "Βαθμίδες = κατηγορίες τεκμηρίου, όχι εγγύηση ακρίβειας. Βαθμονόμηση σε ήδη βαθμολογημένα holdouts (gpm_tiers.py)."}
+    p = os.path.join(root, "config", "synthetic-lab", "persona", "gpm", "evidence-tiers.json")
+    os.makedirs(os.path.dirname(p), exist_ok=True)
+    json.dump(pol, open(p, "w"), ensure_ascii=False, indent=1)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--root", default=".")
@@ -100,6 +124,7 @@ def main():
         rep["tier3ByDomain"] = {k: summary(g) for k, g in d[d.tier == 3].groupby("domain")}
     rep["tier4BySurvey"] = {k: summary(g) for k, g in d[d.tier == 4].groupby("survey")}
     json.dump(rep, open(a.out, "w"), ensure_ascii=False, indent=1)
+    export_policy(root, rep)
     for t, v in rep["tiers"].items():
         print("Tier", t, {k: v[k] for k in ("n", "MAE", "median", "p90", "uniformMAE", "gainVsUniform", "shareWorseThanUniform", "cover80")}, v["selective"])
 

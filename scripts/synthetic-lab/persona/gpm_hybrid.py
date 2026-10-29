@@ -104,7 +104,13 @@ def main():
             nsurv.setdefault(mm["link"], set()).add(mm["survey"])
         shared = [x for x in shared if (St[:, x[0]] > 0).mean() >= 0.9]
         cover = sorted(shared, key=lambda x: (-len(nsurv[x[1]]), hashlib.sha256(x[1].encode()).hexdigest()))
-        anchors = cover[: a.anchors]
+        anchors, seen = [], set()
+        for x in cover:
+            if x[1] not in seen:
+                anchors.append(x)
+                seen.add(x[1])
+            if len(anchors) == a.anchors:
+                break
         anc_t = [j for j, _ in anchors]
         anc_f = [cf[l] for _, l in anchors]
         Sf = X[rf][:, anc_f].toarray()
@@ -127,7 +133,8 @@ def main():
         At = zs(St[:, anc_t], wt)
         Af = zs(Sf, wf)
         targets_pop = {c: {lev: float(np.average(R[c].values[rf].astype(str) == lev, weights=wf)) for lev in levels[c]} for c in DEMO}
-        cand = [j for j in range(len(ct)) if j not in anc_t and (St[:, j] > 0).sum() >= 0.8 * len(rt)]
+        anc_links = {l for _, l in anchors}
+        cand = [j for j in range(len(ct)) if j not in anc_t and meta[ct[j]]["link"] not in anc_links and (St[:, j] > 0).sum() >= 0.8 * len(rt)]
         cand = sorted(cand, key=lambda j: hashlib.sha256(meta[ct[j]]["id"].encode()).hexdigest())[: a.targets]
         demo_t = {c: R[c].values[rt].astype(str) for c in DEMO}
         young = np.isin(demo_t["age_band"], ["17-24", "25-34"])

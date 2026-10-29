@@ -245,15 +245,29 @@ def main():
     E = None
     report = {"createdAt": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "k": a.k, "trainSurveys": sorted(train_s), "donorSurveys": donors_s, "targets": {}}
 
+    from eval_persona import match_items, norm as enorm
+
+    bank = {x["id"]: x for x in json.load(open(os.path.join(root, ".synthetic-lab-data", "persona", "harmonized", "item_bank.json")))}
+    col_of = {mm["id"]: mm["col"] for mm in meta}
+
     def prepare(T):
+        """Γνωστές ερωτήσεις: ίδια οικογένεια με ίδιες ετικέτες επιλογών (κανόνας eval_persona.match_items), αντιστοίχιση κωδικών ανά ετικέτα."""
         rows = np.where(R.survey.values == T)[0]
-        tcols = [mm for mm in meta if mm["survey"] == T and mm["type"] in ("ordinal", "binary") and mm["src"] != "anchor"]
+        hold = [b for b in bank.values() if b["file"] == T and b["type"] in ("ordinal", "binary") and b["id"] in col_of]
+        train = [dict(b, n=int(X[:, col_of[b["id"]]].nnz)) for b in bank.values() if b["file"] in train_s and b["type"] in ("ordinal", "binary") and b["id"] in col_of]
         items = []
-        for mm in tcols:
-            src = last_wave_item(meta, R, X, mm["link"], train_s)
-            if src is None or mm["link"] not in gpm.fidx or src["K"] != mm["K"]:
+        for pr in match_items(hold, train):
+            if pr["kind"] != "repeated":
                 continue
-            items.append(dict(mm, srcCol=src["col"], srcSurvey=src["survey"]))
+            h, t = pr["hold"], pr["train"]
+            tcol = col_of[t["id"]]
+            if meta[tcol]["link"] not in gpm.fidx:
+                continue
+            hcodes = [o["code"] for o in h["options"]]
+            inv = {tc: hc for hc, tc in pr["map"].items()}
+            t2h = np.array([hcodes.index(inv[o["code"]]) for o in t["options"]])
+            items.append(dict(meta[col_of[h["id"]]], srcCol=tcol, srcSurvey=t["file"], link=meta[tcol]["link"], t2h=t2h, holdFamily=h.get("family"),
+                              holdLabels=[enorm(o["label"]) for o in h["options"]], K=len(hcodes)))
         Yr = Xr[rows][:, [it["col"] for it in items]].toarray().astype(int) - 1
         keep = (Yr >= 0).mean(axis=0) >= 0.5
         items = [it for it, k in zip(items, keep) if k]
@@ -264,7 +278,7 @@ def main():
     def src_dist(it):
         rr = np.where(R.survey.values == it["srcSurvey"])[0]
         y = Xr[rr][:, [it["srcCol"]]].toarray().ravel().astype(int) - 1
-        return wdist(y, GC.wnorm(R.weight.values[rr]), it["K"]), rr, y
+        return wdist(y, GC.wnorm(R.weight.values[rr]), len(it["t2h"])), rr, y
 
     def tau_of(p):
         c = np.clip(np.cumsum(p)[:-1], 1e-4, 1 - 1e-4)
@@ -301,20 +315,21 @@ def main():
                     th[m] = gpm.posterior(s, np.array([loc[d][1] for d in donor[m]]), rng)
         for j, it in enumerate(items):
             p, _, _ = src_dist(it)
-            Y[:, j] = gpm.answer(th, it["link"], tau_of(p), kappa, rng)
+            Y[:, j] = it["t2h"][gpm.answer(th, it["link"], tau_of(p), kappa, rng)]
             if mode == "D":
-                # πραγματική απάντηση του δότη στην ίδια οικογένεια, όπου υπάρχει
-                fam_cols = {mm["col"] for mm in meta if mm["link"] == it["link"] and mm["survey"] in donors_s and mm["K"] == it["K"]}
-                for c in fam_cols:
-                    v = Xr[donor][:, [c]].toarray().ravel().astype(int) - 1
-                    Y[v >= 0, j] = v[v >= 0]
+                # πραγματική απάντηση του δότη στην ΙΔΙΑ ερώτηση (ίδια οικογένεια, ίδιες ετικέτες), όπου υπάρχει
+                for bid, bb in bank.items():
+                    if bb["file"] in donors_s and bb.get("family") == it["holdFamily"] and bid in col_of and sorted(enorm(o["label"]) for o in bb["options"]) == sorted(it["holdLabels"]):
+                        mp_ = np.array([it["holdLabels"].index(enorm(o["label"])) for o in bb["options"]])
+                        v = Xr[donor][:, [col_of[bid]]].toarray().ravel().astype(int) - 1
+                        Y[v >= 0, j] = mp_[v[v >= 0]]
         return Y
 
     def gen_m0(items, skel, rng):
         Y = np.empty((len(skel), len(items)), dtype=int)
         for j, it in enumerate(items):
             p, _, _ = src_dist(it)
-            Y[:, j] = rng.choice(it["K"], len(skel), p=p)
+            Y[:, j] = it["t2h"][rng.choice(len(p), len(skel), p=p)]
         return Y
 
     def gen_m1(items, skel, rng):
@@ -325,35 +340,33 @@ def main():
             _, rr, y = src_dist(it)
             ok = y >= 0
             if len(np.unique(y[ok])) < 2:
-                Y[:, j] = y[ok][0]
+                Y[:, j] = it["t2h"][y[ok][0]]
                 continue
             mdl = LogisticRegression(C=1.0, max_iter=300).fit(onehot(R.iloc[rr[ok]], lev), y[ok], sample_weight=GC.wnorm(R.weight.values[rr[ok]]))
-            P = np.zeros((len(skel), it["K"]))
+            Kt = len(it["t2h"])
+            P = np.zeros((len(skel), Kt))
             P[:, mdl.classes_] = mdl.predict_proba(Ds)
-            Y[:, j] = (rng.random(len(skel))[:, None] > np.cumsum(P, axis=1)).sum(axis=1).clip(0, it["K"] - 1)
+            Y[:, j] = it["t2h"][(rng.random(len(skel))[:, None] > np.cumsum(P, axis=1)).sum(axis=1).clip(0, Kt - 1)]
         return Y
 
     def gen_pie(items, skel, rng, model_dir):
         import pie
-        from eval_persona import match_items
 
         mdl = json.load(open(os.path.join(model_dir, "model.json")))
         mitems = json.load(open(os.path.join(model_dir, "items.json")))
-        bank = {b["id"]: b for b in json.load(open(os.path.join(root, ".synthetic-lab-data", "persona", "harmonized", "item_bank.json")))}
-        hold = [bank[it["id"]] for it in items]
-        mp = match_items(hold, mitems)
+        hold = [bank[meta[it["col"]]["id"]] for it in items]
+        mp = {x["hold"]["id"]: x for x in match_items(hold, mitems) if x["kind"] == "repeated"}
         sk = skel[["age_band", "gender", "edu3", "nuts1", "urban"]].copy()
         P = pie.generate_anchors(mdl, sk, rng)
         Y = np.full((len(skel), len(items)), -1)
         for j, it in enumerate(items):
-            t = mp.get(it["id"]) if isinstance(mp, dict) else None
-            if not t:
+            x = mp.get(meta[it["col"]]["id"])
+            if not x:
                 continue
-            codes = pie.answer_item(t, P, rng, factors=True, model=mdl)
-            hc = [o["code"] for o in bank[it["id"]]["options"]]
-            tc = [o["code"] for o in t["options"]]
-            idx = {c: hc.index(c) if c in hc else (tc.index(c) if c in tc else -1) for c in set(codes)}
-            Y[:, j] = [idx.get(c, -1) if c != "dk" else -1 for c in codes]
+            codes = pie.answer_item(x["train"], P, rng, factors=True, model=mdl)
+            hcodes = [o["code"] for o in x["hold"]["options"]]
+            inv = {tc: hc for hc, tc in x["map"].items()}
+            Y[:, j] = [hcodes.index(inv[c]) if c in inv else -1 for c in codes]
         return Y
 
     # κ: επιλογή σε έρευνα ΕΚΠΑΙΔΕΥΣΗΣ (dn2022a), με τον ίδιο σκελετό-λογική
@@ -362,7 +375,7 @@ def main():
     items_c = []
     for mm in meta:
         if mm["survey"] == cal and mm["type"] in ("ordinal", "binary") and mm["src"] != "anchor" and mm["link"] in gpm.fidx:
-            items_c.append(dict(mm, srcCol=mm["col"], srcSurvey=cal))
+            items_c.append(dict(mm, srcCol=mm["col"], srcSurvey=cal, t2h=np.arange(mm["K"])))
     items_c = items_c[:60]
     Yc = Xr[rows_c][:, [it["col"] for it in items_c]].toarray().astype(int) - 1
     Wc = GC.wnorm(R.weight.values[rows_c])

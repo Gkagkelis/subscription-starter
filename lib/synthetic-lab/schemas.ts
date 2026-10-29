@@ -78,6 +78,24 @@ export const QuestionSchema = z
             undecidedOption: str(150).nullable().optional()
           })
           .nullable()
+          .optional(),
+        iqge: z
+          .object({
+            version: str(40),
+            modelVersion: str(80),
+            level: z.record(str(150), z.number().min(0).max(1)),
+            int80: z.record(str(150), z.tuple([z.number(), z.number()])).nullable().optional(),
+            rank: z.array(z.object({ itemId: str(120), weight: z.number(), sign: z.union([z.literal(1), z.literal(-1)]), mean: z.number(), sd: z.number() })).max(10),
+            scoreSd: z.number(),
+            atten: z.number().min(0).max(1),
+            tier: z.enum(['paraphrase', 'related', 'weak', 'international']),
+            expectedMAE: z.number().min(0).max(100),
+            evidence: z.array(z.object({ id: str(120), sim: z.number(), text: str(500), weight: z.number() })).max(10),
+            groupShift: z.record(str(40), z.number()).nullable().optional(),
+            international: z.object({ basis: str(40), countries: z.array(str(10)).max(30), survey: str(60), itemId: str(120) }).nullable().optional(),
+            lake: z.enum(['greek', 'international']).nullable().optional()
+          })
+          .nullable()
           .optional()
       })
       .nullable()
@@ -125,7 +143,8 @@ export const PlanSchema = z.object({
   engine: z.enum(['standard', 'evidence', 'persona']).optional(),
   personaModelVersion: z.string().max(80).regex(/^[\w.\-]+$/).nullable().optional(),
   panelId: z.string().max(100).regex(/^[\w\-]+$/).nullable().optional(),
-  personaAutoLink: z.boolean().optional()
+  personaAutoLink: z.boolean().optional(),
+  allowExperimental: z.boolean().optional()
 });
 
 export const RunStudySchema = z.object({

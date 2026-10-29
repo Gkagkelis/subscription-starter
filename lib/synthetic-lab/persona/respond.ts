@@ -18,6 +18,7 @@ import { dkProb, featureVector, itemProbs, linear, type PersonaItem, type Person
 import { theta, type PersonaState } from './panel';
 import { answerVote, prepareVote, type PreparedVote } from './vote';
 import { incumbencyMismatch } from './incumbency';
+import type { EvidenceDecision } from './evidence-tier';
 
 export const PIE_TEMPORAL_LIMIT_YEARS = 4;
 
@@ -65,6 +66,8 @@ export interface PersonaQuestionProvenance {
   generatedBy: 'statistical_model';
   /** Αυτόματη ερμηνεία (C6): πρόταση/αποδοχή σύνδεσης για ερώτηση χωρίς χειροκίνητη σύνδεση. */
   autoLink?: { version: string; accepted: boolean; confidence: number; target: string | null; reason: string } | null;
+  /** PHASE6: βαθμίδα τεκμηρίωσης (1–5), δρομολόγηση, αναμενόμενο σφάλμα, περιορισμοί· Tier 5 = αποχή. */
+  evidenceTier?: EvidenceDecision | null;
 }
 
 /**

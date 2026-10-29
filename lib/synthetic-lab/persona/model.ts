@@ -101,6 +101,8 @@ export interface PersonaModel {
    * ίδιων ερωτήσεων (family)· αλλιώς ξεχωριστό κλειδί (καμία επινοημένη σχέση).
    */
   constructLatent?: { units: Record<string, { key: string; g: number }>; stats?: Record<string, unknown> } | null;
+  /** PHASE6: πολιτική τεκμηρίωσης (βαθμίδες/αποχή) και μεταδεδομένα GPM. Χωρίς αυτό το πεδίο η συμπεριφορά δεν αλλάζει. */
+  phase6?: { evidencePolicy: string; gpm?: Record<string, unknown> | null; notes?: string[] } | null;
 }
 
 /** Μοντέλο εκλογικής επιλογής (conditional logit χωρίς σταθερές ανά κόμμα· βλ. scripts/synthetic-lab/persona/vote_model.py). */

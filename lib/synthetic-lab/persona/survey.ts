@@ -24,6 +24,7 @@ import { defaultModelVersion, loadPersonaModel, PIE_RUNTIME_VERSION, readRegistr
 import { buildPanel, loadPanel, type SyntheticPanel } from './panel';
 import { answerPersona, expectedDistribution, prepareQuestion, type PreparedPersonaQuestion } from './respond';
 import { AUTOLINK_VERSION, buildIdf, suggestLink } from './autolink';
+import { ABSTAIN_MESSAGE, applyEvidenceDecision, classifyEvidence, loadEvidencePolicy, routingSummary, type EvidenceDecision } from './evidence-tier';
 
 export interface PersonaSurveyOptions {
   plan: StudyPlan;
@@ -146,6 +147,21 @@ export function runPersonaSurvey(o: PersonaSurveyOptions): StudyRun {
     pq.provenance.autoLink = { version: AUTOLINK_VERSION, accepted: s.accepted, confidence: s.confidence, target: s.target, reason: s.reason };
     return pq;
   });
+  // PHASE6: δρομολόγηση και βαθμίδες τεκμηρίωσης (Tier 1–5)· Tier 5 → αποχή. Μόνο για μοντέλα με πολιτική τεκμηρίωσης.
+  const evidenceDecisions: { questionId: string; d: EvidenceDecision }[] = [];
+  const evPolicy = model.phase6?.evidencePolicy ? loadEvidencePolicy() : null;
+  if (evPolicy) {
+    prepared.forEach((pq, i) => {
+      const d = classifyEvidence(pq, model, evPolicy, refMonth, { allowExperimental: !!o.plan.allowExperimental });
+      prepared[i] = applyEvidenceDecision(pq, d);
+      evidenceDecisions.push({ questionId: pq.q.id, d });
+    });
+    warnings.push(routingSummary(evidenceDecisions));
+    const ab = evidenceDecisions.filter((x) => x.d.abstain).map((x) => x.questionId);
+    if (ab.length) warnings.push(`${ab.join(', ')}: ${ABSTAIN_MESSAGE}`);
+    const exp = evidenceDecisions.filter((x) => x.d.experimental && !x.d.abstain).map((x) => x.questionId);
+    if (exp.length) warnings.push(`ΠΕΙΡΑΜΑΤΙΚΕΣ ΕΚΤΙΜΗΣΕΙΣ (Tier 4: ${exp.join(', ')}): δεν έχουν επικυρωθεί· ενδεικτικό σενάριο με ευρεία αβεβαιότητα, όχι μέτρηση.`);
+  } else if (model.phase6?.evidencePolicy) warnings.push('Η πολιτική τεκμηρίωσης δεν βρέθηκε (config/synthetic-lab/persona/gpm/evidence-tiers.json)· οι βαθμίδες δεν εφαρμόστηκαν.');
   const auto = prepared.filter((p) => p.provenance.autoLink?.accepted).map((p) => p.q.id);
   if (auto.length) warnings.push(`Αυτόματη ερμηνεία (${AUTOLINK_VERSION}): ${auto.join(', ')} συνδέθηκαν αυτόματα με πραγματικά δεδομένα (MODEL-EXTRAPOLATED, η αντιστοίχιση καταγράφεται στην προέλευση).`);
   // Συγγενικές (όχι ίδιες) ερωτήσεις: τυφλή αξιολόγηση (διαΝΕΟσις 2022/2024, Phase 3) — απόκλιση περιθωρίων συχνά ΜΕΓΑΛΥΤΕΡΗ
@@ -232,12 +248,19 @@ export function runPersonaSurvey(o: PersonaSurveyOptions): StudyRun {
     warnings: Array.from(new Set(warnings)),
     datasetsUsed: [pop.summary.datasetId, ...pop.summary.updateStatus.targetsDatasetIds, ...Array.from(usedFiles).map((f) => `pie:${f}`)],
     evidenceContext: { referenceYear: o.plan.referenceYear || null, referenceMonth: o.plan.referenceMonth || null, holdout: [], populationNote: null },
-    validation: {
-      status: 'partially_validated',
-      message: 'Ο μηχανισμός PIE αξιολογήθηκε σε ανεξάρτητο holdout (διαΝΕΟσις 2024)· βλ. docs/synthetic-lab/PERSONA_RESULTS.md. Η συγκεκριμένη έρευνα δεν έχει επικυρωθεί απέναντι σε πραγματική.',
-      linkedMetrics: [],
-      backtestIds: ['persona-final-holdout']
-    },
+    validation: evPolicy
+      ? {
+          status: 'partially_validated',
+          message: `Βαθμίδες τεκμηρίωσης ανά ερώτηση (${evPolicy.version}, βαθμονόμηση ${evPolicy.calibratedAt}): αναμενόμενο σφάλμα από ήδη βαθμολογημένα πραγματικά ελληνικά holdouts — βλ. docs/synthetic-lab/PHASE6_RESULTS.md. Η συγκεκριμένη έρευνα δεν έχει επικυρωθεί απέναντι σε πραγματική.`,
+          linkedMetrics: [],
+          backtestIds: ['phase6-evidence-tiers']
+        }
+      : {
+          status: 'partially_validated',
+          message: 'Ο μηχανισμός PIE αξιολογήθηκε σε ανεξάρτητο holdout (διαΝΕΟσις 2024)· βλ. docs/synthetic-lab/PERSONA_RESULTS.md. Η συγκεκριμένη έρευνα δεν έχει επικυρωθεί απέναντι σε πραγματική.',
+          linkedMetrics: [],
+          backtestIds: ['persona-final-holdout']
+        },
     stability,
     personaRun: { panelId: panel.id, modelVersion: model.version, modelSnapshot: model.dataSnapshot, licencePolicy: model.licencePolicy, modelStatus: status, anchorSources: panel.anchorSources }
   };

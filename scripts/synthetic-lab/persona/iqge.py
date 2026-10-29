@@ -83,6 +83,7 @@ def main():
              "type": item_type(q, subst), "wave": a.ref}
         r = G.interpret(t, a.ref)
         link = G.link(r, subst)
+        link["lake"] = "international" if a.international_lake else "greek"
         m = gm.match(t) if gm else None
         if m and t["type"] != "nominal":
             # PHASE5 S1: ισοδύναμη ερώτηση σε διεθνή έρευνα (πραγματικό ελληνικό περιθώριο ή μεταφορά από κοντινές χώρες)

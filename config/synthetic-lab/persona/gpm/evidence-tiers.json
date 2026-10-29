@@ -1,0 +1,68 @@
+{
+ "version": "evidence-1",
+ "calibratedAt": "2026-10-29",
+ "tiers": {
+  "1": {
+   "label": "Άμεσο ελληνικό τεκμήριο",
+   "validated": true,
+   "expectedMAE": 5.28,
+   "medianAE": 3.99,
+   "p90": 11.56,
+   "cover80": null,
+   "uniformMAE": 19.45,
+   "n": 58,
+   "source": "persona final (διαΝΕΟσις 2024, ίδια ερώτηση)"
+  },
+  "2": {
+   "label": "Επικυρωμένο σχετικό ελληνικό τεκμήριο",
+   "validated": false,
+   "expectedMAE": 12.81,
+   "medianAE": 10.78,
+   "p90": 25.96,
+   "cover80": 0.798,
+   "uniformMAE": 13.09,
+   "n": 207,
+   "source": "Phase 4 H1–H7 (IQGE paraphrase/related)"
+  },
+  "3": {
+   "label": "Επικυρωμένη διεθνής μεταφορά",
+   "validated": true,
+   "expectedMAE": 5.95,
+   "medianAE": 4.38,
+   "p90": 12.81,
+   "cover80": 0.729,
+   "uniformMAE": 23.46,
+   "n": 2567,
+   "source": "Phase 5 S1 τελικό (B5)"
+  },
+  "4": {
+   "label": "Πειραματική συμπερασματολογία",
+   "validated": false,
+   "expectedMAE": 14.13,
+   "medianAE": 11.66,
+   "p90": 27.85,
+   "cover80": 0.791,
+   "uniformMAE": 18.59,
+   "n": 659,
+   "source": "Phase 4 weak + Phase 5 S2 C"
+  },
+  "5": {
+   "label": "Ανεπαρκές τεκμήριο",
+   "validated": false,
+   "expectedMAE": null,
+   "medianAE": null,
+   "p90": null,
+   "cover80": null,
+   "uniformMAE": null,
+   "n": 0,
+   "source": "—"
+  }
+ },
+ "rules": {
+  "greekRelatedOnly": "abstain",
+  "relatedEquivalentLink": "abstain",
+  "driftYears": 4,
+  "voteCurrentMonths": 3
+ },
+ "note": "Βαθμίδες = κατηγορίες τεκμηρίου, όχι εγγύηση ακρίβειας. Βαθμονόμηση σε ήδη βαθμολογημένα holdouts (gpm_tiers.py)."
+}

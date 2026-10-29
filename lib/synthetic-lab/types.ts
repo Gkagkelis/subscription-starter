@@ -292,6 +292,8 @@ export interface IqgeLink {
   groupShift?: Record<string, number> | null;
   /** PHASE5: διεθνής βάση — χώρες-πηγές και τρόπος (greek_observed | international_transfer). */
   international?: { basis: string; countries: string[]; survey: string; itemId: string } | null;
+  /** PHASE6: βάση τεκμηρίων της ερμηνείας — μόνο ελληνική ή με διεθνή items (S2, πειραματικό). */
+  lake?: 'greek' | 'international' | null;
 }
 
 /** Κατηγορία υποστήριξης μιας ερώτησης στον μηχανισμό PIE. */
@@ -377,6 +379,8 @@ export interface StudyPlan {
   panelId?: string | null;
   /** PIE: αυτόματη ερμηνεία ερωτήσεων χωρίς χειροκίνητη σύνδεση (προεπιλογή: ναι· αποδοχή μόνο πάνω από κατώφλι). */
   personaAutoLink?: boolean;
+  /** PHASE6: να δίνονται και πειραματικές εκτιμήσεις (Tier 4) αντί για αποχή όπου η πολιτική τεκμηρίωσης το επιτρέπει. */
+  allowExperimental?: boolean;
 }
 
 /** Προέλευση μιας εμπειρικής παραμέτρου (ποσοστό επιλογής) που χρησιμοποιήθηκε σε μια εκτέλεση. */

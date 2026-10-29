@@ -10,6 +10,7 @@ import { respondPanel } from '@/lib/synthetic-lab/persona/survey';
 import { incumbencyMismatch } from '@/lib/synthetic-lab/persona/incumbency';
 import { PIE_TEMPORAL_LIMIT_YEARS, answerPersona, prepareQuestion } from '@/lib/synthetic-lab/persona/respond';
 import { answerVote, arUniform, loadScenario, type PreparedVote } from '@/lib/synthetic-lab/persona/vote';
+import { ABSTAIN_MESSAGE, applyEvidenceDecision, classifyEvidence, detectDomain, loadEvidencePolicy, type EvidencePolicy } from '@/lib/synthetic-lab/persona/evidence-tier';
 import { createRng } from '@/lib/synthetic-lab/rng';
 import { runSurvey } from '@/lib/synthetic-lab/engine/survey';
 import { CALIBRATED_POPULATION_ID } from '@/lib/synthetic-lab/population/store';
@@ -263,6 +264,73 @@ describe('PIE — IQGE (Phase 4): προϋπολογισμένη ερμηνεί�
     const { pn } = run(0.8, 'pie-x');
     expect(pn.iqge?.rank.length).toBe(0);
     expect(pn.reason).toMatch(/αγνοούνται/);
+  });
+});
+
+describe('PIE — PHASE6: δρομολόγηση, βαθμίδες τεκμηρίωσης και αποχή', () => {
+  const policy: EvidencePolicy = {
+    version: 'evidence-test', calibratedAt: '2026-10-29',
+    tiers: {
+      '1': { label: 'Άμεσο', validated: true, expectedMAE: 5.3, medianAE: 4, p90: 11.6, cover80: null, uniformMAE: 19.5, n: 58, source: 'x' },
+      '2': { label: 'Σχετικό', validated: false, expectedMAE: 12.8, medianAE: 10.8, p90: 26, cover80: 0.8, uniformMAE: 13.1, n: 207, source: 'x' },
+      '3': { label: 'Διεθνές', validated: true, expectedMAE: 5.95, medianAE: 4.4, p90: 12.8, cover80: 0.73, uniformMAE: 23.5, n: 2567, source: 'x' },
+      '4': { label: 'Πειραματικό', validated: false, expectedMAE: 14.1, medianAE: 11.7, p90: 27.9, cover80: 0.79, uniformMAE: 18.6, n: 659, source: 'x' },
+      '5': { label: 'Ανεπαρκές', validated: false, expectedMAE: null, medianAE: null, p90: null, cover80: null, uniformMAE: null, n: 0, source: '—' }
+    },
+    rules: { greekRelatedOnly: 'abstain', relatedEquivalentLink: 'abstain', driftYears: 4, voteCurrentMonths: 3 }
+  };
+  const lvl = { Καθόλου: 0.2, Λίγο: 0.3, Πολύ: 0.5 };
+  const iq = (extra: Record<string, unknown>) => ({ version: 'iqge-1', modelVersion: 'fixture', level: lvl, rank: [], scoreSd: 1, atten: 0, tier: 'related' as const, expectedMAE: 14, evidence: [], ...extra });
+  const OPTS = ['Καθόλου', 'Λίγο', 'Πολύ'];
+  it('ίδια ερώτηση σε ελληνικά δεδομένα → Tier 1 (επικυρωμένο)', () => {
+    const pq = prepareQuestion(fixtureModel, q('A', { kind: 'direct', itemId: 'f2024::A', optionMap: MAP, dkOption: 'ΔΞ/ΔΑ' }), '2026-10');
+    const d = classifyEvidence(pq, fixtureModel, policy, '2026-10');
+    expect(d.tier).toBe(1);
+    expect(d.validated).toBe(true);
+    expect(d.abstain).toBe(false);
+    expect(d.expectedMAE).toBe(5.3);
+  });
+  it('μόνο ελληνικά συγγενή τεκμήρια (IQGE) → Tier 5 αποχή χωρίς καμία συνθετική απάντηση· με allowExperimental → Tier 4', () => {
+    const pq = prepareQuestion(fixtureModel, q('N', { kind: 'equivalent', optionMap: {}, iqge: iq({}) }, OPTS), '2026-10');
+    const d = classifyEvidence(pq, fixtureModel, policy, '2026-10');
+    expect(d.tier).toBe(5);
+    const out = applyEvidenceDecision(pq, d);
+    expect(out.support).toBe('NOT_RELIABLY_ESTIMABLE');
+    expect(out.reason).toContain(ABSTAIN_MESSAGE);
+    const ans = answerPersona(out, state(1), 3);
+    expect(ans.skipped).toBe(true);
+    expect(ans.basis).toBe('not_estimable');
+    const d4 = classifyEvidence(pq, fixtureModel, policy, '2026-10', { allowExperimental: true });
+    expect(d4.tier).toBe(4);
+    expect(d4.experimental).toBe(true);
+    expect(d4.validated).toBe(false);
+  });
+  it('ισοδύναμη διεθνής ερώτηση → Tier 3· συγγενικά διεθνή τεκμήρια (S2) → Tier 4 πειραματικό', () => {
+    const intl = prepareQuestion(fixtureModel, q('I', { kind: 'equivalent', optionMap: {}, iqge: iq({ tier: 'international', international: { basis: 'international_transfer', countries: ['CY', 'IT'], survey: 'ess5', itemId: 'ess5::x' } }) }, OPTS), '2026-10');
+    expect(classifyEvidence(intl, fixtureModel, policy, '2026-10').tier).toBe(3);
+    const s2 = prepareQuestion(fixtureModel, q('S', { kind: 'equivalent', optionMap: {}, iqge: iq({ lake: 'international' }) }, OPTS), '2026-10');
+    const d = classifyEvidence(s2, fixtureModel, policy, '2026-10');
+    expect(d.tier).toBe(4);
+    expect(d.abstain).toBe(false);
+  });
+  it('ερώτηση για συγκεκριμένη μάρκα → Tier 5 (δεν συμπεραίνεται από γενικά χαρακτηριστικά)', () => {
+    const base = q('A', { kind: 'direct', itemId: 'f2024::A', optionMap: MAP, dkOption: 'ΔΞ/ΔΑ' });
+    const pq = prepareQuestion(fixtureModel, { ...base, brandLink: { category: 'svod', brand: 'X', measure: 'awareness' } }, '2026-10');
+    const d = classifyEvidence(pq, fixtureModel, policy, '2026-10');
+    expect(d.tier).toBe(5);
+    expect(d.specialist).toBe('brand_entity');
+  });
+  it('ανίχνευση τομέα για μικτό ερωτηματολόγιο', () => {
+    const mk = (text: string) => ({ id: 'x', type: 'single_choice', text, options: ['Ναι', 'Όχι'], required: true }) as Question;
+    expect(detectDomain(mk('Τι θα ψηφίζατε αν γίνονταν εκλογές την Κυριακή;'))).toBe('POLITICAL');
+    expect(detectDomain(mk('Πόσο συχνά ψωνίζετε στο σούπερ μάρκετ;'))).toBe('CONSUMER');
+    expect(detectDomain(mk('Πόσο ικανοποιημένος είστε από τη ζωή σας;'))).toBe('SOCIAL');
+  });
+  it('η πολιτική του repo φορτώνεται και η βαθμίδα 2 (ελληνικά συγγενή) δεν είναι επικυρωμένη', () => {
+    const p = loadEvidencePolicy();
+    if (!p) return;
+    expect(p.tiers['2'].validated).toBe(false);
+    expect(p.rules.greekRelatedOnly).toBe('abstain');
   });
 });
 
