@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Interactive Decision Lab — Repair, Replace or Upgrade?</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="mark"></span><div><b>Interactive Decision Lab</b><small>Repair, Replace or Upgrade? · Greek Synthetic Research Lab</small></div></div>
+  <div class="synthflag">Synthetic research · 500 συνθετικά προφίλ — όχι πραγματικοί συμμετέχοντες</div>
+</header>
+<nav class="tabs" role="tablist">
+  <button role="tab" aria-selected="true" data-tab="scen">Σενάρια</button>
+  <button role="tab" aria-selected="false" data-tab="offers">Σύγκριση προσφορών</button>
+  <button role="tab" aria-selected="false" data-tab="segs">Καταναλωτές &amp; segments</button>
+  <button role="tab" aria-selected="false" data-tab="evid">Χάρτης τεκμηρίωσης</button>
+</nav>
+<main>
+  <section id="scen" class="pane">
+    <div class="intro">Κάθε συνδυασμός παρακάτω είναι ένα σενάριο που <b>εκτελέστηκε πραγματικά</b> στον κινητήρα του Lab (IQGE + PIE pie-0.7) για τους ίδιους 500 καταναλωτές. Οι χειρισμοί ακολουθούν το πλέγμα των 82 εκτελεσμένων σεναρίων. Η εφαρμογή δεν υπολογίζει τίποτα μόνη της: δείχνει ό,τι παρήγαγε το μοντέλο και την <b>απόφαση τεκμηρίωσης</b> του Lab.</div>
+    <div class="fam" role="group" aria-label="Απόφαση">
+      <button data-fam="repair" aria-pressed="true">Επισκευή ή αντικατάσταση</button>
+      <button data-fam="tradein" aria-pressed="false">Trade-in</button>
+      <button data-fam="refurb" aria-pressed="false">Νέο ή refurbished</button>
+      <button data-fam="delivery" aria-pressed="false">Παράδοση</button>
+      <button data-fam="install" aria-pressed="false">Εγκατάσταση</button>
+    </div>
+    <div class="grid2">
+      <div class="card"><h3>Baseline</h3><div id="ctlA" class="ctl"></div><div id="outA"></div></div>
+      <div class="card"><h3>Εναλλακτικό σενάριο</h3><div id="ctlB" class="ctl"></div><div id="outB"></div></div>
+    </div>
+    <div class="card" id="diffCard"></div>
+    <div class="card"><div class="ch"><h3 id="curveTitle">Καμπύλη απόκρισης του μοντέλου</h3><span class="exp"></span></div><div id="curve"></div><div class="cap" id="curveCap"></div></div>
+  </section>
+
+  <section id="offers" class="pane" hidden>
+    <div class="intro">Συνθέστε δύο προσφορές για την ίδια συσκευή (πλυντήριο 8 kg, κλάση A), με τα επίπεδα του σχεδιασμού των πειραμάτων. Η εφαρμογή ελέγχει τη δομή της σύγκρισης και δείχνει τι μπορεί να πει το Lab.</div>
+    <div class="grid2"><div class="card"><h3>Προσφορά Α</h3><div id="offA" class="ctl"></div></div><div class="card"><h3>Προσφορά Β</h3><div id="offB" class="ctl"></div></div></div>
+    <div class="card" id="offRes"></div>
+    <div class="card"><div class="ch"><h3>Τι «έμαθε» το πειραματικό μοντέλο επιλογής</h3><span class="exp"></span></div><div id="coef"></div><div class="cap" id="coefCap"></div></div>
+  </section>
+
+  <section id="segs" class="pane" hidden>
+    <div class="intro">Υπολογισμένα δεδομένα του Lab: εξοπλισμός νοικοκυριών (μοντέλο pie-hbs-0.1, ελληνικά μικροδεδομένα ΕΟΠ). Τα φίλτρα ξαναϋπολογίζουν τα ποσοστά από τις 500 εγγραφές.</div>
+    <div class="card"><div id="filters" class="filters"></div></div>
+    <div class="grid2">
+      <div class="card"><div class="ch"><h3>Εξοπλισμός νοικοκυριών</h3><span class="ok">Υπολογισμένο από το Lab</span></div><div id="ownChart"></div><div class="cap" id="ownCap"></div></div>
+      <div class="card"><div class="ch"><h3>Segments εγκατεστημένης βάσης</h3><span class="ok">Υπολογισμένο από το Lab</span></div><div id="segChart"></div><div class="cap" id="segCap"></div></div>
+    </div>
+    <div class="card"><h3>Προφίλ segments</h3><div id="segTable" class="tw"></div></div>
+  </section>
+
+  <section id="evid" class="pane" hidden>
+    <div class="intro">Για κάθε ερώτηση: η βαθμίδα τεκμηρίωσης σε τρεις διαδρομές του Lab και το τεκμήριο που επέλεξε η πειραματική διαδρομή. Βαθμίδα 5 σημαίνει αποχή. Η Βαθμίδα 4 είναι πειραματική και απορρίφθηκε με τους ελέγχους.</div>
+    <div class="card tw"><table id="evTable" class="t"></table></div>
+    <div class="card"><h3>Δημοσιευμένα στοιχεία (εκτός μοντέλου) έναντι πειραματικής διαδρομής</h3><div id="bridges" class="tw"></div></div>
+  </section>
+</main>
+<footer>Ανεξάρτητο demonstration project· δεν αποτελεί ανάθεση, συνεργασία ή έγκριση οποιουδήποτε retailer. Όλα τα ποσοστά προέρχονται από εκτελέσεις του Lab· καμία τιμή δεν ορίστηκε χειροκίνητα.</footer>
+<div id="tip" class="tip" hidden></div>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
