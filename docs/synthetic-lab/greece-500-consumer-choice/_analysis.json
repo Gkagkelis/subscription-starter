@@ -1,0 +1,7000 @@
+{
+ "meta": {
+  "questions": [
+   {
+    "question_id": "WM1",
+    "text": "Πλήρως επισκευάσιμο πλυντήριο (τιμή Α) έναντι βασικού μοντέλου 549 € με περιορισμένη επισκευασιμότητα",
+    "kind": "price_curve",
+    "model": "swiss-ce-washing-machine",
+    "context": {
+     "category": "washing_machine"
+    },
+    "scenarios": [
+     "449",
+     "499",
+     "549",
+     "599",
+     "649",
+     "699",
+     "749",
+     "799",
+     "849",
+     "899"
+    ]
+   },
+   {
+    "question_id": "WM2",
+    "text": "Πλυντήριο 15 ετών λειτουργικής διάρκειας (τιμή Α) έναντι βασικού 10 ετών στα 549 €",
+    "kind": "price_curve",
+    "model": "swiss-ce-washing-machine",
+    "context": {
+     "category": "washing_machine"
+    },
+    "scenarios": [
+     "449",
+     "499",
+     "549",
+     "599",
+     "649",
+     "699",
+     "749",
+     "799",
+     "849",
+     "899"
+    ]
+   },
+   {
+    "question_id": "WM3",
+    "text": "Ενεργειακή κλάση A (τιμή Α) έναντι κλάσης C στα 549 €",
+    "kind": "price_curve",
+    "model": "swiss-ce-washing-machine",
+    "context": {
+     "category": "washing_machine"
+    },
+    "scenarios": [
+     "449",
+     "499",
+     "549",
+     "599",
+     "649",
+     "699",
+     "749",
+     "799",
+     "849",
+     "899"
+    ]
+   },
+   {
+    "question_id": "WM4",
+    "text": "«Κυκλικό» πλυντήριο: πλήρως επισκευάσιμο, 15 έτη, κλάση A, ανακυκλώσιμο (τιμή Α) έναντι βασικού 549 €",
+    "kind": "price_curve",
+    "model": "swiss-ce-washing-machine",
+    "context": {
+     "category": "washing_machine"
+    },
+    "scenarios": [
+     "449",
+     "499",
+     "549",
+     "599",
+     "649",
+     "699",
+     "749",
+     "799",
+     "849",
+     "899"
+    ]
+   },
+   {
+    "question_id": "WM5",
+    "text": "Μη επισκευάσιμο πλυντήριο με έκπτωση (τιμή Α) έναντι βασικού 549 €",
+    "kind": "price_curve",
+    "model": "swiss-ce-washing-machine",
+    "context": {
+     "category": "washing_machine"
+    },
+    "scenarios": [
+     "349",
+     "399",
+     "449",
+     "499",
+     "549"
+    ]
+   },
+   {
+    "question_id": "WM6",
+    "text": "Σύγκριση προσφορών: Οικονομικό 399 € / Βασικό 549 € / Premium 799 €",
+    "kind": "offer_pairs",
+    "model": "swiss-ce-washing-machine",
+    "context": {
+     "category": "washing_machine"
+    },
+    "scenarios": [
+     "Βασικό(A) vs Οικονομικό(B)",
+     "Premium(A) vs Βασικό(B)",
+     "Premium(A) vs Οικονομικό(B)"
+    ]
+   },
+   {
+    "question_id": "WM7",
+    "text": "Επισκευασιμότητα στην ίδια τιμή (549 €)",
+    "kind": "levels",
+    "model": "swiss-ce-washing-machine",
+    "context": {
+     "category": "washing_machine"
+    },
+    "scenarios": [
+     "περιορισμένη(A) vs καθόλου(B)",
+     "πλήρης(A) vs περιορισμένη(B)",
+     "πλήρης(A) vs καθόλου(B)"
+    ]
+   },
+   {
+    "question_id": "WM8",
+    "text": "Ενεργειακή κλάση στην ίδια τιμή (549 €)",
+    "kind": "levels",
+    "model": "swiss-ce-washing-machine",
+    "context": {
+     "category": "washing_machine"
+    },
+    "scenarios": [
+     "E(A) vs G(B)",
+     "C(A) vs G(B)",
+     "A(A) vs G(B)"
+    ]
+   },
+   {
+    "question_id": "SP1",
+    "text": "Πλήρως επισκευάσιμο smartphone (τιμή Α) έναντι βασικού 299 € με περιορισμένη επισκευασιμότητα",
+    "kind": "price_curve",
+    "model": "swiss-ce-smartphone",
+    "context": {
+     "category": "smartphone"
+    },
+    "scenarios": [
+     "249",
+     "274",
+     "299",
+     "324",
+     "349",
+     "374",
+     "399",
+     "424",
+     "449"
+    ]
+   },
+   {
+    "question_id": "SP2",
+    "text": "Smartphone 8 ετών λειτουργικής διάρκειας (τιμή Α) έναντι βασικού 4 ετών στα 299 €",
+    "kind": "price_curve",
+    "model": "swiss-ce-smartphone",
+    "context": {
+     "category": "smartphone"
+    },
+    "scenarios": [
+     "249",
+     "274",
+     "299",
+     "324",
+     "349",
+     "374",
+     "399",
+     "424",
+     "449"
+    ]
+   },
+   {
+    "question_id": "SP3",
+    "text": "Smartphone ενεργειακής κλάσης A (τιμή Α) έναντι κλάσης C στα 299 €",
+    "kind": "price_curve",
+    "model": "swiss-ce-smartphone",
+    "context": {
+     "category": "smartphone"
+    },
+    "scenarios": [
+     "249",
+     "274",
+     "299",
+     "324",
+     "349",
+     "374",
+     "399",
+     "424",
+     "449"
+    ]
+   },
+   {
+    "question_id": "SP4",
+    "text": "Μη επισκευάσιμο smartphone με έκπτωση (τιμή Α) έναντι βασικού 299 €",
+    "kind": "price_curve",
+    "model": "swiss-ce-smartphone",
+    "context": {
+     "category": "smartphone"
+    },
+    "scenarios": [
+     "199",
+     "224",
+     "249",
+     "274",
+     "299"
+    ]
+   },
+   {
+    "question_id": "SP5",
+    "text": "Σύγκριση προσφορών smartphone: Οικονομικό 199 € / Βασικό 299 € / Premium 429 €",
+    "kind": "offer_pairs",
+    "model": "swiss-ce-smartphone",
+    "context": {
+     "category": "smartphone"
+    },
+    "scenarios": [
+     "Βασικό(A) vs Οικονομικό(B)",
+     "Premium(A) vs Βασικό(B)",
+     "Premium(A) vs Οικονομικό(B)"
+    ]
+   },
+   {
+    "question_id": "RF1",
+    "text": "Ανακατασκευασμένο από τον κατασκευαστή με έκπτωση d έναντι νέου 299 € (και μεταχειρισμένου 150 € από τρίτο)",
+    "kind": "discount_curve",
+    "model": "refurb-smartphone-us2019",
+    "context": {
+     "category": "smartphone_new_vs_refurbished",
+     "brand": "apple"
+    },
+    "scenarios": [
+     "10%",
+     "20%",
+     "30%",
+     "40%",
+     "50%",
+     "60%"
+    ]
+   },
+   {
+    "question_id": "RF2",
+    "text": "Ποιος πωλεί το ανακατασκευασμένο (έκπτωση 30%)",
+    "kind": "levels",
+    "model": "refurb-smartphone-us2019",
+    "context": {
+     "category": "smartphone_new_vs_refurbished",
+     "brand": "apple"
+    },
+    "scenarios": [
+     "μη εξουσιοδοτημένος τρίτος",
+     "εξουσιοδοτημένος τρίτος",
+     "κατασκευαστής"
+    ]
+   },
+   {
+    "question_id": "RF3",
+    "text": "Κατάσταση του προϊόντος (έκπτωση 30%, εξουσιοδοτημένος πωλητής)",
+    "kind": "levels",
+    "model": "refurb-smartphone-us2019",
+    "context": {
+     "category": "smartphone_new_vs_refurbished",
+     "brand": "apple"
+    },
+    "scenarios": [
+     "μεταχειρισμένο",
+     "refurbished",
+     "open box"
+    ]
+   },
+   {
+    "question_id": "DL1",
+    "text": "Ψώνια τελευταίας στιγμής: drone σε 20′ με χρέωση Χ έναντι επίγειας σε 45′ με 1 €",
+    "kind": "fee_curve",
+    "model": "delivery-us2022",
+    "context": {
+     "category": "last_minute_groceries",
+     "product": "last_minute_groceries"
+    },
+    "scenarios": [
+     "0.00",
+     "0.25",
+     "0.50",
+     "0.75",
+     "1.00",
+     "1.25",
+     "1.50",
+     "1.75",
+     "2.00",
+     "2.25"
+    ]
+   },
+   {
+    "question_id": "DL2",
+    "text": "Φαγητό σε πακέτο: drone σε 15′ με χρέωση Χ έναντι επίγειας σε 45′ με 1 €",
+    "kind": "fee_curve",
+    "model": "delivery-us2022",
+    "context": {
+     "category": "takeout_food",
+     "product": "takeout_food"
+    },
+    "scenarios": [
+     "0.00",
+     "0.25",
+     "0.50",
+     "0.75",
+     "1.00",
+     "1.25",
+     "1.50",
+     "1.75",
+     "2.00",
+     "2.25"
+    ]
+   },
+   {
+    "question_id": "DL3",
+    "text": "Φάρμακα με συνταγή: drone σε 30′ με χρέωση Χ έναντι δωρεάν επίγειας σε 6 ώρες",
+    "kind": "fee_curve",
+    "model": "delivery-us2022",
+    "context": {
+     "category": "prescription_medications",
+     "product": "prescription_medications"
+    },
+    "scenarios": [
+     "0.00",
+     "0.50",
+     "1.00",
+     "1.50",
+     "2.00",
+     "2.50",
+     "3.00",
+     "3.50",
+     "4.00",
+     "4.50"
+    ]
+   },
+   {
+    "question_id": "DL4",
+    "text": "Ιδιωτικότητα: drone 1 € σε 20′ με/χωρίς προστασία δεδομένων έναντι επίγειας 1 € σε 45′ (ψώνια)",
+    "kind": "levels",
+    "model": "delivery-us2022",
+    "context": {
+     "category": "last_minute_groceries",
+     "product": "last_minute_groceries"
+    },
+    "scenarios": [
+     "με προστασία",
+     "χωρίς προστασία"
+    ]
+   },
+   {
+    "question_id": "U1",
+    "text": "Επισκευή παλιού πλυντηρίου (150 €) ή αγορά νέου (549 €)",
+    "kind": "unsupported",
+    "model": "swiss-ce-washing-machine",
+    "gate": "NOT_SUPPORTED",
+    "reasons": [
+     "Κατηγορία «washing_machine_repair_vs_replace» εκτός πεδίου (washing_machine)."
+    ]
+   },
+   {
+    "question_id": "U2",
+    "text": "Νέο πλυντήριο με trade-in 60 € έναντι χωρίς trade-in",
+    "kind": "unsupported",
+    "model": "swiss-ce-washing-machine",
+    "gate": "NOT_SUPPORTED",
+    "reasons": [
+     "Χαρακτηριστικό «tradein_eur» δεν εκτιμήθηκε από δεδομένα."
+    ]
+   },
+   {
+    "question_id": "U3",
+    "text": "Νέο πλυντήριο με επέκταση εγγύησης 3 ετών",
+    "kind": "unsupported",
+    "model": "swiss-ce-washing-machine",
+    "gate": "NOT_SUPPORTED",
+    "reasons": [
+     "Χαρακτηριστικό «warranty_years» δεν εκτιμήθηκε από δεδομένα."
+    ]
+   },
+   {
+    "question_id": "U4",
+    "text": "Αγορά με 12 άτοκες δόσεις",
+    "kind": "unsupported",
+    "model": "swiss-ce-washing-machine",
+    "gate": "NOT_SUPPORTED",
+    "reasons": [
+     "Χαρακτηριστικό «installments» δεν εκτιμήθηκε από δεδομένα."
+    ]
+   },
+   {
+    "question_id": "U5",
+    "text": "Παράδοση πλυντηρίου σε 1 έναντι 5 ημερών",
+    "kind": "unsupported",
+    "model": "delivery-us2022",
+    "gate": "NOT_SUPPORTED",
+    "reasons": [
+     "Κατηγορία «washing_machine_delivery» εκτός πεδίου (takeout_food, prescription_medications, liquor_store, last_minute_groceries)."
+    ]
+   },
+   {
+    "question_id": "U6",
+    "text": "Refurbished smartphone με εγγύηση 24 μηνών",
+    "kind": "unsupported",
+    "model": "refurb-smartphone-us2019",
+    "gate": "NOT_SUPPORTED",
+    "reasons": [
+     "Χαρακτηριστικό «warranty_months» δεν εκτιμήθηκε από δεδομένα."
+    ]
+   }
+  ],
+  "assumptions": {
+   "T0": {
+    "label": "Βασικό: PPP ιδιωτικής κατανάλωσης + εισόδημα με ε = 0,5",
+    "method": "ppp_income",
+    "epsilon": 0.5,
+    "factors": {
+     "swiss-ce-washing-machine": {
+      "factor": 2.834954299963031,
+      "deflator_gr": 0.9059877800407331,
+      "ppp_ratio": 2.020325799191107,
+      "income_ratio": 2.3988584674276736,
+      "epsilon": 0.5,
+      "src_country": "CH",
+      "src_year": "2022",
+      "ref_year": "2025"
+     },
+     "swiss-ce-smartphone": {
+      "factor": 2.834954299963031,
+      "deflator_gr": 0.9059877800407331,
+      "ppp_ratio": 2.020325799191107,
+      "income_ratio": 2.3988584674276736,
+      "epsilon": 0.5,
+      "src_country": "CH",
+      "src_year": "2022",
+      "ref_year": "2025"
+     },
+     "refurb-smartphone-us2019": {
+      "factor": 1.9290328932903986,
+      "deflator_gr": 0.8347046843177189,
+      "ppp_ratio": 1.6168567012242838,
+      "income_ratio": 2.0430100495119548,
+      "epsilon": 0.5,
+      "src_country": "US",
+      "src_year": "2019",
+      "ref_year": "2025"
+     },
+     "delivery-us2022": {
+      "factor": 2.197355902228005,
+      "deflator_gr": 0.9059877800407331,
+      "ppp_ratio": 1.724717793051112,
+      "income_ratio": 1.9775161624510114,
+      "epsilon": 0.5,
+      "src_country": "US",
+      "src_year": "2022",
+      "ref_year": "2025"
+     }
+    }
+   },
+   "T1": {
+    "label": "Μόνο PPP (ε = 0): ίδια αγοραστική δύναμη, χωρίς προσαρμογή εισοδήματος",
+    "method": "ppp_income",
+    "epsilon": 0.0,
+    "factors": {
+     "swiss-ce-washing-machine": {
+      "factor": 1.8303904857681712,
+      "deflator_gr": 0.9059877800407331,
+      "ppp_ratio": 2.020325799191107,
+      "income_ratio": 2.3988584674276736,
+      "epsilon": 0.0,
+      "src_country": "CH",
+      "src_year": "2022",
+      "ref_year": "2025"
+     },
+     "swiss-ce-smartphone": {
+      "factor": 1.8303904857681712,
+      "deflator_gr": 0.9059877800407331,
+      "ppp_ratio": 2.020325799191107,
+      "income_ratio": 2.3988584674276736,
+      "epsilon": 0.0,
+      "src_country": "CH",
+      "src_year": "2022",
+      "ref_year": "2025"
+     },
+     "refurb-smartphone-us2019": {
+      "factor": 1.3495978623824043,
+      "deflator_gr": 0.8347046843177189,
+      "ppp_ratio": 1.6168567012242838,
+      "income_ratio": 2.0430100495119548,
+      "epsilon": 0.0,
+      "src_country": "US",
+      "src_year": "2019",
+      "ref_year": "2025"
+     },
+     "delivery-us2022": {
+      "factor": 1.5625732445231295,
+      "deflator_gr": 0.9059877800407331,
+      "ppp_ratio": 1.724717793051112,
+      "income_ratio": 1.9775161624510114,
+      "epsilon": 0.0,
+      "src_country": "US",
+      "src_year": "2022",
+      "ref_year": "2025"
+     }
+    }
+   },
+   "T2": {
+    "label": "Ίσο μερίδιο εισοδήματος (ε = 1)",
+    "method": "ppp_income",
+    "epsilon": 1.0,
+    "factors": {
+     "swiss-ce-washing-machine": {
+      "factor": 4.39084771548403,
+      "deflator_gr": 0.9059877800407331,
+      "ppp_ratio": 2.020325799191107,
+      "income_ratio": 2.3988584674276736,
+      "epsilon": 1.0,
+      "src_country": "CH",
+      "src_year": "2022",
+      "ref_year": "2025"
+     },
+     "swiss-ce-smartphone": {
+      "factor": 4.39084771548403,
+      "deflator_gr": 0.9059877800407331,
+      "ppp_ratio": 2.020325799191107,
+      "income_ratio": 2.3988584674276736,
+      "epsilon": 1.0,
+      "src_country": "CH",
+      "src_year": "2022",
+      "ref_year": "2025"
+     },
+     "refurb-smartphone-us2019": {
+      "factor": 2.757241995647104,
+      "deflator_gr": 0.8347046843177189,
+      "ppp_ratio": 1.6168567012242838,
+      "income_ratio": 2.0430100495119548,
+      "epsilon": 1.0,
+      "src_country": "US",
+      "src_year": "2019",
+      "ref_year": "2025"
+     },
+     "delivery-us2022": {
+      "factor": 3.090013846058005,
+      "deflator_gr": 0.9059877800407331,
+      "ppp_ratio": 1.724717793051112,
+      "income_ratio": 1.9775161624510114,
+      "epsilon": 1.0,
+      "src_country": "US",
+      "src_year": "2022",
+      "ref_year": "2025"
+     }
+    }
+   },
+   "T3": {
+    "label": "Απλή ονομαστική ισοτιμία (μόνο για σύγκριση· οικονομικά αφελής)",
+    "method": "nominal",
+    "epsilon": null,
+    "factors": {
+     "swiss-ce-washing-machine": {
+      "factor": 0.9109571807886073,
+      "deflator_gr": 0.9059877800407331,
+      "exchange_rate_src_per_eur": 1.0054850637694592,
+      "src_country": "CH",
+      "src_year": "2022",
+      "ref_year": "2025"
+     },
+     "swiss-ce-smartphone": {
+      "factor": 0.9109571807886073,
+      "deflator_gr": 0.9059877800407331,
+      "exchange_rate_src_per_eur": 1.0054850637694592,
+      "src_country": "CH",
+      "src_year": "2022",
+      "ref_year": "2025"
+     },
+     "refurb-smartphone-us2019": {
+      "factor": 0.9344306173075974,
+      "deflator_gr": 0.8347046843177189,
+      "exchange_rate_src_per_eur": 1.1194745098038998,
+      "src_country": "US",
+      "src_year": "2019",
+      "ref_year": "2025"
+     },
+     "delivery-us2022": {
+      "factor": 0.9540491979363996,
+      "deflator_gr": 0.9059877800407331,
+      "exchange_rate_src_per_eur": 1.0530486381322999,
+      "src_country": "US",
+      "src_year": "2022",
+      "ref_year": "2025"
+     }
+    }
+   }
+  },
+  "models": {
+   "swiss-ce-washing-machine": {
+    "artifact": "cce-0.1-swiss-ce-washing-machine.json",
+    "sha256": "2add7bcce529524fe2ce688863f2d4a887854e1a10be17f92504302a170973d4",
+    "status": "EXPERIMENTAL_CROSS_COUNTRY_TRANSFER",
+    "model_id": "cce-0.1-swiss-ce-washing-machine",
+    "source_population": "CH",
+    "source_years": "2021-2022",
+    "source_dataset": "Circular products choice experiment, Switzerland — Washing machine",
+    "licence": "CC BY 4.0",
+    "external_validation_for_target": false
+   },
+   "swiss-ce-smartphone": {
+    "artifact": "cce-0.1-swiss-ce-smartphone.json",
+    "sha256": "6e19f22a1d4ab0768681ca15fcd4a96fb918ef6dba38c1dbd1201a9e21448999",
+    "status": "EXPERIMENTAL_CROSS_COUNTRY_TRANSFER",
+    "model_id": "cce-0.1-swiss-ce-smartphone",
+    "source_population": "CH",
+    "source_years": "2021-2022",
+    "source_dataset": "Circular products choice experiment, Switzerland — Smartphone",
+    "licence": "CC BY 4.0",
+    "external_validation_for_target": false
+   },
+   "refurb-smartphone-us2019": {
+    "artifact": "cce-0.1-refurb-smartphone-us2019.json",
+    "sha256": "326d2970ae0cee8d4600e7d722b5608c2f53a8f8a8dd3e78c2fd99b09730f210",
+    "status": "EXPERIMENTAL_CROSS_COUNTRY_TRANSFER",
+    "model_id": "cce-0.1-refurb-smartphone-us2019",
+    "source_population": "US",
+    "source_years": "2019",
+    "source_dataset": "New vs refurbished smartphone choice experiment (Apple, Motorola), US MTurk",
+    "licence": "CC BY-NC 4.0 — μόνο μη εμπορική χρήση",
+    "external_validation_for_target": false
+   },
+   "delivery-us2022": {
+    "artifact": "cce-0.1-delivery-us2022.json",
+    "sha256": "b03030602dd8786a612496bd0d83e870dc63c98d55f2d268814cdee06b9eef8e",
+    "status": "EXPERIMENTAL_CROSS_COUNTRY_TRANSFER",
+    "model_id": "cce-0.1-delivery-us2022",
+    "source_population": "US",
+    "source_years": "2022",
+    "source_dataset": "Drone delivery and the value of customer privacy: a discrete choice experiment with U.S. consumers",
+    "licence": "MIT (repository) + README: «You are welcome to use our data… Please cite»",
+    "external_validation_for_target": false
+   }
+  },
+  "runtime_seconds": 87.7,
+  "seed": 20261030
+ },
+ "summary": {
+  "WM1": {
+   "T0": {
+    "449": {
+     "A": {
+      "sim": 73.6,
+      "p": 74.23,
+      "ci": null
+     },
+     "B": {
+      "sim": 26.4,
+      "p": 25.77,
+      "ci": null
+     }
+    },
+    "499": {
+     "A": {
+      "sim": 71.6,
+      "p": 72.27,
+      "ci": null
+     },
+     "B": {
+      "sim": 28.4,
+      "p": 27.73,
+      "ci": null
+     }
+    },
+    "549": {
+     "A": {
+      "sim": 69.0,
+      "p": 69.97,
+      "ci": null
+     },
+     "B": {
+      "sim": 31.0,
+      "p": 30.03,
+      "ci": null
+     }
+    },
+    "599": {
+     "A": {
+      "sim": 66.4,
+      "p": 67.46,
+      "ci": null
+     },
+     "B": {
+      "sim": 33.6,
+      "p": 32.54,
+      "ci": null
+     }
+    },
+    "649": {
+     "A": {
+      "sim": 65.2,
+      "p": 64.99,
+      "ci": [
+       58.0,
+       69.0
+      ]
+     },
+     "B": {
+      "sim": 34.8,
+      "p": 35.01,
+      "ci": [
+       31.0,
+       42.0
+      ]
+     }
+    },
+    "699": {
+     "A": {
+      "sim": 62.4,
+      "p": 62.66,
+      "ci": null
+     },
+     "B": {
+      "sim": 37.6,
+      "p": 37.34,
+      "ci": null
+     }
+    },
+    "749": {
+     "A": {
+      "sim": 60.2,
+      "p": 60.44,
+      "ci": null
+     },
+     "B": {
+      "sim": 39.8,
+      "p": 39.56,
+      "ci": null
+     }
+    },
+    "799": {
+     "A": {
+      "sim": 56.4,
+      "p": 58.31,
+      "ci": null
+     },
+     "B": {
+      "sim": 43.6,
+      "p": 41.69,
+      "ci": null
+     }
+    },
+    "849": {
+     "A": {
+      "sim": 54.4,
+      "p": 56.26,
+      "ci": null
+     },
+     "B": {
+      "sim": 45.6,
+      "p": 43.74,
+      "ci": null
+     }
+    },
+    "899": {
+     "A": {
+      "sim": 52.8,
+      "p": 54.29,
+      "ci": null
+     },
+     "B": {
+      "sim": 47.2,
+      "p": 45.71,
+      "ci": null
+     }
+    }
+   },
+   "T1": {
+    "449": {
+     "A": {
+      "sim": 72.0,
+      "p": 72.87,
+      "ci": null
+     },
+     "B": {
+      "sim": 28.0,
+      "p": 27.13,
+      "ci": null
+     }
+    },
+    "499": {
+     "A": {
+      "sim": 71.2,
+      "p": 71.5,
+      "ci": null
+     },
+     "B": {
+      "sim": 28.8,
+      "p": 28.5,
+      "ci": null
+     }
+    },
+    "549": {
+     "A": {
+      "sim": 69.0,
+      "p": 69.97,
+      "ci": null
+     },
+     "B": {
+      "sim": 31.0,
+      "p": 30.03,
+      "ci": null
+     }
+    },
+    "599": {
+     "A": {
+      "sim": 67.4,
+      "p": 68.35,
+      "ci": null
+     },
+     "B": {
+      "sim": 32.6,
+      "p": 31.65,
+      "ci": null
+     }
+    },
+    "649": {
+     "A": {
+      "sim": 66.2,
+      "p": 66.73,
+      "ci": null
+     },
+     "B": {
+      "sim": 33.8,
+      "p": 33.27,
+      "ci": null
+     }
+    },
+    "699": {
+     "A": {
+      "sim": 65.4,
+      "p": 65.14,
+      "ci": null
+     },
+     "B": {
+      "sim": 34.6,
+      "p": 34.86,
+      "ci": null
+     }
+    },
+    "749": {
+     "A": {
+      "sim": 63.8,
+      "p": 63.61,
+      "ci": null
+     },
+     "B": {
+      "sim": 36.2,
+      "p": 36.39,
+      "ci": null
+     }
+    },
+    "799": {
+     "A": {
+      "sim": 62.0,
+      "p": 62.14,
+      "ci": null
+     },
+     "B": {
+      "sim": 38.0,
+      "p": 37.86,
+      "ci": null
+     }
+    },
+    "849": {
+     "A": {
+      "sim": 60.4,
+      "p": 60.71,
+      "ci": null
+     },
+     "B": {
+      "sim": 39.6,
+      "p": 39.29,
+      "ci": null
+     }
+    },
+    "899": {
+     "A": {
+      "sim": 58.4,
+      "p": 59.32,
+      "ci": null
+     },
+     "B": {
+      "sim": 41.6,
+      "p": 40.68,
+      "ci": null
+     }
+    }
+   },
+   "T2": {
+    "449": {
+     "A": {
+      "sim": 74.8,
+      "p": 76.11,
+      "ci": null
+     },
+     "B": {
+      "sim": 25.2,
+      "p": 23.89,
+      "ci": null
+     }
+    },
+    "499": {
+     "A": {
+      "sim": 72.4,
+      "p": 73.38,
+      "ci": null
+     },
+     "B": {
+      "sim": 27.6,
+      "p": 26.62,
+      "ci": null
+     }
+    },
+    "549": {
+     "A": {
+      "sim": 69.0,
+      "p": 69.97,
+      "ci": null
+     },
+     "B": {
+      "sim": 31.0,
+      "p": 30.03,
+      "ci": null
+     }
+    },
+    "599": {
+     "A": {
+      "sim": 66.0,
+      "p": 66.09,
+      "ci": null
+     },
+     "B": {
+      "sim": 34.0,
+      "p": 33.91,
+      "ci": null
+     }
+    },
+    "649": {
+     "A": {
+      "sim": 62.4,
+      "p": 62.44,
+      "ci": null
+     },
+     "B": {
+      "sim": 37.6,
+      "p": 37.56,
+      "ci": null
+     }
+    },
+    "699": {
+     "A": {
+      "sim": 57.6,
+      "p": 59.05,
+      "ci": null
+     },
+     "B": {
+      "sim": 42.4,
+      "p": 40.95,
+      "ci": null
+     }
+    }
+   },
+   "T3": {
+    "549": {
+     "A": {
+      "sim": 69.0,
+      "p": 69.97,
+      "ci": null
+     },
+     "B": {
+      "sim": 31.0,
+      "p": 30.03,
+      "ci": null
+     }
+    },
+    "599": {
+     "A": {
+      "sim": 67.8,
+      "p": 69.17,
+      "ci": null
+     },
+     "B": {
+      "sim": 32.2,
+      "p": 30.83,
+      "ci": null
+     }
+    },
+    "649": {
+     "A": {
+      "sim": 67.4,
+      "p": 68.36,
+      "ci": null
+     },
+     "B": {
+      "sim": 32.6,
+      "p": 31.64,
+      "ci": null
+     }
+    },
+    "699": {
+     "A": {
+      "sim": 66.4,
+      "p": 67.55,
+      "ci": null
+     },
+     "B": {
+      "sim": 33.6,
+      "p": 32.45,
+      "ci": null
+     }
+    },
+    "749": {
+     "A": {
+      "sim": 66.2,
+      "p": 66.75,
+      "ci": null
+     },
+     "B": {
+      "sim": 33.8,
+      "p": 33.25,
+      "ci": null
+     }
+    },
+    "799": {
+     "A": {
+      "sim": 66.0,
+      "p": 65.95,
+      "ci": null
+     },
+     "B": {
+      "sim": 34.0,
+      "p": 34.05,
+      "ci": null
+     }
+    },
+    "849": {
+     "A": {
+      "sim": 65.4,
+      "p": 65.16,
+      "ci": null
+     },
+     "B": {
+      "sim": 34.6,
+      "p": 34.84,
+      "ci": null
+     }
+    },
+    "899": {
+     "A": {
+      "sim": 64.6,
+      "p": 64.39,
+      "ci": null
+     },
+     "B": {
+      "sim": 35.4,
+      "p": 35.61,
+      "ci": null
+     }
+    }
+   }
+  },
+  "WM2": {
+   "T0": {
+    "449": {
+     "A": {
+      "sim": 78.8,
+      "p": 78.9,
+      "ci": null
+     },
+     "B": {
+      "sim": 21.2,
+      "p": 21.1,
+      "ci": null
+     }
+    },
+    "499": {
+     "A": {
+      "sim": 77.2,
+      "p": 77.29,
+      "ci": null
+     },
+     "B": {
+      "sim": 22.8,
+      "p": 22.71,
+      "ci": null
+     }
+    },
+    "549": {
+     "A": {
+      "sim": 75.4,
+      "p": 75.37,
+      "ci": null
+     },
+     "B": {
+      "sim": 24.6,
+      "p": 24.63,
+      "ci": null
+     }
+    },
+    "599": {
+     "A": {
+      "sim": 72.2,
+      "p": 73.05,
+      "ci": null
+     },
+     "B": {
+      "sim": 27.8,
+      "p": 26.95,
+      "ci": null
+     }
+    },
+    "649": {
+     "A": {
+      "sim": 69.0,
+      "p": 70.63,
+      "ci": [
+       66.8,
+       73.8
+      ]
+     },
+     "B": {
+      "sim": 31.0,
+      "p": 29.37,
+      "ci": [
+       26.2,
+       33.2
+      ]
+     }
+    },
+    "699": {
+     "A": {
+      "sim": 67.0,
+      "p": 68.25,
+      "ci": null
+     },
+     "B": {
+      "sim": 33.0,
+      "p": 31.75,
+      "ci": null
+     }
+    },
+    "749": {
+     "A": {
+      "sim": 64.6,
+      "p": 65.97,
+      "ci": null
+     },
+     "B": {
+      "sim": 35.4,
+      "p": 34.03,
+      "ci": null
+     }
+    },
+    "799": {
+     "A": {
+      "sim": 62.2,
+      "p": 63.76,
+      "ci": null
+     },
+     "B": {
+      "sim": 37.8,
+      "p": 36.24,
+      "ci": null
+     }
+    },
+    "849": {
+     "A": {
+      "sim": 59.0,
+      "p": 61.63,
+      "ci": null
+     },
+     "B": {
+      "sim": 41.0,
+      "p": 38.37,
+      "ci": null
+     }
+    },
+    "899": {
+     "A": {
+      "sim": 57.8,
+      "p": 59.58,
+      "ci": null
+     },
+     "B": {
+      "sim": 42.2,
+      "p": 40.42,
+      "ci": null
+     }
+    }
+   },
+   "T1": {
+    "449": {
+     "A": {
+      "sim": 77.4,
+      "p": 77.78,
+      "ci": null
+     },
+     "B": {
+      "sim": 22.6,
+      "p": 22.22,
+      "ci": null
+     }
+    },
+    "499": {
+     "A": {
+      "sim": 77.2,
+      "p": 76.65,
+      "ci": null
+     },
+     "B": {
+      "sim": 22.8,
+      "p": 23.35,
+      "ci": null
+     }
+    },
+    "549": {
+     "A": {
+      "sim": 75.4,
+      "p": 75.37,
+      "ci": null
+     },
+     "B": {
+      "sim": 24.6,
+      "p": 24.63,
+      "ci": null
+     }
+    },
+    "599": {
+     "A": {
+      "sim": 73.2,
+      "p": 73.9,
+      "ci": null
+     },
+     "B": {
+      "sim": 26.8,
+      "p": 26.1,
+      "ci": null
+     }
+    },
+    "649": {
+     "A": {
+      "sim": 71.2,
+      "p": 72.34,
+      "ci": null
+     },
+     "B": {
+      "sim": 28.8,
+      "p": 27.66,
+      "ci": null
+     }
+    },
+    "699": {
+     "A": {
+      "sim": 69.0,
+      "p": 70.78,
+      "ci": null
+     },
+     "B": {
+      "sim": 31.0,
+      "p": 29.22,
+      "ci": null
+     }
+    },
+    "749": {
+     "A": {
+      "sim": 67.8,
+      "p": 69.23,
+      "ci": null
+     },
+     "B": {
+      "sim": 32.2,
+      "p": 30.77,
+      "ci": null
+     }
+    },
+    "799": {
+     "A": {
+      "sim": 66.4,
+      "p": 67.72,
+      "ci": null
+     },
+     "B": {
+      "sim": 33.6,
+      "p": 32.28,
+      "ci": null
+     }
+    },
+    "849": {
+     "A": {
+      "sim": 64.8,
+      "p": 66.25,
+      "ci": null
+     },
+     "B": {
+      "sim": 35.2,
+      "p": 33.75,
+      "ci": null
+     }
+    },
+    "899": {
+     "A": {
+      "sim": 63.8,
+      "p": 64.81,
+      "ci": null
+     },
+     "B": {
+      "sim": 36.2,
+      "p": 35.19,
+      "ci": null
+     }
+    }
+   },
+   "T2": {
+    "449": {
+     "A": {
+      "sim": 79.8,
+      "p": 80.43,
+      "ci": null
+     },
+     "B": {
+      "sim": 20.2,
+      "p": 19.57,
+      "ci": null
+     }
+    },
+    "499": {
+     "A": {
+      "sim": 77.6,
+      "p": 78.2,
+      "ci": null
+     },
+     "B": {
+      "sim": 22.4,
+      "p": 21.8,
+      "ci": null
+     }
+    },
+    "549": {
+     "A": {
+      "sim": 75.4,
+      "p": 75.37,
+      "ci": null
+     },
+     "B": {
+      "sim": 24.6,
+      "p": 24.63,
+      "ci": null
+     }
+    },
+    "599": {
+     "A": {
+      "sim": 70.4,
+      "p": 71.72,
+      "ci": null
+     },
+     "B": {
+      "sim": 29.6,
+      "p": 28.28,
+      "ci": null
+     }
+    },
+    "649": {
+     "A": {
+      "sim": 66.6,
+      "p": 68.03,
+      "ci": null
+     },
+     "B": {
+      "sim": 33.4,
+      "p": 31.97,
+      "ci": null
+     }
+    },
+    "699": {
+     "A": {
+      "sim": 63.4,
+      "p": 64.53,
+      "ci": null
+     },
+     "B": {
+      "sim": 36.6,
+      "p": 35.47,
+      "ci": null
+     }
+    }
+   },
+   "T3": {
+    "549": {
+     "A": {
+      "sim": 75.4,
+      "p": 75.37,
+      "ci": null
+     },
+     "B": {
+      "sim": 24.6,
+      "p": 24.63,
+      "ci": null
+     }
+    },
+    "599": {
+     "A": {
+      "sim": 74.6,
+      "p": 74.66,
+      "ci": null
+     },
+     "B": {
+      "sim": 25.4,
+      "p": 25.34,
+      "ci": null
+     }
+    },
+    "649": {
+     "A": {
+      "sim": 73.2,
+      "p": 73.91,
+      "ci": null
+     },
+     "B": {
+      "sim": 26.8,
+      "p": 26.09,
+      "ci": null
+     }
+    },
+    "699": {
+     "A": {
+      "sim": 72.6,
+      "p": 73.14,
+      "ci": null
+     },
+     "B": {
+      "sim": 27.4,
+      "p": 26.86,
+      "ci": null
+     }
+    },
+    "749": {
+     "A": {
+      "sim": 71.2,
+      "p": 72.36,
+      "ci": null
+     },
+     "B": {
+      "sim": 28.8,
+      "p": 27.64,
+      "ci": null
+     }
+    },
+    "799": {
+     "A": {
+      "sim": 70.2,
+      "p": 71.58,
+      "ci": null
+     },
+     "B": {
+      "sim": 29.8,
+      "p": 28.42,
+      "ci": null
+     }
+    },
+    "849": {
+     "A": {
+      "sim": 69.0,
+      "p": 70.8,
+      "ci": null
+     },
+     "B": {
+      "sim": 31.0,
+      "p": 29.2,
+      "ci": null
+     }
+    },
+    "899": {
+     "A": {
+      "sim": 68.4,
+      "p": 70.03,
+      "ci": null
+     },
+     "B": {
+      "sim": 31.6,
+      "p": 29.97,
+      "ci": null
+     }
+    }
+   }
+  },
+  "WM3": {
+   "T0": {
+    "449": {
+     "A": {
+      "sim": 80.8,
+      "p": 79.48,
+      "ci": null
+     },
+     "B": {
+      "sim": 19.2,
+      "p": 20.52,
+      "ci": null
+     }
+    },
+    "499": {
+     "A": {
+      "sim": 78.4,
+      "p": 77.78,
+      "ci": null
+     },
+     "B": {
+      "sim": 21.6,
+      "p": 22.22,
+      "ci": null
+     }
+    },
+    "549": {
+     "A": {
+      "sim": 76.2,
+      "p": 75.71,
+      "ci": null
+     },
+     "B": {
+      "sim": 23.8,
+      "p": 24.29,
+      "ci": null
+     }
+    },
+    "599": {
+     "A": {
+      "sim": 73.6,
+      "p": 73.19,
+      "ci": null
+     },
+     "B": {
+      "sim": 26.4,
+      "p": 26.81,
+      "ci": null
+     }
+    },
+    "649": {
+     "A": {
+      "sim": 70.2,
+      "p": 70.62,
+      "ci": [
+       64.8,
+       75.3
+      ]
+     },
+     "B": {
+      "sim": 29.8,
+      "p": 29.38,
+      "ci": [
+       24.7,
+       35.2
+      ]
+     }
+    },
+    "699": {
+     "A": {
+      "sim": 68.0,
+      "p": 68.12,
+      "ci": null
+     },
+     "B": {
+      "sim": 32.0,
+      "p": 31.88,
+      "ci": null
+     }
+    },
+    "749": {
+     "A": {
+      "sim": 67.6,
+      "p": 65.67,
+      "ci": null
+     },
+     "B": {
+      "sim": 32.4,
+      "p": 34.33,
+      "ci": null
+     }
+    },
+    "799": {
+     "A": {
+      "sim": 65.2,
+      "p": 63.3,
+      "ci": null
+     },
+     "B": {
+      "sim": 34.8,
+      "p": 36.7,
+      "ci": null
+     }
+    },
+    "849": {
+     "A": {
+      "sim": 62.2,
+      "p": 61.01,
+      "ci": null
+     },
+     "B": {
+      "sim": 37.8,
+      "p": 38.99,
+      "ci": null
+     }
+    },
+    "899": {
+     "A": {
+      "sim": 58.8,
+      "p": 58.82,
+      "ci": null
+     },
+     "B": {
+      "sim": 41.2,
+      "p": 41.18,
+      "ci": null
+     }
+    }
+   },
+   "T1": {
+    "449": {
+     "A": {
+      "sim": 79.2,
+      "p": 78.31,
+      "ci": null
+     },
+     "B": {
+      "sim": 20.8,
+      "p": 21.69,
+      "ci": null
+     }
+    },
+    "499": {
+     "A": {
+      "sim": 77.8,
+      "p": 77.1,
+      "ci": null
+     },
+     "B": {
+      "sim": 22.2,
+      "p": 22.9,
+      "ci": null
+     }
+    },
+    "549": {
+     "A": {
+      "sim": 76.2,
+      "p": 75.71,
+      "ci": null
+     },
+     "B": {
+      "sim": 23.8,
+      "p": 24.29,
+      "ci": null
+     }
+    },
+    "599": {
+     "A": {
+      "sim": 74.6,
+      "p": 74.11,
+      "ci": null
+     },
+     "B": {
+      "sim": 25.4,
+      "p": 25.89,
+      "ci": null
+     }
+    },
+    "649": {
+     "A": {
+      "sim": 72.6,
+      "p": 72.44,
+      "ci": null
+     },
+     "B": {
+      "sim": 27.4,
+      "p": 27.56,
+      "ci": null
+     }
+    },
+    "699": {
+     "A": {
+      "sim": 70.2,
+      "p": 70.78,
+      "ci": null
+     },
+     "B": {
+      "sim": 29.8,
+      "p": 29.22,
+      "ci": null
+     }
+    },
+    "749": {
+     "A": {
+      "sim": 68.6,
+      "p": 69.16,
+      "ci": null
+     },
+     "B": {
+      "sim": 31.4,
+      "p": 30.84,
+      "ci": null
+     }
+    },
+    "799": {
+     "A": {
+      "sim": 68.0,
+      "p": 67.56,
+      "ci": null
+     },
+     "B": {
+      "sim": 32.0,
+      "p": 32.44,
+      "ci": null
+     }
+    },
+    "849": {
+     "A": {
+      "sim": 67.6,
+      "p": 65.98,
+      "ci": null
+     },
+     "B": {
+      "sim": 32.4,
+      "p": 34.02,
+      "ci": null
+     }
+    },
+    "899": {
+     "A": {
+      "sim": 66.6,
+      "p": 64.43,
+      "ci": null
+     },
+     "B": {
+      "sim": 33.4,
+      "p": 35.57,
+      "ci": null
+     }
+    }
+   },
+   "T2": {
+    "449": {
+     "A": {
+      "sim": 82.6,
+      "p": 81.06,
+      "ci": null
+     },
+     "B": {
+      "sim": 17.4,
+      "p": 18.94,
+      "ci": null
+     }
+    },
+    "499": {
+     "A": {
+      "sim": 80.8,
+      "p": 78.75,
+      "ci": null
+     },
+     "B": {
+      "sim": 19.2,
+      "p": 21.25,
+      "ci": null
+     }
+    },
+    "549": {
+     "A": {
+      "sim": 76.2,
+      "p": 75.71,
+      "ci": null
+     },
+     "B": {
+      "sim": 23.8,
+      "p": 24.29,
+      "ci": null
+     }
+    },
+    "599": {
+     "A": {
+      "sim": 71.2,
+      "p": 71.77,
+      "ci": null
+     },
+     "B": {
+      "sim": 28.8,
+      "p": 28.23,
+      "ci": null
+     }
+    },
+    "649": {
+     "A": {
+      "sim": 68.0,
+      "p": 67.88,
+      "ci": null
+     },
+     "B": {
+      "sim": 32.0,
+      "p": 32.12,
+      "ci": null
+     }
+    },
+    "699": {
+     "A": {
+      "sim": 66.4,
+      "p": 64.13,
+      "ci": null
+     },
+     "B": {
+      "sim": 33.6,
+      "p": 35.87,
+      "ci": null
+     }
+    }
+   },
+   "T3": {
+    "549": {
+     "A": {
+      "sim": 76.2,
+      "p": 75.71,
+      "ci": null
+     },
+     "B": {
+      "sim": 23.8,
+      "p": 24.29,
+      "ci": null
+     }
+    },
+    "599": {
+     "A": {
+      "sim": 75.2,
+      "p": 74.93,
+      "ci": null
+     },
+     "B": {
+      "sim": 24.8,
+      "p": 25.07,
+      "ci": null
+     }
+    },
+    "649": {
+     "A": {
+      "sim": 74.6,
+      "p": 74.11,
+      "ci": null
+     },
+     "B": {
+      "sim": 25.4,
+      "p": 25.89,
+      "ci": null
+     }
+    },
+    "699": {
+     "A": {
+      "sim": 73.6,
+      "p": 73.28,
+      "ci": null
+     },
+     "B": {
+      "sim": 26.4,
+      "p": 26.72,
+      "ci": null
+     }
+    },
+    "749": {
+     "A": {
+      "sim": 72.6,
+      "p": 72.45,
+      "ci": null
+     },
+     "B": {
+      "sim": 27.4,
+      "p": 27.55,
+      "ci": null
+     }
+    },
+    "799": {
+     "A": {
+      "sim": 71.2,
+      "p": 71.63,
+      "ci": null
+     },
+     "B": {
+      "sim": 28.8,
+      "p": 28.37,
+      "ci": null
+     }
+    },
+    "849": {
+     "A": {
+      "sim": 70.2,
+      "p": 70.81,
+      "ci": null
+     },
+     "B": {
+      "sim": 29.8,
+      "p": 29.19,
+      "ci": null
+     }
+    },
+    "899": {
+     "A": {
+      "sim": 70.0,
+      "p": 69.99,
+      "ci": null
+     },
+     "B": {
+      "sim": 30.0,
+      "p": 30.01,
+      "ci": null
+     }
+    }
+   }
+  },
+  "WM4": {
+   "T0": {
+    "449": {
+     "A": {
+      "sim": 97.8,
+      "p": 97.65,
+      "ci": null
+     },
+     "B": {
+      "sim": 2.2,
+      "p": 2.35,
+      "ci": null
+     }
+    },
+    "499": {
+     "A": {
+      "sim": 97.8,
+      "p": 97.41,
+      "ci": null
+     },
+     "B": {
+      "sim": 2.2,
+      "p": 2.59,
+      "ci": null
+     }
+    },
+    "549": {
+     "A": {
+      "sim": 97.6,
+      "p": 97.09,
+      "ci": null
+     },
+     "B": {
+      "sim": 2.4,
+      "p": 2.91,
+      "ci": null
+     }
+    },
+    "599": {
+     "A": {
+      "sim": 97.4,
+      "p": 96.6,
+      "ci": null
+     },
+     "B": {
+      "sim": 2.6,
+      "p": 3.4,
+      "ci": null
+     }
+    },
+    "649": {
+     "A": {
+      "sim": 96.6,
+      "p": 95.96,
+      "ci": null
+     },
+     "B": {
+      "sim": 3.4,
+      "p": 4.04,
+      "ci": null
+     }
+    },
+    "699": {
+     "A": {
+      "sim": 95.8,
+      "p": 95.21,
+      "ci": null
+     },
+     "B": {
+      "sim": 4.2,
+      "p": 4.79,
+      "ci": null
+     }
+    },
+    "749": {
+     "A": {
+      "sim": 94.4,
+      "p": 94.28,
+      "ci": [
+       86.8,
+       95.4
+      ]
+     },
+     "B": {
+      "sim": 5.6,
+      "p": 5.72,
+      "ci": [
+       4.6,
+       13.2
+      ]
+     }
+    },
+    "799": {
+     "A": {
+      "sim": 93.6,
+      "p": 93.3,
+      "ci": null
+     },
+     "B": {
+      "sim": 6.4,
+      "p": 6.7,
+      "ci": null
+     }
+    },
+    "849": {
+     "A": {
+      "sim": 92.0,
+      "p": 92.31,
+      "ci": null
+     },
+     "B": {
+      "sim": 8.0,
+      "p": 7.69,
+      "ci": null
+     }
+    },
+    "899": {
+     "A": {
+      "sim": 91.4,
+      "p": 91.28,
+      "ci": null
+     },
+     "B": {
+      "sim": 8.6,
+      "p": 8.72,
+      "ci": null
+     }
+    }
+   },
+   "T1": {
+    "449": {
+     "A": {
+      "sim": 97.8,
+      "p": 97.49,
+      "ci": null
+     },
+     "B": {
+      "sim": 2.2,
+      "p": 2.51,
+      "ci": null
+     }
+    },
+    "499": {
+     "A": {
+      "sim": 97.6,
+      "p": 97.31,
+      "ci": null
+     },
+     "B": {
+      "sim": 2.4,
+      "p": 2.69,
+      "ci": null
+     }
+    },
+    "549": {
+     "A": {
+      "sim": 97.6,
+      "p": 97.09,
+      "ci": null
+     },
+     "B": {
+      "sim": 2.4,
+      "p": 2.91,
+      "ci": null
+     }
+    },
+    "599": {
+     "A": {
+      "sim": 97.4,
+      "p": 96.81,
+      "ci": null
+     },
+     "B": {
+      "sim": 2.6,
+      "p": 3.19,
+      "ci": null
+     }
+    },
+    "649": {
+     "A": {
+      "sim": 97.2,
+      "p": 96.42,
+      "ci": null
+     },
+     "B": {
+      "sim": 2.8,
+      "p": 3.58,
+      "ci": null
+     }
+    },
+    "699": {
+     "A": {
+      "sim": 96.6,
+      "p": 96.0,
+      "ci": null
+     },
+     "B": {
+      "sim": 3.4,
+      "p": 4.0,
+      "ci": null
+     }
+    },
+    "749": {
+     "A": {
+      "sim": 96.4,
+      "p": 95.55,
+      "ci": null
+     },
+     "B": {
+      "sim": 3.6,
+      "p": 4.45,
+      "ci": null
+     }
+    },
+    "799": {
+     "A": {
+      "sim": 95.4,
+      "p": 95.01,
+      "ci": null
+     },
+     "B": {
+      "sim": 4.6,
+      "p": 4.99,
+      "ci": null
+     }
+    },
+    "849": {
+     "A": {
+      "sim": 94.6,
+      "p": 94.4,
+      "ci": null
+     },
+     "B": {
+      "sim": 5.4,
+      "p": 5.6,
+      "ci": null
+     }
+    },
+    "899": {
+     "A": {
+      "sim": 94.4,
+      "p": 93.77,
+      "ci": null
+     },
+     "B": {
+      "sim": 5.6,
+      "p": 6.23,
+      "ci": null
+     }
+    }
+   },
+   "T2": {
+    "449": {
+     "A": {
+      "sim": 98.2,
+      "p": 97.86,
+      "ci": null
+     },
+     "B": {
+      "sim": 1.8,
+      "p": 2.14,
+      "ci": null
+     }
+    },
+    "499": {
+     "A": {
+      "sim": 97.8,
+      "p": 97.55,
+      "ci": null
+     },
+     "B": {
+      "sim": 2.2,
+      "p": 2.45,
+      "ci": null
+     }
+    },
+    "549": {
+     "A": {
+      "sim": 97.6,
+      "p": 97.09,
+      "ci": null
+     },
+     "B": {
+      "sim": 2.4,
+      "p": 2.91,
+      "ci": null
+     }
+    },
+    "599": {
+     "A": {
+      "sim": 96.8,
+      "p": 96.25,
+      "ci": null
+     },
+     "B": {
+      "sim": 3.2,
+      "p": 3.75,
+      "ci": null
+     }
+    },
+    "649": {
+     "A": {
+      "sim": 95.6,
+      "p": 95.13,
+      "ci": null
+     },
+     "B": {
+      "sim": 4.4,
+      "p": 4.87,
+      "ci": null
+     }
+    },
+    "699": {
+     "A": {
+      "sim": 94.0,
+      "p": 93.64,
+      "ci": null
+     },
+     "B": {
+      "sim": 6.0,
+      "p": 6.36,
+      "ci": null
+     }
+    }
+   },
+   "T3": {
+    "549": {
+     "A": {
+      "sim": 97.6,
+      "p": 97.09,
+      "ci": null
+     },
+     "B": {
+      "sim": 2.4,
+      "p": 2.91,
+      "ci": null
+     }
+    },
+    "599": {
+     "A": {
+      "sim": 97.6,
+      "p": 96.96,
+      "ci": null
+     },
+     "B": {
+      "sim": 2.4,
+      "p": 3.04,
+      "ci": null
+     }
+    },
+    "649": {
+     "A": {
+      "sim": 97.4,
+      "p": 96.81,
+      "ci": null
+     },
+     "B": {
+      "sim": 2.6,
+      "p": 3.19,
+      "ci": null
+     }
+    },
+    "699": {
+     "A": {
+      "sim": 97.4,
+      "p": 96.62,
+      "ci": null
+     },
+     "B": {
+      "sim": 2.6,
+      "p": 3.38,
+      "ci": null
+     }
+    },
+    "749": {
+     "A": {
+      "sim": 97.2,
+      "p": 96.42,
+      "ci": null
+     },
+     "B": {
+      "sim": 2.8,
+      "p": 3.58,
+      "ci": null
+     }
+    },
+    "799": {
+     "A": {
+      "sim": 96.8,
+      "p": 96.21,
+      "ci": null
+     },
+     "B": {
+      "sim": 3.2,
+      "p": 3.79,
+      "ci": null
+     }
+    },
+    "849": {
+     "A": {
+      "sim": 96.6,
+      "p": 96.0,
+      "ci": null
+     },
+     "B": {
+      "sim": 3.4,
+      "p": 4.0,
+      "ci": null
+     }
+    },
+    "899": {
+     "A": {
+      "sim": 96.4,
+      "p": 95.79,
+      "ci": null
+     },
+     "B": {
+      "sim": 3.6,
+      "p": 4.21,
+      "ci": null
+     }
+    }
+   }
+  },
+  "WM5": {
+   "T0": {
+    "349": {
+     "A": {
+      "sim": 42.2,
+      "p": 39.96,
+      "ci": null
+     },
+     "B": {
+      "sim": 57.8,
+      "p": 60.04,
+      "ci": null
+     }
+    },
+    "399": {
+     "A": {
+      "sim": 40.8,
+      "p": 37.47,
+      "ci": null
+     },
+     "B": {
+      "sim": 59.2,
+      "p": 62.53,
+      "ci": null
+     }
+    },
+    "449": {
+     "A": {
+      "sim": 38.2,
+      "p": 34.88,
+      "ci": [
+       31.3,
+       42.5
+      ]
+     },
+     "B": {
+      "sim": 61.8,
+      "p": 65.12,
+      "ci": [
+       57.5,
+       68.7
+      ]
+     }
+    },
+    "499": {
+     "A": {
+      "sim": 33.8,
+      "p": 32.2,
+      "ci": null
+     },
+     "B": {
+      "sim": 66.2,
+      "p": 67.8,
+      "ci": null
+     }
+    },
+    "549": {
+     "A": {
+      "sim": 31.4,
+      "p": 29.49,
+      "ci": null
+     },
+     "B": {
+      "sim": 68.6,
+      "p": 70.51,
+      "ci": null
+     }
+    }
+   },
+   "T1": {
+    "349": {
+     "A": {
+      "sim": 39.6,
+      "p": 36.4,
+      "ci": null
+     },
+     "B": {
+      "sim": 60.4,
+      "p": 63.6,
+      "ci": null
+     }
+    },
+    "399": {
+     "A": {
+      "sim": 38.2,
+      "p": 34.71,
+      "ci": null
+     },
+     "B": {
+      "sim": 61.8,
+      "p": 65.29,
+      "ci": null
+     }
+    },
+    "449": {
+     "A": {
+      "sim": 36.0,
+      "p": 32.99,
+      "ci": null
+     },
+     "B": {
+      "sim": 64.0,
+      "p": 67.01,
+      "ci": null
+     }
+    },
+    "499": {
+     "A": {
+      "sim": 32.4,
+      "p": 31.22,
+      "ci": null
+     },
+     "B": {
+      "sim": 67.6,
+      "p": 68.78,
+      "ci": null
+     }
+    },
+    "549": {
+     "A": {
+      "sim": 31.4,
+      "p": 29.49,
+      "ci": null
+     },
+     "B": {
+      "sim": 68.6,
+      "p": 70.51,
+      "ci": null
+     }
+    }
+   },
+   "T2": {
+    "349": {
+     "A": {
+      "sim": 47.0,
+      "p": 45.03,
+      "ci": null
+     },
+     "B": {
+      "sim": 53.0,
+      "p": 54.97,
+      "ci": null
+     }
+    },
+    "399": {
+     "A": {
+      "sim": 43.2,
+      "p": 41.52,
+      "ci": null
+     },
+     "B": {
+      "sim": 56.8,
+      "p": 58.48,
+      "ci": null
+     }
+    },
+    "449": {
+     "A": {
+      "sim": 40.8,
+      "p": 37.72,
+      "ci": null
+     },
+     "B": {
+      "sim": 59.2,
+      "p": 62.28,
+      "ci": null
+     }
+    },
+    "499": {
+     "A": {
+      "sim": 36.8,
+      "p": 33.68,
+      "ci": null
+     },
+     "B": {
+      "sim": 63.2,
+      "p": 66.32,
+      "ci": null
+     }
+    },
+    "549": {
+     "A": {
+      "sim": 31.4,
+      "p": 29.49,
+      "ci": null
+     },
+     "B": {
+      "sim": 68.6,
+      "p": 70.51,
+      "ci": null
+     }
+    }
+   },
+   "T3": {
+    "549": {
+     "A": {
+      "sim": 31.4,
+      "p": 29.49,
+      "ci": null
+     },
+     "B": {
+      "sim": 68.6,
+      "p": 70.51,
+      "ci": null
+     }
+    }
+   }
+  },
+  "WM6": {
+   "T0": {
+    "Βασικό(A) vs Οικονομικό(B)": {
+     "A": {
+      "sim": 94.8,
+      "p": 94.59,
+      "ci": [
+       85.9,
+       95.9
+      ]
+     },
+     "B": {
+      "sim": 5.2,
+      "p": 5.41,
+      "ci": [
+       4.1,
+       14.1
+      ]
+     }
+    },
+    "Premium(A) vs Βασικό(B)": {
+     "A": {
+      "sim": 95.4,
+      "p": 95.92,
+      "ci": [
+       89.9,
+       96.8
+      ]
+     },
+     "B": {
+      "sim": 4.6,
+      "p": 4.08,
+      "ci": [
+       3.2,
+       10.1
+      ]
+     }
+    },
+    "Premium(A) vs Οικονομικό(B)": {
+     "A": {
+      "sim": 98.2,
+      "p": 98.66,
+      "ci": [
+       97.6,
+       99.3
+      ]
+     },
+     "B": {
+      "sim": 1.8,
+      "p": 1.34,
+      "ci": [
+       0.7,
+       2.4
+      ]
+     }
+    }
+   },
+   "T1": {
+    "Βασικό(A) vs Οικονομικό(B)": {
+     "A": {
+      "sim": 95.8,
+      "p": 95.5,
+      "ci": null
+     },
+     "B": {
+      "sim": 4.2,
+      "p": 4.5,
+      "ci": null
+     }
+    },
+    "Premium(A) vs Βασικό(B)": {
+     "A": {
+      "sim": 96.6,
+      "p": 97.18,
+      "ci": null
+     },
+     "B": {
+      "sim": 3.4,
+      "p": 2.82,
+      "ci": null
+     }
+    },
+    "Premium(A) vs Οικονομικό(B)": {
+     "A": {
+      "sim": 99.4,
+      "p": 99.42,
+      "ci": null
+     },
+     "B": {
+      "sim": 0.6,
+      "p": 0.58,
+      "ci": null
+     }
+    }
+   },
+   "T2": {
+    "Βασικό(A) vs Οικονομικό(B)": {
+     "A": {
+      "sim": 93.0,
+      "p": 92.98,
+      "ci": null
+     },
+     "B": {
+      "sim": 7.0,
+      "p": 7.02,
+      "ci": null
+     }
+    }
+   },
+   "T3": {
+    "Premium(A) vs Βασικό(B)": {
+     "A": {
+      "sim": 97.2,
+      "p": 97.97,
+      "ci": null
+     },
+     "B": {
+      "sim": 2.8,
+      "p": 2.03,
+      "ci": null
+     }
+    }
+   }
+  },
+  "WM7": {
+   "T0": {
+    "περιορισμένη(A) vs καθόλου(B)": {
+     "A": {
+      "sim": 74.2,
+      "p": 72.22,
+      "ci": null
+     },
+     "B": {
+      "sim": 25.8,
+      "p": 27.78,
+      "ci": null
+     }
+    },
+    "πλήρης(A) vs περιορισμένη(B)": {
+     "A": {
+      "sim": 73.2,
+      "p": 69.97,
+      "ci": null
+     },
+     "B": {
+      "sim": 26.8,
+      "p": 30.03,
+      "ci": null
+     }
+    },
+    "πλήρης(A) vs καθόλου(B)": {
+     "A": {
+      "sim": 85.8,
+      "p": 85.09,
+      "ci": null
+     },
+     "B": {
+      "sim": 14.2,
+      "p": 14.91,
+      "ci": null
+     }
+    }
+   },
+   "T1": {
+    "περιορισμένη(A) vs καθόλου(B)": {
+     "A": {
+      "sim": 74.2,
+      "p": 72.22,
+      "ci": null
+     },
+     "B": {
+      "sim": 25.8,
+      "p": 27.78,
+      "ci": null
+     }
+    },
+    "πλήρης(A) vs περιορισμένη(B)": {
+     "A": {
+      "sim": 73.2,
+      "p": 69.97,
+      "ci": null
+     },
+     "B": {
+      "sim": 26.8,
+      "p": 30.03,
+      "ci": null
+     }
+    },
+    "πλήρης(A) vs καθόλου(B)": {
+     "A": {
+      "sim": 85.8,
+      "p": 85.09,
+      "ci": null
+     },
+     "B": {
+      "sim": 14.2,
+      "p": 14.91,
+      "ci": null
+     }
+    }
+   },
+   "T2": {
+    "περιορισμένη(A) vs καθόλου(B)": {
+     "A": {
+      "sim": 74.2,
+      "p": 72.22,
+      "ci": null
+     },
+     "B": {
+      "sim": 25.8,
+      "p": 27.78,
+      "ci": null
+     }
+    },
+    "πλήρης(A) vs περιορισμένη(B)": {
+     "A": {
+      "sim": 73.2,
+      "p": 69.97,
+      "ci": null
+     },
+     "B": {
+      "sim": 26.8,
+      "p": 30.03,
+      "ci": null
+     }
+    },
+    "πλήρης(A) vs καθόλου(B)": {
+     "A": {
+      "sim": 85.8,
+      "p": 85.09,
+      "ci": null
+     },
+     "B": {
+      "sim": 14.2,
+      "p": 14.91,
+      "ci": null
+     }
+    }
+   },
+   "T3": {
+    "περιορισμένη(A) vs καθόλου(B)": {
+     "A": {
+      "sim": 74.2,
+      "p": 72.22,
+      "ci": null
+     },
+     "B": {
+      "sim": 25.8,
+      "p": 27.78,
+      "ci": null
+     }
+    },
+    "πλήρης(A) vs περιορισμένη(B)": {
+     "A": {
+      "sim": 73.2,
+      "p": 69.97,
+      "ci": null
+     },
+     "B": {
+      "sim": 26.8,
+      "p": 30.03,
+      "ci": null
+     }
+    },
+    "πλήρης(A) vs καθόλου(B)": {
+     "A": {
+      "sim": 85.8,
+      "p": 85.09,
+      "ci": null
+     },
+     "B": {
+      "sim": 14.2,
+      "p": 14.91,
+      "ci": null
+     }
+    }
+   }
+  },
+  "WM8": {
+   "T0": {
+    "E(A) vs G(B)": {
+     "A": {
+      "sim": 76.0,
+      "p": 76.42,
+      "ci": null
+     },
+     "B": {
+      "sim": 24.0,
+      "p": 23.58,
+      "ci": null
+     }
+    },
+    "C(A) vs G(B)": {
+     "A": {
+      "sim": 89.6,
+      "p": 88.09,
+      "ci": null
+     },
+     "B": {
+      "sim": 10.4,
+      "p": 11.91,
+      "ci": null
+     }
+    },
+    "A(A) vs G(B)": {
+     "A": {
+      "sim": 97.0,
+      "p": 95.67,
+      "ci": null
+     },
+     "B": {
+      "sim": 3.0,
+      "p": 4.33,
+      "ci": null
+     }
+    }
+   },
+   "T1": {
+    "E(A) vs G(B)": {
+     "A": {
+      "sim": 76.0,
+      "p": 76.42,
+      "ci": null
+     },
+     "B": {
+      "sim": 24.0,
+      "p": 23.58,
+      "ci": null
+     }
+    },
+    "C(A) vs G(B)": {
+     "A": {
+      "sim": 89.6,
+      "p": 88.09,
+      "ci": null
+     },
+     "B": {
+      "sim": 10.4,
+      "p": 11.91,
+      "ci": null
+     }
+    },
+    "A(A) vs G(B)": {
+     "A": {
+      "sim": 97.0,
+      "p": 95.67,
+      "ci": null
+     },
+     "B": {
+      "sim": 3.0,
+      "p": 4.33,
+      "ci": null
+     }
+    }
+   },
+   "T2": {
+    "E(A) vs G(B)": {
+     "A": {
+      "sim": 76.0,
+      "p": 76.42,
+      "ci": null
+     },
+     "B": {
+      "sim": 24.0,
+      "p": 23.58,
+      "ci": null
+     }
+    },
+    "C(A) vs G(B)": {
+     "A": {
+      "sim": 89.6,
+      "p": 88.09,
+      "ci": null
+     },
+     "B": {
+      "sim": 10.4,
+      "p": 11.91,
+      "ci": null
+     }
+    },
+    "A(A) vs G(B)": {
+     "A": {
+      "sim": 97.0,
+      "p": 95.67,
+      "ci": null
+     },
+     "B": {
+      "sim": 3.0,
+      "p": 4.33,
+      "ci": null
+     }
+    }
+   },
+   "T3": {
+    "E(A) vs G(B)": {
+     "A": {
+      "sim": 76.0,
+      "p": 76.42,
+      "ci": null
+     },
+     "B": {
+      "sim": 24.0,
+      "p": 23.58,
+      "ci": null
+     }
+    },
+    "C(A) vs G(B)": {
+     "A": {
+      "sim": 89.6,
+      "p": 88.09,
+      "ci": null
+     },
+     "B": {
+      "sim": 10.4,
+      "p": 11.91,
+      "ci": null
+     }
+    },
+    "A(A) vs G(B)": {
+     "A": {
+      "sim": 97.0,
+      "p": 95.67,
+      "ci": null
+     },
+     "B": {
+      "sim": 3.0,
+      "p": 4.33,
+      "ci": null
+     }
+    }
+   }
+  },
+  "SP1": {
+   "T0": {
+    "249": {
+     "A": {
+      "sim": 75.2,
+      "p": 76.62,
+      "ci": null
+     },
+     "B": {
+      "sim": 24.8,
+      "p": 23.38,
+      "ci": null
+     }
+    },
+    "274": {
+     "A": {
+      "sim": 72.8,
+      "p": 73.63,
+      "ci": null
+     },
+     "B": {
+      "sim": 27.2,
+      "p": 26.37,
+      "ci": null
+     }
+    },
+    "299": {
+     "A": {
+      "sim": 69.2,
+      "p": 69.48,
+      "ci": null
+     },
+     "B": {
+      "sim": 30.8,
+      "p": 30.52,
+      "ci": null
+     }
+    },
+    "324": {
+     "A": {
+      "sim": 64.8,
+      "p": 64.32,
+      "ci": null
+     },
+     "B": {
+      "sim": 35.2,
+      "p": 35.68,
+      "ci": null
+     }
+    },
+    "349": {
+     "A": {
+      "sim": 60.2,
+      "p": 59.88,
+      "ci": [
+       54.9,
+       64.0
+      ]
+     },
+     "B": {
+      "sim": 39.8,
+      "p": 40.12,
+      "ci": [
+       36.0,
+       45.1
+      ]
+     }
+    },
+    "374": {
+     "A": {
+      "sim": 56.4,
+      "p": 55.93,
+      "ci": null
+     },
+     "B": {
+      "sim": 43.6,
+      "p": 44.07,
+      "ci": null
+     }
+    },
+    "399": {
+     "A": {
+      "sim": 53.6,
+      "p": 52.4,
+      "ci": null
+     },
+     "B": {
+      "sim": 46.4,
+      "p": 47.6,
+      "ci": null
+     }
+    },
+    "424": {
+     "A": {
+      "sim": 50.6,
+      "p": 49.23,
+      "ci": null
+     },
+     "B": {
+      "sim": 49.4,
+      "p": 50.77,
+      "ci": null
+     }
+    },
+    "449": {
+     "A": {
+      "sim": 48.2,
+      "p": 46.35,
+      "ci": null
+     },
+     "B": {
+      "sim": 51.8,
+      "p": 53.65,
+      "ci": null
+     }
+    }
+   },
+   "T1": {
+    "249": {
+     "A": {
+      "sim": 74.0,
+      "p": 74.59,
+      "ci": null
+     },
+     "B": {
+      "sim": 26.0,
+      "p": 25.41,
+      "ci": null
+     }
+    },
+    "274": {
+     "A": {
+      "sim": 72.4,
+      "p": 72.35,
+      "ci": null
+     },
+     "B": {
+      "sim": 27.6,
+      "p": 27.65,
+      "ci": null
+     }
+    },
+    "299": {
+     "A": {
+      "sim": 69.2,
+      "p": 69.48,
+      "ci": null
+     },
+     "B": {
+      "sim": 30.8,
+      "p": 30.52,
+      "ci": null
+     }
+    },
+    "324": {
+     "A": {
+      "sim": 65.8,
+      "p": 66.05,
+      "ci": null
+     },
+     "B": {
+      "sim": 34.2,
+      "p": 33.95,
+      "ci": null
+     }
+    },
+    "349": {
+     "A": {
+      "sim": 63.6,
+      "p": 62.97,
+      "ci": null
+     },
+     "B": {
+      "sim": 36.4,
+      "p": 37.03,
+      "ci": null
+     }
+    },
+    "374": {
+     "A": {
+      "sim": 60.2,
+      "p": 60.14,
+      "ci": null
+     },
+     "B": {
+      "sim": 39.8,
+      "p": 39.86,
+      "ci": null
+     }
+    },
+    "399": {
+     "A": {
+      "sim": 59.0,
+      "p": 57.52,
+      "ci": null
+     },
+     "B": {
+      "sim": 41.0,
+      "p": 42.48,
+      "ci": null
+     }
+    },
+    "424": {
+     "A": {
+      "sim": 56.0,
+      "p": 55.09,
+      "ci": null
+     },
+     "B": {
+      "sim": 44.0,
+      "p": 44.91,
+      "ci": null
+     }
+    },
+    "449": {
+     "A": {
+      "sim": 53.8,
+      "p": 52.83,
+      "ci": null
+     },
+     "B": {
+      "sim": 46.2,
+      "p": 47.17,
+      "ci": null
+     }
+    }
+   },
+   "T3": {
+    "249": {
+     "A": {
+      "sim": 72.4,
+      "p": 72.33,
+      "ci": null
+     },
+     "B": {
+      "sim": 27.6,
+      "p": 27.67,
+      "ci": null
+     }
+    },
+    "274": {
+     "A": {
+      "sim": 71.0,
+      "p": 71.02,
+      "ci": null
+     },
+     "B": {
+      "sim": 29.0,
+      "p": 28.98,
+      "ci": null
+     }
+    },
+    "299": {
+     "A": {
+      "sim": 69.2,
+      "p": 69.48,
+      "ci": null
+     },
+     "B": {
+      "sim": 30.8,
+      "p": 30.52,
+      "ci": null
+     }
+    },
+    "324": {
+     "A": {
+      "sim": 67.6,
+      "p": 67.74,
+      "ci": null
+     },
+     "B": {
+      "sim": 32.4,
+      "p": 32.26,
+      "ci": null
+     }
+    },
+    "349": {
+     "A": {
+      "sim": 65.8,
+      "p": 66.06,
+      "ci": null
+     },
+     "B": {
+      "sim": 34.2,
+      "p": 33.94,
+      "ci": null
+     }
+    },
+    "374": {
+     "A": {
+      "sim": 64.8,
+      "p": 64.49,
+      "ci": null
+     },
+     "B": {
+      "sim": 35.2,
+      "p": 35.51,
+      "ci": null
+     }
+    },
+    "399": {
+     "A": {
+      "sim": 63.6,
+      "p": 62.99,
+      "ci": null
+     },
+     "B": {
+      "sim": 36.4,
+      "p": 37.01,
+      "ci": null
+     }
+    },
+    "424": {
+     "A": {
+      "sim": 61.4,
+      "p": 61.56,
+      "ci": null
+     },
+     "B": {
+      "sim": 38.6,
+      "p": 38.44,
+      "ci": null
+     }
+    },
+    "449": {
+     "A": {
+      "sim": 60.4,
+      "p": 60.18,
+      "ci": null
+     },
+     "B": {
+      "sim": 39.6,
+      "p": 39.82,
+      "ci": null
+     }
+    }
+   }
+  },
+  "SP2": {
+   "T0": {
+    "249": {
+     "A": {
+      "sim": 84.0,
+      "p": 85.12,
+      "ci": null
+     },
+     "B": {
+      "sim": 16.0,
+      "p": 14.88,
+      "ci": null
+     }
+    },
+    "274": {
+     "A": {
+      "sim": 82.2,
+      "p": 83.25,
+      "ci": null
+     },
+     "B": {
+      "sim": 17.8,
+      "p": 16.75,
+      "ci": null
+     }
+    },
+    "299": {
+     "A": {
+      "sim": 79.4,
+      "p": 80.59,
+      "ci": null
+     },
+     "B": {
+      "sim": 20.6,
+      "p": 19.41,
+      "ci": null
+     }
+    },
+    "324": {
+     "A": {
+      "sim": 74.4,
+      "p": 76.52,
+      "ci": null
+     },
+     "B": {
+      "sim": 25.6,
+      "p": 23.48,
+      "ci": null
+     }
+    },
+    "349": {
+     "A": {
+      "sim": 69.6,
+      "p": 72.61,
+      "ci": [
+       69.2,
+       75.7
+      ]
+     },
+     "B": {
+      "sim": 30.4,
+      "p": 27.39,
+      "ci": [
+       24.3,
+       30.8
+      ]
+     }
+    },
+    "374": {
+     "A": {
+      "sim": 66.6,
+      "p": 68.96,
+      "ci": null
+     },
+     "B": {
+      "sim": 33.4,
+      "p": 31.04,
+      "ci": null
+     }
+    },
+    "399": {
+     "A": {
+      "sim": 62.0,
+      "p": 65.58,
+      "ci": null
+     },
+     "B": {
+      "sim": 38.0,
+      "p": 34.42,
+      "ci": null
+     }
+    },
+    "424": {
+     "A": {
+      "sim": 60.0,
+      "p": 62.42,
+      "ci": null
+     },
+     "B": {
+      "sim": 40.0,
+      "p": 37.58,
+      "ci": null
+     }
+    },
+    "449": {
+     "A": {
+      "sim": 57.2,
+      "p": 59.45,
+      "ci": null
+     },
+     "B": {
+      "sim": 42.8,
+      "p": 40.55,
+      "ci": null
+     }
+    }
+   },
+   "T1": {
+    "249": {
+     "A": {
+      "sim": 82.8,
+      "p": 83.85,
+      "ci": null
+     },
+     "B": {
+      "sim": 17.2,
+      "p": 16.15,
+      "ci": null
+     }
+    },
+    "274": {
+     "A": {
+      "sim": 81.6,
+      "p": 82.43,
+      "ci": null
+     },
+     "B": {
+      "sim": 18.4,
+      "p": 17.57,
+      "ci": null
+     }
+    },
+    "299": {
+     "A": {
+      "sim": 79.4,
+      "p": 80.59,
+      "ci": null
+     },
+     "B": {
+      "sim": 20.6,
+      "p": 19.41,
+      "ci": null
+     }
+    },
+    "324": {
+     "A": {
+      "sim": 76.8,
+      "p": 77.99,
+      "ci": null
+     },
+     "B": {
+      "sim": 23.2,
+      "p": 22.01,
+      "ci": null
+     }
+    },
+    "349": {
+     "A": {
+      "sim": 72.4,
+      "p": 75.35,
+      "ci": null
+     },
+     "B": {
+      "sim": 27.6,
+      "p": 24.65,
+      "ci": null
+     }
+    },
+    "374": {
+     "A": {
+      "sim": 69.6,
+      "p": 72.85,
+      "ci": null
+     },
+     "B": {
+      "sim": 30.4,
+      "p": 27.15,
+      "ci": null
+     }
+    },
+    "399": {
+     "A": {
+      "sim": 67.6,
+      "p": 70.45,
+      "ci": null
+     },
+     "B": {
+      "sim": 32.4,
+      "p": 29.55,
+      "ci": null
+     }
+    },
+    "424": {
+     "A": {
+      "sim": 65.2,
+      "p": 68.17,
+      "ci": null
+     },
+     "B": {
+      "sim": 34.8,
+      "p": 31.83,
+      "ci": null
+     }
+    },
+    "449": {
+     "A": {
+      "sim": 62.6,
+      "p": 65.99,
+      "ci": null
+     },
+     "B": {
+      "sim": 37.4,
+      "p": 34.01,
+      "ci": null
+     }
+    }
+   },
+   "T3": {
+    "249": {
+     "A": {
+      "sim": 81.6,
+      "p": 82.43,
+      "ci": null
+     },
+     "B": {
+      "sim": 18.4,
+      "p": 17.57,
+      "ci": null
+     }
+    },
+    "274": {
+     "A": {
+      "sim": 80.4,
+      "p": 81.58,
+      "ci": null
+     },
+     "B": {
+      "sim": 19.6,
+      "p": 18.42,
+      "ci": null
+     }
+    },
+    "299": {
+     "A": {
+      "sim": 79.4,
+      "p": 80.59,
+      "ci": null
+     },
+     "B": {
+      "sim": 20.6,
+      "p": 19.41,
+      "ci": null
+     }
+    },
+    "324": {
+     "A": {
+      "sim": 78.2,
+      "p": 79.34,
+      "ci": null
+     },
+     "B": {
+      "sim": 21.8,
+      "p": 20.66,
+      "ci": null
+     }
+    },
+    "349": {
+     "A": {
+      "sim": 76.8,
+      "p": 78.01,
+      "ci": null
+     },
+     "B": {
+      "sim": 23.2,
+      "p": 21.99,
+      "ci": null
+     }
+    },
+    "374": {
+     "A": {
+      "sim": 74.8,
+      "p": 76.67,
+      "ci": null
+     },
+     "B": {
+      "sim": 25.2,
+      "p": 23.33,
+      "ci": null
+     }
+    },
+    "399": {
+     "A": {
+      "sim": 72.4,
+      "p": 75.37,
+      "ci": null
+     },
+     "B": {
+      "sim": 27.6,
+      "p": 24.63,
+      "ci": null
+     }
+    },
+    "424": {
+     "A": {
+      "sim": 71.8,
+      "p": 74.11,
+      "ci": null
+     },
+     "B": {
+      "sim": 28.2,
+      "p": 25.89,
+      "ci": null
+     }
+    },
+    "449": {
+     "A": {
+      "sim": 69.8,
+      "p": 72.88,
+      "ci": null
+     },
+     "B": {
+      "sim": 30.2,
+      "p": 27.12,
+      "ci": null
+     }
+    }
+   }
+  },
+  "SP3": {
+   "T0": {
+    "249": {
+     "A": {
+      "sim": 76.2,
+      "p": 76.43,
+      "ci": null
+     },
+     "B": {
+      "sim": 23.8,
+      "p": 23.57,
+      "ci": null
+     }
+    },
+    "274": {
+     "A": {
+      "sim": 73.4,
+      "p": 73.44,
+      "ci": null
+     },
+     "B": {
+      "sim": 26.6,
+      "p": 26.56,
+      "ci": null
+     }
+    },
+    "299": {
+     "A": {
+      "sim": 70.2,
+      "p": 69.23,
+      "ci": null
+     },
+     "B": {
+      "sim": 29.8,
+      "p": 30.77,
+      "ci": null
+     }
+    },
+    "324": {
+     "A": {
+      "sim": 64.8,
+      "p": 63.84,
+      "ci": null
+     },
+     "B": {
+      "sim": 35.2,
+      "p": 36.16,
+      "ci": null
+     }
+    },
+    "349": {
+     "A": {
+      "sim": 61.2,
+      "p": 59.15,
+      "ci": [
+       53.4,
+       64.6
+      ]
+     },
+     "B": {
+      "sim": 38.8,
+      "p": 40.85,
+      "ci": [
+       35.4,
+       46.6
+      ]
+     }
+    },
+    "374": {
+     "A": {
+      "sim": 56.6,
+      "p": 55.0,
+      "ci": null
+     },
+     "B": {
+      "sim": 43.4,
+      "p": 45.0,
+      "ci": null
+     }
+    },
+    "399": {
+     "A": {
+      "sim": 53.4,
+      "p": 51.31,
+      "ci": null
+     },
+     "B": {
+      "sim": 46.6,
+      "p": 48.69,
+      "ci": null
+     }
+    },
+    "424": {
+     "A": {
+      "sim": 49.6,
+      "p": 48.04,
+      "ci": null
+     },
+     "B": {
+      "sim": 50.4,
+      "p": 51.96,
+      "ci": null
+     }
+    },
+    "449": {
+     "A": {
+      "sim": 46.8,
+      "p": 45.12,
+      "ci": null
+     },
+     "B": {
+      "sim": 53.2,
+      "p": 54.88,
+      "ci": null
+     }
+    }
+   },
+   "T1": {
+    "249": {
+     "A": {
+      "sim": 74.0,
+      "p": 74.39,
+      "ci": null
+     },
+     "B": {
+      "sim": 26.0,
+      "p": 25.61,
+      "ci": null
+     }
+    },
+    "274": {
+     "A": {
+      "sim": 72.0,
+      "p": 72.15,
+      "ci": null
+     },
+     "B": {
+      "sim": 28.0,
+      "p": 27.85,
+      "ci": null
+     }
+    },
+    "299": {
+     "A": {
+      "sim": 70.2,
+      "p": 69.23,
+      "ci": null
+     },
+     "B": {
+      "sim": 29.8,
+      "p": 30.77,
+      "ci": null
+     }
+    },
+    "324": {
+     "A": {
+      "sim": 67.2,
+      "p": 65.64,
+      "ci": null
+     },
+     "B": {
+      "sim": 32.8,
+      "p": 34.36,
+      "ci": null
+     }
+    },
+    "349": {
+     "A": {
+      "sim": 63.8,
+      "p": 62.41,
+      "ci": null
+     },
+     "B": {
+      "sim": 36.2,
+      "p": 37.59,
+      "ci": null
+     }
+    },
+    "374": {
+     "A": {
+      "sim": 61.4,
+      "p": 59.43,
+      "ci": null
+     },
+     "B": {
+      "sim": 38.6,
+      "p": 40.57,
+      "ci": null
+     }
+    },
+    "399": {
+     "A": {
+      "sim": 58.4,
+      "p": 56.67,
+      "ci": null
+     },
+     "B": {
+      "sim": 41.6,
+      "p": 43.33,
+      "ci": null
+     }
+    },
+    "424": {
+     "A": {
+      "sim": 55.8,
+      "p": 54.12,
+      "ci": null
+     },
+     "B": {
+      "sim": 44.2,
+      "p": 45.88,
+      "ci": null
+     }
+    },
+    "449": {
+     "A": {
+      "sim": 54.2,
+      "p": 51.75,
+      "ci": null
+     },
+     "B": {
+      "sim": 45.8,
+      "p": 48.25,
+      "ci": null
+     }
+    }
+   },
+   "T3": {
+    "249": {
+     "A": {
+      "sim": 72.0,
+      "p": 72.14,
+      "ci": null
+     },
+     "B": {
+      "sim": 28.0,
+      "p": 27.86,
+      "ci": null
+     }
+    },
+    "274": {
+     "A": {
+      "sim": 70.8,
+      "p": 70.81,
+      "ci": null
+     },
+     "B": {
+      "sim": 29.2,
+      "p": 29.19,
+      "ci": null
+     }
+    },
+    "299": {
+     "A": {
+      "sim": 70.2,
+      "p": 69.23,
+      "ci": null
+     },
+     "B": {
+      "sim": 29.8,
+      "p": 30.77,
+      "ci": null
+     }
+    },
+    "324": {
+     "A": {
+      "sim": 68.8,
+      "p": 67.4,
+      "ci": null
+     },
+     "B": {
+      "sim": 31.2,
+      "p": 32.6,
+      "ci": null
+     }
+    },
+    "349": {
+     "A": {
+      "sim": 67.2,
+      "p": 65.66,
+      "ci": null
+     },
+     "B": {
+      "sim": 32.8,
+      "p": 34.34,
+      "ci": null
+     }
+    },
+    "374": {
+     "A": {
+      "sim": 65.0,
+      "p": 64.02,
+      "ci": null
+     },
+     "B": {
+      "sim": 35.0,
+      "p": 35.98,
+      "ci": null
+     }
+    },
+    "399": {
+     "A": {
+      "sim": 63.8,
+      "p": 62.44,
+      "ci": null
+     },
+     "B": {
+      "sim": 36.2,
+      "p": 37.56,
+      "ci": null
+     }
+    },
+    "424": {
+     "A": {
+      "sim": 62.6,
+      "p": 60.93,
+      "ci": null
+     },
+     "B": {
+      "sim": 37.4,
+      "p": 39.07,
+      "ci": null
+     }
+    },
+    "449": {
+     "A": {
+      "sim": 61.4,
+      "p": 59.47,
+      "ci": null
+     },
+     "B": {
+      "sim": 38.6,
+      "p": 40.53,
+      "ci": null
+     }
+    }
+   }
+  },
+  "SP4": {
+   "T0": {
+    "199": {
+     "A": {
+      "sim": 55.0,
+      "p": 54.33,
+      "ci": null
+     },
+     "B": {
+      "sim": 45.0,
+      "p": 45.67,
+      "ci": null
+     }
+    },
+    "224": {
+     "A": {
+      "sim": 52.4,
+      "p": 50.81,
+      "ci": null
+     },
+     "B": {
+      "sim": 47.6,
+      "p": 49.19,
+      "ci": null
+     }
+    },
+    "249": {
+     "A": {
+      "sim": 47.6,
+      "p": 46.77,
+      "ci": null
+     },
+     "B": {
+      "sim": 52.4,
+      "p": 53.23,
+      "ci": null
+     }
+    },
+    "274": {
+     "A": {
+      "sim": 43.2,
+      "p": 42.1,
+      "ci": null
+     },
+     "B": {
+      "sim": 56.8,
+      "p": 57.9,
+      "ci": null
+     }
+    },
+    "299": {
+     "A": {
+      "sim": 37.4,
+      "p": 36.51,
+      "ci": null
+     },
+     "B": {
+      "sim": 62.6,
+      "p": 63.49,
+      "ci": null
+     }
+    }
+   },
+   "T1": {
+    "199": {
+     "A": {
+      "sim": 50.2,
+      "p": 49.19,
+      "ci": null
+     },
+     "B": {
+      "sim": 49.8,
+      "p": 50.81,
+      "ci": null
+     }
+    },
+    "224": {
+     "A": {
+      "sim": 47.4,
+      "p": 46.49,
+      "ci": null
+     },
+     "B": {
+      "sim": 52.6,
+      "p": 53.51,
+      "ci": null
+     }
+    },
+    "249": {
+     "A": {
+      "sim": 44.0,
+      "p": 43.53,
+      "ci": null
+     },
+     "B": {
+      "sim": 56.0,
+      "p": 56.47,
+      "ci": null
+     }
+    },
+    "274": {
+     "A": {
+      "sim": 41.4,
+      "p": 40.26,
+      "ci": null
+     },
+     "B": {
+      "sim": 58.6,
+      "p": 59.74,
+      "ci": null
+     }
+    },
+    "299": {
+     "A": {
+      "sim": 37.4,
+      "p": 36.51,
+      "ci": null
+     },
+     "B": {
+      "sim": 62.6,
+      "p": 63.49,
+      "ci": null
+     }
+    }
+   },
+   "T3": {
+    "199": {
+     "A": {
+      "sim": 44.0,
+      "p": 43.5,
+      "ci": null
+     },
+     "B": {
+      "sim": 56.0,
+      "p": 56.5,
+      "ci": null
+     }
+    },
+    "224": {
+     "A": {
+      "sim": 42.8,
+      "p": 41.92,
+      "ci": null
+     },
+     "B": {
+      "sim": 57.2,
+      "p": 58.08,
+      "ci": null
+     }
+    },
+    "249": {
+     "A": {
+      "sim": 41.4,
+      "p": 40.24,
+      "ci": null
+     },
+     "B": {
+      "sim": 58.6,
+      "p": 59.76,
+      "ci": null
+     }
+    },
+    "274": {
+     "A": {
+      "sim": 39.2,
+      "p": 38.45,
+      "ci": null
+     },
+     "B": {
+      "sim": 60.8,
+      "p": 61.55,
+      "ci": null
+     }
+    },
+    "299": {
+     "A": {
+      "sim": 37.4,
+      "p": 36.51,
+      "ci": null
+     },
+     "B": {
+      "sim": 62.6,
+      "p": 63.49,
+      "ci": null
+     }
+    }
+   }
+  },
+  "SP5": {
+   "T0": {
+    "Βασικό(A) vs Οικονομικό(B)": {
+     "A": {
+      "sim": 76.8,
+      "p": 77.54,
+      "ci": [
+       71.8,
+       82.4
+      ]
+     },
+     "B": {
+      "sim": 23.2,
+      "p": 22.46,
+      "ci": [
+       17.6,
+       28.2
+      ]
+     }
+    },
+    "Premium(A) vs Βασικό(B)": {
+     "A": {
+      "sim": 91.2,
+      "p": 90.87,
+      "ci": [
+       82.5,
+       93.2
+      ]
+     },
+     "B": {
+      "sim": 8.8,
+      "p": 9.13,
+      "ci": [
+       6.8,
+       17.5
+      ]
+     }
+    },
+    "Premium(A) vs Οικονομικό(B)": {
+     "A": {
+      "sim": 92.4,
+      "p": 91.99,
+      "ci": null
+     },
+     "B": {
+      "sim": 7.6,
+      "p": 8.01,
+      "ci": null
+     }
+    }
+   },
+   "T1": {
+    "Βασικό(A) vs Οικονομικό(B)": {
+     "A": {
+      "sim": 81.6,
+      "p": 82.09,
+      "ci": null
+     },
+     "B": {
+      "sim": 18.4,
+      "p": 17.91,
+      "ci": null
+     }
+    },
+    "Premium(A) vs Βασικό(B)": {
+     "A": {
+      "sim": 94.2,
+      "p": 94.07,
+      "ci": null
+     },
+     "B": {
+      "sim": 5.8,
+      "p": 5.93,
+      "ci": null
+     }
+    },
+    "Premium(A) vs Οικονομικό(B)": {
+     "A": {
+      "sim": 95.2,
+      "p": 95.36,
+      "ci": null
+     },
+     "B": {
+      "sim": 4.8,
+      "p": 4.64,
+      "ci": null
+     }
+    }
+   },
+   "T3": {
+    "Βασικό(A) vs Οικονομικό(B)": {
+     "A": {
+      "sim": 85.6,
+      "p": 86.3,
+      "ci": null
+     },
+     "B": {
+      "sim": 14.4,
+      "p": 13.7,
+      "ci": null
+     }
+    },
+    "Premium(A) vs Βασικό(B)": {
+     "A": {
+      "sim": 97.2,
+      "p": 96.59,
+      "ci": null
+     },
+     "B": {
+      "sim": 2.8,
+      "p": 3.41,
+      "ci": null
+     }
+    },
+    "Premium(A) vs Οικονομικό(B)": {
+     "A": {
+      "sim": 98.8,
+      "p": 98.15,
+      "ci": null
+     },
+     "B": {
+      "sim": 1.2,
+      "p": 1.85,
+      "ci": null
+     }
+    }
+   }
+  },
+  "RF1": {
+   "T0": {
+    "10%": {
+     "refurb_A": {
+      "sim": 38.0,
+      "p": 38.9,
+      "ci": null
+     },
+     "refurb_B": {
+      "sim": 39.6,
+      "p": 38.94,
+      "ci": null
+     },
+     "new": {
+      "sim": 22.4,
+      "p": 22.17,
+      "ci": null
+     }
+    },
+    "20%": {
+     "refurb_A": {
+      "sim": 42.0,
+      "p": 42.32,
+      "ci": null
+     },
+     "refurb_B": {
+      "sim": 36.2,
+      "p": 36.29,
+      "ci": null
+     },
+     "new": {
+      "sim": 21.8,
+      "p": 21.39,
+      "ci": null
+     }
+    },
+    "30%": {
+     "refurb_A": {
+      "sim": 46.6,
+      "p": 47.05,
+      "ci": [
+       41.6,
+       52.9
+      ]
+     },
+     "refurb_B": {
+      "sim": 32.0,
+      "p": 32.42,
+      "ci": [
+       28.1,
+       37.0
+      ]
+     },
+     "new": {
+      "sim": 21.4,
+      "p": 20.53,
+      "ci": [
+       17.2,
+       23.7
+      ]
+     }
+    },
+    "40%": {
+     "refurb_A": {
+      "sim": 55.0,
+      "p": 53.66,
+      "ci": null
+     },
+     "refurb_B": {
+      "sim": 25.2,
+      "p": 26.71,
+      "ci": null
+     },
+     "new": {
+      "sim": 19.8,
+      "p": 19.64,
+      "ci": null
+     }
+    },
+    "50%": {
+     "refurb_A": {
+      "sim": 66.0,
+      "p": 65.8,
+      "ci": null
+     },
+     "refurb_B": {
+      "sim": 14.8,
+      "p": 15.44,
+      "ci": null
+     },
+     "new": {
+      "sim": 19.2,
+      "p": 18.76,
+      "ci": null
+     }
+    },
+    "60%": {
+     "refurb_A": {
+      "sim": 71.8,
+      "p": 70.73,
+      "ci": null
+     },
+     "refurb_B": {
+      "sim": 11.0,
+      "p": 11.36,
+      "ci": null
+     },
+     "new": {
+      "sim": 17.2,
+      "p": 17.92,
+      "ci": null
+     }
+    }
+   },
+   "T1": {
+    "10%": {
+     "refurb_A": {
+      "sim": 41.8,
+      "p": 41.73,
+      "ci": null
+     },
+     "refurb_B": {
+      "sim": 34.2,
+      "p": 34.22,
+      "ci": null
+     },
+     "new": {
+      "sim": 24.0,
+      "p": 24.05,
+      "ci": null
+     }
+    },
+    "20%": {
+     "refurb_A": {
+      "sim": 45.4,
+      "p": 44.96,
+      "ci": null
+     },
+     "refurb_B": {
+      "sim": 31.4,
+      "p": 31.77,
+      "ci": null
+     },
+     "new": {
+      "sim": 23.2,
+      "p": 23.26,
+      "ci": null
+     }
+    },
+    "30%": {
+     "refurb_A": {
+      "sim": 49.2,
+      "p": 49.14,
+      "ci": null
+     },
+     "refurb_B": {
+      "sim": 28.2,
+      "p": 28.47,
+      "ci": null
+     },
+     "new": {
+      "sim": 22.6,
+      "p": 22.39,
+      "ci": null
+     }
+    },
+    "40%": {
+     "refurb_A": {
+      "sim": 55.4,
+      "p": 54.62,
+      "ci": null
+     },
+     "refurb_B": {
+      "sim": 22.4,
+      "p": 23.89,
+      "ci": null
+     },
+     "new": {
+      "sim": 22.2,
+      "p": 21.48,
+      "ci": null
+     }
+    },
+    "50%": {
+     "refurb_A": {
+      "sim": 64.4,
+      "p": 64.3,
+      "ci": null
+     },
+     "refurb_B": {
+      "sim": 14.4,
+      "p": 15.08,
+      "ci": null
+     },
+     "new": {
+      "sim": 21.2,
+      "p": 20.61,
+      "ci": null
+     }
+    },
+    "60%": {
+     "refurb_A": {
+      "sim": 68.4,
+      "p": 68.35,
+      "ci": null
+     },
+     "refurb_B": {
+      "sim": 11.4,
+      "p": 11.83,
+      "ci": null
+     },
+     "new": {
+      "sim": 20.2,
+      "p": 19.83,
+      "ci": null
+     }
+    }
+   },
+   "T3": {
+    "10%": {
+     "refurb_A": {
+      "sim": 44.0,
+      "p": 44.37,
+      "ci": null
+     },
+     "refurb_B": {
+      "sim": 30.2,
+      "p": 29.9,
+      "ci": null
+     },
+     "new": {
+      "sim": 25.8,
+      "p": 25.73,
+      "ci": null
+     }
+    },
+    "20%": {
+     "refurb_A": {
+      "sim": 47.6,
+      "p": 47.2,
+      "ci": null
+     },
+     "refurb_B": {
+      "sim": 28.0,
+      "p": 27.83,
+      "ci": null
+     },
+     "new": {
+      "sim": 24.4,
+      "p": 24.97,
+      "ci": null
+     }
+    },
+    "30%": {
+     "refurb_A": {
+      "sim": 52.0,
+      "p": 50.68,
+      "ci": null
+     },
+     "refurb_B": {
+      "sim": 24.2,
+      "p": 25.18,
+      "ci": null
+     },
+     "new": {
+      "sim": 23.8,
+      "p": 24.14,
+      "ci": null
+     }
+    },
+    "40%": {
+     "refurb_A": {
+      "sim": 56.6,
+      "p": 55.21,
+      "ci": null
+     },
+     "refurb_B": {
+      "sim": 20.6,
+      "p": 21.49,
+      "ci": null
+     },
+     "new": {
+      "sim": 22.8,
+      "p": 23.3,
+      "ci": null
+     }
+    },
+    "50%": {
+     "refurb_A": {
+      "sim": 63.0,
+      "p": 62.79,
+      "ci": null
+     },
+     "refurb_B": {
+      "sim": 14.4,
+      "p": 14.74,
+      "ci": null
+     },
+     "new": {
+      "sim": 22.6,
+      "p": 22.48,
+      "ci": null
+     }
+    },
+    "60%": {
+     "refurb_A": {
+      "sim": 66.2,
+      "p": 66.09,
+      "ci": null
+     },
+     "refurb_B": {
+      "sim": 12.0,
+      "p": 12.21,
+      "ci": null
+     },
+     "new": {
+      "sim": 21.8,
+      "p": 21.71,
+      "ci": null
+     }
+    }
+   }
+  },
+  "RF2": {
+   "T0": {
+    "μη εξουσιοδοτημένος τρίτος": {
+     "refurb_A": {
+      "sim": 24.4,
+      "p": 23.81,
+      "ci": null
+     },
+     "refurb_B": {
+      "sim": 48.2,
+      "p": 45.89,
+      "ci": null
+     },
+     "new": {
+      "sim": 27.4,
+      "p": 30.3,
+      "ci": null
+     }
+    },
+    "εξουσιοδοτημένος τρίτος": {
+     "refurb_A": {
+      "sim": 36.0,
+      "p": 34.84,
+      "ci": null
+     },
+     "refurb_B": {
+      "sim": 39.2,
+      "p": 38.31,
+      "ci": null
+     },
+     "new": {
+      "sim": 24.8,
+      "p": 26.85,
+      "ci": null
+     }
+    },
+    "κατασκευαστής": {
+     "refurb_A": {
+      "sim": 48.2,
+      "p": 47.05,
+      "ci": [
+       41.6,
+       52.9
+      ]
+     },
+     "refurb_B": {
+      "sim": 33.0,
+      "p": 32.42,
+      "ci": [
+       28.1,
+       37.0
+      ]
+     },
+     "new": {
+      "sim": 18.8,
+      "p": 20.53,
+      "ci": [
+       17.2,
+       23.7
+      ]
+     }
+    }
+   },
+   "T1": {
+    "μη εξουσιοδοτημένος τρίτος": {
+     "refurb_A": {
+      "sim": 26.0,
+      "p": 25.19,
+      "ci": null
+     },
+     "refurb_B": {
+      "sim": 44.2,
+      "p": 41.79,
+      "ci": null
+     },
+     "new": {
+      "sim": 29.8,
+      "p": 33.02,
+      "ci": null
+     }
+    },
+    "εξουσιοδοτημένος τρίτος": {
+     "refurb_A": {
+      "sim": 36.2,
+      "p": 36.7,
+      "ci": null
+     },
+     "refurb_B": {
+      "sim": 36.4,
+      "p": 34.07,
+      "ci": null
+     },
+     "new": {
+      "sim": 27.4,
+      "p": 29.23,
+      "ci": null
+     }
+    },
+    "κατασκευαστής": {
+     "refurb_A": {
+      "sim": 50.4,
+      "p": 49.14,
+      "ci": null
+     },
+     "refurb_B": {
+      "sim": 29.0,
+      "p": 28.47,
+      "ci": null
+     },
+     "new": {
+      "sim": 20.6,
+      "p": 22.39,
+      "ci": null
+     }
+    }
+   },
+   "T3": {
+    "μη εξουσιοδοτημένος τρίτος": {
+     "refurb_A": {
+      "sim": 27.0,
+      "p": 26.36,
+      "ci": null
+     },
+     "refurb_B": {
+      "sim": 39.0,
+      "p": 38.08,
+      "ci": null
+     },
+     "new": {
+      "sim": 34.0,
+      "p": 35.56,
+      "ci": null
+     }
+    },
+    "εξουσιοδοτημένος τρίτος": {
+     "refurb_A": {
+      "sim": 37.0,
+      "p": 38.19,
+      "ci": null
+     },
+     "refurb_B": {
+      "sim": 31.4,
+      "p": 30.33,
+      "ci": null
+     },
+     "new": {
+      "sim": 31.6,
+      "p": 31.48,
+      "ci": null
+     }
+    },
+    "κατασκευαστής": {
+     "refurb_A": {
+      "sim": 51.4,
+      "p": 50.68,
+      "ci": null
+     },
+     "refurb_B": {
+      "sim": 25.8,
+      "p": 25.18,
+      "ci": null
+     },
+     "new": {
+      "sim": 22.8,
+      "p": 24.14,
+      "ci": null
+     }
+    }
+   }
+  },
+  "RF3": {
+   "T0": {
+    "μεταχειρισμένο": {
+     "refurb_A": {
+      "sim": 32.2,
+      "p": 29.32,
+      "ci": null
+     },
+     "refurb_B": {
+      "sim": 38.6,
+      "p": 42.05,
+      "ci": null
+     },
+     "new": {
+      "sim": 29.2,
+      "p": 28.63,
+      "ci": null
+     }
+    },
+    "refurbished": {
+     "refurb_A": {
+      "sim": 38.6,
+      "p": 34.84,
+      "ci": null
+     },
+     "refurb_B": {
+      "sim": 34.4,
+      "p": 38.31,
+      "ci": null
+     },
+     "new": {
+      "sim": 27.0,
+      "p": 26.85,
+      "ci": null
+     }
+    },
+    "open box": {
+     "refurb_A": {
+      "sim": 41.6,
+      "p": 38.54,
+      "ci": [
+       32.9,
+       43.7
+      ]
+     },
+     "refurb_B": {
+      "sim": 33.6,
+      "p": 36.14,
+      "ci": [
+       31.1,
+       41.1
+      ]
+     },
+     "new": {
+      "sim": 24.8,
+      "p": 25.32,
+      "ci": [
+       21.8,
+       28.5
+      ]
+     }
+    }
+   },
+   "T1": {
+    "μεταχειρισμένο": {
+     "refurb_A": {
+      "sim": 33.4,
+      "p": 30.95,
+      "ci": null
+     },
+     "refurb_B": {
+      "sim": 34.0,
+      "p": 37.87,
+      "ci": null
+     },
+     "new": {
+      "sim": 32.6,
+      "p": 31.18,
+      "ci": null
+     }
+    },
+    "refurbished": {
+     "refurb_A": {
+      "sim": 41.4,
+      "p": 36.7,
+      "ci": null
+     },
+     "refurb_B": {
+      "sim": 28.8,
+      "p": 34.07,
+      "ci": null
+     },
+     "new": {
+      "sim": 29.8,
+      "p": 29.23,
+      "ci": null
+     }
+    },
+    "open box": {
+     "refurb_A": {
+      "sim": 43.4,
+      "p": 40.37,
+      "ci": null
+     },
+     "refurb_B": {
+      "sim": 28.2,
+      "p": 32.13,
+      "ci": null
+     },
+     "new": {
+      "sim": 28.4,
+      "p": 27.51,
+      "ci": null
+     }
+    }
+   },
+   "T3": {
+    "μεταχειρισμένο": {
+     "refurb_A": {
+      "sim": 36.6,
+      "p": 32.29,
+      "ci": null
+     },
+     "refurb_B": {
+      "sim": 28.2,
+      "p": 34.12,
+      "ci": null
+     },
+     "new": {
+      "sim": 35.2,
+      "p": 33.59,
+      "ci": null
+     }
+    },
+    "refurbished": {
+     "refurb_A": {
+      "sim": 42.6,
+      "p": 38.19,
+      "ci": null
+     },
+     "refurb_B": {
+      "sim": 24.8,
+      "p": 30.33,
+      "ci": null
+     },
+     "new": {
+      "sim": 32.6,
+      "p": 31.48,
+      "ci": null
+     }
+    },
+    "open box": {
+     "refurb_A": {
+      "sim": 44.4,
+      "p": 41.7,
+      "ci": null
+     },
+     "refurb_B": {
+      "sim": 25.4,
+      "p": 28.72,
+      "ci": null
+     },
+     "new": {
+      "sim": 30.2,
+      "p": 29.58,
+      "ci": null
+     }
+    }
+   }
+  },
+  "DL1": {
+   "T0": {
+    "0.00": {
+     "ground": {
+      "sim": 14.6,
+      "p": 12.87,
+      "ci": null
+     },
+     "drone": {
+      "sim": 85.4,
+      "p": 87.13,
+      "ci": null
+     }
+    },
+    "0.25": {
+     "ground": {
+      "sim": 17.6,
+      "p": 14.78,
+      "ci": null
+     },
+     "drone": {
+      "sim": 82.4,
+      "p": 85.22,
+      "ci": null
+     }
+    },
+    "0.50": {
+     "ground": {
+      "sim": 20.2,
+      "p": 17.35,
+      "ci": null
+     },
+     "drone": {
+      "sim": 79.8,
+      "p": 82.65,
+      "ci": null
+     }
+    },
+    "0.75": {
+     "ground": {
+      "sim": 24.6,
+      "p": 21.1,
+      "ci": null
+     },
+     "drone": {
+      "sim": 75.4,
+      "p": 78.9,
+      "ci": null
+     }
+    },
+    "1.00": {
+     "ground": {
+      "sim": 29.8,
+      "p": 27.35,
+      "ci": [
+       24.5,
+       29.9
+      ]
+     },
+     "drone": {
+      "sim": 70.2,
+      "p": 72.65,
+      "ci": [
+       70.1,
+       75.5
+      ]
+     }
+    },
+    "1.25": {
+     "ground": {
+      "sim": 37.6,
+      "p": 36.36,
+      "ci": null
+     },
+     "drone": {
+      "sim": 62.4,
+      "p": 63.64,
+      "ci": null
+     }
+    },
+    "1.50": {
+     "ground": {
+      "sim": 46.6,
+      "p": 43.7,
+      "ci": null
+     },
+     "drone": {
+      "sim": 53.4,
+      "p": 56.3,
+      "ci": null
+     }
+    },
+    "1.75": {
+     "ground": {
+      "sim": 52.2,
+      "p": 49.91,
+      "ci": null
+     },
+     "drone": {
+      "sim": 47.8,
+      "p": 50.09,
+      "ci": null
+     }
+    },
+    "2.00": {
+     "ground": {
+      "sim": 58.4,
+      "p": 55.21,
+      "ci": null
+     },
+     "drone": {
+      "sim": 41.6,
+      "p": 44.79,
+      "ci": null
+     }
+    },
+    "2.25": {
+     "ground": {
+      "sim": 61.4,
+      "p": 59.72,
+      "ci": null
+     },
+     "drone": {
+      "sim": 38.6,
+      "p": 40.28,
+      "ci": null
+     }
+    }
+   },
+   "T1": {
+    "0.00": {
+     "ground": {
+      "sim": 17.8,
+      "p": 15.13,
+      "ci": null
+     },
+     "drone": {
+      "sim": 82.2,
+      "p": 84.87,
+      "ci": null
+     }
+    },
+    "0.25": {
+     "ground": {
+      "sim": 19.8,
+      "p": 16.95,
+      "ci": null
+     },
+     "drone": {
+      "sim": 80.2,
+      "p": 83.05,
+      "ci": null
+     }
+    },
+    "0.50": {
+     "ground": {
+      "sim": 22.6,
+      "p": 19.32,
+      "ci": null
+     },
+     "drone": {
+      "sim": 77.4,
+      "p": 80.68,
+      "ci": null
+     }
+    },
+    "0.75": {
+     "ground": {
+      "sim": 25.4,
+      "p": 22.54,
+      "ci": null
+     },
+     "drone": {
+      "sim": 74.6,
+      "p": 77.46,
+      "ci": null
+     }
+    },
+    "1.00": {
+     "ground": {
+      "sim": 29.8,
+      "p": 27.35,
+      "ci": null
+     },
+     "drone": {
+      "sim": 70.2,
+      "p": 72.65,
+      "ci": null
+     }
+    },
+    "1.25": {
+     "ground": {
+      "sim": 35.8,
+      "p": 33.92,
+      "ci": null
+     },
+     "drone": {
+      "sim": 64.2,
+      "p": 66.08,
+      "ci": null
+     }
+    },
+    "1.50": {
+     "ground": {
+      "sim": 41.0,
+      "p": 39.61,
+      "ci": null
+     },
+     "drone": {
+      "sim": 59.0,
+      "p": 60.39,
+      "ci": null
+     }
+    },
+    "1.75": {
+     "ground": {
+      "sim": 47.6,
+      "p": 44.59,
+      "ci": null
+     },
+     "drone": {
+      "sim": 52.4,
+      "p": 55.41,
+      "ci": null
+     }
+    },
+    "2.00": {
+     "ground": {
+      "sim": 51.4,
+      "p": 49.0,
+      "ci": null
+     },
+     "drone": {
+      "sim": 48.6,
+      "p": 51.0,
+      "ci": null
+     }
+    },
+    "2.25": {
+     "ground": {
+      "sim": 55.6,
+      "p": 52.96,
+      "ci": null
+     },
+     "drone": {
+      "sim": 44.4,
+      "p": 47.04,
+      "ci": null
+     }
+    }
+   },
+   "T2": {
+    "0.00": {
+     "ground": {
+      "sim": 11.2,
+      "p": 10.57,
+      "ci": null
+     },
+     "drone": {
+      "sim": 88.8,
+      "p": 89.43,
+      "ci": null
+     }
+    },
+    "0.25": {
+     "ground": {
+      "sim": 14.0,
+      "p": 12.52,
+      "ci": null
+     },
+     "drone": {
+      "sim": 86.0,
+      "p": 87.48,
+      "ci": null
+     }
+    },
+    "0.50": {
+     "ground": {
+      "sim": 17.8,
+      "p": 15.2,
+      "ci": null
+     },
+     "drone": {
+      "sim": 82.2,
+      "p": 84.8,
+      "ci": null
+     }
+    },
+    "0.75": {
+     "ground": {
+      "sim": 23.0,
+      "p": 19.38,
+      "ci": null
+     },
+     "drone": {
+      "sim": 77.0,
+      "p": 80.62,
+      "ci": null
+     }
+    },
+    "1.00": {
+     "ground": {
+      "sim": 29.8,
+      "p": 27.35,
+      "ci": null
+     },
+     "drone": {
+      "sim": 70.2,
+      "p": 72.65,
+      "ci": null
+     }
+    },
+    "1.25": {
+     "ground": {
+      "sim": 41.0,
+      "p": 39.49,
+      "ci": null
+     },
+     "drone": {
+      "sim": 59.0,
+      "p": 60.51,
+      "ci": null
+     }
+    },
+    "1.50": {
+     "ground": {
+      "sim": 51.2,
+      "p": 48.82,
+      "ci": null
+     },
+     "drone": {
+      "sim": 48.8,
+      "p": 51.18,
+      "ci": null
+     }
+    }
+   },
+   "T3": {
+    "0.00": {
+     "ground": {
+      "sim": 21.2,
+      "p": 18.19,
+      "ci": null
+     },
+     "drone": {
+      "sim": 78.8,
+      "p": 81.81,
+      "ci": null
+     }
+    },
+    "0.25": {
+     "ground": {
+      "sim": 23.4,
+      "p": 19.79,
+      "ci": null
+     },
+     "drone": {
+      "sim": 76.6,
+      "p": 80.21,
+      "ci": null
+     }
+    },
+    "0.50": {
+     "ground": {
+      "sim": 25.0,
+      "p": 21.73,
+      "ci": null
+     },
+     "drone": {
+      "sim": 75.0,
+      "p": 78.27,
+      "ci": null
+     }
+    },
+    "0.75": {
+     "ground": {
+      "sim": 26.4,
+      "p": 24.16,
+      "ci": null
+     },
+     "drone": {
+      "sim": 73.6,
+      "p": 75.84,
+      "ci": null
+     }
+    },
+    "1.00": {
+     "ground": {
+      "sim": 29.8,
+      "p": 27.35,
+      "ci": null
+     },
+     "drone": {
+      "sim": 70.2,
+      "p": 72.65,
+      "ci": null
+     }
+    },
+    "1.25": {
+     "ground": {
+      "sim": 34.4,
+      "p": 31.41,
+      "ci": null
+     },
+     "drone": {
+      "sim": 65.6,
+      "p": 68.59,
+      "ci": null
+     }
+    },
+    "1.50": {
+     "ground": {
+      "sim": 37.0,
+      "p": 35.28,
+      "ci": null
+     },
+     "drone": {
+      "sim": 63.0,
+      "p": 64.72,
+      "ci": null
+     }
+    },
+    "1.75": {
+     "ground": {
+      "sim": 39.8,
+      "p": 38.71,
+      "ci": null
+     },
+     "drone": {
+      "sim": 60.2,
+      "p": 61.29,
+      "ci": null
+     }
+    },
+    "2.00": {
+     "ground": {
+      "sim": 44.4,
+      "p": 41.89,
+      "ci": null
+     },
+     "drone": {
+      "sim": 55.6,
+      "p": 58.11,
+      "ci": null
+     }
+    },
+    "2.25": {
+     "ground": {
+      "sim": 47.6,
+      "p": 44.83,
+      "ci": null
+     },
+     "drone": {
+      "sim": 52.4,
+      "p": 55.17,
+      "ci": null
+     }
+    }
+   }
+  },
+  "DL2": {
+   "T0": {
+    "0.00": {
+     "ground": {
+      "sim": 8.6,
+      "p": 8.08,
+      "ci": null
+     },
+     "drone": {
+      "sim": 91.4,
+      "p": 91.92,
+      "ci": null
+     }
+    },
+    "0.25": {
+     "ground": {
+      "sim": 9.6,
+      "p": 9.35,
+      "ci": null
+     },
+     "drone": {
+      "sim": 90.4,
+      "p": 90.65,
+      "ci": null
+     }
+    },
+    "0.50": {
+     "ground": {
+      "sim": 11.0,
+      "p": 11.05,
+      "ci": null
+     },
+     "drone": {
+      "sim": 89.0,
+      "p": 88.95,
+      "ci": null
+     }
+    },
+    "0.75": {
+     "ground": {
+      "sim": 14.4,
+      "p": 13.57,
+      "ci": null
+     },
+     "drone": {
+      "sim": 85.6,
+      "p": 86.43,
+      "ci": null
+     }
+    },
+    "1.00": {
+     "ground": {
+      "sim": 19.4,
+      "p": 18.04,
+      "ci": [
+       15.9,
+       20.3
+      ]
+     },
+     "drone": {
+      "sim": 80.6,
+      "p": 81.96,
+      "ci": [
+       79.7,
+       84.1
+      ]
+     }
+    },
+    "1.25": {
+     "ground": {
+      "sim": 28.4,
+      "p": 26.0,
+      "ci": null
+     },
+     "drone": {
+      "sim": 71.6,
+      "p": 74.0,
+      "ci": null
+     }
+    },
+    "1.50": {
+     "ground": {
+      "sim": 34.2,
+      "p": 33.12,
+      "ci": null
+     },
+     "drone": {
+      "sim": 65.8,
+      "p": 66.88,
+      "ci": null
+     }
+    },
+    "1.75": {
+     "ground": {
+      "sim": 39.8,
+      "p": 39.47,
+      "ci": null
+     },
+     "drone": {
+      "sim": 60.2,
+      "p": 60.53,
+      "ci": null
+     }
+    },
+    "2.00": {
+     "ground": {
+      "sim": 45.2,
+      "p": 45.11,
+      "ci": null
+     },
+     "drone": {
+      "sim": 54.8,
+      "p": 54.89,
+      "ci": null
+     }
+    },
+    "2.25": {
+     "ground": {
+      "sim": 51.4,
+      "p": 50.07,
+      "ci": null
+     },
+     "drone": {
+      "sim": 48.6,
+      "p": 49.93,
+      "ci": null
+     }
+    }
+   },
+   "T1": {
+    "0.00": {
+     "ground": {
+      "sim": 10.0,
+      "p": 9.58,
+      "ci": null
+     },
+     "drone": {
+      "sim": 90.0,
+      "p": 90.42,
+      "ci": null
+     }
+    },
+    "0.25": {
+     "ground": {
+      "sim": 10.8,
+      "p": 10.79,
+      "ci": null
+     },
+     "drone": {
+      "sim": 89.2,
+      "p": 89.21,
+      "ci": null
+     }
+    },
+    "0.50": {
+     "ground": {
+      "sim": 13.0,
+      "p": 12.37,
+      "ci": null
+     },
+     "drone": {
+      "sim": 87.0,
+      "p": 87.63,
+      "ci": null
+     }
+    },
+    "0.75": {
+     "ground": {
+      "sim": 15.6,
+      "p": 14.56,
+      "ci": null
+     },
+     "drone": {
+      "sim": 84.4,
+      "p": 85.44,
+      "ci": null
+     }
+    },
+    "1.00": {
+     "ground": {
+      "sim": 19.4,
+      "p": 18.04,
+      "ci": null
+     },
+     "drone": {
+      "sim": 80.6,
+      "p": 81.96,
+      "ci": null
+     }
+    },
+    "1.25": {
+     "ground": {
+      "sim": 26.0,
+      "p": 23.68,
+      "ci": null
+     },
+     "drone": {
+      "sim": 74.0,
+      "p": 76.32,
+      "ci": null
+     }
+    },
+    "1.50": {
+     "ground": {
+      "sim": 31.2,
+      "p": 29.11,
+      "ci": null
+     },
+     "drone": {
+      "sim": 68.8,
+      "p": 70.89,
+      "ci": null
+     }
+    },
+    "1.75": {
+     "ground": {
+      "sim": 36.0,
+      "p": 34.02,
+      "ci": null
+     },
+     "drone": {
+      "sim": 64.0,
+      "p": 65.98,
+      "ci": null
+     }
+    },
+    "2.00": {
+     "ground": {
+      "sim": 39.2,
+      "p": 38.53,
+      "ci": null
+     },
+     "drone": {
+      "sim": 60.8,
+      "p": 61.47,
+      "ci": null
+     }
+    },
+    "2.25": {
+     "ground": {
+      "sim": 43.0,
+      "p": 42.69,
+      "ci": null
+     },
+     "drone": {
+      "sim": 57.0,
+      "p": 57.31,
+      "ci": null
+     }
+    }
+   },
+   "T2": {
+    "0.00": {
+     "ground": {
+      "sim": 7.0,
+      "p": 6.55,
+      "ci": null
+     },
+     "drone": {
+      "sim": 93.0,
+      "p": 93.45,
+      "ci": null
+     }
+    },
+    "0.25": {
+     "ground": {
+      "sim": 8.6,
+      "p": 7.84,
+      "ci": null
+     },
+     "drone": {
+      "sim": 91.4,
+      "p": 92.16,
+      "ci": null
+     }
+    },
+    "0.50": {
+     "ground": {
+      "sim": 10.0,
+      "p": 9.63,
+      "ci": null
+     },
+     "drone": {
+      "sim": 90.0,
+      "p": 90.37,
+      "ci": null
+     }
+    },
+    "0.75": {
+     "ground": {
+      "sim": 13.0,
+      "p": 12.41,
+      "ci": null
+     },
+     "drone": {
+      "sim": 87.0,
+      "p": 87.59,
+      "ci": null
+     }
+    },
+    "1.00": {
+     "ground": {
+      "sim": 19.4,
+      "p": 18.04,
+      "ci": null
+     },
+     "drone": {
+      "sim": 80.6,
+      "p": 81.96,
+      "ci": null
+     }
+    },
+    "1.25": {
+     "ground": {
+      "sim": 31.2,
+      "p": 28.99,
+      "ci": null
+     },
+     "drone": {
+      "sim": 68.8,
+      "p": 71.01,
+      "ci": null
+     }
+    },
+    "1.50": {
+     "ground": {
+      "sim": 39.2,
+      "p": 38.34,
+      "ci": null
+     },
+     "drone": {
+      "sim": 60.8,
+      "p": 61.66,
+      "ci": null
+     }
+    }
+   },
+   "T3": {
+    "0.00": {
+     "ground": {
+      "sim": 11.6,
+      "p": 11.61,
+      "ci": null
+     },
+     "drone": {
+      "sim": 88.4,
+      "p": 88.39,
+      "ci": null
+     }
+    },
+    "0.25": {
+     "ground": {
+      "sim": 13.2,
+      "p": 12.68,
+      "ci": null
+     },
+     "drone": {
+      "sim": 86.8,
+      "p": 87.32,
+      "ci": null
+     }
+    },
+    "0.50": {
+     "ground": {
+      "sim": 14.8,
+      "p": 14.0,
+      "ci": null
+     },
+     "drone": {
+      "sim": 85.2,
+      "p": 86.0,
+      "ci": null
+     }
+    },
+    "0.75": {
+     "ground": {
+      "sim": 16.8,
+      "p": 15.69,
+      "ci": null
+     },
+     "drone": {
+      "sim": 83.2,
+      "p": 84.31,
+      "ci": null
+     }
+    },
+    "1.00": {
+     "ground": {
+      "sim": 19.4,
+      "p": 18.04,
+      "ci": null
+     },
+     "drone": {
+      "sim": 80.6,
+      "p": 81.96,
+      "ci": null
+     }
+    },
+    "1.25": {
+     "ground": {
+      "sim": 23.6,
+      "p": 21.44,
+      "ci": null
+     },
+     "drone": {
+      "sim": 76.4,
+      "p": 78.56,
+      "ci": null
+     }
+    },
+    "1.50": {
+     "ground": {
+      "sim": 27.4,
+      "p": 24.97,
+      "ci": null
+     },
+     "drone": {
+      "sim": 72.6,
+      "p": 75.03,
+      "ci": null
+     }
+    },
+    "1.75": {
+     "ground": {
+      "sim": 30.4,
+      "p": 28.25,
+      "ci": null
+     },
+     "drone": {
+      "sim": 69.6,
+      "p": 71.75,
+      "ci": null
+     }
+    },
+    "2.00": {
+     "ground": {
+      "sim": 33.2,
+      "p": 31.32,
+      "ci": null
+     },
+     "drone": {
+      "sim": 66.8,
+      "p": 68.68,
+      "ci": null
+     }
+    },
+    "2.25": {
+     "ground": {
+      "sim": 36.0,
+      "p": 34.27,
+      "ci": null
+     },
+     "drone": {
+      "sim": 64.0,
+      "p": 65.73,
+      "ci": null
+     }
+    }
+   }
+  },
+  "DL3": {
+   "T0": {
+    "0.00": {
+     "ground": {
+      "sim": 46.2,
+      "p": 49.21,
+      "ci": null
+     },
+     "drone": {
+      "sim": 53.8,
+      "p": 50.79,
+      "ci": null
+     }
+    },
+    "0.50": {
+     "ground": {
+      "sim": 62.4,
+      "p": 64.49,
+      "ci": null
+     },
+     "drone": {
+      "sim": 37.6,
+      "p": 35.51,
+      "ci": null
+     }
+    },
+    "1.00": {
+     "ground": {
+      "sim": 72.0,
+      "p": 73.34,
+      "ci": null
+     },
+     "drone": {
+      "sim": 28.0,
+      "p": 26.66,
+      "ci": null
+     }
+    },
+    "1.50": {
+     "ground": {
+      "sim": 80.0,
+      "p": 79.06,
+      "ci": null
+     },
+     "drone": {
+      "sim": 20.0,
+      "p": 20.94,
+      "ci": null
+     }
+    },
+    "2.00": {
+     "ground": {
+      "sim": 84.8,
+      "p": 82.95,
+      "ci": [
+       81.6,
+       84.1
+      ]
+     },
+     "drone": {
+      "sim": 15.2,
+      "p": 17.05,
+      "ci": [
+       15.9,
+       18.4
+      ]
+     }
+    },
+    "2.50": {
+     "ground": {
+      "sim": 86.2,
+      "p": 85.68,
+      "ci": null
+     },
+     "drone": {
+      "sim": 13.8,
+      "p": 14.32,
+      "ci": null
+     }
+    },
+    "3.00": {
+     "ground": {
+      "sim": 89.4,
+      "p": 87.73,
+      "ci": null
+     },
+     "drone": {
+      "sim": 10.6,
+      "p": 12.27,
+      "ci": null
+     }
+    },
+    "3.50": {
+     "ground": {
+      "sim": 91.4,
+      "p": 89.34,
+      "ci": null
+     },
+     "drone": {
+      "sim": 8.6,
+      "p": 10.66,
+      "ci": null
+     }
+    },
+    "4.00": {
+     "ground": {
+      "sim": 91.8,
+      "p": 90.64,
+      "ci": null
+     },
+     "drone": {
+      "sim": 8.2,
+      "p": 9.36,
+      "ci": null
+     }
+    },
+    "4.50": {
+     "ground": {
+      "sim": 92.8,
+      "p": 91.7,
+      "ci": null
+     },
+     "drone": {
+      "sim": 7.2,
+      "p": 8.3,
+      "ci": null
+     }
+    }
+   },
+   "T1": {
+    "0.00": {
+     "ground": {
+      "sim": 46.2,
+      "p": 49.21,
+      "ci": null
+     },
+     "drone": {
+      "sim": 53.8,
+      "p": 50.79,
+      "ci": null
+     }
+    },
+    "0.50": {
+     "ground": {
+      "sim": 60.0,
+      "p": 61.07,
+      "ci": null
+     },
+     "drone": {
+      "sim": 40.0,
+      "p": 38.93,
+      "ci": null
+     }
+    },
+    "1.00": {
+     "ground": {
+      "sim": 67.4,
+      "p": 68.72,
+      "ci": null
+     },
+     "drone": {
+      "sim": 32.6,
+      "p": 31.28,
+      "ci": null
+     }
+    },
+    "1.50": {
+     "ground": {
+      "sim": 73.6,
+      "p": 74.24,
+      "ci": null
+     },
+     "drone": {
+      "sim": 26.4,
+      "p": 25.76,
+      "ci": null
+     }
+    },
+    "2.00": {
+     "ground": {
+      "sim": 78.6,
+      "p": 78.32,
+      "ci": null
+     },
+     "drone": {
+      "sim": 21.4,
+      "p": 21.68,
+      "ci": null
+     }
+    },
+    "2.50": {
+     "ground": {
+      "sim": 83.6,
+      "p": 81.4,
+      "ci": null
+     },
+     "drone": {
+      "sim": 16.4,
+      "p": 18.6,
+      "ci": null
+     }
+    },
+    "3.00": {
+     "ground": {
+      "sim": 85.2,
+      "p": 83.76,
+      "ci": null
+     },
+     "drone": {
+      "sim": 14.8,
+      "p": 16.24,
+      "ci": null
+     }
+    },
+    "3.50": {
+     "ground": {
+      "sim": 86.2,
+      "p": 85.63,
+      "ci": null
+     },
+     "drone": {
+      "sim": 13.8,
+      "p": 14.37,
+      "ci": null
+     }
+    },
+    "4.00": {
+     "ground": {
+      "sim": 89.0,
+      "p": 87.14,
+      "ci": null
+     },
+     "drone": {
+      "sim": 11.0,
+      "p": 12.86,
+      "ci": null
+     }
+    },
+    "4.50": {
+     "ground": {
+      "sim": 89.6,
+      "p": 88.42,
+      "ci": null
+     },
+     "drone": {
+      "sim": 10.4,
+      "p": 11.58,
+      "ci": null
+     }
+    }
+   },
+   "T2": {
+    "0.00": {
+     "ground": {
+      "sim": 46.2,
+      "p": 49.21,
+      "ci": null
+     },
+     "drone": {
+      "sim": 53.8,
+      "p": 50.79,
+      "ci": null
+     }
+    },
+    "0.50": {
+     "ground": {
+      "sim": 67.2,
+      "p": 68.57,
+      "ci": null
+     },
+     "drone": {
+      "sim": 32.8,
+      "p": 31.43,
+      "ci": null
+     }
+    },
+    "1.00": {
+     "ground": {
+      "sim": 78.4,
+      "p": 78.16,
+      "ci": null
+     },
+     "drone": {
+      "sim": 21.6,
+      "p": 21.84,
+      "ci": null
+     }
+    },
+    "1.50": {
+     "ground": {
+      "sim": 85.2,
+      "p": 83.62,
+      "ci": null
+     },
+     "drone": {
+      "sim": 14.8,
+      "p": 16.38,
+      "ci": null
+     }
+    },
+    "2.00": {
+     "ground": {
+      "sim": 88.8,
+      "p": 87.02,
+      "ci": null
+     },
+     "drone": {
+      "sim": 11.2,
+      "p": 12.98,
+      "ci": null
+     }
+    },
+    "2.50": {
+     "ground": {
+      "sim": 91.4,
+      "p": 89.38,
+      "ci": null
+     },
+     "drone": {
+      "sim": 8.6,
+      "p": 10.62,
+      "ci": null
+     }
+    },
+    "3.00": {
+     "ground": {
+      "sim": 92.4,
+      "p": 91.13,
+      "ci": null
+     },
+     "drone": {
+      "sim": 7.6,
+      "p": 8.87,
+      "ci": null
+     }
+    }
+   },
+   "T3": {
+    "0.00": {
+     "ground": {
+      "sim": 46.2,
+      "p": 49.21,
+      "ci": null
+     },
+     "drone": {
+      "sim": 53.8,
+      "p": 50.79,
+      "ci": null
+     }
+    },
+    "0.50": {
+     "ground": {
+      "sim": 55.2,
+      "p": 57.23,
+      "ci": null
+     },
+     "drone": {
+      "sim": 44.8,
+      "p": 42.77,
+      "ci": null
+     }
+    },
+    "1.00": {
+     "ground": {
+      "sim": 61.4,
+      "p": 63.0,
+      "ci": null
+     },
+     "drone": {
+      "sim": 38.6,
+      "p": 37.0,
+      "ci": null
+     }
+    },
+    "1.50": {
+     "ground": {
+      "sim": 66.4,
+      "p": 67.6,
+      "ci": null
+     },
+     "drone": {
+      "sim": 33.6,
+      "p": 32.4,
+      "ci": null
+     }
+    },
+    "2.00": {
+     "ground": {
+      "sim": 70.2,
+      "p": 71.38,
+      "ci": null
+     },
+     "drone": {
+      "sim": 29.8,
+      "p": 28.62,
+      "ci": null
+     }
+    },
+    "2.50": {
+     "ground": {
+      "sim": 74.2,
+      "p": 74.49,
+      "ci": null
+     },
+     "drone": {
+      "sim": 25.8,
+      "p": 25.51,
+      "ci": null
+     }
+    },
+    "3.00": {
+     "ground": {
+      "sim": 77.0,
+      "p": 77.07,
+      "ci": null
+     },
+     "drone": {
+      "sim": 23.0,
+      "p": 22.93,
+      "ci": null
+     }
+    },
+    "3.50": {
+     "ground": {
+      "sim": 80.0,
+      "p": 79.25,
+      "ci": null
+     },
+     "drone": {
+      "sim": 20.0,
+      "p": 20.75,
+      "ci": null
+     }
+    },
+    "4.00": {
+     "ground": {
+      "sim": 83.2,
+      "p": 81.08,
+      "ci": null
+     },
+     "drone": {
+      "sim": 16.8,
+      "p": 18.92,
+      "ci": null
+     }
+    },
+    "4.50": {
+     "ground": {
+      "sim": 84.6,
+      "p": 82.64,
+      "ci": null
+     },
+     "drone": {
+      "sim": 15.4,
+      "p": 17.36,
+      "ci": null
+     }
+    }
+   }
+  },
+  "DL4": {
+   "T0": {
+    "με προστασία": {
+     "ground": {
+      "sim": 30.2,
+      "p": 27.35,
+      "ci": null
+     },
+     "drone": {
+      "sim": 69.8,
+      "p": 72.65,
+      "ci": null
+     }
+    },
+    "χωρίς προστασία": {
+     "ground": {
+      "sim": 57.6,
+      "p": 57.47,
+      "ci": [
+       54.1,
+       60.2
+      ]
+     },
+     "drone": {
+      "sim": 42.4,
+      "p": 42.53,
+      "ci": [
+       39.8,
+       45.9
+      ]
+     }
+    }
+   },
+   "T1": {
+    "με προστασία": {
+     "ground": {
+      "sim": 30.2,
+      "p": 27.35,
+      "ci": null
+     },
+     "drone": {
+      "sim": 69.8,
+      "p": 72.65,
+      "ci": null
+     }
+    },
+    "χωρίς προστασία": {
+     "ground": {
+      "sim": 57.6,
+      "p": 57.47,
+      "ci": null
+     },
+     "drone": {
+      "sim": 42.4,
+      "p": 42.53,
+      "ci": null
+     }
+    }
+   },
+   "T2": {
+    "με προστασία": {
+     "ground": {
+      "sim": 30.2,
+      "p": 27.35,
+      "ci": null
+     },
+     "drone": {
+      "sim": 69.8,
+      "p": 72.65,
+      "ci": null
+     }
+    },
+    "χωρίς προστασία": {
+     "ground": {
+      "sim": 57.6,
+      "p": 57.47,
+      "ci": null
+     },
+     "drone": {
+      "sim": 42.4,
+      "p": 42.53,
+      "ci": null
+     }
+    }
+   },
+   "T3": {
+    "με προστασία": {
+     "ground": {
+      "sim": 30.2,
+      "p": 27.35,
+      "ci": null
+     },
+     "drone": {
+      "sim": 69.8,
+      "p": 72.65,
+      "ci": null
+     }
+    },
+    "χωρίς προστασία": {
+     "ground": {
+      "sim": 57.6,
+      "p": 57.47,
+      "ci": null
+     },
+     "drone": {
+      "sim": 42.4,
+      "p": 42.53,
+      "ci": null
+     }
+    }
+   }
+  }
+ },
+ "rejections": [
+  {
+   "question_id": "DL1",
+   "assumption_id": "T2",
+   "status": "EXTRAPOLATION_REJECTED",
+   "scenario_id": 3
+  },
+  {
+   "question_id": "DL2",
+   "assumption_id": "T2",
+   "status": "EXTRAPOLATION_REJECTED",
+   "scenario_id": 3
+  },
+  {
+   "question_id": "DL3",
+   "assumption_id": "T2",
+   "status": "EXTRAPOLATION_REJECTED",
+   "scenario_id": 3
+  },
+  {
+   "question_id": "RF1",
+   "assumption_id": "T2",
+   "status": "EXTRAPOLATION_REJECTED",
+   "scenario_id": 6
+  },
+  {
+   "question_id": "RF2",
+   "assumption_id": "T2",
+   "status": "EXTRAPOLATION_REJECTED",
+   "scenario_id": 3
+  },
+  {
+   "question_id": "RF3",
+   "assumption_id": "T2",
+   "status": "EXTRAPOLATION_REJECTED",
+   "scenario_id": 3
+  },
+  {
+   "question_id": "SP1",
+   "assumption_id": "T2",
+   "status": "EXTRAPOLATION_REJECTED",
+   "scenario_id": 9
+  },
+  {
+   "question_id": "SP2",
+   "assumption_id": "T2",
+   "status": "EXTRAPOLATION_REJECTED",
+   "scenario_id": 9
+  },
+  {
+   "question_id": "SP3",
+   "assumption_id": "T2",
+   "status": "EXTRAPOLATION_REJECTED",
+   "scenario_id": 9
+  },
+  {
+   "question_id": "SP4",
+   "assumption_id": "T2",
+   "status": "EXTRAPOLATION_REJECTED",
+   "scenario_id": 5
+  },
+  {
+   "question_id": "SP5",
+   "assumption_id": "T2",
+   "status": "EXTRAPOLATION_REJECTED",
+   "scenario_id": 3
+  },
+  {
+   "question_id": "U1",
+   "assumption_id": "T0",
+   "status": "NOT_SUPPORTED",
+   "scenario_id": 1
+  },
+  {
+   "question_id": "U2",
+   "assumption_id": "T0",
+   "status": "NOT_SUPPORTED",
+   "scenario_id": 1
+  },
+  {
+   "question_id": "U3",
+   "assumption_id": "T0",
+   "status": "NOT_SUPPORTED",
+   "scenario_id": 1
+  },
+  {
+   "question_id": "U4",
+   "assumption_id": "T0",
+   "status": "NOT_SUPPORTED",
+   "scenario_id": 1
+  },
+  {
+   "question_id": "U5",
+   "assumption_id": "T0",
+   "status": "NOT_SUPPORTED",
+   "scenario_id": 1
+  },
+  {
+   "question_id": "U6",
+   "assumption_id": "T0",
+   "status": "NOT_SUPPORTED",
+   "scenario_id": 1
+  },
+  {
+   "question_id": "WM1",
+   "assumption_id": "T2",
+   "status": "EXTRAPOLATION_REJECTED",
+   "scenario_id": 4
+  },
+  {
+   "question_id": "WM1",
+   "assumption_id": "T3",
+   "status": "EXTRAPOLATION_REJECTED",
+   "scenario_id": 2
+  },
+  {
+   "question_id": "WM2",
+   "assumption_id": "T2",
+   "status": "EXTRAPOLATION_REJECTED",
+   "scenario_id": 4
+  },
+  {
+   "question_id": "WM2",
+   "assumption_id": "T3",
+   "status": "EXTRAPOLATION_REJECTED",
+   "scenario_id": 2
+  },
+  {
+   "question_id": "WM3",
+   "assumption_id": "T2",
+   "status": "EXTRAPOLATION_REJECTED",
+   "scenario_id": 4
+  },
+  {
+   "question_id": "WM3",
+   "assumption_id": "T3",
+   "status": "EXTRAPOLATION_REJECTED",
+   "scenario_id": 2
+  },
+  {
+   "question_id": "WM4",
+   "assumption_id": "T2",
+   "status": "EXTRAPOLATION_REJECTED",
+   "scenario_id": 4
+  },
+  {
+   "question_id": "WM4",
+   "assumption_id": "T3",
+   "status": "EXTRAPOLATION_REJECTED",
+   "scenario_id": 2
+  },
+  {
+   "question_id": "WM5",
+   "assumption_id": "T3",
+   "status": "EXTRAPOLATION_REJECTED",
+   "scenario_id": 4
+  },
+  {
+   "question_id": "WM6",
+   "assumption_id": "T2",
+   "status": "EXTRAPOLATION_REJECTED",
+   "scenario_id": 2
+  },
+  {
+   "question_id": "WM6",
+   "assumption_id": "T3",
+   "status": "EXTRAPOLATION_REJECTED",
+   "scenario_id": 2
+  }
+ ],
+ "status_counts": {
+  "EXPERIMENTAL_CROSS_COUNTRY_TRANSFER": {
+   "T0": 133,
+   "T1": 133,
+   "T2": 59,
+   "T3": 119
+  },
+  "EXTRAPOLATION_REJECTED": {
+   "T0": 0,
+   "T1": 0,
+   "T2": 74,
+   "T3": 14
+  },
+  "NOT_SUPPORTED": {
+   "T0": 6,
+   "T1": 0,
+   "T2": 0,
+   "T3": 0
+  }
+ },
+ "segments": {
+  "washing_machine": {
+   "Ισορροπημένοι": {
+    "n": 192,
+    "pct": 38.4,
+    "mean_importance": {
+     "price": 0.845,
+     "lifespan": 2.112,
+     "repairability": 2.074,
+     "energy": 3.052
+    }
+   },
+   "Έμφαση στην ενεργειακή κλάση": {
+    "n": 90,
+    "pct": 18.0,
+    "mean_importance": {
+     "price": 0.655,
+     "lifespan": 0.715,
+     "repairability": 1.782,
+     "energy": 3.052
+    }
+   },
+   "Έμφαση στη διάρκεια ζωής": {
+    "n": 175,
+    "pct": 35.0,
+    "mean_importance": {
+     "price": 0.716,
+     "lifespan": 3.601,
+     "repairability": 1.681,
+     "energy": 3.052
+    }
+   },
+   "Έμφαση στην τιμή": {
+    "n": 43,
+    "pct": 8.6,
+    "mean_importance": {
+     "price": 5.235,
+     "lifespan": 2.181,
+     "repairability": 1.488,
+     "energy": 3.052
+    }
+   }
+  },
+  "smartphone": {
+   "Έμφαση στην ενεργειακή κλάση": {
+    "n": 134,
+    "pct": 26.8,
+    "mean_importance": {
+     "price": 0.585,
+     "lifespan": 0.88,
+     "repairability": 1.538,
+     "energy": 2.006
+    }
+   },
+   "Έμφαση στη διάρκεια ζωής": {
+    "n": 198,
+    "pct": 39.6,
+    "mean_importance": {
+     "price": 0.679,
+     "lifespan": 2.138,
+     "repairability": 1.357,
+     "energy": 2.006
+    }
+   },
+   "Μέτρια έμφαση στην τιμή": {
+    "n": 130,
+    "pct": 26.0,
+    "mean_importance": {
+     "price": 2.693,
+     "lifespan": 1.589,
+     "repairability": 1.435,
+     "energy": 2.006
+    }
+   },
+   "Έμφαση στην τιμή": {
+    "n": 38,
+    "pct": 7.6,
+    "mean_importance": {
+     "price": 12.336,
+     "lifespan": 1.483,
+     "repairability": 1.192,
+     "energy": 2.006
+    }
+   }
+  }
+ },
+ "segment_sensitivity_wm": {
+  "T0": {
+   "price": 8.6,
+   "energy": 18.0,
+   "balanced": 38.4,
+   "lifespan": 35.0
+  },
+  "T1": {
+   "price": 7.6,
+   "energy": 18.2,
+   "balanced": 39.2,
+   "lifespan": 35.0
+  },
+  "T2": {
+   "price": 6.8,
+   "energy": 27.0,
+   "moderate_price": 24.0,
+   "lifespan": 42.2
+  },
+  "T3": {
+   "price": 5.8,
+   "energy": 17.8,
+   "lifespan": 37.2,
+   "balanced": 39.2
+  }
+ },
+ "segment_deviation_pp": {
+  "swiss-ce-washing-machine": {
+   "energy": {
+    "price": -1.6,
+    "lifespan": -16.1,
+    "repairability": 5.8,
+    "energy": 11.9
+   },
+   "lifespan": {
+    "price": -4.2,
+    "lifespan": 12.1,
+    "repairability": -4.0,
+    "energy": -3.9
+   },
+   "balanced": {
+    "price": -1.7,
+    "lifespan": -1.5,
+    "repairability": 3.1,
+    "energy": 0.1
+   },
+   "price": {
+    "price": 28.0,
+    "lifespan": -8.9,
+    "repairability": -9.5,
+    "energy": -9.6
+   }
+  },
+  "swiss-ce-smartphone": {
+   "moderate_price": {
+    "price": 13.2,
+    "lifespan": -4.1,
+    "repairability": -3.5,
+    "energy": -5.6
+   },
+   "lifespan": {
+    "price": -10.7,
+    "lifespan": 10.3,
+    "repairability": -0.4,
+    "energy": 0.8
+   },
+   "price": {
+    "price": 44.8,
+    "lifespan": -14.0,
+    "repairability": -13.8,
+    "energy": -17.0
+   },
+   "energy": {
+    "price": -9.8,
+    "lifespan": -7.2,
+    "repairability": 8.0,
+    "energy": 9.0
+   }
+  }
+ },
+ "segment_choice": {
+  "WM1|649": {
+   "Έμφαση στη διάρκεια ζωής": 62.9,
+   "Έμφαση στην ενεργειακή κλάση": 58.9,
+   "Έμφαση στην τιμή": 58.1,
+   "Ισορροπημένοι": 71.9
+  },
+  "WM2|649": {
+   "Έμφαση στη διάρκεια ζωής": 86.3,
+   "Έμφαση στην ενεργειακή κλάση": 54.4,
+   "Έμφαση στην τιμή": 41.9,
+   "Ισορροπημένοι": 66.1
+  },
+  "WM3|649": {
+   "Έμφαση στη διάρκεια ζωής": 70.3,
+   "Έμφαση στην ενεργειακή κλάση": 75.6,
+   "Έμφαση στην τιμή": 51.2,
+   "Ισορροπημένοι": 71.9
+  },
+  "WM4|749": {
+   "Έμφαση στη διάρκεια ζωής": 97.7,
+   "Έμφαση στην ενεργειακή κλάση": 93.3,
+   "Έμφαση στην τιμή": 72.1,
+   "Ισορροπημένοι": 96.9
+  },
+  "WM6|Premium(A) vs Βασικό(B)": {
+   "Έμφαση στη διάρκεια ζωής": 98.3,
+   "Έμφαση στην ενεργειακή κλάση": 95.6,
+   "Έμφαση στην τιμή": 69.8,
+   "Ισορροπημένοι": 98.4
+  },
+  "WM6|Βασικό(A) vs Οικονομικό(B)": {
+   "Έμφαση στη διάρκεια ζωής": 97.7,
+   "Έμφαση στην ενεργειακή κλάση": 91.1,
+   "Έμφαση στην τιμή": 81.4,
+   "Ισορροπημένοι": 96.9
+  }
+ },
+ "demographics": {
+  "gender": {
+   "Άνδρας": 51.2,
+   "Γυναίκα": 48.8
+  },
+  "age_band": {
+   "65+": 28.2,
+   "45-54": 16.0,
+   "55-64": 15.6,
+   "35-44": 15.6,
+   "25-34": 13.8,
+   "18-24": 10.8
+  },
+  "region": {
+   "Αττική": 36.4,
+   "Κεντρική Μακεδονία": 17.2,
+   "Θεσσαλία": 6.6,
+   "Δυτική Ελλάδα": 6.2,
+   "Κρήτη": 5.8,
+   "Ανατολική Μακεδονία & Θράκη": 5.4,
+   "Πελοπόννησος": 5.2,
+   "Στερεά Ελλάδα": 4.8,
+   "Ήπειρος": 3.2,
+   "Νότιο Αιγαίο": 3.0,
+   "Δυτική Μακεδονία": 2.4,
+   "Βόρειο Αιγαίο": 2.0,
+   "Ιόνια Νησιά": 1.8
+  },
+  "income_quintile": {
+   "3": 21.4,
+   "2": 21.2,
+   "1": 20.0,
+   "5": 19.8,
+   "4": 17.6
+  },
+  "settlement": {
+   "Αστική": 69.0,
+   "Αγροτική": 31.0
+  },
+  "household_size": {
+   "3-4": 43.4,
+   "2": 30.8,
+   "5-6": 12.6,
+   "1": 12.0,
+   "7-10": 1.0,
+   "10+": 0.2
+  },
+  "education": {
+   "Μέση": 48.0,
+   "Ανώτατη": 28.0,
+   "Έως υποχρεωτική": 24.0
+  }
+ },
+ "demographic_null_check": [
+  {
+   "question_id": "WM1",
+   "scenario_id": "649",
+   "variable": "age_band",
+   "chi2_p": 0.47
+  },
+  {
+   "question_id": "WM1",
+   "scenario_id": "649",
+   "variable": "income_quintile",
+   "chi2_p": 0.021
+  },
+  {
+   "question_id": "WM1",
+   "scenario_id": "649",
+   "variable": "region",
+   "chi2_p": 0.087
+  },
+  {
+   "question_id": "WM4",
+   "scenario_id": "749",
+   "variable": "age_band",
+   "chi2_p": 0.418
+  },
+  {
+   "question_id": "WM4",
+   "scenario_id": "749",
+   "variable": "income_quintile",
+   "chi2_p": 0.278
+  },
+  {
+   "question_id": "WM4",
+   "scenario_id": "749",
+   "variable": "region",
+   "chi2_p": 0.138
+  },
+  {
+   "question_id": "SP1",
+   "scenario_id": "349",
+   "variable": "age_band",
+   "chi2_p": 0.376
+  },
+  {
+   "question_id": "SP1",
+   "scenario_id": "349",
+   "variable": "income_quintile",
+   "chi2_p": 0.042
+  },
+  {
+   "question_id": "SP1",
+   "scenario_id": "349",
+   "variable": "region",
+   "chi2_p": 0.093
+  },
+  {
+   "question_id": "RF1",
+   "scenario_id": "30%",
+   "variable": "age_band",
+   "chi2_p": 0.628
+  },
+  {
+   "question_id": "RF1",
+   "scenario_id": "30%",
+   "variable": "income_quintile",
+   "chi2_p": 0.25
+  },
+  {
+   "question_id": "RF1",
+   "scenario_id": "30%",
+   "variable": "region",
+   "chi2_p": 0.402
+  }
+ ]
+}

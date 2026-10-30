@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Greece 500 Choice Lab</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="mark"></span><div><h1>REPAIR, REPLACE OR UPGRADE? · Greece 500 Choice Lab</h1>
+  <p>500 <b>συνθετικοί</b> Έλληνες καταναλωτές · συντελεστές προτίμησης από μοντέλα CCE 0.1 εκπαιδευμένα <b>εκτός Ελλάδας</b> · EXPERIMENTAL_CROSS_COUNTRY_TRANSFER</p></div></div>
+</header>
+<main class="wrap">
+  <section class="controls card">
+    <div class="row">
+      <label>Κατηγορία<select id="cat"></select></label>
+      <label>Ερώτηση / σενάριο<select id="q"></select></label>
+      <label>Υπόθεση μεταφοράς<select id="as"></select></label>
+    </div>
+    <div class="row filters">
+      <label>Φύλο<select id="f_gender"></select></label>
+      <label>Ηλικία<select id="f_age"></select></label>
+      <label>Περιφέρεια<select id="f_region"></select></label>
+      <label>Εισόδημα<select id="f_inc"></select></label>
+      <label>Segment<select id="f_seg"></select></label>
+    </div>
+  </section>
+  <section class="grid">
+    <div class="card" id="offers"><h2>Προσφορές</h2><div id="offerForm"></div><p class="hint">Οι τιμές σε ευρώ μετατρέπονται στις μονάδες του μοντέλου με την επιλεγμένη υπόθεση. Εκτός εύρους εκπαίδευσης → καμία απάντηση.</p></div>
+    <div class="card" id="out"><h2>Αποτέλεσμα για το φίλτρο</h2><div id="status"></div><div id="kpis"></div><div id="bars"></div><div id="match" class="hint"></div></div>
+  </section>
+  <section class="card">
+    <div class="ch-head"><h2>Καμπύλη απόκρισης</h2>
+      <div class="tools"><label class="inline"><input type="checkbox" id="allAs"> όλες οι υποθέσεις</label>
+      <button id="dlSvg">SVG</button><button id="dlPng">PNG</button><button id="dlCsv">CSV</button></div></div>
+    <p class="hint" id="curveNote"></p>
+    <div id="curve"></div>
+  </section>
+  <section class="card">
+    <div class="ch-head"><h2>Συνθετικοί καταναλωτές</h2><span class="hint" id="nfilt"></span></div>
+    <div class="tablewrap"><table id="ptab"></table></div>
+  </section>
+  <footer class="hint">Κάθε αριθμός υπολογίζεται εδώ από τους ατομικούς συντελεστές και τα σταθερά τυχαία σφάλματα που εξήγαγε η CCE (seed 20261030). Για τα σενάρια της μελέτης ταυτίζεται με το RESULTS.csv. Δεν είναι μέτρηση της ελληνικής αγοράς. Μοντέλο refurbished: δεδομένα CC BY-NC 4.0, μόνο μη εμπορική χρήση. Δεν υποστηρίζονται: επισκευή παλιάς συσκευής, trade-in, εγγύηση, δόσεις, παράδοση συσκευών.</footer>
+</main>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

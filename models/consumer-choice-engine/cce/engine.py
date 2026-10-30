@@ -188,7 +188,15 @@ class ChoiceEngine:
             out = {"status": STATUS_OK if res["status"] == STATUS_OK else res["status"], "expected_shares": shares_p, "simulated_choice_shares": shares_c, "individual": rows}
             if uncertainty_draws:
                 rng = np.random.default_rng(seed)
-                TH = rng.multivariate_normal(th, self._cov(), size=uncertainty_draws, check_valid="ignore")
+                # εκφυλισμένες παράμετροι (π.χ. τυπική απόκλιση τυχαίου συντελεστή → 0 με SE ~10^4) κρατιούνται στην εκτίμηση·
+                # αλλιώς οι κληρώσεις τους δίνουν υπερχείλιση και άκυρα διαστήματα
+                cov = self._cov().copy()
+                sd = np.sqrt(np.clip(np.diag(cov), 0, None))
+                bad = ~np.isfinite(sd) | (sd > 100)
+                cov[bad, :] = 0.0
+                cov[:, bad] = 0.0
+                out["uncertainty_fixed_params"] = int(bad.sum())
+                TH = rng.multivariate_normal(th, cov, size=uncertainty_draws, check_valid="ignore")
                 sims = []
                 for t in TH:
                     acc = np.zeros(len(ids))

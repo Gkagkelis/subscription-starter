@@ -1,0 +1,828 @@
+{
+ "1_shares_vs_records": {
+  "result_rows_checked": 924,
+  "share_mismatches": 0,
+  "mean_probability_mismatches": 0,
+  "runs": 444,
+  "runs_with_500_unique_ids": 444,
+  "ids_match_panel": true,
+  "records_for_rejected_or_unsupported": 0
+ },
+ "2_3_consistency_monotonicity": {
+  "curves": [
+   {
+    "question_id": "DL1",
+    "assumption_id": "T0",
+    "points": 10,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "DL1",
+    "assumption_id": "T1",
+    "points": 10,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "DL1",
+    "assumption_id": "T2",
+    "points": 7,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "DL1",
+    "assumption_id": "T3",
+    "points": 10,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "DL2",
+    "assumption_id": "T0",
+    "points": 10,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "DL2",
+    "assumption_id": "T1",
+    "points": 10,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "DL2",
+    "assumption_id": "T2",
+    "points": 7,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "DL2",
+    "assumption_id": "T3",
+    "points": 10,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "DL3",
+    "assumption_id": "T0",
+    "points": 10,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "DL3",
+    "assumption_id": "T1",
+    "points": 10,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "DL3",
+    "assumption_id": "T2",
+    "points": 7,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "DL3",
+    "assumption_id": "T3",
+    "points": 10,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "RF1",
+    "assumption_id": "T0",
+    "points": 6,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "RF1",
+    "assumption_id": "T1",
+    "points": 6,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "RF1",
+    "assumption_id": "T3",
+    "points": 6,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "SP1",
+    "assumption_id": "T0",
+    "points": 9,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "SP1",
+    "assumption_id": "T1",
+    "points": 9,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "SP1",
+    "assumption_id": "T3",
+    "points": 9,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "SP2",
+    "assumption_id": "T0",
+    "points": 9,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "SP2",
+    "assumption_id": "T1",
+    "points": 9,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "SP2",
+    "assumption_id": "T3",
+    "points": 9,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "SP3",
+    "assumption_id": "T0",
+    "points": 9,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "SP3",
+    "assumption_id": "T1",
+    "points": 9,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "SP3",
+    "assumption_id": "T3",
+    "points": 9,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "SP4",
+    "assumption_id": "T0",
+    "points": 5,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "SP4",
+    "assumption_id": "T1",
+    "points": 5,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "SP4",
+    "assumption_id": "T3",
+    "points": 5,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "WM1",
+    "assumption_id": "T0",
+    "points": 10,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "WM1",
+    "assumption_id": "T1",
+    "points": 10,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "WM1",
+    "assumption_id": "T2",
+    "points": 6,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "WM1",
+    "assumption_id": "T3",
+    "points": 8,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "WM2",
+    "assumption_id": "T0",
+    "points": 10,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "WM2",
+    "assumption_id": "T1",
+    "points": 10,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "WM2",
+    "assumption_id": "T2",
+    "points": 6,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "WM2",
+    "assumption_id": "T3",
+    "points": 8,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "WM3",
+    "assumption_id": "T0",
+    "points": 10,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "WM3",
+    "assumption_id": "T1",
+    "points": 10,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "WM3",
+    "assumption_id": "T2",
+    "points": 6,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "WM3",
+    "assumption_id": "T3",
+    "points": 8,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "WM4",
+    "assumption_id": "T0",
+    "points": 10,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "WM4",
+    "assumption_id": "T1",
+    "points": 10,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "WM4",
+    "assumption_id": "T2",
+    "points": 6,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "WM4",
+    "assumption_id": "T3",
+    "points": 8,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "WM5",
+    "assumption_id": "T0",
+    "points": 5,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "WM5",
+    "assumption_id": "T1",
+    "points": 5,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "WM5",
+    "assumption_id": "T2",
+    "points": 5,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   },
+   {
+    "question_id": "WM5",
+    "assumption_id": "T3",
+    "points": 1,
+    "choice_reversals": 0,
+    "individual_probability_reversals": 0,
+    "mean_probability_monotone": true
+   }
+  ],
+  "total_choice_reversals": 0,
+  "total_probability_reversals": 0,
+  "all_means_monotone": true
+ },
+ "4_repeatability": [
+  {
+   "question_id": "WM1",
+   "assumption_id": "T0",
+   "records": 5000,
+   "identical": 5000
+  },
+  {
+   "question_id": "WM6",
+   "assumption_id": "T3",
+   "records": 500,
+   "identical": 500
+  },
+  {
+   "question_id": "SP2",
+   "assumption_id": "T1",
+   "records": 4500,
+   "identical": 4500
+  },
+  {
+   "question_id": "RF2",
+   "assumption_id": "T0",
+   "records": 1500,
+   "identical": 1500
+  },
+  {
+   "question_id": "DL1",
+   "assumption_id": "T0",
+   "records": 5000,
+   "identical": 5000
+  },
+  {
+   "question_id": "DL3",
+   "assumption_id": "T2",
+   "records": 3500,
+   "identical": 3500
+  }
+ ],
+ "5_independent_recomputation": {
+  "records": 66500,
+  "max_abs_probability_diff": 6.375376614076167e-06
+ },
+ "6_coefficient_provenance": {
+  "swiss-ce-washing-machine": {
+   "artifact": "cce-0.1-swiss-ce-washing-machine.json",
+   "sha256_now": "2add7bcce529524fe2ce688863f2d4a887854e1a10be17f92504302a170973d4",
+   "sha256_at_run": "2add7bcce529524fe2ce688863f2d4a887854e1a10be17f92504302a170973d4",
+   "unchanged": true,
+   "trained_at": "2026-10-30T21:26:11Z",
+   "selected": "mixed_logit",
+   "training_population": [
+    "CH"
+   ],
+   "n_respondents": 1118,
+   "licence": "CC BY 4.0",
+   "external_validation": {}
+  },
+  "swiss-ce-smartphone": {
+   "artifact": "cce-0.1-swiss-ce-smartphone.json",
+   "sha256_now": "6e19f22a1d4ab0768681ca15fcd4a96fb918ef6dba38c1dbd1201a9e21448999",
+   "sha256_at_run": "6e19f22a1d4ab0768681ca15fcd4a96fb918ef6dba38c1dbd1201a9e21448999",
+   "unchanged": true,
+   "trained_at": "2026-10-30T21:26:14Z",
+   "selected": "mixed_logit",
+   "training_population": [
+    "CH"
+   ],
+   "n_respondents": 1145,
+   "licence": "CC BY 4.0",
+   "external_validation": {}
+  },
+  "refurb-smartphone-us2019": {
+   "artifact": "cce-0.1-refurb-smartphone-us2019.json",
+   "sha256_now": "326d2970ae0cee8d4600e7d722b5608c2f53a8f8a8dd3e78c2fd99b09730f210",
+   "sha256_at_run": "326d2970ae0cee8d4600e7d722b5608c2f53a8f8a8dd3e78c2fd99b09730f210",
+   "unchanged": true,
+   "trained_at": "2026-10-30T21:28:39Z",
+   "selected": "mixed_logit",
+   "training_population": [
+    "US"
+   ],
+   "n_respondents": 202,
+   "licence": "CC BY-NC 4.0 — μόνο μη εμπορική χρήση",
+   "external_validation": {}
+  },
+  "delivery-us2022": {
+   "artifact": "cce-0.1-delivery-us2022.json",
+   "sha256_now": "b03030602dd8786a612496bd0d83e870dc63c98d55f2d268814cdee06b9eef8e",
+   "sha256_at_run": "b03030602dd8786a612496bd0d83e870dc63c98d55f2d268814cdee06b9eef8e",
+   "unchanged": true,
+   "trained_at": "2026-10-30T21:28:35Z",
+   "selected": "mixed_logit",
+   "training_population": [
+    "US"
+   ],
+   "n_respondents": 3625,
+   "licence": "MIT (repository) + README: «You are welcome to use our data… Please cite»",
+   "external_validation": {}
+  }
+ },
+ "7_domain_bounds": {
+  "answered_outside_domain": 0,
+  "rejected_but_inside": 0,
+  "rejected_runs": 88
+ },
+ "8_transfer_effect_max_abs_pp": {
+  "DL1": {
+   "T1": 7.0,
+   "T2": 4.6,
+   "T3": 14.0,
+   "T2_T3_answered_share": {
+    "T2": 0.7,
+    "T3": 1.0
+   }
+  },
+  "DL2": {
+   "T1": 8.4,
+   "T2": 5.0,
+   "T3": 15.4,
+   "T2_T3_answered_share": {
+    "T2": 0.7,
+    "T3": 1.0
+   }
+  },
+  "DL3": {
+   "T1": 6.4,
+   "T2": 6.4,
+   "T3": 14.6,
+   "T2_T3_answered_share": {
+    "T2": 0.7,
+    "T3": 1.0
+   }
+  },
+  "DL4": {
+   "T1": 0.0,
+   "T2": 0.0,
+   "T3": 0.0,
+   "T2_T3_answered_share": {
+    "T2": 1.0,
+    "T3": 1.0
+   }
+  },
+  "RF1": {
+   "T1": 5.4,
+   "T2": null,
+   "T3": 9.4,
+   "T2_T3_answered_share": {
+    "T2": 0.0,
+    "T3": 1.0
+   }
+  },
+  "RF2": {
+   "T1": 4.0,
+   "T2": null,
+   "T3": 9.2,
+   "T2_T3_answered_share": {
+    "T2": 0.0,
+    "T3": 1.0
+   }
+  },
+  "RF3": {
+   "T1": 5.6,
+   "T2": null,
+   "T3": 10.4,
+   "T2_T3_answered_share": {
+    "T2": 0.0,
+    "T3": 1.0
+   }
+  },
+  "SP1": {
+   "T1": 5.6,
+   "T2": null,
+   "T3": 12.2,
+   "T2_T3_answered_share": {
+    "T2": 0.0,
+    "T3": 1.0
+   }
+  },
+  "SP2": {
+   "T1": 5.6,
+   "T2": null,
+   "T3": 12.6,
+   "T2_T3_answered_share": {
+    "T2": 0.0,
+    "T3": 1.0
+   }
+  },
+  "SP3": {
+   "T1": 7.4,
+   "T2": null,
+   "T3": 14.6,
+   "T2_T3_answered_share": {
+    "T2": 0.0,
+    "T3": 1.0
+   }
+  },
+  "SP4": {
+   "T1": 5.0,
+   "T2": null,
+   "T3": 11.0,
+   "T2_T3_answered_share": {
+    "T2": 0.0,
+    "T3": 1.0
+   }
+  },
+  "SP5": {
+   "T1": 4.8,
+   "T2": null,
+   "T3": 8.8,
+   "T2_T3_answered_share": {
+    "T2": 0.0,
+    "T3": 1.0
+   }
+  },
+  "WM1": {
+   "T1": 6.0,
+   "T2": 4.8,
+   "T3": 11.8,
+   "T2_T3_answered_share": {
+    "T2": 0.6,
+    "T3": 0.8
+   }
+  },
+  "WM2": {
+   "T1": 6.0,
+   "T2": 3.6,
+   "T3": 10.6,
+   "T2_T3_answered_share": {
+    "T2": 0.6,
+    "T3": 0.8
+   }
+  },
+  "WM3": {
+   "T1": 7.8,
+   "T2": 2.4,
+   "T3": 11.2,
+   "T2_T3_answered_share": {
+    "T2": 0.6,
+    "T3": 0.8
+   }
+  },
+  "WM4": {
+   "T1": 3.0,
+   "T2": 1.8,
+   "T3": 5.0,
+   "T2_T3_answered_share": {
+    "T2": 0.6,
+    "T3": 0.8
+   }
+  },
+  "WM5": {
+   "T1": 2.6,
+   "T2": 4.8,
+   "T3": 0.0,
+   "T2_T3_answered_share": {
+    "T2": 1.0,
+    "T3": 0.2
+   }
+  },
+  "WM6": {
+   "T1": 1.2,
+   "T2": 1.8,
+   "T3": 1.8,
+   "T2_T3_answered_share": {
+    "T2": 0.33,
+    "T3": 0.33
+   }
+  },
+  "WM7": {
+   "T1": 0.0,
+   "T2": 0.0,
+   "T3": 0.0,
+   "T2_T3_answered_share": {
+    "T2": 1.0,
+    "T3": 1.0
+   }
+  },
+  "WM8": {
+   "T1": 0.0,
+   "T2": 0.0,
+   "T3": 0.0,
+   "T2_T3_answered_share": {
+    "T2": 1.0,
+    "T3": 1.0
+   }
+  }
+ },
+ "9_no_preset_shares": {
+  "study_code_mentions_share_targets": false,
+  "shares_computed_from_records_only": true,
+  "seed_change_WM1_649": {
+   "seed": 20261031,
+   "share_A_pct": 64.8,
+   "mean_p_A_pct": 64.77,
+   "original_share_A_pct": 65.2,
+   "original_mean_p_A_pct": 64.99
+  }
+ },
+ "10_no_artificial_demographics": [
+  {
+   "question_id": "WM1",
+   "scenario_id": "649",
+   "variable": "age_band",
+   "chi2_p": 0.47
+  },
+  {
+   "question_id": "WM1",
+   "scenario_id": "649",
+   "variable": "income_quintile",
+   "chi2_p": 0.021
+  },
+  {
+   "question_id": "WM1",
+   "scenario_id": "649",
+   "variable": "region",
+   "chi2_p": 0.087
+  },
+  {
+   "question_id": "WM4",
+   "scenario_id": "749",
+   "variable": "age_band",
+   "chi2_p": 0.418
+  },
+  {
+   "question_id": "WM4",
+   "scenario_id": "749",
+   "variable": "income_quintile",
+   "chi2_p": 0.278
+  },
+  {
+   "question_id": "WM4",
+   "scenario_id": "749",
+   "variable": "region",
+   "chi2_p": 0.138
+  },
+  {
+   "question_id": "SP1",
+   "scenario_id": "349",
+   "variable": "age_band",
+   "chi2_p": 0.376
+  },
+  {
+   "question_id": "SP1",
+   "scenario_id": "349",
+   "variable": "income_quintile",
+   "chi2_p": 0.042
+  },
+  {
+   "question_id": "SP1",
+   "scenario_id": "349",
+   "variable": "region",
+   "chi2_p": 0.093
+  },
+  {
+   "question_id": "RF1",
+   "scenario_id": "30%",
+   "variable": "age_band",
+   "chi2_p": 0.628
+  },
+  {
+   "question_id": "RF1",
+   "scenario_id": "30%",
+   "variable": "income_quintile",
+   "chi2_p": 0.25
+  },
+  {
+   "question_id": "RF1",
+   "scenario_id": "30%",
+   "variable": "region",
+   "chi2_p": 0.402
+  }
+ ],
+ "11_unsupported": [
+  {
+   "question_id": "U1",
+   "text": "Επισκευή παλιού πλυντηρίου (150 €) ή αγορά νέου (549 €)",
+   "kind": "unsupported",
+   "model": "swiss-ce-washing-machine",
+   "gate": "NOT_SUPPORTED",
+   "reasons": [
+    "Κατηγορία «washing_machine_repair_vs_replace» εκτός πεδίου (washing_machine)."
+   ]
+  },
+  {
+   "question_id": "U2",
+   "text": "Νέο πλυντήριο με trade-in 60 € έναντι χωρίς trade-in",
+   "kind": "unsupported",
+   "model": "swiss-ce-washing-machine",
+   "gate": "NOT_SUPPORTED",
+   "reasons": [
+    "Χαρακτηριστικό «tradein_eur» δεν εκτιμήθηκε από δεδομένα."
+   ]
+  },
+  {
+   "question_id": "U3",
+   "text": "Νέο πλυντήριο με επέκταση εγγύησης 3 ετών",
+   "kind": "unsupported",
+   "model": "swiss-ce-washing-machine",
+   "gate": "NOT_SUPPORTED",
+   "reasons": [
+    "Χαρακτηριστικό «warranty_years» δεν εκτιμήθηκε από δεδομένα."
+   ]
+  },
+  {
+   "question_id": "U4",
+   "text": "Αγορά με 12 άτοκες δόσεις",
+   "kind": "unsupported",
+   "model": "swiss-ce-washing-machine",
+   "gate": "NOT_SUPPORTED",
+   "reasons": [
+    "Χαρακτηριστικό «installments» δεν εκτιμήθηκε από δεδομένα."
+   ]
+  },
+  {
+   "question_id": "U5",
+   "text": "Παράδοση πλυντηρίου σε 1 έναντι 5 ημερών",
+   "kind": "unsupported",
+   "model": "delivery-us2022",
+   "gate": "NOT_SUPPORTED",
+   "reasons": [
+    "Κατηγορία «washing_machine_delivery» εκτός πεδίου (takeout_food, prescription_medications, liquor_store, last_minute_groceries)."
+   ]
+  },
+  {
+   "question_id": "U6",
+   "text": "Refurbished smartphone με εγγύηση 24 μηνών",
+   "kind": "unsupported",
+   "model": "refurb-smartphone-us2019",
+   "gate": "NOT_SUPPORTED",
+   "reasons": [
+    "Χαρακτηριστικό «warranty_months» δεν εκτιμήθηκε από δεδομένα."
+   ]
+  }
+ ]
+}

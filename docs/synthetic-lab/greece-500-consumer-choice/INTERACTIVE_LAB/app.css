@@ -1,0 +1,49 @@
+:root { --bg: #f3f4f6; --card: #ffffff; --ink: #16191d; --ink2: #52514e; --muted: #8b939d; --line: #e4e6e9; --navy: #12263a; --teal: #0f766e;
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100; --warn: #b4413a; color-scheme: light; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+.top { background: linear-gradient(150deg, #12263a, #12263a 60%, #0f766e 140%); color: #fff; padding: 16px 20px; }
+.brand { display: flex; gap: 14px; align-items: center; max-width: 1200px; margin: 0 auto; }
+.mark { width: 42px; height: 5px; background: #5eead4; border-radius: 3px; flex: none; }
+.top h1 { margin: 0; font-size: 18px; letter-spacing: -.01em; }
+.top p { margin: 2px 0 0; font-size: 12.5px; color: #c9d4de; }
+.wrap { max-width: 1200px; margin: 0 auto; padding: 16px; display: grid; gap: 14px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+.card h2 { font-size: 15px; margin: 0 0 8px; color: var(--navy); }
+.row { display: flex; flex-wrap: wrap; gap: 10px 14px; }
+.row + .row { margin-top: 10px; }
+label { display: flex; flex-direction: column; font-size: 11.5px; color: var(--ink2); gap: 3px; min-width: 150px; flex: 1; }
+label.inline { flex-direction: row; align-items: center; gap: 6px; min-width: 0; flex: none; font-size: 12.5px; }
+select, input[type=number] { font: inherit; font-size: 13.5px; padding: 6px 8px; border: 1px solid #cfd3d8; border-radius: 8px; background: #fff; color: var(--ink); }
+input[type=range] { width: 100%; accent-color: var(--s1); }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+.offer { border: 1px solid var(--line); border-radius: 10px; padding: 9px 11px; margin-bottom: 8px; }
+.offer h3 { margin: 0 0 6px; font-size: 13px; display: flex; align-items: center; gap: 8px; }
+.offer h3 i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 6px 10px; }
+.fields label { min-width: 0; }
+.pv { font-weight: 700; color: var(--ink); font-size: 13px; }
+.hint { font-size: 11.5px; color: var(--muted); margin: 6px 0 0; }
+.badge { display: inline-block; font-weight: 700; font-size: 11.5px; padding: 3px 9px; border-radius: 999px; border: 1px solid; }
+.ok { color: #8a4b0f; background: #fdf1e3; border-color: #f0c98f; } .no { color: var(--warn); background: #fbf0ef; border-color: #ecc4c0; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin: 10px 0; }
+.kpi { border: 1px solid var(--line); border-top: 4px solid var(--s1); border-radius: 8px; padding: 8px 10px; }
+.kpi b { font-size: 22px; display: block; color: var(--navy); font-variant-numeric: tabular-nums; }
+.kpi span { font-size: 11.5px; color: var(--ink2); }
+.ch-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; }
+.tools { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+button { font: inherit; font-size: 12.5px; padding: 5px 11px; border-radius: 8px; border: 1px solid #cfd3d8; background: #fff; cursor: pointer; color: var(--ink); }
+button:hover { border-color: var(--s1); }
+svg text { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+.tablewrap { max-height: 360px; overflow: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+th, td { padding: 4px 7px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
+th { position: sticky; top: 0; background: #fff; color: var(--ink2); font-size: 11.5px; }
+td.n { text-align: right; }
+.tip { position: fixed; pointer-events: none; background: #16191d; color: #fff; font-size: 12px; padding: 5px 8px; border-radius: 6px; display: none; z-index: 10; }
+footer { padding: 4px 4px 18px; }
+select { width: 100%; max-width: 100%; min-width: 0; text-overflow: ellipsis; }
+label { min-width: min(150px, 100%); }
+.card, .grid > * { min-width: 0; }
+@media (max-width: 600px) { .wrap { padding: 12px 16px; } .row { flex-direction: column; } .top h1 { font-size: 16px; } }
