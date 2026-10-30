@@ -1,0 +1,72 @@
+{
+ "model_id": "cce-0.1-refurb-smartphone-us2019",
+ "artifact_trained_at": "2026-10-30T21:28:39Z",
+ "n_panel": 500,
+ "behavior": {
+  "A_repair_cost": {
+   "status": "NOT_APPLICABLE",
+   "reason": "Το χαρακτηριστικό δεν υπάρχει στο εκπαιδευμένο μοντέλο."
+  },
+  "B_trade_in": {
+   "status": "NOT_APPLICABLE",
+   "reason": "Το χαρακτηριστικό δεν υπάρχει στο εκπαιδευμένο μοντέλο."
+  },
+  "C_warranty": {
+   "status": "NOT_APPLICABLE",
+   "reason": "Το χαρακτηριστικό δεν υπάρχει στο εκπαιδευμένο μοντέλο."
+  },
+  "D_delivery": {
+   "status": "NOT_APPLICABLE",
+   "reason": "Το χαρακτηριστικό δεν υπάρχει στο εκπαιδευμένο μοντέλο."
+  },
+  "refurb_price": {
+   "status": "PASS",
+   "n_profiles": 100,
+   "n_fail": 0,
+   "example": {
+    "status": "PASS",
+    "values": [
+     0.6,
+     1.8,
+     3.0,
+     4.2,
+     5.4
+    ],
+    "probabilities": [
+     0.6069142893216992,
+     0.5646338288495328,
+     0.48872766049050975,
+     0.24812876318891985,
+     0.18714459398006175
+    ]
+   }
+  },
+  "E_dominance": {
+   "status": "PASS",
+   "note": "Η βελτίωση ενός χαρακτηριστικού, με τα υπόλοιπα ίσα, δεν μειώνει την πιθανότητα επιλογής."
+  },
+  "F_repeatability": {
+   "status": "PASS"
+  }
+ },
+ "greek_repair_scenario": {
+  "status": "NOT_SUPPORTED",
+  "transfer": "SOURCE_POPULATION_ONLY",
+  "probabilities_returned": false,
+  "pass": true
+ },
+ "in_domain_scenario": {
+  "status": "SUPPORTED",
+  "transfer": "SOURCE_POPULATION_ONLY",
+  "pass": true
+ },
+ "panel_consistency": {
+  "status": "PASS",
+  "attr": "price_100usd",
+  "alt": "refurb_A",
+  "respondents_with_reversal": 0,
+  "repeatable": true,
+  "note": "Κανείς καταναλωτής δεν επιλέγει την εναλλακτική σε υψηλότερη τιμή ενώ την απέρριψε σε χαμηλότερη."
+ },
+ "all_pass": true
+}

@@ -1,0 +1,2267 @@
+{
+ "design_id": "cce-gr-min-wm-0.1",
+ "alternatives": [
+  "repair",
+  "new",
+  "refurb",
+  "none"
+ ],
+ "blocks": {
+  "1": [
+   {
+    "task": 1,
+    "type": "design",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 1.2,
+      "price_100eur": 0.0,
+      "repair_days": 5,
+      "repair_warranty_m": 12,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 6.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 10,
+      "tradein_100eur": 1.0,
+      "warranty_years": 3,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 2.2,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 12,
+      "refurb_oem": 1
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 2,
+    "type": "design",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 1.8,
+      "price_100eur": 0.0,
+      "repair_days": 2,
+      "repair_warranty_m": 3,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 3.8,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 1,
+      "tradein_100eur": 1.5,
+      "warranty_years": 5,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 2.9,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 24,
+      "refurb_oem": 0
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 3,
+    "type": "design",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 1.2,
+      "price_100eur": 0.0,
+      "repair_days": 5,
+      "repair_warranty_m": 12,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 7.5,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 1,
+      "tradein_100eur": 1.0,
+      "warranty_years": 2,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 3.6,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 12,
+      "refurb_oem": 0
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 4,
+    "type": "design",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 1.2,
+      "price_100eur": 0.0,
+      "repair_days": 10,
+      "repair_warranty_m": 3,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 6.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 4,
+      "tradein_100eur": 1.0,
+      "warranty_years": 2,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 3.6,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 6,
+      "refurb_oem": 1
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 5,
+    "type": "design",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 2.5,
+      "price_100eur": 0.0,
+      "repair_days": 5,
+      "repair_warranty_m": 3,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 6.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 10,
+      "tradein_100eur": 0.5,
+      "warranty_years": 5,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 2.9,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 6,
+      "refurb_oem": 1
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 6,
+    "type": "design",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 0.6,
+      "price_100eur": 0.0,
+      "repair_days": 10,
+      "repair_warranty_m": 12,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 6.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 4,
+      "tradein_100eur": 0.5,
+      "warranty_years": 2,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 2.2,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 6,
+      "refurb_oem": 1
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 7,
+    "type": "design",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 1.8,
+      "price_100eur": 0.0,
+      "repair_days": 10,
+      "repair_warranty_m": 3,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 7.5,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 10,
+      "tradein_100eur": 0.0,
+      "warranty_years": 3,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 3.6,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 6,
+      "refurb_oem": 1
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 8,
+    "type": "design",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 1.8,
+      "price_100eur": 0.0,
+      "repair_days": 10,
+      "repair_warranty_m": 3,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 7.5,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 1,
+      "tradein_100eur": 0.0,
+      "warranty_years": 3,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 2.2,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 24,
+      "refurb_oem": 1
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 9,
+    "type": "design",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 0.6,
+      "price_100eur": 0.0,
+      "repair_days": 5,
+      "repair_warranty_m": 3,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 3.8,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 1,
+      "tradein_100eur": 1.0,
+      "warranty_years": 5,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 2.2,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 24,
+      "refurb_oem": 0
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 10,
+    "type": "design",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 1.2,
+      "price_100eur": 0.0,
+      "repair_days": 10,
+      "repair_warranty_m": 12,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 7.5,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 4,
+      "tradein_100eur": 0.0,
+      "warranty_years": 3,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 2.9,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 12,
+      "refurb_oem": 0
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 11,
+    "type": "design",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 2.5,
+      "price_100eur": 0.0,
+      "repair_days": 2,
+      "repair_warranty_m": 12,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 7.5,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 1,
+      "tradein_100eur": 1.5,
+      "warranty_years": 5,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 2.9,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 12,
+      "refurb_oem": 0
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 12,
+    "type": "design",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 1.8,
+      "price_100eur": 0.0,
+      "repair_days": 5,
+      "repair_warranty_m": 12,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 4.8,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 10,
+      "tradein_100eur": 0.0,
+      "warranty_years": 3,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 3.6,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 24,
+      "refurb_oem": 1
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 13,
+    "type": "holdout_H1",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 1.8,
+      "price_100eur": 0.0,
+      "repair_days": 5,
+      "repair_warranty_m": 3,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 4.8,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 4,
+      "tradein_100eur": 0.5,
+      "warranty_years": 3,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 2.9,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 12,
+      "refurb_oem": 1
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 14,
+    "type": "holdout_H2",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 1.2,
+      "price_100eur": 0.0,
+      "repair_days": 2,
+      "repair_warranty_m": 12,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 6.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 1,
+      "tradein_100eur": 1.0,
+      "warranty_years": 5,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 2.2,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 6,
+      "refurb_oem": 0
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 15,
+    "type": "repeat_of_1",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 1.2,
+      "price_100eur": 0.0,
+      "repair_days": 5,
+      "repair_warranty_m": 12,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 6.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 10,
+      "tradein_100eur": 1.0,
+      "warranty_years": 3,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 2.2,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 12,
+      "refurb_oem": 1
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   }
+  ],
+  "2": [
+   {
+    "task": 1,
+    "type": "design",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 1.2,
+      "price_100eur": 0.0,
+      "repair_days": 2,
+      "repair_warranty_m": 12,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 7.5,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 1,
+      "tradein_100eur": 0.0,
+      "warranty_years": 5,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 2.9,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 12,
+      "refurb_oem": 1
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 2,
+    "type": "design",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 0.6,
+      "price_100eur": 0.0,
+      "repair_days": 2,
+      "repair_warranty_m": 12,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 3.8,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 10,
+      "tradein_100eur": 1.5,
+      "warranty_years": 3,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 2.9,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 6,
+      "refurb_oem": 1
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 3,
+    "type": "design",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 0.6,
+      "price_100eur": 0.0,
+      "repair_days": 2,
+      "repair_warranty_m": 12,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 4.8,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 4,
+      "tradein_100eur": 0.5,
+      "warranty_years": 2,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 2.2,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 24,
+      "refurb_oem": 1
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 4,
+    "type": "design",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 2.5,
+      "price_100eur": 0.0,
+      "repair_days": 2,
+      "repair_warranty_m": 3,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 3.8,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 1,
+      "tradein_100eur": 1.0,
+      "warranty_years": 2,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 3.6,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 24,
+      "refurb_oem": 1
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 5,
+    "type": "design",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 1.2,
+      "price_100eur": 0.0,
+      "repair_days": 5,
+      "repair_warranty_m": 12,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 4.8,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 10,
+      "tradein_100eur": 1.5,
+      "warranty_years": 5,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 3.6,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 6,
+      "refurb_oem": 1
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 6,
+    "type": "design",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 2.5,
+      "price_100eur": 0.0,
+      "repair_days": 2,
+      "repair_warranty_m": 12,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 6.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 1,
+      "tradein_100eur": 1.5,
+      "warranty_years": 5,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 2.9,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 12,
+      "refurb_oem": 1
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 7,
+    "type": "design",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 1.2,
+      "price_100eur": 0.0,
+      "repair_days": 2,
+      "repair_warranty_m": 3,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 6.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 4,
+      "tradein_100eur": 1.0,
+      "warranty_years": 3,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 2.2,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 12,
+      "refurb_oem": 0
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 8,
+    "type": "design",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 2.5,
+      "price_100eur": 0.0,
+      "repair_days": 5,
+      "repair_warranty_m": 12,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 4.8,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 10,
+      "tradein_100eur": 1.0,
+      "warranty_years": 2,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 2.2,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 6,
+      "refurb_oem": 1
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 9,
+    "type": "design",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 0.6,
+      "price_100eur": 0.0,
+      "repair_days": 10,
+      "repair_warranty_m": 3,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 6.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 10,
+      "tradein_100eur": 1.0,
+      "warranty_years": 2,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 3.6,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 24,
+      "refurb_oem": 1
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 10,
+    "type": "design",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 2.5,
+      "price_100eur": 0.0,
+      "repair_days": 10,
+      "repair_warranty_m": 3,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 4.8,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 1,
+      "tradein_100eur": 0.0,
+      "warranty_years": 5,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 2.9,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 6,
+      "refurb_oem": 0
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 11,
+    "type": "design",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 1.8,
+      "price_100eur": 0.0,
+      "repair_days": 5,
+      "repair_warranty_m": 12,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 3.8,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 10,
+      "tradein_100eur": 1.5,
+      "warranty_years": 5,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 3.6,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 12,
+      "refurb_oem": 0
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 12,
+    "type": "design",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 0.6,
+      "price_100eur": 0.0,
+      "repair_days": 10,
+      "repair_warranty_m": 3,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 4.8,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 1,
+      "tradein_100eur": 0.0,
+      "warranty_years": 2,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 2.9,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 6,
+      "refurb_oem": 1
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 13,
+    "type": "holdout_H1",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 1.8,
+      "price_100eur": 0.0,
+      "repair_days": 5,
+      "repair_warranty_m": 3,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 4.8,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 4,
+      "tradein_100eur": 0.5,
+      "warranty_years": 3,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 2.9,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 12,
+      "refurb_oem": 1
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 14,
+    "type": "holdout_H2",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 1.2,
+      "price_100eur": 0.0,
+      "repair_days": 2,
+      "repair_warranty_m": 12,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 6.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 1,
+      "tradein_100eur": 1.0,
+      "warranty_years": 5,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 2.2,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 6,
+      "refurb_oem": 0
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 15,
+    "type": "repeat_of_1",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 1.2,
+      "price_100eur": 0.0,
+      "repair_days": 2,
+      "repair_warranty_m": 12,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 7.5,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 1,
+      "tradein_100eur": 0.0,
+      "warranty_years": 5,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 2.9,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 12,
+      "refurb_oem": 1
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   }
+  ],
+  "3": [
+   {
+    "task": 1,
+    "type": "design",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 2.5,
+      "price_100eur": 0.0,
+      "repair_days": 10,
+      "repair_warranty_m": 12,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 3.8,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 4,
+      "tradein_100eur": 0.0,
+      "warranty_years": 2,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 2.2,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 24,
+      "refurb_oem": 0
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 2,
+    "type": "design",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 1.8,
+      "price_100eur": 0.0,
+      "repair_days": 10,
+      "repair_warranty_m": 12,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 3.8,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 4,
+      "tradein_100eur": 0.5,
+      "warranty_years": 3,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 2.9,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 12,
+      "refurb_oem": 0
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 3,
+    "type": "design",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 1.8,
+      "price_100eur": 0.0,
+      "repair_days": 5,
+      "repair_warranty_m": 12,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 4.8,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 1,
+      "tradein_100eur": 1.5,
+      "warranty_years": 2,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 2.2,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 12,
+      "refurb_oem": 0
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 4,
+    "type": "design",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 0.6,
+      "price_100eur": 0.0,
+      "repair_days": 10,
+      "repair_warranty_m": 3,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 4.8,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 4,
+      "tradein_100eur": 1.5,
+      "warranty_years": 5,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 2.9,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 24,
+      "refurb_oem": 0
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 5,
+    "type": "design",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 1.8,
+      "price_100eur": 0.0,
+      "repair_days": 2,
+      "repair_warranty_m": 3,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 3.8,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 10,
+      "tradein_100eur": 0.0,
+      "warranty_years": 5,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 3.6,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 6,
+      "refurb_oem": 0
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 6,
+    "type": "design",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 1.2,
+      "price_100eur": 0.0,
+      "repair_days": 2,
+      "repair_warranty_m": 3,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 7.5,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 4,
+      "tradein_100eur": 1.5,
+      "warranty_years": 3,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 2.2,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 24,
+      "refurb_oem": 1
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 7,
+    "type": "design",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 0.6,
+      "price_100eur": 0.0,
+      "repair_days": 2,
+      "repair_warranty_m": 3,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 3.8,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 10,
+      "tradein_100eur": 0.5,
+      "warranty_years": 2,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 3.6,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 24,
+      "refurb_oem": 0
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 8,
+    "type": "design",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 2.5,
+      "price_100eur": 0.0,
+      "repair_days": 10,
+      "repair_warranty_m": 3,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 7.5,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 4,
+      "tradein_100eur": 0.5,
+      "warranty_years": 2,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 3.6,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 12,
+      "refurb_oem": 0
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 9,
+    "type": "design",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 0.6,
+      "price_100eur": 0.0,
+      "repair_days": 5,
+      "repair_warranty_m": 12,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 4.8,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 1,
+      "tradein_100eur": 0.5,
+      "warranty_years": 5,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 2.9,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 24,
+      "refurb_oem": 0
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 10,
+    "type": "design",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 1.8,
+      "price_100eur": 0.0,
+      "repair_days": 2,
+      "repair_warranty_m": 12,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 6.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 4,
+      "tradein_100eur": 0.5,
+      "warranty_years": 3,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 2.2,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 6,
+      "refurb_oem": 0
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 11,
+    "type": "design",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 2.5,
+      "price_100eur": 0.0,
+      "repair_days": 5,
+      "repair_warranty_m": 3,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 7.5,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 4,
+      "tradein_100eur": 0.5,
+      "warranty_years": 3,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 3.6,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 6,
+      "refurb_oem": 0
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 12,
+    "type": "design",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 1.2,
+      "price_100eur": 0.0,
+      "repair_days": 5,
+      "repair_warranty_m": 3,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 6.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 10,
+      "tradein_100eur": 1.0,
+      "warranty_years": 3,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 2.2,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 12,
+      "refurb_oem": 1
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 13,
+    "type": "holdout_H1",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 1.8,
+      "price_100eur": 0.0,
+      "repair_days": 5,
+      "repair_warranty_m": 3,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 4.8,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 4,
+      "tradein_100eur": 0.5,
+      "warranty_years": 3,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 2.9,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 12,
+      "refurb_oem": 1
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 14,
+    "type": "holdout_H2",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 1.2,
+      "price_100eur": 0.0,
+      "repair_days": 2,
+      "repair_warranty_m": 12,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 6.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 1,
+      "tradein_100eur": 1.0,
+      "warranty_years": 5,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 2.2,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 6,
+      "refurb_oem": 0
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   },
+   {
+    "task": 15,
+    "type": "repeat_of_1",
+    "alts": {
+     "repair": {
+      "repair_cost_100eur": 2.5,
+      "price_100eur": 0.0,
+      "repair_days": 10,
+      "repair_warranty_m": 12,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "new": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 3.8,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 4,
+      "tradein_100eur": 0.0,
+      "warranty_years": 2,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     },
+     "refurb": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 2.2,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 24,
+      "refurb_oem": 0
+     },
+     "none": {
+      "repair_cost_100eur": 0.0,
+      "price_100eur": 0.0,
+      "repair_days": 0,
+      "repair_warranty_m": 0,
+      "delivery_days": 0,
+      "tradein_100eur": 0.0,
+      "warranty_years": 0,
+      "refurb_warranty_m": 0,
+      "refurb_oem": 0
+     }
+    }
+   }
+  ]
+ }
+}

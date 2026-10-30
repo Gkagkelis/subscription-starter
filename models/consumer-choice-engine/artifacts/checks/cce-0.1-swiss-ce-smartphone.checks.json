@@ -1,0 +1,70 @@
+{
+ "model_id": "cce-0.1-swiss-ce-smartphone",
+ "artifact_trained_at": "2026-10-30T21:26:14Z",
+ "n_panel": 500,
+ "behavior": {
+  "A_repair_cost": {
+   "status": "NOT_APPLICABLE",
+   "reason": "Το χαρακτηριστικό δεν υπάρχει στο εκπαιδευμένο μοντέλο."
+  },
+  "B_trade_in": {
+   "status": "NOT_APPLICABLE",
+   "reason": "Το χαρακτηριστικό δεν υπάρχει στο εκπαιδευμένο μοντέλο."
+  },
+  "C_warranty": {
+   "status": "NOT_APPLICABLE",
+   "reason": "Το χαρακτηριστικό δεν υπάρχει στο εκπαιδευμένο μοντέλο."
+  },
+  "D_delivery": {
+   "status": "NOT_APPLICABLE",
+   "reason": "Το χαρακτηριστικό δεν υπάρχει στο εκπαιδευμένο μοντέλο."
+  },
+  "price": {
+   "status": "PASS",
+   "n_profiles": 100,
+   "n_fail": 0,
+   "example": {
+    "status": "PASS",
+    "values": [
+     1.8,
+     5.5,
+     9.2,
+     13.0
+    ],
+    "probabilities": [
+     0.7011638807546847,
+     0.5051664401558189,
+     0.3065701923493399,
+     0.2212983136600281
+    ]
+   }
+  },
+  "E_dominance": {
+   "status": "PASS",
+   "note": "Η βελτίωση ενός χαρακτηριστικού, με τα υπόλοιπα ίσα, δεν μειώνει την πιθανότητα επιλογής."
+  },
+  "F_repeatability": {
+   "status": "PASS"
+  }
+ },
+ "greek_repair_scenario": {
+  "status": "NOT_SUPPORTED",
+  "transfer": "SOURCE_POPULATION_ONLY",
+  "probabilities_returned": false,
+  "pass": true
+ },
+ "in_domain_scenario": {
+  "status": "SUPPORTED",
+  "transfer": "SOURCE_POPULATION_ONLY",
+  "pass": true
+ },
+ "panel_consistency": {
+  "status": "PASS",
+  "attr": "price_100chf",
+  "alt": "A",
+  "respondents_with_reversal": 0,
+  "repeatable": true,
+  "note": "Κανείς καταναλωτής δεν επιλέγει την εναλλακτική σε υψηλότερη τιμή ενώ την απέρριψε σε χαμηλότερη."
+ },
+ "all_pass": true
+}

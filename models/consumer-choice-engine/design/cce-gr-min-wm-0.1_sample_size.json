@@ -1,0 +1,392 @@
+{
+ "design_id": "cce-gr-min-wm-0.1",
+ "d_error_design_priors": 0.08795000156865153,
+ "design_prior_scenario": "central (ΗΠΑ, refurbished κινητά, CL)",
+ "sample_size": {
+  "low (Ελβετία, πλυντήρια, CL)": {
+   "price_abs_coef_per_100eur": 0.056,
+   "targets": [
+    {
+     "target": "P1 Κόστος επισκευής: συντελεστής ≠ 0 (ανιχνεύσιμος στο 50% της ευαισθησίας τιμής αγοράς)",
+     "primary": true,
+     "delta_utility": 0.028,
+     "N_conditional_logit": 8985
+    },
+    {
+     "target": "P2 Trade-in: συντελεστής ≠ 0 (στο 50% της ευαισθησίας τιμής)",
+     "primary": true,
+     "delta_utility": 0.028,
+     "N_conditional_logit": 16509
+    },
+    {
+     "target": "P3 Εγγύηση νέου 2→5 έτη αξίας ≥ 60 €",
+     "primary": true,
+     "delta_utility": 0.0112,
+     "N_conditional_logit": 20565
+    },
+    {
+     "target": "P4 Παράδοση 10→1 ημέρες αξίας ≥ 60 €",
+     "primary": true,
+     "delta_utility": 0.00373,
+     "N_conditional_logit": 20636
+    },
+    {
+     "target": "S1 Κόστος επισκευής ≠ τιμή αγοράς (διαφορά 25%)",
+     "primary": false,
+     "delta_utility": 0.014,
+     "N_conditional_logit": 43486
+    },
+    {
+     "target": "S2 Trade-in ≠ ισόποση έκπτωση (διαφορά 25%)",
+     "primary": false,
+     "delta_utility": 0.014,
+     "N_conditional_logit": 79890
+    },
+    {
+     "target": "S3 Χρόνος επισκευής 10→2 ημέρες αξίας ≥ 30 €",
+     "primary": false,
+     "delta_utility": 0.0021,
+     "N_conditional_logit": 74987
+    },
+    {
+     "target": "S4 Εγγύηση επισκευής 3→12 μήνες αξίας ≥ 25 €",
+     "primary": false,
+     "delta_utility": 0.00156,
+     "N_conditional_logit": 72296
+    },
+    {
+     "target": "S5 Εγγύηση refurbished 6→24 μήνες αξίας ≥ 30 €",
+     "primary": false,
+     "delta_utility": 0.00093,
+     "N_conditional_logit": 74694
+    },
+    {
+     "target": "S6 Refurbished από κατασκευαστή έναντι λιανοπωλητή αξίας ≥ 30 €",
+     "primary": false,
+     "delta_utility": 0.0168,
+     "N_conditional_logit": 51930
+    },
+    {
+     "target": "S7 Παράδοση 10→1 ημέρες αξίας ≥ 30 €",
+     "primary": false,
+     "delta_utility": 0.00187,
+     "N_conditional_logit": 82542
+    },
+    {
+     "target": "Μερίδιο «repair» στο H1 ±5 μον.",
+     "primary": true,
+     "share_at_prior": 0.252,
+     "N_conditional_logit": 60
+    },
+    {
+     "target": "Μερίδιο «new» στο H1 ±5 μον.",
+     "primary": true,
+     "share_at_prior": 0.224,
+     "N_conditional_logit": 45
+    },
+    {
+     "target": "Μερίδιο «refurb» στο H1 ±5 μον.",
+     "primary": true,
+     "share_at_prior": 0.245,
+     "N_conditional_logit": 55
+    },
+    {
+     "target": "Μερίδιο «none» στο H1 ±5 μον.",
+     "primary": true,
+     "share_at_prior": 0.28,
+     "N_conditional_logit": 35
+    },
+    {
+     "target": "Μερίδιο «repair» στο H2 ±5 μον.",
+     "primary": true,
+     "share_at_prior": 0.261,
+     "N_conditional_logit": 94
+    },
+    {
+     "target": "Μερίδιο «new» στο H2 ±5 μον.",
+     "primary": true,
+     "share_at_prior": 0.219,
+     "N_conditional_logit": 96
+    },
+    {
+     "target": "Μερίδιο «refurb» στο H2 ±5 μον.",
+     "primary": true,
+     "share_at_prior": 0.245,
+     "N_conditional_logit": 102
+    },
+    {
+     "target": "Μερίδιο «none» στο H2 ±5 μον.",
+     "primary": true,
+     "share_at_prior": 0.275,
+     "N_conditional_logit": 50
+    }
+   ],
+   "N_primary_cl": 20636,
+   "N_all_cl": 82542,
+   "N_recommended_field": 31561
+  },
+  "central (ΗΠΑ, refurbished κινητά, CL)": {
+   "price_abs_coef_per_100eur": 0.309,
+   "targets": [
+    {
+     "target": "P1 Κόστος επισκευής: συντελεστής ≠ 0 (ανιχνεύσιμος στο 50% της ευαισθησίας τιμής αγοράς)",
+     "primary": true,
+     "delta_utility": 0.1545,
+     "N_conditional_logit": 297
+    },
+    {
+     "target": "P2 Trade-in: συντελεστής ≠ 0 (στο 50% της ευαισθησίας τιμής)",
+     "primary": true,
+     "delta_utility": 0.1545,
+     "N_conditional_logit": 911
+    },
+    {
+     "target": "P3 Εγγύηση νέου 2→5 έτη αξίας ≥ 60 €",
+     "primary": true,
+     "delta_utility": 0.0618,
+     "N_conditional_logit": 1065
+    },
+    {
+     "target": "P4 Παράδοση 10→1 ημέρες αξίας ≥ 60 €",
+     "primary": true,
+     "delta_utility": 0.0206,
+     "N_conditional_logit": 1068
+    },
+    {
+     "target": "S1 Κόστος επισκευής ≠ τιμή αγοράς (διαφορά 25%)",
+     "primary": false,
+     "delta_utility": 0.07725,
+     "N_conditional_logit": 1656
+    },
+    {
+     "target": "S2 Trade-in ≠ ισόποση έκπτωση (διαφορά 25%)",
+     "primary": false,
+     "delta_utility": 0.07725,
+     "N_conditional_logit": 4325
+    },
+    {
+     "target": "S3 Χρόνος επισκευής 10→2 ημέρες αξίας ≥ 30 €",
+     "primary": false,
+     "delta_utility": 0.01159,
+     "N_conditional_logit": 2419
+    },
+    {
+     "target": "S4 Εγγύηση επισκευής 3→12 μήνες αξίας ≥ 25 €",
+     "primary": false,
+     "delta_utility": 0.00858,
+     "N_conditional_logit": 2356
+    },
+    {
+     "target": "S5 Εγγύηση refurbished 6→24 μήνες αξίας ≥ 30 €",
+     "primary": false,
+     "delta_utility": 0.00515,
+     "N_conditional_logit": 2874
+    },
+    {
+     "target": "S6 Refurbished από κατασκευαστή έναντι λιανοπωλητή αξίας ≥ 30 €",
+     "primary": false,
+     "delta_utility": 0.0927,
+     "N_conditional_logit": 1991
+    },
+    {
+     "target": "S7 Παράδοση 10→1 ημέρες αξίας ≥ 30 €",
+     "primary": false,
+     "delta_utility": 0.0103,
+     "N_conditional_logit": 4272
+    },
+    {
+     "target": "Μερίδιο «repair» στο H1 ±5 μον.",
+     "primary": true,
+     "share_at_prior": 0.239,
+     "N_conditional_logit": 56
+    },
+    {
+     "target": "Μερίδιο «new» στο H1 ±5 μον.",
+     "primary": true,
+     "share_at_prior": 0.126,
+     "N_conditional_logit": 27
+    },
+    {
+     "target": "Μερίδιο «refurb» στο H1 ±5 μον.",
+     "primary": true,
+     "share_at_prior": 0.205,
+     "N_conditional_logit": 47
+    },
+    {
+     "target": "Μερίδιο «none» στο H1 ±5 μον.",
+     "primary": true,
+     "share_at_prior": 0.43,
+     "N_conditional_logit": 50
+    },
+    {
+     "target": "Μερίδιο «repair» στο H2 ±5 μον.",
+     "primary": true,
+     "share_at_prior": 0.293,
+     "N_conditional_logit": 99
+    },
+    {
+     "target": "Μερίδιο «new» στο H2 ±5 μον.",
+     "primary": true,
+     "share_at_prior": 0.111,
+     "N_conditional_logit": 51
+    },
+    {
+     "target": "Μερίδιο «refurb» στο H2 ±5 μον.",
+     "primary": true,
+     "share_at_prior": 0.205,
+     "N_conditional_logit": 93
+    },
+    {
+     "target": "Μερίδιο «none» στο H2 ±5 μον.",
+     "primary": true,
+     "share_at_prior": 0.391,
+     "N_conditional_logit": 67
+    }
+   ],
+   "N_primary_cl": 1068,
+   "N_all_cl": 4325,
+   "N_recommended_field": 1634
+  },
+  "high (2× central)": {
+   "price_abs_coef_per_100eur": 0.618,
+   "targets": [
+    {
+     "target": "P1 Κόστος επισκευής: συντελεστής ≠ 0 (ανιχνεύσιμος στο 50% της ευαισθησίας τιμής αγοράς)",
+     "primary": true,
+     "delta_utility": 0.309,
+     "N_conditional_logit": 87
+    },
+    {
+     "target": "P2 Trade-in: συντελεστής ≠ 0 (στο 50% της ευαισθησίας τιμής)",
+     "primary": true,
+     "delta_utility": 0.309,
+     "N_conditional_logit": 486
+    },
+    {
+     "target": "P3 Εγγύηση νέου 2→5 έτη αξίας ≥ 60 €",
+     "primary": true,
+     "delta_utility": 0.1236,
+     "N_conditional_logit": 525
+    },
+    {
+     "target": "P4 Παράδοση 10→1 ημέρες αξίας ≥ 60 €",
+     "primary": true,
+     "delta_utility": 0.0412,
+     "N_conditional_logit": 505
+    },
+    {
+     "target": "S1 Κόστος επισκευής ≠ τιμή αγοράς (διαφορά 25%)",
+     "primary": false,
+     "delta_utility": 0.1545,
+     "N_conditional_logit": 638
+    },
+    {
+     "target": "S2 Trade-in ≠ ισόποση έκπτωση (διαφορά 25%)",
+     "primary": false,
+     "delta_utility": 0.1545,
+     "N_conditional_logit": 2294
+    },
+    {
+     "target": "S3 Χρόνος επισκευής 10→2 ημέρες αξίας ≥ 30 €",
+     "primary": false,
+     "delta_utility": 0.02317,
+     "N_conditional_logit": 671
+    },
+    {
+     "target": "S4 Εγγύηση επισκευής 3→12 μήνες αξίας ≥ 25 €",
+     "primary": false,
+     "delta_utility": 0.01717,
+     "N_conditional_logit": 653
+    },
+    {
+     "target": "S5 Εγγύηση refurbished 6→24 μήνες αξίας ≥ 30 €",
+     "primary": false,
+     "delta_utility": 0.0103,
+     "N_conditional_logit": 1010
+    },
+    {
+     "target": "S6 Refurbished από κατασκευαστή έναντι λιανοπωλητή αξίας ≥ 30 €",
+     "primary": false,
+     "delta_utility": 0.1854,
+     "N_conditional_logit": 707
+    },
+    {
+     "target": "S7 Παράδοση 10→1 ημέρες αξίας ≥ 30 €",
+     "primary": false,
+     "delta_utility": 0.0206,
+     "N_conditional_logit": 2020
+    },
+    {
+     "target": "Μερίδιο «repair» στο H1 ±5 μον.",
+     "primary": true,
+     "share_at_prior": 0.19,
+     "N_conditional_logit": 47
+    },
+    {
+     "target": "Μερίδιο «new» στο H1 ±5 μον.",
+     "primary": true,
+     "share_at_prior": 0.053,
+     "N_conditional_logit": 13
+    },
+    {
+     "target": "Μερίδιο «refurb» στο H1 ±5 μον.",
+     "primary": true,
+     "share_at_prior": 0.14,
+     "N_conditional_logit": 35
+    },
+    {
+     "target": "Μερίδιο «none» στο H1 ±5 μον.",
+     "primary": true,
+     "share_at_prior": 0.617,
+     "N_conditional_logit": 57
+    },
+    {
+     "target": "Μερίδιο «repair» στο H2 ±5 μον.",
+     "primary": true,
+     "share_at_prior": 0.292,
+     "N_conditional_logit": 99
+    },
+    {
+     "target": "Μερίδιο «new» στο H2 ±5 μον.",
+     "primary": true,
+     "share_at_prior": 0.042,
+     "N_conditional_logit": 18
+    },
+    {
+     "target": "Μερίδιο «refurb» στο H2 ±5 μον.",
+     "primary": true,
+     "share_at_prior": 0.143,
+     "N_conditional_logit": 77
+    },
+    {
+     "target": "Μερίδιο «none» στο H2 ±5 μον.",
+     "primary": true,
+     "share_at_prior": 0.523,
+     "N_conditional_logit": 86
+    }
+   ],
+   "N_primary_cl": 525,
+   "N_all_cl": 2294,
+   "N_recommended_field": 803
+  }
+ },
+ "simulation_check": {
+  "scenario": "central (ΗΠΑ, refurbished κινητά, CL)",
+  "N": 1068,
+  "reps": 200,
+  "note": "Έλεγχος του αναλυτικού υπολογισμού: ισχύς ≈ 0,80 αναμένεται για τον δεσμευτικό κύριο στόχο, υψηλότερη για τους υπόλοιπους κύριους. Στους S1/S2 η αληθινή διαφορά είναι 0 στην προσομοίωση, άρα το ποσοστό απόρριψης μετρά το σφάλμα τύπου Ι (≈ 0,05). Οι δευτερεύοντες με κοινό χαρακτηριστικό με κύριο στόχο (S7) προσομοιώνονται στο μέγεθος του κύριου.",
+  "empirical_power": {
+   "P1 Κόστος επισκευής: συντελεστής ≠ 0 (ανιχνεύσιμος στο 50% της ευαισθησίας τιμής αγοράς)": 1.0,
+   "P2 Trade-in: συντελεστής ≠ 0 (στο 50% της ευαισθησίας τιμής)": 1.0,
+   "P3 Εγγύηση νέου 2→5 έτη αξίας ≥ 60 €": 0.775,
+   "P4 Παράδοση 10→1 ημέρες αξίας ≥ 60 €": 0.81,
+   "S1 Κόστος επισκευής ≠ τιμή αγοράς (διαφορά 25%)": 0.035,
+   "S2 Trade-in ≠ ισόποση έκπτωση (διαφορά 25%)": 0.05,
+   "S3 Χρόνος επισκευής 10→2 ημέρες αξίας ≥ 30 €": 0.425,
+   "S4 Εγγύηση επισκευής 3→12 μήνες αξίας ≥ 25 €": 0.505,
+   "S5 Εγγύηση refurbished 6→24 μήνες αξίας ≥ 30 €": 0.42,
+   "S6 Refurbished από κατασκευαστή έναντι λιανοπωλητή αξίας ≥ 30 €": 0.53,
+   "S7 Παράδοση 10→1 ημέρες αξίας ≥ 30 €": 0.81
+  }
+ }
+}

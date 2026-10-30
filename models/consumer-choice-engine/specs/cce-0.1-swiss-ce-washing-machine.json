@@ -1,0 +1,167 @@
+{
+ "model_id": "cce-0.1-swiss-ce-washing-machine",
+ "data": "../../.synthetic-lab-data/cce/data/brugge2024_swiss_ce_washing_machine.csv",
+ "manifest": "brugge2024_swiss_ce_washing_machine.manifest.json",
+ "terms": [
+  {
+   "name": "asc_left",
+   "kind": "asc",
+   "alt": "A"
+  },
+  {
+   "name": "price_100chf",
+   "kind": "attr",
+   "col": "price_100chf"
+  },
+  {
+   "name": "life_years",
+   "kind": "attr",
+   "col": "life_years"
+  },
+  {
+   "name": "repair_limited",
+   "kind": "attr",
+   "col": "repair_limited"
+  },
+  {
+   "name": "repair_full",
+   "kind": "attr",
+   "col": "repair_full"
+  },
+  {
+   "name": "recy_limited",
+   "kind": "attr",
+   "col": "recy_limited"
+  },
+  {
+   "name": "recy_full",
+   "kind": "attr",
+   "col": "recy_full"
+  },
+  {
+   "name": "env_impact_medium",
+   "kind": "attr",
+   "col": "env_impact_medium"
+  },
+  {
+   "name": "env_impact_very_high",
+   "kind": "attr",
+   "col": "env_impact_very_high"
+  },
+  {
+   "name": "energy_E",
+   "kind": "attr",
+   "col": "energy_E"
+  },
+  {
+   "name": "energy_C",
+   "kind": "attr",
+   "col": "energy_C"
+  },
+  {
+   "name": "energy_A",
+   "kind": "attr",
+   "col": "energy_A"
+  }
+ ],
+ "price_only_terms": [
+  {
+   "name": "asc_left",
+   "kind": "asc",
+   "alt": "A"
+  },
+  {
+   "name": "price_100chf",
+   "kind": "attr",
+   "col": "price_100chf"
+  }
+ ],
+ "mixed": {
+  "random": {
+   "price_100chf": "neglognormal",
+   "life_years": "normal",
+   "repair_full": "normal",
+   "repair_limited": "normal"
+  },
+  "draws": 100
+ },
+ "domain": {
+  "categories": [
+   "washing_machine"
+  ],
+  "populations": [
+   "CH"
+  ],
+  "units": {
+   "price_100chf": "100 CHF",
+   "life_years": "έτη"
+  }
+ },
+ "status": "EXPERIMENTAL",
+ "validation_note": "Source-population validation: held-out ερωτώμενοι του ίδιου ελβετικού δείγματος 2021-22. Δεν αποτελεί ελληνική επικύρωση.",
+ "external_validation": {},
+ "behavior_spec": {
+  "context": {
+   "category": "washing_machine"
+  },
+  "base_alternatives": [
+   {
+    "alt_id": "A",
+    "price_100chf": 8.9,
+    "life_years": 10,
+    "repair_limited": 0,
+    "repair_full": 0,
+    "recy_limited": 0,
+    "recy_full": 0,
+    "env_impact_medium": 0,
+    "env_impact_very_high": 0,
+    "energy_E": 0,
+    "energy_C": 0,
+    "energy_A": 0
+   },
+   {
+    "alt_id": "B",
+    "price_100chf": 8.9,
+    "life_years": 10,
+    "repair_limited": 0,
+    "repair_full": 0,
+    "recy_limited": 0,
+    "recy_full": 0,
+    "env_impact_medium": 0,
+    "env_impact_very_high": 0,
+    "energy_E": 0,
+    "energy_C": 0,
+    "energy_A": 0
+   }
+  ],
+  "tests": {
+   "A_repair_cost": null,
+   "B_trade_in": null,
+   "C_warranty": null,
+   "D_delivery": null,
+   "price": {
+    "alt": "A",
+    "attr": "price_100chf",
+    "values": [
+     4.7,
+     8.9,
+     16.5,
+     32.0
+    ],
+    "direction": "nonincreasing"
+   }
+  },
+  "dominance": {
+   "alt_better": "A",
+   "alt_worse": "B",
+   "attr": "price_100chf",
+   "better_value": 4.7
+  }
+ },
+ "limitations": [
+  "Ελβετία 2021-22, τιμές σε CHF· το ελβετικό επίπεδο τιμών και εισοδήματος διαφέρει ουσιωδώς από το ελληνικό.",
+  "Επιλογή μεταξύ δύο ΚΑΙΝΟΥΡΓΙΩΝ προϊόντων χωρίς «κανένα»: δεν εκτιμά πιθανότητα αγοράς, επισκευής ή αναβολής.",
+  "Η «επισκευασιμότητα» είναι ιδιότητα του νέου προϊόντος, όχι κόστος επισκευής υπάρχουσας συσκευής.",
+  "Τα επίπεδα των χαρακτηριστικών ήταν πλήρως τυχαία (ανεξάρτητα), άρα συνδυασμοί όπως 3.200 CHF με κλάση G εμφανίστηκαν."
+ ]
+}

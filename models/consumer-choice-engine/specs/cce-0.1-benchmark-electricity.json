@@ -1,0 +1,137 @@
+{
+ "model_id": "cce-0.1-benchmark-electricity",
+ "data": "../../.synthetic-lab-data/cce/data/train_electricity.csv",
+ "manifest": "train_electricity.manifest.json",
+ "terms": [
+  {
+   "name": "price_fixed",
+   "kind": "attr",
+   "col": "price_fixed"
+  },
+  {
+   "name": "contract_years",
+   "kind": "attr",
+   "col": "contract_years"
+  },
+  {
+   "name": "local",
+   "kind": "attr",
+   "col": "local"
+  },
+  {
+   "name": "well_known",
+   "kind": "attr",
+   "col": "well_known"
+  },
+  {
+   "name": "tod",
+   "kind": "attr",
+   "col": "tod"
+  },
+  {
+   "name": "seasonal",
+   "kind": "attr",
+   "col": "seasonal"
+  }
+ ],
+ "price_only_terms": [
+  {
+   "name": "price_fixed",
+   "kind": "attr",
+   "col": "price_fixed"
+  },
+  {
+   "name": "tod",
+   "kind": "attr",
+   "col": "tod"
+  },
+  {
+   "name": "seasonal",
+   "kind": "attr",
+   "col": "seasonal"
+  }
+ ],
+ "mixed": {
+  "random": {
+   "price_fixed": "neglognormal",
+   "contract_years": "normal",
+   "local": "normal",
+   "well_known": "normal"
+  },
+  "draws": 200
+ },
+ "domain": {
+  "categories": [
+   "electricity_supplier"
+  ],
+  "populations": [
+   "US"
+  ]
+ },
+ "status": "BENCHMARK_ONLY",
+ "validation_note": "Μεθοδολογικό benchmark: έλεγχος ότι ο υποψήφιος εκτιμητής (panel mixed logit) γενικεύει σε held-out πραγματικούς ερωτώμενους.",
+ "behavior_spec": {
+  "context": {
+   "category": "electricity_supplier"
+  },
+  "base_alternatives": [
+   {
+    "alt_id": "1",
+    "price_fixed": 7,
+    "contract_years": 1,
+    "local": 0,
+    "well_known": 0,
+    "tod": 0,
+    "seasonal": 0
+   },
+   {
+    "alt_id": "2",
+    "price_fixed": 7,
+    "contract_years": 1,
+    "local": 0,
+    "well_known": 0,
+    "tod": 0,
+    "seasonal": 0
+   },
+   {
+    "alt_id": "3",
+    "price_fixed": 7,
+    "contract_years": 1,
+    "local": 0,
+    "well_known": 0,
+    "tod": 0,
+    "seasonal": 0
+   },
+   {
+    "alt_id": "4",
+    "price_fixed": 7,
+    "contract_years": 1,
+    "local": 0,
+    "well_known": 0,
+    "tod": 0,
+    "seasonal": 0
+   }
+  ],
+  "tests": {
+   "fee": {
+    "alt": "1",
+    "attr": "price_fixed",
+    "values": [
+     0,
+     7,
+     9
+    ],
+    "direction": "nonincreasing"
+   }
+  },
+  "dominance": {
+   "alt_better": "1",
+   "alt_worse": "2",
+   "attr": "well_known",
+   "better_value": 1
+  }
+ },
+ "limitations": [
+  "Μόνο benchmark· ΗΠΑ, υπηρεσία κοινής ωφέλειας."
+ ]
+}

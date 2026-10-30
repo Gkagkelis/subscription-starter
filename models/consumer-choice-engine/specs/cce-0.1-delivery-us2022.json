@@ -1,0 +1,176 @@
+{
+ "model_id": "cce-0.1-delivery-us2022",
+ "data": "../../.synthetic-lab-data/cce/data/berke2023_drone_delivery.csv",
+ "manifest": "berke2023_drone_delivery.manifest.json",
+ "context_vars": [
+  "product"
+ ],
+ "terms": [
+  {
+   "name": "asc_drone",
+   "kind": "asc",
+   "alt": "drone"
+  },
+  {
+   "name": "fee_usd",
+   "kind": "attr",
+   "col": "fee_usd"
+  },
+  {
+   "name": "wait_hours:takeout_food",
+   "kind": "attr_x_cov",
+   "col": "wait_hours",
+   "cov": "product",
+   "cov_value": "takeout_food"
+  },
+  {
+   "name": "wait_hours:prescription_medications",
+   "kind": "attr_x_cov",
+   "col": "wait_hours",
+   "cov": "product",
+   "cov_value": "prescription_medications"
+  },
+  {
+   "name": "wait_hours:liquor_store",
+   "kind": "attr_x_cov",
+   "col": "wait_hours",
+   "cov": "product",
+   "cov_value": "liquor_store"
+  },
+  {
+   "name": "wait_hours:last_minute_groceries",
+   "kind": "attr_x_cov",
+   "col": "wait_hours",
+   "cov": "product",
+   "cov_value": "last_minute_groceries"
+  },
+  {
+   "name": "privacy_risk",
+   "kind": "attr",
+   "col": "privacy_risk"
+  },
+  {
+   "name": "asc_drone:age_55plus",
+   "kind": "asc_x_cov",
+   "alt": "drone",
+   "cov": "age_band",
+   "cov_value": "55-64"
+  },
+  {
+   "name": "asc_drone:age_65plus",
+   "kind": "asc_x_cov",
+   "alt": "drone",
+   "cov": "age_band",
+   "cov_value": "65+"
+  },
+  {
+   "name": "asc_drone:age_18_24",
+   "kind": "asc_x_cov",
+   "alt": "drone",
+   "cov": "age_band",
+   "cov_value": "18-24"
+  },
+  {
+   "name": "asc_drone:female",
+   "kind": "asc_x_cov",
+   "alt": "drone",
+   "cov": "female"
+  }
+ ],
+ "price_only_terms": [
+  {
+   "name": "asc_drone",
+   "kind": "asc",
+   "alt": "drone"
+  },
+  {
+   "name": "fee_usd",
+   "kind": "attr",
+   "col": "fee_usd"
+  }
+ ],
+ "mixed": {
+  "random": {
+   "fee_usd": "neglognormal",
+   "asc_drone": "normal"
+  },
+  "draws": 100
+ },
+ "domain": {
+  "categories": [
+   "takeout_food",
+   "prescription_medications",
+   "liquor_store",
+   "last_minute_groceries"
+  ],
+  "populations": [
+   "US"
+  ],
+  "units": {
+   "fee_usd": "USD",
+   "wait_hours": "ώρες",
+   "privacy_risk": "0/1"
+  }
+ },
+ "status": "EXPERIMENTAL",
+ "validation_note": "Source-population validation: held-out ερωτώμενοι του ίδιου δείγματος ΗΠΑ 2022. Δεν αποτελεί ελληνική επικύρωση.",
+ "external_validation": {},
+ "behavior_spec": {
+  "context": {
+   "category": "takeout_food",
+   "product": "takeout_food"
+  },
+  "base_alternatives": [
+   {
+    "alt_id": "ground",
+    "fee_usd": 3,
+    "wait_hours": 0.5,
+    "privacy_risk": 0
+   },
+   {
+    "alt_id": "drone",
+    "fee_usd": 3,
+    "wait_hours": 0.5,
+    "privacy_risk": 0
+   }
+  ],
+  "tests": {
+   "D_delivery": {
+    "alt": "drone",
+    "attr": "wait_hours",
+    "values": [
+     0.25,
+     0.333,
+     0.5,
+     0.75
+    ],
+    "direction": "nonincreasing"
+   },
+   "B_trade_in": null,
+   "A_repair_cost": null,
+   "C_warranty": null,
+   "fee": {
+    "alt": "drone",
+    "attr": "fee_usd",
+    "values": [
+     0,
+     1,
+     3,
+     5
+    ],
+    "direction": "nonincreasing"
+   }
+  },
+  "dominance": {
+   "alt_better": "drone",
+   "alt_worse": "ground",
+   "attr": "fee_usd",
+   "better_value": 1
+  }
+ },
+ "limitations": [
+  "ΗΠΑ 2022, μη πιθανοτικό online panel.",
+  "Παράδοση εντός ημέρας (λεπτά–1 ημέρα) για τρόφιμα/φάρμακα/ποτά· όχι συσκευές.",
+  "Οι δύο εναλλακτικές είναι τρόποι παράδοσης, όχι προσφορές καταστημάτων."
+ ]
+}

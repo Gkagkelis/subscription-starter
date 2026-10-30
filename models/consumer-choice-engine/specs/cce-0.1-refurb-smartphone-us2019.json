@@ -1,0 +1,154 @@
+{
+ "model_id": "cce-0.1-refurb-smartphone-us2019",
+ "data": "../../.synthetic-lab-data/cce/data/kurdhi2023_refurb_smartphone.csv",
+ "manifest": "kurdhi2023_refurb_smartphone.manifest.json",
+ "context_vars": [
+  "brand"
+ ],
+ "terms": [
+  {
+   "name": "asc_new",
+   "kind": "asc",
+   "alt": "new"
+  },
+  {
+   "name": "asc_new:motorola",
+   "kind": "asc_x_cov",
+   "alt": "new",
+   "cov": "brand",
+   "cov_value": "motorola"
+  },
+  {
+   "name": "asc_refurb_A",
+   "kind": "asc",
+   "alt": "refurb_A"
+  },
+  {
+   "name": "price_100usd",
+   "kind": "attr",
+   "col": "price_100usd"
+  },
+  {
+   "name": "cond_refurbished",
+   "kind": "attr",
+   "col": "cond_refurbished"
+  },
+  {
+   "name": "cond_open_box",
+   "kind": "attr",
+   "col": "cond_open_box"
+  },
+  {
+   "name": "seller_authorized",
+   "kind": "attr",
+   "col": "seller_authorized"
+  },
+  {
+   "name": "seller_oem",
+   "kind": "attr",
+   "col": "seller_oem"
+  }
+ ],
+ "price_only_terms": [
+  {
+   "name": "asc_new",
+   "kind": "asc",
+   "alt": "new"
+  },
+  {
+   "name": "asc_refurb_A",
+   "kind": "asc",
+   "alt": "refurb_A"
+  },
+  {
+   "name": "price_100usd",
+   "kind": "attr",
+   "col": "price_100usd"
+  }
+ ],
+ "mixed": {
+  "random": {
+   "price_100usd": "neglognormal",
+   "asc_new": "normal",
+   "cond_open_box": "normal",
+   "seller_oem": "normal"
+  },
+  "draws": 200
+ },
+ "domain": {
+  "categories": [
+   "smartphone_new_vs_refurbished"
+  ],
+  "populations": [
+   "US"
+  ],
+  "units": {
+   "price_100usd": "100 USD"
+  }
+ },
+ "status": "EXPERIMENTAL_NONCOMMERCIAL",
+ "validation_note": "Source-population validation: held-out ερωτώμενοι του ίδιου δείγματος MTurk ΗΠΑ 2019 (μόνο ~40 ερωτώμενοι στο test → ευρέα διαστήματα). Δεν αποτελεί ελληνική επικύρωση.",
+ "external_validation": {},
+ "behavior_spec": {
+  "context": {
+   "category": "smartphone_new_vs_refurbished",
+   "brand": "apple"
+  },
+  "base_alternatives": [
+   {
+    "alt_id": "refurb_A",
+    "price_100usd": 3.6,
+    "cond_refurbished": 1,
+    "cond_open_box": 0,
+    "seller_authorized": 1,
+    "seller_oem": 0
+   },
+   {
+    "alt_id": "refurb_B",
+    "price_100usd": 3.6,
+    "cond_refurbished": 1,
+    "cond_open_box": 0,
+    "seller_authorized": 1,
+    "seller_oem": 0
+   },
+   {
+    "alt_id": "new",
+    "price_100usd": 6.0,
+    "cond_refurbished": 0,
+    "cond_open_box": 0,
+    "seller_authorized": 0,
+    "seller_oem": 1
+   }
+  ],
+  "tests": {
+   "A_repair_cost": null,
+   "B_trade_in": null,
+   "C_warranty": null,
+   "D_delivery": null,
+   "refurb_price": {
+    "alt": "refurb_A",
+    "attr": "price_100usd",
+    "values": [
+     0.6,
+     1.8,
+     3.0,
+     4.2,
+     5.4
+    ],
+    "direction": "nonincreasing"
+   }
+  },
+  "dominance": {
+   "alt_better": "refurb_A",
+   "alt_worse": "refurb_B",
+   "attr": "price_100usd",
+   "better_value": 2.4
+  }
+ },
+ "limitations": [
+  "ΗΠΑ 2019, MTurk (μη πιθανοτικό), 202 ερωτώμενοι στα δημοσιευμένα αρχεία.",
+  "Άδεια CC BY-NC 4.0: μόνο για μη εμπορική έρευνα/benchmark· όχι για ανατεθείσα μελέτη λιανεμπορίου χωρίς άδεια των δημιουργών.",
+  "Χωρίς επιλογή «κανένα» και χωρίς εγγύηση/trade-in/κανάλι.",
+  "Η τιμή του νέου είναι σταθερή ανά brand: η ευαισθησία στην τιμή εκτιμάται μόνο από τις τιμές refurbished."
+ ]
+}
