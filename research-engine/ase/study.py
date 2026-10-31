@@ -184,7 +184,7 @@ class Study:
         while True:
             added = self._added_profiles(rdir)
             profiles = pd.concat([sel, added], ignore_index=True) if len(added) else sel
-            results = sr.execute(profiles.to_dict("records"), rdir / "checkpoint.jsonl", stop_after=stop_after)
+            results = sr.execute(self.with_lab_state(profiles).to_dict("records"), rdir / "checkpoint.jsonl", stop_after=stop_after)
             if getattr(sr, "pending", 0):
                 from .llm.session_provider import status
                 st_ = status(rdir / "session")
@@ -262,6 +262,43 @@ class Study:
             return base
         added = self._added_profiles(self.internal / "runs" / run_id)
         return pd.concat([base, added], ignore_index=True) if len(added) else base
+
+    # ------------------------------------------------------------ κανονική κατάσταση ερωτώμενου (ASE + Lab)
+    def lab_cfg(self) -> dict:
+        lab = dict(self.cfg.get("lab") or {})
+        lab.setdefault("model", "pie-0.7")
+        lab.setdefault("ref", "2026-10")
+        lab.setdefault("prompt_anchors", ["emp", "econ4", "class3"])
+        return lab
+
+    def with_lab_state(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Προσθέτει στα προφίλ τις άγκυρες PIE (ίδια πρόσωπα, ίδια IDs). Αποθήκευση στο internal/respondent_state με κλειδί
+        (respondent_id, frame_record)· οι άγκυρες είναι ΕΚΤΙΜΗΣΕΙΣ μοντέλου από ελληνικά μικροδεδομένα, όχι γνωστά στοιχεία."""
+        lab = self.lab_cfg()
+        if not lab.get("enabled") or not len(df):
+            return df
+        from .lab.bridge import ANCHOR_COLS, call, respondent_payload
+        path = self.internal / "respondent_state" / f"lab_anchors_{lab['model'].replace('.', '_')}"
+        try:
+            state = read_table(path)
+        except FileNotFoundError:
+            state = pd.DataFrame(columns=["respondent_id", "frame_record"])
+        key = lambda d: d["respondent_id"].astype(str) + "|" + d["frame_record"].astype(str)   # noqa: E731
+        have = set(key(state)) if len(state) else set()
+        miss = df[~key(df).isin(have)]
+        if len(miss):
+            seed = int(self.cfg["panel"]["random_seed"])
+            res = call("anchors", {"model": lab["model"], "respondents": [
+                respondent_payload(p, derive_seed(seed, self.study_id, p["respondent_id"], p["frame_record"], "lab-anchors")) for p in miss.to_dict("records")]})
+            fr = dict(zip(miss["respondent_id"], miss["frame_record"]))
+            new = pd.DataFrame([{"respondent_id": r["id"], "frame_record": fr[r["id"]], **{f"lab_{k}": r["anchors"].get(k) for k in ANCHOR_COLS},
+                                 "lab_model": res["model"], "lab_bridge": res["bridge"]} for r in res["respondents"]])
+            state = pd.concat([state, new], ignore_index=True) if len(state) else new
+            write_table(state, path)
+        state = state.drop_duplicates(["respondent_id", "frame_record"], keep="last")
+        out = df.drop(columns=[c for c in df.columns if c.startswith("lab_")], errors="ignore").merge(state, on=["respondent_id", "frame_record"], how="left")
+        out["lab_prompt_anchors"] = ",".join(lab["prompt_anchors"])
+        return out
 
     def responses(self, run_id) -> pd.DataFrame:
         return read_table(self.internal / "runs" / run_id / "individual_responses")

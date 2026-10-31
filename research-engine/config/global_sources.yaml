@@ -1,0 +1,102 @@
+# Κατάλογος διεθνών πηγών τεκμηρίωσης (Global Behavioral Evidence Layer).
+# status: ingested = λήψη και κανονικοποίηση έγιναν (βλ. manifest)· queued = προτεραιότητα, δεν έγινε ακόμη λήψη·
+#         blocked = δεν είναι νόμιμα/πρακτικά προσβάσιμο σε αυτό το περιβάλλον (αιτιολογία).
+# priority: 1 (υψηλότερη) … 5. Κριτήρια: συνάφεια με έννοιες χωρίς ελληνική κάλυψη, ελληνική/ευρωπαϊκή κάλυψη, ποιότητα
+# μέτρησης, ατομικά δεδομένα, επικαιρότητα, άδεια. Καμία πηγή δεν θεωρείται σχετική μόνο από το όνομά της.
+sources:
+  - id: eurostat_isoc_ec_ibgs
+    title: "Eurostat — Internet purchases: goods or services (2020 onwards)"
+    access: eurostat_api
+    dataset: isoc_ec_ibgs
+    licence: "CC BY 4.0 (Eurostat copyright notice: επαναχρησιμοποίηση με αναφορά πηγής)"
+    url: https://ec.europa.eu/eurostat/databrowser/view/isoc_ec_ibgs/default/table
+    level: aggregate (ποσοστά ανά χώρα × ομάδα)
+    constructs: [online_purchase_electronics]
+    indicators: [I_BEEQU1, I_BHARD1]
+    units: [PC_IND, PC_IND_BUY3]
+    priority: 1
+    status: queued
+  - id: eurostat_isoc_ec_iprb21
+    title: "Eurostat — Internet purchases: problems encountered (2021 onwards)"
+    access: eurostat_api
+    dataset: isoc_ec_iprb21
+    licence: "CC BY 4.0"
+    url: https://ec.europa.eu/eurostat/databrowser/view/isoc_ec_iprb21/default/table
+    level: aggregate
+    constructs: [delivery_problem, complaint_redress, warranty_repair]
+    indicators: [I_BSPD1, I_BWDN1, I_BCR1, I_BDGL1, I_BARR2Y, I_BCPR1]
+    units: [PC_IND, PC_IND_BUY3]
+    priority: 1
+    status: queued
+  - id: eurostat_isoc_ci_ac_i
+    title: "Eurostat — Individuals: internet activities"
+    access: eurostat_api
+    dataset: isoc_ci_ac_i
+    licence: "CC BY 4.0"
+    url: https://ec.europa.eu/eurostat/databrowser/view/isoc_ci_ac_i/default/table
+    level: aggregate
+    constructs: [info_search_goods, messaging_channel]
+    indicators: [I_IUIF, I_IUCHAT1, I_IUPH1]
+    units: [PC_IND]
+    priority: 2
+    status: queued
+  - id: ec_consumer_conditions_survey_2024
+    title: "European Commission — Consumer Conditions Survey 2024 (Scoreboard 2025)"
+    access: manual_download
+    licence: "CC BY 4.0 (EC legal notice)"
+    url: https://commission.europa.eu/strategy-and-policy/policies/consumers/consumer-protection-policy/key-consumer-data_en
+    level: aggregate (χώρα)
+    constructs: [retailer_trust, complaint_redress, warranty_repair]
+    priority: 1
+    status: queued
+    note: "Τα δεδομένα δημοσιεύονται ως αρχείο/πίνακας ελέγχου· δεν υπάρχει τεκμηριωμένο API. Στο repo υπάρχει μόνο ως κείμενο (sources.yaml)."
+  - id: ess
+    title: "European Social Survey (μικροδεδομένα)"
+    access: registration_required
+    licence: "CC BY 4.0 με εγγραφή χρήστη"
+    url: https://www.europeansocialsurvey.org/data-portal
+    level: microdata
+    constructs: [institutional_trust]
+    priority: 3
+    status: blocked
+    note: "Απαιτεί λογαριασμό χρήστη· δεν δημιουργούνται λογαριασμοί για λογαριασμό του χρήστη. Μέρος του ESS υπάρχει ήδη στο PIE (ess10/ess11)."
+  - id: wvs
+    title: "World Values Survey (μικροδεδομένα)"
+    access: registration_required
+    licence: "Μη εμπορική χρήση χωρίς άδεια· όροι WVSA"
+    url: https://www.worldvaluessurvey.org/WVSDocumentationWV7.jsp
+    level: microdata
+    constructs: [institutional_trust, generalized_trust]
+    priority: 4
+    status: blocked
+    note: "Απαιτεί εγγραφή και οι όροι περιορίζουν εμπορικά παραδοτέα."
+  - id: eurobarometer
+    title: "Eurobarometer (Standard/Flash/Special)"
+    access: lake
+    licence: "Κατά GESIS/data.europa.eu ανά έρευνα"
+    url: https://data.europa.eu/data/datasets?query=eurobarometer
+    level: aggregate (ελληνικές διασταυρώσεις στο lake)
+    constructs: [retailer_trust, complaint_redress]
+    priority: 2
+    status: ingested
+    note: "Ήδη στο ελληνικό lake (2,26 εκατ. γραμμές κατανομών). Οι σχετικές με καταναλωτές έρευνες είναι κυρίως ≤2015 (εκτός ορίου επικαιρότητας)."
+  - id: oecd_consumer
+    title: "OECD — Consumer policy / trust indicators"
+    access: oecd_api
+    licence: "OECD terms (επαναχρησιμοποίηση με αναφορά, εξαιρέσεις ανά σύνολο)"
+    url: https://data-explorer.oecd.org/
+    level: aggregate
+    constructs: [retailer_trust]
+    priority: 4
+    status: queued
+    note: "Δεν έχει επιβεβαιωθεί σύνολο με τις έννοιες της μελέτης· να εξεταστεί πριν από λήψη."
+  - id: icpsr_service_recovery
+    title: "ICPSR — μελέτες service recovery / customer satisfaction"
+    access: registration_required
+    licence: "Ανά μελέτη· συχνά μόνο για μέλη"
+    url: https://www.icpsr.umich.edu/
+    level: microdata
+    constructs: [service_recovery]
+    priority: 3
+    status: blocked
+    note: "Απαιτεί ιδρυματική πρόσβαση."

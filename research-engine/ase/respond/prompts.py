@@ -58,7 +58,30 @@ def profile_text(p: dict) -> str:
              f"Νοικοκυριό: {LABELS['household_type'].get(p.get('household_type'), p.get('household_type'))}, μέγεθος {p.get('household_size')}",
              f"Εισοδηματικό πεμπτημόριο νοικοκυριού: {p.get('income_quintile')} (1 = χαμηλότερο, 5 = υψηλότερο)"]
     ext = [f"{k}: {v}" for k, v in p.items() if k.startswith("x_")]
-    return "\n".join(parts + ext + ["Άγνωστα (δεν υπάρχουν δεδομένα): απασχόληση, επάγγελμα, προσωπικό ιστορικό αγορών."])
+    lab = lab_text(p)
+    unknown = "επάγγελμα, προσωπικό ιστορικό αγορών" + ("" if lab else ", απασχόληση")
+    return "\n".join(parts + ext + ([lab] if lab else []) + [f"Άγνωστα (δεν υπάρχουν δεδομένα): {unknown}."])
+
+
+def lab_text(p: dict) -> str:
+    """Άγκυρες PIE που επιτρέπει η μελέτη να δει το μοντέλο (εκτιμήσεις από ελληνικά μικροδεδομένα, όχι γνωστά στοιχεία)."""
+    show = [x for x in str(p.get("lab_prompt_anchors") or "").split(",") if x]
+    if not show or p.get("lab_model") in (None, ""):
+        return ""
+    from ..lab.bridge import ANCHOR_LABELS
+    names = {"emp": "απασχόληση", "econ4": "οικονομική κατάσταση νοικοκυριού", "class3": "υποκειμενική κοινωνική τάξη", "inc6": "μηνιαίο οικογενειακό εισόδημα"}
+    bits = []
+    for k in show:
+        v = p.get(f"lab_{k}")
+        if v is None or (isinstance(v, float) and v != v) or v == "":
+            continue
+        lab = ANCHOR_LABELS.get(k, {})
+        key = v if k == "emp" else int(float(v))
+        bits.append(f"{names.get(k, k)}: {lab.get(key, v)}")
+    if not bits:
+        return ""
+    return ("Εκτιμώμενα χαρακτηριστικά (στατιστική εκτίμηση του μοντέλου PIE από ελληνικά μικροδεδομένα διαΝΕΟσις 2023–24 με βάση τα δημογραφικά· "
+            "ΟΧΙ γνωστά στοιχεία του προσώπου): " + "; ".join(bits))
 
 
 def question_block(q, codes_labels, task=None, numeric_range=None) -> str:
