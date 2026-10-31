@@ -1,0 +1,19 @@
+{
+ "key": "6634a99ac9feb1c2862c",
+ "answer": {
+  "Q24": {
+   "probabilities": {
+    "1": 0.12,
+    "2": 0.26,
+    "3": 0.3,
+    "4": 0.12,
+    "5": 0.03,
+    "6": 0.17
+   },
+   "rationale": "Αγοράζει online από μεγάλη αλυσίδα, τον κρίνει περίπου ίδιο αλλά εξετάζει μόνο Public· ουδέτερη ή χαμηλή πιθανότητα."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 158)",
+ "imported_at": "2026-10-31T20:23:16Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

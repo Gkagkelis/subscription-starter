@@ -1,0 +1,19 @@
+{
+ "key": "f14a8f69f45f44841355",
+ "answer": {
+  "Q24": {
+   "probabilities": {
+    "1": 0.15,
+    "2": 0.3,
+    "3": 0.25,
+    "4": 0.08,
+    "5": 0.02,
+    "6": 0.2
+   },
+   "rationale": "Άνεργη με οικονομική δυσκολία, χωρίς διαμορφωμένη εικόνα, εξετάζει Public και Skroutz για τιμή και δόσεις."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 162)",
+ "imported_at": "2026-10-31T20:23:17Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

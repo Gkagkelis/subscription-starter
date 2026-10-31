@@ -1,0 +1,19 @@
+{
+ "key": "b7eab33beadf04dbfcb6",
+ "answer": {
+  "Q24": {
+   "probabilities": {
+    "1": 0.1,
+    "2": 0.3,
+    "3": 0.3,
+    "4": 0.12,
+    "5": 0.02,
+    "6": 0.16
+   },
+   "rationale": "Κυνηγά την τελική τιμή σε πολλά κανάλια και εξετάζει Public, Skroutz και κατασκευαστή, όχι Κωτσόβολο· ουδέτερη εικόνα, άρα μάλλον λίγο πιθανό."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 160)",
+ "imported_at": "2026-10-31T20:23:16Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

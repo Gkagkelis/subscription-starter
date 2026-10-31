@@ -1,0 +1,19 @@
+{
+ "key": "b476cc7d551a8e7741fa",
+ "answer": {
+  "Q24": {
+   "probabilities": {
+    "1": 0.06,
+    "2": 0.24,
+    "3": 0.3,
+    "4": 0.22,
+    "5": 0.04,
+    "6": 0.14
+   },
+   "rationale": "Φοιτήτρια που αγοράζει από marketplace με έμφαση στην τιμή· μάλλον θετική εικόνα αλλά εξετάζει κυρίως Skroutz, οπότε μέτρια πιθανότητα επιλογής."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 160)",
+ "imported_at": "2026-10-31T20:23:16Z",
+ "source": "Claude Code session (AI), όχι mock"
+}
