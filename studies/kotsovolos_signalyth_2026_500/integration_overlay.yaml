@@ -1,0 +1,93 @@
+# Overlay ενοποίησης για το kotsovolos_500_questionnaire.json (ΔΕΝ αλλάζει κείμενα, επιλογές, τύπους ή ask_if).
+# Περιέχει ΜΟΝΟ ό,τι χρειάζεται η μηχανή ASE και δεν υπάρχει στο JSON. Κάθε στοιχείο εδώ είναι πρόταση της ενοποίησης
+# και εκκρεμεί έγκριση από τον ερευνητικό συνεργάτη (βλ. QUESTIONNAIRE_VALIDATION.md).
+#
+#  * profile_field / profile_map: D01–D03 προέρχονται από το συνθετικό προφίλ (όχι από AI).
+#  * intent: κατηγορία ερώτησης· επηρεάζει μόνο τη σήμανση «συνθετικό χαρακτηριστικό σεναρίου» για ερωτήσεις εμπειρίας.
+#  * analysis.positive: ποιες επιλογές μετρούν ως «θετικές» στην ανάλυση ευαισθησίας της μάρκας (όχι στην προσομοίωση).
+#  * constraints (hard): απαγορευμένοι συνδυασμοί που είναι λογικά αδύνατοι· εφαρμόζονται με περικοπή της κατανομής.
+#  * consistency_rules (soft): ασυνήθιστοι αλλά δυνατοί συνδυασμοί· ΔΕΝ μπλοκάρονται, μετριούνται στο QC.
+questions:
+  D01:
+    intent: demographic
+    profile_field: age_band
+    profile_map: {"18-24": "1", "25-34": "2", "35-44": "3", "45-54": "4", "55-64": "5", "65+": "6"}
+  D02:
+    intent: demographic
+    profile_field: gender
+    # Το πλαίσιο πληθυσμού (GLOPOP-S / Eurostat) έχει δυαδικό φύλο: οι κωδικοί 3 και 4 δεν μπορούν να προκύψουν (βλ. audit).
+    profile_map: {female: "1", male: "2"}
+  D03:
+    intent: demographic
+    profile_field: region
+    profile_map: {"Αττική": "1", "Κεντρική Μακεδονία": "2", "Ανατολική Μακεδονία & Θράκη": "3", "Δυτική Μακεδονία": "4", "Ήπειρος": "5",
+                  "Θεσσαλία": "6", "Ιόνια Νησιά": "7", "Δυτική Ελλάδα": "8", "Στερεά Ελλάδα": "9", "Πελοπόννησος": "10", "Βόρειο Αιγαίο": "11",
+                  "Νότιο Αιγαίο": "12", "Κρήτη": "13"}
+  Q01: {intent: experience}
+  Q02: {intent: experience}
+  Q03: {intent: attitude}
+  Q04: {intent: knowledge, analysis: {positive: ["3", "4"]}}
+  Q05: {intent: experience, analysis: {positive: ["1"]}}
+  Q06: {intent: experience, analysis: {sensitivity: false}}
+  Q07: {intent: experience, analysis: {sensitivity: false}}
+  Q08: {intent: attitude, analysis: {positive: ["4", "5"]}}
+  Q09: {intent: attitude, analysis: {positive: ["4", "5"]}}
+  Q10: {intent: attitude, analysis: {positive: ["4", "5"]}}
+  Q11: {intent: attitude}
+  Q12: {intent: experience, analysis: {positive: ["4", "5"]}}
+  Q13: {intent: experience, analysis: {positive: ["4", "5"]}}
+  Q14: {intent: experience, analysis: {positive: ["1", "2"]}}
+  Q15: {intent: experience, analysis: {positive: ["1"]}}
+  Q16: {intent: experience}
+  Q17: {intent: experience, analysis: {positive: ["1"]}}
+  Q18: {intent: experience, analysis: {positive: ["1"]}}
+  Q19: {intent: experience, analysis: {positive: ["4", "5"]}}
+  Q20: {intent: experience, analysis: {positive: ["4", "5"]}}
+  Q21: {intent: experience, analysis: {positive: ["5", "6"]}}
+  Q22: {intent: attitude, analysis: {positive: ["4", "5"]}}
+  Q23: {intent: intention}
+  Q24: {intent: intention, analysis: {positive: ["4", "5"]}}
+  Q25: {intent: intention, analysis: {positive: ["10", "11"]}}   # 9–10 στην κλίμακα 0–10
+  Q26: {intent: experience, analysis: {positive: ["1"]}}
+  Q27: {intent: knowledge, analysis: {positive: ["1"]}}
+  Q28: {intent: attitude}
+  Q29: {intent: hypothetical_choice}
+  Q30: {intent: attitude}
+  Q31: {intent: hypothetical_choice}
+  Q32: {intent: attitude}
+  Q33: {intent: hypothetical_choice, analysis: {sensitivity: false}}
+  Q34: {intent: attitude, analysis: {sensitivity: false}}
+
+constraints:
+  - id: C1
+    forbid: "Q01 == '2' and Q05 == '1'"
+    reason: >-
+      Κανόνας «Q05=1 indicates recent buyer»: αγορά από τον Κωτσόβολο στους 24 μήνες είναι αγορά ηλεκτρικής/ηλεκτρονικής συσκευής
+      στους ίδιους 24 μήνες. Όποιος απάντησε Q01=«Όχι» δεν μπορεί να απαντήσει Q05=«Ναι».
+  - id: C2
+    forbid: "Q01 == '1' and Q05 == '1' and not (contains(Q02, '1') or contains(Q02, '2') or contains(Q02, '6') or contains(Q02, '7'))"
+    reason: >-
+      Ο Κωτσόβολος είναι μεγάλη αλυσίδα (φυσικά καταστήματα και e-shop). Αγοραστής του στους 24 μήνες πρέπει να έχει δηλώσει στο Q02
+      «Μεγάλη αλυσίδα φυσικών καταστημάτων» ή «Ηλεκτρονικό κατάστημα μεγάλης αλυσίδας» (ή «Άλλο» / «Δεν θυμάμαι»).
+  - id: C3
+    forbid: "Q06 == '1' and Q01 == '1' and not (contains(Q02, '1') or contains(Q02, '7'))"
+    reason: "Πιο πρόσφατη αγορά Κωτσόβολου σε φυσικό κατάστημα ⇒ το Q02 περιέχει «Μεγάλη αλυσίδα φυσικών καταστημάτων» (ή «Δεν θυμάμαι»)."
+  - id: C4
+    forbid: "Q06 == '2' and Q01 == '1' and not (contains(Q02, '2') or contains(Q02, '7'))"
+    reason: "Πιο πρόσφατη αγορά Κωτσόβολου από το e-shop ⇒ το Q02 περιέχει «Ηλεκτρονικό κατάστημα μεγάλης αλυσίδας» (ή «Δεν θυμάμαι»)."
+  - id: C5
+    forbid: "Q04 == '1' and contains(Q23, '7')"
+    reason: "Όποιος δεν γνωρίζει την αλυσίδα (Q04=1) δεν μπορεί να την εξετάζει ως εναλλακτική στο Q23."
+
+consistency_rules:
+  - {id: S1, when: "Q01 == '3' and Q05 == '1'", note: "Δεν θυμάται αν αγόρασε συσκευή, αλλά δηλώνει αγορά από Κωτσόβολο"}
+  - {id: S2, when: "Q14 == '3' and Q15 == '2'", note: "Σημαντική καθυστέρηση παράδοσης, αλλά «κανένα πρόβλημα»"}
+  - {id: S3, when: "Q14 == '1' and contains(Q16, '1')", note: "Παράδοση πλήρως στην ώρα της, αλλά πρόβλημα «καθυστέρηση παράδοσης»"}
+  - {id: S4, when: "Q08 == '1' and Q09 in ['4', '5']", note: "Πολύ αρνητική εικόνα, αλλά πολύ μεγάλη εμπιστοσύνη"}
+  - {id: S5, when: "Q08 == '5' and Q09 == '1'", note: "Πολύ θετική εικόνα, αλλά καμία εμπιστοσύνη"}
+  - {id: S6, when: "Q18 == '3' and Q19 in ['4', '5']", note: "Πρόβλημα άλυτο, αλλά πολύ ικανοποιημένος από τον χειρισμό"}
+  - {id: S7, when: "Q18 == '3' and Q20 in ['4', '5']", note: "Πρόβλημα άλυτο, αλλά η εμπιστοσύνη αυξήθηκε"}
+  - {id: S8, when: "Q24 == '5' and Q25 in ['1', '2', '3', '4']", note: "Πολύ πιθανό να επιλέξει, αλλά σύσταση 0–3"}
+  - {id: S9, when: "Q26 == '1' and Q08 in ['1', '2']", note: "Ενθάρρυνε άλλους, αλλά έχει αρνητική εικόνα"}
+  - {id: S10, when: "contains(Q23, '7') and Q24 == '1'", note: "Εξετάζει τον Κωτσόβολο ως εναλλακτική, αλλά «καθόλου πιθανό» να τον επιλέξει"}
+  - {id: S11, when: "Q12 == '5' and Q18 == '3'", note: "Πολύ θετική συνολική εμπειρία με πρόβλημα που παραμένει άλυτο"}

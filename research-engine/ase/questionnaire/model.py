@@ -72,6 +72,7 @@ class Questionnaire:
     blocks: list
     questions: list
     meta: dict
+    constraints: list = field(default_factory=list)
 
     def by_id(self):
         return {q.id: q for q in self.questions}
@@ -163,10 +164,60 @@ def parse(spec: dict) -> Questionnaire:
                     errs.append(f"{q.id}: η συνθήκη αναφέρεται σε άγνωστη ερώτηση {r}")
                 elif ids.index(r) >= i:
                     errs.append(f"{q.id}: η συνθήκη αναφέρεται σε μεταγενέστερη ερώτηση {r}")
+    # λογικοί περιορισμοί (hard): απαγορευμένοι συνδυασμοί απαντήσεων· εφαρμόζονται στην ΤΕΛΕΥΤΑΙΑ ερώτηση που αναφέρουν
+    cons = []
+    for c in spec.get("constraints") or []:
+        cid = str(c.get("id", ""))
+        try:
+            refs = condition_refs(c["forbid"])
+        except (KeyError, ValueError, SyntaxError) as e:
+            errs.append(f"περιορισμός {cid}: μη έγκυρη έκφραση ({e})")
+            continue
+        unknown = [r for r in refs if r not in ids]
+        if unknown or not refs:
+            errs.append(f"περιορισμός {cid}: άγνωστες ερωτήσεις {unknown or '—'}")
+            continue
+        if not str(c.get("reason", "")).strip():
+            errs.append(f"περιορισμός {cid}: χρειάζεται αιτιολόγηση (reason)")
+        target = max(refs, key=ids.index)
+        if qs[ids.index(target)].type not in ("single_choice", "likert", "scenario", "multiple_choice"):
+            errs.append(f"περιορισμός {cid}: η ερώτηση-στόχος {target} πρέπει να είναι κλειστού τύπου")
+        cons.append({"id": cid, "forbid": c["forbid"], "reason": str(c.get("reason", "")), "target": target, "refs": sorted(refs, key=ids.index),
+                     "origin": c.get("origin", "")})
     if errs:
         raise ValueError("Μη έγκυρο ερωτηματολόγιο:\n- " + "\n- ".join(errs))
     return Questionnaire(id=spec.get("questionnaire_id", "questionnaire"), title=spec.get("title", ""), language=spec.get("language", "el"),
-                         blocks=blocks, questions=qs, meta={k: v for k, v in spec.items() if k != "blocks"})
+                         blocks=blocks, questions=qs, meta={k: v for k, v in spec.items() if k != "blocks"}, constraints=cons)
+
+
+def constraints_for(qn: "Questionnaire", qid: str) -> list:
+    return [c for c in qn.constraints if c["target"] == qid]
+
+
+def violated(cons: list, qid: str, ans, answers: dict, profile: dict) -> list:
+    """Ποιοι περιορισμοί παραβιάζονται αν η qid πάρει την τιμή ans (με τις ήδη γνωστές απαντήσεις)."""
+    a = {**answers, qid: ans}
+    return [c["id"] for c in cons if evaluate_condition(c["forbid"], a, profile)]
+
+
+def split_units(qn: "Questionnaire", order: list) -> list:
+    """Batching «per_block_dep»: όπως per_block, αλλά μια ερώτηση ξεκινά νέα μονάδα όταν η συνθήκη της ή ένας περιορισμός της
+    αναφέρεται σε ερώτηση της ΙΔΙΑΣ μονάδας· έτσι κάθε εξάρτηση βλέπει την ήδη κληρωμένη απάντηση (και στο ιστορικό του prompt)."""
+    units = []
+    for b in qn.blocks:
+        cur, ids = [], set()
+        for q in [x for x in order if x.block == b["id"]]:
+            deps = set(condition_refs(q.condition)) if q.condition else set()
+            for c in constraints_for(qn, q.id):
+                deps |= set(c["refs"]) - {q.id}
+            if cur and deps & ids:
+                units.append(cur)
+                cur, ids = [], set()
+            cur.append(q)
+            ids.add(q.id)
+        if cur:
+            units.append(cur)
+    return units
 
 
 def load(path) -> Questionnaire:

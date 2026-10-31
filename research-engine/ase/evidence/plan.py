@@ -96,8 +96,17 @@ def build(study, use_lab: bool = True, lake_limit: int = 5) -> dict:
     lake_err = None
     plan = {"built_at": now_iso(), "study_id": study.study_id, "lab_model": lab.get("model") if lab.get("enabled") else None, "lab_error": lab_err,
             "evidence_map": str(emap_path.name) if emap_path.exists() else None, "brand": emap.get("brand"), "questions": {}}
+    # μάρκα: από το κείμενο Ή από τη διαδρομή (π.χ. ερωτήσεις εμπειρίας που ρωτώνται μόνο σε όσους αγόρασαν από τη μάρκα)
+    from ..questionnaire.model import condition_refs
+    brand_q = {}
+    for q in study.qn.questions:
+        via = sorted(r for r in (condition_refs(q.condition) if q.condition else set()) if brand_q.get(r))
+        brand_q[q.id] = "text" if interpret(q)["brand_specific"] else (f"routing:{','.join(via)}" if via else "")
     for q in study.qn.questions:
         qi = interpret(q)
+        if brand_q[q.id] and not qi["brand_specific"]:
+            qi = {**qi, "brand_specific": True}
+        qi["brand_basis"] = brand_q[q.id] or None
         entry = {"interpretation": qi, "lab": None, "lake_candidates": [], "components": [], "mode": "D_AI", "option_modes": {}}
         lr = lab_route.get(q.id)
         if lr:

@@ -1,0 +1,1102 @@
+# ΠΑΡΑΓΩΓΗ ΑΠΟ kotsovolos_500_questionnaire.json με `ase_cli.py import-questionnaire` (+ overlay integration_overlay.yaml).
+# Μην το επεξεργάζεστε με το χέρι: αλλαγές στο JSON ή στο overlay και νέα εισαγωγή. Τα κείμενα/επιλογές είναι αυτούσια.
+questionnaire_id: kotsovolos_signalyth_2026_500
+title: Κωτσόβολος | Συνθετική προσομοίωση 500 ολοκληρωμένων συνεντεύξεων
+language: el
+source_meta:
+  schema_version: '1.0'
+  study_id: kotsovolos_signalyth_2026_500
+  title: Κωτσόβολος | Συνθετική προσομοίωση 500 ολοκληρωμένων συνεντεύξεων
+  status: DRAFT_PENDING_PARTNER_APPROVAL
+  target_completes: 500
+  sample_size_basis: completes
+  population: Ενήλικοι 18+ κάτοικοι Ελλάδας
+  sampling_policy: general_population; no forced Kotsovolos buyer quota; report natural incidence
+  fieldwork_type: synthetic_simulation_not_real_respondents
+  source: Viewscope / Signalyth, Brand Intelligence, Greece, 2026-09-01 to 2026-10-30, pp.2-14
+  important: Digital conversation metrics are NOT representative population survey benchmarks and MUST NOT be calibrated as response percentages. No invented brand-specific
+    priors.
+  routing_rules:
+  - Q01=1 etc refer to option code
+  - If ask_if false store null with missing_reason=not_applicable
+  - Multi selections cannot include exclusive options (e.g. Καμία, Δεν γνωρίζω) with substantive choices
+  - If Q04=1 skip all brand-specific assessment questions
+  - Q05=1 indicates recent buyer; never infer purchase experience otherwise
+  - Q15=1 indicates problem; Q17=1 indicates contacted company
+  - Maintain consistent persona and response history
+blocks:
+- id: B01
+  title: Δημογραφικά
+  questions:
+  - id: D01
+    text: Ποια είναι η ηλικιακή σας ομάδα;
+    type: single_choice
+    options:
+    - code: '1'
+      label: 18–24
+    - code: '2'
+      label: 25–34
+    - code: '3'
+      label: 35–44
+    - code: '4'
+      label: 45–54
+    - code: '5'
+      label: 55–64
+    - code: '6'
+      label: 65+
+    source_meta:
+      section: Δημογραφικά
+      ask_if: all
+      rationale: Στρωματοποίηση ηλικιών
+      source_pages: ''
+    intent: demographic
+    profile_field: age_band
+    profile_map:
+      18-24: '1'
+      25-34: '2'
+      35-44: '3'
+      45-54: '4'
+      55-64: '5'
+      65+: '6'
+  - id: D02
+    text: Πώς αυτοπροσδιορίζεστε ως προς το φύλο;
+    type: single_choice
+    options:
+    - code: '1'
+      label: Γυναίκα
+    - code: '2'
+      label: Άνδρας
+    - code: '3'
+      label: Άλλο / μη δυαδικό
+    - code: '4'
+      label: Προτιμώ να μην απαντήσω
+    source_meta:
+      section: Δημογραφικά
+      ask_if: all
+      rationale: Δημογραφική ανάλυση
+      source_pages: ''
+    intent: demographic
+    profile_field: gender
+    profile_map:
+      female: '1'
+      male: '2'
+  - id: D03
+    text: Σε ποια περιφέρεια κατοικείτε;
+    type: single_choice
+    options:
+    - code: '1'
+      label: Αττική
+    - code: '2'
+      label: Κεντρική Μακεδονία
+    - code: '3'
+      label: Ανατολική Μακεδονία και Θράκη
+    - code: '4'
+      label: Δυτική Μακεδονία
+    - code: '5'
+      label: Ήπειρος
+    - code: '6'
+      label: Θεσσαλία
+    - code: '7'
+      label: Ιόνια Νησιά
+    - code: '8'
+      label: Δυτική Ελλάδα
+    - code: '9'
+      label: Στερεά Ελλάδα
+    - code: '10'
+      label: Πελοπόννησος
+    - code: '11'
+      label: Βόρειο Αιγαίο
+    - code: '12'
+      label: Νότιο Αιγαίο
+    - code: '13'
+      label: Κρήτη
+    source_meta:
+      section: Δημογραφικά
+      ask_if: all
+      rationale: Περιφερειακή κάλυψη
+      source_pages: ''
+    intent: demographic
+    profile_field: region
+    profile_map:
+      Αττική: '1'
+      Κεντρική Μακεδονία: '2'
+      Ανατολική Μακεδονία & Θράκη: '3'
+      Δυτική Μακεδονία: '4'
+      Ήπειρος: '5'
+      Θεσσαλία: '6'
+      Ιόνια Νησιά: '7'
+      Δυτική Ελλάδα: '8'
+      Στερεά Ελλάδα: '9'
+      Πελοπόννησος: '10'
+      Βόρειο Αιγαίο: '11'
+      Νότιο Αιγαίο: '12'
+      Κρήτη: '13'
+- id: B02
+  title: Αγορά & σχέση με μάρκα
+  questions:
+  - id: Q01
+    text: Τους τελευταίους 24 μήνες αγοράσατε ηλεκτρική ή ηλεκτρονική συσκευή για εσάς ή το νοικοκυριό σας;
+    type: single_choice
+    options:
+    - code: '1'
+      label: Ναι
+    - code: '2'
+      label: Όχι
+    - code: '3'
+      label: Δεν θυμάμαι
+    source_meta:
+      section: Αγορά & σχέση με μάρκα
+      ask_if: all
+      rationale: Διαχωρισμός εμπειρίας από γενική αντίληψη
+      source_pages: ''
+    intent: experience
+  - id: Q02
+    text: Από ποιους τύπους καταστημάτων αγοράσατε ηλεκτρικά ή ηλεκτρονικά είδη τους τελευταίους 24 μήνες;
+    type: multiple_choice
+    options:
+    - code: '1'
+      label: Μεγάλη αλυσίδα φυσικών καταστημάτων
+    - code: '2'
+      label: Ηλεκτρονικό κατάστημα μεγάλης αλυσίδας
+    - code: '3'
+      label: Μικρό/ανεξάρτητο φυσικό κατάστημα
+    - code: '4'
+      label: Αμιγώς ηλεκτρονικό κατάστημα / marketplace
+    - code: '5'
+      label: Απευθείας από κατασκευαστή
+    - code: '6'
+      label: Άλλο
+    - code: '7'
+      label: Δεν θυμάμαι
+      exclusive: true
+    condition: Q01 == '1'
+    min_choices: 1
+    max_choices: 4
+    source_meta:
+      section: Αγορά & σχέση με μάρκα
+      ask_if: Q01=1
+      rationale: Κατανόηση καναλιών αγοράς
+      source_pages: ''
+    intent: experience
+  - id: Q03
+    text: Ποιοι τρεις παράγοντες είναι σημαντικότεροι όταν επιλέγετε κατάστημα ηλεκτρικών ειδών;
+    type: multiple_choice
+    options:
+    - code: '1'
+      label: Τελική τιμή
+    - code: '2'
+      label: Διαθεσιμότητα προϊόντος
+    - code: '3'
+      label: Αξιοπιστία παράδοσης
+    - code: '4'
+      label: Εξυπηρέτηση προσωπικού
+    - code: '5'
+      label: Εγγύηση / επισκευή / after-sales
+    - code: '6'
+      label: Ευκολία επιστροφών
+    - code: '7'
+      label: Ποικιλία προϊόντων
+    - code: '8'
+      label: Ευκολία ηλεκτρονικής αγοράς
+    - code: '9'
+      label: Φήμη και εμπιστοσύνη
+    - code: '10'
+      label: Δυνατότητα δόσεων
+    - code: '11'
+      label: Άλλο
+    min_choices: 1
+    max_choices: 3
+    source_meta:
+      section: Αγορά & σχέση με μάρκα
+      ask_if: all
+      rationale: Καθορισμός βασικών οδηγών επιλογής
+      source_pages: '12'
+    intent: attitude
+  - id: Q04
+    text: Πόσο εξοικειωμένος/η είστε με την αλυσίδα Κωτσόβολος;
+    type: single_choice
+    options:
+    - code: '1'
+      label: Δεν τη γνωρίζω
+    - code: '2'
+      label: Τη γνωρίζω μόνο ως όνομα
+    - code: '3'
+      label: Γνωρίζω αρκετά την εταιρεία
+    - code: '4'
+      label: Τη γνωρίζω πολύ καλά
+    source_meta:
+      section: Αγορά & σχέση με μάρκα
+      ask_if: all
+      rationale: Διαχωρισμός γνώσης από εμπειρία
+      source_pages: ''
+    intent: knowledge
+    analysis:
+      positive:
+      - '3'
+      - '4'
+  - id: Q05
+    text: Έχετε πραγματοποιήσει αγορά από τον Κωτσόβολο τους τελευταίους 24 μήνες;
+    type: single_choice
+    options:
+    - code: '1'
+      label: Ναι
+    - code: '2'
+      label: Όχι
+    - code: '3'
+      label: Δεν θυμάμαι
+    condition: Q04 != '1'
+    source_meta:
+      section: Αγορά & σχέση με μάρκα
+      ask_if: Q04!=1
+      rationale: Ορισμός ομάδας πελατών
+      source_pages: ''
+    intent: experience
+    analysis:
+      positive:
+      - '1'
+  - id: Q06
+    text: Πώς πραγματοποιήσατε την πιο πρόσφατη αγορά σας από τον Κωτσόβολο;
+    type: single_choice
+    options:
+    - code: '1'
+      label: Σε φυσικό κατάστημα
+    - code: '2'
+      label: Από το ηλεκτρονικό κατάστημα
+    - code: '3'
+      label: Τηλεφωνικά / άλλο κανάλι
+    - code: '4'
+      label: Δεν θυμάμαι
+    condition: Q05 == '1'
+    source_meta:
+      section: Αγορά & σχέση με μάρκα
+      ask_if: Q05=1
+      rationale: Διαχωρισμός καναλιών εμπειρίας
+      source_pages: ''
+    intent: experience
+    analysis:
+      sensitivity: false
+  - id: Q07
+    text: Ποια κατηγορία προϊόντος αφορούσε η πιο πρόσφατη αγορά σας από τον Κωτσόβολο;
+    type: single_choice
+    options:
+    - code: '1'
+      label: Μεγάλη οικιακή συσκευή
+    - code: '2'
+      label: Μικροσυσκευή
+    - code: '3'
+      label: Τηλεόραση / ήχος
+    - code: '4'
+      label: Υπολογιστής / tablet
+    - code: '5'
+      label: Κινητό / wearable
+    - code: '6'
+      label: Άλλη κατηγορία
+    - code: '7'
+      label: Δεν θυμάμαι
+    condition: Q05 == '1'
+    source_meta:
+      section: Αγορά & σχέση με μάρκα
+      ask_if: Q05=1
+      rationale: Έλεγχος διαφορών ανά προϊόν
+      source_pages: 7–8
+    intent: experience
+    analysis:
+      sensitivity: false
+- id: B03
+  title: Εικόνα & εμπιστοσύνη
+  questions:
+  - id: Q08
+    text: Ποια είναι συνολικά η εικόνα σας για τον Κωτσόβολο;
+    type: single_choice
+    options:
+    - code: '1'
+      label: Πολύ αρνητική
+    - code: '2'
+      label: Μάλλον αρνητική
+    - code: '3'
+      label: Ούτε θετική ούτε αρνητική
+    - code: '4'
+      label: Μάλλον θετική
+    - code: '5'
+      label: Πολύ θετική
+    - code: '6'
+      label: Δεν γνωρίζω / Δεν μπορώ να κρίνω
+    condition: Q04 != '1'
+    source_meta:
+      section: Εικόνα & εμπιστοσύνη
+      ask_if: Q04!=1
+      rationale: Μέτρηση εικόνας χωρίς υπόθεση αρνητικότητας
+      source_pages: 2,12
+    intent: attitude
+    analysis:
+      positive:
+      - '4'
+      - '5'
+  - id: Q09
+    text: Πόσο εμπιστεύεστε τον Κωτσόβολο ως κατάστημα για αγορά ηλεκτρικών ειδών;
+    type: single_choice
+    options:
+    - code: '1'
+      label: Καθόλου
+    - code: '2'
+      label: Λίγο
+    - code: '3'
+      label: Μέτρια
+    - code: '4'
+      label: Πολύ
+    - code: '5'
+      label: Πάρα πολύ
+    - code: '6'
+      label: Δεν γνωρίζω / Δεν μπορώ να κρίνω
+    condition: Q04 != '1'
+    source_meta:
+      section: Εικόνα & εμπιστοσύνη
+      ask_if: Q04!=1
+      rationale: Έλεγχος εμπιστοσύνης ως υπόθεση
+      source_pages: 3,12
+    intent: attitude
+    analysis:
+      positive:
+      - '4'
+      - '5'
+  - id: Q10
+    text: Σε ποιο βαθμό συμφωνείτε ότι ο Κωτσόβολος τηρεί τις δεσμεύσεις του προς τους πελάτες;
+    type: single_choice
+    options:
+    - code: '1'
+      label: Διαφωνώ απόλυτα
+    - code: '2'
+      label: Διαφωνώ
+    - code: '3'
+      label: Ούτε συμφωνώ ούτε διαφωνώ
+    - code: '4'
+      label: Συμφωνώ
+    - code: '5'
+      label: Συμφωνώ απόλυτα
+    - code: '6'
+      label: Δεν γνωρίζω / Δεν μπορώ να κρίνω
+    condition: Q04 != '1'
+    source_meta:
+      section: Εικόνα & εμπιστοσύνη
+      ask_if: Q04!=1
+      rationale: Συνέπεια υποσχέσεων
+      source_pages: 7–8,12
+    intent: attitude
+    analysis:
+      positive:
+      - '4'
+      - '5'
+  - id: Q11
+    text: Ποια από τα ακόλουθα επηρεάζουν περισσότερο την εμπιστοσύνη σας σε ένα κατάστημα ηλεκτρικών ειδών; Επιλέξτε έως τρία.
+    type: multiple_choice
+    options:
+    - code: '1'
+      label: Παράδοση στον συμφωνημένο χρόνο
+    - code: '2'
+      label: Διαφανείς τιμές και όροι
+    - code: '3'
+      label: Ποιότητα προϊόντων
+    - code: '4'
+      label: Γρήγορη ανταπόκριση σε πρόβλημα
+    - code: '5'
+      label: Δίκαιες επιστροφές / αντικαταστάσεις
+    - code: '6'
+      label: Ευγένεια και επάρκεια προσωπικού
+    - code: '7'
+      label: Αξιόπιστη εγγύηση / επισκευή
+    - code: '8'
+      label: Κοινωνική υπευθυνότητα
+    - code: '9'
+      label: Κριτικές άλλων πελατών
+    - code: '10'
+      label: Άλλο
+    min_choices: 1
+    max_choices: 3
+    source_meta:
+      section: Εικόνα & εμπιστοσύνη
+      ask_if: all
+      rationale: Μηχανισμοί εμπιστοσύνης
+      source_pages: 7–8,12
+    intent: attitude
+- id: B04
+  title: Εμπειρία πελατών
+  questions:
+  - id: Q12
+    text: Πώς αξιολογείτε συνολικά την πιο πρόσφατη εμπειρία αγοράς σας από τον Κωτσόβολο;
+    type: single_choice
+    options:
+    - code: '1'
+      label: Πολύ αρνητικά
+    - code: '2'
+      label: Μάλλον αρνητικά
+    - code: '3'
+      label: Ούτε θετικά ούτε αρνητικά
+    - code: '4'
+      label: Μάλλον θετικά
+    - code: '5'
+      label: Πολύ θετικά
+    - code: '6'
+      label: Δεν γνωρίζω / Δεν μπορώ να κρίνω
+    condition: Q05 == '1'
+    source_meta:
+      section: Εμπειρία πελατών
+      ask_if: Q05=1
+      rationale: Πραγματική εμπειρία έναντι δημόσιας εικόνας
+      source_pages: 7–8
+    intent: experience
+    analysis:
+      positive:
+      - '4'
+      - '5'
+  - id: Q13
+    text: Πώς αξιολογείτε τη σαφήνεια της ενημέρωσης για την παραγγελία σας;
+    type: single_choice
+    options:
+    - code: '1'
+      label: Πολύ κακή
+    - code: '2'
+      label: Μάλλον κακή
+    - code: '3'
+      label: Μέτρια
+    - code: '4'
+      label: Μάλλον καλή
+    - code: '5'
+      label: Πολύ καλή
+    - code: '6'
+      label: Δεν εφαρμόζεται / δεν θυμάμαι
+    condition: Q05 == '1'
+    source_meta:
+      section: Εμπειρία πελατών
+      ask_if: Q05=1
+      rationale: Ποιότητα επικοινωνίας
+      source_pages: 7–8
+    intent: experience
+    analysis:
+      positive:
+      - '4'
+      - '5'
+  - id: Q14
+    text: Στην πιο πρόσφατη αγορά σας, η παράδοση ή παραλαβή έγινε στον χρόνο που σας είχε γνωστοποιηθεί;
+    type: single_choice
+    options:
+    - code: '1'
+      label: Ναι, πλήρως
+    - code: '2'
+      label: Ναι, με μικρή απόκλιση
+    - code: '3'
+      label: Όχι, υπήρξε σημαντική καθυστέρηση
+    - code: '4'
+      label: Δεν είχε δοθεί συγκεκριμένος χρόνος
+    - code: '5'
+      label: Δεν εφαρμόζεται / δεν θυμάμαι
+    condition: Q05 == '1'
+    source_meta:
+      section: Εμπειρία πελατών
+      ask_if: Q05=1
+      rationale: Έλεγχος αναφορών καθυστερήσεων
+      source_pages: 7–8,12
+    intent: experience
+    analysis:
+      positive:
+      - '1'
+      - '2'
+  - id: Q15
+    text: Προέκυψε κάποιο πρόβλημα με το προϊόν, την παράδοση, την εγκατάσταση ή την εξυπηρέτηση μετά την αγορά;
+    type: single_choice
+    options:
+    - code: '1'
+      label: Ναι
+    - code: '2'
+      label: Όχι
+    - code: '3'
+      label: Δεν θυμάμαι
+    condition: Q05 == '1'
+    source_meta:
+      section: Εμπειρία πελατών
+      ask_if: Q05=1
+      rationale: Βασική επίπτωση προβλημάτων χωρίς προϋπόθεση
+      source_pages: 7–8,12
+    intent: experience
+    analysis:
+      positive:
+      - '1'
+  - id: Q16
+    text: Τι είδους πρόβλημα αντιμετωπίσατε; Επιλέξτε όσα ισχύουν.
+    type: multiple_choice
+    options:
+    - code: '1'
+      label: Καθυστέρηση παράδοσης
+    - code: '2'
+      label: Ελαττωματικό ή μη λειτουργικό προϊόν
+    - code: '3'
+      label: Πρόβλημα εγκατάστασης
+    - code: '4'
+      label: Δυσκολία επικοινωνίας
+    - code: '5'
+      label: Καθυστέρηση επισκευής
+    - code: '6'
+      label: Δυσκολία επιστροφής ή αντικατάστασης
+    - code: '7'
+      label: Ασάφεια χρέωσης / όρων
+    - code: '8'
+      label: Άλλο
+    condition: Q15 == '1'
+    min_choices: 1
+    max_choices: 8
+    source_meta:
+      section: Εμπειρία πελατών
+      ask_if: Q15=1
+      rationale: Κατηγορίες προβλημάτων που αναδύθηκαν
+      source_pages: 7–8,12
+    intent: experience
+  - id: Q17
+    text: Όταν προέκυψε το πρόβλημα, επικοινωνήσατε με τον Κωτσόβολο για να επιλυθεί;
+    type: single_choice
+    options:
+    - code: '1'
+      label: Ναι
+    - code: '2'
+      label: Όχι
+    - code: '3'
+      label: Δεν θυμάμαι
+    condition: Q15 == '1'
+    source_meta:
+      section: Εμπειρία πελατών
+      ask_if: Q15=1
+      rationale: Διαχωρισμός προβλήματος από χειρισμό
+      source_pages: 7–8
+    intent: experience
+    analysis:
+      positive:
+      - '1'
+  - id: Q18
+    text: Ποια είναι η τρέχουσα κατάσταση του προβλήματος;
+    type: single_choice
+    options:
+    - code: '1'
+      label: Επιλύθηκε πλήρως
+    - code: '2'
+      label: Επιλύθηκε εν μέρει
+    - code: '3'
+      label: Παραμένει άλυτο
+    - code: '4'
+      label: Δεν γνωρίζω / δεν θυμάμαι
+    condition: Q15 == '1'
+    source_meta:
+      section: Εμπειρία πελατών
+      ask_if: Q15=1
+      rationale: Service recovery outcome
+      source_pages: 7–8,12
+    intent: experience
+    analysis:
+      positive:
+      - '1'
+  - id: Q19
+    text: Πόσο ικανοποιημένος/η είστε από τον τρόπο χειρισμού του προβλήματος;
+    type: single_choice
+    options:
+    - code: '1'
+      label: Καθόλου
+    - code: '2'
+      label: Λίγο
+    - code: '3'
+      label: Μέτρια
+    - code: '4'
+      label: Πολύ
+    - code: '5'
+      label: Πάρα πολύ
+    - code: '6'
+      label: Δεν μπορώ να κρίνω
+    condition: Q15 == '1' and Q17 == '1'
+    source_meta:
+      section: Εμπειρία πελατών
+      ask_if: Q15=1 AND Q17=1
+      rationale: Αξιολόγηση απόκρισης
+      source_pages: 7–8
+    intent: experience
+    analysis:
+      positive:
+      - '4'
+      - '5'
+  - id: Q20
+    text: 'Μετά από αυτή την εμπειρία, η εμπιστοσύνη σας στον Κωτσόβολο:'
+    type: single_choice
+    options:
+    - code: '1'
+      label: Μειώθηκε πολύ
+    - code: '2'
+      label: Μειώθηκε λίγο
+    - code: '3'
+      label: Δεν άλλαξε
+    - code: '4'
+      label: Αυξήθηκε λίγο
+    - code: '5'
+      label: Αυξήθηκε πολύ
+    - code: '6'
+      label: Δεν γνωρίζω / Δεν μπορώ να κρίνω
+    condition: Q15 == '1'
+    source_meta:
+      section: Εμπειρία πελατών
+      ask_if: Q15=1
+      rationale: Σχέση προβλήματος και εμπιστοσύνης
+      source_pages: 7–8,12
+    intent: experience
+    analysis:
+      positive:
+      - '4'
+      - '5'
+  - id: Q21
+    text: Ποιο συναίσθημα περιγράφει καλύτερα την εμπειρία σας με το συγκεκριμένο πρόβλημα;
+    type: single_choice
+    options:
+    - code: '1'
+      label: Θυμός
+    - code: '2'
+      label: Απογοήτευση / λύπη
+    - code: '3'
+      label: Ανησυχία
+    - code: '4'
+      label: Αδιαφορία
+    - code: '5'
+      label: Ανακούφιση
+    - code: '6'
+      label: Ικανοποίηση
+    - code: '7'
+      label: Άλλο
+    - code: '8'
+      label: Δεν μπορώ να προσδιορίσω
+    condition: Q15 == '1'
+    source_meta:
+      section: Εμπειρία πελατών
+      ask_if: Q15=1
+      rationale: Έλεγχος συναισθημάτων χωρίς επιβολή θυμού
+      source_pages: 9–11
+    intent: experience
+    analysis:
+      positive:
+      - '5'
+      - '6'
+- id: B05
+  title: Ανταγωνισμός & επιλογή
+  questions:
+  - id: Q22
+    text: Σε σύγκριση με άλλα καταστήματα ηλεκτρικών ειδών που γνωρίζετε, πώς αξιολογείτε τον Κωτσόβολο ως προς την αξιοπιστία;
+    type: single_choice
+    options:
+    - code: '1'
+      label: Πολύ χειρότερα
+    - code: '2'
+      label: Μάλλον χειρότερα
+    - code: '3'
+      label: Περίπου το ίδιο
+    - code: '4'
+      label: Μάλλον καλύτερα
+    - code: '5'
+      label: Πολύ καλύτερα
+    - code: '6'
+      label: Δεν μπορώ να συγκρίνω
+    condition: Q04 != '1'
+    source_meta:
+      section: Ανταγωνισμός & επιλογή
+      ask_if: Q04!=1
+      rationale: Σχετική θέση στην αγορά
+      source_pages: 7–8
+    intent: attitude
+    analysis:
+      positive:
+      - '4'
+      - '5'
+  - id: Q23
+    text: Ποιες εναλλακτικές θα εξετάζατε για την επόμενη αγορά ηλεκτρικών ειδών; Επιλέξτε έως τρεις.
+    type: multiple_choice
+    options:
+    - code: '1'
+      label: Public
+    - code: '2'
+      label: Πλαίσιο
+    - code: '3'
+      label: Skroutz / συνεργαζόμενα καταστήματα
+    - code: '4'
+      label: Άλλη μεγάλη αλυσίδα
+    - code: '5'
+      label: Μικρό τοπικό κατάστημα
+    - code: '6'
+      label: Απευθείας από κατασκευαστή
+    - code: '7'
+      label: Κωτσόβολος
+    - code: '8'
+      label: Άλλο
+    - code: '9'
+      label: Δεν γνωρίζω
+      exclusive: true
+    min_choices: 1
+    max_choices: 3
+    source_meta:
+      section: Ανταγωνισμός & επιλογή
+      ask_if: all
+      rationale: Εναλλακτικές επιλογές και ανταγωνιστική πίεση
+      source_pages: 7–8
+    intent: intention
+  - id: Q24
+    text: Πόσο πιθανό είναι να επιλέξετε τον Κωτσόβολο στην επόμενη σχετική αγορά σας;
+    type: single_choice
+    options:
+    - code: '1'
+      label: Καθόλου πιθανό
+    - code: '2'
+      label: Λίγο πιθανό
+    - code: '3'
+      label: Ούτε πιθανό ούτε απίθανο
+    - code: '4'
+      label: Αρκετά πιθανό
+    - code: '5'
+      label: Πολύ πιθανό
+    - code: '6'
+      label: Δεν σχεδιάζω σχετική αγορά / δεν γνωρίζω
+    condition: Q04 != '1'
+    source_meta:
+      section: Ανταγωνισμός & επιλογή
+      ask_if: Q04!=1
+      rationale: Πρόθεση επιλογής
+      source_pages: 8,12
+    intent: intention
+    analysis:
+      positive:
+      - '4'
+      - '5'
+  - id: Q25
+    text: Πόσο πιθανό είναι να συστήσετε τον Κωτσόβολο σε φίλο ή συγγενή;
+    type: single_choice
+    options:
+    - code: '1'
+      label: '0'
+    - code: '2'
+      label: '1'
+    - code: '3'
+      label: '2'
+    - code: '4'
+      label: '3'
+    - code: '5'
+      label: '4'
+    - code: '6'
+      label: '5'
+    - code: '7'
+      label: '6'
+    - code: '8'
+      label: '7'
+    - code: '9'
+      label: '8'
+    - code: '10'
+      label: '9'
+    - code: '11'
+      label: '10'
+    - code: '12'
+      label: Δεν γνωρίζω / δεν μπορώ να κρίνω
+    condition: Q04 != '1'
+    source_meta:
+      section: Ανταγωνισμός & επιλογή
+      ask_if: Q04!=1
+      rationale: Σύσταση, δείκτης 0–10 (όχι πραγματικό NPS πληθυσμού)
+      source_pages: 8,12
+    intent: intention
+    analysis:
+      positive:
+      - '10'
+      - '11'
+  - id: Q26
+    text: Έχετε αποτρέψει ή ενθαρρύνει κάποιον να αγοράσει από τον Κωτσόβολο τους τελευταίους 12 μήνες;
+    type: single_choice
+    options:
+    - code: '1'
+      label: Τον/την ενθάρρυνα
+    - code: '2'
+      label: Τον/την απέτρεψα
+    - code: '3'
+      label: Έκανα και τα δύο σε διαφορετικές περιπτώσεις
+    - code: '4'
+      label: Όχι
+    - code: '5'
+      label: Δεν θυμάμαι
+    condition: Q04 != '1'
+    source_meta:
+      section: Ανταγωνισμός & επιλογή
+      ask_if: Q04!=1
+      rationale: Συμπεριφορική σύσταση έναντι πρόθεσης
+      source_pages: 7–8
+    intent: experience
+    analysis:
+      positive:
+      - '1'
+- id: B06
+  title: Κοινωνική εικόνα
+  questions:
+  - id: Q27
+    text: Πριν από αυτό το ερωτηματολόγιο, γνωρίζατε κάποια κοινωνική ή εθελοντική δράση του Κωτσόβολου;
+    type: single_choice
+    options:
+    - code: '1'
+      label: Ναι
+    - code: '2'
+      label: Όχι
+    - code: '3'
+      label: Δεν είμαι βέβαιος/η
+    condition: Q04 != '1'
+    source_meta:
+      section: Κοινωνική εικόνα
+      ask_if: Q04!=1
+      rationale: Αυθόρμητη γνώση κοινωνικών δράσεων
+      source_pages: 4–6,11–12
+    intent: knowledge
+    analysis:
+      positive:
+      - '1'
+  - id: Q28
+    text: Σε ποιο βαθμό επηρεάζουν γενικά οι κοινωνικές δράσεις μιας εταιρείας την εικόνα που έχετε γι’ αυτήν;
+    type: single_choice
+    options:
+    - code: '1'
+      label: Καθόλου
+    - code: '2'
+      label: Λίγο
+    - code: '3'
+      label: Μέτρια
+    - code: '4'
+      label: Πολύ
+    - code: '5'
+      label: Πάρα πολύ
+    - code: '6'
+      label: Δεν γνωρίζω / Δεν μπορώ να κρίνω
+    source_meta:
+      section: Κοινωνική εικόνα
+      ask_if: all
+      rationale: Γενική αξία κοινωνικής συνεισφοράς
+      source_pages: 4–6,11–12
+    intent: attitude
+  - id: Q29
+    text: Αν μια εταιρεία έχει σημαντική κοινωνική προσφορά αλλά σας έχει απογοητεύσει στην εξυπηρέτηση, πόσο μπορεί η κοινωνική προσφορά να αποκαταστήσει την εμπιστοσύνη
+      σας;
+    type: single_choice
+    options:
+    - code: '1'
+      label: Καθόλου
+    - code: '2'
+      label: Λίγο
+    - code: '3'
+      label: Μέτρια
+    - code: '4'
+      label: Πολύ
+    - code: '5'
+      label: Πάρα πολύ
+    - code: '6'
+      label: Δεν γνωρίζω / Δεν μπορώ να κρίνω
+    source_meta:
+      section: Κοινωνική εικόνα
+      ask_if: all
+      rationale: Διαχωρισμός CSR και service recovery
+      source_pages: 5,11–12
+    intent: hypothetical_choice
+- id: B07
+  title: Αποκατάσταση & προτεραιότητες
+  questions:
+  - id: Q30
+    text: Ποιες έως τρεις ενέργειες θα αύξαναν περισσότερο την εμπιστοσύνη σας στον Κωτσόβολο;
+    type: multiple_choice
+    options:
+    - code: '1'
+      label: Ακριβέστεροι χρόνοι παράδοσης
+    - code: '2'
+      label: Συνεχής ενημέρωση για παραγγελίες
+    - code: '3'
+      label: Γρηγορότερες επισκευές
+    - code: '4'
+      label: Απλούστερες επιστροφές / αντικαταστάσεις
+    - code: '5'
+      label: Άμεση και ανθρώπινη εξυπηρέτηση
+    - code: '6'
+      label: Σαφέστεροι όροι / χρεώσεις
+    - code: '7'
+      label: Ανταγωνιστικότερες τιμές
+    - code: '8'
+      label: Καλύτερη διαθεσιμότητα προϊόντων
+    - code: '9'
+      label: Περισσότερες κοινωνικές δράσεις
+    - code: '10'
+      label: Καμία από τις παραπάνω
+      exclusive: true
+    - code: '11'
+      label: Άλλο
+    min_choices: 1
+    max_choices: 3
+    source_meta:
+      section: Αποκατάσταση & προτεραιότητες
+      ask_if: all
+      rationale: Επιχειρησιακές προτεραιότητες ανάκτησης εμπιστοσύνης
+      source_pages: 7–8,12
+    intent: attitude
+  - id: Q31
+    text: Αν μια εταιρεία λύσει γρήγορα και δίκαια ένα πρόβλημα μετά την αγορά, πόσο πιθανό είναι να της δώσετε ξανά ευκαιρία;
+    type: single_choice
+    options:
+    - code: '1'
+      label: Καθόλου πιθανό
+    - code: '2'
+      label: Λίγο πιθανό
+    - code: '3'
+      label: Μέτρια πιθανό
+    - code: '4'
+      label: Αρκετά πιθανό
+    - code: '5'
+      label: Πολύ πιθανό
+    - code: '6'
+      label: Δεν γνωρίζω / Δεν μπορώ να κρίνω
+    source_meta:
+      section: Αποκατάσταση & προτεραιότητες
+      ask_if: all
+      rationale: Γενικός μηχανισμός αποκατάστασης
+      source_pages: 10,12
+    intent: hypothetical_choice
+  - id: Q32
+    text: Ποιο είναι το μέγιστο εύλογο διάστημα για την πρώτη ουσιαστική απάντηση σε αίτημα υποστήριξης για σημαντική οικιακή συσκευή;
+    type: single_choice
+    options:
+    - code: '1'
+      label: Την ίδια ημέρα
+    - code: '2'
+      label: Εντός 1–2 ημερών
+    - code: '3'
+      label: Εντός 3–5 ημερών
+    - code: '4'
+      label: Εντός μίας εβδομάδας
+    - code: '5'
+      label: Περισσότερο από μία εβδομάδα
+    - code: '6'
+      label: Εξαρτάται από το πρόβλημα / δεν γνωρίζω
+    source_meta:
+      section: Αποκατάσταση & προτεραιότητες
+      ask_if: all
+      rationale: Προσδοκίες ταχύτητας απόκρισης
+      source_pages: 7–8,12
+    intent: attitude
+  - id: Q33
+    text: Αν είχατε αρνητική εμπειρία από τον Κωτσόβολο, ποιο θα ήταν το σημαντικότερο στοιχείο για να ανακτήσετε την εμπιστοσύνη σας;
+    type: single_choice
+    options:
+    - code: '1'
+      label: Πλήρης και γρήγορη επίλυση
+    - code: '2'
+      label: Δίκαιη αποζημίωση / επιστροφή χρημάτων
+    - code: '3'
+      label: Ειλικρινής εξήγηση και ανάληψη ευθύνης
+    - code: '4'
+      label: Συστηματική ενημέρωση μέχρι τη λύση
+    - code: '5'
+      label: Εγγύηση ότι δεν θα επαναληφθεί
+    - code: '6'
+      label: Δεν θα επανερχόταν η εμπιστοσύνη μου
+    - code: '7'
+      label: Άλλο / δεν γνωρίζω
+    source_meta:
+      section: Αποκατάσταση & προτεραιότητες
+      ask_if: all
+      rationale: Συγκεκριμένη ιεράρχηση service recovery
+      source_pages: 7–8,12
+    intent: hypothetical_choice
+    analysis:
+      sensitivity: false
+  - id: Q34
+    text: Ποια μία βελτίωση θα έπρεπε, κατά τη γνώμη σας, να αποτελέσει την πρώτη προτεραιότητα του Κωτσόβολου;
+    type: single_choice
+    options:
+    - code: '1'
+      label: Παραδόσεις και συνέπεια χρόνων
+    - code: '2'
+      label: After-sales / επισκευές
+    - code: '3'
+      label: Επιστροφές και αντικαταστάσεις
+    - code: '4'
+      label: Εξυπηρέτηση και επικοινωνία
+    - code: '5'
+      label: Τιμές και προσφορές
+    - code: '6'
+      label: Διαθεσιμότητα / ποιότητα προϊόντων
+    - code: '7'
+      label: Κοινωνική προσφορά
+    - code: '8'
+      label: Καμία συγκεκριμένη / δεν γνωρίζω
+    condition: Q04 != '1'
+    source_meta:
+      section: Αποκατάσταση & προτεραιότητες
+      ask_if: Q04!=1
+      rationale: Τελική προτεραιότητα διοίκησης
+      source_pages: 12–14
+    intent: attitude
+    analysis:
+      sensitivity: false
+constraints:
+- id: C1
+  forbid: Q01 == '2' and Q05 == '1'
+  reason: 'Κανόνας «Q05=1 indicates recent buyer»: αγορά από τον Κωτσόβολο στους 24 μήνες είναι αγορά ηλεκτρικής/ηλεκτρονικής συσκευής στους ίδιους 24 μήνες. Όποιος
+    απάντησε Q01=«Όχι» δεν μπορεί να απαντήσει Q05=«Ναι».'
+  origin: integration_overlay
+- id: C2
+  forbid: Q01 == '1' and Q05 == '1' and not (contains(Q02, '1') or contains(Q02, '2') or contains(Q02, '6') or contains(Q02, '7'))
+  reason: Ο Κωτσόβολος είναι μεγάλη αλυσίδα (φυσικά καταστήματα και e-shop). Αγοραστής του στους 24 μήνες πρέπει να έχει δηλώσει στο Q02 «Μεγάλη αλυσίδα φυσικών καταστημάτων»
+    ή «Ηλεκτρονικό κατάστημα μεγάλης αλυσίδας» (ή «Άλλο» / «Δεν θυμάμαι»).
+  origin: integration_overlay
+- id: C3
+  forbid: Q06 == '1' and Q01 == '1' and not (contains(Q02, '1') or contains(Q02, '7'))
+  reason: Πιο πρόσφατη αγορά Κωτσόβολου σε φυσικό κατάστημα ⇒ το Q02 περιέχει «Μεγάλη αλυσίδα φυσικών καταστημάτων» (ή «Δεν θυμάμαι»).
+  origin: integration_overlay
+- id: C4
+  forbid: Q06 == '2' and Q01 == '1' and not (contains(Q02, '2') or contains(Q02, '7'))
+  reason: Πιο πρόσφατη αγορά Κωτσόβολου από το e-shop ⇒ το Q02 περιέχει «Ηλεκτρονικό κατάστημα μεγάλης αλυσίδας» (ή «Δεν θυμάμαι»).
+  origin: integration_overlay
+- id: C5
+  forbid: Q04 == '1' and contains(Q23, '7')
+  reason: Όποιος δεν γνωρίζει την αλυσίδα (Q04=1) δεν μπορεί να την εξετάζει ως εναλλακτική στο Q23.
+  origin: integration_overlay
+consistency_rules:
+- id: S1
+  when: Q01 == '3' and Q05 == '1'
+  note: Δεν θυμάται αν αγόρασε συσκευή, αλλά δηλώνει αγορά από Κωτσόβολο
+  origin: integration_overlay
+- id: S2
+  when: Q14 == '3' and Q15 == '2'
+  note: Σημαντική καθυστέρηση παράδοσης, αλλά «κανένα πρόβλημα»
+  origin: integration_overlay
+- id: S3
+  when: Q14 == '1' and contains(Q16, '1')
+  note: Παράδοση πλήρως στην ώρα της, αλλά πρόβλημα «καθυστέρηση παράδοσης»
+  origin: integration_overlay
+- id: S4
+  when: Q08 == '1' and Q09 in ['4', '5']
+  note: Πολύ αρνητική εικόνα, αλλά πολύ μεγάλη εμπιστοσύνη
+  origin: integration_overlay
+- id: S5
+  when: Q08 == '5' and Q09 == '1'
+  note: Πολύ θετική εικόνα, αλλά καμία εμπιστοσύνη
+  origin: integration_overlay
+- id: S6
+  when: Q18 == '3' and Q19 in ['4', '5']
+  note: Πρόβλημα άλυτο, αλλά πολύ ικανοποιημένος από τον χειρισμό
+  origin: integration_overlay
+- id: S7
+  when: Q18 == '3' and Q20 in ['4', '5']
+  note: Πρόβλημα άλυτο, αλλά η εμπιστοσύνη αυξήθηκε
+  origin: integration_overlay
+- id: S8
+  when: Q24 == '5' and Q25 in ['1', '2', '3', '4']
+  note: Πολύ πιθανό να επιλέξει, αλλά σύσταση 0–3
+  origin: integration_overlay
+- id: S9
+  when: Q26 == '1' and Q08 in ['1', '2']
+  note: Ενθάρρυνε άλλους, αλλά έχει αρνητική εικόνα
+  origin: integration_overlay
+- id: S10
+  when: contains(Q23, '7') and Q24 == '1'
+  note: Εξετάζει τον Κωτσόβολο ως εναλλακτική, αλλά «καθόλου πιθανό» να τον επιλέξει
+  origin: integration_overlay
+- id: S11
+  when: Q12 == '5' and Q18 == '3'
+  note: Πολύ θετική συνολική εμπειρία με πρόβλημα που παραμένει άλυτο
+  origin: integration_overlay

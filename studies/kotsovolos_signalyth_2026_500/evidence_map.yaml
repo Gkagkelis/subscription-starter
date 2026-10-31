@@ -1,0 +1,69 @@
+# Δηλωμένες σχέσεις μέτρησης ανάμεσα σε ερωτήσεις/επιλογές της μελέτης και εμπειρικές πηγές (kotsovolos_signalyth_2026_500).
+# Μόνο μέσω αυτού του αρχείου μια πηγή μπορεί να επηρεάσει ποσοτικά μια απάντηση· κάθε συνιστώσα περνά από την πύλη
+# καταλληλότητας (ase/evidence/suitability.py) και, αν απορριφθεί, καταγράφεται ο λόγος στο σχέδιο τεκμηρίωσης.
+# Η αναφορά Signalyth (social listening) ΔΕΝ είναι πηγή εδώ: δεν είναι αντιπροσωπευτική μέτρηση πληθυσμού.
+#
+# relation:
+#   lower_bound        P(επιλογή) ≥ ποσοστό πηγής ανά πρόσωπο (λογικό υποσύνολο)
+#   lower_bound_union  P(τουλάχιστον μία από τις επιλογές | συνθήκη) ≥ ποσοστό πηγής ανά πρόσωπο
+#   proxy              συγγενής μέτρηση: πλαίσιο με την τιμή της ομάδας του προσώπου· ΔΕΝ ορίζει πιθανότητα
+components:
+  - question: Q01
+    target: {option: "1"}
+    relation: lower_bound
+    source: {dataset: isoc_ec_ibgs, indicator: I_BEEQU1, unit: PC_IND}
+    justification: >-
+      Όποιος αγόρασε online ηλεκτρονικά ή οικιακές συσκευές στο τελευταίο τρίμηνο έχει αγοράσει ηλεκτρική ή ηλεκτρονική συσκευή
+      στους 24 μήνες: λογικό υποσύνολο (υπόθεση: θυμάται την αγορά· η επιλογή «Δεν θυμάμαι» την παραβιάζει ελαφρά).
+    population_note: "Eurostat: άτομα 16–74 (75+ με εγκεκριμένη μεταφορά)· για 65+ το μικρότερο από 65–74/75+."
+  - question: Q01
+    target: {option: "1"}
+    relation: lower_bound
+    source: {dataset: isoc_ec_ibgs, indicator: I_BHARD1, unit: PC_IND}
+    justification: "Online αγορά υπολογιστή/tablet/κινητού στο τρίμηνο ⊂ αγορά ηλεκτρονικού είδους στους 24 μήνες."
+  - question: Q02
+    target: {options: ["2", "4", "5", "6"], given: "Q01 == '1'"}
+    relation: lower_bound_union
+    source: {dataset: isoc_ec_ibgs, indicator: I_BEEQU1, unit: PC_IND}
+    justification: >-
+      Η online αγορά ηλεκτρονικών/συσκευών γίνεται από κάποιο από: e-shop μεγάλης αλυσίδας (2), αμιγώς online/marketplace (4),
+      απευθείας από κατασκευαστή (5) ή «Άλλο» (6). Για αγοραστές: P(τουλάχιστον ένα από αυτά | αγοραστής) ≥ ποσοστό Eurostat.
+      Παραδοχή: ανεξάρτητες επιλογές στην ένωση· η αποκλειστική «Δεν θυμάμαι» δεν μετρά ως online κανάλι.
+  - question: Q14
+    target: {option: "3"}
+    relation: proxy
+    source: {dataset: isoc_ec_iprb21, indicator: I_BSPD1, unit: PC_IND_BUY3}
+    justification: "Ποσοστό online αγοραστών με παράδοση πιο αργή από την αναγγελθείσα (όλα τα είδη, όλοι οι πωλητές)· όχι μέτρηση για τον Κωτσόβολο."
+  - question: Q15
+    target: {question: true}
+    relation: proxy
+    source: {dataset: isoc_ec_iprb21, indicator: [I_BSPD1, I_BWDN1, I_BCR1, I_BDGL1], unit: PC_IND_BUY3}
+    justification: "Συχνότητα προβλημάτων σε online αγορές στην ομάδα του προσώπου· η ερώτηση αφορά οποιοδήποτε κανάλι και μόνο τον Κωτσόβολο."
+  - question: Q16
+    target: {option: "1"}
+    relation: proxy
+    source: {dataset: isoc_ec_iprb21, indicator: I_BSPD1, unit: PC_IND_BUY3}
+    justification: "Καθυστέρηση παράδοσης σε online αγορές (γενικά)."
+  - question: Q16
+    target: {option: "2"}
+    relation: proxy
+    source: {dataset: isoc_ec_iprb21, indicator: I_BWDN1, unit: PC_IND_BUY3}
+    justification: "Λάθος ή κατεστραμμένο προϊόν σε online αγορές (γενικά)."
+  - question: Q16
+    target: {options: ["4", "6"]}
+    relation: proxy
+    source: {dataset: isoc_ec_iprb21, indicator: I_BCR1, unit: PC_IND_BUY3}
+    justification: "Δύσκολα παράπονα/αποζημίωση ή μη ικανοποιητική απάντηση μετά από παράπονο (γενικά)."
+  - question: Q16
+    target: {option: "7"}
+    relation: proxy
+    source: {dataset: isoc_ec_iprb21, indicator: I_BDGL1, unit: PC_IND_BUY3}
+    justification: "Δυσκολία εύρεσης πληροφοριών για εγγυήσεις και νόμιμα δικαιώματα (συγγενές με «ασάφεια όρων»)."
+brand:
+  terms: [Κωτσόβολο, Κωτσόβολος, Kotsovolos]
+  baseline_evidence: none
+  note: >-
+    Καμία αντιπροσωπευτική μέτρηση γνωριμίας, εικόνας, εμπιστοσύνης, μεριδίου ή NPS του Κωτσόβολου στο lake ή στις επαληθευμένες πηγές.
+    Τα ποσοστά social listening της Signalyth δεν είναι μετρήσεις πληθυσμού και δεν χρησιμοποιούνται. Οι ερωτήσεις μάρκας
+    εξαρτώνται από την κρίση του AI για το συγκεκριμένο προφίλ· ανάλυση ευαισθησίας στη βάση της μάρκας.
+  sensitivity: {logit_shifts: [-1.0, -0.5, 0.5, 1.0]}

@@ -49,11 +49,11 @@ def main(argv=None):
             x.add_argument("dir")
     a = sp.add_parser("panel"); a.add_argument("dir"); a.add_argument("--regenerate", action="store_true")
     a = sp.add_parser("estimate"); a.add_argument("dir"); a.add_argument("--provider", default="anthropic"); a.add_argument("--model", default="claude-opus-5-5")
-    a.add_argument("--n", type=int); a.add_argument("--questions"); a.add_argument("--batching", default="per_question")
+    a.add_argument("--n", type=int); a.add_argument("--questions"); a.add_argument("--batching", default=None, help="per_question | per_block | per_block_dep (προεπιλογή: run.batching του config ή per_question)")
     for c in ("dry-run", "run"):
         a = sp.add_parser(c); a.add_argument("dir"); a.add_argument("--provider", default="mock"); a.add_argument("--model", default=None)
         a.add_argument("--n", type=int); a.add_argument("--questions"); a.add_argument("--budget-usd", type=float); a.add_argument("--confirm", action="store_true")
-        a.add_argument("--resume"); a.add_argument("--workers", type=int, default=4); a.add_argument("--rpm", type=float, default=50); a.add_argument("--batching", default="per_question")
+        a.add_argument("--resume"); a.add_argument("--workers", type=int, default=4); a.add_argument("--rpm", type=float, default=50); a.add_argument("--batching", default=None, help="per_question | per_block | per_block_dep (προεπιλογή: run.batching του config ή per_question)")
         a.add_argument("--effort", default="low")
     for c in ("session-status", "session-import"):
         a = sp.add_parser(c); a.add_argument("dir"); a.add_argument("--run", required=True)
@@ -68,7 +68,25 @@ def main(argv=None):
     sp.add_parser("validate-transport", help="LOCO επικύρωση μεταφοράς μεταξύ χωρών ΕΕ")
     a = sp.add_parser("evidence-plan", help="σχέδιο τεκμηρίωσης ανά ερώτηση/επιλογή"); a.add_argument("dir"); a.add_argument("--no-lab", action="store_true")
     a = sp.add_parser("sensitivity"); a.add_argument("dir"); a.add_argument("--run", required=True)
+    a = sp.add_parser("import-questionnaire", help="partner JSON → questionnaire.yaml (χωρίς απώλεια) + έλεγχος round-trip")
+    a.add_argument("source"); a.add_argument("dest"); a.add_argument("--overlay")
+    a = sp.add_parser("paths", help="απαρίθμηση διαδρομών skip logic και ικανοποιησιμότητας περιορισμών"); a.add_argument("dir")
     args = ap.parse_args(argv)
+
+    if args.cmd == "import-questionnaire":
+        import yaml
+        from ase.questionnaire.convert import convert, roundtrip_check
+        from ase.util import load_structured
+        spec = load_structured(Path(args.source))
+        native, rep = convert(spec, load_structured(Path(args.overlay)) if args.overlay else None)
+        rt = roundtrip_check(spec, native)
+        if rt:
+            raise ValueError("Αποτυχία round-trip: " + "; ".join(rt))
+        head = (f"# ΠΑΡΑΓΩΓΗ ΑΠΟ {Path(args.source).name} με `ase_cli.py import-questionnaire` (+ overlay {Path(args.overlay).name if args.overlay else '—'}).\n"
+                "# Μην το επεξεργάζεστε με το χέρι: αλλαγές στο JSON ή στο overlay και νέα εισαγωγή. Τα κείμενα/επιλογές είναι αυτούσια.\n")
+        Path(args.dest).write_text(head + yaml.safe_dump(native, allow_unicode=True, sort_keys=False, width=160), encoding="utf-8")
+        _print({**rep, "roundtrip": "OK", "written": args.dest})
+        return
 
     if args.cmd == "evidence-index":
         from ase.evidence.lake_index import build
@@ -115,11 +133,11 @@ def main(argv=None):
         reg = st.build_context()
         _print({"accepted": len(reg["accepted"]), "rejected": len(reg["rejected"]), "notes": reg["notes"], "top": [a["title"] for a in reg["accepted"][:8]]})
     elif args.cmd == "estimate":
-        _print(st.estimate({"provider": args.provider, "model": args.model}, n=args.n, question_ids=args.questions.split(",") if args.questions else None, batching=args.batching))
+        _print(st.estimate({"provider": args.provider, "model": args.model}, n=args.n, question_ids=args.questions.split(",") if args.questions else None, batching=args.batching or (st.cfg.get("run") or {}).get("batching", "per_question")))
     elif args.cmd in ("dry-run", "run"):
         pc = {"provider": args.provider, "model": args.model, "effort": args.effort}
         rid = st.run(pc, n=args.n, question_ids=args.questions.split(",") if args.questions else None, dry_run=args.cmd == "dry-run", confirm=args.confirm,
-                     budget_usd=args.budget_usd, resume_run_id=args.resume, max_workers=args.workers, batching=args.batching, requests_per_minute=args.rpm)
+                     budget_usd=args.budget_usd, resume_run_id=args.resume, max_workers=args.workers, batching=args.batching or (st.cfg.get("run") or {}).get("batching", "per_question"), requests_per_minute=args.rpm)
         man = json.loads((st.internal / "runs" / rid / "execution_manifest.json").read_text(encoding="utf-8"))
         qc = json.loads((st.internal / "runs" / rid / "quality_checks.json").read_text(encoding="utf-8"))
         _print({"run_id": rid, "respondents": man["respondents_completed"], "errors": man["errors"], "ledger": man["ledger"],
@@ -155,6 +173,9 @@ def main(argv=None):
             "questions": {k: {"mode": v["mode"], "option_modes": v["option_modes"], "brand": v["brand_dependent"],
                               "components": [f"{c['spec']['source']['indicator']}:{c['class']}:{'ok' if c['usable'] else 'rejected'}" for c in v["components"]]}
                           for k, v in plan["questions"].items() if v["mode"] != "D_AI" or v["components"]}})
+    elif args.cmd == "paths":
+        from ase.questionnaire.paths import enumerate_paths
+        _print(enumerate_paths(st.qn))
     elif args.cmd == "sensitivity":
         from ase.analysis.sensitivity import run as srun
         _print(srun(st, args.run))

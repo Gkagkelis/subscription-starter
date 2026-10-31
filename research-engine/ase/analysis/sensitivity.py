@@ -19,6 +19,10 @@ def _logit(p):
 
 
 def positive_codes(q) -> list[str]:
+    """Δηλωμένες «θετικές» επιλογές (`analysis.positive` στο ερωτηματολόγιο) ή, αλλιώς, η προεπιλογή του τύπου."""
+    decl = ((q.raw or {}).get("analysis") or {}).get("positive")
+    if decl:
+        return [str(c) for c in decl]
     codes = [o.code for o in q.options]
     if q.type == "likert" and len(codes) >= 4:
         return codes[-2:]
@@ -54,7 +58,7 @@ def run(study, run_id, shifts=(-1.0, -0.5, 0.0, 0.5, 1.0)) -> dict:
     out = {}
     for qid, g in df.groupby("question_id"):
         q = qby[qid]
-        if q.type not in ("single_choice", "likert", "scenario"):
+        if q.type not in ("single_choice", "likert", "scenario") or ((q.raw or {}).get("analysis") or {}).get("sensitivity") is False:
             continue
         codes, pos = [o.code for o in q.options], positive_codes(q)
         dists = [json.loads(x) for x in g["distribution"]]

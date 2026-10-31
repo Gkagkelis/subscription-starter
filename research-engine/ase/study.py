@@ -111,8 +111,13 @@ class Study:
                 sample_prompts.append(len(P.SYSTEM) + len(P.user_prompt(prof, ["Qx: ..."] * min(20, len(qs)), "- [ref] ..." * 3, [blk], run.brief)))
         avg_in = (sum(sample_prompts) / len(sample_prompts) / CHARS_PER_TOKEN) if sample_prompts else 0
         out_per_q = {q.id: 40 + 10 * max(1, len(q.options)) + (120 if q.type == "open" else 0) for q in llm_qs}
-        calls = n * (len(llm_qs) if batching == "per_question" else len({q.block for q in llm_qs}))
-        in_tok = calls * avg_in if batching == "per_question" else n * len({q.block for q in llm_qs}) * avg_in * 1.6
+        if batching == "per_block_dep":
+            ids = {q.id for q in llm_qs}
+            n_units = sum(1 for u in QM.split_units(self.qn, self.qn.questions) if any(q.id in ids for q in u))
+        else:
+            n_units = len({q.block for q in llm_qs})
+        calls = n * (len(llm_qs) if batching == "per_question" else n_units)
+        in_tok = calls * avg_in if batching == "per_question" else n * n_units * avg_in * 1.6
         base_out = n * sum(out_per_q.values())
         measured = self._measured_usage(provider_cfg)
         if measured:

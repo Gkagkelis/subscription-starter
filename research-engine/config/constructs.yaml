@@ -74,3 +74,9 @@ constructs:
       recovery: [αποκατασ, χειρισμ, συγγνωμ, αποζημιω, κουπον, recovery, apolog, compensat, αντικατασ, επιστροφη χρηματ, refund]
 brand_terms: [κωτσοβολ, kotsovolos]
 generic_terms: [consumer, consumers, καταναλωτ, survey, ερευνα, greece, ελλαδα]
+# πεδίο της μελέτης για την ΑΥΤΟΜΑΤΗ ανάκτηση: ένας υποψήφιος του lake πρέπει να αφορά λιανική / αγορές καταναλωτικών αγαθών /
+# ηλεκτρικά είδη / εξυπηρέτηση πελατών· αλλιώς απορρίπτεται ως «εκτός πεδίου» (π.χ. streaming μουσικής, φορολογία, αλιεία)
+domain_terms: [retail, shop, store, seller, purchas, buying, bought, e-commerce, ecommerce, appliance, electronic, warrant, guarantee,
+               after-sales, customer service, complaint, redress, refund, deliver, λιανικ, καταστημ, αγορασ, ηλεκτρικ, ηλεκτρονικ, συσκευ,
+               εγγυησ, παραπον, επιστροφ, παραδοσ]
+

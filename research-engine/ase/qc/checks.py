@@ -99,6 +99,15 @@ def run_qc(study, run_id) -> dict:
     add("Αντιφατικές απαντήσεις", worst <= 0.10, f"{len(rules)} κανόνες· {dict(contra)}" if rules else "δεν ορίστηκαν κανόνες συνέπειας", warn=True)
     if worst > 0.10:
         flags.append(f"Υψηλό ποσοστό αντιφάσεων: {dict(contra)}")
+    # λογικοί περιορισμοί (hard): πρέπει να είναι μηδέν παραβιάσεις
+    if qn.constraints:
+        hard = Counter()
+        for rid, g in ans.groupby("respondent_id"):
+            a = {r.question_id: json.loads(r.response) for r in g.itertuples()}
+            for c in qn.constraints:
+                if all(k in a for k in c["refs"]) and QM.evaluate_condition(c["forbid"], a, {}):
+                    hard[c["id"]] += 1
+        add("Παραβιάσεις λογικών περιορισμών", not hard, f"{len(qn.constraints)} περιορισμοί· παραβιάσεις: {dict(hard) or 0}")
     # υπερβολικά ομοιόμορφες απαντήσεις
     uni = []
     for qid, g in ans.groupby("question_id"):

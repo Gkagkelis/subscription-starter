@@ -1,0 +1,65 @@
+study_id: kotsovolos_signalyth_2026_500
+country: GR
+questionnaire: questionnaire.yaml
+# ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ
+status: DRAFT_PENDING_PARTNER_APPROVAL      # η πλήρης εκτέλεση ΔΕΝ ξεκινά πριν από ρητή επιβεβαίωση του χρήστη
+study:
+  title: "Κωτσόβολος: εικόνα, εμπιστοσύνη και εμπειρία αγοράς ηλεκτρικών ειδών"
+  subtitle: "Συνθετική προσομοίωση · 500 ολοκληρωμένες συνθετικές συνεντεύξεις · Ενήλικοι 18+ κάτοικοι Ελλάδας"
+  client: "Κωτσόβολος"
+  # Το topic μπαίνει στο prompt: ουδέτερο, χωρίς ευρήματα ή ποσοστά της αναφοράς Signalyth.
+  topic: "Αγορά ηλεκτρικών ειδών, εικόνα και εμπιστοσύνη σε αλυσίδα καταστημάτων, εμπειρία μετά την αγορά, εξυπηρέτηση και κοινωνική εικόνα εταιρειών"
+  summary_intro: "Η συνθετική μελέτη εξετάζει πώς αντιλαμβάνονται οι ενήλικοι στην Ελλάδα την αγορά ηλεκτρικών ειδών, την εικόνα και την εμπιστοσύνη στον Κωτσόβολο και την εμπειρία μετά την αγορά."
+  # Πηγή του σκεπτικού (ΟΧΙ δεδομένα πληθυσμού): δεν μπαίνει στα prompts, δεν χρησιμοποιείται ως quota, στόχος βαθμονόμησης ή αναμενόμενο αποτέλεσμα.
+  rationale_source: "Viewscope / Signalyth, Brand Intelligence, Greece, 2026-09-01 – 2026-10-30 (social listening· όχι αντιπροσωπευτική έρευνα)"
+  brand_intelligence_report: null   # η αναφορά δεν υπάρχει στο repository· μόνο το ερωτηματολόγιο που σχεδιάστηκε από αυτήν
+panel:
+  population: adults_18_plus
+  sample_size: 500
+  geography: nationwide
+  sampling:
+    strategy: demographic_quota
+    variables: [age, gender, region, household_type, education, income_band]
+    tolerance_pp: 2
+  random_seed: 20261101
+  # 500 = ΟΛΟΚΛΗΡΩΜΕΝΕΣ συνθετικές συνεντεύξεις (όχι αρχικά προφίλ). Το ερωτηματολόγιο δεν έχει screening:
+  # κάθε ενήλικος είναι επιλέξιμος· αντικαταστάτες χρειάζονται μόνο για τεχνικά σφάλματα, στο ίδιο κελί περιφέρεια × ηλικία × φύλο.
+  sample_size_basis: completes
+  completes:
+    quota_basis: general_population
+    max_profiles: 600
+research:
+  search_terms_en: [trust, retail, "consumer protection", delivery, complaint, "e-commerce", "online shopping", electronic, "after-sales", warranty]
+  search_terms_el: [εμπιστοσύνη, παράδοση, επιστροφή, παράπονο, ηλεκτρικ, εγγύηση, εξυπηρέτηση]
+  use_lake: true
+  use_official: true
+  web: {enabled: false}
+  max_sources: 40
+  per_question: 3
+  # κανόνες συνάφειας v2: μια πηγή γίνεται δεκτή μόνο αν ταιριάζει σε θεματική έννοια στον τίτλο/λέξεις-κλειδιά,
+  # αφορά καταναλωτές (όχι επιχειρήσεις), έχει δεδομένα ≤ max_age_years και δεν είναι εκτός θέματος
+  concepts:
+    trust: [trust, trustworth, εμπιστοσύνη, εμπιστευ, reliab, αξιοπιστ, υποσχε]
+    after_sales: [after-sales, after sales, customer service, εξυπηρέτηση, εξυπηρετ, service quality]
+    delivery: [delivery, delivered, παράδοση, παραδόσ, παραδιδ, late deliver, shipping, καθυστερ]
+    returns: [return, refund, επιστροφή, επιστροφ, withdrawal, υπαναχώρηση]
+    complaints: [complaint, redress, dispute, παράπονο, παράπονα, καταγγελ, ADR, ombudsman, συνήγορος]
+    warranty: [warranty, guarantee, εγγύηση, repair, επισκευ, conformity, faulty, ελαττωματ, defective, βλαβ]
+  # πεδίο της μελέτης: η πηγή πρέπει να αφορά αγορές καταναλωτών/λιανική (όχι μόνο να περιέχει λέξη όπως «trust»)
+  domain_terms: [consumer protection, consumer conditions, consumer rights, consumer law, προστασία καταναλωτ, δικαιώματα καταναλωτ, retail, λιανικ, shopping,
+                 online purchas, buying online, e-commerce, ηλεκτρονικό εμπόριο, ηλεκτρονικές αγορές, appliance, συσκευ, electronic goods, sale of goods, πώληση αγαθών]
+  off_topic_terms: [cross-border, crossborder, διασυνοριακ]
+  max_age_years: 8
+llm:
+  max_tokens: 2000
+  history_window: 60      # όλο το ιστορικό του προσώπου (37 ερωτήσεις)· οι πύλες Q01/Q04/Q05 μένουν ορατές μέχρι το Q34
+run:
+  batching: per_block_dep  # ανά block, με διαχωρισμό όπου μια ερώτηση εξαρτάται από ερώτηση του ίδιου block
+lab: {enabled: true, model: pie-0.7, ref: "2026-10", prompt_anchors: [emp, econ4, class3]}
+# hybrid: ποσοτικός συνδυασμός εμπειρικού μοντέλου και AI μόνο με επικύρωση (weight + validation_ref)· κανένα προεπιλεγμένο βάρος
+reference_distributions: []   # τα ποσοστά social listening της Signalyth ΔΕΝ είναι κατανομές πληθυσμού· δεν χρησιμοποιούνται
+report:
+  key_questions: [Q04, Q08, Q09, Q10, Q12, Q15, Q22, Q24, Q31, Q33]
+  crosstab_questions: [Q08, Q09, Q24]
+  implications: []
+  conclusions: []

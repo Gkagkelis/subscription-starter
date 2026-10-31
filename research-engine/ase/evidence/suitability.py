@@ -10,6 +10,8 @@
   * Αποτυχία ανάκτησης ≠ απουσία: RETRIEVAL_ERROR / UNAVAILABLE_SOURCE."""
 from __future__ import annotations
 
+import re
+
 from .interpret import missing_facets, norm, ontology
 
 CLASSES = ("DIRECT_EMPIRICAL", "TRANSPORTABLE_EMPIRICAL", "CONTEXTUAL_EVIDENCE", "INSUFFICIENT_EVIDENCE", "RETRIEVAL_ERROR", "UNAVAILABLE_SOURCE")
@@ -35,13 +37,20 @@ def assess_candidate(cand: dict, qi: dict, max_age: int = 8) -> dict:
         checks.append(check("έννοια", False, "; ".join(why) or "καμία κοινή έννοια"))
         return {"class": "INSUFFICIENT_EVIDENCE", "rejected": True, "checks": checks, "reason": "Διαφορετική έννοια (λεξική ομοιότητα χωρίς ισοδυναμία μέτρησης)"}
     checks.append(check("έννοια", True, f"κοινές έννοιες: {', '.join(shared)}"))
+    dom = onto.get("domain_terms") or []
+    if dom:
+        ctext = norm(f"{cand.get('text', '')} {cand.get('options', '')}")
+        hit = [t for t in dom if re.search(r"(?<![0-9a-zα-ω])" + re.escape(norm(t)), ctext)]      # αρχή λέξης («store» ≠ «restore»)
+        checks.append(check("πεδίο μελέτης", bool(hit), f"όροι πεδίου: {', '.join(hit[:4])}" if hit else "δεν αφορά λιανική/καταναλωτικά αγαθά/εξυπηρέτηση"))
+        if not hit:
+            return {"class": "INSUFFICIENT_EVIDENCE", "rejected": True, "checks": checks, "reason": "Εκτός πεδίου μελέτης (κοινή λέξη, άλλο πλαίσιο)"}
     years = [int(y) for y in str(cand.get("years") or cand.get("study_year") or "").replace(",", " ").split() if y.isdigit()]
     latest = max(years) if years else None
     checks.append(check("επικαιρότητα", latest is not None and CURRENT_YEAR - latest <= max_age, f"τελευταίο έτος {latest} (όριο {max_age})"))
     checks.append(check("σχέση μέτρησης", False, "αυτόματη αντιστοίχιση: δεν έχει δηλωθεί σχέση μέτρησης (ισοδύναμη/όριο/proxy)"))
     if qi["brand_specific"] and not any(norm(b) in norm(cand.get("text", "")) for b in onto.get("brand_terms", [])):
         checks.append(check("μάρκα", False, "η ερώτηση αφορά συγκεκριμένη μάρκα· η πηγή είναι γενική — δεν κληρονομεί ποσοστό"))
-    recent = checks[1]["pass"]
+    recent = next(c for c in checks if c["check"] == "επικαιρότητα")["pass"]
     return {"class": "CONTEXTUAL_EVIDENCE" if recent else "INSUFFICIENT_EVIDENCE", "rejected": not recent, "checks": checks,
             "reason": "Σχετική πηγή για πλαίσιο· όχι εμπειρική εκτίμηση" if recent else "Παλαιά δεδομένα"}
 

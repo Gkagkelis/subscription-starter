@@ -75,6 +75,51 @@ def sample_answer(q, parsed: dict, codes: list, rng: np.random.Generator):
     return str(parsed.get("text", "")).strip(), None
 
 
+def sample_constrained(q, parsed: dict, codes: list, rng: np.random.Generator, cons: list, answers: dict, prof: dict):
+    """Κλήρωση με λογικούς περιορισμούς: κλειστές μονής επιλογής → οι απαγορευμένες επιλογές αφαιρούνται και η κατανομή
+    ξανακανονικοποιείται (ακριβής περικοπή)· πολλαπλή επιλογή → επανάληψη κλήρωσης (έως 200, ίδιο seed-stream).
+    Επιστρέφει (απάντηση, κατανομή audit, καταγραφές περιορισμών). Χωρίς περιορισμούς: ίδιο αποτέλεσμα με sample_answer."""
+    if not cons:
+        a, d = sample_answer(q, parsed, codes, rng)
+        return a, d, []
+    if q.type in ("single_choice", "likert", "scenario"):
+        bad = {c: QM.violated(cons, q.id, c, answers, prof) for c in codes}
+        allowed = [c for c in codes if not bad[c]]
+        if not allowed:
+            return None, None, ["καμία επιτρεπτή επιλογή (" + ", ".join(sorted({x for v in bad.values() for x in v})) + ")"]
+        p = _norm(parsed["probabilities"], codes)
+        removed = float(sum(p[i] for i, c in enumerate(codes) if bad[c]))
+        if removed <= 0:
+            a, d = sample_answer(q, parsed, codes, rng)
+            return a, d, []
+        pm = np.array([p[i] if not bad[c] else 0.0 for i, c in enumerate(codes)])
+        if pm.sum() <= 0:
+            pm = np.array([0.0 if bad[c] else 1.0 for c in codes])
+        pm = pm / pm.sum()
+        a = codes[int(rng.choice(len(codes), p=pm))]
+        ids = sorted({x for v in bad.values() for x in v})
+        return a, dict(zip(codes, pm.round(4).tolist())), [f"{', '.join(ids)}: αφαιρέθηκαν οι επιλογές {[c for c in codes if bad[c]]} "
+                                                          f"(μάζα {removed:.1%}) και η κατανομή ξανακανονικοποιήθηκε"]
+    # πολλαπλή επιλογή: (α) κωδικοί που παραβιάζουν περιορισμό ΑΠΟ ΜΟΝΟΙ ΤΟΥΣ μηδενίζονται (αλλιώς η συμπλήρωση έως min_choices
+    # θα τους ξαναέβαζε)· (β) για συνδυασμούς, επανάληψη κλήρωσης έως 200 φορές.
+    key = "inclusion_probabilities" if q.type == "multiple_choice" else None
+    notes = []
+    if key:
+        single_bad = [c for c in codes if QM.violated(cons, q.id, [c], answers, prof)]
+        if single_bad:
+            parsed = {**parsed, key: {c: (0.0 if c in single_bad else v) for c, v in parsed[key].items()}}
+            notes.append(f"{', '.join(sorted({x for c in single_bad for x in QM.violated(cons, q.id, [c], answers, prof)}))}: "
+                         f"μηδενίστηκε η πιθανότητα των επιλογών {single_bad}")
+    v0 = []
+    for k in range(200):
+        a, d = sample_answer(q, parsed, codes, rng)
+        v = QM.violated(cons, q.id, a, answers, prof)
+        if not v:
+            return a, d, notes + ([f"επανάληψη κλήρωσης {k} φορές λόγω {', '.join(v0)}"] if k else [])
+        v0 = v
+    return None, None, [f"αδύνατη κλήρωση χωρίς παραβίαση ({', '.join(v0)})"]
+
+
 def profile_answer(q, prof: dict):
     v = str(prof.get(q.profile_field))
     if q.type == "numeric":
@@ -182,7 +227,12 @@ class StudyRun:
         order = QM.question_order(self.s.qn, self.seed, self.s.study_id, rid)
         if self.qids:
             order = [q for q in order if q.id in self.qids]
-        units = [[q] for q in order] if self.batching == "per_question" else [[q for q in order if q.block == b["id"]] for b in self.s.qn.blocks]
+        if self.batching == "per_question":
+            units = [[q] for q in order]
+        elif self.batching == "per_block_dep":
+            units = QM.split_units(self.s.qn, order)
+        else:
+            units = [[q for q in order if q.block == b["id"]] for b in self.s.qn.blocks]
         for unit in units:
             unit = [q for q in unit]
             if not unit:
@@ -222,7 +272,8 @@ class StudyRun:
                     blocks.append(P.question_block(q, [(x.code, x.label) for x in o] if q.type != "dce" else None, prep[q.id]["task"], nr))
                 schema = {"type": "object", "properties": {q.id: QM.response_schema(q, prep[q.id]["codes"]) for q in ask_llm},
                           "required": [q.id for q in ask_llm], "additionalProperties": False}
-                user = P.user_prompt(prof, history, "\n".join(ctx_lines), blocks, self.brief)
+                user = P.user_prompt(prof, history, "\n".join(ctx_lines), blocks, self.brief,
+                                     history_window=int((self.cfg.get("llm") or {}).get("history_window", 25)))
                 kw = {"sleep": self.sleep} if self.sleep else {}
                 res, attempts = call_with_retry(self.provider, P.SYSTEM, user, schema, max_tokens=int(self.cfg.get("llm", {}).get("max_tokens", 1500)),
                                                 max_attempts=self.max_attempts, limiter=self.limiter, ledger=self.ledger,
@@ -241,7 +292,7 @@ class StudyRun:
                     rows.append({**base, "status": "SKIPPED", "engine_mode": "SKIP_LOGIC", "response": "", "answer_nature": "", "validation_ok": True,
                                  "validation_errors": "", "provider": "", "model": "", "model_version": "", "evidence_refs": "", "source_country": "",
                                  "assumptions": "", "distribution": "", "rationale": "", "empirical_support": "", "attempts": "", "error": "",
-                                 "inference_mode": "SKIP", "evidence_components": "", "brand_dependent": False,
+                                 "inference_mode": "SKIP", "evidence_components": "", "brand_dependent": False, "missing_reason": "not_applicable",
                                  "input_tokens": 0, "output_tokens": 0, "request_id": ""})
                     answers[q.id] = None
                     continue
@@ -305,7 +356,12 @@ class StudyRun:
                             assumptions.append(f"Εμπειρικό μοντέλο {ad.spec['artifact']} ({ad.source_country}) δόθηκε μόνο ως πλαίσιο: δεν υπάρχει επικυρωμένη στάθμιση συνδυασμού")
                         if pr.get("fallback"):
                             assumptions.append(pr["fallback"])
-                        ans, dist = sample_answer(q, llm, pr["codes"], rng)
+                        cons = QM.constraints_for(self.s.qn, q.id)
+                        ans, dist, applied = sample_constrained(q, llm, pr["codes"], rng, cons, answers, prof)
+                        if applied and ans is None:
+                            err = "Λογικός περιορισμός: " + "; ".join(applied)
+                        elif applied:
+                            assumptions.append("Λογικός περιορισμός ερωτηματολογίου: " + "; ".join(applied))
                         rationale = llm.get("rationale", "")
                         prov, model, mver = self.provider.name, self.provider.model, call_meta.get("model_version") or ""
                         support = "CONTEXT_ONLY" if call_meta.get("evidence_refs") else "NONE"
@@ -324,7 +380,7 @@ class StudyRun:
                              "attempts": json.dumps(call_meta.get("attempts", []), ensure_ascii=False) if mode in ("B_LLM", "C_HYBRID") or err else "",
                              "inference_mode": self._inference_mode(q, mode, pr, err), "evidence_components": self._components_json(q, pr, prof),
                              "brand_dependent": bool(self.orch and self.orch.entry(q.id).get("brand_dependent")),
-                             "error": err, "input_tokens": call_meta.get("input_tokens", 0) if q is (ask_llm[0] if ask_llm else None) else 0,
+                             "missing_reason": "", "error": err, "input_tokens": call_meta.get("input_tokens", 0) if q is (ask_llm[0] if ask_llm else None) else 0,
                              "output_tokens": call_meta.get("output_tokens", 0) if q is (ask_llm[0] if ask_llm else None) else 0,
                              "request_id": call_meta.get("request_id") or ""})
                 answers[q.id] = ans if not errs else None

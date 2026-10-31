@@ -106,7 +106,7 @@ def question_block(q, codes_labels, task=None, numeric_range=None) -> str:
     return "\n".join(lines)
 
 
-def user_prompt(profile: dict, history: list, context: str, blocks: list[str], study_brief: str) -> str:
-    hist = "\n".join(f"- {h}" for h in history[-25:]) or "- (καμία)"
+def user_prompt(profile: dict, history: list, context: str, blocks: list[str], study_brief: str, history_window: int = 25) -> str:
+    hist = "\n".join(f"- {h}" for h in history[-history_window:]) or "- (καμία)"
     return (f"ΜΕΛΕΤΗ: {study_brief}\n\nΣΥΝΘΕΤΙΚΟ ΠΡΟΦΙΛ:\n{profile_text(profile)}\n\nΠΡΟΗΓΟΥΜΕΝΕΣ ΑΠΑΝΤΗΣΕΙΣ ΤΟΥ ΙΔΙΟΥ ΠΡΟΣΩΠΟΥ:\n{hist}\n\n"
             f"ΕΡΕΥΝΗΤΙΚΟ ΠΛΑΙΣΙΟ (υπόβαθρο, όχι στόχος):\n{context}\n\n" + "\n\n".join(blocks))
