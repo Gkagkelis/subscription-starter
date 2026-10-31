@@ -1,0 +1,19 @@
+{
+ "key": "bf726e823cb4bfbdffd3",
+ "answer": {
+  "Q24": {
+   "probabilities": {
+    "1": 0.26,
+    "2": 0.34,
+    "3": 0.14,
+    "4": 0.04,
+    "5": 0.01,
+    "6": 0.21
+   },
+   "rationale": "Μάλλον αρνητική εικόνα, λίγη εμπιστοσύνη και τον κρίνει χειρότερο· εξετάζει Public και Skroutz, με στενό εισόδημα που ίσως αναβάλει την αγορά."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 26)",
+ "imported_at": "2026-10-31T19:27:50Z",
+ "source": "Claude Code session (AI), όχι mock"
+}
