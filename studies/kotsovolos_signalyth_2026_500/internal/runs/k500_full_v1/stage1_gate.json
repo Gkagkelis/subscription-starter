@@ -1,0 +1,107 @@
+{
+ "label": "ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ",
+ "run_id": "k500_full_v1",
+ "stage": 1,
+ "checks": [
+  {
+   "criterion": "Ολοκληρωμένες συνεντεύξεις = στόχος σταδίου",
+   "status": "PASS",
+   "detail": "50/50 · προφίλ 50 · αντικαταστάτες 0"
+  },
+  {
+   "criterion": "Σφάλματα εκτέλεσης",
+   "status": "PASS",
+   "detail": "0"
+  },
+  {
+   "criterion": "Εγκεκριμένη (παγωμένη) έκδοση ερωτηματολογίου",
+   "status": "PASS",
+   "detail": "c5fc909087d7"
+  },
+  {
+   "criterion": "Έγκυρες διαδρομές και απαντήσεις (επανυπολογισμός από τις απαντήσεις)",
+   "status": "PASS",
+   "detail": "0 ζητήματα"
+  },
+  {
+   "criterion": "Δημογραφική συνέπεια D01–D03 με το προφίλ",
+   "status": "PASS",
+   "detail": "μέρος του προηγούμενου ελέγχου"
+  },
+  {
+   "criterion": "Λογικοί περιορισμοί C1–C5",
+   "status": "PASS",
+   "detail": "0 παραβιάσεις"
+  },
+  {
+   "criterion": "Συνοχή μεταξύ ερωτήσεων: κάθε κανόνας S1–S14 ≤ 15%",
+   "status": "PASS",
+   "detail": "μέγιστο 12.0% · {'S12': 4, 'S13': 6, 'S9': 1, 'S10': 2}"
+  },
+  {
+   "criterion": "Ποικιλία: καμία διπλή αιτιολόγηση > 1%",
+   "status": "PASS",
+   "detail": "0 από 1185"
+  },
+  {
+   "criterion": "Ποικιλία: καμία ερώτηση > 95% σε μία επιλογή, χωρίς straight-lining",
+   "status": "PASS",
+   "detail": "καμία ερώτηση >95%; straight-lining Likert: 0/50"
+  },
+  {
+   "criterion": "Ρεαλιστική μεταβλητότητα: κλήρωση σύμφωνη με τις κατανομές",
+   "status": "PASS",
+   "detail": "{\"n\": 946, \"drawn_from_options_below_10pct\": 0.135, \"expected_under_correct_sampling\": 0.114, \"z\": 2.1, \"ok\": true, \"mean_probability_of_drawn_option\": 0.351}"
+  },
+  {
+   "criterion": "Καμία διπλοεγγραφή ερωτώμενου/ερώτησης",
+   "status": "PASS",
+   "detail": "0"
+  },
+  {
+   "criterion": "Κανένας διπλός ερωτώμενος (ίδια εγγραφή πλαισίου)",
+   "status": "PASS",
+   "detail": "50 μοναδικοί"
+  },
+  {
+   "criterion": "Σωστοί παρονομαστές και πολλαπλές επιλογές στο report",
+   "status": "PASS",
+   "detail": "0 αποκλίσεις"
+  },
+  {
+   "criterion": "Ενοποίηση AI και τεκμηρίων όπως σχεδιάστηκε (όρια Q01/Q02, πλαίσιο Q14–Q16, προφίλ D01–D03)",
+   "status": "PASS",
+   "detail": "όρια που άλλαξαν την κατανομή: 0"
+  },
+  {
+   "criterion": "Καμία διαρροή Signalyth / σκεπτικού στα prompts",
+   "status": "PASS",
+   "detail": "735 κείμενα"
+  },
+  {
+   "criterion": "Άγκυρες PIE αληθοφανείς",
+   "status": "PASS",
+   "detail": ""
+  },
+  {
+   "criterion": "Κανένα FAIL στους ελέγχους ποιότητας της μηχανής",
+   "status": "PASS",
+   "detail": "—"
+  }
+ ],
+ "engine_warnings": [
+  {
+   "check": "Σύνθεση completes έναντι στόχων",
+   "detail": "Μέγιστη απόκλιση από γενικό πληθυσμό του πλαισίου (μον.): {'age_band': 8.6, 'gender': 13.4, 'region': 4.6} · ανοχή 2.0"
+  },
+  {
+   "check": "Αντιφατικές απαντήσεις",
+   "detail": "14 κανόνες· {'S12': 4, 'S13': 6, 'S9': 1, 'S10': 2}"
+  },
+  {
+   "check": "Επαναληψιμότητα (ίδιος πάροχος, ίδιο seed)",
+   "detail": "ταύτιση απαντήσεων: {'pilot_k500_12 (claude_session/claude-code-session)': 0.78, 'pilot_k500_v2 (claude_session/claude-code-session)': 0.764, 'qa_branches (claude_session/claude-code-session)': 0.693}"
+  }
+ ],
+ "result": "PASS"
+}
