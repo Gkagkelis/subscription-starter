@@ -1,0 +1,16 @@
+{
+ "key": "37c14b9fc5639bd73466",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.44,
+    "2": 0.43,
+    "3": 0.13
+   },
+   "rationale": "Ηλικιωμένη μόνη, χαμηλή εκπαίδευση και εισόδημα· αγοράζει ελάχιστα και ίσως δεν θυμάται με ακρίβεια."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 51)",
+ "imported_at": "2026-10-31T19:58:58Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

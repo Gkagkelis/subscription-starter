@@ -1,0 +1,16 @@
+{
+ "key": "3c094bbaac7f601ceb82",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.55,
+    "2": 0.36,
+    "3": 0.09
+   },
+   "rationale": "Μόνος συνταξιούχος, χαμηλή εκπαίδευση, λίγες ανάγκες· αγοράζει κάτι μόνο αν χαλάσει, ίσως ούτε το θυμάται."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 51)",
+ "imported_at": "2026-10-31T19:58:58Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

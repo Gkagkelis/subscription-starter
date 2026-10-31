@@ -1,0 +1,16 @@
+{
+ "key": "ed81d13d816d090fb4ed",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.63,
+    "2": 0.29,
+    "3": 0.08
+   },
+   "rationale": "Συνταξιούχος σε χωριό που δυσκολεύεται· λίγες αγορές, κυρίως αντικατάσταση όταν χαλάσει κάτι."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 61)",
+ "imported_at": "2026-10-31T19:58:59Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

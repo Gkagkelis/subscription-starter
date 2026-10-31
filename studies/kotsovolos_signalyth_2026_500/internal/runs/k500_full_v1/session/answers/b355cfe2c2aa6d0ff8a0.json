@@ -1,0 +1,16 @@
+{
+ "key": "b355cfe2c2aa6d0ff8a0",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.8,
+    "2": 0.17,
+    "3": 0.03
+   },
+   "rationale": "Μορφωμένη γυναίκα στην Αθήνα, πιθανώς άνεργη· το ζευγάρι μάλλον αγόρασε κάτι, αλλά η ανεργία ίσως ανέβαλε αγορές."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 58)",
+ "imported_at": "2026-10-31T19:59:42Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

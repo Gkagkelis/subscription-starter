@@ -1,0 +1,16 @@
+{
+ "key": "07a03861a577edaffa78",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.58,
+    "2": 0.35,
+    "3": 0.07
+   },
+   "rationale": "Άνεργος, μόνος, σε αγροτική περιοχή με χαμηλό εισόδημα· περιορίζει τις αγορές στα απολύτως απαραίτητα."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 48)",
+ "imported_at": "2026-10-31T19:58:58Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

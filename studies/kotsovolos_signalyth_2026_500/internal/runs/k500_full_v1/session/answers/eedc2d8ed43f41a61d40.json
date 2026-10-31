@@ -1,0 +1,16 @@
+{
+ "key": "eedc2d8ed43f41a61d40",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.8,
+    "2": 0.15,
+    "3": 0.05
+   },
+   "rationale": "Φοιτητής σε οικογένεια με περιορισμένο εισόδημα· κινητό ή αξεσουάρ πιθανά, μεγάλες αγορές λιγότερο."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 61)",
+ "imported_at": "2026-10-31T19:58:59Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

@@ -1,0 +1,16 @@
+{
+ "key": "93fb576c50a1b563b0ef",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.87,
+    "2": 0.1,
+    "3": 0.03
+   },
+   "rationale": "Νέος 18-24 με τριτοβάθμια εκπαίδευση και σταθερή εργασία στο δημόσιο· οι νέοι αγοράζουν συχνά κινητά, laptop ή gadgets."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 56)",
+ "imported_at": "2026-10-31T19:59:42Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

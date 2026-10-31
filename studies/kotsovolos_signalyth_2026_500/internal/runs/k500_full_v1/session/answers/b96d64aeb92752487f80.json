@@ -1,0 +1,16 @@
+{
+ "key": "b96d64aeb92752487f80",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.91,
+    "2": 0.06,
+    "3": 0.03
+   },
+   "rationale": "Νεαρός φοιτητής σε εύπορη οικογένεια· κινητό, υπολογιστής ή gaming συσκευή είναι πολύ πιθανές αγορές για εκείνον ή το σπίτι."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 58)",
+ "imported_at": "2026-10-31T19:59:42Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

@@ -1,0 +1,16 @@
+{
+ "key": "ee770416e90dac8be0b0",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.7,
+    "2": 0.25,
+    "3": 0.05
+   },
+   "rationale": "Μισθωτός χαμηλού εισοδήματος με οικογένεια· αγοράζει μόνο όταν είναι ανάγκη, πιθανό κάποιο κινητό ή μικροσυσκευή."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 61)",
+ "imported_at": "2026-10-31T19:58:59Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

@@ -1,0 +1,16 @@
+{
+ "key": "e35216000fb7b2d8f304",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.66,
+    "2": 0.28,
+    "3": 0.06
+   },
+   "rationale": "Μόνη συνταξιούχος με χαμηλό εισόδημα σε πόλη· λίγες ανάγκες, αγοράζει κυρίως όταν κάτι χαλάσει."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 61)",
+ "imported_at": "2026-10-31T19:58:59Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

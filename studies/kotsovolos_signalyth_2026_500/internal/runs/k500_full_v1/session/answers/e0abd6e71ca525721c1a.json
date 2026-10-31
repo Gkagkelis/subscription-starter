@@ -1,0 +1,16 @@
+{
+ "key": "e0abd6e71ca525721c1a",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.88,
+    "2": 0.09,
+    "3": 0.03
+   },
+   "rationale": "Οικογένεια με παιδιά και υψηλό εισόδημα· πολλές συσκευές στο σπίτι, πολύ πιθανή κάποια αγορά σε δύο χρόνια."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 61)",
+ "imported_at": "2026-10-31T19:58:59Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

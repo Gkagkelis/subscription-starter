@@ -1,0 +1,16 @@
+{
+ "key": "33af3eb9b3c88dd27c4f",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.6,
+    "2": 0.33,
+    "3": 0.07
+   },
+   "rationale": "Νοικοκυρά 65+ με περιορισμένο εισόδημα· πιθανή αντικατάσταση μικρής οικιακής συσκευής, αλλά προσεκτικές δαπάνες."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 51)",
+ "imported_at": "2026-10-31T19:58:58Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

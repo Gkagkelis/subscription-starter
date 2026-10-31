@@ -1,0 +1,16 @@
+{
+ "key": "0c0d115d73bdd6a2d215",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.9,
+    "2": 0.07,
+    "3": 0.03
+   },
+   "rationale": "Νέα μητέρα σε πολυμελή, εύπορη οικογένεια στην Κρήτη· οι αγορές συσκευών και ηλεκτρονικών είναι σχεδόν βέβαιες."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 48)",
+ "imported_at": "2026-10-31T19:58:58Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

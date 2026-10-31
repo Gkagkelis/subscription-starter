@@ -1,0 +1,16 @@
+{
+ "key": "47c6f94dd8afba7e9be7",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.81,
+    "2": 0.15,
+    "3": 0.04
+   },
+   "rationale": "Νέος εργαζόμενος που ζει με την οικογένεια· παρά τη δυσκολία, κινητό, ακουστικά ή gaming είναι συνηθισμένες αγορές στην ηλικία του."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 52)",
+ "imported_at": "2026-10-31T19:58:58Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

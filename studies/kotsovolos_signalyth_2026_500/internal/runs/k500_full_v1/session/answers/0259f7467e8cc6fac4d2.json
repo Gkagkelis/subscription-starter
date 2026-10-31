@@ -1,0 +1,16 @@
+{
+ "key": "0259f7467e8cc6fac4d2",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.92,
+    "2": 0.06,
+    "3": 0.02
+   },
+   "rationale": "Νέος, υψηλό εισόδημα, μεγάλο νοικοκυριό στην Αττική· αγορά ηλεκτρονικών ή συσκευών σε δύο χρόνια σχεδόν βέβαιη."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 48)",
+ "imported_at": "2026-10-31T19:58:58Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

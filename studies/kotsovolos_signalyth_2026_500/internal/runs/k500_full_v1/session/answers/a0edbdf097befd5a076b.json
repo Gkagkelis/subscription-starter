@@ -1,0 +1,16 @@
+{
+ "key": "a0edbdf097befd5a076b",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.5,
+    "2": 0.44,
+    "3": 0.06
+   },
+   "rationale": "Μόνος, πολύ χαμηλό εισόδημα, δεν τα βγάζει πέρα· ίσως αγόρασε φθηνό κινητό ή μικροσυσκευή από ανάγκη, αλλά αποφεύγει τα έξοδα."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 57)",
+ "imported_at": "2026-10-31T19:59:42Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

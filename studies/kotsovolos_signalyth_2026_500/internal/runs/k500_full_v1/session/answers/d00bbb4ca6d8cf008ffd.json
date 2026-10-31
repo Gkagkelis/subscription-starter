@@ -1,0 +1,16 @@
+{
+ "key": "d00bbb4ca6d8cf008ffd",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.82,
+    "2": 0.13,
+    "3": 0.05
+   },
+   "rationale": "Εύπορη συνταξιούχος με πτυχίο στην Αττική· άνεση για αντικαταστάσεις ή tablet/κινητό, μετριασμένη από ηλικία."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 59)",
+ "imported_at": "2026-10-31T19:59:43Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

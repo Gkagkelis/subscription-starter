@@ -1,0 +1,16 @@
+{
+ "key": "0c5b7f3bc449e5708aac",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.82,
+    "2": 0.14,
+    "3": 0.04
+   },
+   "rationale": "Μορφωμένη δημόσια υπάλληλος, ζευγάρι, μεσαίο εισόδημα· παρά την πίεση, μια αγορά σε δύο χρόνια είναι πιθανή."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 48)",
+ "imported_at": "2026-10-31T19:58:58Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

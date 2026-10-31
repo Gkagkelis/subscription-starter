@@ -1,0 +1,16 @@
+{
+ "key": "7bee69515bb9b810ac84",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.79,
+    "2": 0.16,
+    "3": 0.05
+   },
+   "rationale": "Μεγάλο νοικοκυριό 5-6 ατόμων σε αγροτική περιοχή· πολλές ανάγκες σε συσκευές και κινητά, μέτρια οικονομικά."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 55)",
+ "imported_at": "2026-10-31T19:58:59Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

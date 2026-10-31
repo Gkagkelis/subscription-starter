@@ -1,0 +1,16 @@
+{
+ "key": "701665c1f070d563277c",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.68,
+    "2": 0.26,
+    "3": 0.06
+   },
+   "rationale": "Ζευγάρι 55-64 με πολύ χαμηλό εισόδημα που δεν τα βγάζει πέρα· αγορές μόνο όταν είναι απαραίτητες."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 54)",
+ "imported_at": "2026-10-31T19:58:59Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

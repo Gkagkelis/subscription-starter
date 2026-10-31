@@ -1,0 +1,16 @@
+{
+ "key": "85cd4f2d07061baf6628",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.4,
+    "2": 0.48,
+    "3": 0.12
+   },
+   "rationale": "Ηλικιωμένη που ζει μόνη, χαμηλό εισόδημα και μόρφωση· αγορές σπάνιες, μόνο για αναγκαία αντικατάσταση."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 55)",
+ "imported_at": "2026-10-31T19:58:59Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

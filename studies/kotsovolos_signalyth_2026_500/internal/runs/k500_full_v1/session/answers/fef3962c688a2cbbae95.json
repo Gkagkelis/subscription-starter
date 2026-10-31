@@ -1,0 +1,16 @@
+{
+ "key": "fef3962c688a2cbbae95",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.71,
+    "2": 0.23,
+    "3": 0.06
+   },
+   "rationale": "Φοιτήτρια 18-24 στην αγροτική Κρήτη με οικογένεια χαμηλού εισοδήματος· πιθανή αγορά κινητού ή laptop, αλλά η οικονομική δυσκολία περιορίζει."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 62)",
+ "imported_at": "2026-10-31T19:59:43Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

@@ -1,0 +1,16 @@
+{
+ "key": "eb7b345cd701cf7842b1",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.7,
+    "2": 0.25,
+    "3": 0.05
+   },
+   "rationale": "Μονογονεϊκή με χαμηλό εισόδημα σε χωριό· αγοράζει μόνο τα απαραίτητα, ίσως κινητό ή μικροσυσκευή."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 61)",
+ "imported_at": "2026-10-31T19:58:59Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

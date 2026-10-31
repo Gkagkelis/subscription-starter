@@ -1,0 +1,16 @@
+{
+ "key": "ad1ca56cedac42c0195d",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.78,
+    "2": 0.16,
+    "3": 0.06
+   },
+   "rationale": "Ηλικιωμένος άνδρας με βασική εκπαίδευση αλλά σχετικά καλό εισόδημα· πιθανή αγορά, όχι όμως συχνός αγοραστής συσκευών."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 58)",
+ "imported_at": "2026-10-31T19:59:42Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

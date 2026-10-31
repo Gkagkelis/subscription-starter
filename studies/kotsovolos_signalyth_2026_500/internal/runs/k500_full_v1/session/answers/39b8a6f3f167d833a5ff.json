@@ -1,0 +1,16 @@
+{
+ "key": "39b8a6f3f167d833a5ff",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.85,
+    "2": 0.12,
+    "3": 0.03
+   },
+   "rationale": "Μορφωμένος επαγγελματίας με άνετο εισόδημα· αναβαθμίζει συσκευές και τεχνολογία με κάποια συχνότητα."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 51)",
+ "imported_at": "2026-10-31T19:58:58Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

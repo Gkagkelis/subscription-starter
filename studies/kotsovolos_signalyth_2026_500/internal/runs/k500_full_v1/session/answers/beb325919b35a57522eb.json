@@ -1,0 +1,16 @@
+{
+ "key": "beb325919b35a57522eb",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.89,
+    "2": 0.08,
+    "3": 0.03
+   },
+   "rationale": "Νεαρή φοιτήτρια από εύπορη οικογένεια στα Γιάννενα· πιθανή αγορά κινητού, laptop ή μικροσυσκευής για εκείνη ή το σπίτι."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 58)",
+ "imported_at": "2026-10-31T19:59:43Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

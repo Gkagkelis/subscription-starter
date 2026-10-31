@@ -1,0 +1,16 @@
+{
+ "key": "85d43e4b972e4a0cd255",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.89,
+    "2": 0.08,
+    "3": 0.03
+   },
+   "rationale": "Φοιτήτρια σε εύπορο οικογενειακό νοικοκυριό στην Αττική· σχεδόν βέβαιη αγορά κινητού, laptop ή άλλης συσκευής."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 55)",
+ "imported_at": "2026-10-31T19:58:59Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

@@ -1,0 +1,16 @@
+{
+ "key": "0e347eb014cdbb193ae0",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.5,
+    "2": 0.41,
+    "3": 0.09
+   },
+   "rationale": "Μόνη συνταξιούχος με πολύ χαμηλό εισόδημα και δυσκολία· αγοράζει μόνο αν χαλάσει κάτι απαραίτητο."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 48)",
+ "imported_at": "2026-10-31T19:58:58Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

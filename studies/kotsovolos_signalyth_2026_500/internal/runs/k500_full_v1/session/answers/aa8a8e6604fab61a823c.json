@@ -1,0 +1,16 @@
+{
+ "key": "aa8a8e6604fab61a823c",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.84,
+    "2": 0.11,
+    "3": 0.05
+   },
+   "rationale": "Νοικοκυρά 65+ σε νοικοκυριό 3-4 ατόμων με καλό εισόδημα· οι ανάγκες του σπιτιού κάνουν πιθανή κάποια αγορά συσκευής."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 58)",
+ "imported_at": "2026-10-31T19:59:42Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

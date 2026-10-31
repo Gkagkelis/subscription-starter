@@ -1,0 +1,16 @@
+{
+ "key": "9aece1fadbd7ccebbefd",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.55,
+    "2": 0.39,
+    "3": 0.06
+   },
+   "rationale": "Ζευγάρι συνταξιούχων με χαμηλό εισόδημα και δυσκολίες· αγορές μόνο από ανάγκη, όπως βλάβη ψυγείου ή κινητού."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 57)",
+ "imported_at": "2026-10-31T19:59:42Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

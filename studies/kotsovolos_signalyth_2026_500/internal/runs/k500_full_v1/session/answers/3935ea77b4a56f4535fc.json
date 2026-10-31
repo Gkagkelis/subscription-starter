@@ -1,0 +1,16 @@
+{
+ "key": "3935ea77b4a56f4535fc",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.57,
+    "2": 0.35,
+    "3": 0.08
+   },
+   "rationale": "Μόνη σε νησιωτικό χωριό με περιορισμένα έσοδα· λίγες ευκαιρίες και χρήματα για αγορές, μόνο τα απαραίτητα."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 51)",
+ "imported_at": "2026-10-31T19:58:58Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

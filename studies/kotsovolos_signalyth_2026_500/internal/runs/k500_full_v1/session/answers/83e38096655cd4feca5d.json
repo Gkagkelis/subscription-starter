@@ -1,0 +1,16 @@
+{
+ "key": "83e38096655cd4feca5d",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.83,
+    "2": 0.13,
+    "3": 0.04
+   },
+   "rationale": "Δημόσιος υπάλληλος σε νοικοκυριό 3-4 ατόμων με συγγενείς· πιθανή αγορά κινητού ή οικιακής συσκευής."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 55)",
+ "imported_at": "2026-10-31T19:58:59Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

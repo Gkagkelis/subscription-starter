@@ -1,0 +1,16 @@
+{
+ "key": "02dc23d0d39ead281a45",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.7,
+    "2": 0.25,
+    "3": 0.05
+   },
+   "rationale": "Νέα, άνεργη, μόνη, με οικονομική δυσκολία· ίσως πήρε κινητό ή μικρή συσκευή, όμως η ανεργία μειώνει τις αγορές."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 48)",
+ "imported_at": "2026-10-31T19:58:58Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

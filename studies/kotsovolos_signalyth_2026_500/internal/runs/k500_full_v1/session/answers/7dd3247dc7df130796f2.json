@@ -1,0 +1,16 @@
+{
+ "key": "7dd3247dc7df130796f2",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.74,
+    "2": 0.22,
+    "3": 0.04
+   },
+   "rationale": "Φοιτήτρια με πολύ περιορισμένα οικονομικά· οι νέοι χρειάζονται κινητό ή laptop, αλλά η έλλειψη χρημάτων περιορίζει."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 55)",
+ "imported_at": "2026-10-31T19:58:59Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

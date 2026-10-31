@@ -1,0 +1,16 @@
+{
+ "key": "28459465c5bd4890caeb",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.75,
+    "2": 0.18,
+    "3": 0.07
+   },
+   "rationale": "Μορφωμένη συνταξιούχος στην Αθήνα, ζευγάρι με μέτρια άνεση· πιθανή αγορά κινητού, tablet ή οικιακής συσκευής μέσα σε δύο χρόνια."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 50)",
+ "imported_at": "2026-10-31T19:58:58Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

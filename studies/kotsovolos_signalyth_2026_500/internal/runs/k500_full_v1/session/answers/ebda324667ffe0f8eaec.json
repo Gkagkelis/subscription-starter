@@ -1,0 +1,16 @@
+{
+ "key": "ebda324667ffe0f8eaec",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.84,
+    "2": 0.12,
+    "3": 0.04
+   },
+   "rationale": "Φοιτήτρια σε εύπορη οικογένεια στην Αθήνα· νέο κινητό ή laptop πολύ πιθανό."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 61)",
+ "imported_at": "2026-10-31T19:58:59Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

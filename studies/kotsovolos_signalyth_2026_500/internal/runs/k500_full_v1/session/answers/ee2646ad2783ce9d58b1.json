@@ -1,0 +1,16 @@
+{
+ "key": "ee2646ad2783ce9d58b1",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.88,
+    "2": 0.1,
+    "3": 0.02
+   },
+   "rationale": "Εργαζόμενη μητέρα στην Αττική με καλό εισόδημα· οικογενειακές ανάγκες κάνουν μια αγορά πολύ πιθανή."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 61)",
+ "imported_at": "2026-10-31T19:58:59Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

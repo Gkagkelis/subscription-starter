@@ -1,0 +1,16 @@
+{
+ "key": "458fac42800f7139893b",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.86,
+    "2": 0.11,
+    "3": 0.03
+   },
+   "rationale": "Νέος φοιτητής που ζει με σύντροφο· συχνή ανανέωση κινητού, laptop ή αξεσουάρ, παρά το χαμηλό καταγεγραμμένο εισόδημα."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 52)",
+ "imported_at": "2026-10-31T19:58:58Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

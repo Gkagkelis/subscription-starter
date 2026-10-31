@@ -1,0 +1,16 @@
+{
+ "key": "2e6c3eed95b2e89e1aa1",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.53,
+    "2": 0.34,
+    "3": 0.13
+   },
+   "rationale": "Ηλικιωμένος αγρότης στη Θράκη που δεν τα βγάζει πέρα· αγοράζει μόνο ό,τι είναι απαραίτητο, οπότε η αγορά είναι αβέβαιη."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 50)",
+ "imported_at": "2026-10-31T19:58:58Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

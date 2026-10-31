@@ -1,0 +1,16 @@
+{
+ "key": "c8ae2d5ba98bf23e856f",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.87,
+    "2": 0.1,
+    "3": 0.03
+   },
+   "rationale": "Νέα εργαζόμενη με πτυχίο στη Θεσσαλονίκη· πιθανή αγορά κινητού, laptop ή μικροσυσκευής, παρά το μέτριο εισόδημα."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 59)",
+ "imported_at": "2026-10-31T19:59:43Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

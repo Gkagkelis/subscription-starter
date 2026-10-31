@@ -1,0 +1,16 @@
+{
+ "key": "326b568ee05d6c6797e9",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.86,
+    "2": 0.1,
+    "3": 0.04
+   },
+   "rationale": "Φοιτήτρια σε πολυμελές νοικοκυριό στη Θεσσαλονίκη· πολύ πιθανή αγορά κινητού, laptop ή οικιακής συσκευής για το σπίτι."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 51)",
+ "imported_at": "2026-10-31T19:58:58Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

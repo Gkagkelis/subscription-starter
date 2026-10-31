@@ -1,0 +1,16 @@
+{
+ "key": "68cafdcae8e204ec2b05",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.5,
+    "2": 0.4,
+    "3": 0.1
+   },
+   "rationale": "Ηλικιωμένη που ζει μόνη σε νησί με πολύ χαμηλό εισόδημα· αγορές μόνο σε ανάγκη, αυξημένη πιθανότητα μη αγοράς ή μη ανάκλησης."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 54)",
+ "imported_at": "2026-10-31T19:58:59Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

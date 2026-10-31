@@ -1,0 +1,16 @@
+{
+ "key": "d02b52c06983ae3f31a2",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.83,
+    "2": 0.12,
+    "3": 0.05
+   },
+   "rationale": "Εύπορος αυτοαπασχολούμενος 65+ με πτυχίο· πιθανή αγορά για εργασία ή σπίτι, παρά την ηλικία."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 59)",
+ "imported_at": "2026-10-31T19:59:43Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

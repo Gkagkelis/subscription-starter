@@ -1,0 +1,16 @@
+{
+ "key": "f165e059ddfe3d5698ec",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.76,
+    "2": 0.19,
+    "3": 0.05
+   },
+   "rationale": "Νέος μισθωτός στην Αθήνα με χαμηλό εισόδημα· κινητό ή μικροσυσκευή πιθανά, μεγαλύτερες αγορές αναβάλλονται."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 61)",
+ "imported_at": "2026-10-31T19:58:59Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

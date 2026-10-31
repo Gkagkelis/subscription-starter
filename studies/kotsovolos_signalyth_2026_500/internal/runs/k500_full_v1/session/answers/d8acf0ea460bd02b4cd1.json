@@ -1,0 +1,16 @@
+{
+ "key": "d8acf0ea460bd02b4cd1",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.68,
+    "2": 0.26,
+    "3": 0.06
+   },
+   "rationale": "Αυτοαπασχολούμενη χαμηλού εισοδήματος σε αγροτική περιοχή, ζευγάρι χωρίς παιδιά· αγοράζει μόνο το απολύτως αναγκαίο."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 60)",
+ "imported_at": "2026-10-31T19:59:43Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

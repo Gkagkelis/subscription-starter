@@ -1,0 +1,16 @@
+{
+ "key": "3dbedbd31208db569f1e",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.5,
+    "2": 0.37,
+    "3": 0.13
+   },
+   "rationale": "Ηλικιωμένη χωρίς ολοκληρωμένη εκπαίδευση· τις αγορές μάλλον κάνει ο σύζυγος ή τα παιδιά, υψηλότερη αβεβαιότητα μνήμης."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 51)",
+ "imported_at": "2026-10-31T19:58:58Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

@@ -1,0 +1,16 @@
+{
+ "key": "3efbc3ff0d5503984d84",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.76,
+    "2": 0.18,
+    "3": 0.06
+   },
+   "rationale": "Μορφωμένη συνταξιούχος σε πολυμελές νοικοκυριό με καλό εισόδημα· πιθανή αγορά για το σπίτι ή τα εγγόνια."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 51)",
+ "imported_at": "2026-10-31T19:58:58Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

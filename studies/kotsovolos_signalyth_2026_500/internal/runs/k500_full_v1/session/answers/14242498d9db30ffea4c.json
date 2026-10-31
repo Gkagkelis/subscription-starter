@@ -1,0 +1,16 @@
+{
+ "key": "14242498d9db30ffea4c",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.8,
+    "2": 0.14,
+    "3": 0.06
+   },
+   "rationale": "Φοιτητής από πολυμελή οικογένεια στη Στερεά Ελλάδα με καλό εισόδημα· πιθανή αγορά laptop ή κινητού για τις σπουδές ή για το σπίτι."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 49)",
+ "imported_at": "2026-10-31T19:58:58Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

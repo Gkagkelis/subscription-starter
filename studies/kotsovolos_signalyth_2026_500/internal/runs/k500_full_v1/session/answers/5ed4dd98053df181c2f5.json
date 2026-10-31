@@ -1,0 +1,16 @@
+{
+ "key": "5ed4dd98053df181c2f5",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.73,
+    "2": 0.22,
+    "3": 0.05
+   },
+   "rationale": "Μονογονέας με χαμηλό εισόδημα και δυσκολίες· οι ανάγκες των παιδιών πιέζουν για αγορές, αλλά το στενό budget αναβάλλει αρκετές."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 53)",
+ "imported_at": "2026-10-31T19:58:59Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

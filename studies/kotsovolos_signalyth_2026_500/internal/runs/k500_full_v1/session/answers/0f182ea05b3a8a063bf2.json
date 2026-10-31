@@ -1,0 +1,16 @@
+{
+ "key": "0f182ea05b3a8a063bf2",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.56,
+    "2": 0.35,
+    "3": 0.09
+   },
+   "rationale": "Ηλικιωμένη που ζει μόνη, μεσαίο εισόδημα· σπάνιες αγορές συσκευών, κυρίως για αντικατάσταση."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 48)",
+ "imported_at": "2026-10-31T19:58:58Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

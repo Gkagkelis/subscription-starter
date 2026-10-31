@@ -1,0 +1,16 @@
+{
+ "key": "332ff2ebf87395aedfe9",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.8,
+    "2": 0.15,
+    "3": 0.05
+   },
+   "rationale": "Συνταξιούχος με άνετο εισόδημα και παιδιά στο σπίτι· αναβαθμίσεις συσκευών μέσα σε δύο χρόνια είναι αρκετά πιθανές."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 51)",
+ "imported_at": "2026-10-31T19:58:58Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

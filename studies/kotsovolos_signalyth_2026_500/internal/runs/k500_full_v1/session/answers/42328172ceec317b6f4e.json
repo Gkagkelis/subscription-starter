@@ -1,0 +1,16 @@
+{
+ "key": "42328172ceec317b6f4e",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.9,
+    "2": 0.08,
+    "3": 0.02
+   },
+   "rationale": "Άνετο οικονομικά νοικοκυριό με παιδιά στην Αττική· πολύ πιθανή αγορά ή ανανέωση συσκευών μέσα σε δύο χρόνια."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 52)",
+ "imported_at": "2026-10-31T19:58:58Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

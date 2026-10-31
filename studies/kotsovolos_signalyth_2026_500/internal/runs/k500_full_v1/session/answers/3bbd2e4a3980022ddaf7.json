@@ -1,0 +1,16 @@
+{
+ "key": "3bbd2e4a3980022ddaf7",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.6,
+    "2": 0.33,
+    "3": 0.07
+   },
+   "rationale": "Μορφωμένος ηλικιωμένος με οικονομική δυσκολία· ενδεχόμενη αγορά κινητού ή μικροσυσκευής, αλλά αποφεύγει έξοδα."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 51)",
+ "imported_at": "2026-10-31T19:58:58Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

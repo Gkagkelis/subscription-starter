@@ -1,0 +1,16 @@
+{
+ "key": "eb25579876bbee380ad9",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.78,
+    "2": 0.18,
+    "3": 0.04
+   },
+   "rationale": "Μορφωμένη εργαζόμενη στη Λάρισα με χαμηλότερο εισόδημα· πιθανή αγορά, αν και συγκρατημένη."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 61)",
+ "imported_at": "2026-10-31T19:58:59Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

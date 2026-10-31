@@ -1,0 +1,16 @@
+{
+ "key": "e3c465a0bf17397b1ade",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.86,
+    "2": 0.11,
+    "3": 0.03
+   },
+   "rationale": "Μορφωμένη, εργαζόμενη με υψηλό εισόδημα και οικογένεια· πιθανή αγορά ηλεκτρονικών ή οικιακών συσκευών."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 61)",
+ "imported_at": "2026-10-31T19:58:59Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

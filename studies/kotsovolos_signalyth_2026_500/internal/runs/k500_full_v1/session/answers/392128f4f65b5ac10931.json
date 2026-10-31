@@ -1,0 +1,16 @@
+{
+ "key": "392128f4f65b5ac10931",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.87,
+    "2": 0.09,
+    "3": 0.04
+   },
+   "rationale": "Νεαρός φοιτητής σε εύπορο πολυμελές νοικοκυριό· κινητό, κονσόλα ή υπολογιστής πολύ πιθανή αγορά."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 51)",
+ "imported_at": "2026-10-31T19:58:58Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

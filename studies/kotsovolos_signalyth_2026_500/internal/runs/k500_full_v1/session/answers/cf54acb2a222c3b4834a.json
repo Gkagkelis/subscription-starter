@@ -1,0 +1,16 @@
+{
+ "key": "cf54acb2a222c3b4834a",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.52,
+    "2": 0.38,
+    "3": 0.1
+   },
+   "rationale": "Μοναχική συνταξιούχος που δεν τα βγάζει πέρα· ελάχιστες αγορές, μόνο αν χαλάσει κάτι απαραίτητο."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 59)",
+ "imported_at": "2026-10-31T19:59:43Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

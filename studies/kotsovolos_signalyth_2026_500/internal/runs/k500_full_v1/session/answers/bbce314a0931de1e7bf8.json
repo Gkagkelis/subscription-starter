@@ -1,0 +1,16 @@
+{
+ "key": "bbce314a0931de1e7bf8",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.55,
+    "2": 0.36,
+    "3": 0.09
+   },
+   "rationale": "Ηλικιωμένη, μόνη, χωρίς ολοκληρωμένη εκπαίδευση, με δυσκολία· αγοράζει σπάνια, και ίσως δεν θυμάται ακριβώς πότε."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 58)",
+ "imported_at": "2026-10-31T19:59:42Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

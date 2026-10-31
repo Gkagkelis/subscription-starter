@@ -1,0 +1,16 @@
+{
+ "key": "3490166e85d8cff96be0",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.89,
+    "2": 0.08,
+    "3": 0.03
+   },
+   "rationale": "Πολύ μεγάλο νοικοκυριό με υψηλό εισόδημα· οι ανάγκες σε συσκευές είναι συνεχείς, άρα αγορά σχεδόν σίγουρη."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 51)",
+ "imported_at": "2026-10-31T19:58:58Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

@@ -1,0 +1,16 @@
+{
+ "key": "9c451fb950c922aa1851",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.8,
+    "2": 0.17,
+    "3": 0.03
+   },
+   "rationale": "Μόνος δημόσιος υπάλληλος στη Θεσσαλονίκη με καλό εισόδημα και μόρφωση· πιθανή αγορά κινητού, laptop ή μικροσυσκευής."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 57)",
+ "imported_at": "2026-10-31T19:59:42Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

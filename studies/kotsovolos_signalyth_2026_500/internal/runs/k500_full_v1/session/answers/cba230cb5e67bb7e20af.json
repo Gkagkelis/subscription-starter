@@ -1,0 +1,16 @@
+{
+ "key": "cba230cb5e67bb7e20af",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.77,
+    "2": 0.18,
+    "3": 0.05
+   },
+   "rationale": "Άνεργος 45-54 με οικογένεια στην Αττική· ανάγκες νοικοκυριού με παιδιά κάνουν πιθανή κάποια αγορά, παρά την ανεργία."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 59)",
+ "imported_at": "2026-10-31T19:59:43Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

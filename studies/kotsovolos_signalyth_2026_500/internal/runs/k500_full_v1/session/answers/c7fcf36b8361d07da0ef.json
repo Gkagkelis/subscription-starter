@@ -1,0 +1,16 @@
+{
+ "key": "c7fcf36b8361d07da0ef",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.63,
+    "2": 0.29,
+    "3": 0.08
+   },
+   "rationale": "Άνεργος με πολυμελή οικογένεια που δεν τα βγάζει πέρα· αγορές αναβάλλονται, αν και τα παιδιά μπορεί να χρειάστηκαν κάτι."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 59)",
+ "imported_at": "2026-10-31T19:59:43Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

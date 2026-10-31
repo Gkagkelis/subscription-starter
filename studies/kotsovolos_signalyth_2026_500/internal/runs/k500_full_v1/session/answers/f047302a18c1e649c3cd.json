@@ -1,0 +1,16 @@
+{
+ "key": "f047302a18c1e649c3cd",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.82,
+    "2": 0.13,
+    "3": 0.05
+   },
+   "rationale": "Φοιτήτρια από εύπορη οικογένεια στην Πελοπόννησο· νέο κινητό ή laptop για σπουδές πολύ πιθανό."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 61)",
+ "imported_at": "2026-10-31T19:58:59Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

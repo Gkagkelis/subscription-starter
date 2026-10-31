@@ -1,0 +1,16 @@
+{
+ "key": "a2af4d6d4215f70fcfef",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.7,
+    "2": 0.24,
+    "3": 0.06
+   },
+   "rationale": "Μορφωμένος συνταξιούχος με οικογένεια στο σπίτι στην Αθήνα· μέτρια οικονομικά αλλά πιθανή κάποια αγορά για το νοικοκυριό."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 57)",
+ "imported_at": "2026-10-31T19:59:42Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

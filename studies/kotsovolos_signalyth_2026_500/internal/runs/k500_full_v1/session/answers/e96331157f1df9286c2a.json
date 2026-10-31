@@ -1,0 +1,16 @@
+{
+ "key": "e96331157f1df9286c2a",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.91,
+    "2": 0.07,
+    "3": 0.02
+   },
+   "rationale": "Μορφωμένη μητέρα στην Αθήνα με υψηλό εισόδημα· σχεδόν σίγουρα αγόρασε κάποια συσκευή σε δύο χρόνια."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 61)",
+ "imported_at": "2026-10-31T19:58:59Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

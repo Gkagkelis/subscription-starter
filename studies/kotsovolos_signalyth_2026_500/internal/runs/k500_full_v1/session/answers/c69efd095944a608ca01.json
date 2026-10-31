@@ -1,0 +1,16 @@
+{
+ "key": "c69efd095944a608ca01",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.68,
+    "2": 0.26,
+    "3": 0.06
+   },
+   "rationale": "Άνεργη με χαμηλό εισόδημα σε διμελές νοικοκυριό· αναβάλλει αγορές, εκτός αν χαλάσει κάτι βασικό."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 59)",
+ "imported_at": "2026-10-31T19:59:43Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

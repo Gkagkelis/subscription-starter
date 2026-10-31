@@ -1,0 +1,16 @@
+{
+ "key": "ee98acccd2de7950dc1f",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.85,
+    "2": 0.12,
+    "3": 0.03
+   },
+   "rationale": "Μεγάλο οικογενειακό νοικοκυριό σε νησί· πολλές συσκευές σε χρήση, πιθανή αγορά παρά τη μικρότερη πρόσβαση."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 61)",
+ "imported_at": "2026-10-31T19:58:59Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

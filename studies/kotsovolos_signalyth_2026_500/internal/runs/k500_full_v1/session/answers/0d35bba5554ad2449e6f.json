@@ -1,0 +1,16 @@
+{
+ "key": "0d35bba5554ad2449e6f",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.8,
+    "2": 0.15,
+    "3": 0.05
+   },
+   "rationale": "Εύπορη συνταξιούχος στην Αττική με οικογένεια στο σπίτι· η άνεση και οι ανάγκες του νοικοκυριού ευνοούν αγορές."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 48)",
+ "imported_at": "2026-10-31T19:58:58Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

@@ -1,0 +1,16 @@
+{
+ "key": "78d4f4f2d1a285fb0844",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.8,
+    "2": 0.16,
+    "3": 0.04
+   },
+   "rationale": "Νέα απόφοιτη, άνεργη· οι νέοι αγοράζουν συχνά κινητό, ακουστικά ή laptop, έστω και με περιορισμένα χρήματα."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 55)",
+ "imported_at": "2026-10-31T19:58:59Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

@@ -1,0 +1,16 @@
+{
+ "key": "3ca95f18b24db3c4df52",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.85,
+    "2": 0.12,
+    "3": 0.03
+   },
+   "rationale": "Δημόσιος υπάλληλος με παιδιά και τριτοβάθμια· σταθερό εισόδημα επιτρέπει ανανέωση συσκευών μέσα σε δύο χρόνια."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 51)",
+ "imported_at": "2026-10-31T19:58:58Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

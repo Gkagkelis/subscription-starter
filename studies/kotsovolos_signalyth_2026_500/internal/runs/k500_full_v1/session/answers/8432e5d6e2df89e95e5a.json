@@ -1,0 +1,16 @@
+{
+ "key": "8432e5d6e2df89e95e5a",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.82,
+    "2": 0.15,
+    "3": 0.03
+   },
+   "rationale": "Εύπορος, μορφωμένος συνταξιούχος· έχει την οικονομική άνεση για ανανέωση συσκευών, αν και ζει μόνος."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 55)",
+ "imported_at": "2026-10-31T19:58:59Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

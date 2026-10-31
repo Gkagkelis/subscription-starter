@@ -1,0 +1,16 @@
+{
+ "key": "bceeb780936c34c8b812",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.93,
+    "2": 0.05,
+    "3": 0.02
+   },
+   "rationale": "Νέα, μορφωμένη, οικονομικά άνετη μητέρα στην Αθήνα· σχεδόν βέβαιη αγορά κινητού ή συσκευής για το σπίτι."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 58)",
+ "imported_at": "2026-10-31T19:59:43Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

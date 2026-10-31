@@ -1,0 +1,16 @@
+{
+ "key": "b55c4ff6aa9a9dea0a8e",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.72,
+    "2": 0.21,
+    "3": 0.07
+   },
+   "rationale": "Ηλικιωμένος αγρότης σε χωριό με καλό εισόδημα· πιθανή αγορά για το σπίτι, αλλά η ηλικία μειώνει τη συχνότητα αγορών."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 58)",
+ "imported_at": "2026-10-31T19:59:42Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

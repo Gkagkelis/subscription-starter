@@ -1,0 +1,16 @@
+{
+ "key": "c40f6334603cd9d0158c",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.93,
+    "2": 0.05,
+    "3": 0.02
+   },
+   "rationale": "Φοιτητής από εύπορο νοικοκυριό στην Κρήτη· πολύ πιθανή αγορά κινητού, υπολογιστή ή gaming εξοπλισμού."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 59)",
+ "imported_at": "2026-10-31T19:59:43Z",
+ "source": "Claude Code session (AI), όχι mock"
+}
