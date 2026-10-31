@@ -1,0 +1,19 @@
+{
+ "key": "06fd89f607d3aff1c858",
+ "answer": {
+  "Q24": {
+   "probabilities": {
+    "1": 0.03,
+    "2": 0.12,
+    "3": 0.25,
+    "4": 0.4,
+    "5": 0.12,
+    "6": 0.08
+   },
+   "rationale": "Μάλλον θετική εικόνα και τον περιλαμβάνει στις εναλλακτικές μαζί με Public· μέτρια εμπιστοσύνη, αγοράζει κυρίως online."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 151)",
+ "imported_at": "2026-10-31T20:19:25Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

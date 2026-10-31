@@ -1,0 +1,19 @@
+{
+ "key": "21223348f652f40764df",
+ "answer": {
+  "Q24": {
+   "probabilities": {
+    "1": 0.04,
+    "2": 0.2,
+    "3": 0.35,
+    "4": 0.27,
+    "5": 0.06,
+    "6": 0.08
+   },
+   "rationale": "Τον κρίνει μάλλον καλύτερο, αλλά ψωνίζει από marketplace και ανέφερε μόνο Public και Skroutz ως εναλλακτικές· μέτρια, αβέβαιη πιθανότητα επιλογής."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 138)",
+ "imported_at": "2026-10-31T20:19:25Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

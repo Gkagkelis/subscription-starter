@@ -1,0 +1,19 @@
+{
+ "key": "d0e262a63352b66616e7",
+ "answer": {
+  "Q24": {
+   "probabilities": {
+    "1": 0.12,
+    "2": 0.3,
+    "3": 0.3,
+    "4": 0.15,
+    "5": 0.03,
+    "6": 0.1
+   },
+   "rationale": "Αγοράζει κυρίως online από marketplace, εξετάζει μόνο Skroutz και δεν μπορεί να συγκρίνει· μέτρια εμπιστοσύνη, άρα χαμηλή ως μέτρια πιθανότητα."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 150)",
+ "imported_at": "2026-10-31T20:19:27Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

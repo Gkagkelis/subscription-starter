@@ -1,0 +1,19 @@
+{
+ "key": "9c0afdad630d13573f7b",
+ "answer": {
+  "Q24": {
+   "probabilities": {
+    "1": 0.04,
+    "2": 0.16,
+    "3": 0.35,
+    "4": 0.25,
+    "5": 0.05,
+    "6": 0.15
+   },
+   "rationale": "Τον βάζει στις εναλλακτικές με Public και Skroutz και τον κρίνει ίδιο με άλλους· φοιτητής που ψωνίζει online για τιμή, άρα μάλλον ουδέτερη πρόθεση."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 142)",
+ "imported_at": "2026-10-31T20:19:26Z",
+ "source": "Claude Code session (AI), όχι mock"
+}
