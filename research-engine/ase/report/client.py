@@ -102,7 +102,9 @@ def render_report(study, run_id, res: pd.DataFrame, xt: pd.DataFrame, preview: b
     cfg, rep = study.cfg, cfg_report(study.cfg)
     man = read_json(study.internal / "runs" / run_id / "execution_manifest.json")
     panel = read_json(study.internal / "panel_report.json")
-    n = man["respondents_completed"]
+    n = int((man.get("status_counts") or {}).get("COMPLETE", man["respondents_completed"]))   # ολοκληρωμένα ερωτηματολόγια
+    n_prof = int(man["respondents_completed"])
+    comp = man.get("completes")
     period = rep.get("period") or man["finished_at"][:10]
     P = []
     P.append(f'''<section class="cover"><div class="k">Greek Synthetic Research Lab · Adaptive Synthetic Research Engine</div>
@@ -110,7 +112,7 @@ def render_report(study, run_id, res: pd.DataFrame, xt: pd.DataFrame, preview: b
 <div class="disc"><b>Σημαντικό:</b> {esc(DISCLOSURE)}</div>
 {'<div class="preview">ΠΡΟΕΠΙΣΚΟΠΗΣΗ — DRY RUN / ΔΟΚΙΜΑΣΤΙΚΗ ΕΚΤΕΛΕΣΗ. Τα αποτελέσματα δεν αποτελούν ευρήματα της μελέτης.</div>' if preview else ''}
 <div class="meta"><div><span>Πελάτης</span><b>{esc(cfg["study"].get("client", "—"))}</b></div><div><span>Περίοδος</span><b>{esc(period)}</b></div>
-<div><span>Συνθετικά προφίλ</span><b>{f"{n:,}".replace(",", ".")}</b></div></div></section>''')
+<div><span>Ολοκληρωμένα ερωτηματολόγια</span><b>{f"{n:,}".replace(",", ".")}</b></div></div></section>''')
     closed = res[res["type"].isin(["single_choice", "likert", "scenario", "dce", "multiple_choice", "ranking"])]
     finds = []
     for qid in (rep.get("key_questions") or list(dict.fromkeys(closed["question_id"]))[:6]):
@@ -122,7 +124,7 @@ def render_report(study, run_id, res: pd.DataFrame, xt: pd.DataFrame, preview: b
         var = f" ({esc(qq.raw['variant_label'])})" if qq is not None and qq.raw.get("variant_label") else ""
         finds.append(f"Στην ερώτηση «{esc(top['question'])}»{var}, η συχνότερη απάντηση ήταν «{esc(top['option_label'])}» ({f1(top['pct'])}% των {int(top['n_base'])} συνθετικών ερωτωμένων).")
     P.append(f'''<section class="sec"><h2>Σύνοψη</h2><p class="lead">{esc(cfg["study"].get("summary_intro", "Η μελέτη προσομοιώνει πώς θα απαντούσαν συνθετικοί καταναλωτές με τα δημογραφικά χαρακτηριστικά του πληθυσμού-στόχου."))}</p>
-<div class="kpis"><div class="kpi"><b>{n}</b><span>συνθετικοί καταναλωτές</span></div><div class="kpi"><b>{res["question_id"].nunique()}</b><span>ερωτήσεις με αποτελέσματα</span></div>
+<div class="kpis"><div class="kpi"><b>{n}</b><span>ολοκληρωμένα συνθετικά ερωτηματολόγια</span></div><div class="kpi"><b>{res["question_id"].nunique()}</b><span>ερωτήσεις με αποτελέσματα</span></div>
 <div class="kpi"><b>{esc(geo_label(panel["target_population"]["geography"]))}</b><span>γεωγραφική κάλυψη</span></div></div>
 <h3>Βασικά ευρήματα</h3><ul class="f">{"".join(f"<li>{x}</li>" for x in finds)}</ul></section>''')
     for b in study.qn.blocks:
@@ -194,11 +196,24 @@ def render_report(study, run_id, res: pd.DataFrame, xt: pd.DataFrame, preview: b
              + "<h2>Συμπεράσματα</h2>" + ("<ul class='f'>" + "".join(f"<li>{esc(x)}</li>" for x in con) + "</ul>" if con else "<p>Βλ. βασικά ευρήματα.</p>") + "</section>")
     fm = panel["frame_manifest"]
     P.append(f'''<section class="sec meth"><h2>Μεθοδολογία</h2><p><b>{esc(DISCLOSURE)}</b></p>
-<p><b>Συνθετικό πάνελ.</b> {n} συνθετικά προφίλ ενηλίκων ({esc(str(panel["target_population"]["population"]))}). Τα δημογραφικά (ηλικία, φύλο, περιφέρεια, εκπαίδευση, νοικοκυριό, εισόδημα) προέρχονται από συνεκτικές εγγραφές του GLOPOP-S, βαθμονομημένες στον επίσημο πληθυσμό 2025 (Eurostat/ΕΛΣΤΑΤ), με δειγματοληψία quotas (μέγιστη απόκλιση από τους στόχους {f1(panel["max_abs_deviation_pp"])} μονάδες).</p>
-<p><b>Προσομοίωση απαντήσεων.</b> Για κάθε ερώτηση, ένα μοντέλο τεχνητής νοημοσύνης εκτιμά πώς θα απαντούσε ένα πρόσωπο με το συγκεκριμένο προφίλ, με βάση ένα κοινό, τεκμηριωμένο ερευνητικό πλαίσιο και τις προηγούμενες απαντήσεις του. Η απάντηση κάθε προσώπου επιλέγεται από αυτή την εκτίμηση με αναπαραγώγιμη τυχαιότητα. Ερωτήσεις για προσωπική εμπειρία απαντώνται ως υποθετικά χαρακτηριστικά σεναρίου. Όπου υπάρχει κατάλληλο εμπειρικό μοντέλο, χρησιμοποιείται εντός των ορίων του.</p>
+<p><b>Συνθετικό πάνελ.</b> {n_prof} συνθετικά προφίλ ενηλίκων ({esc(str(panel["target_population"]["population"]))}). Τα δημογραφικά (ηλικία, φύλο, περιφέρεια, εκπαίδευση, νοικοκυριό, εισόδημα) προέρχονται από συνεκτικές εγγραφές του GLOPOP-S, βαθμονομημένες στον επίσημο πληθυσμό 2025 (Eurostat/ΕΛΣΤΑΤ), με δειγματοληψία quotas (μέγιστη απόκλιση από τους στόχους {f1(panel["max_abs_deviation_pp"])} μονάδες). {_sample_text(n, n_prof, comp)}</p>
+<p><b>Προσομοίωση απαντήσεων.</b> Για κάθε ερώτηση, ένα μοντέλο τεχνητής νοημοσύνης εκτιμά πώς θα απαντούσε ένα πρόσωπο με το συγκεκριμένο προφίλ, με βάση το προφίλ, τις προηγούμενες απαντήσεις του και, όπου υπάρχει, δημόσιο ερευνητικό υπόβαθρο για το θέμα, το οποίο λειτουργεί ως πλαίσιο και όχι ως πηγή ποσοστών. Η απάντηση κάθε προσώπου επιλέγεται από αυτή την εκτίμηση με αναπαραγώγιμη τυχαιότητα. Ερωτήσεις για προσωπική εμπειρία απαντώνται ως υποθετικά χαρακτηριστικά σεναρίου. Όπου υπάρχει κατάλληλο εμπειρικό μοντέλο, χρησιμοποιείται εντός των ορίων του.</p>
 <p><b>Ερμηνεία.</b> Τα ποσοστά περιγράφουν το συνθετικό πάνελ· δεν αποτελούν επαληθευμένες εκτιμήσεις του πραγματικού πληθυσμού και δεν συνοδεύονται από περιθώριο σφάλματος δειγματοληψίας. Η δημογραφική ομοιότητα του πάνελ με τον πληθυσμό δεν τεκμηριώνει την εγκυρότητα των απαντήσεων. Τα σενάρια για εταιρείες είναι υποθετικά ερευνητικά παραδείγματα και όχι περιγραφές πραγματικών πολιτικών.</p>
 <p class="cap">Πηγές πληθυσμού: {esc(fm["glopop"]["attribution"])}; {esc("; ".join(s["source"] for s in fm["targets_sources"]))}.</p></section>''')
     return f'<!doctype html><html lang="el"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{esc(cfg["study"]["title"])}</title><style>{CSS}</style></head><body><main>{"".join(P)}</main></body></html>'
+
+
+def _sample_text(n, n_prof, comp) -> str:
+    """Σύντομη, επαγγελματική περιγραφή του δείγματος (λεπτομέρειες αντικαταστάσεων μόνο στο εσωτερικό audit)."""
+    if comp:
+        basis = {"natural_incidence": "Η δημογραφική σύνθεση των ολοκληρωμένων ερωτηματολογίων προκύπτει από το κριτήριο συμμετοχής και δεν εξαναγκάστηκε στα quotas του γενικού πληθυσμού.",
+                 "general_population": "Κάθε προφίλ που δεν πληρούσε το κριτήριο συμμετοχής αντικαταστάθηκε από προφίλ της ίδιας δημογραφικής ομάδας.",
+                 "documented_target": "Η επιλογή των προφίλ στοχεύει στη δημογραφική σύνθεση του κοινού-στόχου όπως ορίστηκε στη μελέτη."}.get(comp.get("quota_basis"), "")
+        return (f"Το δείγμα ορίστηκε σε ολοκληρωμένα ερωτηματολόγια: {n} ολοκληρωμένα από {n_prof} προφίλ, με αντικατάσταση όσων δεν πληρούσαν "
+                f"το κριτήριο συμμετοχής. {basis}")
+    if n != n_prof:
+        return f"Από αυτά, {n} πληρούσαν το κριτήριο συμμετοχής και ολοκλήρωσαν το ερωτηματολόγιο."
+    return ""
 
 
 def geo_label(g):

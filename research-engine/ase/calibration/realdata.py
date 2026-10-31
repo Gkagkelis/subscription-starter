@@ -130,7 +130,7 @@ def compare(study, run_id, import_id) -> dict:
     real["weight"] = real["weight"].astype(float)
     syn = study.responses(run_id)
     syn = syn[syn["status"] == "ANSWERED"]
-    resp = read_table(study.internal / "respondents")
+    resp = study.profiles(run_id)
     syn = syn.merge(resp[["respondent_id", "age_band", "gender"]], on="respondent_id", how="left")
     out = {"run_id": run_id, "import_id": import_id, "compared_at": now_iso(), "questions": {}}
     for qid, g in real.groupby("question_id"):

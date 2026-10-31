@@ -37,7 +37,7 @@ def _closed_counts(q, sub: pd.DataFrame):
 def aggregate(study, run_id):
     df = study.responses(run_id)
     df = df[df["status"] == "ANSWERED"]
-    resp = read_table(study.internal / "respondents")
+    resp = study.profiles(run_id)
     df = df.merge(resp[["respondent_id"] + XT_VARS], on="respondent_id", how="left")
     rows, xrows = [], []
     for q in study.qn.questions:

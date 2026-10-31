@@ -1,0 +1,279 @@
+# Επιμελημένες πηγές ερευνητικού πλαισίου (επαληθευμένες 2026-10-31 από τη συνεδρία· βλ. verified_by ανά πηγή).
+# Χρήση: ΜΟΝΟ ως υπόβαθρο για τις συνθετικές απαντήσεις. Δεν αναπαράγονται αριθμοί/ποσοστά και δεν μετατρέπονται σε πιθανότητες επιλογής.
+# Η αποδοχή κάθε πηγής κρίνεται από τους κανόνες συνάφειας v2 (research.concepts / domain_terms / off_topic_terms / max_age_years).
+sources:
+- id: src:ec-ccs-2024-greece-factsheet
+  title: 'Consumer conditions survey - Consumers at home in the single market - 2025 edition: Country factsheet Greece'
+  title_en: 2024 Consumer conditions survey - Country factsheets (Greece)
+  publisher: European Commission, Directorate-General for Justice and Consumers (fieldwork by Ipsos)
+  url: https://commission.europa.eu/document/download/e3ed8322-eb20-4355-b013-c21674f014e9_en?filename=Greece%20factsheet.pdf
+  date: 2025-03
+  country: GR (with EU27 average and range)
+  population: General public aged 18+ in Greece (nationally representative), CATI telephone interviews; fieldwork 4-30 November 2024
+  sample: 1,000 per country (Greece 1,000), per the factsheet's technical note
+  licence: CC BY 4.0 (European Commission legal notice for Commission-owned content, unless otherwise noted)
+  concepts:
+  - trust
+  - complaints
+  - after_sales
+  - warranty
+  evidence_type: survey_statistics
+  supports: Greece-vs-EU27 background on whether consumers think retailers respect their rights, trust in public authorities and consumer organisations,
+    ease of out-of-court/court dispute settlement, share who experienced a problem with goods/services and whether they complained (to retailer,
+    manufacturer, authority, ECC, ADR), reasons for not complaining, and what people did with a product that failed outside the legal guarantee
+    (repair vs replace).
+  limitations: Covers all goods and services, not electrical/electronics retailers specifically; the "reasons for not taking action" items are
+    flagged in the factsheet as indicative for Greece because of small bases.
+  verified_by: opened page (publication page and the PDF text)
+  keywords:
+  - consumer trust
+  - complaints
+  - redress
+  - ADR
+  - legal guarantee
+  - εμπιστοσύνη καταναλωτών
+  - καταγγελίες
+  - επίλυση διαφορών
+  data_year: 2024
+  verified_on: '2026-10-31'
+- id: src:ec-consumer-conditions-scoreboard-2025
+  title: 2025 Consumer Conditions Scoreboard
+  publisher: European Commission, Directorate-General for Justice and Consumers
+  url: https://commission.europa.eu/strategy-and-policy/policies/consumers/consumer-protection-policy/key-consumer-data_en
+  date: 2025-03
+  country: EU27 incl. GR (plus IS, NO)
+  population: Consumers aged 18+ in EU27, Iceland and Norway (2024 Consumer Conditions Survey); same survey as the Greece factsheet
+  sample: unknown (the main report was not opened; the factsheet states 1,000 per country, 500 in LU, MT, CY, IS)
+  licence: CC BY 4.0 (European Commission legal notice for Commission-owned content, unless otherwise noted)
+  concepts:
+  - trust
+  - complaints
+  - after_sales
+  - warranty
+  evidence_type: survey_statistics
+  supports: EU-level frame and cross-country comparison for the Greek factsheet indicators (consumer confidence, problems and complaints, redress,
+    online purchasing); the landing page also links the full data set, methodology metadata and an interactive dashboard for comparable European
+    markets.
+  limitations: Main report PDF (13.39 MB) was not opened, so its exact chapters and Greece coverage are unverified; not specific to electronics
+    retail.
+  verified_by: opened page (key consumer data landing page listing the 2025 Scoreboard, dated 14 March 2025)
+  keywords:
+  - consumer conditions scoreboard
+  - consumer confidence
+  - EU comparison
+  - problems and complaints
+  - πίνακας αποτελεσμάτων καταναλωτικών συνθηκών
+  data_year: 2024
+  verified_on: '2026-10-31'
+- id: src:eurostat-isoc-ec-iprb21
+  title: Internet purchases - problems encountered (2021 onwards)
+  publisher: Eurostat (ICT usage in households and by individuals survey)
+  url: https://ec.europa.eu/eurostat/databrowser/view/isoc_ec_iprb21/default/table?lang=en
+  date: 2026-04
+  country: EU27 incl. GR (Greece reported separately)
+  population: Individuals (all individuals and breakdowns by age, sex, education etc.) who bought via a website or app in the previous 3 months;
+    Greece data available for 2021, 2023 and 2025
+  sample: unknown
+  licence: CC BY 4.0 per Eurostat copyright notice (reuse permitted with source acknowledgement)
+  concepts:
+  - delivery
+  - complaints
+  - warranty
+  evidence_type: survey_statistics
+  supports: Share of Greek online buyers reporting delivery slower than indicated, wrong or damaged goods delivered, difficult complaints/redress
+    or no satisfactory response after complaint, and difficulty finding information on guarantees/legal rights (Eurostat 2021/2023/2025), compared
+    with other EU countries. DOI 10.2908/ISOC_EC_IPRB21.
+  limitations: Online purchases of all goods and services, not electronics retail or in-store buying; problem items are not directly comparable
+    with the pre-2020 series (indicator wording changed). Data last updated 17 April 2026.
+  verified_by: opened page (Eurostat dissemination API metadata for geo=EL; the JavaScript databrowser did not render)
+  keywords:
+  - online shopping problems
+  - late delivery
+  - damaged goods
+  - wrong goods
+  - redress
+  - προβλήματα ηλεκτρονικών αγορών
+  - καθυστέρηση παράδοσης
+  data_year: 2025
+  verified_on: '2026-10-31'
+- id: src:eurostat-isoc-ec-iprb
+  title: Problems encountered by individuals when buying/ordering over the internet (2002-2019)
+  publisher: Eurostat (ICT usage in households and by individuals survey)
+  url: https://ec.europa.eu/eurostat/databrowser/view/isoc_ec_iprb/default/table?lang=en
+  date: 2024-06
+  country: EU27 incl. GR (Greece reported separately)
+  population: Individuals who bought/ordered goods or services over the internet for private use; series ends in 2019
+  sample: unknown
+  licence: CC BY 4.0 per Eurostat copyright notice (reuse permitted with source acknowledgement)
+  concepts:
+  - delivery
+  - complaints
+  - warranty
+  evidence_type: survey_statistics
+  supports: Pre-2020 trend context (use 2016-2019 only) for Greek online buyers reporting slower-than-indicated delivery, wrong or damaged goods,
+    difficulties concerning guarantees, and difficult complaints/redress.
+  limitations: Discontinued after 2019 and replaced by isoc_ec_iprb21 with changed wording; years before 2016 fall outside the study's recency
+    rule.
+  verified_by: opened page (Eurostat dissemination API metadata for geo=EL; label states 2002-2019, updated 16 June 2024)
+  keywords:
+  - online shopping problems
+  - guarantees
+  - late delivery
+  - complaints
+  - Eurostat ICT survey
+  - προβλήματα αγορών μέσω διαδικτύου
+  data_year: 2019
+  verified_on: '2026-10-31'
+- id: src:stk-annual-report-2024
+  title: Ετήσια Έκθεση 2024 - Συνήγορος του Καταναλωτή
+  title_en: Annual Report 2024 - Hellenic Consumer Ombudsman
+  publisher: Συνήγορος του Καταναλωτή (Hellenic Consumer Ombudsman), incl. ECC Greece
+  url: https://www.synigoroskatanaloti.gr/el/etisia-ekthesi-2024
+  date: 2026-05
+  country: GR
+  population: Complaints (αναφορές) submitted by consumers to the Consumer Ombudsman in 2024 (and to ECC Greece for the combined total)
+  sample: administrative data (18,192 complaints to the Ombudsman in 2024; 19,061 including ECC Greece)
+  licence: All rights reserved (site footer); no reuse licence stated
+  concepts:
+  - complaints
+  - delivery
+  - after_sales
+  - warranty
+  - returns
+  evidence_type: administrative_statistics
+  supports: Greek complaint landscape by sector and complaint type, including consumer-goods sub-sectors ICT goods, large household appliances
+    and non-ICT/entertainment electronics, complaint content such as delivery of goods (non- or partial delivery, delay, customer service), product
+    quality, sales method (e-commerce vs face to face) and mediation outcomes; also case examples on courier/postal non-delivery and damaged parcels.
+  limitations: Complaint counts reflect who chooses to contact the Ombudsman, not prevalence among consumers; 92-page Greek PDF (report PDF dated
+    March 2026, web page dated 6 May 2026) with sector charts partly only as images.
+  verified_by: opened page (web page and full report PDF text)
+  keywords:
+  - consumer ombudsman
+  - complaints by sector
+  - household appliances
+  - ICT goods
+  - delivery
+  - Συνήγορος του Καταναλωτή
+  - αναφορές καταναλωτών
+  - μεγάλες οικιακές συσκευές
+  data_year: 2024
+  verified_on: '2026-10-31'
+- id: src:ecc-greece-annual-report-2025
+  title: Ετήσια Έκθεση του ΕΚΚ Ελλάδας για το 2025 - Αναφορά πεπραγμένων
+  title_en: European Consumer Centre Greece - Annual Activity Report 2025
+  publisher: Ευρωπαϊκό Κέντρο Καταναλωτή Ελλάδας (ECC Greece), under the Consumer Ombudsman
+  url: https://www.eccgreece.gr/el/resources/anafores/etisia-ekthesi-toy-ekk-elladas-gia-2025
+  date: 2026-06
+  country: GR
+  population: Cross-border consumer complaints and enquiries handled by ECC Greece in 2025
+  sample: administrative data (936 complaints and 1,390 enquiries, per iefimerida.gr coverage of the report)
+  licence: All rights reserved (site footer); no reuse licence stated
+  concepts:
+  - complaints
+  evidence_type: administrative_statistics
+  supports: Background on the volume and trend of Greek consumers' cross-border complaints and the amicable-settlement rate for disputes with
+    traders in other EU countries (relevant if the scenario touches cross-border online purchases).
+  limitations: Cross-border cases only; the web page gives aggregate figures only and the PDF (sector/product breakdown, if any) was not opened.
+  verified_by: opened page
+  keywords:
+  - ECC-Net
+  - cross-border complaints
+  - amicable settlement
+  - Ευρωπαϊκό Κέντρο Καταναλωτή
+  - διασυνοριακές διαφορές
+  data_year: 2025
+  verified_on: '2026-10-31'
+- id: src:greca-eltrun-ecommerce-2026
+  title: Έρευνα Ηλεκτρονικού Εμπορίου 2026 - Η συμπεριφορά του Έλληνα Καταναλωτή στις Διαδικτυακές Αγορές
+  title_en: E-commerce Survey 2026 - Greek consumer behaviour in online markets
+  publisher: GR.EC.A (Hellenic E-commerce Association) and ELTRUN, Athens University of Economics and Business, under the auspices of eQuality
+    NGO
+  url: https://www.newmoney.gr/wp-content/uploads/2026/05/Greca-eCommerce-Report-2026.pdf
+  date: 2026-05
+  country: GR
+  population: Greek consumers who shop online (online questionnaire, multiple-choice questions)
+  sample: '600'
+  licence: unknown – see site
+  concepts:
+  - trust
+  - delivery
+  - after_sales
+  evidence_type: survey_statistics
+  supports: Greek-specific background on what drives trust in e-shops (known brand/chain, prompt service before and after purchase, clear terms,
+    reviews, trust certifications), delivery and pickup preferences (home delivery, lockers), payment methods, and online purchasing of electrical
+    appliances as a category.
+  limitations: Online opt-in sample of online shoppers, not representative of all Greek consumers; sponsored by industry; PDF is hosted by a news
+    site (newmoney.gr), no official GR.EC.A page found; covers trust and delivery more than complaints or warranty.
+  verified_by: opened page (report PDF text; press coverage on cnn.gr and naftemporiki.gr also opened)
+  keywords:
+  - e-commerce survey
+  - trust in e-shops
+  - lockers
+  - customer service
+  - ELTRUN
+  - έρευνα ηλεκτρονικού εμπορίου
+  - εμπιστοσύνη
+  - εξυπηρέτηση πελατών
+  data_year: 2026
+  verified_on: '2026-10-31'
+- id: src:eu-directive-2019-771
+  title: Directive (EU) 2019/771 of the European Parliament and of the Council of 20 May 2019 on certain aspects concerning contracts for the
+    sale of goods, amending Regulation (EU) 2017/2394 and Directive 2009/22/EC, and repealing Directive 1999/44/EC
+  publisher: European Parliament and Council of the EU (Official Journal L 136, 22.5.2019, p. 28-50)
+  url: https://eur-lex.europa.eu/eli/dir/2019/771/oj/eng
+  date: 2019-05
+  country: EU27 incl. GR
+  population: Consumer sales contracts for goods in the EU (legal text)
+  sample: legal text
+  licence: unknown – see site
+  concepts:
+  - warranty
+  - returns
+  - after_sales
+  evidence_type: legal_framework
+  supports: Legal context for the seller's liability for lack of conformity (the 2-year legal guarantee), and the consumer's remedies of repair,
+    replacement, price reduction or termination/refund that a post-purchase scenario can refer to.
+  limitations: Sets minimum harmonised rules; Greek application is via Law 4967/2022. EUR-Lex text could not be opened (bot challenge), so article-level
+    details were not checked here; EUR-Lex lists a later amendment by Directive (EU) 2024/1799.
+  verified_by: search result
+  keywords:
+  - sale of goods directive
+  - legal guarantee
+  - lack of conformity
+  - repair
+  - replacement
+  - Οδηγία 2019/771
+  - νόμιμη εγγύηση
+  data_year: 2019
+  verified_on: '2026-10-31'
+- id: src:gr-law-4967-2022
+  title: Ν. 4967/2022 - Ενσωμάτωση της Οδηγίας (ΕΕ) 2019/770 ... και της Οδηγίας (ΕΕ) 2019/771 ... και λοιπές διατάξεις
+  title_en: Law 4967/2022 transposing Directives (EU) 2019/770 and 2019/771 (digital content; sale of goods)
+  publisher: Hellenic Republic, Government Gazette ΦΕΚ Α' 171/09.09.2022
+  url: https://www.taxheaven.gr/law/4967/2022
+  date: 2022-09
+  country: GR
+  population: Consumer sales contracts in Greece (legal text)
+  sample: legal text
+  licence: unknown – see site
+  concepts:
+  - warranty
+  - returns
+  - after_sales
+  evidence_type: legal_framework
+  supports: 'Greek legal framing for conformity and seller liability: it rewrites Civil Code arts. 534 ff. (conformity, burden of proof, buyer''s
+    rights, price reduction and rescission, prescription in art. 554) and Law 2251/1994 arts. 5 (seller liability) and 5a (commercial guarantee).'
+  limitations: Only article headings were viewable (full text behind a subscription on taxheaven.gr); the official ΦΕΚ text should be consulted
+    for exact wording and later amendments.
+  verified_by: opened page (taxheaven.gr article index; lawspot.gr news item of 19.09.2022)
+  keywords:
+  - Greek civil code
+  - legal guarantee
+  - seller liability
+  - commercial guarantee
+  - ν. 4967/2022
+  - νόμιμη εγγύηση
+  - ΑΚ 534
+  - ν. 2251/1994
+  data_year: 2022
+  verified_on: '2026-10-31'

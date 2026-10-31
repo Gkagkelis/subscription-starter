@@ -1,5 +1,6 @@
 {
- "built_at": "2026-10-31T10:56:58Z",
+ "built_at": "2026-10-31T12:48:04Z",
+ "relevance_rules": "v2",
  "concepts": [
   "εμπιστοσύνη",
   "παράδοση",
@@ -32,6 +33,66 @@
   "ηλεκτρική",
   "οικιακή"
  ],
+ "study_concepts": {
+  "trust": [
+   "trust",
+   "trustworth",
+   "εμπιστοσύνη",
+   "εμπιστευ",
+   "reliab",
+   "αξιοπιστ",
+   "υποσχε"
+  ],
+  "after_sales": [
+   "after-sales",
+   "after sales",
+   "customer service",
+   "εξυπηρέτηση",
+   "εξυπηρετ",
+   "service quality"
+  ],
+  "delivery": [
+   "delivery",
+   "delivered",
+   "παράδοση",
+   "παραδόσ",
+   "παραδιδ",
+   "late deliver",
+   "shipping",
+   "καθυστερ"
+  ],
+  "returns": [
+   "return",
+   "refund",
+   "επιστροφή",
+   "επιστροφ",
+   "withdrawal",
+   "υπαναχώρηση"
+  ],
+  "complaints": [
+   "complaint",
+   "redress",
+   "dispute",
+   "παράπονο",
+   "παράπονα",
+   "καταγγελ",
+   "ADR",
+   "ombudsman",
+   "συνήγορος"
+  ],
+  "warranty": [
+   "warranty",
+   "guarantee",
+   "εγγύηση",
+   "repair",
+   "επισκευ",
+   "conformity",
+   "faulty",
+   "ελαττωματ",
+   "defective",
+   "βλαβ"
+  ]
+ },
  "search_terms": [
   "trust",
   "retail",
@@ -57,68 +118,373 @@
  },
  "accepted": [
   {
-   "id": "lake:eurobarometer:s861_300",
-   "kind": "internal_lake_study",
-   "title": "Flash Eurobarometer 300: Retailers’ attitudes towards cross-border trade and consumer protection",
-   "publisher": "European Commission (DG COMM) — Eurobarometer",
-   "country": "EL",
-   "date": "2015",
-   "sample": 252,
-   "population": "Επιχειρήσεις (B2B δείγμα)",
-   "url": "https://data.europa.eu/data/datasets/s861_300",
-   "licence": "Commission Decision 2011/833/EU (επαναχρησιμοποίηση με αναφορά πηγής) — data.europa.eu",
-   "lake_status": "PARSED",
-   "excerpt": "The survey provides a picture of the retailers' awareness of and compliance with their legal obligations towards consumers. In addition, it gives information on cross-border sales, complaints handling and safety issues.\n#####The results by volumes are distributed as follows:\n* Volume A: Countries\n* ",
-   "matched_term": "retail",
-   "relevance": 3.0
+   "id": "src:greca-eltrun-ecommerce-2026",
+   "kind": "curated_source",
+   "title": "Έρευνα Ηλεκτρονικού Εμπορίου 2026 - Η συμπεριφορά του Έλληνα Καταναλωτή στις Διαδικτυακές Αγορές",
+   "title_en": "E-commerce Survey 2026 - Greek consumer behaviour in online markets",
+   "publisher": "GR.EC.A (Hellenic E-commerce Association) and ELTRUN, Athens University of Economics and Business, under the auspices of eQuality NGO",
+   "url": "https://www.newmoney.gr/wp-content/uploads/2026/05/Greca-eCommerce-Report-2026.pdf",
+   "date": "2026-05",
+   "country": "GR",
+   "population": "Greek consumers who shop online (online questionnaire, multiple-choice questions)",
+   "sample": "600",
+   "licence": "unknown – see site",
+   "concepts": [
+    "trust",
+    "delivery",
+    "after_sales"
+   ],
+   "evidence_type": "survey_statistics",
+   "supports": "Greek-specific background on what drives trust in e-shops (known brand/chain, prompt service before and after purchase, clear terms, reviews, trust certifications), delivery and pickup preferences (home delivery, lockers), payment methods, and online purchasing of electrical appliances as a category.",
+   "limitations": "Online opt-in sample of online shoppers, not representative of all Greek consumers; sponsored by industry; PDF is hosted by a news site (newmoney.gr), no official GR.EC.A page found; covers trust and delivery more than complaints or warranty.",
+   "verified_by": "opened page (report PDF text; press coverage on cnn.gr and naftemporiki.gr also opened)",
+   "keywords": [
+    "e-commerce survey",
+    "trust in e-shops",
+    "lockers",
+    "customer service",
+    "ELTRUN",
+    "έρευνα ηλεκτρονικού εμπορίου",
+    "εμπιστοσύνη",
+    "εξυπηρέτηση πελατών"
+   ],
+   "data_year": 2026,
+   "verified_on": "2026-10-31",
+   "year": 2026,
+   "matched_concepts": [
+    "after_sales",
+    "delivery",
+    "trust"
+   ],
+   "strong_concepts": [
+    "after_sales",
+    "delivery",
+    "trust"
+   ],
+   "relevance": 4.5
   },
   {
-   "id": "lake:eurobarometer:s688_224",
-   "kind": "internal_lake_study",
-   "title": "Flash Eurobarometer 224: Business attitudes towards cross-border sales and consumer protection",
-   "publisher": "European Commission (DG COMM) — Eurobarometer",
-   "country": "EL",
-   "date": "2015",
-   "sample": 150,
-   "population": "Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online)",
-   "url": "https://data.europa.eu/data/datasets/s688_224",
-   "licence": "Commission Decision 2011/833/EU (επαναχρησιμοποίηση με αναφορά πηγής) — data.europa.eu",
-   "lake_status": "PARSED",
-   "excerpt": "The study will aim to assess cross-border sales activity from a retail perspective.  It will aim to assess the views of SMEs concerning their experience related to cross-border transactions and also their views on certain consumer protection measures.\n#####The results by volumes are distributed as f",
-   "matched_term": "retail",
-   "relevance": 2.0
+   "id": "src:stk-annual-report-2024",
+   "kind": "curated_source",
+   "title": "Ετήσια Έκθεση 2024 - Συνήγορος του Καταναλωτή",
+   "title_en": "Annual Report 2024 - Hellenic Consumer Ombudsman",
+   "publisher": "Συνήγορος του Καταναλωτή (Hellenic Consumer Ombudsman), incl. ECC Greece",
+   "url": "https://www.synigoroskatanaloti.gr/el/etisia-ekthesi-2024",
+   "date": "2026-05",
+   "country": "GR",
+   "population": "Complaints (αναφορές) submitted by consumers to the Consumer Ombudsman in 2024 (and to ECC Greece for the combined total)",
+   "sample": "administrative data (18,192 complaints to the Ombudsman in 2024; 19,061 including ECC Greece)",
+   "licence": "All rights reserved (site footer); no reuse licence stated",
+   "concepts": [
+    "complaints",
+    "delivery",
+    "after_sales",
+    "warranty",
+    "returns"
+   ],
+   "evidence_type": "administrative_statistics",
+   "supports": "Greek complaint landscape by sector and complaint type, including consumer-goods sub-sectors ICT goods, large household appliances and non-ICT/entertainment electronics, complaint content such as delivery of goods (non- or partial delivery, delay, customer service), product quality, sales method (e-commerce vs face to face) and mediation outcomes; also case examples on courier/postal non-delivery and damaged parcels.",
+   "limitations": "Complaint counts reflect who chooses to contact the Ombudsman, not prevalence among consumers; 92-page Greek PDF (report PDF dated March 2026, web page dated 6 May 2026) with sector charts partly only as images.",
+   "verified_by": "opened page (web page and full report PDF text)",
+   "keywords": [
+    "consumer ombudsman",
+    "complaints by sector",
+    "household appliances",
+    "ICT goods",
+    "delivery",
+    "Συνήγορος του Καταναλωτή",
+    "αναφορές καταναλωτών",
+    "μεγάλες οικιακές συσκευές"
+   ],
+   "data_year": 2024,
+   "verified_on": "2026-10-31",
+   "year": 2024,
+   "matched_concepts": [
+    "after_sales",
+    "complaints",
+    "delivery",
+    "returns",
+    "warranty"
+   ],
+   "strong_concepts": [
+    "after_sales",
+    "complaints",
+    "delivery",
+    "returns",
+    "warranty"
+   ],
+   "relevance": 7.5
   },
   {
-   "id": "lake:eurobarometer:s766_282",
-   "kind": "internal_lake_study",
-   "title": "Flash Eurobarometer 282: Attitudes towards crossborder sales and consumer protection",
-   "publisher": "European Commission (DG COMM) — Eurobarometer",
-   "country": "EL",
-   "date": "2015",
-   "sample": 1002,
-   "population": "Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online)",
-   "url": "https://data.europa.eu/data/datasets/s766_282",
-   "licence": "Commission Decision 2011/833/EU (επαναχρησιμοποίηση με αναφορά πηγής) — data.europa.eu",
-   "lake_status": "PARSED",
-   "excerpt": "The spring Consumer Markets Scoreboard reveals that EU consumers are still not reaping the full benefits of the internal market due to barriers to cross-border commerce. There is a growing gap between cross-border and domestic e-commerce. The national conditions for consumers – measured e.g. by cons",
-   "matched_term": "retail",
-   "relevance": 2.0
+   "id": "src:gr-law-4967-2022",
+   "kind": "curated_source",
+   "title": "Ν. 4967/2022 - Ενσωμάτωση της Οδηγίας (ΕΕ) 2019/770 ... και της Οδηγίας (ΕΕ) 2019/771 ... και λοιπές διατάξεις",
+   "title_en": "Law 4967/2022 transposing Directives (EU) 2019/770 and 2019/771 (digital content; sale of goods)",
+   "publisher": "Hellenic Republic, Government Gazette ΦΕΚ Α' 171/09.09.2022",
+   "url": "https://www.taxheaven.gr/law/4967/2022",
+   "date": "2022-09",
+   "country": "GR",
+   "population": "Consumer sales contracts in Greece (legal text)",
+   "sample": "legal text",
+   "licence": "unknown – see site",
+   "concepts": [
+    "warranty",
+    "returns",
+    "after_sales"
+   ],
+   "evidence_type": "legal_framework",
+   "supports": "Greek legal framing for conformity and seller liability: it rewrites Civil Code arts. 534 ff. (conformity, burden of proof, buyer's rights, price reduction and rescission, prescription in art. 554) and Law 2251/1994 arts. 5 (seller liability) and 5a (commercial guarantee).",
+   "limitations": "Only article headings were viewable (full text behind a subscription on taxheaven.gr); the official ΦΕΚ text should be consulted for exact wording and later amendments.",
+   "verified_by": "opened page (taxheaven.gr article index; lawspot.gr news item of 19.09.2022)",
+   "keywords": [
+    "Greek civil code",
+    "legal guarantee",
+    "seller liability",
+    "commercial guarantee",
+    "ν. 4967/2022",
+    "νόμιμη εγγύηση",
+    "ΑΚ 534",
+    "ν. 2251/1994"
+   ],
+   "data_year": 2022,
+   "verified_on": "2026-10-31",
+   "year": 2022,
+   "matched_concepts": [
+    "after_sales",
+    "returns",
+    "warranty"
+   ],
+   "strong_concepts": [
+    "after_sales",
+    "returns",
+    "warranty"
+   ],
+   "relevance": 4.5
   },
   {
-   "id": "lake:eurobarometer:s2032_396_eng",
-   "kind": "internal_lake_study",
-   "title": "Flash Eurobarometer 396: Retailers’ attitudes towards cross-border trade and consumer protection",
-   "publisher": "European Commission (DG COMM) — Eurobarometer",
-   "country": "EL",
-   "date": "2015",
-   "sample": 400,
-   "population": "Επιχειρήσεις (B2B δείγμα)",
-   "url": "https://data.europa.eu/data/datasets/s2032_396_eng",
-   "licence": "Commission Decision 2011/833/EU (επαναχρησιμοποίηση με αναφορά πηγής) — data.europa.eu",
-   "lake_status": "VALIDATED",
-   "excerpt": "This report presents the results of the Flash Eurobarometer survey “Retailers' attitudes\ntowards cross-border trade and consumer protection”, carried out in March and April\n2014. This survey is part of a series of consumer protection surveys targeting retailers\nthat have been conducted since 2006 on",
-   "matched_term": "retail",
-   "relevance": 2.0
+   "id": "src:eurostat-isoc-ec-iprb21",
+   "kind": "curated_source",
+   "title": "Internet purchases - problems encountered (2021 onwards)",
+   "publisher": "Eurostat (ICT usage in households and by individuals survey)",
+   "url": "https://ec.europa.eu/eurostat/databrowser/view/isoc_ec_iprb21/default/table?lang=en",
+   "date": "2026-04",
+   "country": "EU27 incl. GR (Greece reported separately)",
+   "population": "Individuals (all individuals and breakdowns by age, sex, education etc.) who bought via a website or app in the previous 3 months; Greece data available for 2021, 2023 and 2025",
+   "sample": "unknown",
+   "licence": "CC BY 4.0 per Eurostat copyright notice (reuse permitted with source acknowledgement)",
+   "concepts": [
+    "delivery",
+    "complaints",
+    "warranty"
+   ],
+   "evidence_type": "survey_statistics",
+   "supports": "Share of Greek online buyers reporting delivery slower than indicated, wrong or damaged goods delivered, difficult complaints/redress or no satisfactory response after complaint, and difficulty finding information on guarantees/legal rights (Eurostat 2021/2023/2025), compared with other EU countries. DOI 10.2908/ISOC_EC_IPRB21.",
+   "limitations": "Online purchases of all goods and services, not electronics retail or in-store buying; problem items are not directly comparable with the pre-2020 series (indicator wording changed). Data last updated 17 April 2026.",
+   "verified_by": "opened page (Eurostat dissemination API metadata for geo=EL; the JavaScript databrowser did not render)",
+   "keywords": [
+    "online shopping problems",
+    "late delivery",
+    "damaged goods",
+    "wrong goods",
+    "redress",
+    "προβλήματα ηλεκτρονικών αγορών",
+    "καθυστέρηση παράδοσης"
+   ],
+   "data_year": 2025,
+   "verified_on": "2026-10-31",
+   "year": 2025,
+   "matched_concepts": [
+    "complaints",
+    "delivery",
+    "warranty"
+   ],
+   "strong_concepts": [
+    "complaints",
+    "delivery",
+    "warranty"
+   ],
+   "relevance": 4.5
+  },
+  {
+   "id": "src:ec-ccs-2024-greece-factsheet",
+   "kind": "curated_source",
+   "title": "Consumer conditions survey - Consumers at home in the single market - 2025 edition: Country factsheet Greece",
+   "title_en": "2024 Consumer conditions survey - Country factsheets (Greece)",
+   "publisher": "European Commission, Directorate-General for Justice and Consumers (fieldwork by Ipsos)",
+   "url": "https://commission.europa.eu/document/download/e3ed8322-eb20-4355-b013-c21674f014e9_en?filename=Greece%20factsheet.pdf",
+   "date": "2025-03",
+   "country": "GR (with EU27 average and range)",
+   "population": "General public aged 18+ in Greece (nationally representative), CATI telephone interviews; fieldwork 4-30 November 2024",
+   "sample": "1,000 per country (Greece 1,000), per the factsheet's technical note",
+   "licence": "CC BY 4.0 (European Commission legal notice for Commission-owned content, unless otherwise noted)",
+   "concepts": [
+    "trust",
+    "complaints",
+    "after_sales",
+    "warranty"
+   ],
+   "evidence_type": "survey_statistics",
+   "supports": "Greece-vs-EU27 background on whether consumers think retailers respect their rights, trust in public authorities and consumer organisations, ease of out-of-court/court dispute settlement, share who experienced a problem with goods/services and whether they complained (to retailer, manufacturer, authority, ECC, ADR), reasons for not complaining, and what people did with a product that failed outside the legal guarantee (repair vs replace).",
+   "limitations": "Covers all goods and services, not electrical/electronics retailers specifically; the \"reasons for not taking action\" items are flagged in the factsheet as indicative for Greece because of small bases.",
+   "verified_by": "opened page (publication page and the PDF text)",
+   "keywords": [
+    "consumer trust",
+    "complaints",
+    "redress",
+    "ADR",
+    "legal guarantee",
+    "εμπιστοσύνη καταναλωτών",
+    "καταγγελίες",
+    "επίλυση διαφορών"
+   ],
+   "data_year": 2024,
+   "verified_on": "2026-10-31",
+   "year": 2024,
+   "matched_concepts": [
+    "after_sales",
+    "complaints",
+    "trust",
+    "warranty"
+   ],
+   "strong_concepts": [
+    "after_sales",
+    "complaints",
+    "trust",
+    "warranty"
+   ],
+   "relevance": 6.0
+  },
+  {
+   "id": "src:ec-consumer-conditions-scoreboard-2025",
+   "kind": "curated_source",
+   "title": "2025 Consumer Conditions Scoreboard",
+   "publisher": "European Commission, Directorate-General for Justice and Consumers",
+   "url": "https://commission.europa.eu/strategy-and-policy/policies/consumers/consumer-protection-policy/key-consumer-data_en",
+   "date": "2025-03",
+   "country": "EU27 incl. GR (plus IS, NO)",
+   "population": "Consumers aged 18+ in EU27, Iceland and Norway (2024 Consumer Conditions Survey); same survey as the Greece factsheet",
+   "sample": "unknown (the main report was not opened; the factsheet states 1,000 per country, 500 in LU, MT, CY, IS)",
+   "licence": "CC BY 4.0 (European Commission legal notice for Commission-owned content, unless otherwise noted)",
+   "concepts": [
+    "trust",
+    "complaints",
+    "after_sales",
+    "warranty"
+   ],
+   "evidence_type": "survey_statistics",
+   "supports": "EU-level frame and cross-country comparison for the Greek factsheet indicators (consumer confidence, problems and complaints, redress, online purchasing); the landing page also links the full data set, methodology metadata and an interactive dashboard for comparable European markets.",
+   "limitations": "Main report PDF (13.39 MB) was not opened, so its exact chapters and Greece coverage are unverified; not specific to electronics retail.",
+   "verified_by": "opened page (key consumer data landing page listing the 2025 Scoreboard, dated 14 March 2025)",
+   "keywords": [
+    "consumer conditions scoreboard",
+    "consumer confidence",
+    "EU comparison",
+    "problems and complaints",
+    "πίνακας αποτελεσμάτων καταναλωτικών συνθηκών"
+   ],
+   "data_year": 2024,
+   "verified_on": "2026-10-31",
+   "year": 2024,
+   "matched_concepts": [
+    "after_sales",
+    "complaints",
+    "trust",
+    "warranty"
+   ],
+   "strong_concepts": [
+    "after_sales",
+    "complaints",
+    "trust",
+    "warranty"
+   ],
+   "relevance": 6.0
+  },
+  {
+   "id": "src:eurostat-isoc-ec-iprb",
+   "kind": "curated_source",
+   "title": "Problems encountered by individuals when buying/ordering over the internet (2002-2019)",
+   "publisher": "Eurostat (ICT usage in households and by individuals survey)",
+   "url": "https://ec.europa.eu/eurostat/databrowser/view/isoc_ec_iprb/default/table?lang=en",
+   "date": "2024-06",
+   "country": "EU27 incl. GR (Greece reported separately)",
+   "population": "Individuals who bought/ordered goods or services over the internet for private use; series ends in 2019",
+   "sample": "unknown",
+   "licence": "CC BY 4.0 per Eurostat copyright notice (reuse permitted with source acknowledgement)",
+   "concepts": [
+    "delivery",
+    "complaints",
+    "warranty"
+   ],
+   "evidence_type": "survey_statistics",
+   "supports": "Pre-2020 trend context (use 2016-2019 only) for Greek online buyers reporting slower-than-indicated delivery, wrong or damaged goods, difficulties concerning guarantees, and difficult complaints/redress.",
+   "limitations": "Discontinued after 2019 and replaced by isoc_ec_iprb21 with changed wording; years before 2016 fall outside the study's recency rule.",
+   "verified_by": "opened page (Eurostat dissemination API metadata for geo=EL; label states 2002-2019, updated 16 June 2024)",
+   "keywords": [
+    "online shopping problems",
+    "guarantees",
+    "late delivery",
+    "complaints",
+    "Eurostat ICT survey",
+    "προβλήματα αγορών μέσω διαδικτύου"
+   ],
+   "data_year": 2019,
+   "verified_on": "2026-10-31",
+   "year": 2019,
+   "matched_concepts": [
+    "complaints",
+    "delivery",
+    "warranty"
+   ],
+   "strong_concepts": [
+    "complaints",
+    "delivery",
+    "warranty"
+   ],
+   "relevance": 4.5
+  },
+  {
+   "id": "src:eu-directive-2019-771",
+   "kind": "curated_source",
+   "title": "Directive (EU) 2019/771 of the European Parliament and of the Council of 20 May 2019 on certain aspects concerning contracts for the sale of goods, amending Regulation (EU) 2017/2394 and Directive 2009/22/EC, and repealing Directive 1999/44/EC",
+   "publisher": "European Parliament and Council of the EU (Official Journal L 136, 22.5.2019, p. 28-50)",
+   "url": "https://eur-lex.europa.eu/eli/dir/2019/771/oj/eng",
+   "date": "2019-05",
+   "country": "EU27 incl. GR",
+   "population": "Consumer sales contracts for goods in the EU (legal text)",
+   "sample": "legal text",
+   "licence": "unknown – see site",
+   "concepts": [
+    "warranty",
+    "returns",
+    "after_sales"
+   ],
+   "evidence_type": "legal_framework",
+   "supports": "Legal context for the seller's liability for lack of conformity (the 2-year legal guarantee), and the consumer's remedies of repair, replacement, price reduction or termination/refund that a post-purchase scenario can refer to.",
+   "limitations": "Sets minimum harmonised rules; Greek application is via Law 4967/2022. EUR-Lex text could not be opened (bot challenge), so article-level details were not checked here; EUR-Lex lists a later amendment by Directive (EU) 2024/1799.",
+   "verified_by": "search result",
+   "keywords": [
+    "sale of goods directive",
+    "legal guarantee",
+    "lack of conformity",
+    "repair",
+    "replacement",
+    "Οδηγία 2019/771",
+    "νόμιμη εγγύηση"
+   ],
+   "data_year": 2019,
+   "verified_on": "2026-10-31",
+   "year": 2019,
+   "matched_concepts": [
+    "after_sales",
+    "returns",
+    "warranty"
+   ],
+   "strong_concepts": [
+    "after_sales",
+    "returns",
+    "warranty"
+   ],
+   "relevance": 4.5
   }
  ],
  "rejected": [
@@ -129,15 +495,18 @@
    "publisher": "figshare",
    "country": "EL",
    "date": "2017",
+   "data_year": null,
    "sample": 99,
    "population": "Δείγμα της μελέτης (βλ. περιγραφή αποθετηρίου)",
    "url": "https://plos.figshare.com/articles/dataset/Development_and_validation_of_a_tool_to_assess_knowledge_and_attitudes_towards_generic_medicines_among_students_in_Greece_The_ATtitude_TOwards_GENerics_ATTOGEN_questionnaire/5647306",
    "licence": "CC BY 4.0",
    "lake_status": "INTEGRATED",
    "excerpt": "Introduction  The use of generic medicines is a cost-effective policy, often dictated by fiscal restraints. To our knowledge, no fully validated tool exploring the students’ knowledge and attitudes towards generic medicines exists. The aim of our study was to develop and validate a questionnaire exp",
+   "keywords": "[\"18 items\", \"attitude\", \"5- point Likert scale\", \"ATtitude TOwards GENerics\", \"consistency reliability\", \"inter-scale correlations\", \"response rate\", \"six-scale model\", \"ceiling effect\", \"polychoric correlations\", \"rating scale model\", \"ordinal nature\", \"Health Care Management students\", \"multi-item scales\", \"986 persons\", \"conjoint use\", \"1402 persons\", \"drug substitution\", \"Confirmatory factor analysis\", \"literature review\", \"knowledge scale\", \"tool\", \"ATTOGEN instrument\", \"state audit\", \"Mixed Model analysis\", \"confirmatory factor analysis\", \"Generalized Linear Latent\", \"Exploratory factor analysis\", \"sample\", \"questionnaire Introduction\", \"GLLAMM analyses\", \"test-retest reliability\", \"data\", \"drug quality\", \"confirmatory factor\"]",
    "matched_term": "trust",
+   "year": 2017,
    "relevance": 0.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "rejected_reason": "Παλαιά δεδομένα (2017· όριο 8 έτη)"
   },
   {
    "id": "lake:zenodo:11444667",
@@ -146,15 +515,22 @@
    "publisher": "zenodo",
    "country": "EL",
    "date": "2024",
+   "data_year": null,
    "sample": 203,
    "population": "Δείγμα της μελέτης (βλ. περιγραφή αποθετηρίου)",
    "url": "https://zenodo.org/records/11444667",
    "licence": "cc-by-4.0",
    "lake_status": "INTEGRATED",
    "excerpt": "This supporting  dataset of D3.3 reflects  the results of a vignette survey study carried out in four European countries (Austria, Cyprus, Greece and Spain) with  155 citizens . Our objective was to explore whether methods addressing societal mistrust in science that were identified in previous VERI",
+   "keywords": "[]",
    "matched_term": "trust",
-   "relevance": 1.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "year": 2024,
+   "matched_concepts": [
+    "trust"
+   ],
+   "strong_concepts": [],
+   "relevance": 0.5,
+   "rejected_reason": "Καμία θεματική έννοια της μελέτης στον τίτλο/λέξεις-κλειδιά (γενικοί όροι δεν αρκούν)"
   },
   {
    "id": "lake:zenodo:14755322",
@@ -163,15 +539,20 @@
    "publisher": "zenodo",
    "country": "EL",
    "date": "2025",
+   "data_year": null,
    "sample": 1141,
    "population": "Δείγμα της μελέτης (βλ. περιγραφή αποθετηρίου)",
    "url": "https://zenodo.org/records/14755322",
    "licence": "cc-by-4.0",
    "lake_status": "INTEGRATED",
    "excerpt": "This dataset was produced as part of the DEMOTEC Horizon project funded by the European Union (H2020 GA no. 962553). The main objective of the project was to study professional journalists' opinions and perceptions regarding Participatory Budgeting (PB). \n The dataset consists of survey responses fr",
+   "keywords": "[]",
    "matched_term": "trust",
+   "year": 2025,
+   "matched_concepts": [],
+   "strong_concepts": [],
    "relevance": 0.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "rejected_reason": "Καμία θεματική έννοια της μελέτης στον τίτλο/λέξεις-κλειδιά (γενικοί όροι δεν αρκούν)"
   },
   {
    "id": "lake:zenodo:20772797",
@@ -179,16 +560,19 @@
    "title": "Populist and other socio-political attitudes in Italy, Greece and Spain (2022)",
    "publisher": "zenodo",
    "country": "EL",
-   "date": "2026",
+   "date": "2014",
+   "data_year": 2014,
    "sample": 3246,
    "population": "Δείγμα της μελέτης (βλ. περιγραφή αποθετηρίου)",
    "url": "https://zenodo.org/records/20772797",
    "licence": "cc-by-4.0",
    "lake_status": "INTEGRATED",
    "excerpt": "This dataset captures the responses of over 3000 participants in Italy, Greece and Spain to an original online survey that was conducted by Qualtrics Research. \n This online survey was designed by a group of experts in populism from Universidad Nacional de Educaci&oacute;n a Distancia (UNED, Madrid)",
+   "keywords": "[]",
    "matched_term": "trust",
+   "year": 2014,
    "relevance": 0.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "rejected_reason": "Παλαιά δεδομένα (2014· όριο 8 έτη)"
   },
   {
    "id": "lake:eurobarometer:s3703_105_4_sp578_eng",
@@ -197,15 +581,24 @@
    "publisher": "European Commission (DG COMM) — Eurobarometer",
    "country": "EL",
    "date": "2026",
+   "data_year": 2026,
    "sample": 1007,
    "population": "Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online)",
    "url": "https://data.europa.eu/data/datasets/s3703_105_4_sp578_eng",
    "licence": "Commission Decision 2011/833/EU (επαναχρησιμοποίηση με αναφορά πηγής) — data.europa.eu",
    "lake_status": "INTEGRATED",
    "excerpt": "This Special Eurobarometer explores Europeans’ awareness, perceptions and attitudes towards innovative foods, including foods and ingredients developed using advanced technologies. It examines how informed citizens feel about food innovation, their overall views and willingness to consume different ",
+   "keywords": "",
    "matched_term": "trust",
-   "relevance": 1.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "year": 2026,
+   "matched_concepts": [
+    "trust"
+   ],
+   "strong_concepts": [
+    "trust"
+   ],
+   "relevance": 1.5,
+   "rejected_reason": "Η λέξη-έννοια εμφανίζεται, αλλά η πηγή δεν αφορά το πεδίο της μελέτης (π.χ. άλλο κλάδο/θέμα)"
   },
   {
    "id": "lake:eurobarometer:s3705_fl588_eng",
@@ -214,15 +607,22 @@
    "publisher": "European Commission (DG COMM) — Eurobarometer",
    "country": "EL",
    "date": "2026",
+   "data_year": 2026,
    "sample": 1007,
    "population": "Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online)",
    "url": "https://data.europa.eu/data/datasets/s3705_fl588_eng",
    "licence": "Commission Decision 2011/833/EU (επαναχρησιμοποίηση με αναφορά πηγής) — data.europa.eu",
    "lake_status": "INTEGRATED",
    "excerpt": "A new Eurobarometer survey shows that Europeans are increasing recognizing and trusting the EU Ecolabel. 46% of Europeans have seen the EU Ecolabel logo before, up 8 points since 2023. Correct understanding of the label’s core features (strict criteria, environmental excellence, independent verifica",
+   "keywords": "",
    "matched_term": "trust",
-   "relevance": 1.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "year": 2026,
+   "matched_concepts": [
+    "trust"
+   ],
+   "strong_concepts": [],
+   "relevance": 0.5,
+   "rejected_reason": "Καμία θεματική έννοια της μελέτης στον τίτλο/λέξεις-κλειδιά (γενικοί όροι δεν αρκούν)"
   },
   {
    "id": "lake:eurobarometer:s3677_fl584_eng",
@@ -231,15 +631,20 @@
    "publisher": "European Commission (DG COMM) — Eurobarometer",
    "country": "EL",
    "date": "2026",
+   "data_year": 2026,
    "sample": 1008,
    "population": "Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online)",
    "url": "https://data.europa.eu/data/datasets/s3677_fl584_eng",
    "licence": "Commission Decision 2011/833/EU (επαναχρησιμοποίηση με αναφορά πηγής) — data.europa.eu",
    "lake_status": "INTEGRATED",
    "excerpt": "The risk of cyberbullying or harassment that children face on social media (mentioned by 71% of respondents) and the risk of online grooming or sexual exploitation that children face on social media (70%) are the biggest concerns of Europeans. To further strengthen the protection of children online,",
+   "keywords": "",
    "matched_term": "trust",
+   "year": 2026,
+   "matched_concepts": [],
+   "strong_concepts": [],
    "relevance": 0.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "rejected_reason": "Καμία θεματική έννοια της μελέτης στον τίτλο/λέξεις-κλειδιά (γενικοί όροι δεν αρκούν)"
   },
   {
    "id": "lake:eurobarometer:s2183_464_eng",
@@ -248,15 +653,20 @@
    "publisher": "European Commission (DG COMM) — Eurobarometer",
    "country": "EL",
    "date": "2018",
+   "data_year": 2018,
    "sample": 688,
    "population": "Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online)",
    "url": "https://data.europa.eu/data/datasets/s2183_464_eng",
    "licence": "Commission Decision 2011/833/EU (επαναχρησιμοποίηση με αναφορά πηγής) — data.europa.eu",
    "lake_status": "INTEGRATED",
    "excerpt": "Online platforms and other Internet services have provided new ways for people to connect, to debate and to gather information. However, the spread of news that intentionally mislead readers has become an increasing problem for the functioning of our democracies, affecting people’s understanding of ",
+   "keywords": "",
    "matched_term": "trust",
+   "year": 2018,
+   "matched_concepts": [],
+   "strong_concepts": [],
    "relevance": 0.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "rejected_reason": "Καμία θεματική έννοια της μελέτης στον τίτλο/λέξεις-κλειδιά (γενικοί όροι δεν αρκούν)"
   },
   {
    "id": "lake:eurobarometer:s2654_fl511_eng",
@@ -265,15 +675,60 @@
    "publisher": "European Commission (DG COMM) — Eurobarometer",
    "country": "EL",
    "date": "2022",
+   "data_year": 2022,
    "sample": 1002,
    "population": "Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online)",
    "url": "https://data.europa.eu/data/datasets/s2654_fl511_eng",
    "licence": "Commission Decision 2011/833/EU (επαναχρησιμοποίηση με αναφορά πηγής) — data.europa.eu",
    "lake_status": "INTEGRATED",
    "excerpt": "83% agree that competition allows for more choice for consumers and 82% that it encourages innovation and economic growth. The level of agreement is also high for the goals of allowing for better prices for consumers (74%). 54% of respondents have experienced a problem – such as higher prices, less ",
+   "keywords": "",
    "matched_term": "retail",
+   "year": 2022,
+   "matched_concepts": [],
+   "strong_concepts": [],
    "relevance": 0.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "rejected_reason": "Καμία θεματική έννοια της μελέτης στον τίτλο/λέξεις-κλειδιά (γενικοί όροι δεν αρκούν)"
+  },
+  {
+   "id": "lake:eurobarometer:s688_224",
+   "kind": "internal_lake_study",
+   "title": "Flash Eurobarometer 224: Business attitudes towards cross-border sales and consumer protection",
+   "publisher": "European Commission (DG COMM) — Eurobarometer",
+   "country": "EL",
+   "date": "2015",
+   "data_year": null,
+   "sample": 150,
+   "population": "Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online)",
+   "url": "https://data.europa.eu/data/datasets/s688_224",
+   "licence": "Commission Decision 2011/833/EU (επαναχρησιμοποίηση με αναφορά πηγής) — data.europa.eu",
+   "lake_status": "PARSED",
+   "excerpt": "The study will aim to assess cross-border sales activity from a retail perspective.  It will aim to assess the views of SMEs concerning their experience related to cross-border transactions and also their views on certain consumer protection measures.\n#####The results by volumes are distributed as f",
+   "keywords": "",
+   "matched_term": "retail",
+   "year": 2015,
+   "relevance": 0.0,
+   "rejected_reason": "Πληθυσμός επιχειρήσεων/εμπόρων, όχι καταναλωτών"
+  },
+  {
+   "id": "lake:eurobarometer:s766_282",
+   "kind": "internal_lake_study",
+   "title": "Flash Eurobarometer 282: Attitudes towards crossborder sales and consumer protection",
+   "publisher": "European Commission (DG COMM) — Eurobarometer",
+   "country": "EL",
+   "date": "2015",
+   "data_year": null,
+   "sample": 1002,
+   "population": "Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online)",
+   "url": "https://data.europa.eu/data/datasets/s766_282",
+   "licence": "Commission Decision 2011/833/EU (επαναχρησιμοποίηση με αναφορά πηγής) — data.europa.eu",
+   "lake_status": "PARSED",
+   "excerpt": "The spring Consumer Markets Scoreboard reveals that EU consumers are still not reaping the full benefits of the internal market due to barriers to cross-border commerce. There is a growing gap between cross-border and domestic e-commerce. The national conditions for consumers – measured e.g. by cons",
+   "keywords": "",
+   "matched_term": "retail",
+   "year": 2015,
+   "relevance": 0.0,
+   "rejected_reason": "Εκτός θέματος της μελέτης (crossborder)"
   },
   {
    "id": "lake:eurobarometer:s767_278",
@@ -282,15 +737,38 @@
    "publisher": "European Commission (DG COMM) — Eurobarometer",
    "country": "EL",
    "date": "2015",
+   "data_year": null,
    "sample": 250,
    "population": "Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online)",
    "url": "https://data.europa.eu/data/datasets/s767_278",
    "licence": "Commission Decision 2011/833/EU (επαναχρησιμοποίηση με αναφορά πηγής) — data.europa.eu",
    "lake_status": "PARSED",
    "excerpt": "The main focus of this survey is to provide a picture of  enforcement and redress in the 27 member states in regards to Businesses (retailers that sell directly to consumers), including knowledge and use of redress mechanisms, knowledge of consumer protec\n#####The results by volumes are distributed ",
+   "keywords": "",
    "matched_term": "retail",
-   "relevance": 1.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "year": 2015,
+   "relevance": 0.0,
+   "rejected_reason": "Πληθυσμός επιχειρήσεων/εμπόρων, όχι καταναλωτών"
+  },
+  {
+   "id": "lake:eurobarometer:s861_300",
+   "kind": "internal_lake_study",
+   "title": "Flash Eurobarometer 300: Retailers’ attitudes towards cross-border trade and consumer protection",
+   "publisher": "European Commission (DG COMM) — Eurobarometer",
+   "country": "EL",
+   "date": "2010",
+   "data_year": 2010,
+   "sample": 252,
+   "population": "Επιχειρήσεις (B2B δείγμα)",
+   "url": "https://data.europa.eu/data/datasets/s861_300",
+   "licence": "Commission Decision 2011/833/EU (επαναχρησιμοποίηση με αναφορά πηγής) — data.europa.eu",
+   "lake_status": "PARSED",
+   "excerpt": "The survey provides a picture of the retailers' awareness of and compliance with their legal obligations towards consumers. In addition, it gives information on cross-border sales, complaints handling and safety issues.\n#####The results by volumes are distributed as follows:\n* Volume A: Countries\n* ",
+   "keywords": "",
+   "matched_term": "retail",
+   "year": 2010,
+   "relevance": 0.0,
+   "rejected_reason": "Πληθυσμός επιχειρήσεων/εμπόρων, όχι καταναλωτών"
   },
   {
    "id": "lake:eurobarometer:s990_76_1_ebs373",
@@ -298,16 +776,39 @@
    "title": "Special Eurobarometer 373: Retail financial services",
    "publisher": "European Commission (DG COMM) — Eurobarometer",
    "country": "EL",
-   "date": "2014",
+   "date": "2011",
+   "data_year": 2011,
    "sample": 1000,
    "population": "Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online)",
    "url": "https://data.europa.eu/data/datasets/s990_76_1_ebs373",
    "licence": "Commission Decision 2011/833/EU (επαναχρησιμοποίηση με αναφορά πηγής) — data.europa.eu",
    "lake_status": "PARSED",
    "excerpt": "This Eurobarometer survey examines public opinion in the area of retail financial services (bank accounts, mortgage credit, consumer credit, stocks/bonds/shares, investment funds, insurance and payments). The survey covered 26 856 EU citizens in all 27 EU Member States. It analyses the way in which ",
+   "keywords": "",
    "matched_term": "retail",
-   "relevance": 1.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "year": 2011,
+   "relevance": 0.0,
+   "rejected_reason": "Παλαιά δεδομένα (2011· όριο 8 έτη)"
+  },
+  {
+   "id": "lake:eurobarometer:s2032_396_eng",
+   "kind": "internal_lake_study",
+   "title": "Flash Eurobarometer 396: Retailers’ attitudes towards cross-border trade and consumer protection",
+   "publisher": "European Commission (DG COMM) — Eurobarometer",
+   "country": "EL",
+   "date": "2014",
+   "data_year": 2014,
+   "sample": 400,
+   "population": "Επιχειρήσεις (B2B δείγμα)",
+   "url": "https://data.europa.eu/data/datasets/s2032_396_eng",
+   "licence": "Commission Decision 2011/833/EU (επαναχρησιμοποίηση με αναφορά πηγής) — data.europa.eu",
+   "lake_status": "VALIDATED",
+   "excerpt": "This report presents the results of the Flash Eurobarometer survey “Retailers' attitudes\ntowards cross-border trade and consumer protection”, carried out in March and April\n2014. This survey is part of a series of consumer protection surveys targeting retailers\nthat have been conducted since 2006 on",
+   "keywords": "",
+   "matched_term": "retail",
+   "year": 2014,
+   "relevance": 0.0,
+   "rejected_reason": "Πληθυσμός επιχειρήσεων/εμπόρων, όχι καταναλωτών"
   },
   {
    "id": "lake:dataverse_nl:10.34894_OPKFDE",
@@ -315,16 +816,19 @@
    "title": "Panel data-set of the paper Disentangling Covid-19, Economic Mobility, and Containment Policy Shocks",
    "publisher": "dataverse_nl",
    "country": "EL",
-   "date": "2025",
+   "date": "2016",
+   "data_year": 2016,
    "sample": null,
    "population": null,
    "url": "https://doi.org/10.34894/OPKFDE",
    "licence": "In-Copyright – <a href=\"https://rightsstatements.org/page/InC/1.0/\" target=\"_blank\">https://rightsstatements.org/page/InC/1.0/</a>",
    "lake_status": "VERIFIED",
    "excerpt": "Data-set of the paper Disentangling Covid-19, Economic Mobility, and Containment Policy Shocks for replication purpose of the Data Editor of AEJMacro. Detailed information on the data-set is in the readme file in the public repository openicpsr-175241 (under review). We study the dynamic interaction",
+   "keywords": "[\"Epidemics.\", \"Non-Pharmaceutical Interventions\", \"Structural Vector Autoregressions\", \"Coronavirus\", \"Bayesian Analysis\", \"Panel Data\", \"Excel\"]",
    "matched_term": "retail",
+   "year": 2016,
    "relevance": 0.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "rejected_reason": "Παλαιά δεδομένα (2016· όριο 8 έτη)"
   },
   {
    "id": "lake:eurobarometer:s1029_358",
@@ -332,16 +836,19 @@
    "title": "Flash Eurobarometer 358: Consumer attitudes towards cross-border trade and consumer protection",
    "publisher": "European Commission (DG COMM) — Eurobarometer",
    "country": "EL",
-   "date": "2015",
+   "date": "2012",
+   "data_year": 2012,
    "sample": 1000,
    "population": "Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online)",
    "url": "https://data.europa.eu/data/datasets/s1029_358",
    "licence": "Commission Decision 2011/833/EU (επαναχρησιμοποίηση με αναφορά πηγής) — data.europa.eu",
    "lake_status": "INTEGRATED",
    "excerpt": "The survey examines distance and cross-border shopping and EU citizens' perceptions regarding various aspects of consumer protection. It also presents data on knowledge of consumers' legislation, unfair commercial practices, environmental impact and purchasing decisions. \n#####The results by volumes",
+   "keywords": "",
    "matched_term": "consumer protection",
-   "relevance": 1.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "year": 2012,
+   "relevance": 0.0,
+   "rejected_reason": "Εκτός θέματος της μελέτης (cross-border)"
   },
   {
    "id": "lake:eurobarometer:s1400_65_2_257",
@@ -349,16 +856,19 @@
    "title": "Special Eurobarometer 257: Avian Influenza",
    "publisher": "European Commission (DG COMM) — Eurobarometer",
    "country": "EL",
-   "date": "2014",
+   "date": "2006",
+   "data_year": 2006,
    "sample": 1000,
    "population": "Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online)",
    "url": "https://data.europa.eu/data/datasets/s1400_65_2_257",
    "licence": "Commission Decision 2011/833/EU (επαναχρησιμοποίηση με αναφορά πηγής) — data.europa.eu",
    "lake_status": "PARSED",
    "excerpt": "The Directorate General for Health and Consumer Protection (DG SANCO) Commissioned the present Eurobarometer study, which was conducted among 24,693 respondents in the 25 Member States, two acceding countries (Bulgaria and Romania), and two candidate countries (Croatia and Turkey).\nThis study has th",
+   "keywords": "",
    "matched_term": "consumer protection",
-   "relevance": 1.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "year": 2006,
+   "relevance": 0.0,
+   "rejected_reason": "Παλαιά δεδομένα (2006· όριο 8 έτη)"
   },
   {
    "id": "lake:eurobarometer:s1496_66_2_ebs272c",
@@ -366,16 +876,19 @@
    "title": "Special Eurobarometer 272c: Attitudes of Europeans towards tobacco",
    "publisher": "European Commission (DG COMM) — Eurobarometer",
    "country": "EL",
-   "date": "2014",
+   "date": "2006",
+   "data_year": 2006,
    "sample": 1000,
    "population": "Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online)",
    "url": "https://data.europa.eu/data/datasets/s1496_66_2_ebs272c",
    "licence": "Commission Decision 2011/833/EU (επαναχρησιμοποίηση με αναφορά πηγής) — data.europa.eu",
    "lake_status": "PARSED",
    "excerpt": "This survey, commissioned by the Directorate-General Health and Consumer Protection of the European Commission aims to evaluate the Europeans’ attitude towards tobacco. The last such survey was carried out in autumn 2005.\nThe main themes addressed in this survey are:\n- the level and frequency of tob",
+   "keywords": "",
    "matched_term": "consumer protection",
-   "relevance": 1.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "year": 2006,
+   "relevance": 0.0,
+   "rejected_reason": "Παλαιά δεδομένα (2006· όριο 8 έτη)"
   },
   {
    "id": "lake:eurobarometer:s1497_66_2_ebs272b",
@@ -383,16 +896,19 @@
    "title": "Special Eurobarometer 272b: Attitudes towards alcohol",
    "publisher": "European Commission (DG COMM) — Eurobarometer",
    "country": "EL",
-   "date": "2014",
+   "date": "2006",
+   "data_year": 2006,
    "sample": 1000,
    "population": "Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online)",
    "url": "https://data.europa.eu/data/datasets/s1497_66_2_ebs272b",
    "licence": "Commission Decision 2011/833/EU (επαναχρησιμοποίηση με αναφορά πηγής) — data.europa.eu",
    "lake_status": "PARSED",
    "excerpt": "In order to obtain a picture of EU citizens’ alcohol drinking habits and their attitudes towards measures potentially influencing alcohol related harm, the Health and Consumer Protection Directorate-General of the European Commission commissioned a poll on these issues. Interviews were conducted fac",
+   "keywords": "",
    "matched_term": "consumer protection",
-   "relevance": 1.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "year": 2006,
+   "relevance": 0.0,
+   "rejected_reason": "Παλαιά δεδομένα (2006· όριο 8 έτη)"
   },
   {
    "id": "lake:eurobarometer:s1498_66_2_ebs272a",
@@ -400,16 +916,19 @@
    "title": "Special Eurobarometer 272a: Electromagnetic fields",
    "publisher": "European Commission (DG COMM) — Eurobarometer",
    "country": "EL",
-   "date": "2014",
+   "date": "2006",
+   "data_year": 2006,
    "sample": 1000,
    "population": "Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online)",
    "url": "https://data.europa.eu/data/datasets/s1498_66_2_ebs272a",
    "licence": "Commission Decision 2011/833/EU (επαναχρησιμοποίηση με αναφορά πηγής) — data.europa.eu",
    "lake_status": "PARSED",
    "excerpt": "This Special Eurobarometer on EMF was conducted in October and November 2006, simultaneously with the public consultation of the SCENIHR opinion on EMF, and assess the issue of electromagnetic fields through the eyes of EU citizens. It examines on a broad basis how much they know about EMF, which so",
+   "keywords": "",
    "matched_term": "consumer protection",
+   "year": 2006,
    "relevance": 0.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "rejected_reason": "Παλαιά δεδομένα (2006· όριο 8 έτη)"
   },
   {
    "id": "lake:eurobarometer:s403_64_3_241",
@@ -417,16 +936,19 @@
    "title": "Special Eurobarometer 241: Medical errors",
    "publisher": "European Commission (DG COMM) — Eurobarometer",
    "country": "EL",
-   "date": "2014",
+   "date": "2005",
+   "data_year": 2005,
    "sample": 1000,
    "population": "Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online)",
    "url": "https://data.europa.eu/data/datasets/s403_64_3_241",
    "licence": "Commission Decision 2011/833/EU (επαναχρησιμοποίηση με αναφορά πηγής) — data.europa.eu",
    "lake_status": "PARSED",
    "excerpt": "This in mind the Directorate-General of Health and Consumer Protection launched this\nEurobarometer survey on medical errors in the 25 Member States and, in addition, in\nthe acceding and candidate countries and the Turkish Cypriot Community.\nThis survey deals with the following themes:\n• General perc",
+   "keywords": "",
    "matched_term": "consumer protection",
-   "relevance": 1.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "year": 2005,
+   "relevance": 0.0,
+   "rejected_reason": "Παλαιά δεδομένα (2005· όριο 8 έτη)"
   },
   {
    "id": "lake:eurobarometer:s450_63_2_ebs229",
@@ -434,16 +956,19 @@
    "title": "Special Eurobarometer 229: Attitudes of consumers towards the welfare of farmed animals",
    "publisher": "European Commission (DG COMM) — Eurobarometer",
    "country": "EL",
-   "date": "2014",
+   "date": "2005",
+   "data_year": 2005,
    "sample": 1000,
    "population": "Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online)",
    "url": "https://data.europa.eu/data/datasets/s450_63_2_ebs229",
    "licence": "Commission Decision 2011/833/EU (επαναχρησιμοποίηση με αναφορά πηγής) — data.europa.eu",
    "lake_status": "PARSED",
    "excerpt": "This survey is focused particularly on the attitude of consumers to the welfare and protection of farmed animals. It was commissioned by the European Commission’s Health and Consumer Protection Directorate General. The survey has been carried out by TNS Opinion & Social, interviewing 24 708 citizens",
+   "keywords": "",
    "matched_term": "consumer protection",
-   "relevance": 1.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "year": 2005,
+   "relevance": 0.0,
+   "rejected_reason": "Παλαιά δεδομένα (2005· όριο 8 έτη)"
   },
   {
    "id": "lake:eurobarometer:s453_63_2_ebs230",
@@ -451,16 +976,19 @@
    "title": "Special Eurobarometer 230: Public Opinion in Europe on Financial Services",
    "publisher": "European Commission (DG COMM) — Eurobarometer",
    "country": "EL",
-   "date": "2014",
+   "date": "2005",
+   "data_year": 2005,
    "sample": 1002,
    "population": "Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online)",
    "url": "https://data.europa.eu/data/datasets/s453_63_2_ebs230",
    "licence": "Commission Decision 2011/833/EU (επαναχρησιμοποίηση με αναφορά πηγής) — data.europa.eu",
    "lake_status": "PARSED",
    "excerpt": "The Directorate-General Health and Consumer Protection wished to once again commission a poll on Europeans views on consumers’ ownership and use of financial services. Interviews were conducted face-to-face in people’s homes in their national language between February 9 and March 20, 2005.\nFor each ",
+   "keywords": "",
    "matched_term": "consumer protection",
-   "relevance": 1.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "year": 2005,
+   "relevance": 0.0,
+   "rejected_reason": "Παλαιά δεδομένα (2005· όριο 8 έτη)"
   },
   {
    "id": "lake:eurobarometer:s2058_413_eng",
@@ -469,15 +997,18 @@
    "publisher": "European Commission (DG COMM) — Eurobarometer",
    "country": "EL",
    "date": "2015",
+   "data_year": 2015,
    "sample": 400,
    "population": "Επιχειρήσεις (B2B δείγμα)",
    "url": "https://data.europa.eu/data/datasets/s2058_413_eng",
    "licence": "Commission Decision 2011/833/EU (επαναχρησιμοποίηση με αναφορά πηγής) — data.europa.eu",
    "lake_status": "VALIDATED",
    "excerpt": "The survey of companies engaging in online selling or online purchasing asked companies which were the main obstacles they encountered when selling to or purchasing from other member states. The most important obstacles were in both cases the onerous cost of cross-border delivery and the costs of cr",
+   "keywords": "",
    "matched_term": "delivery",
-   "relevance": 1.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "year": 2015,
+   "relevance": 0.0,
+   "rejected_reason": "Πληθυσμός επιχειρήσεων/εμπόρων, όχι καταναλωτών"
   },
   {
    "id": "lake:cessda:d6a84085557021c4e709fc1efa3109de6026d89be8604dbf9774f4ff57ce0c4c",
@@ -485,16 +1016,19 @@
    "title": "Flash Eurobarometer 164 (Innobarometer 2004)",
    "publisher": "GESIS Data Archive for the Social Sciences",
    "country": "EL+24",
-   "date": "2011",
+   "date": "2004",
+   "data_year": 2004,
    "sample": null,
    "population": null,
    "url": "https://search.gesis.org/research_data/ZA4188?lang=en",
    "licence": "0 - Data and documents are released for everybody.",
    "lake_status": "VERIFIED",
    "excerpt": "Innovations in European companies. Topics: innovative activities of the company in the last two years: market research for introducing new products or services, introduction of new or significantly improved products or services, introduction of new or significantly improved production or delivery pr",
+   "keywords": "[]",
    "matched_term": "delivery",
-   "relevance": 1.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "year": 2004,
+   "relevance": 0.0,
+   "rejected_reason": "Παλαιά δεδομένα (2004· όριο 8 έτη)"
   },
   {
    "id": "lake:cessda:e43f80f8dc36ad428f0473e290ede3fde7d36d2893f9a06405af672ba181d93b",
@@ -503,15 +1037,18 @@
    "publisher": "GESIS Data Archive for the Social Sciences",
    "country": "EL+25",
    "date": "2015",
+   "data_year": 2015,
    "sample": null,
    "population": null,
    "url": "https://search.gesis.org/research_data/ZA6284?lang=en",
    "licence": "0 - Data and documents are released for everybody.",
    "lake_status": "VERIFIED",
    "excerpt": "Companies’ attitudes towards online activities. Topics: company sells or purchases online and / or uses Electronic Data Interchange (EDI) type transactions; online selling of products or services using: own website or apps, small commercial platform, large commercial platform, EDI type transactions;",
+   "keywords": "[]",
    "matched_term": "delivery",
-   "relevance": 1.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "year": 2015,
+   "relevance": 0.0,
+   "rejected_reason": "Παλαιά δεδομένα (2015· όριο 8 έτη)"
   },
   {
    "id": "lake:cessda:30bb0cdeff1ee6209af75627a235305ba21247333f0028d528b2cd8911751598",
@@ -520,15 +1057,18 @@
    "publisher": "GESIS Data Archive for the Social Sciences",
    "country": "EL+33",
    "date": "2015",
+   "data_year": 2015,
    "sample": null,
    "population": null,
    "url": "https://search.gesis.org/research_data/ZA6585?lang=en",
    "licence": "0 - Data and documents are released for everybody.",
    "lake_status": "VERIFIED",
    "excerpt": "Attitude of small and medium-sized enterprises towards import and export activities. Topics: awareness of the Enterprise Europe Network; activities of the company in the last three years inside or outside the EU: exports to other countries, imports from other countries, cooperation with partners bas",
+   "keywords": "[]",
    "matched_term": "delivery",
+   "year": 2015,
    "relevance": 0.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "rejected_reason": "Παλαιά δεδομένα (2015· όριο 8 έτη)"
   },
   {
    "id": "lake:cessda:e976475374c7747116867fd7537764cffdc85e44a9c419cd17dad64f5e19170f",
@@ -536,16 +1076,19 @@
    "title": "Flash Eurobarometer 305 (Innobarometer 2010)",
    "publisher": "GESIS Data Archive for the Social Sciences",
    "country": "EL+28",
-   "date": "2011",
+   "date": "2010",
+   "data_year": 2010,
    "sample": null,
    "population": null,
    "url": "https://search.gesis.org/research_data/ZA5458?lang=en",
    "licence": "0 - Data and documents are released for everybody.",
    "lake_status": "VERIFIED",
    "excerpt": "Innovation in public administration. Topics: 1. Innovation: introduction of innovations since January 2008; pioneering role compared to other public administration authorities; innovation development process: own organisation in cooperation with other public sector organisations, own organisation in",
+   "keywords": "[]",
    "matched_term": "delivery",
+   "year": 2010,
    "relevance": 0.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "rejected_reason": "Παλαιά δεδομένα (2010· όριο 8 έτη)"
   },
   {
    "id": "lake:cessda:940882bf93703f7ba2195f8550294dc5f5dbe8af59d37acff10f46b0874f4475",
@@ -553,16 +1096,21 @@
    "title": "Eurobarometer 92.1 (2019)",
    "publisher": "GESIS Data Archive for the Social Sciences",
    "country": "EL+26",
-   "date": "2026",
+   "date": "2019",
+   "data_year": 2019,
    "sample": null,
    "population": null,
    "url": "https://search.gesis.org/research_data/ZA7579?lang=en",
    "licence": "0 - Data and documents are released for everybody.",
    "lake_status": "VERIFIED",
    "excerpt": "Since the early 1970s the European Commission´s Standard & Special Eurobarometer are regularly monitoring the public opinion in the European Union member countries. Principal investigators are the Directorate-General Communication and on occasion other departments of the European Commission or the E",
+   "keywords": "[]",
    "matched_term": "delivery",
+   "year": 2019,
+   "matched_concepts": [],
+   "strong_concepts": [],
    "relevance": 0.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "rejected_reason": "Καμία θεματική έννοια της μελέτης στον τίτλο/λέξεις-κλειδιά (γενικοί όροι δεν αρκούν)"
   },
   {
    "id": "lake:cessda:dcfa482b9c6e4e3c0f0b8c97c1e7cae33dab9ee6de55675136cabbc08d3da373",
@@ -570,16 +1118,19 @@
    "title": "Eurobarometer 79.2 (2013)",
    "publisher": "GESIS Data Archive for the Social Sciences",
    "country": "EL+26",
-   "date": "2016",
+   "date": "2013",
+   "data_year": 2013,
    "sample": null,
    "population": null,
    "url": "https://search.gesis.org/research_data/ZA5688?lang=en",
    "licence": "0 - Data and documents are released for everybody.",
    "lake_status": "VERIFIED",
    "excerpt": "Since the early 1970s the European Commission´s Standard & Special Eurobarometer are regularly monitoring the public opinion in the European Union member countries. Principal investigators are the Directorate-General Communication and on occasion other departments of the European Commission or the E",
+   "keywords": "[]",
    "matched_term": "delivery",
+   "year": 2013,
    "relevance": 0.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "rejected_reason": "Παλαιά δεδομένα (2013· όριο 8 έτη)"
   },
   {
    "id": "lake:cessda:5008fb820aa031e2f476326413c79ce9b7c8f4b9af5e8c21f75ed73b1b06e5c9",
@@ -587,16 +1138,21 @@
    "title": "Eurobarometer 92.2 (2019)",
    "publisher": "GESIS Data Archive for the Social Sciences",
    "country": "EL+26",
-   "date": "2021",
+   "date": "2019",
+   "data_year": 2019,
    "sample": null,
    "population": null,
    "url": "https://search.gesis.org/research_data/ZA7580?lang=en",
    "licence": "0 - Data and documents are released for everybody.",
    "lake_status": "VERIFIED",
    "excerpt": "Since the early 1970s the European Commission´s Standard & Special Eurobarometer are regularly monitoring the public opinion in the European Union member countries. Principal investigators are the Directorate-General Communication and on occasion other departments of the European Commission or the E",
+   "keywords": "[]",
    "matched_term": "delivery",
+   "year": 2019,
+   "matched_concepts": [],
+   "strong_concepts": [],
    "relevance": 0.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "rejected_reason": "Καμία θεματική έννοια της μελέτης στον τίτλο/λέξεις-κλειδιά (γενικοί όροι δεν αρκούν)"
   },
   {
    "id": "lake:eurobarometer:s2172__eng",
@@ -604,16 +1160,21 @@
    "title": "Flash Eurobarometer 463 :  Europeans’ satisfaction with passenger rail services",
    "publisher": "European Commission (DG COMM) — Eurobarometer",
    "country": "EL",
-   "date": "2019",
+   "date": "2018",
+   "data_year": 2018,
    "sample": 1001,
    "population": "Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online)",
    "url": "https://data.europa.eu/data/datasets/s2172__eng",
    "licence": "Commission Decision 2011/833/EU (επαναχρησιμοποίηση με αναφορά πηγής) — data.europa.eu",
    "lake_status": "INTEGRATED",
    "excerpt": "This Flash Eurobarometer survey was commissioned by the Directorate-General for \"Mobility and Transport\" to investigate public satisfaction regarding a range of aspects of rail transport. \nThe survey covers the following areas:\n- Satisfaction with rail services including buying tickets and train sta",
+   "keywords": "",
    "matched_term": "complaint",
+   "year": 2018,
+   "matched_concepts": [],
+   "strong_concepts": [],
    "relevance": 0.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "rejected_reason": "Καμία θεματική έννοια της μελέτης στον τίτλο/λέξεις-κλειδιά (γενικοί όροι δεν αρκούν)"
   },
   {
    "id": "lake:eurobarometer:s1055_350",
@@ -621,16 +1182,19 @@
    "title": "Flash Eurobarometer 350: Safety of services",
    "publisher": "European Commission (DG COMM) — Eurobarometer",
    "country": "EL",
-   "date": "2015",
+   "date": "2012",
+   "data_year": 2012,
    "sample": 1000,
    "population": "Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online)",
    "url": "https://data.europa.eu/data/datasets/s1055_350",
    "licence": "Commission Decision 2011/833/EU (επαναχρησιμοποίηση με αναφορά πηγής) — data.europa.eu",
    "lake_status": "INTEGRATED",
    "excerpt": "This new survey aims to examine, for the first time, European consumers' perceptions and experiences with the safety of specific services: accommodation, organised outdoor leisure activities, swimming pools, beauty and wellness centres and amusement parks and fairgrounds. Consumers are asked about t",
+   "keywords": "",
    "matched_term": "complaint",
+   "year": 2012,
    "relevance": 0.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "rejected_reason": "Παλαιά δεδομένα (2012· όριο 8 έτη)"
   },
   {
    "id": "lake:eurobarometer:s2013_392",
@@ -638,16 +1202,19 @@
    "title": "Flash Eurobarometer 392: Preferences of Europeans towards tourism",
    "publisher": "European Commission (DG COMM) — Eurobarometer",
    "country": "EL",
-   "date": "2015",
+   "date": "2014",
+   "data_year": 2014,
    "sample": 1000,
    "population": "Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online)",
    "url": "https://data.europa.eu/data/datasets/s2013_392",
    "licence": "Commission Decision 2011/833/EU (επαναχρησιμοποίηση με αναφορά πηγής) — data.europa.eu",
    "lake_status": "INTEGRATED",
    "excerpt": "Researching and planning a holiday:\n- reasons for going on holiday in 2013;\n- respondents’ motivation to return to the same place for holidays;\n- most used sources of information for planning a holiday;\n- how respondents arranged their holidays in 2013;\nType of holiday experience: travellers' profil",
+   "keywords": "",
    "matched_term": "complaint",
+   "year": 2014,
    "relevance": 0.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "rejected_reason": "Παλαιά δεδομένα (2014· όριο 8 έτη)"
   },
   {
    "id": "lake:eurobarometer:s457_62_1_ebs219",
@@ -655,16 +1222,19 @@
    "title": "Special Eurobarometer 219: Services of general interest",
    "publisher": "European Commission (DG COMM) — Eurobarometer",
    "country": "EL",
-   "date": "2014",
+   "date": "2004",
+   "data_year": 2004,
    "sample": 1001,
    "population": "Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online)",
    "url": "https://data.europa.eu/data/datasets/s457_62_1_ebs219",
    "licence": "Commission Decision 2011/833/EU (επαναχρησιμοποίηση με αναφορά πηγής) — data.europa.eu",
    "lake_status": "PARSED",
    "excerpt": "For this survey in 2004, 24,867 citizens of the 25 European Union Member States were\nquestioned between 27 October and 27 November 2004.\nThe survey deals with eight services of general interest:\n♦ Mobile telephone services\n♦ Fixed telephone services\n♦ Electricity supply services\n♦ Gas supply service",
+   "keywords": "",
    "matched_term": "complaint",
+   "year": 2004,
    "relevance": 0.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "rejected_reason": "Παλαιά δεδομένα (2004· όριο 8 έτη)"
   },
   {
    "id": "lake:eurobarometer:s517_65_3_ebs260",
@@ -672,16 +1242,19 @@
    "title": "Special Eurobarometer 260: Services of general interest",
    "publisher": "European Commission (DG COMM) — Eurobarometer",
    "country": "EL",
-   "date": "2014",
+   "date": "2006",
+   "data_year": 2006,
    "sample": 1000,
    "population": "Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online)",
    "url": "https://data.europa.eu/data/datasets/s517_65_3_ebs260",
    "licence": "Commission Decision 2011/833/EU (επαναχρησιμοποίηση με αναφορά πηγής) — data.europa.eu",
    "lake_status": "PARSED",
    "excerpt": "The Directorate-General SANCO commissioned a poll in the twenty-five Member States of the European Union on Europeans' use of and satisfaction with services of general interest. Interviews were conducted face-to-face in people’s homes, in their national language, between May 5 and June 11, 2006.\nThi",
+   "keywords": "",
    "matched_term": "complaint",
+   "year": 2006,
    "relevance": 0.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "rejected_reason": "Παλαιά δεδομένα (2006· όριο 8 έτη)"
   },
   {
    "id": "lake:eurobarometer:s796_72_2_ebs327",
@@ -689,16 +1262,19 @@
    "title": "Special Eurobarometer 327: Patient Safety and quality of healthcare",
    "publisher": "European Commission (DG COMM) — Eurobarometer",
    "country": "EL",
-   "date": "2014",
+   "date": "2009",
+   "data_year": 2009,
    "sample": 1000,
    "population": "Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online)",
    "url": "https://data.europa.eu/data/datasets/s796_72_2_ebs327",
    "licence": "Commission Decision 2011/833/EU (επαναχρησιμοποίηση με αναφορά πηγής) — data.europa.eu",
    "lake_status": "PARSED",
    "excerpt": "In the light of the importance of patient safety, this Eurobarometer survey has been conducted with the main objective of exploring Europeans' perceptions regarding patient safety and their attitudes toward the quality of healthcare in their country and cross-border.\nSince patient safety is such a s",
+   "keywords": "",
    "matched_term": "complaint",
+   "year": 2009,
    "relevance": 0.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "rejected_reason": "Παλαιά δεδομένα (2009· όριο 8 έτη)"
   },
   {
    "id": "lake:eurobarometer:s821_71_2_ebs319",
@@ -706,16 +1282,19 @@
    "title": "Special Eurobarometer 319: Air Passenger's Rights",
    "publisher": "European Commission (DG COMM) — Eurobarometer",
    "country": "EL",
-   "date": "2014",
+   "date": "2009",
+   "data_year": 2009,
    "sample": 1000,
    "population": "Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online)",
    "url": "https://data.europa.eu/data/datasets/s821_71_2_ebs319",
    "licence": "Commission Decision 2011/833/EU (επαναχρησιμοποίηση με αναφορά πηγής) — data.europa.eu",
    "lake_status": "PARSED",
    "excerpt": "The Directorate-General for Energy and Transport launched this special Eurobarometer study to understand public awareness of the issue. A survey was conducted in 2005 among the then 25 Member States of the European Union. Although the questionnaires have changed since the 2005 survey was conducted, ",
+   "keywords": "",
    "matched_term": "complaint",
+   "year": 2009,
    "relevance": 0.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "rejected_reason": "Παλαιά δεδομένα (2009· όριο 8 έτη)"
   },
   {
    "id": "lake:eurobarometer:s986_75_1_ebs363",
@@ -723,16 +1302,19 @@
    "title": "Special Eurobarometer 363: Internal Market : Awareness, Perceptions and Impacts",
    "publisher": "European Commission (DG COMM) — Eurobarometer",
    "country": "EL",
-   "date": "2014",
+   "date": "2011",
+   "data_year": 2011,
    "sample": 1000,
    "population": "Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online)",
    "url": "https://data.europa.eu/data/datasets/s986_75_1_ebs363",
    "licence": "Commission Decision 2011/833/EU (επαναχρησιμοποίηση με αναφορά πηγής) — data.europa.eu",
    "lake_status": "PARSED",
    "excerpt": "Citizens' views on EU policies are of the utmost importance. To better gauge these views, DG MARKT undertook research out in the first quarter of 2011 on \"Awareness, Perception and Impacts of Internal Market Policies\". The data is representative of EU citizens' views and fills the often deplored inf",
+   "keywords": "",
    "matched_term": "e-commerce",
+   "year": 2011,
    "relevance": 0.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "rejected_reason": "Παλαιά δεδομένα (2011· όριο 8 έτη)"
   },
   {
    "id": "lake:eurostat:isoc_ec_ebuys",
@@ -741,15 +1323,18 @@
    "publisher": "Eurostat (δεδομένα ΕΛΣΤΑΤ για την Ελλάδα)",
    "country": "EL",
    "date": "2012",
+   "data_year": 2012,
    "sample": null,
    "population": "Επιχειρήσεις, Ελλάδα",
    "url": "https://ec.europa.eu/eurostat/databrowser/view/isoc_ec_ebuys/default/table",
    "licence": "Eurostat — CC BY 4.0 (Commission Decision 2011/833/EU), επαναχρησιμοποίηση με αναφορά πηγής",
    "lake_status": "VALIDATED",
    "excerpt": "",
+   "keywords": "",
    "matched_term": "e-commerce",
-   "relevance": 1.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "year": 2012,
+   "relevance": 0.0,
+   "rejected_reason": "Πληθυσμός επιχειρήσεων/εμπόρων, όχι καταναλωτών"
   },
   {
    "id": "lake:eurostat:isoc_ec_ebuyn2",
@@ -758,15 +1343,18 @@
    "publisher": "Eurostat (δεδομένα ΕΛΣΤΑΤ για την Ελλάδα)",
    "country": "EL",
    "date": "2012",
+   "data_year": 2012,
    "sample": null,
    "population": "Πληθυσμός Ελλάδας (βλ. ορισμό dataset)",
    "url": "https://ec.europa.eu/eurostat/databrowser/view/isoc_ec_ebuyn2/default/table",
    "licence": "Eurostat — CC BY 4.0 (Commission Decision 2011/833/EU), επαναχρησιμοποίηση με αναφορά πηγής",
    "lake_status": "VALIDATED",
    "excerpt": "",
+   "keywords": "",
    "matched_term": "e-commerce",
-   "relevance": 1.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "year": 2012,
+   "relevance": 0.0,
+   "rejected_reason": "Παλαιά δεδομένα (2012· όριο 8 έτη)"
   },
   {
    "id": "lake:eurostat:isoc_ec_esels",
@@ -775,15 +1363,18 @@
    "publisher": "Eurostat (δεδομένα ΕΛΣΤΑΤ για την Ελλάδα)",
    "country": "EL",
    "date": "2012",
+   "data_year": 2012,
    "sample": null,
    "population": "Επιχειρήσεις, Ελλάδα",
    "url": "https://ec.europa.eu/eurostat/databrowser/view/isoc_ec_esels/default/table",
    "licence": "Eurostat — CC BY 4.0 (Commission Decision 2011/833/EU), επαναχρησιμοποίηση με αναφορά πηγής",
    "lake_status": "VALIDATED",
    "excerpt": "",
+   "keywords": "",
    "matched_term": "e-commerce",
-   "relevance": 1.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "year": 2012,
+   "relevance": 0.0,
+   "rejected_reason": "Πληθυσμός επιχειρήσεων/εμπόρων, όχι καταναλωτών"
   },
   {
    "id": "lake:eurostat:isoc_ec_eseln2",
@@ -792,15 +1383,18 @@
    "publisher": "Eurostat (δεδομένα ΕΛΣΤΑΤ για την Ελλάδα)",
    "country": "EL",
    "date": "2012",
+   "data_year": 2012,
    "sample": null,
    "population": "Επιχειρήσεις, Ελλάδα",
    "url": "https://ec.europa.eu/eurostat/databrowser/view/isoc_ec_eseln2/default/table",
    "licence": "Eurostat — CC BY 4.0 (Commission Decision 2011/833/EU), επαναχρησιμοποίηση με αναφορά πηγής",
    "lake_status": "VALIDATED",
    "excerpt": "",
+   "keywords": "",
    "matched_term": "e-commerce",
-   "relevance": 1.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "year": 2012,
+   "relevance": 0.0,
+   "rejected_reason": "Πληθυσμός επιχειρήσεων/εμπόρων, όχι καταναλωτών"
   },
   {
    "id": "lake:eurostat:isoc_ec_evaln2",
@@ -809,15 +1403,18 @@
    "publisher": "Eurostat (δεδομένα ΕΛΣΤΑΤ για την Ελλάδα)",
    "country": "EL",
    "date": "2012",
+   "data_year": 2012,
    "sample": null,
    "population": "Πληθυσμός Ελλάδας (βλ. ορισμό dataset)",
    "url": "https://ec.europa.eu/eurostat/databrowser/view/isoc_ec_evaln2/default/table",
    "licence": "Eurostat — CC BY 4.0 (Commission Decision 2011/833/EU), επαναχρησιμοποίηση με αναφορά πηγής",
    "lake_status": "VALIDATED",
    "excerpt": "",
+   "keywords": "",
    "matched_term": "e-commerce",
-   "relevance": 1.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "year": 2012,
+   "relevance": 0.0,
+   "rejected_reason": "Παλαιά δεδομένα (2012· όριο 8 έτη)"
   },
   {
    "id": "lake:eurostat:isoc_ec_evals",
@@ -826,15 +1423,18 @@
    "publisher": "Eurostat (δεδομένα ΕΛΣΤΑΤ για την Ελλάδα)",
    "country": "EL",
    "date": "2012",
+   "data_year": 2012,
    "sample": null,
    "population": "Επιχειρήσεις, Ελλάδα",
    "url": "https://ec.europa.eu/eurostat/databrowser/view/isoc_ec_evals/default/table",
    "licence": "Eurostat — CC BY 4.0 (Commission Decision 2011/833/EU), επαναχρησιμοποίηση με αναφορά πηγής",
    "lake_status": "VALIDATED",
    "excerpt": "",
+   "keywords": "",
    "matched_term": "e-commerce",
-   "relevance": 1.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "year": 2012,
+   "relevance": 0.0,
+   "rejected_reason": "Πληθυσμός επιχειρήσεων/εμπόρων, όχι καταναλωτών"
   },
   {
    "id": "lake:eurobarometer:s1087_79_2_398",
@@ -842,16 +1442,19 @@
    "title": "Special Eurobarometer 398: Internal Market",
    "publisher": "European Commission (DG COMM) — Eurobarometer",
    "country": "EL",
-   "date": "2014",
+   "date": "2013",
+   "data_year": 2013,
    "sample": 1000,
    "population": "Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online)",
    "url": "https://data.europa.eu/data/datasets/s1087_79_2_398",
    "licence": "Commission Decision 2011/833/EU (επαναχρησιμοποίηση με αναφορά πηγής) — data.europa.eu",
    "lake_status": "INTEGRATED",
    "excerpt": "The Internal Market is a cornerstone of the European Union and it remains an ongoing project. While many barriers to integration have been removed since 1993, some obstacles still remain, especially in the provision of services. The barriers remain higher in some Member States than in others. By ass",
+   "keywords": "",
    "matched_term": "online shopping",
+   "year": 2013,
    "relevance": 0.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "rejected_reason": "Παλαιά δεδομένα (2013· όριο 8 έτη)"
   },
   {
    "id": "lake:cessda:18b5360c55f77f4e85e8a7b107fd25208329d2df57e583bc2102eed83911ecf6",
@@ -859,16 +1462,19 @@
    "title": "Eurobarometer 82.2 (2014)",
    "publisher": "GESIS Data Archive for the Social Sciences",
    "country": "EL+26",
-   "date": "2018",
+   "date": "2014",
+   "data_year": 2014,
    "sample": null,
    "population": null,
    "url": "https://search.gesis.org/research_data/ZA5931?lang=en",
    "licence": "0 - Data and documents are released for everybody.",
    "lake_status": "VERIFIED",
    "excerpt": "Since the early 1970s the European Commission´s Standard & Special Eurobarometer are regularly monitoring the public opinion in the European Union member countries. Principal investigators are the Directorate-General Communication and on occasion other departments of the European Commission or the E",
+   "keywords": "[]",
    "matched_term": "online shopping",
+   "year": 2014,
    "relevance": 0.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "rejected_reason": "Παλαιά δεδομένα (2014· όριο 8 έτη)"
   },
   {
    "id": "lake:cessda:24720a4d3aa52ade6e8cd232bb71c365301425c006f0f72b68a72cb21a07b57a",
@@ -876,16 +1482,19 @@
    "title": "Eurobarometer 79.4 (2013)",
    "publisher": "GESIS Data Archive for the Social Sciences",
    "country": "EL+26",
-   "date": "2017",
+   "date": "2013",
+   "data_year": 2013,
    "sample": null,
    "population": null,
    "url": "https://search.gesis.org/research_data/ZA5852?lang=en",
    "licence": "0 - Data and documents are released for everybody.",
    "lake_status": "VERIFIED",
    "excerpt": "Since the early 1970s the European Commission´s Standard & Special Eurobarometer are regularly monitoring the public opinion in the European Union member countries. Principal investigators are the Directorate-General Communication and on occasion other departments of the European Commission or the E",
+   "keywords": "[]",
    "matched_term": "online shopping",
+   "year": 2013,
    "relevance": 0.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "rejected_reason": "Παλαιά δεδομένα (2013· όριο 8 έτη)"
   },
   {
    "id": "lake:cessda:76be257795dd868917ad11d540fdf71610e41f1ba859c8e922c471709e9c414b",
@@ -893,16 +1502,19 @@
    "title": "Eurobarometer 73.2+73.3 (FEB-MAR 2010)",
    "publisher": "GESIS Data Archive for the Social Sciences",
    "country": "EL+27",
-   "date": "2012",
+   "date": "2010",
+   "data_year": 2010,
    "sample": null,
    "population": null,
    "url": "https://search.gesis.org/research_data/ZA5236?lang=en",
    "licence": "0 - Data and documents are released for everybody.",
    "lake_status": "VERIFIED",
    "excerpt": "Since the early 1970s the European Commission´s Standard & Special Eurobarometer are regularly monitoring the public opinion in the European Union member countries. Principal investigators are the Directorate-General Communication and on occasion other departments of the European Commission or the E",
+   "keywords": "[]",
    "matched_term": "online shopping",
+   "year": 2010,
    "relevance": 0.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "rejected_reason": "Παλαιά δεδομένα (2010· όριο 8 έτη)"
   },
   {
    "id": "lake:cessda:714dc0b0c54006af9bd9a6d84f659aec9131edb2c1017e1cc86dd0f3552f6837",
@@ -910,16 +1522,19 @@
    "title": "Eurobarometer 74.3 (2010)",
    "publisher": "GESIS Data Archive for the Social Sciences",
    "country": "EL+25",
-   "date": "2013",
+   "date": "2010",
+   "data_year": 2010,
    "sample": null,
    "population": null,
    "url": "https://search.gesis.org/research_data/ZA5450?lang=en",
    "licence": "0 - Data and documents are released for everybody.",
    "lake_status": "VERIFIED",
    "excerpt": "Since the early 1970s the European Commission´s Standard & Special Eurobarometer are regularly monitoring the public opinion in the European Union member countries. Principal investigators are the Directorate-General Communication and on occasion other departments of the European Commission or the E",
+   "keywords": "[]",
    "matched_term": "online shopping",
+   "year": 2010,
    "relevance": 0.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "rejected_reason": "Παλαιά δεδομένα (2010· όριο 8 έτη)"
   },
   {
    "id": "lake:cessda:115b0522e0ba5813a3cbe41c765ce8bdb6f551ea44e2fe474c6e0965a7e5b1c5",
@@ -927,16 +1542,19 @@
    "title": "Eurobarometer 77.2 (2012)",
    "publisher": "GESIS Data Archive for the Social Sciences",
    "country": "EL+25",
-   "date": "2014",
+   "date": "2012",
+   "data_year": 2012,
    "sample": null,
    "population": null,
    "url": "https://search.gesis.org/research_data/ZA5598?lang=en",
    "licence": "0 - Data and documents are released for everybody.",
    "lake_status": "VERIFIED",
    "excerpt": "Since the early 1970s the European Commission´s Standard & Special Eurobarometer are regularly monitoring the public opinion in the European Union member countries. Principal investigators are the Directorate-General Communication and on occasion other departments of the European Commission or the E",
+   "keywords": "[]",
    "matched_term": "online shopping",
+   "year": 2012,
    "relevance": 0.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "rejected_reason": "Παλαιά δεδομένα (2012· όριο 8 έτη)"
   },
   {
    "id": "lake:cessda:96ec3ca64a95ade7f3c8b2b5eb3406fcdc242d6a84f8e6ec5301799f7be93fbb",
@@ -944,16 +1562,19 @@
    "title": "Eurobarometer 87.4 (2017)",
    "publisher": "GESIS Data Archive for the Social Sciences",
    "country": "EL+25",
-   "date": "2022",
+   "date": "2017",
+   "data_year": 2017,
    "sample": null,
    "population": null,
    "url": "https://search.gesis.org/research_data/ZA6924?lang=en",
    "licence": "0 - Data and documents are released for everybody.",
    "lake_status": "VERIFIED",
    "excerpt": "Since the early 1970s the European Commission´s Standard & Special Eurobarometer are regularly monitoring the public opinion in the European Union member countries. Principal investigators are the Directorate-General Communication and on occasion other departments of the European Commission or the E",
+   "keywords": "[]",
    "matched_term": "online shopping",
+   "year": 2017,
    "relevance": 0.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "rejected_reason": "Παλαιά δεδομένα (2017· όριο 8 έτη)"
   },
   {
    "id": "lake:zenodo:8096705",
@@ -961,16 +1582,21 @@
    "title": "PrescIT_T2EDK00640_Survey_Responses_Greek_language",
    "publisher": "zenodo",
    "country": "EL",
-   "date": "2023",
+   "date": "2024",
+   "data_year": 2024,
    "sample": 164,
    "population": "Δείγμα της μελέτης (βλ. περιγραφή αποθετηρίου)",
    "url": "https://zenodo.org/records/8096705",
    "licence": "cc-by-4.0",
    "lake_status": "INTEGRATED",
    "excerpt": "The dataset includes 430 collected answers from self-reported online distributed questionnaires regarding healthcare professionals views on e-prescription systems in Greece. The survey was conducted in the context of the PrescIT project (https://www.prescit.com/), aiming to elicit end-user requireme",
+   "keywords": "[\"electronic prescription, healthcare professionals, system evaluation\"]",
    "matched_term": "electronic",
+   "year": 2024,
+   "matched_concepts": [],
+   "strong_concepts": [],
    "relevance": 0.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "rejected_reason": "Καμία θεματική έννοια της μελέτης στον τίτλο/λέξεις-κλειδιά (γενικοί όροι δεν αρκούν)"
   },
   {
    "id": "lake:eurostat:hlth_ehis_sk6e",
@@ -979,15 +1605,20 @@
    "publisher": "Eurostat (δεδομένα ΕΛΣΤΑΤ για την Ελλάδα)",
    "country": "EL",
    "date": "2019",
+   "data_year": 2019,
    "sample": null,
    "population": "Πληθυσμός Ελλάδας (βλ. ορισμό dataset)",
    "url": "https://ec.europa.eu/eurostat/databrowser/view/hlth_ehis_sk6e/default/table",
    "licence": "Eurostat — CC BY 4.0 (Commission Decision 2011/833/EU), επαναχρησιμοποίηση με αναφορά πηγής",
    "lake_status": "INTEGRATED",
    "excerpt": "",
+   "keywords": "",
    "matched_term": "electronic",
-   "relevance": 1.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "year": 2019,
+   "matched_concepts": [],
+   "strong_concepts": [],
+   "relevance": 0.0,
+   "rejected_reason": "Καμία θεματική έννοια της μελέτης στον τίτλο/λέξεις-κλειδιά (γενικοί όροι δεν αρκούν)"
   },
   {
    "id": "lake:eurobarometer:s2232_510_eng",
@@ -995,16 +1626,21 @@
    "title": "Special Eurobarometer 510 : E-Communications in the Single Market",
    "publisher": "European Commission (DG COMM) — Eurobarometer",
    "country": "EL",
-   "date": "2021",
+   "date": "2020",
+   "data_year": 2020,
    "sample": 1002,
    "population": "Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online)",
    "url": "https://data.europa.eu/data/datasets/s2232_510_eng",
    "licence": "Commission Decision 2011/833/EU (επαναχρησιμοποίηση με αναφορά πηγής) — data.europa.eu",
    "lake_status": "INTEGRATED",
    "excerpt": "This Eurobarometer survey on E-communications in the EU shows Europeans’ use of and satisfaction with electronic communication services, including with Internet, fixed and mobile telephone access, service bundles, roaming, emergency and international communication within the EU and more. This editio",
+   "keywords": "",
    "matched_term": "electronic",
-   "relevance": 1.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "year": 2020,
+   "matched_concepts": [],
+   "strong_concepts": [],
+   "relevance": 0.0,
+   "rejected_reason": "Καμία θεματική έννοια της μελέτης στον τίτλο/λέξεις-κλειδιά (γενικοί όροι δεν αρκούν)"
   },
   {
    "id": "lake:eurobarometer:s2240_506_eng",
@@ -1012,16 +1648,21 @@
    "title": "Special Eurobarometer 506: Attitudes of Europeans towards tobacco and electronic cigarettes",
    "publisher": "European Commission (DG COMM) — Eurobarometer",
    "country": "EL",
-   "date": "2021",
+   "date": "2020",
+   "data_year": 2020,
    "sample": 1016,
    "population": "Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online)",
    "url": "https://data.europa.eu/data/datasets/s2240_506_eng",
    "licence": "Commission Decision 2011/833/EU (επαναχρησιμοποίηση με αναφορά πηγής) — data.europa.eu",
    "lake_status": "INTEGRATED",
    "excerpt": "The European Union and its Member States have been working to reduce the use of tobacco and related products through a range of measures, including regulating tobacco and related products, restricting the advertising and sponsorship of tobacco and related products, implementing smoke-free environmen",
+   "keywords": "",
    "matched_term": "electronic",
-   "relevance": 1.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "year": 2020,
+   "matched_concepts": [],
+   "strong_concepts": [],
+   "relevance": 0.0,
+   "rejected_reason": "Καμία θεματική έννοια της μελέτης στον τίτλο/λέξεις-κλειδιά (γενικοί όροι δεν αρκούν)"
   },
   {
    "id": "lake:eurostat:isoc_eid_ieid",
@@ -1030,15 +1671,20 @@
    "publisher": "Eurostat (δεδομένα ΕΛΣΤΑΤ για την Ελλάδα)",
    "country": "EL",
    "date": "2023",
+   "data_year": 2023,
    "sample": null,
    "population": "Πληθυσμός Ελλάδας (βλ. ορισμό dataset)",
    "url": "https://ec.europa.eu/eurostat/databrowser/view/isoc_eid_ieid/default/table",
    "licence": "Eurostat — CC BY 4.0 (Commission Decision 2011/833/EU), επαναχρησιμοποίηση με αναφορά πηγής",
    "lake_status": "INTEGRATED",
    "excerpt": "",
+   "keywords": "",
    "matched_term": "electronic",
-   "relevance": 1.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "year": 2023,
+   "matched_concepts": [],
+   "strong_concepts": [],
+   "relevance": 0.0,
+   "rejected_reason": "Καμία θεματική έννοια της μελέτης στον τίτλο/λέξεις-κλειδιά (γενικοί όροι δεν αρκούν)"
   },
   {
    "id": "lake:eurobarometer:s3175_103_1_sp560_eng",
@@ -1046,16 +1692,21 @@
    "title": "Special Eurobarometer SP560 : e-Communications and Digital Single Market",
    "publisher": "European Commission (DG COMM) — Eurobarometer",
    "country": "EL",
-   "date": "2026",
+   "date": "2025",
+   "data_year": 2025,
    "sample": 1011,
    "population": "Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online)",
    "url": "https://data.europa.eu/data/datasets/s3175_103_1_sp560_eng",
    "licence": "Commission Decision 2011/833/EU (επαναχρησιμοποίηση με αναφορά πηγής) — data.europa.eu",
    "lake_status": "INTEGRATED",
    "excerpt": "The European Commission released the Special Eurobarometer survey results about E-communications, highlighting current electronic communication trends across the EU. The survey covered topics like internet access, phone usage, bundled services, fraudulent calls and messages, roaming, international c",
+   "keywords": "",
    "matched_term": "electronic",
-   "relevance": 1.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "year": 2025,
+   "matched_concepts": [],
+   "strong_concepts": [],
+   "relevance": 0.0,
+   "rejected_reason": "Καμία θεματική έννοια της μελέτης στον τίτλο/λέξεις-κλειδιά (γενικοί όροι δεν αρκούν)"
   },
   {
    "id": "lake:eurobarometer:s2033_82_4_429_eng",
@@ -1063,16 +1714,19 @@
    "title": "Special Eurobarometer 429: Attitudes of Europeans towards tobacco",
    "publisher": "European Commission (DG COMM) — Eurobarometer",
    "country": "EL",
-   "date": "2015",
+   "date": "2014",
+   "data_year": 2014,
    "sample": 999,
    "population": "Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online)",
    "url": "https://data.europa.eu/data/datasets/s2033_82_4_429_eng",
    "licence": "Commission Decision 2011/833/EU (επαναχρησιμοποίηση με αναφορά πηγής) — data.europa.eu",
    "lake_status": "INTEGRATED",
    "excerpt": "The EU regularly carries out public opinion polls to monitor Europeans' attitudes to a range of tobacco-related issues. This survey is the most recent in a series that has been carried out since 2003, with the last survey in 20123. The general aim of these surveys is to assess the prevalence of toba",
+   "keywords": "",
    "matched_term": "electronic",
+   "year": 2014,
    "relevance": 0.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "rejected_reason": "Παλαιά δεδομένα (2014· όριο 8 έτη)"
   },
   {
    "id": "lake:eurobarometer:s864_74_3_ebs359",
@@ -1080,16 +1734,19 @@
    "title": "Special Eurobarometer 359: Attitudes on Data Protection and Electronic Identity in the European Union",
    "publisher": "European Commission (DG COMM) — Eurobarometer",
    "country": "EL",
-   "date": "2014",
+   "date": "2010",
+   "data_year": 2010,
    "sample": 1000,
    "population": "Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online)",
    "url": "https://data.europa.eu/data/datasets/s864_74_3_ebs359",
    "licence": "Commission Decision 2011/833/EU (επαναχρησιμοποίηση με αναφορά πηγής) — data.europa.eu",
    "lake_status": "PARSED",
    "excerpt": "This report presents the results of the largest survey ever conducted regarding citizen’s behaviours and attitudes concerning identity management, data protection and privacy. Two types of digital experts emerged from the survey. Firstly, 'digital natives': young persons born during or after the gen",
+   "keywords": "",
    "matched_term": "electronic",
-   "relevance": 1.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "year": 2010,
+   "relevance": 0.0,
+   "rejected_reason": "Παλαιά δεδομένα (2010· όριο 8 έτη)"
   },
   {
    "id": "official:consumer-context",
@@ -1103,8 +1760,9 @@
    "licence": null,
    "path": "lib/synthetic-lab/data/official/consumer-context.json",
    "excerpt": "",
+   "year": null,
    "relevance": 0.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "rejected_reason": "Άγνωστο έτος δεδομένων"
   },
   {
    "id": "official:ec-bcs-consumer-greece",
@@ -1118,8 +1776,9 @@
    "licence": "Ευρωπαϊκή Επιτροπή — επαναχρησιμοποίηση με αναφορά πηγής (Απόφαση 2011/833/ΕΕ, CC BY 4.0)",
    "path": "lib/synthetic-lab/data/official/ec-bcs-consumer-greece.json",
    "excerpt": "Ισοζύγια = σταθμισμένες θετικές μείον αρνητικές απαντήσεις· ΔΕΝ είναι ποσοστά. Ομάδες: εισοδηματικά τεταρτημόρια νοικοκυριού, μόρφωση (πρωτοβάθμια/δευτεροβάθμια/ανώτερη), ηλικία 16-29/30-49/50-64/65+, φύλο.",
+   "year": null,
    "relevance": 0.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "rejected_reason": "Άγνωστο έτος δεδομένων"
   },
   {
    "id": "official:eurostat-education-2025",
@@ -1133,8 +1792,11 @@
    "licence": "Eurostat — CC BY 4.0 (Commission Decision 2011/833/EU), επαναχρησιμοποίηση με αναφορά πηγής",
    "path": "lib/synthetic-lab/data/official/eurostat-education-2025.json",
    "excerpt": "Άτομα σε ιδιωτικά νοικοκυριά 15-74 (ISCED 0-2 = έως γυμνάσιο, 3-4 = λύκειο/μεταλυκειακή, 5-8 = ανώτατη). Οι 75+ δεν καλύπτονται.",
+   "year": 2025,
+   "matched_concepts": [],
+   "strong_concepts": [],
    "relevance": 0.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "rejected_reason": "Καμία θεματική έννοια της μελέτης στον τίτλο/λέξεις-κλειδιά (γενικοί όροι δεν αρκούν)"
   },
   {
    "id": "official:eurostat-ict",
@@ -1148,8 +1810,9 @@
    "licence": "Eurostat — CC BY 4.0 (Commission Decision 2011/833/EU), επαναχρησιμοποίηση με αναφορά πηγής",
    "path": "lib/synthetic-lab/data/official/eurostat-ict.json",
    "excerpt": "",
+   "year": null,
    "relevance": 0.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "rejected_reason": "Άγνωστο έτος δεδομένων"
   },
   {
    "id": "official:eurostat-population-2025",
@@ -1163,8 +1826,11 @@
    "licence": "Eurostat — CC BY 4.0 (Commission Decision 2011/833/EU), επαναχρησιμοποίηση με αναφορά πηγής",
    "path": "lib/synthetic-lab/data/official/eurostat-population-2025.json",
    "excerpt": "",
+   "year": 2025,
+   "matched_concepts": [],
+   "strong_concepts": [],
    "relevance": 0.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "rejected_reason": "Καμία θεματική έννοια της μελέτης στον τίτλο/λέξεις-κλειδιά (γενικοί όροι δεν αρκούν)"
   },
   {
    "id": "official:eurostat-silc",
@@ -1178,124 +1844,251 @@
    "licence": "Eurostat — CC BY 4.0 (Commission Decision 2011/833/EU), επαναχρησιμοποίηση με αναφορά πηγής",
    "path": "lib/synthetic-lab/data/official/eurostat-silc.json",
    "excerpt": "",
+   "year": null,
    "relevance": 0.0,
-   "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"
+   "rejected_reason": "Άγνωστο έτος δεδομένων"
+  },
+  {
+   "id": "src:ecc-greece-annual-report-2025",
+   "kind": "curated_source",
+   "title": "Ετήσια Έκθεση του ΕΚΚ Ελλάδας για το 2025 - Αναφορά πεπραγμένων",
+   "title_en": "European Consumer Centre Greece - Annual Activity Report 2025",
+   "publisher": "Ευρωπαϊκό Κέντρο Καταναλωτή Ελλάδας (ECC Greece), under the Consumer Ombudsman",
+   "url": "https://www.eccgreece.gr/el/resources/anafores/etisia-ekthesi-toy-ekk-elladas-gia-2025",
+   "date": "2026-06",
+   "country": "GR",
+   "population": "Cross-border consumer complaints and enquiries handled by ECC Greece in 2025",
+   "sample": "administrative data (936 complaints and 1,390 enquiries, per iefimerida.gr coverage of the report)",
+   "licence": "All rights reserved (site footer); no reuse licence stated",
+   "concepts": [
+    "complaints"
+   ],
+   "evidence_type": "administrative_statistics",
+   "supports": "Background on the volume and trend of Greek consumers' cross-border complaints and the amicable-settlement rate for disputes with traders in other EU countries (relevant if the scenario touches cross-border online purchases).",
+   "limitations": "Cross-border cases only; the web page gives aggregate figures only and the PDF (sector/product breakdown, if any) was not opened.",
+   "verified_by": "opened page",
+   "keywords": [
+    "ECC-Net",
+    "cross-border complaints",
+    "amicable settlement",
+    "Ευρωπαϊκό Κέντρο Καταναλωτή",
+    "διασυνοριακές διαφορές"
+   ],
+   "data_year": 2025,
+   "verified_on": "2026-10-31",
+   "year": 2025,
+   "relevance": 0.0,
+   "rejected_reason": "Εκτός θέματος της μελέτης (cross-border, διασυνοριακ)"
   }
  ],
  "question_map": {
   "S1": [],
-  "D1": [
-   "lake:eurobarometer:s861_300",
-   "lake:eurobarometer:s688_224",
-   "lake:eurobarometer:s766_282"
-  ],
-  "D2": [
-   "lake:eurobarometer:s861_300",
-   "lake:eurobarometer:s688_224",
-   "lake:eurobarometer:s766_282"
-  ],
-  "D3": [
-   "lake:eurobarometer:s861_300",
-   "lake:eurobarometer:s688_224",
-   "lake:eurobarometer:s766_282"
-  ],
+  "D1": [],
+  "D2": [],
+  "D3": [],
   "Q1": [],
-  "Q2": [
-   "lake:eurobarometer:s861_300",
-   "lake:eurobarometer:s688_224",
-   "lake:eurobarometer:s766_282"
+  "Q2": [],
+  "Q3": [],
+  "Q4": [
+   "src:greca-eltrun-ecommerce-2026",
+   "src:stk-annual-report-2024",
+   "src:gr-law-4967-2022"
   ],
-  "Q3": [
-   "lake:eurobarometer:s861_300",
-   "lake:eurobarometer:s688_224",
-   "lake:eurobarometer:s766_282"
+  "Q5": [
+   "src:greca-eltrun-ecommerce-2026",
+   "src:stk-annual-report-2024",
+   "src:gr-law-4967-2022"
   ],
-  "Q4": [],
-  "Q5": [],
   "Q6": [],
-  "Q7": [],
-  "Q8": [
-   "lake:eurobarometer:s861_300",
-   "lake:eurobarometer:s688_224",
-   "lake:eurobarometer:s766_282"
+  "Q7": [
+   "src:greca-eltrun-ecommerce-2026",
+   "src:ec-ccs-2024-greece-factsheet",
+   "src:ec-consumer-conditions-scoreboard-2025"
   ],
+  "Q8": [],
   "Q9": [
-   "lake:eurobarometer:s861_300",
-   "lake:eurobarometer:s688_224",
-   "lake:eurobarometer:s766_282"
+   "src:greca-eltrun-ecommerce-2026",
+   "src:ec-ccs-2024-greece-factsheet",
+   "src:ec-consumer-conditions-scoreboard-2025"
   ],
   "Q10": [
-   "lake:eurobarometer:s861_300",
-   "lake:eurobarometer:s688_224",
-   "lake:eurobarometer:s766_282"
+   "src:greca-eltrun-ecommerce-2026",
+   "src:stk-annual-report-2024",
+   "src:eurostat-isoc-ec-iprb21"
   ],
-  "Q11": [],
-  "Q12a": [],
-  "Q12b": [],
-  "Q13": [],
-  "Q14": [],
-  "Q15": [
-   "lake:eurobarometer:s861_300",
-   "lake:eurobarometer:s688_224",
-   "lake:eurobarometer:s766_282"
+  "Q11": [
+   "src:greca-eltrun-ecommerce-2026",
+   "src:stk-annual-report-2024",
+   "src:eurostat-isoc-ec-iprb21"
   ],
+  "Q12a": [
+   "src:greca-eltrun-ecommerce-2026",
+   "src:stk-annual-report-2024",
+   "src:eurostat-isoc-ec-iprb21"
+  ],
+  "Q12b": [
+   "src:greca-eltrun-ecommerce-2026",
+   "src:stk-annual-report-2024",
+   "src:eurostat-isoc-ec-iprb21"
+  ],
+  "Q13": [
+   "src:greca-eltrun-ecommerce-2026",
+   "src:stk-annual-report-2024",
+   "src:eurostat-isoc-ec-iprb21"
+  ],
+  "Q14": [
+   "src:stk-annual-report-2024",
+   "src:gr-law-4967-2022",
+   "src:eurostat-isoc-ec-iprb21"
+  ],
+  "Q15": [],
   "Q16": [
-   "lake:eurobarometer:s861_300",
-   "lake:eurobarometer:s688_224",
-   "lake:eurobarometer:s766_282"
+   "src:stk-annual-report-2024",
+   "src:gr-law-4967-2022",
+   "src:eurostat-isoc-ec-iprb21"
   ],
-  "Q17": [
-   "lake:eurobarometer:s861_300",
-   "lake:eurobarometer:s688_224",
-   "lake:eurobarometer:s766_282"
-  ],
+  "Q17": [],
   "Q18a": [
-   "lake:eurobarometer:s861_300",
-   "lake:eurobarometer:s688_224",
-   "lake:eurobarometer:s766_282"
+   "src:greca-eltrun-ecommerce-2026",
+   "src:stk-annual-report-2024",
+   "src:gr-law-4967-2022"
   ],
   "Q18b": [
-   "lake:eurobarometer:s861_300",
-   "lake:eurobarometer:s688_224",
-   "lake:eurobarometer:s766_282"
+   "src:greca-eltrun-ecommerce-2026",
+   "src:stk-annual-report-2024",
+   "src:gr-law-4967-2022"
   ],
   "Q19": [
-   "lake:eurobarometer:s861_300",
-   "lake:eurobarometer:s688_224",
-   "lake:eurobarometer:s766_282"
+   "src:greca-eltrun-ecommerce-2026",
+   "src:stk-annual-report-2024",
+   "src:gr-law-4967-2022"
   ],
-  "Q20a": [],
-  "Q20b": [],
-  "Q21": [
-   "lake:eurobarometer:s861_300",
-   "lake:eurobarometer:s688_224",
-   "lake:eurobarometer:s766_282"
+  "Q20a": [
+   "src:greca-eltrun-ecommerce-2026",
+   "src:stk-annual-report-2024",
+   "src:eurostat-isoc-ec-iprb21"
   ],
-  "Q22": [
-   "lake:eurobarometer:s861_300",
-   "lake:eurobarometer:s688_224",
-   "lake:eurobarometer:s766_282"
+  "Q20b": [
+   "src:greca-eltrun-ecommerce-2026",
+   "src:stk-annual-report-2024",
+   "src:eurostat-isoc-ec-iprb21"
   ],
-  "Q23": [],
-  "Q24": [
-   "lake:eurobarometer:s861_300",
-   "lake:eurobarometer:s688_224",
-   "lake:eurobarometer:s766_282"
+  "Q21": [],
+  "Q22": [],
+  "Q23": [
+   "src:greca-eltrun-ecommerce-2026",
+   "src:stk-annual-report-2024",
+   "src:gr-law-4967-2022"
   ],
-  "Q25": [
-   "lake:eurobarometer:s861_300",
-   "lake:eurobarometer:s688_224",
-   "lake:eurobarometer:s766_282"
+  "Q24": [],
+  "Q25": [],
+  "Q26": [
+   "src:greca-eltrun-ecommerce-2026",
+   "src:ec-ccs-2024-greece-factsheet",
+   "src:ec-consumer-conditions-scoreboard-2025"
   ],
-  "Q26": [],
   "Q27": [],
   "Q28": [],
-  "Q29": [],
+  "Q29": [
+   "src:greca-eltrun-ecommerce-2026",
+   "src:stk-annual-report-2024",
+   "src:gr-law-4967-2022"
+  ],
   "Q30": [
-   "lake:eurobarometer:s861_300",
-   "lake:eurobarometer:s688_224",
-   "lake:eurobarometer:s766_282"
+   "src:greca-eltrun-ecommerce-2026",
+   "src:stk-annual-report-2024",
+   "src:gr-law-4967-2022"
   ]
  },
- "usage_policy": "Το πλαίσιο εμπλουτίζει τις συνθετικές απαντήσεις· δεν ορίζει επιθυμητά ποσοστά. Οι πηγές δεν είναι αποτελέσματα της μελέτης."
+ "question_concepts": {
+  "S1": [],
+  "D1": [],
+  "D2": [],
+  "D3": [],
+  "Q1": [],
+  "Q2": [],
+  "Q3": [],
+  "Q4": [
+   "after_sales",
+   "delivery",
+   "returns",
+   "trust",
+   "warranty"
+  ],
+  "Q5": [
+   "after_sales"
+  ],
+  "Q6": [],
+  "Q7": [
+   "trust"
+  ],
+  "Q8": [],
+  "Q9": [
+   "trust"
+  ],
+  "Q10": [
+   "delivery"
+  ],
+  "Q11": [
+   "delivery"
+  ],
+  "Q12a": [
+   "delivery"
+  ],
+  "Q12b": [
+   "delivery"
+  ],
+  "Q13": [
+   "delivery"
+  ],
+  "Q14": [
+   "warranty"
+  ],
+  "Q15": [],
+  "Q16": [
+   "returns",
+   "warranty"
+  ],
+  "Q17": [],
+  "Q18a": [
+   "trust",
+   "warranty"
+  ],
+  "Q18b": [
+   "trust",
+   "warranty"
+  ],
+  "Q19": [
+   "trust",
+   "warranty"
+  ],
+  "Q20a": [
+   "delivery"
+  ],
+  "Q20b": [
+   "delivery"
+  ],
+  "Q21": [],
+  "Q22": [],
+  "Q23": [
+   "after_sales"
+  ],
+  "Q24": [],
+  "Q25": [],
+  "Q26": [
+   "trust"
+  ],
+  "Q27": [],
+  "Q28": [],
+  "Q29": [
+   "after_sales",
+   "delivery",
+   "returns",
+   "warranty"
+  ],
+  "Q30": [
+   "after_sales"
+  ]
+ },
+ "usage_policy": "Το πλαίσιο είναι υπόβαθρο για τις συνθετικές απαντήσεις· δεν ορίζει επιθυμητά ποσοστά και δεν μετατρέπεται σε πιθανότητες επιλογής. Οι πηγές δεν είναι αποτελέσματα της μελέτης. Ερωτήσεις χωρίς συναφή πηγή μένουν χωρίς τεκμηρίωση (καταγράφεται στο audit)."
 }

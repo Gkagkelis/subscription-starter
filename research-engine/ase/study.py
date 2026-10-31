@@ -17,11 +17,13 @@ import subprocess
 import sys
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 from . import ASE_VERSION
 from .evidence.context import build_context
 from .llm.runtime import CHARS_PER_TOKEN, Pricing, make_provider
+from .population.completes import completes_report, completes_spec, draw_profiles
 from .population.panel import generate_panel
 from .questionnaire import model as QM
 from .respond import prompts as P
@@ -150,9 +152,14 @@ class Study:
         if not ok:
             raise RuntimeError(f"Ο πάροχος {provider.name} δεν είναι διαθέσιμος: {why}")
         resp = self.ensure_panel()
+        cs = completes_spec(self.cfg["panel"])           # None → n = αρχικά προφίλ (όπως πριν)· αλλιώς n = ολοκληρωμένα ερωτηματολόγια
         if dry_run:
-            n = min(n or DRY_RUN_MAX, DRY_RUN_MAX)
+            n = min(n or int(self.cfg["panel"]["sample_size"]), DRY_RUN_MAX)
         sel = resp.head(n) if n else resp
+        if cs is not None:
+            target_n = int(n or self.cfg["panel"]["sample_size"])
+            cap = int(np.ceil(cs["max_profiles"] * target_n / int(self.cfg["panel"]["sample_size"])))
+            sel = resp.head(target_n) if cs["quota_basis"] != "documented_target" else resp.head(0)
         if provider.name != "mock" and not dry_run:
             est = self.estimate(provider_cfg, n=len(sel), question_ids=question_ids, batching=batching)
             if budget_usd is None or not confirm:
@@ -168,15 +175,44 @@ class Study:
             provider.bind(rdir / "session")  # πάροχος συνεδρίας Claude Code: αιτήματα/απαντήσεις ως αρχεία του run
         if provider.name in ("mock", "claude_session"):
             requests_per_minute = 0          # χωρίς rate limit για τοπικούς παρόχους (mock / συνεδρία)
+        if not (rdir / "evidence_registry_used.json").exists():
+            write_json(rdir / "evidence_registry_used.json", self.registry)   # το πλαίσιο πηγών που είδε ΑΥΤΗ η εκτέλεση (audit)
         sr = StudyRun(self, provider, run_id=run_id, dry_run=dry_run, budget_usd=budget_usd, max_workers=max_workers, requests_per_minute=requests_per_minute,
                       batching=batching, sleep=sleep, question_ids=question_ids)
-        results = sr.execute(sel.to_dict("records"), rdir / "checkpoint.jsonl", stop_after=stop_after)
-        if getattr(sr, "pending", 0):
-            from .llm.session_provider import status
-            st_ = status(rdir / "session")
-            raise AnswersPending(f"run {run_id}: {len(results)} ερωτώμενοι ολοκληρώθηκαν, {sr.pending} περιμένουν· "
-                                 f"{len(st_['waiting'])} αιτήματα χωρίς απάντηση στο {rdir / 'session' / 'pending'}. "
-                                 f"Μετά τις απαντήσεις: session-import και ξανά --resume {run_id}.")
+        added_path = rdir / "added_profiles"                # αρχικά προφίλ documented_target και αντικαταστάτες (completes)
+        comp_notes, stop_reason = [], None
+        while True:
+            added = self._added_profiles(rdir)
+            profiles = pd.concat([sel, added], ignore_index=True) if len(added) else sel
+            results = sr.execute(profiles.to_dict("records"), rdir / "checkpoint.jsonl", stop_after=stop_after)
+            if getattr(sr, "pending", 0):
+                from .llm.session_provider import status
+                st_ = status(rdir / "session")
+                raise AnswersPending(f"run {run_id}: {len(results)} ερωτώμενοι ολοκληρώθηκαν, {sr.pending} περιμένουν· "
+                                     f"{len(st_['waiting'])} αιτήματα χωρίς απάντηση στο {rdir / 'session' / 'pending'}. "
+                                     f"Μετά τις απαντήσεις: session-import και ξανά --resume {run_id}.")
+            if cs is None:
+                break
+            stat = {x["respondent_id"]: x["status"] for x in results}
+            short = target_n - sum(1 for v in stat.values() if v == "COMPLETE")
+            if short <= 0:
+                stop_reason = "target_reached"
+                break
+            if len(profiles) >= cap:
+                stop_reason = "max_profiles_reached"
+                break
+            wave = int(added["wave"].max()) + 1 if len(added) else (1 if cs["quota_basis"] == "documented_target" and not len(sel) else 2)
+            replaced = set(added["replaces"]) if len(added) else set()
+            so = profiles[profiles["respondent_id"].map(stat).eq("SCREENED_OUT") & ~profiles["respondent_id"].isin(replaced)]
+            k = min(short, cap - len(profiles))
+            new, notes = draw_profiles(self.cfg["panel"], self.study_id, cs, k, wave=wave, start_number=len(resp) + len(added) + 1,
+                                       exclude=set(resp["frame_record"]) | (set(added["frame_record"]) if len(added) else set()), screened_out=so)
+            comp_notes += [f"κύμα {wave}: {n_}" for n_ in notes]
+            if not len(new):
+                stop_reason = "frame_exhausted"
+                break
+            write_table(pd.concat([added, new], ignore_index=True) if len(added) else new, added_path)
+        sel = profiles
         rows = [r for x in results for r in x["rows"]]
         status = {x["respondent_id"]: x["status"] for x in results}
         df = pd.DataFrame(rows)
@@ -192,7 +228,15 @@ class Study:
                     "status_counts": pd.Series(list(status.values())).value_counts().to_dict(), "question_subset": sorted(question_ids) if question_ids else None,
                     "batching": batching, "seed": int(self.cfg["panel"]["random_seed"]), "max_workers": max_workers,
                     "config_sha256": sha256_file(self.dir / "config.yaml"), "questionnaire_sha256": sha256_file(self.dir / self.cfg.get("questionnaire", "questionnaire.yaml")),
-                    "ledger": sr.ledger.summary(), "errors": int((df["status"] == "ERROR").sum()) if len(df) else 0}
+                    "ledger": sr.ledger.summary(), "errors": int((df["status"] == "ERROR").sum()) if len(df) else 0,
+                    "sample_size_basis": "completes" if cs else "initial_profiles"}
+        if cs is not None:
+            crep = completes_report(sel, status, cs, target_n, self.cfg["panel"], self.study_id)
+            crep.update(stop_reason=stop_reason, notes=comp_notes, max_profiles_this_run=cap,
+                        documented_target_source=cs.get("source") or ({"status": "assumption", "justification": cs.get("justification")} if cs.get("status") else None))
+            write_json(rdir / "completes_report.json", crep)
+            manifest["completes"] = {k: crep[k] for k in ("target_completes", "achieved_completes", "profiles_used", "screened_out", "replacements",
+                                                          "quota_basis", "incidence_pct", "stop_reason")}
         write_json(rdir / "execution_manifest.json", manifest)
         self.write_assumptions()
         from .qc.checks import run_qc
@@ -200,6 +244,24 @@ class Study:
         write_json(rdir / "quality_checks.json", qc)
         (rdir / "validation_report.md").write_text(qc_markdown(self, run_id, qc, manifest), encoding="utf-8")
         return run_id
+
+    @staticmethod
+    def _added_profiles(rdir) -> pd.DataFrame:
+        try:
+            a = read_table(rdir / "added_profiles")
+        except FileNotFoundError:
+            return pd.DataFrame()
+        a["wave"] = pd.to_numeric(a["wave"], errors="coerce").astype(int)
+        a["replaces"] = a["replaces"].fillna("").astype(str)
+        return a
+
+    def profiles(self, run_id=None) -> pd.DataFrame:
+        """Προφίλ μιας εκτέλεσης: πάνελ της μελέτης + (completes) αρχικά/αντικαταστάτες που κληρώθηκαν στο run."""
+        base = read_table(self.internal / "respondents")
+        if run_id is None:
+            return base
+        added = self._added_profiles(self.internal / "runs" / run_id)
+        return pd.concat([base, added], ignore_index=True) if len(added) else base
 
     def responses(self, run_id) -> pd.DataFrame:
         return read_table(self.internal / "runs" / run_id / "individual_responses")

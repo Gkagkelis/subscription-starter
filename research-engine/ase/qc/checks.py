@@ -32,7 +32,7 @@ def run_qc(study, run_id) -> dict:
     df["validation_ok"] = df["validation_ok"].astype(str).isin(["True", "true", "1"])
     status = read_json(study.internal / "runs" / run_id / "respondent_status.json")
     man = read_json(study.internal / "runs" / run_id / "execution_manifest.json")
-    resp = read_table(study.internal / "respondents")
+    resp = study.profiles(run_id)
     qn = study.qn
     qby = qn.by_id()
     checks, flags = [], []
@@ -63,6 +63,25 @@ def run_qc(study, run_id) -> dict:
     add("Διπλοεγγραφές", dup == 0, f"{dup} διπλές (respondent, question)")
     pr = read_json(study.internal / "panel_report.json")
     add("Δημογραφικές quotas πάνελ", pr["all_within_tolerance"], f"μέγιστη απόκλιση {pr['max_abs_deviation_pp']} μον. (ανοχή {pr['tolerance_pp']})")
+    # ολοκληρωμένα ερωτηματολόγια (sample_size_basis: completes)
+    crp = study.internal / "runs" / run_id / "completes_report.json"
+    if crp.exists():
+        cr = read_json(crp)
+        got = cr["achieved_completes"] == cr["target_completes"]
+        add("Ολοκληρωμένα ερωτηματολόγια", got,
+            f"{cr['achieved_completes']}/{cr['target_completes']} completes από {cr['profiles_used']} προφίλ "
+            f"({cr['replacements']} αντικαταστάτες, διέλευση screening {cr['incidence_pct']}%) · τερματισμός: {cr['stop_reason']}", warn=not got)
+        if not got:
+            flags.append(f"Δεν συμπληρώθηκαν τα completes ({cr['achieved_completes']}/{cr['target_completes']}): {cr['stop_reason']}.")
+        dev = {c: d["max_abs_pp"] for c, d in cr["deviation"].items()}
+        tol = float(study.cfg["panel"].get("completes", {}).get("tolerance_pp", pr["tolerance_pp"]))
+        if cr["quota_basis"] == "natural_incidence":
+            add("Σύνθεση completes (natural incidence)", True,
+                f"Η σύνθεση προκύπτει από το screening· δεν εξαναγκάζεται στα quotas του γενικού πληθυσμού. Διαφορά από τον γενικό πληθυσμό (μον.): {dev}")
+        else:
+            ok = all(v <= tol for v in dev.values())
+            ref = "στόχους του ειδικού κοινού" if cr["quota_basis"] == "documented_target" else "γενικό πληθυσμό του πλαισίου"
+            add("Σύνθεση completes έναντι στόχων", ok, f"Μέγιστη απόκλιση από {ref} (μον.): {dev} · ανοχή {tol}", warn=not ok)
     # αντιφατικές απαντήσεις (κανόνες του ερωτηματολογίου)
     rules = qn.meta.get("consistency_rules") or []
     contra = Counter()

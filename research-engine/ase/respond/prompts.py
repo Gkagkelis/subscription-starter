@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import re
 
-PROMPT_VERSION = "ase-prompt-1.0"
+PROMPT_VERSION = "ase-prompt-1.1"   # 1.1: ετικέτες στο ιστορικό πολλαπλής/κατάταξης, πλαίσιο πηγών με σημείωση «υπόβαθρο μόνο»
 
 LABELS = {
     "gender": {"male": "Άνδρας", "female": "Γυναίκα"},

@@ -49,16 +49,16 @@ def search_lake(terms_en: list[str], limit_per_term: int = 8, db: Path | None = 
     seen, out = set(), []
     for term in terms_en:
         q = f"%{term}%"
-        rows = con.execute("select study_id,title,publisher,country,publication_year,collection_year_start,sample_size,target_population,url,doi,license,status,description "
+        rows = con.execute("select study_id,title,publisher,country,publication_year,collection_year_start,sample_size,target_population,url,doi,license,status,description,keywords "
                            "from studies where (title like ? or keywords like ? or description like ?) and status in ('INTEGRATED','VALIDATED','VERIFIED','PARSED') "
                            "and (country like 'EL%' or country is null) limit ?", (q, q, q, limit_per_term)).fetchall()
         for r in rows:
             if r[0] in seen:
                 continue
             seen.add(r[0])
-            out.append({"id": f"lake:{r[0]}", "kind": "internal_lake_study", "title": r[1], "publisher": r[2], "country": r[3], "date": str(r[4] or r[5] or ""),
-                        "sample": r[6], "population": r[7], "url": r[8] or (f"https://doi.org/{r[9]}" if r[9] else None), "licence": r[10], "lake_status": r[11],
-                        "excerpt": (r[12] or "")[:300], "matched_term": term})
+            out.append({"id": f"lake:{r[0]}", "kind": "internal_lake_study", "title": r[1], "publisher": r[2], "country": r[3], "date": str(r[5] or r[4] or ""),
+                        "data_year": r[5], "sample": r[6], "population": r[7], "url": r[8] or (f"https://doi.org/{r[9]}" if r[9] else None), "licence": r[10],
+                        "lake_status": r[11], "excerpt": (r[12] or "")[:300], "keywords": r[13] or "", "matched_term": term})
     con.close()
     return out, "ok"
 
@@ -126,6 +126,70 @@ def _score(item: dict, terms: list[str]) -> float:
     return float(len({_norm(t) for t in terms if _norm(t) in blob}))
 
 
+# ---------------------------------------------------------------- κανόνες συνάφειας (v2)
+# Γενικές λέξεις που ΔΕΝ αρκούν για συνάφεια (εμφανίζονται σε σχεδόν κάθε καταναλωτική πηγή).
+GENERIC = {"consumer", "consumers", "καταναλωτης", "καταναλωτες", "survey", "ερευνα", "attitudes", "greece", "ελλαδα", "eu", "europe", "market", "retail"}
+# Πηγή ΜΕ ερωτώμενους επιχειρήσεις (π.χ. «Retailers' attitudes», «Business attitudes»), όχι πηγή ΓΙΑ επιχειρήσεις (π.χ. «trust in retailers»).
+BUSINESS_TITLE = re.compile(r"\b(business(es)?|retailers?|enterprises?|compan(y|ies)|firms?|smes?|traders?)\W{0,2}\s*(attitudes?|views|survey|perceptions?|opinions?|panel)\b")
+BUSINESS_POP = re.compile(r"\b(business(es)?|retailers?|enterprises?|compan(y|ies)|firms?|b2b|smes?|traders?)\b|επιχειρησ|εμπορ(ων|οι|ους)\b")
+CURRENT_YEAR = int(now_iso()[:4])
+
+
+def study_concepts(rc: dict) -> dict:
+    """Θεματικές έννοιες της μελέτης {έννοια: [όροι]}. Χωρίς research.concepts: κάθε μη γενικός όρος αναζήτησης γίνεται έννοια."""
+    if rc.get("concepts"):
+        return {k: [t for t in v] for k, v in rc["concepts"].items()}
+    terms = rc.get("search_terms_en", []) + rc.get("search_terms_el", [])
+    return {t: [t] for t in terms if _norm(t) not in GENERIC}
+
+
+def _concepts_in(text: str, concepts: dict) -> set:
+    t = _norm(text)
+    return {c for c, terms in concepts.items() if any(_norm(x) in t for x in terms if _norm(x) not in GENERIC)}
+
+
+def _year(item: dict):
+    for k in ("data_year", "date"):
+        m = re.search(r"(19|20)\d{2}", str(item.get(k) or ""))
+        if m:
+            return int(m.group(0))
+    return None
+
+
+def assess(item: dict, concepts: dict, rc: dict) -> tuple[bool, str, dict]:
+    """Απόφαση συνάφειας με αιτιολογία. Μια πηγή γίνεται δεκτή μόνο αν αφορά καταναλωτές, είναι αρκετά πρόσφατη, δεν είναι
+    εκτός θέματος και ταιριάζει σε θεματική έννοια της μελέτης ΣΤΟΝ ΤΙΤΛΟ ή στις λέξεις-κλειδιά (όχι μόνο σε περίληψη)."""
+    title = str(item.get("title") or "")
+    strong = " ".join([title, str(item.get("title_en") or ""), " ".join(item["keywords"]) if isinstance(item.get("keywords"), list) else str(item.get("keywords") or "")])
+    weak = " ".join(str(item.get(k) or "") for k in ("excerpt", "supports", "population"))
+    info = {"year": _year(item)}
+    if not title:
+        return False, "Χωρίς τίτλο", info
+    if not (item.get("url") or item.get("path")):
+        return False, "Χωρίς URL/διαδρομή — μη επαληθεύσιμη", info
+    if not rc.get("allow_business_sources") and (BUSINESS_TITLE.search(_norm(title)) or BUSINESS_POP.search(_norm(str(item.get("population") or "")))):
+        return False, "Πληθυσμός επιχειρήσεων/εμπόρων, όχι καταναλωτών", info
+    off = [t for t in rc.get("off_topic_terms", []) if _norm(t) in _norm(strong)]
+    if off:
+        return False, f"Εκτός θέματος της μελέτης ({', '.join(off)})", info
+    y, max_age = info["year"], int(rc.get("max_age_years", 8))
+    if item.get("evidence_type") != "legal_framework":
+        if y is None and item.get("kind") != "curated_source":
+            return False, "Άγνωστο έτος δεδομένων", info
+        if y is not None and CURRENT_YEAR - y > max_age:
+            return False, f"Παλαιά δεδομένα ({y}· όριο {max_age} έτη)", info
+    declared = set(item.get("concepts") or []) & set(concepts) if item.get("kind") == "curated_source" else set()
+    in_strong = _concepts_in(strong, concepts) | declared
+    info.update(matched_concepts=sorted(in_strong | _concepts_in(weak, concepts)), strong_concepts=sorted(in_strong))
+    if not in_strong:
+        return False, "Καμία θεματική έννοια της μελέτης στον τίτλο/λέξεις-κλειδιά (γενικοί όροι δεν αρκούν)", info
+    dom = rc.get("domain_terms") or []
+    topic_text = strong + " " + str(item.get("excerpt") or "") + " " + str(item.get("supports") or "")   # όχι μεταδεδομένα πληθυσμού/μεθόδου
+    if dom and not any(_norm(d) in _norm(topic_text) for d in dom):
+        return False, "Η λέξη-έννοια εμφανίζεται, αλλά η πηγή δεν αφορά το πεδίο της μελέτης (π.χ. άλλο κλάδο/θέμα)", info
+    return True, "", info
+
+
 def build_context(study_dir: Path, cfg: dict, questionnaire) -> dict:
     rc = cfg.get("research") or {}
     texts = [q.text for q in questionnaire.questions] + [(q.scenario or {}).get("text", "") for q in questionnaire.questions]
@@ -135,29 +199,26 @@ def build_context(study_dir: Path, cfg: dict, questionnaire) -> dict:
     cur_ok, cur_rej = curated_items(study_dir)
     web, web_note = web_research(rc, concepts)
     terms = rc.get("search_terms_en", []) + rc.get("search_terms_el", [])
+    sc = study_concepts(rc)
     accepted, rejected = [], list(cur_rej)
     for it in lake + offi + cur_ok + web:
-        s = _score(it, terms)
-        it["relevance"] = s
-        if not it.get("title"):
-            rejected.append({**it, "rejected_reason": "Χωρίς τίτλο"})
-        elif not (it.get("url") or it.get("path")):
-            rejected.append({**it, "rejected_reason": "Χωρίς URL/διαδρομή — μη επαληθεύσιμη"})
-        elif it["kind"] != "curated_source" and s < float(rc.get("min_relevance", 2)):
-            rejected.append({**it, "rejected_reason": "Χαμηλή συνάφεια με τους όρους της μελέτης"})
-        else:
-            accepted.append(it)
-    accepted.sort(key=lambda x: -x["relevance"])
+        ok, why, info = assess(it, sc, rc)
+        it.update(info)
+        it["relevance"] = len(info.get("strong_concepts", [])) + 0.5 * len(info.get("matched_concepts", []))
+        (accepted if ok else rejected).append(it if ok else {**it, "rejected_reason": why})
+    gr_first = lambda it: (0 if str(it.get("country") or "").upper() in ("GR", "EL") else 1, -(it.get("year") or 0), -it["relevance"])  # noqa: E731
+    accepted.sort(key=gr_first)
     accepted = accepted[: int(rc.get("max_sources", 40))]
-    qmap = {}
+    qmap, qconc = {}, {}
     for q in questionnaire.questions:
-        qtext = _norm(q.text + " " + (q.scenario or {}).get("text", ""))
-        qterms = [t for t in terms if _norm(t) in qtext] or terms
-        ranked = sorted(accepted, key=lambda it: -(_score(it, qterms) + 0.1 * it["relevance"]))
-        qmap[q.id] = [it["id"] for it in ranked[: int(rc.get("per_question", 3))] if _score(it, qterms) > 0]
-    return {"built_at": now_iso(), "concepts": concepts, "search_terms": terms, "notes": {"lake": lake_note, "web": web_note},
-            "accepted": accepted, "rejected": rejected, "question_map": qmap,
-            "usage_policy": "Το πλαίσιο εμπλουτίζει τις συνθετικές απαντήσεις· δεν ορίζει επιθυμητά ποσοστά. Οι πηγές δεν είναι αποτελέσματα της μελέτης."}
+        qc = _concepts_in(" ".join([q.text, (q.scenario or {}).get("text", ""), " ".join(o.label for o in q.options)]), sc)
+        qconc[q.id] = sorted(qc)
+        match = [it for it in accepted if qc & set(it.get("matched_concepts", []))]           # ΚΑΜΙΑ εναλλακτική «όλοι οι όροι»
+        qmap[q.id] = [it["id"] for it in sorted(match, key=gr_first)[: int(rc.get("per_question", 3))]]
+    return {"built_at": now_iso(), "relevance_rules": "v2", "concepts": concepts, "study_concepts": sc, "search_terms": terms,
+            "notes": {"lake": lake_note, "web": web_note}, "accepted": accepted, "rejected": rejected, "question_map": qmap, "question_concepts": qconc,
+            "usage_policy": "Το πλαίσιο είναι υπόβαθρο για τις συνθετικές απαντήσεις· δεν ορίζει επιθυμητά ποσοστά και δεν μετατρέπεται σε πιθανότητες "
+                            "επιλογής. Οι πηγές δεν είναι αποτελέσματα της μελέτης. Ερωτήσεις χωρίς συναφή πηγή μένουν χωρίς τεκμηρίωση (καταγράφεται στο audit)."}
 
 
 def context_text(registry: dict, qid: str, max_items: int = 3) -> tuple[str, list]:
@@ -166,5 +227,8 @@ def context_text(registry: dict, qid: str, max_items: int = 3) -> tuple[str, lis
     lines = []
     for i in ids:
         it = by[i]
-        lines.append(f"- [{i}] {it['title']} ({it.get('country') or '—'}, {it.get('date') or '—'}; πληθυσμός: {it.get('population') or '—'}; δείγμα: {it.get('sample') or '—'})")
+        sup = f" — αφορά: {it['supports']}" if it.get("supports") else ""
+        lines.append(f"- [{i}] {it['title']} ({it.get('country') or '—'}, {it.get('date') or '—'}; πληθυσμός: {it.get('population') or '—'}; δείγμα: {it.get('sample') or '—'}){sup}")
+    if lines:
+        lines.append("  (Υπόβαθρο μόνο: μην μετατρέπεις στατιστικά των πηγών σε πιθανότητες απάντησης του προσώπου.)")
     return ("\n".join(lines) if lines else "- Δεν βρέθηκε συναφής τεκμηρίωση για αυτή την ερώτηση."), ids

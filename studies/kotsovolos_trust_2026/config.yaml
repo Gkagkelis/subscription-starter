@@ -17,6 +17,12 @@ panel:
     variables: [age, gender, region, household_type, education, income_band]
     tolerance_pp: 2
   random_seed: 20261031
+  # Επιλογή μεγέθους δείγματος (ΔΕΝ είναι ενεργή — αποφασίζεται πριν από την έρευνα των 500):
+  # sample_size_basis: completes          # 500 = ολοκληρωμένα ερωτηματολόγια (αντί για αρχικά προφίλ)
+  # completes:
+  #   quota_basis: natural_incidence      # κοινό-στόχος «πρόσφατοι αγοραστές»: δεν υπάρχει τεκμηριωμένη δημογραφική κατανομή·
+  #                                       # η σύνθεση προκύπτει από το screening S1 (όχι quotas γενικού πληθυσμού)
+  #   max_profiles: 1500
 research:
   search_terms_en: [trust, retail, "consumer protection", delivery, complaint, "e-commerce", "online shopping", electronic, "after-sales", warranty]
   search_terms_el: [εμπιστοσύνη, παράδοση, επιστροφή, παράπονο, ηλεκτρικ, εγγύηση, εξυπηρέτηση]
@@ -25,6 +31,20 @@ research:
   web: {enabled: false}
   max_sources: 40
   per_question: 3
+  # κανόνες συνάφειας v2: μια πηγή γίνεται δεκτή μόνο αν ταιριάζει σε θεματική έννοια στον τίτλο/λέξεις-κλειδιά,
+  # αφορά καταναλωτές (όχι επιχειρήσεις), έχει δεδομένα ≤ max_age_years και δεν είναι εκτός θέματος
+  concepts:
+    trust: [trust, trustworth, εμπιστοσύνη, εμπιστευ, reliab, αξιοπιστ, υποσχε]
+    after_sales: [after-sales, after sales, customer service, εξυπηρέτηση, εξυπηρετ, service quality]
+    delivery: [delivery, delivered, παράδοση, παραδόσ, παραδιδ, late deliver, shipping, καθυστερ]
+    returns: [return, refund, επιστροφή, επιστροφ, withdrawal, υπαναχώρηση]
+    complaints: [complaint, redress, dispute, παράπονο, παράπονα, καταγγελ, ADR, ombudsman, συνήγορος]
+    warranty: [warranty, guarantee, εγγύηση, repair, επισκευ, conformity, faulty, ελαττωματ, defective, βλαβ]
+  # πεδίο της μελέτης: η πηγή πρέπει να αφορά αγορές καταναλωτών/λιανική (όχι μόνο να περιέχει λέξη όπως «trust»)
+  domain_terms: [consumer protection, consumer conditions, consumer rights, consumer law, προστασία καταναλωτ, δικαιώματα καταναλωτ, retail, λιανικ, shopping,
+                 online purchas, buying online, e-commerce, ηλεκτρονικό εμπόριο, ηλεκτρονικές αγορές, appliance, συσκευ, electronic goods, sale of goods, πώληση αγαθών]
+  off_topic_terms: [cross-border, crossborder, διασυνοριακ]
+  max_age_years: 8
 llm:
   max_tokens: 1500
 hybrid_weight: 0.5
