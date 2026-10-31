@@ -26,7 +26,7 @@ from ..util import derive_seed, now_iso
 from . import prompts as P
 from .empirical import make_adapter
 
-NATURE = {"PROFILE": "PROFILE_ATTRIBUTE", "A_EMPIRICAL": "EMPIRICAL_MODEL_PREDICTION"}
+NATURE = {"PROFILE": "PROFILE_ATTRIBUTE", "A_EMPIRICAL": "EMPIRICAL_MODEL_PREDICTION", "A_LAB": "EMPIRICAL_MODEL_PREDICTION"}
 
 
 class RunInterrupted(Exception):
@@ -120,6 +120,11 @@ class StudyRun:
         if self.cfg.get("calibration_version"):
             from ..util import read_json
             self.calibration = read_json(study.internal / "calibrations" / f"{self.cfg['calibration_version']}.json")["questions"]
+        self.orch = None
+        pl = study.evidence_plan() if hasattr(study, "evidence_plan") else None
+        if pl:
+            from .orchestrator import Orchestrator
+            self.orch = Orchestrator(study, pl)
         brief = self.cfg.get("study", {})
         self.brief = f"{brief.get('title', '')} — {brief.get('topic', '')}. Πληθυσμός: {self.cfg['panel'].get('population')} ({self.cfg.get('country', 'GR')})."
         for txt in (brief.get("instructions_to_model") or "", self.brief):
@@ -131,15 +136,44 @@ class StudyRun:
     def _codes(self, q, task):
         return [a["id"] for a in task["alternatives"]] if task else q.codes
 
+    def _hybrid_validated(self) -> bool:
+        """Ποσοτικός συνδυασμός εμπειρικού μοντέλου άλλης χώρας με AI ΜΟΝΟ με υπαρκτή, δηλωμένη επικύρωση (όχι προεπιλεγμένο βάρος)."""
+        hv = self.cfg.get("hybrid") or {}
+        from pathlib import Path
+        return bool(hv.get("weight") is not None and hv.get("validation_ref") and (Path(self.s.dir) / hv["validation_ref"]).exists())
+
     def _route(self, q):
         if q.intent == "demographic" and q.profile_field:
             return "PROFILE"
+        if self.orch and self.orch.mode(q) == "A_EMPIRICAL":
+            return "A_LAB"
         ad = self.adapters.get(q.id)
         if ad:
             if not ad.cross_country or self.cfg.get("allow_cross_country_mode_a"):
                 return "A_EMPIRICAL"
-            return "C_HYBRID"
+            return "C_HYBRID" if self._hybrid_validated() else "B_LLM"
         return "B_LLM"
+
+    def _inference_mode(self, q, mode, pr, err) -> str:
+        if err:
+            return "ERROR"
+        if mode == "PROFILE":
+            return "PROFILE"
+        if mode in ("A_LAB", "A_EMPIRICAL"):
+            return "A_EMPIRICAL"
+        if mode == "C_HYBRID":
+            return "E_VALIDATED_HYBRID"
+        if any(b.get("applied") for b in pr.get("bounds", [])):
+            return "C_EVIDENCE_CONSTRAINED"
+        if self.orch and self.orch.components(q, "context"):
+            return "C_EVIDENCE_INFORMED"
+        return "D_AI"
+
+    def _components_json(self, q, pr, prof) -> str:
+        if not self.orch:
+            return ""
+        return json.dumps({"declared": self.orch.components_record(q, prof), "bounds": pr.get("bounds", []),
+                           "lab": self.orch.entry(q.id).get("lab"), "plan_mode": self.orch.mode(q)}, ensure_ascii=False, default=str)
 
     def respondent(self, prof: dict) -> dict:
         rid = prof["respondent_id"]
@@ -158,6 +192,8 @@ class StudyRun:
                 task = QM.dce_task(q, self.seed, self.s.study_id, rid) if q.type == "dce" else None
                 opts = QM.presented_options(q, self.seed, self.s.study_id, rid)
                 prep[q.id] = {"task": task, "opts": opts, "codes": [a["id"] for a in task["alternatives"]] if task else [o.code for o in opts], "mode": self._route(q)}
+                if prep[q.id]["mode"] == "A_LAB" and (self.orch.lab_answers.get(rid, {}).get(q.id) or {}).get("code") in (None, []):
+                    prep[q.id]["mode"], prep[q.id]["fallback"] = "B_LLM", "Η απάντηση του Lab δεν ήταν διαθέσιμη για αυτό το πρόσωπο (ρητή μετάπτωση σε AI)"
             # προ-αξιολόγηση συνθηκών που δεν εξαρτώνται από ερωτήσεις της ίδιας μονάδας
             unit_ids = {q.id for q in unit}
             ask_llm = []
@@ -172,7 +208,14 @@ class StudyRun:
                 blocks = []
                 for q in ask_llm:
                     t, ids = context_text(self.s.registry, q.id)
-                    ctx_lines.append(f"[{q.id}]\n{t}")
+                    extra = self.orch.context(q, prof) if self.orch else ""
+                    ad = self.adapters.get(q.id)
+                    if ad and ad.cross_country and prep[q.id]["mode"] == "B_LLM":
+                        emp_ctx, st_, _r = ad.probabilities(prof, prep[q.id]["codes"])
+                        if emp_ctx:
+                            extra += (f"\n- Εμπειρικό μοντέλο ΑΛΛΗΣ χώρας ({ad.source_country}, πειραματική μεταφορά, χωρίς επικυρωμένο συνδυασμό): "
+                                      + ", ".join(f"[{k}] {v:.0%}" for k, v in emp_ctx.items()) + " — μόνο πλαίσιο")
+                    ctx_lines.append(f"[{q.id}]\n{t}" + (f"\n{extra}" if extra else ""))
                     ev_ids += ids
                     o = prep[q.id]["opts"]
                     nr = (q.numeric["min"], q.numeric["max"]) if q.type == "numeric" else None
@@ -198,6 +241,7 @@ class StudyRun:
                     rows.append({**base, "status": "SKIPPED", "engine_mode": "SKIP_LOGIC", "response": "", "answer_nature": "", "validation_ok": True,
                                  "validation_errors": "", "provider": "", "model": "", "model_version": "", "evidence_refs": "", "source_country": "",
                                  "assumptions": "", "distribution": "", "rationale": "", "empirical_support": "", "attempts": "", "error": "",
+                                 "inference_mode": "SKIP", "evidence_components": "", "brand_dependent": False,
                                  "input_tokens": 0, "output_tokens": 0, "request_id": ""})
                     answers[q.id] = None
                     continue
@@ -220,14 +264,21 @@ class StudyRun:
                             mode = "B_LLM"
                             assumptions.append(f"Εμπειρικό μοντέλο εκτός πεδίου ({emp_status}): {'; '.join(reasons)[:200]}")
                     llm = parsed.get(q.id)
-                    if mode == "A_EMPIRICAL":
+                    if mode == "A_LAB":
+                        la = self.orch.lab_answers[rid][q.id]
+                        ans = la["code"]
+                        e = self.orch.entry(q.id).get("lab") or {}
+                        prov, model, mver, support = "lab", la["model"], la["model"], "EMPIRICAL"
+                        assumptions.append(f"Lab PIE {la['model']} (βαθμίδα {e.get('tier')}, {e.get('specialist')}); αναμενόμενο σφάλμα {e.get('expectedMAE')} μον.; "
+                                           f"άγκυρες του ίδιου προσώπου")
+                    elif mode == "A_EMPIRICAL":
                         ans, dist = sample_answer(q, {"probabilities": emp}, pr["codes"], rng)
                         prov, model, support = "cce", ad.spec["artifact"], "EMPIRICAL"
                         assumptions.append(f"Εμπειρικό μοντέλο {ad.spec['artifact']} ({ad.source_country})")
                     elif llm is None:
                         err = "Αποτυχία LLM μετά από επαναλήψεις" if ask_llm else "Δεν ζητήθηκε απάντηση"
                     elif mode == "C_HYBRID" and emp is not None and q.type in ("single_choice", "likert", "scenario", "dce"):
-                        w = float(self.cfg.get("hybrid_weight", 0.5))
+                        w = float(self.cfg["hybrid"]["weight"])                     # μόνο με επικυρωμένη στάθμιση (βλ. _hybrid_validated)
                         pl = _norm(llm["probabilities"], pr["codes"])
                         pe = np.array([emp[c] for c in pr["codes"]])
                         mix = w * pe + (1 - w) * pl
@@ -235,7 +286,7 @@ class StudyRun:
                         rationale = llm.get("rationale", "")
                         prov, model, mver = self.provider.name, self.provider.model, call_meta.get("model_version") or ""
                         support = "PARTIAL_EMPIRICAL"
-                        assumptions.append(f"Linear opinion pool: w={w} × εμπειρικό ({ad.spec['artifact']}, {ad.source_country}, EXPERIMENTAL_CROSS_COUNTRY_TRANSFER) + {1 - w} × LLM")
+                        assumptions.append(f"Linear opinion pool: w={w} × εμπειρικό ({ad.spec['artifact']}, {ad.source_country}) + {1 - w} × LLM — επικύρωση: {self.cfg['hybrid']['validation_ref']}")
                     else:
                         mode = "B_LLM"
                         fac = (self.calibration.get(q.id) or {}).get("factors") if self.calibration else None
@@ -244,6 +295,16 @@ class StudyRun:
                             llm = {**llm, "probabilities": {c: float(llm["probabilities"].get(c, 0)) * float(fac.get(c, 1.0)) for c in pr["codes"]}}
                             assumptions.append(f"Βαθμονόμηση {self.cfg['calibration_version']} (πραγματικά δεδομένα, έλεγχος σε holdout)")
                             mode = "B_LLM_CALIBRATED"
+                        if self.orch:
+                            llm, bound_recs = self.orch.apply_bounds(q, llm, pr["codes"], prof, answers)
+                            pr["bounds"] = bound_recs
+                            if any(b.get("applied") for b in bound_recs):
+                                assumptions.append("Εμπειρικό κάτω όριο ανά πρόσωπο (Eurostat, Ελλάδα): " + "; ".join(
+                                    f"{b['source']} ≥{b['bound']:.1%} ({'ενεργό' if b['binding'] else 'μη δεσμευτικό'})" for b in bound_recs if b.get("applied")))
+                        if ad and ad.cross_country:
+                            assumptions.append(f"Εμπειρικό μοντέλο {ad.spec['artifact']} ({ad.source_country}) δόθηκε μόνο ως πλαίσιο: δεν υπάρχει επικυρωμένη στάθμιση συνδυασμού")
+                        if pr.get("fallback"):
+                            assumptions.append(pr["fallback"])
                         ans, dist = sample_answer(q, llm, pr["codes"], rng)
                         rationale = llm.get("rationale", "")
                         prov, model, mver = self.provider.name, self.provider.model, call_meta.get("model_version") or ""
@@ -261,6 +322,8 @@ class StudyRun:
                              "source_country": src_country, "assumptions": " | ".join(assumptions), "distribution": json.dumps(dist, ensure_ascii=False) if dist else "",
                              "rationale": rationale, "empirical_support": support,
                              "attempts": json.dumps(call_meta.get("attempts", []), ensure_ascii=False) if mode in ("B_LLM", "C_HYBRID") or err else "",
+                             "inference_mode": self._inference_mode(q, mode, pr, err), "evidence_components": self._components_json(q, pr, prof),
+                             "brand_dependent": bool(self.orch and self.orch.entry(q.id).get("brand_dependent")),
                              "error": err, "input_tokens": call_meta.get("input_tokens", 0) if q is (ask_llm[0] if ask_llm else None) else 0,
                              "output_tokens": call_meta.get("output_tokens", 0) if q is (ask_llm[0] if ask_llm else None) else 0,
                              "request_id": call_meta.get("request_id") or ""})
@@ -288,6 +351,8 @@ class StudyRun:
                     r = json.loads(line)
                     done[r["respondent_id"]] = r
         todo = [p for p in respondents if p["respondent_id"] not in done]
+        if self.orch:
+            self.orch.prepare_lab(todo)                                   # απαντήσεις Lab για τα ίδια πρόσωπα (μία κλήση, cache)
         completed = 0
         self.pending = 0
         stop = threading.Event()

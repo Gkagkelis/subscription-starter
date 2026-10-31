@@ -21,7 +21,7 @@ if not (ASE_DATA / "frames" / "gr_adults_2025_v1.csv.gz").exists():
     print("Δημιουργία πλαισίου δειγματοληψίας…")
     build_frame()
 
-ok = fail = 0
+ok = fail = blocked = 0
 for f in sorted((ROOT / "tests").glob("test_*.py")):
     mod = importlib.import_module(f.stem)
     for name in sorted(n for n in dir(mod) if n.startswith("test_")):
@@ -30,9 +30,13 @@ for f in sorted((ROOT / "tests").glob("test_*.py")):
             getattr(mod, name)()
             ok += 1
             print(f"PASS {f.name}::{name} ({time.time() - t:.1f}s)")
-        except Exception:
+        except Exception as e:
+            if type(e).__name__ == "Blocked":
+                blocked += 1
+                print(f"BLOCKED {f.name}::{name}: {e}")
+                continue
             fail += 1
             print(f"FAIL {f.name}::{name}")
             traceback.print_exc()
-print(f"{ok}/{ok + fail} πέρασαν")
+print(f"{ok}/{ok + fail + blocked} πέρασαν" + (f" · {blocked} BLOCKED (λείπουν ιδιωτικά δεδομένα)" if blocked else ""))
 sys.exit(1 if fail else 0)

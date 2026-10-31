@@ -1,0 +1,76 @@
+# Οντολογία ερευνητικών εννοιών (constructs) για ανάκτηση και έλεγχο καταλληλότητας τεκμηρίων.
+# Κάθε έννοια έχει «πτυχές» (facets)· ένα κείμενο ταιριάζει σε μια έννοια ΜΟΝΟ αν ταιριάζει σε ΟΛΕΣ τις πτυχές της.
+# Οι όροι είναι ρίζες, χωρίς τόνους, πεζά (ελληνικά και αγγλικά). Η σημασιολογική ομοιότητα χρησιμοποιείται μόνο για
+# εύρεση υποψηφίων· η αντιστοίχιση εννοιών αποφασίζεται από αυτόν τον κατάλογο και από τον έλεγχο καταλληλότητας.
+# measure: τι μετρά συνήθως (behavior/experience, attitude, awareness, intention, preference, perception, ownership)
+constructs:
+  appliance_purchase:
+    measure: behavior
+    facets:
+      purchase: [αγορασ, αγοραζ, αγορα, purchas, bought, buy]
+      product: [ηλεκτρικ, ηλεκτρονικ ειδ, συσκευ, appliance, electronic, computer, tablet, mobile phone, κινητο]
+  online_purchase:
+    measure: behavior
+    facets:
+      purchase: [αγορασ, αγοραζ, αγορα, purchas, bought, buy, ψωνι, shopping]
+      online: [online, internet, διαδικτυ, e-shop, website, app, ηλεκτρονικο καταστημα, marketplace]
+  appliance_ownership:
+    measure: ownership
+    facets:
+      own: [διαθετει, κατοχ, κατεχ, own, possess, has a]
+      product: [συσκευ, appliance, dvd, τηλεορασ, television, computer]
+  delivery_problem:
+    measure: experience
+    facets:
+      delivery: [deliver, παραδοσ, παραδιδ, παραλαβ, αποστολ, shipping, courier]
+      problem: [problem, προβλημ, slower, late, καθυστερ, damaged, wrong, κατεστραμμ, λαθο]
+  delivery_importance:
+    measure: attitude
+    facets:
+      delivery: [deliver, παραδοσ, παραδιδ]
+      importance: [σημαντικ, important, importance]
+  complaint_redress:
+    measure: experience
+    facets:
+      complaint: [complain, redress, παραπον, καταγγελ, dispute, διαφορ, επικοινωνησ]
+  warranty_repair:
+    measure: experience
+    facets:
+      warranty: [guarantee, warranty, εγγυησ, repair, επισκευ, conformity, ελαττωματ, faulty, βλαβ, defective]
+  retailer_trust:
+    measure: attitude
+    facets:
+      trust: [trust, εμπιστ, reliab, αξιοπιστ, respect, σεβον, τηρει]
+      retailer: [retail, shop, store, καταστημα, λιανικ, seller, πωλητ, αλυσιδ, εμπορ]
+  info_search_goods:
+    measure: behavior
+    facets:
+      info: [information, πληροφορ, ενημερωνεστε, search, αναζητ, finding, κριτικ, review, συγκρισ]
+      goods: [goods, products, προιον, συσκευ, αγορ, purchase, services]
+  messaging_channel:
+    measure: behavior
+    facets:
+      channel: [instant messag, messag, viber, whatsapp, sms, μηνυμ, τηλεφων, telephon, email, ειδοποιησ, call]
+  online_reviews:
+    measure: attitude
+    facets:
+      review: [review, κριτικ, rating, βαθμολογ]
+  expenditure_appliances:
+    measure: behavior
+    facets:
+      money: [expenditure, δαπαν, spend, ποσα χρηματ, ευρω, budget, διαθετατε]
+      product: [συσκευ, appliance, ηλεκτρικ]
+  csr:
+    measure: attitude
+    facets:
+      csr: [κοινωνικ προσφορ, social responsib, corporate social, δωρε, donation, κοινωνικης προσφορ]
+  repurchase_loyalty:
+    measure: intention
+    facets:
+      loyalty: [ξαναγορ, επαναγορ, repurchase, loyal, συστησ, συστην, recommend, ξανα]
+  service_recovery:
+    measure: attitude
+    facets:
+      recovery: [αποκατασ, χειρισμ, συγγνωμ, αποζημιω, κουπον, recovery, apolog, compensat, αντικατασ, επιστροφη χρηματ, refund]
+brand_terms: [κωτσοβολ, kotsovolos]
+generic_terms: [consumer, consumers, καταναλωτ, survey, ερευνα, greece, ελλαδα]

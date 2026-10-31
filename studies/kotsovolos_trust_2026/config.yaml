@@ -47,7 +47,9 @@ research:
   max_age_years: 8
 llm:
   max_tokens: 1500
-hybrid_weight: 0.5
+# Ενοποίηση με το Lab: άγκυρες PIE για τα ίδια πρόσωπα + δρομολόγηση/βαθμίδες τεκμηρίωσης ανά ερώτηση
+lab: {enabled: true, model: pie-0.7, ref: "2026-10", prompt_anchors: [emp, econ4, class3]}
+# hybrid: ποσοτικός συνδυασμός εμπειρικού μοντέλου και AI μόνο με επικύρωση (weight + validation_ref)· κανένα προεπιλεγμένο βάρος
 reference_distributions: []   # ποσοστά Brand Intelligence (π.χ. sentiment) για τον έλεγχο μη αντιγραφής — όταν υπάρξει η αναφορά
 report:
   key_questions: [Q4, Q7, Q12a, Q12b, Q16, Q17, Q18a, Q18b, Q20a, Q20b]

@@ -60,9 +60,9 @@ def fit_person_model(targets: dict, frame: pd.DataFrame) -> dict:
     fams = {"age_band": ({k: v for k, v in t_age.items() if v is not None}, lambda r: r),
             "gender": ({k: v for k, v in t_sex.items() if v is not None}, lambda r: r),
             "edu3": ({k: v for k, v in edu_cells.items() if v is not None}, lambda r: r)}
-    f = frame.copy()
+    f = frame[["age_band", "gender", "education", "w"]].copy()
     f["edu3"] = f["education"].map(EDU)
-    f = f.dropna(subset=["edu3"])
+    f = f.dropna(subset=["edu3"]).assign(w=lambda d: d["w"].astype(float)).groupby(["age_band", "gender", "edu3"], as_index=False)["w"].sum()
     w = f["w"].astype(float).to_numpy()
     eta = np.full(len(f), float(logit(targets["total"])))
     eff = {fam: {} for fam in fams}

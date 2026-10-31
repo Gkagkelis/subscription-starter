@@ -24,7 +24,7 @@ def init_study(d: Path, study_id: str, title: str, client: str, n: int, regions:
                      "sampling": {"strategy": "demographic_quota", "variables": ["age", "gender", "region", "household_type", "education", "income_band"], "tolerance_pp": 2},
                      "random_seed": 20261031},
            "research": {"search_terms_en": [], "search_terms_el": [], "use_lake": True, "use_official": True, "web": {"enabled": False}},
-           "llm": {"max_tokens": 1500}, "hybrid_weight": 0.5, "report": {"key_questions": [], "implications": [], "conclusions": []}}
+           "llm": {"max_tokens": 1500}, "report": {"key_questions": [], "implications": [], "conclusions": []}}
     (d / "config.yaml").write_text(yaml.safe_dump(cfg, allow_unicode=True, sort_keys=False), encoding="utf-8")
     q = dict(QUESTIONNAIRE_TEMPLATE, questionnaire_id=f"{study_id}_v1", title=title)
     (d / "questionnaire.yaml").write_text(yaml.safe_dump(q, allow_unicode=True, sort_keys=False), encoding="utf-8")

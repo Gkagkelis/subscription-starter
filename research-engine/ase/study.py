@@ -175,6 +175,9 @@ class Study:
             provider.bind(rdir / "session")  # πάροχος συνεδρίας Claude Code: αιτήματα/απαντήσεις ως αρχεία του run
         if provider.name in ("mock", "claude_session"):
             requests_per_minute = 0          # χωρίς rate limit για τοπικούς παρόχους (mock / συνεδρία)
+        if self.evidence_plan() and not (rdir / "evidence_plan_used.json").exists():
+            from .evidence.plan import serializable
+            write_json(rdir / "evidence_plan_used.json", serializable(self.evidence_plan()))
         if not (rdir / "evidence_registry_used.json").exists():
             write_json(rdir / "evidence_registry_used.json", self.registry)   # το πλαίσιο πηγών που είδε ΑΥΤΗ η εκτέλεση (audit)
         sr = StudyRun(self, provider, run_id=run_id, dry_run=dry_run, budget_usd=budget_usd, max_workers=max_workers, requests_per_minute=requests_per_minute,
@@ -300,6 +303,18 @@ class Study:
         out["lab_prompt_anchors"] = ",".join(lab["prompt_anchors"])
         return out
 
+    def evidence_plan(self) -> dict | None:
+        """Σχέδιο τεκμηρίωσης (lake + Lab + δηλωμένες σχέσεις μέτρησης). Χτίζεται όταν η μελέτη έχει evidence_map.yaml ή Lab."""
+        if getattr(self, "_plan", None) is not None:
+            return self._plan
+        if not ((self.dir / "evidence_map.yaml").exists() or self.lab_cfg().get("enabled")) or (self.cfg.get("evidence") or {}).get("enabled") is False:
+            self._plan = None
+            return None
+        from .evidence.plan import build, serializable
+        self._plan = build(self)
+        write_json(self.internal / "evidence_plan.json", serializable(self._plan))
+        return self._plan
+
     def responses(self, run_id) -> pd.DataFrame:
         return read_table(self.internal / "runs" / run_id / "individual_responses")
 
@@ -309,7 +324,7 @@ class Study:
                  f"- {fm['disclaimer']}", "", "## Απαντήσεις",
                  "- MODE B: το LLM εκτιμά κατανομή πιθανοτήτων για το συγκεκριμένο προφίλ· η απάντηση κληρώνεται με σταθερό seed ανά (ερωτώμενο, ερώτηση).",
                  "- Ερωτήσεις εμπειρίας: συνθετικά χαρακτηριστικά σεναρίου (SYNTHETIC_SCENARIO_ATTRIBUTE), όχι πραγματικό ιστορικό.",
-                 "- MODE C: linear opinion pool εμπειρικής και LLM κατανομής με βάρος hybrid_weight· δεν είναι στατιστικά επικυρωμένο.",
+                 "- Συνδυασμός δεδομένων–AI: μόνο ως εμπειρικό όριο ανά πρόσωπο ή ως πλαίσιο· ποσοτική στάθμιση μόνο με δηλωμένη επικύρωση (hybrid.validation_ref). Κανένα προεπιλεγμένο βάρος.",
                  "- Μοντέλα άλλης χώρας: ποτέ αυτόματα ως επικυρωμένες ελληνικές προβλέψεις.",
                  "- Το ερευνητικό πλαίσιο εμπλουτίζει τις απαντήσεις· δεν ορίζει στόχους. Οι οδηγίες προς το μοντέλο ελέγχονται για εντολές-στόχους.",
                  "", "## Αναφορά", "- Δεν χρησιμοποιείται στατιστικό περιθώριο σφάλματος (το πάνελ δεν είναι δειγματοληπτική έρευνα)."]

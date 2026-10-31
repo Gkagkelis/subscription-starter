@@ -1,0 +1,55 @@
+# Δηλωμένες σχέσεις μέτρησης ανάμεσα σε ερωτήσεις/επιλογές της μελέτης και εμπειρικές πηγές.
+# Μόνο μέσω αυτού του αρχείου μια πηγή μπορεί να επηρεάσει ποσοτικά μια απάντηση· κάθε συνιστώσα περνά από την πύλη
+# καταλληλότητας (ase/evidence/suitability.py). Γράφτηκε από τον ερευνητή (συνεδρία Claude Code, 2026-10-31) μετά τη διάγνωση
+# KOTSOVOLOS_LAB_DIAGNOSIS: καμία ερώτηση δεν έχει ίδια μέτρηση στο lake· οι σχέσεις παρακάτω είναι όρια ή proxy.
+#
+# relation:
+#   lower_bound        P(επιλογή) ≥ ποσοστό πηγής ανά πρόσωπο (λογικό υποσύνολο)
+#   lower_bound_union  P(τουλάχιστον μία από τις επιλογές | συνθήκη) ≥ ποσοστό πηγής ανά πρόσωπο
+#   proxy              συγγενής μέτρηση: δίνεται ως πλαίσιο με τιμή της ομάδας του προσώπου· ΔΕΝ ορίζει πιθανότητα
+components:
+  - question: S1
+    target: {option: "1"}
+    relation: lower_bound
+    source: {dataset: isoc_ec_ibgs, indicator: I_BEEQU1, unit: PC_IND}
+    justification: >-
+      Όποιος αγόρασε online ηλεκτρονικά ή οικιακές συσκευές στο τρίμηνο έχει αγοράσει ηλεκτρική συσκευή ή ηλεκτρονικό είδος
+      στους 24 μήνες (για τον εαυτό του ή το νοικοκυριό): λογικό υποσύνολο.
+    population_note: "Eurostat: άτομα 16–74 (και 75+ όπου υπάρχει)· για 65+ χρησιμοποιείται το μικρότερο από 65–74/75+."
+  - question: S1
+    target: {option: "1"}
+    relation: lower_bound
+    source: {dataset: isoc_ec_ibgs, indicator: I_BHARD1, unit: PC_IND}
+    justification: "Online αγορά υπολογιστή/tablet/κινητού στο τρίμηνο ⊂ αγορά ηλεκτρονικού είδους στους 24 μήνες."
+  - question: Q1
+    target: {options: ["2", "3", "4", "7"], given: "S1 == '1'"}
+    relation: lower_bound_union
+    source: {dataset: isoc_ec_ibgs, indicator: I_BEEQU1, unit: PC_IND}
+    justification: >-
+      Η online αγορά ηλεκτρονικών/συσκευών στο τρίμηνο γίνεται από κάποιο online κανάλι (e-shop αλυσίδας, marketplace,
+      e-shop κατασκευαστή ή «άλλο»). Για αγοραστές: P(online κανάλι | αγοραστής) ≥ P(online αγορά) ≥ ποσοστό Eurostat.
+  - question: Q13
+    target: {option: "5"}
+    relation: proxy
+    source: {dataset: isoc_ci_ac_i, indicator: I_IUCHAT1, unit: PC_IND}
+    justification: "Χρήση άμεσων μηνυμάτων (Viber/WhatsApp κ.λπ.) στο τρίμηνο: σχετίζεται με την προτίμηση ενημέρωσης μέσω Viber/WhatsApp, δεν είναι ίδια μέτρηση."
+  - question: Q28
+    target: {options: ["1", "2", "3", "6"]}
+    relation: proxy
+    source: {dataset: isoc_ci_ac_i, indicator: I_IUIF, unit: PC_IND}
+    justification: "Αναζήτηση πληροφοριών για αγαθά/υπηρεσίες online στο τρίμηνο: σχετίζεται με τις online πηγές ενημέρωσης πριν από αγορά συσκευής."
+  - question: Q29
+    target: {question: true}
+    relation: proxy
+    source: {dataset: isoc_ec_iprb21, indicator: [I_BSPD1, I_BWDN1, I_BCR1, I_BDGL1], unit: PC_IND_BUY3}
+    justification: "Συχνότητα προβλημάτων σε online αγορές (καθυστέρηση, λάθος/κατεστραμμένο, παράπονα, πληροφορίες εγγύησης) στην ομάδα του προσώπου· η ερώτηση μετρά αντίληψη για «μεγαλύτερο πρόβλημα»."
+  - question: Q10
+    target: {question: true}
+    relation: proxy
+    source: {dataset: isoc_ec_iprb21, indicator: [I_BSPD1], unit: PC_IND_BUY3}
+    justification: "Συχνότητα καθυστερήσεων παράδοσης σε online αγορές· πλαίσιο για τη σημασία της έγκαιρης παράδοσης."
+brand:
+  terms: [Κωτσόβολο, Κωτσόβολος, Kotsovolos]
+  baseline_evidence: none
+  note: "Καμία μέτρηση γνωριμίας/εμπιστοσύνης/μεριδίου της μάρκας στο lake ή στις επαληθευμένες πηγές. Οι ερωτήσεις μάρκας εξαρτώνται από παραδοχές· ανάλυση ευαισθησίας στη βάση."
+  sensitivity: {logit_shifts: [-1.0, -0.5, 0.5, 1.0]}

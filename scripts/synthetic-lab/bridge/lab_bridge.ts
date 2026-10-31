@@ -101,7 +101,11 @@ function anchors(inp: { model: string; respondents: AseRespondent[] }) {
 function answer(inp: { model: string; ref: string; questions: Question[]; respondents: AseRespondent[]; seed: number }) {
   const model = modelOrThrow(inp.model);
   const policy = loadEvidencePolicy();
-  const prepared = inp.questions.map((q) => {
+  const idf = buildIdf(model);
+  const prepared = inp.questions.map((q0) => {
+    // ίδια αυτόματη σύνδεση με τη route (αλλιώς η απάντηση θα ακολουθούσε άλλη λογική από τη δρομολόγηση)
+    const s = q0.personaLink ? null : suggestLink(model, q0, inp.ref, { idf });
+    const q = s && s.accepted && s.link ? { ...q0, personaLink: s.link } : q0;
     let pq = prepareQuestion(model, q, inp.ref);
     const d = policy ? classifyEvidence(pq, model, policy, inp.ref, {}) : null;
     if (d) pq = applyEvidenceDecision(pq, d);

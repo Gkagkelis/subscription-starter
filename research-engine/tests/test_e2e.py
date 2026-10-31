@@ -203,8 +203,17 @@ def test_cce_adapter_modes():
     rid = st.run({"provider": "mock"}, max_workers=1)
     w = st.responses(rid)
     w = w[(w["question_id"] == "W1") & (w["status"] == "ANSWERED")]
-    assert len(w) and (w["engine_mode"] == "C_HYBRID").all() and (w["source_country"] == "CH").all()       # ξένο μοντέλο ΠΟΤΕ αυτόματα MODE A
-    assert w["assumptions"].str.contains("EXPERIMENTAL_CROSS_COUNTRY_TRANSFER").all()
+    # ξένο μοντέλο ΠΟΤΕ αυτόματα MODE A· χωρίς επικυρωμένη στάθμιση ΔΕΝ συνδυάζεται ποσοτικά (καμία προεπιλογή 0,5) — μόνο πλαίσιο
+    assert len(w) and (w["engine_mode"] == "B_LLM").all() and (w["source_country"] == "CH").all()
+    assert w["assumptions"].str.contains("μόνο ως πλαίσιο").all() and not w["assumptions"].str.contains("Linear opinion pool").any()
+    d = make_study("cce_c_val", n=8, questionnaire=q, extra_cfg={"hybrid": {"weight": 0.3, "validation_ref": "validation/cce_wm.json"}})
+    (d / "validation").mkdir(exist_ok=True)
+    (d / "validation" / "cce_wm.json").write_text('{"note": "δοκιμαστική επικύρωση για το test"}', encoding="utf-8")
+    st_v = Study(d)
+    wv = st_v.responses(st_v.run({"provider": "mock"}, max_workers=1))
+    wv = wv[(wv["question_id"] == "W1") & (wv["status"] == "ANSWERED")]
+    assert (wv["engine_mode"] == "C_HYBRID").all() and (wv["inference_mode"] == "E_VALIDATED_HYBRID").all()
+    assert wv["assumptions"].str.contains("validation/cce_wm.json").all()
     st2 = Study(make_study("cce_a", n=8, questionnaire=q, extra_cfg={"allow_cross_country_mode_a": True}))
     w2 = st2.responses(st2.run({"provider": "mock"}, max_workers=1))
     w2 = w2[(w2["question_id"] == "W1") & (w2["status"] == "ANSWERED")]
