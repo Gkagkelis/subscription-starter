@@ -1,0 +1,19 @@
+{
+ "key": "23c24bf61adb6749496d",
+ "answer": {
+  "Q08": {
+   "probabilities": {
+    "1": 0.03,
+    "2": 0.09,
+    "3": 0.36,
+    "4": 0.2,
+    "5": 0.03,
+    "6": 0.29
+   },
+   "rationale": "Νέα που αγοράζει μόνο από marketplaces και δίνει βάρος στην online ευκολία· γνωρίζει την αλυσίδα μόνο ως όνομα, άρα κυρίως ουδέτερη ή χωρίς άποψη."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 91)",
+ "imported_at": "2026-10-31T20:07:53Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

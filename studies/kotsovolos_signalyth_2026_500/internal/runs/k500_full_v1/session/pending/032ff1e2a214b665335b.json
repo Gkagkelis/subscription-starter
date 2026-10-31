@@ -1,0 +1,64 @@
+{
+ "key": "032ff1e2a214b665335b",
+ "created_at": "2026-10-31T20:08:06Z",
+ "question_ids": [
+  "Q09"
+ ],
+ "system_prompt_file": "system_prompt.txt",
+ "user_prompt": "ΜΕΛΕΤΗ: Έρευνα για την αγορά ηλεκτρικών και ηλεκτρονικών ειδών, τα καταστήματα και την εμπειρία πελατών. Πληθυσμός: adults_18_plus (GR).\n\nΣΥΝΘΕΤΙΚΟ ΠΡΟΦΙΛ:\nΓυναίκα, ηλικία 55-64\nΠεριφέρεια: Αττική (αστική περιοχή)\nΕκπαίδευση: τριτοβάθμια\nΝοικοκυριό: ζευγάρι με παιδιά και συγγενείς, μέγεθος 5-6\nΕισοδηματικό πεμπτημόριο νοικοκυριού: 3 (1 = χαμηλότερο, 5 = υψηλότερο)\nΕκτιμώμενα χαρακτηριστικά (στατιστική εκτίμηση του μοντέλου PIE από ελληνικά μικροδεδομένα διαΝΕΟσις 2023–24 με βάση τα δημογραφικά· ΟΧΙ γνωστά στοιχεία του προσώπου): απασχόληση: αυτοαπασχολούμενος/η; οικονομική κατάσταση νοικοκυριού: τα βγάζει πέρα με δυσκολία; υποκειμενική κοινωνική τάξη: μεσαία\nΆγνωστα (δεν υπάρχουν δεδομένα): επάγγελμα, προσωπικό ιστορικό αγορών.\n\nΠΡΟΗΓΟΥΜΕΝΕΣ ΑΠΑΝΤΗΣΕΙΣ ΤΟΥ ΙΔΙΟΥ ΠΡΟΣΩΠΟΥ:\n- D01 «Ποια είναι η ηλικιακή σας ομάδα;»: 55–64\n- D02 «Πώς αυτοπροσδιορίζεστε ως προς το φύλο;»: Γυναίκα\n- D03 «Σε ποια περιφέρεια κατοικείτε;»: Αττική\n- Q01 «Τους τελευταίους 24 μήνες αγοράσατε ηλεκτρική ή ηλεκτρονική συσκευή για εσάς ή το νοικο…»: Όχι\n- Q03 «Ποιοι τρεις παράγοντες είναι σημαντικότεροι όταν επιλέγετε κατάστημα ηλεκτρικών ειδών;»: Τελική τιμή, Εγγύηση / επισκευή / after-sales\n- Q04 «Πόσο εξοικειωμένος/η είστε με την αλυσίδα Κωτσόβολος;»: Τη γνωρίζω πολύ καλά\n- Q05 «Έχετε πραγματοποιήσει αγορά από τον Κωτσόβολο τους τελευταίους 24 μήνες;»: Όχι\n- Q08 «Ποια είναι συνολικά η εικόνα σας για τον Κωτσόβολο;»: Πολύ αρνητική\n\nΕΡΕΥΝΗΤΙΚΟ ΠΛΑΙΣΙΟ (υπόβαθρο, όχι στόχος):\n[Q09]\n- [src:greca-eltrun-ecommerce-2026] Έρευνα Ηλεκτρονικού Εμπορίου 2026 - Η συμπεριφορά του Έλληνα Καταναλωτή στις Διαδικτυακές Αγορές (GR, 2026-05; πληθυσμός: Greek consumers who shop online (online questionnaire, multiple-choice questions); δείγμα: 600) — αφορά: Greek-specific background on what drives trust in e-shops (known brand/chain, prompt service before and after purchase, clear terms, reviews, trust certifications), delivery and pickup preferences (home delivery, lockers), payment methods, and online purchasing of electrical appliances as a category.\n- [src:ec-ccs-2024-greece-factsheet] Consumer conditions survey - Consumers at home in the single market - 2025 edition: Country factsheet Greece (GR (with EU27 average and range), 2025-03; πληθυσμός: General public aged 18+ in Greece (nationally representative), CATI telephone interviews; fieldwork 4-30 November 2024; δείγμα: 1,000 per country (Greece 1,000), per the factsheet's technical note) — αφορά: Greece-vs-EU27 background on whether consumers think retailers respect their rights, trust in public authorities and consumer organisations, ease of out-of-court/court dispute settlement, share who experienced a problem with goods/services and whether they complained (to retailer, manufacturer, authority, ECC, ADR), reasons for not complaining, and what people did with a product that failed outside the legal guarantee (repair vs replace).\n- [src:ec-consumer-conditions-scoreboard-2025] 2025 Consumer Conditions Scoreboard (EU27 incl. GR (plus IS, NO), 2025-03; πληθυσμός: Consumers aged 18+ in EU27, Iceland and Norway (2024 Consumer Conditions Survey); same survey as the Greece factsheet; δείγμα: unknown (the main report was not opened; the factsheet states 1,000 per country, 500 in LU, MT, CY, IS)) — αφορά: EU-level frame and cross-country comparison for the Greek factsheet indicators (consumer confidence, problems and complaints, redress, online purchasing); the landing page also links the full data set, methodology metadata and an interactive dashboard for comparable European markets.\n  (Υπόβαθρο μόνο: μην μετατρέπεις στατιστικά των πηγών σε πιθανότητες απάντησης του προσώπου.)\n\nΕΡΩΤΗΣΗ Q09 (single_choice): Πόσο εμπιστεύεστε τον Κωτσόβολο ως κατάστημα για αγορά ηλεκτρικών ειδών;\n  [1] Καθόλου\n  [2] Λίγο\n  [3] Μέτρια\n  [4] Πολύ\n  [5] Πάρα πολύ\n  [6] Δεν γνωρίζω / Δεν μπορώ να κρίνω",
+ "schema": {
+  "type": "object",
+  "properties": {
+   "Q09": {
+    "type": "object",
+    "properties": {
+     "probabilities": {
+      "type": "object",
+      "properties": {
+       "1": {
+        "type": "number"
+       },
+       "2": {
+        "type": "number"
+       },
+       "3": {
+        "type": "number"
+       },
+       "4": {
+        "type": "number"
+       },
+       "5": {
+        "type": "number"
+       },
+       "6": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "1",
+       "2",
+       "3",
+       "4",
+       "5",
+       "6"
+      ],
+      "additionalProperties": false
+     },
+     "rationale": {
+      "type": "string",
+      "description": "Σύντομη, ελέγξιμη αιτιολόγηση (έως 30 λέξεις), χωρίς εσωτερική συλλογιστική."
+     }
+    },
+    "required": [
+     "probabilities",
+     "rationale"
+    ],
+    "additionalProperties": false
+   }
+  },
+  "required": [
+   "Q09"
+  ],
+  "additionalProperties": false
+ }
+}

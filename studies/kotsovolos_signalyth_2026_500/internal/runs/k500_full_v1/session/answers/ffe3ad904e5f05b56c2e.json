@@ -1,0 +1,16 @@
+{
+ "key": "ffe3ad904e5f05b56c2e",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.56,
+    "2": 0.37,
+    "3": 0.07
+   },
+   "rationale": "Νέος πατέρας στην Αθήνα που χρησιμοποιεί φυσικά και online καταστήματα αλυσίδων, γνωρίζει αρκετά την εταιρεία· μάλλον ναι, αλλά όχι βέβαιο."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 94)",
+ "imported_at": "2026-10-31T20:07:54Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

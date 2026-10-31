@@ -1,0 +1,16 @@
+{
+ "key": "f441910f768eb7bbe1f8",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.2,
+    "2": 0.71,
+    "3": 0.09
+   },
+   "rationale": "Αγόρασε από μικρό κατάστημα και marketplace, όχι από μεγάλη αλυσίδα· παρότι γνωρίζει την εταιρεία, μάλλον δεν αγόρασε από αυτήν."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 94)",
+ "imported_at": "2026-10-31T20:07:54Z",
+ "source": "Claude Code session (AI), όχι mock"
+}
