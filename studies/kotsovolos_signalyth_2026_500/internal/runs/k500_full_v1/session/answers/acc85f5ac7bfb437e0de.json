@@ -1,0 +1,19 @@
+{
+ "key": "acc85f5ac7bfb437e0de",
+ "answer": {
+  "Q24": {
+   "probabilities": {
+    "1": 0.1,
+    "2": 0.3,
+    "3": 0.32,
+    "4": 0.12,
+    "5": 0.03,
+    "6": 0.13
+   },
+   "rationale": "Φοιτήτρια που ψωνίζει μόνο σε marketplaces και θα εξέταζε μόνο Skroutz· γνωρίζει την αλυσίδα μόνο ως όνομα, άρα μικρή ή αβέβαιη πιθανότητα."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 136)",
+ "imported_at": "2026-10-31T20:16:35Z",
+ "source": "Claude Code session (AI), όχι mock"
+}
