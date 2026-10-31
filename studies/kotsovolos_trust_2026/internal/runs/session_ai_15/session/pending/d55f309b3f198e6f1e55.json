@@ -1,0 +1,104 @@
+{
+ "key": "d55f309b3f198e6f1e55",
+ "created_at": "2026-10-31T12:03:31Z",
+ "question_ids": [
+  "Q10",
+  "Q11"
+ ],
+ "system_prompt_file": "system_prompt.txt",
+ "user_prompt": "ΜΕΛΕΤΗ: Η Εμπιστοσύνη μετά την Αγορά: Τι Κάνει έναν Καταναλωτή να Μείνει ή να Φύγει; — Εμπιστοσύνη πελατών σε retailer ηλεκτρικών ειδών μετά την αγορά: παράδοση, ελαττωματικά προϊόντα, αποκατάσταση, επαναγορά, εταιρική εικόνα. Πληθυσμός: adults_18_plus (GR).\n\nΣΥΝΘΕΤΙΚΟ ΠΡΟΦΙΛ:\nΓυναίκα, ηλικία 45-54\nΠεριφέρεια: Κρήτη (αγροτική περιοχή)\nΕκπαίδευση: λύκειο / μεταλυκειακή\nΝοικοκυριό: ζευγάρι με παιδιά, μέγεθος 3-4\nΕισοδηματικό πεμπτημόριο νοικοκυριού: 3 (1 = χαμηλότερο, 5 = υψηλότερο)\nΆγνωστα (δεν υπάρχουν δεδομένα): απασχόληση, επάγγελμα, προσωπικό ιστορικό αγορών.\n\nΠΡΟΗΓΟΥΜΕΝΕΣ ΑΠΑΝΤΗΣΕΙΣ ΤΟΥ ΙΔΙΟΥ ΠΡΟΣΩΠΟΥ:\n- S1: Ναι\n- D1: Γυναίκα\n- D2: 45–54\n- D3: Κρήτη\n- Q1: Φυσικό κατάστημα αλυσίδας ηλεκτρικών ειδών\n- Q2: Δεν αγοράζω εγώ τέτοιες συσκευές\n- Q3: 508.0\n- Q4: Συμβουλές προσωπικού, Αξιόπιστη και έγκαιρη παράδοση, Εγγύηση και επισκευές (σειρά σημασίας)\n- Q5: Εξαιρετικά σημαντική\n- Q6: Ναι, τη γνωρίζω\n- Q7: Απόλυτα\n- Q8: Όχι\n- Q9: Συμφωνώ\n\nΕΡΕΥΝΗΤΙΚΟ ΠΛΑΙΣΙΟ (υπόβαθρο, όχι στόχος):\n[Q10]\n- [lake:eurobarometer:s861_300] Flash Eurobarometer 300: Retailers’ attitudes towards cross-border trade and consumer protection (EL, 2015; πληθυσμός: Επιχειρήσεις (B2B δείγμα); δείγμα: 252)\n- [lake:eurobarometer:s688_224] Flash Eurobarometer 224: Business attitudes towards cross-border sales and consumer protection (EL, 2015; πληθυσμός: Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online); δείγμα: 150)\n- [lake:eurobarometer:s766_282] Flash Eurobarometer 282: Attitudes towards crossborder sales and consumer protection (EL, 2015; πληθυσμός: Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online); δείγμα: 1002)\n[Q11]\n- Δεν βρέθηκε συναφής τεκμηρίωση για αυτή την ερώτηση.\n\nΕΡΩΤΗΣΗ Q10 (likert): Πόσο σημαντικό είναι για εσάς να παραδίδεται μια μεγάλη συσκευή ακριβώς τη μέρα και ώρα που συμφωνήθηκε;\n  [1] Καθόλου σημαντικό\n  [2] 2\n  [3] 3\n  [4] 4\n  [5] Εξαιρετικά σημαντικό\n\nΕΡΩΤΗΣΗ Q11 (single_choice): Αν μια παράδοση καθυστερούσε, μετά από πόσο χρόνο θα επικοινωνούσατε με το κατάστημα;\n  [1] Αμέσως, την ίδια μέρα\n  [2] Μετά από 1 ημέρα\n  [3] Μετά από 2–3 ημέρες\n  [4] Μετά από μία εβδομάδα\n  [5] Θα περίμενα να επικοινωνήσουν εκείνοι",
+ "schema": {
+  "type": "object",
+  "properties": {
+   "Q10": {
+    "type": "object",
+    "properties": {
+     "probabilities": {
+      "type": "object",
+      "properties": {
+       "1": {
+        "type": "number"
+       },
+       "2": {
+        "type": "number"
+       },
+       "3": {
+        "type": "number"
+       },
+       "4": {
+        "type": "number"
+       },
+       "5": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "1",
+       "2",
+       "3",
+       "4",
+       "5"
+      ],
+      "additionalProperties": false
+     },
+     "rationale": {
+      "type": "string",
+      "description": "Σύντομη, ελέγξιμη αιτιολόγηση (έως 30 λέξεις), χωρίς εσωτερική συλλογιστική."
+     }
+    },
+    "required": [
+     "probabilities",
+     "rationale"
+    ],
+    "additionalProperties": false
+   },
+   "Q11": {
+    "type": "object",
+    "properties": {
+     "probabilities": {
+      "type": "object",
+      "properties": {
+       "1": {
+        "type": "number"
+       },
+       "2": {
+        "type": "number"
+       },
+       "3": {
+        "type": "number"
+       },
+       "4": {
+        "type": "number"
+       },
+       "5": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "1",
+       "2",
+       "3",
+       "4",
+       "5"
+      ],
+      "additionalProperties": false
+     },
+     "rationale": {
+      "type": "string",
+      "description": "Σύντομη, ελέγξιμη αιτιολόγηση (έως 30 λέξεις), χωρίς εσωτερική συλλογιστική."
+     }
+    },
+    "required": [
+     "probabilities",
+     "rationale"
+    ],
+    "additionalProperties": false
+   }
+  },
+  "required": [
+   "Q10",
+   "Q11"
+  ],
+  "additionalProperties": false
+ }
+}

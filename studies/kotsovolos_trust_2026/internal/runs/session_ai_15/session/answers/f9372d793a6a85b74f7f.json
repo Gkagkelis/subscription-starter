@@ -1,0 +1,15 @@
+{
+ "key": "f9372d793a6a85b74f7f",
+ "answer": {
+  "S1": {
+   "probabilities": {
+    "1": 0.94,
+    "2": 0.06
+   },
+   "rationale": "Νέος άνδρας σε Αττική, εισόδημα νοικοκυριού υψηλό· πολύ συχνές αγορές τεχνολογίας."
+  }
+ },
+ "answered_by": "claude-code-session (κύρια συνεδρία)",
+ "imported_at": "2026-10-31T11:56:43Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

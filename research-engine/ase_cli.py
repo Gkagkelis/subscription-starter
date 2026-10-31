@@ -17,6 +17,8 @@
   compare <dir> --run RUN_ID --import IMPORT_ID [--dashboard]
   calibrate <dir> --run RUN_ID --import IMPORT_ID [--min-n 200]
   providers                                     διαθεσιμότητα παρόχων LLM
+  session-status <dir> --run RUN_ID             πάροχος συνεδρίας Claude Code: αιτήματα σε αναμονή
+  session-import <dir> --run RUN_ID             έλεγχος + εισαγωγή απαντήσεων AI της συνεδρίας (inbox → answers)
 """
 from __future__ import annotations
 
@@ -49,10 +51,12 @@ def main(argv=None):
     a = sp.add_parser("estimate"); a.add_argument("dir"); a.add_argument("--provider", default="anthropic"); a.add_argument("--model", default="claude-opus-5-5")
     a.add_argument("--n", type=int); a.add_argument("--questions"); a.add_argument("--batching", default="per_question")
     for c in ("dry-run", "run"):
-        a = sp.add_parser(c); a.add_argument("dir"); a.add_argument("--provider", default="mock"); a.add_argument("--model", default="mock-1")
+        a = sp.add_parser(c); a.add_argument("dir"); a.add_argument("--provider", default="mock"); a.add_argument("--model", default=None)
         a.add_argument("--n", type=int); a.add_argument("--questions"); a.add_argument("--budget-usd", type=float); a.add_argument("--confirm", action="store_true")
         a.add_argument("--resume"); a.add_argument("--workers", type=int, default=4); a.add_argument("--rpm", type=float, default=50); a.add_argument("--batching", default="per_question")
         a.add_argument("--effort", default="low")
+    for c in ("session-status", "session-import"):
+        a = sp.add_parser(c); a.add_argument("dir"); a.add_argument("--run", required=True)
     a = sp.add_parser("report"); a.add_argument("dir"); a.add_argument("--run", required=True); a.add_argument("--no-pdf", action="store_true")
     a = sp.add_parser("export"); a.add_argument("dir"); a.add_argument("dest")
     a = sp.add_parser("import-real"); a.add_argument("dir"); a.add_argument("data"); a.add_argument("meta"); a.add_argument("mapping")
@@ -98,6 +102,14 @@ def main(argv=None):
         qc = json.loads((st.internal / "runs" / rid / "quality_checks.json").read_text(encoding="utf-8"))
         _print({"run_id": rid, "respondents": man["respondents_completed"], "errors": man["errors"], "ledger": man["ledger"],
                 "qc": {c["check"]: c["status"] for c in qc["checks"]}, "flags": qc["flags"]})
+    elif args.cmd in ("session-status", "session-import"):
+        from ase.llm.session_provider import import_answers, status
+        root = st.internal / "runs" / args.run / "session"
+        if not root.exists():
+            raise FileNotFoundError(f"Δεν υπάρχει φάκελος συνεδρίας για το run {args.run}")
+        out = import_answers(root, st.qn) if args.cmd == "session-import" else {}
+        s = status(root)
+        _print({**out, **{k: (len(v) if k == "waiting" else v) for k, v in s.items()}, "waiting_files": [f"pending/{k}.json" for k in s["waiting"]]})
     elif args.cmd == "report":
         print(st.build_deliverables(args.run, pdf=not args.no_pdf))
     elif args.cmd == "export":
@@ -117,10 +129,13 @@ def main(argv=None):
 
 
 if __name__ == "__main__":
-    from ase.study import ConfirmationRequired
+    from ase.study import AnswersPending, ConfirmationRequired
     from ase.llm.base import BudgetExceeded
     try:
         main()
+    except AnswersPending as e:
+        print(f"[ase] ΑΝΑΜΟΝΗ: {e}", file=sys.stderr)
+        sys.exit(3)
     except (ConfirmationRequired, BudgetExceeded, RuntimeError, PermissionError, FileNotFoundError, FileExistsError, ValueError) as e:
         print(f"[ase] {e.__class__.__name__}: {e}", file=sys.stderr)
         sys.exit(2)

@@ -1,0 +1,175 @@
+{
+ "key": "38da242c458747190f29",
+ "created_at": "2026-10-31T12:09:30Z",
+ "question_ids": [
+  "Q20a",
+  "Q20b",
+  "Q21",
+  "Q22"
+ ],
+ "system_prompt_file": "system_prompt.txt",
+ "user_prompt": "ΜΕΛΕΤΗ: Η Εμπιστοσύνη μετά την Αγορά: Τι Κάνει έναν Καταναλωτή να Μείνει ή να Φύγει; — Εμπιστοσύνη πελατών σε retailer ηλεκτρικών ειδών μετά την αγορά: παράδοση, ελαττωματικά προϊόντα, αποκατάσταση, επαναγορά, εταιρική εικόνα. Πληθυσμός: adults_18_plus (GR).\n\nΣΥΝΘΕΤΙΚΟ ΠΡΟΦΙΛ:\nΓυναίκα, ηλικία 35-44\nΠεριφέρεια: Θεσσαλία (αγροτική περιοχή)\nΕκπαίδευση: λύκειο / μεταλυκειακή\nΝοικοκυριό: ζευγάρι με παιδιά και συγγενείς, μέγεθος 3-4\nΕισοδηματικό πεμπτημόριο νοικοκυριού: 5 (1 = χαμηλότερο, 5 = υψηλότερο)\nΆγνωστα (δεν υπάρχουν δεδομένα): απασχόληση, επάγγελμα, προσωπικό ιστορικό αγορών.\n\nΠΡΟΗΓΟΥΜΕΝΕΣ ΑΠΑΝΤΗΣΕΙΣ ΤΟΥ ΙΔΙΟΥ ΠΡΟΣΩΠΟΥ:\n- S1: Ναι\n- D1: Γυναίκα\n- D2: 35–44\n- D3: Θεσσαλία\n- Q1: Online marketplace / πλατφόρμα σύγκρισης τιμών, Φυσικό κατάστημα αλυσίδας ηλεκτρικών ειδών, Μικρό τοπικό κατάστημα\n- Q2: Κάθε 4–6 χρόνια\n- Q3: 997.0\n- Q4: Ποικιλία προϊόντων, Κοντινό κατάστημα, Χαμηλή τιμή (σειρά σημασίας)\n- Q5: Μέτρια\n- Q6: Ναι, τη γνωρίζω\n- Q7: Μέτρια\n- Q8: Όχι\n- Q9: Συμφωνώ\n- Q10: 4\n- Q11: Μετά από 1 ημέρα\n- Q12a: Μέτρια\n- Q12b: Μέτρια\n- Q13: Email, SMS, Viber / WhatsApp\n- Q14: Θα πήγαινα αυτοπροσώπως στο κατάστημα\n- Q15: 10.0\n- Q16: Επισκευή\n- Q17: A\n- Q18a: Μέτρια\n- Q18b: Καθόλου\n- Q19: Ειλικρινής συγγνώμη, Γρήγορη λύση του προβλήματος, Συνεχής ενημέρωση για την πρόοδο (σειρά σημασίας)\n\nΕΡΕΥΝΗΤΙΚΟ ΠΛΑΙΣΙΟ (υπόβαθρο, όχι στόχος):\n[Q20a]\n- Δεν βρέθηκε συναφής τεκμηρίωση για αυτή την ερώτηση.\n[Q20b]\n- Δεν βρέθηκε συναφής τεκμηρίωση για αυτή την ερώτηση.\n[Q21]\n- [lake:eurobarometer:s861_300] Flash Eurobarometer 300: Retailers’ attitudes towards cross-border trade and consumer protection (EL, 2015; πληθυσμός: Επιχειρήσεις (B2B δείγμα); δείγμα: 252)\n- [lake:eurobarometer:s688_224] Flash Eurobarometer 224: Business attitudes towards cross-border sales and consumer protection (EL, 2015; πληθυσμός: Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online); δείγμα: 150)\n- [lake:eurobarometer:s766_282] Flash Eurobarometer 282: Attitudes towards crossborder sales and consumer protection (EL, 2015; πληθυσμός: Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online); δείγμα: 1002)\n[Q22]\n- [lake:eurobarometer:s861_300] Flash Eurobarometer 300: Retailers’ attitudes towards cross-border trade and consumer protection (EL, 2015; πληθυσμός: Επιχειρήσεις (B2B δείγμα); δείγμα: 252)\n- [lake:eurobarometer:s688_224] Flash Eurobarometer 224: Business attitudes towards cross-border sales and consumer protection (EL, 2015; πληθυσμός: Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online); δείγμα: 150)\n- [lake:eurobarometer:s766_282] Flash Eurobarometer 282: Attitudes towards crossborder sales and consumer protection (EL, 2015; πληθυσμός: Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online); δείγμα: 1002)\n\nΣΕΝΑΡΙΟ (υποθετικό): Την τελευταία φορά που αγοράσατε από ένα κατάστημα ηλεκτρικών ειδών είχατε πρόβλημα με την παράδοση, το οποίο όμως λύθηκε γρήγορα και σωστά. Τώρα χρειάζεστε νέα συσκευή.\nΕΡΩΤΗΣΗ Q20a (scenario): Πόσο πιθανό είναι να ξαναγοράσετε από αυτό το κατάστημα;\n  [1] Καθόλου πιθανό\n  [2] Λίγο πιθανό\n  [3] Μέτρια\n  [4] Πολύ πιθανό\n  [5] Σίγουρα\n\nΣΕΝΑΡΙΟ (υποθετικό): Την τελευταία φορά που αγοράσατε από ένα κατάστημα ηλεκτρικών ειδών είχατε πρόβλημα με την παράδοση, το οποίο δεν λύθηκε ικανοποιητικά. Τώρα χρειάζεστε νέα συσκευή.\nΕΡΩΤΗΣΗ Q20b (scenario): Πόσο πιθανό είναι να ξαναγοράσετε από αυτό το κατάστημα;\n  [1] Καθόλου πιθανό\n  [2] Λίγο πιθανό\n  [3] Μέτρια\n  [4] Πολύ πιθανό\n  [5] Σίγουρα\n\nΕΡΩΤΗΣΗ Q21 (single_choice): Αν αποφασίζατε να αγοράσετε αλλού μετά από κακή εμπειρία, πού θα στρεφόσασταν πιθανότερα;\n  [1] Σε άλλη αλυσίδα ηλεκτρικών ειδών\n  [2] Σε online marketplace\n  [3] Στο e-shop του κατασκευαστή\n  [4] Σε μικρό τοπικό κατάστημα\n  [5] Θα αγόραζα πάλι από το ίδιο κατάστημα\n\nΕΡΩΤΗΣΗ Q22 (numeric): Σε κλίμακα 0–10, πόσο πιθανό είναι να συστήνατε τον Κωτσόβολο σε έναν φίλο ή συγγενή;\nΕΥΡΟΣ: 0–10\n  (αριθμητική: δώσε χαμηλή, τυπική και υψηλή εκτίμηση )",
+ "schema": {
+  "type": "object",
+  "properties": {
+   "Q20a": {
+    "type": "object",
+    "properties": {
+     "probabilities": {
+      "type": "object",
+      "properties": {
+       "1": {
+        "type": "number"
+       },
+       "2": {
+        "type": "number"
+       },
+       "3": {
+        "type": "number"
+       },
+       "4": {
+        "type": "number"
+       },
+       "5": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "1",
+       "2",
+       "3",
+       "4",
+       "5"
+      ],
+      "additionalProperties": false
+     },
+     "rationale": {
+      "type": "string",
+      "description": "Σύντομη, ελέγξιμη αιτιολόγηση (έως 30 λέξεις), χωρίς εσωτερική συλλογιστική."
+     }
+    },
+    "required": [
+     "probabilities",
+     "rationale"
+    ],
+    "additionalProperties": false
+   },
+   "Q20b": {
+    "type": "object",
+    "properties": {
+     "probabilities": {
+      "type": "object",
+      "properties": {
+       "1": {
+        "type": "number"
+       },
+       "2": {
+        "type": "number"
+       },
+       "3": {
+        "type": "number"
+       },
+       "4": {
+        "type": "number"
+       },
+       "5": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "1",
+       "2",
+       "3",
+       "4",
+       "5"
+      ],
+      "additionalProperties": false
+     },
+     "rationale": {
+      "type": "string",
+      "description": "Σύντομη, ελέγξιμη αιτιολόγηση (έως 30 λέξεις), χωρίς εσωτερική συλλογιστική."
+     }
+    },
+    "required": [
+     "probabilities",
+     "rationale"
+    ],
+    "additionalProperties": false
+   },
+   "Q21": {
+    "type": "object",
+    "properties": {
+     "probabilities": {
+      "type": "object",
+      "properties": {
+       "1": {
+        "type": "number"
+       },
+       "2": {
+        "type": "number"
+       },
+       "3": {
+        "type": "number"
+       },
+       "4": {
+        "type": "number"
+       },
+       "5": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "1",
+       "2",
+       "3",
+       "4",
+       "5"
+      ],
+      "additionalProperties": false
+     },
+     "rationale": {
+      "type": "string",
+      "description": "Σύντομη, ελέγξιμη αιτιολόγηση (έως 30 λέξεις), χωρίς εσωτερική συλλογιστική."
+     }
+    },
+    "required": [
+     "probabilities",
+     "rationale"
+    ],
+    "additionalProperties": false
+   },
+   "Q22": {
+    "type": "object",
+    "properties": {
+     "low": {
+      "type": "number"
+     },
+     "typical": {
+      "type": "number"
+     },
+     "high": {
+      "type": "number"
+     },
+     "rationale": {
+      "type": "string",
+      "description": "Σύντομη, ελέγξιμη αιτιολόγηση (έως 30 λέξεις), χωρίς εσωτερική συλλογιστική."
+     }
+    },
+    "required": [
+     "low",
+     "typical",
+     "high",
+     "rationale"
+    ],
+    "additionalProperties": false
+   }
+  },
+  "required": [
+   "Q20a",
+   "Q20b",
+   "Q21",
+   "Q22"
+  ],
+  "additionalProperties": false
+ }
+}

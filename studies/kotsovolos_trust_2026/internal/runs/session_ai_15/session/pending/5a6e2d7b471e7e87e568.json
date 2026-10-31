@@ -1,0 +1,176 @@
+{
+ "key": "5a6e2d7b471e7e87e568",
+ "created_at": "2026-10-31T12:01:54Z",
+ "question_ids": [
+  "Q6",
+  "Q7",
+  "Q8",
+  "Q9"
+ ],
+ "system_prompt_file": "system_prompt.txt",
+ "user_prompt": "ΜΕΛΕΤΗ: Η Εμπιστοσύνη μετά την Αγορά: Τι Κάνει έναν Καταναλωτή να Μείνει ή να Φύγει; — Εμπιστοσύνη πελατών σε retailer ηλεκτρικών ειδών μετά την αγορά: παράδοση, ελαττωματικά προϊόντα, αποκατάσταση, επαναγορά, εταιρική εικόνα. Πληθυσμός: adults_18_plus (GR).\n\nΣΥΝΘΕΤΙΚΟ ΠΡΟΦΙΛ:\nΆνδρας, ηλικία 45-54\nΠεριφέρεια: Δυτική Μακεδονία (αστική περιοχή)\nΕκπαίδευση: γυμνάσιο\nΝοικοκυριό: μονοπρόσωπο, μέγεθος 1\nΕισοδηματικό πεμπτημόριο νοικοκυριού: 1 (1 = χαμηλότερο, 5 = υψηλότερο)\nΆγνωστα (δεν υπάρχουν δεδομένα): απασχόληση, επάγγελμα, προσωπικό ιστορικό αγορών.\n\nΠΡΟΗΓΟΥΜΕΝΕΣ ΑΠΑΝΤΗΣΕΙΣ ΤΟΥ ΙΔΙΟΥ ΠΡΟΣΩΠΟΥ:\n- S1: Ναι\n- D1: Άνδρας\n- D2: 45–54\n- D3: Δυτική Μακεδονία\n- Q1: Φυσικό κατάστημα αλυσίδας ηλεκτρικών ειδών\n- Q2: Κάθε 4–6 χρόνια\n- Q3: 486.0\n- Q4: Αξιόπιστη και έγκαιρη παράδοση, Χαμηλή τιμή, Εύκολες επιστροφές (σειρά σημασίας)\n- Q5: Εξαιρετικά σημαντική\n\nΕΡΕΥΝΗΤΙΚΟ ΠΛΑΙΣΙΟ (υπόβαθρο, όχι στόχος):\n[Q6]\n- Δεν βρέθηκε συναφής τεκμηρίωση για αυτή την ερώτηση.\n[Q7]\n- Δεν βρέθηκε συναφής τεκμηρίωση για αυτή την ερώτηση.\n[Q8]\n- [lake:eurobarometer:s861_300] Flash Eurobarometer 300: Retailers’ attitudes towards cross-border trade and consumer protection (EL, 2015; πληθυσμός: Επιχειρήσεις (B2B δείγμα); δείγμα: 252)\n- [lake:eurobarometer:s688_224] Flash Eurobarometer 224: Business attitudes towards cross-border sales and consumer protection (EL, 2015; πληθυσμός: Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online); δείγμα: 150)\n- [lake:eurobarometer:s766_282] Flash Eurobarometer 282: Attitudes towards crossborder sales and consumer protection (EL, 2015; πληθυσμός: Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online); δείγμα: 1002)\n[Q9]\n- [lake:eurobarometer:s861_300] Flash Eurobarometer 300: Retailers’ attitudes towards cross-border trade and consumer protection (EL, 2015; πληθυσμός: Επιχειρήσεις (B2B δείγμα); δείγμα: 252)\n- [lake:eurobarometer:s688_224] Flash Eurobarometer 224: Business attitudes towards cross-border sales and consumer protection (EL, 2015; πληθυσμός: Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online); δείγμα: 150)\n- [lake:eurobarometer:s766_282] Flash Eurobarometer 282: Attitudes towards crossborder sales and consumer protection (EL, 2015; πληθυσμός: Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online); δείγμα: 1002)\n\nΕΡΩΤΗΣΗ Q6 (single_choice): Γνωρίζετε την αλυσίδα καταστημάτων ηλεκτρικών ειδών Κωτσόβολος;\n  [1] Ναι, τη γνωρίζω\n  [2] Την έχω ακουστά μόνο\n  [3] Όχι\n\nΕΡΩΤΗΣΗ Q7 (likert): Πόσο εμπιστεύεστε τον Κωτσόβολο ως κατάστημα για την αγορά ηλεκτρικών ειδών;\n  [1] Καθόλου\n  [2] Λίγο\n  [3] Μέτρια\n  [4] Πολύ\n  [5] Απόλυτα\n\nΕΡΩΤΗΣΗ Q8 (single_choice): Έχετε αγοράσει από τον Κωτσόβολο (κατάστημα ή online) τους τελευταίους 12 μήνες;\n  [1] Ναι\n  [2] Όχι\n  [3] Δεν θυμάμαι\n  ΣΗΜΕΙΩΣΗ: συνθετικό χαρακτηριστικό σεναρίου — όχι πραγματικό ιστορικό.\n\nΕΡΩΤΗΣΗ Q9 (likert): Σε ποιο βαθμό συμφωνείτε: «Ο Κωτσόβολος τηρεί όσα υπόσχεται στους πελάτες του»;\n  [1] Διαφωνώ απόλυτα\n  [2] Διαφωνώ\n  [3] Ούτε συμφωνώ ούτε διαφωνώ\n  [4] Συμφωνώ\n  [5] Συμφωνώ απόλυτα",
+ "schema": {
+  "type": "object",
+  "properties": {
+   "Q6": {
+    "type": "object",
+    "properties": {
+     "probabilities": {
+      "type": "object",
+      "properties": {
+       "1": {
+        "type": "number"
+       },
+       "2": {
+        "type": "number"
+       },
+       "3": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "1",
+       "2",
+       "3"
+      ],
+      "additionalProperties": false
+     },
+     "rationale": {
+      "type": "string",
+      "description": "Σύντομη, ελέγξιμη αιτιολόγηση (έως 30 λέξεις), χωρίς εσωτερική συλλογιστική."
+     }
+    },
+    "required": [
+     "probabilities",
+     "rationale"
+    ],
+    "additionalProperties": false
+   },
+   "Q7": {
+    "type": "object",
+    "properties": {
+     "probabilities": {
+      "type": "object",
+      "properties": {
+       "1": {
+        "type": "number"
+       },
+       "2": {
+        "type": "number"
+       },
+       "3": {
+        "type": "number"
+       },
+       "4": {
+        "type": "number"
+       },
+       "5": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "1",
+       "2",
+       "3",
+       "4",
+       "5"
+      ],
+      "additionalProperties": false
+     },
+     "rationale": {
+      "type": "string",
+      "description": "Σύντομη, ελέγξιμη αιτιολόγηση (έως 30 λέξεις), χωρίς εσωτερική συλλογιστική."
+     }
+    },
+    "required": [
+     "probabilities",
+     "rationale"
+    ],
+    "additionalProperties": false
+   },
+   "Q8": {
+    "type": "object",
+    "properties": {
+     "probabilities": {
+      "type": "object",
+      "properties": {
+       "1": {
+        "type": "number"
+       },
+       "2": {
+        "type": "number"
+       },
+       "3": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "1",
+       "2",
+       "3"
+      ],
+      "additionalProperties": false
+     },
+     "rationale": {
+      "type": "string",
+      "description": "Σύντομη, ελέγξιμη αιτιολόγηση (έως 30 λέξεις), χωρίς εσωτερική συλλογιστική."
+     }
+    },
+    "required": [
+     "probabilities",
+     "rationale"
+    ],
+    "additionalProperties": false
+   },
+   "Q9": {
+    "type": "object",
+    "properties": {
+     "probabilities": {
+      "type": "object",
+      "properties": {
+       "1": {
+        "type": "number"
+       },
+       "2": {
+        "type": "number"
+       },
+       "3": {
+        "type": "number"
+       },
+       "4": {
+        "type": "number"
+       },
+       "5": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "1",
+       "2",
+       "3",
+       "4",
+       "5"
+      ],
+      "additionalProperties": false
+     },
+     "rationale": {
+      "type": "string",
+      "description": "Σύντομη, ελέγξιμη αιτιολόγηση (έως 30 λέξεις), χωρίς εσωτερική συλλογιστική."
+     }
+    },
+    "required": [
+     "probabilities",
+     "rationale"
+    ],
+    "additionalProperties": false
+   }
+  },
+  "required": [
+   "Q6",
+   "Q7",
+   "Q8",
+   "Q9"
+  ],
+  "additionalProperties": false
+ }
+}

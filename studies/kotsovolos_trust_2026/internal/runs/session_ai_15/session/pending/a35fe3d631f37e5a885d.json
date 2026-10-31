@@ -1,0 +1,92 @@
+{
+ "key": "a35fe3d631f37e5a885d",
+ "created_at": "2026-10-31T12:07:07Z",
+ "question_ids": [
+  "Q16",
+  "Q17"
+ ],
+ "system_prompt_file": "system_prompt.txt",
+ "user_prompt": "ΜΕΛΕΤΗ: Η Εμπιστοσύνη μετά την Αγορά: Τι Κάνει έναν Καταναλωτή να Μείνει ή να Φύγει; — Εμπιστοσύνη πελατών σε retailer ηλεκτρικών ειδών μετά την αγορά: παράδοση, ελαττωματικά προϊόντα, αποκατάσταση, επαναγορά, εταιρική εικόνα. Πληθυσμός: adults_18_plus (GR).\n\nΣΥΝΘΕΤΙΚΟ ΠΡΟΦΙΛ:\nΆνδρας, ηλικία 25-34\nΠεριφέρεια: Νότιο Αιγαίο (αγροτική περιοχή)\nΕκπαίδευση: λύκειο / μεταλυκειακή\nΝοικοκυριό: ζευγάρι με παιδιά και συγγενείς, μέγεθος 5-6\nΕισοδηματικό πεμπτημόριο νοικοκυριού: 3 (1 = χαμηλότερο, 5 = υψηλότερο)\nΆγνωστα (δεν υπάρχουν δεδομένα): απασχόληση, επάγγελμα, προσωπικό ιστορικό αγορών.\n\nΠΡΟΗΓΟΥΜΕΝΕΣ ΑΠΑΝΤΗΣΕΙΣ ΤΟΥ ΙΔΙΟΥ ΠΡΟΣΩΠΟΥ:\n- S1: Ναι\n- D1: Άνδρας\n- D2: 25–34\n- D3: Νότιο Αιγαίο\n- Q1: Online marketplace / πλατφόρμα σύγκρισης τιμών, Κατάστημα ή e-shop του κατασκευαστή\n- Q2: Κάθε 4–6 χρόνια\n- Q3: 610.0\n- Q4: Ποικιλία προϊόντων, Εύκολες επιστροφές, Χαμηλή τιμή (σειρά σημασίας)\n- Q5: Μέτρια\n- Q6: Όχι\n- Q10: 3\n- Q11: Μετά από μία εβδομάδα\n- Q12a: Απόλυτα ικανοποιημένος/η\n- Q12b: Μέτρια\n- Q13: Viber / WhatsApp, SMS\n- Q14: Θα επικοινωνούσα με το κατάστημα αγοράς\n- Q15: 17.0\n\nΕΡΕΥΝΗΤΙΚΟ ΠΛΑΙΣΙΟ (υπόβαθρο, όχι στόχος):\n[Q16]\n- [lake:eurobarometer:s861_300] Flash Eurobarometer 300: Retailers’ attitudes towards cross-border trade and consumer protection (EL, 2015; πληθυσμός: Επιχειρήσεις (B2B δείγμα); δείγμα: 252)\n- [lake:eurobarometer:s688_224] Flash Eurobarometer 224: Business attitudes towards cross-border sales and consumer protection (EL, 2015; πληθυσμός: Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online); δείγμα: 150)\n- [lake:eurobarometer:s766_282] Flash Eurobarometer 282: Attitudes towards crossborder sales and consumer protection (EL, 2015; πληθυσμός: Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online); δείγμα: 1002)\n[Q17]\n- [lake:eurobarometer:s861_300] Flash Eurobarometer 300: Retailers’ attitudes towards cross-border trade and consumer protection (EL, 2015; πληθυσμός: Επιχειρήσεις (B2B δείγμα); δείγμα: 252)\n- [lake:eurobarometer:s688_224] Flash Eurobarometer 224: Business attitudes towards cross-border sales and consumer protection (EL, 2015; πληθυσμός: Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online); δείγμα: 150)\n- [lake:eurobarometer:s766_282] Flash Eurobarometer 282: Attitudes towards crossborder sales and consumer protection (EL, 2015; πληθυσμός: Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online); δείγμα: 1002)\n\nΕΡΩΤΗΣΗ Q16 (single_choice): Αν μια νέα συσκευή αποδεικνυόταν ελαττωματική, ποια λύση θα προτιμούσατε;\n  [1] Επισκευή\n  [2] Αντικατάσταση με καινούργια\n  [3] Επιστροφή χρημάτων\n  [4] Πιστωτικό σημείωμα για μελλοντική αγορά\n\nΕΡΩΤΗΣΗ Q17 (dce): Ποια από τις δύο προσφορές για το ίδιο πλυντήριο θα επιλέγατε;\n  [A] Κατάστημα Α — Τιμή: 579 €; Παράδοση στην ώρα της: συνήθως; Εξυπηρέτηση μετά την πώληση: τηλεφωνικό κέντρο; Επιστροφή: 14 ημέρες\n  [B] Κατάστημα Β — Τιμή: 529 €; Παράδοση στην ώρα της: συνήθως; Εξυπηρέτηση μετά την πώληση: τεχνικός στο σπίτι σε 48 ώρες; Επιστροφή: 30 ημέρες\n  [none] Καμία από τις δύο — —",
+ "schema": {
+  "type": "object",
+  "properties": {
+   "Q16": {
+    "type": "object",
+    "properties": {
+     "probabilities": {
+      "type": "object",
+      "properties": {
+       "1": {
+        "type": "number"
+       },
+       "2": {
+        "type": "number"
+       },
+       "3": {
+        "type": "number"
+       },
+       "4": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "1",
+       "2",
+       "3",
+       "4"
+      ],
+      "additionalProperties": false
+     },
+     "rationale": {
+      "type": "string",
+      "description": "Σύντομη, ελέγξιμη αιτιολόγηση (έως 30 λέξεις), χωρίς εσωτερική συλλογιστική."
+     }
+    },
+    "required": [
+     "probabilities",
+     "rationale"
+    ],
+    "additionalProperties": false
+   },
+   "Q17": {
+    "type": "object",
+    "properties": {
+     "probabilities": {
+      "type": "object",
+      "properties": {
+       "A": {
+        "type": "number"
+       },
+       "B": {
+        "type": "number"
+       },
+       "none": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "A",
+       "B",
+       "none"
+      ],
+      "additionalProperties": false
+     },
+     "rationale": {
+      "type": "string",
+      "description": "Σύντομη, ελέγξιμη αιτιολόγηση (έως 30 λέξεις), χωρίς εσωτερική συλλογιστική."
+     }
+    },
+    "required": [
+     "probabilities",
+     "rationale"
+    ],
+    "additionalProperties": false
+   }
+  },
+  "required": [
+   "Q16",
+   "Q17"
+  ],
+  "additionalProperties": false
+ }
+}

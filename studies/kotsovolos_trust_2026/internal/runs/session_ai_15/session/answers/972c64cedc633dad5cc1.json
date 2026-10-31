@@ -1,0 +1,15 @@
+{
+ "key": "972c64cedc633dad5cc1",
+ "answer": {
+  "S1": {
+   "probabilities": {
+    "1": 0.75,
+    "2": 0.25
+   },
+   "rationale": "Μόνος, χαμηλό εισόδημα· περιορισμένες αγορές, πιθανή μία αντικατάσταση ή κινητό σε 2 χρόνια."
+  }
+ },
+ "answered_by": "claude-code-session (κύρια συνεδρία)",
+ "imported_at": "2026-10-31T11:56:43Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

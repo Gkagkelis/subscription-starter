@@ -1,0 +1,15 @@
+{
+ "key": "33f9dda591d90dff2cf6",
+ "answer": {
+  "S1": {
+   "probabilities": {
+    "1": 0.96,
+    "2": 0.04
+   },
+   "rationale": "Οικογένεια σε Αττική με υψηλό εισόδημα και τριτοβάθμια· πολύ συχνές αγορές ηλεκτρονικών και συσκευών."
+  }
+ },
+ "answered_by": "claude-code-session (κύρια συνεδρία)",
+ "imported_at": "2026-10-31T11:56:43Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

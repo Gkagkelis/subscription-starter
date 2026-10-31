@@ -363,3 +363,26 @@ python3 -I research-engine/ase_cli.py calibrate   studies/X --run <RUN_ID> --imp
 - Οι ομάδες καταναλωτών (k-means στις Likert) είναι περιγραφικές.
 - Το mock περνά όλους τους ελέγχους υποδομής, αλλά **δεν αποδεικνύει ότι οι συνθετικές απαντήσεις είναι έγκυρες**. Η εγκυρότητα μπορεί να ελεγχθεί μόνο με σύγκριση με πραγματικά δεδομένα (§8).
 - Δεν έχουν υλοποιηθεί ακόμη: Batches API, prompt caching, μοντέλα πληθυσμού εκτός «ενήλικες 18+ Ελλάδα».
+
+---
+
+## 10. Απαντήσεις AI από συνεδρία Claude Code, χωρίς API key (`claude_session`)
+
+Το AI της συνεδρίας παίζει τον ρόλο του API, μέσω αρχείων. Δεν χρειάζεται key και δεν υπάρχει χρέωση API. Καταναλώνεται όμως το όριο χρήσης της συνδρομής Claude.
+
+```bash
+S=studies/kotsovolos_trust_2026
+# 1) γύρος: η εκτέλεση γράφει αιτήματα στο internal/runs/<RUN>/session/pending/ και σταματά (exit 3 = αναμονή)
+python3 -I research-engine/ase_cli.py dry-run $S --provider claude_session --n 15 --batching per_block --resume <RUN>
+# 2) το AI της συνεδρίας γράφει απαντήσεις στο session/inbox/<key>.json: {"answered_by": "...", "answer": {...}}
+# 3) έλεγχος + εισαγωγή (ίδιο JSON schema και σημασιολογικός έλεγχος με το API)
+python3 -I research-engine/ase_cli.py session-import $S --run <RUN>
+python3 -I research-engine/ase_cli.py session-status $S --run <RUN>
+# 4) επανάληψη του 1 μέχρι να μη μένουν αιτήματα· μετά report
+```
+
+- **Ιστορικό:** κάθε προφίλ περνά μία ενότητα ανά γύρο και βλέπει τις προηγούμενες απαντήσεις του.
+- **Απαντήσεις που λείπουν:** οι ερωτώμενοι δεν γράφονται ως σφάλματα· απλώς περιμένουν τον επόμενο γύρο.
+- **Μη έγκυρες απαντήσεις:** πάνε στο `session/rejected/` με αιτιολογία. Δεν διορθώνονται σιωπηρά.
+- **Καταγραφή:** provider `claude_session`, model `claude-code-session`, `mock = false`, και `answered_by` ανά απάντηση.
+- **Πρώτη δοκιμή (15 προφίλ):** `studies/kotsovolos_trust_2026/internal/runs/session_ai_15/SESSION_TEST_REPORT.md`.

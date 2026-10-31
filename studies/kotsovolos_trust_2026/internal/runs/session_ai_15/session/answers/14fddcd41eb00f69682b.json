@@ -1,0 +1,15 @@
+{
+ "key": "14fddcd41eb00f69682b",
+ "answer": {
+  "S1": {
+   "probabilities": {
+    "1": 0.86,
+    "2": 0.14
+   },
+   "rationale": "Πολυμελές νοικοκυριό 7-10 ατόμων με μεσαίο-υψηλό εισόδημα· πολλές συσκευές σε χρήση, συχνές αντικαταστάσεις."
+  }
+ },
+ "answered_by": "claude-code-session (κύρια συνεδρία)",
+ "imported_at": "2026-10-31T11:56:43Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

@@ -1,0 +1,15 @@
+{
+ "key": "b6dabb41ea4487a14b16",
+ "answer": {
+  "S1": {
+   "probabilities": {
+    "1": 0.93,
+    "2": 0.07
+   },
+   "rationale": "Νέος πατέρας με τριτοβάθμια· ηλεκτρονικά και οικιακές συσκευές για οικογένεια πολύ πιθανά."
+  }
+ },
+ "answered_by": "claude-code-session (κύρια συνεδρία)",
+ "imported_at": "2026-10-31T11:56:43Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

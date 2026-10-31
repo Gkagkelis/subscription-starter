@@ -20,6 +20,7 @@ import numpy as np
 from .. import ASE_VERSION
 from ..evidence.context import context_text
 from ..llm.runtime import Ledger, Pricing, RateLimiter, call_with_retry
+from ..llm.session_provider import PendingAnswer
 from ..questionnaire import model as QM
 from ..util import derive_seed, now_iso
 from . import prompts as P
@@ -265,9 +266,13 @@ class StudyRun:
                              "request_id": call_meta.get("request_id") or ""})
                 answers[q.id] = ans if not errs else None
                 if not errs and ans is not None:
-                    shown = ans if not isinstance(ans, list) else ", ".join(map(str, ans))
                     lab = {o.code: o.label for o in q.options}
-                    history.append(f"{q.id}: {lab.get(str(shown), shown) if not isinstance(ans, list) else shown}")
+                    if isinstance(ans, list):          # πολλαπλή/κατάταξη: ετικέτες, όχι σκέτοι κωδικοί (αλλιώς το μοντέλο δεν ξέρει τι απαντήθηκε)
+                        shown = ", ".join(lab.get(str(a), str(a)) for a in ans)
+                        shown = f"{shown} (σειρά σημασίας)" if q.type == "ranking" else shown
+                    else:
+                        shown = lab.get(str(ans), ans)
+                    history.append(f"{q.id}: {shown}")
                 if q.screening and not errs and str(ans) in [str(x) for x in q.screening.get("terminate_if", [])]:
                     status = "SCREENED_OUT"
                     return {"respondent_id": rid, "status": status, "rows": rows}
@@ -284,6 +289,7 @@ class StudyRun:
                     done[r["respondent_id"]] = r
         todo = [p for p in respondents if p["respondent_id"] not in done]
         completed = 0
+        self.pending = 0
         stop = threading.Event()
 
         def work(p):
@@ -291,6 +297,10 @@ class StudyRun:
                 return None
             try:
                 r = self.respondent(p)
+            except PendingAnswer:
+                with self.lock:
+                    self.pending += 1
+                return None         # πάροχος συνεδρίας: περιμένει απάντηση· συνεχίζει στον επόμενο γύρο (--resume)
             except Exception:
                 stop.set()          # π.χ. BudgetExceeded: δεν ξεκινούν νέοι ερωτώμενοι· οι ολοκληρωμένοι μένουν στο checkpoint
                 raise
@@ -301,7 +311,10 @@ class StudyRun:
 
         if self.max_workers <= 1:
             for p in todo:
-                done[p["respondent_id"]] = work(p)
+                r = work(p)
+                if r is None:
+                    continue
+                done[p["respondent_id"]] = r
                 completed += 1
                 if stop_after is not None and completed >= stop_after:
                     raise RunInterrupted(f"Διακοπή μετά από {completed} ερωτώμενους (δοκιμή resume)")

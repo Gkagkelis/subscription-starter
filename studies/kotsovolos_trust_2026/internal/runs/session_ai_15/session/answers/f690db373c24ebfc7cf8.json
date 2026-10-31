@@ -1,0 +1,15 @@
+{
+ "key": "f690db373c24ebfc7cf8",
+ "answer": {
+  "S1": {
+   "probabilities": {
+    "1": 0.88,
+    "2": 0.12
+   },
+   "rationale": "Οικογένεια στην Κρήτη με μεσαίο εισόδημα· πιθανή αγορά οικιακής συσκευής ή ηλεκτρονικού."
+  }
+ },
+ "answered_by": "claude-code-session (κύρια συνεδρία)",
+ "imported_at": "2026-10-31T11:56:43Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

@@ -1,0 +1,17 @@
+{
+ "provider": {
+  "provider": "claude_session",
+  "model": "claude-code-session",
+  "options": {
+   "effort": "low"
+  }
+ },
+ "model_versions_seen": [
+  "claude-code-session"
+ ],
+ "prompt_version": "ase-prompt-1.0",
+ "system_prompt_sha256": "7994692fe471e998624922343667dc3848d44f082402d42d043bfb3de1cd24be",
+ "empirical_models": {},
+ "mock": false,
+ "note": ""
+}

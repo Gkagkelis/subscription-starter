@@ -1,0 +1,15 @@
+{
+ "key": "bb49c12d38a2622a6330",
+ "answer": {
+  "S1": {
+   "probabilities": {
+    "1": 0.92,
+    "2": 0.08
+   },
+   "rationale": "Οικογένεια με υψηλό εισόδημα στη Θεσσαλία· οικονομική άνεση για ανανέωση συσκευών."
+  }
+ },
+ "answered_by": "claude-code-session (κύρια συνεδρία)",
+ "imported_at": "2026-10-31T11:56:43Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

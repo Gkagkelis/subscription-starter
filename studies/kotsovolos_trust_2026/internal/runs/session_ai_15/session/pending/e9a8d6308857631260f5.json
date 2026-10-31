@@ -1,0 +1,139 @@
+{
+ "key": "e9a8d6308857631260f5",
+ "created_at": "2026-10-31T11:56:44Z",
+ "question_ids": [
+  "Q1",
+  "Q2",
+  "Q3"
+ ],
+ "system_prompt_file": "system_prompt.txt",
+ "user_prompt": "ΜΕΛΕΤΗ: Η Εμπιστοσύνη μετά την Αγορά: Τι Κάνει έναν Καταναλωτή να Μείνει ή να Φύγει; — Εμπιστοσύνη πελατών σε retailer ηλεκτρικών ειδών μετά την αγορά: παράδοση, ελαττωματικά προϊόντα, αποκατάσταση, επαναγορά, εταιρική εικόνα. Πληθυσμός: adults_18_plus (GR).\n\nΣΥΝΘΕΤΙΚΟ ΠΡΟΦΙΛ:\nΓυναίκα, ηλικία 45-54\nΠεριφέρεια: Ανατολική Μακεδονία & Θράκη (αγροτική περιοχή)\nΕκπαίδευση: πρωτοβάθμια\nΝοικοκυριό: ζευγάρι με παιδιά, μέγεθος 3-4\nΕισοδηματικό πεμπτημόριο νοικοκυριού: 1 (1 = χαμηλότερο, 5 = υψηλότερο)\nΆγνωστα (δεν υπάρχουν δεδομένα): απασχόληση, επάγγελμα, προσωπικό ιστορικό αγορών.\n\nΠΡΟΗΓΟΥΜΕΝΕΣ ΑΠΑΝΤΗΣΕΙΣ ΤΟΥ ΙΔΙΟΥ ΠΡΟΣΩΠΟΥ:\n- S1: Ναι\n- D1: Γυναίκα\n- D2: 45–54\n- D3: Ανατολική Μακεδονία & Θράκη\n\nΕΡΕΥΝΗΤΙΚΟ ΠΛΑΙΣΙΟ (υπόβαθρο, όχι στόχος):\n[Q1]\n- Δεν βρέθηκε συναφής τεκμηρίωση για αυτή την ερώτηση.\n[Q2]\n- [lake:eurobarometer:s861_300] Flash Eurobarometer 300: Retailers’ attitudes towards cross-border trade and consumer protection (EL, 2015; πληθυσμός: Επιχειρήσεις (B2B δείγμα); δείγμα: 252)\n- [lake:eurobarometer:s688_224] Flash Eurobarometer 224: Business attitudes towards cross-border sales and consumer protection (EL, 2015; πληθυσμός: Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online); δείγμα: 150)\n- [lake:eurobarometer:s766_282] Flash Eurobarometer 282: Attitudes towards crossborder sales and consumer protection (EL, 2015; πληθυσμός: Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online); δείγμα: 1002)\n[Q3]\n- [lake:eurobarometer:s861_300] Flash Eurobarometer 300: Retailers’ attitudes towards cross-border trade and consumer protection (EL, 2015; πληθυσμός: Επιχειρήσεις (B2B δείγμα); δείγμα: 252)\n- [lake:eurobarometer:s688_224] Flash Eurobarometer 224: Business attitudes towards cross-border sales and consumer protection (EL, 2015; πληθυσμός: Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online); δείγμα: 150)\n- [lake:eurobarometer:s766_282] Flash Eurobarometer 282: Attitudes towards crossborder sales and consumer protection (EL, 2015; πληθυσμός: Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online); δείγμα: 1002)\n\nΕΡΩΤΗΣΗ Q1 (multiple_choice): Από ποια κανάλια έχετε αγοράσει ηλεκτρικές συσκευές ή ηλεκτρονικά τους τελευταίους 24 μήνες;\n  [6] Υπεραγορά / πολυκατάστημα\n  [4] Κατάστημα ή e-shop του κατασκευαστή\n  [1] Φυσικό κατάστημα αλυσίδας ηλεκτρικών ειδών\n  [5] Μικρό τοπικό κατάστημα\n  [2] Ηλεκτρονικό κατάστημα αλυσίδας ηλεκτρικών ειδών\n  [3] Online marketplace / πλατφόρμα σύγκρισης τιμών\n  [7] Άλλο\n  (πολλαπλή επιλογή: 1–4 επιλογές· δώσε πιθανότητα επιλογής για κάθε κωδικό)\n  ΣΗΜΕΙΩΣΗ: συνθετικό χαρακτηριστικό σεναρίου — όχι πραγματικό ιστορικό.\n\nΕΡΩΤΗΣΗ Q2 (single_choice): Πόσο συχνά αγοράζετε μεγάλη οικιακή συσκευή (π.χ. πλυντήριο, ψυγείο, κουζίνα);\n  [1] Κάθε χρόνο ή συχνότερα\n  [2] Κάθε 2–3 χρόνια\n  [3] Κάθε 4–6 χρόνια\n  [4] Σπανιότερα\n  [5] Δεν αγοράζω εγώ τέτοιες συσκευές\n  ΣΗΜΕΙΩΣΗ: συνθετικό χαρακτηριστικό σεναρίου — όχι πραγματικό ιστορικό.\n\nΕΡΩΤΗΣΗ Q3 (numeric): Περίπου πόσα χρήματα θα διαθέτατε για μια νέα μεγάλη οικιακή συσκευή αν τη χρειαζόσασταν σήμερα;\nΕΥΡΟΣ: 100–3000\n  (αριθμητική: δώσε χαμηλή, τυπική και υψηλή εκτίμηση €)",
+ "schema": {
+  "type": "object",
+  "properties": {
+   "Q1": {
+    "type": "object",
+    "properties": {
+     "inclusion_probabilities": {
+      "type": "object",
+      "properties": {
+       "6": {
+        "type": "number"
+       },
+       "4": {
+        "type": "number"
+       },
+       "1": {
+        "type": "number"
+       },
+       "5": {
+        "type": "number"
+       },
+       "2": {
+        "type": "number"
+       },
+       "3": {
+        "type": "number"
+       },
+       "7": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "6",
+       "4",
+       "1",
+       "5",
+       "2",
+       "3",
+       "7"
+      ],
+      "additionalProperties": false
+     },
+     "rationale": {
+      "type": "string",
+      "description": "Σύντομη, ελέγξιμη αιτιολόγηση (έως 30 λέξεις), χωρίς εσωτερική συλλογιστική."
+     }
+    },
+    "required": [
+     "inclusion_probabilities",
+     "rationale"
+    ],
+    "additionalProperties": false
+   },
+   "Q2": {
+    "type": "object",
+    "properties": {
+     "probabilities": {
+      "type": "object",
+      "properties": {
+       "1": {
+        "type": "number"
+       },
+       "2": {
+        "type": "number"
+       },
+       "3": {
+        "type": "number"
+       },
+       "4": {
+        "type": "number"
+       },
+       "5": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "1",
+       "2",
+       "3",
+       "4",
+       "5"
+      ],
+      "additionalProperties": false
+     },
+     "rationale": {
+      "type": "string",
+      "description": "Σύντομη, ελέγξιμη αιτιολόγηση (έως 30 λέξεις), χωρίς εσωτερική συλλογιστική."
+     }
+    },
+    "required": [
+     "probabilities",
+     "rationale"
+    ],
+    "additionalProperties": false
+   },
+   "Q3": {
+    "type": "object",
+    "properties": {
+     "low": {
+      "type": "number"
+     },
+     "typical": {
+      "type": "number"
+     },
+     "high": {
+      "type": "number"
+     },
+     "rationale": {
+      "type": "string",
+      "description": "Σύντομη, ελέγξιμη αιτιολόγηση (έως 30 λέξεις), χωρίς εσωτερική συλλογιστική."
+     }
+    },
+    "required": [
+     "low",
+     "typical",
+     "high",
+     "rationale"
+    ],
+    "additionalProperties": false
+   }
+  },
+  "required": [
+   "Q1",
+   "Q2",
+   "Q3"
+  ],
+  "additionalProperties": false
+ }
+}

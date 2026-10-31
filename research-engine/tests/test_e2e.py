@@ -121,7 +121,9 @@ def test_paid_provider_requires_confirmation_and_budget_stops_run():
         name = "anthropic"                          # τιμολογείται ως Anthropic· δεν γίνεται καμία πραγματική κλήση
     PROVIDERS["fakepaid"] = FakePaid
     try:
-        st = Study(make_study("paid", n=10))
+        q = copy.deepcopy(QUESTIONNAIRE)
+        q["blocks"][0]["questions"][0].pop("screening")           # χωρίς screening: σταθερό κόστος ανά ερωτώμενο, ανεξάρτητο από το πάνελ
+        st = Study(make_study("paid", n=10, questionnaire=q))
         cfg = {"provider": "fakepaid", "model": "claude-opus-5-5"}
         for kw in ({}, {"budget_usd": 1.0}, {"confirm": True}):
             try:
@@ -207,3 +209,45 @@ def test_cce_adapter_modes():
     w2 = st2.responses(st2.run({"provider": "mock"}, max_workers=1))
     w2 = w2[(w2["question_id"] == "W1") & (w2["status"] == "ANSWERED")]
     assert (w2["engine_mode"] == "A_EMPIRICAL").all() and (w2["answer_nature"] == "EMPIRICAL_MODEL_PREDICTION").all()
+
+
+def test_claude_session_provider_rounds_import_and_history():
+    """Πάροχος συνεδρίας: αιτήματα ως αρχεία, έλεγχος/εισαγωγή απαντήσεων, συνέχεια ανά γύρο με ιστορικό.
+    (Στο test οι απαντήσεις του inbox γράφονται από βοηθητικό· στην πραγματική χρήση τις γράφει το AI της συνεδρίας.)"""
+    from ase.llm.session_provider import import_answers, status
+    from ase.study import AnswersPending
+    st = Study(make_study("session", n=4))
+    helper = MockProvider()
+    root = st.internal / "runs" / "sess" / "session"
+    rounds, first = 0, True
+    while True:
+        try:
+            st.run({"provider": "claude_session"}, dry_run=True, resume_run_id="sess", batching="per_block", max_workers=2)
+            break
+        except AnswersPending:
+            rounds += 1
+            assert rounds < 20
+        waiting = status(root)["waiting"]
+        assert waiting
+        for i, k in enumerate(waiting):
+            req = json.loads((root / "pending" / f"{k}.json").read_text(encoding="utf-8"))
+            ans = helper.generate("s", req["user_prompt"], req["schema"]).parsed
+            if first and i == 0:                                   # μία μη έγκυρη απάντηση → απόρριψη, όχι σιωπηρή διόρθωση
+                bad = json.loads(json.dumps(ans))
+                bad[next(iter(bad))] = {"x": 1}
+                (root / "inbox" / f"{k}.json").write_text(json.dumps(bad), encoding="utf-8")
+                continue
+            (root / "inbox" / f"{k}.json").write_text(json.dumps({"answer": ans, "answered_by": "test-helper"}), encoding="utf-8")
+        out = import_answers(root, st.qn)
+        if first:
+            assert len(out["rejected"]) == 1 and status(root)["rejected"] == 1
+            first = False
+    assert rounds >= 2                                             # τουλάχιστον μία ενότητα ανά γύρο, με ιστορικό
+    rid = "sess"
+    df = st.responses(rid)
+    llm = df[df["engine_mode"].isin(["B_LLM", "C_HYBRID"])]
+    assert len(llm) and (llm["provider"] == "claude_session").all() and (llm["model"] == "claude-code-session").all()
+    assert not read_json(st.internal / "runs" / rid / "model_provenance.json")["mock"]
+    later = [json.loads(p.read_text(encoding="utf-8"))["user_prompt"] for p in (root / "pending").glob("*.json")]
+    assert any("S1: Ναι" in u for u in later)                    # οι επόμενοι γύροι βλέπουν τις προηγούμενες απαντήσεις
+    assert all(len(json.loads(x)) for x in df[df["attempts"] != ""]["attempts"])

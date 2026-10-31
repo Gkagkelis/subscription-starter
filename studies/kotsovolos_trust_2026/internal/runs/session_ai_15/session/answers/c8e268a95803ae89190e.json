@@ -1,0 +1,15 @@
+{
+ "key": "c8e268a95803ae89190e",
+ "answer": {
+  "S1": {
+   "probabilities": {
+    "1": 0.72,
+    "2": 0.28
+   },
+   "rationale": "Ζευγάρι 65+ με χαμηλό εισόδημα· αγορές κυρίως για αντικατάσταση, μέτρια πιθανότητα σε 24 μήνες."
+  }
+ },
+ "answered_by": "claude-code-session (κύρια συνεδρία)",
+ "imported_at": "2026-10-31T11:56:43Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

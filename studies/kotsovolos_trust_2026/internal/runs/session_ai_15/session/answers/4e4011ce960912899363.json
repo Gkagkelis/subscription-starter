@@ -1,0 +1,15 @@
+{
+ "key": "4e4011ce960912899363",
+ "answer": {
+  "S1": {
+   "probabilities": {
+    "1": 0.89,
+    "2": 0.11
+   },
+   "rationale": "Νέος άνδρας σε πολυμελές νοικοκυριό· κινητά, αξεσουάρ ή οικιακές συσκευές σε 24 μήνες πολύ πιθανά."
+  }
+ },
+ "answered_by": "claude-code-session (κύρια συνεδρία)",
+ "imported_at": "2026-10-31T11:56:43Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

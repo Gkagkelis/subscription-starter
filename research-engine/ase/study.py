@@ -38,6 +38,10 @@ class ConfirmationRequired(Exception):
     pass
 
 
+class AnswersPending(Exception):
+    """Πάροχος συνεδρίας: υπάρχουν ερωτώμενοι που περιμένουν απαντήσεις AI· συνέχεια με --resume μετά το session-import."""
+
+
 def _git_commit():
     try:
         return subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True, cwd=Path(__file__).parent).stdout.strip()
@@ -160,11 +164,19 @@ class Study:
         print(f"[ase] run_id: {run_id} (συνέχεια μετά από διακοπή: --resume {run_id})", file=sys.stderr)
         _ = self.registry
         started = now_iso()
-        if provider.name == "mock":
-            requests_per_minute = 0          # χωρίς rate limit για τον τοπικό mock πάροχο
+        if hasattr(provider, "bind"):
+            provider.bind(rdir / "session")  # πάροχος συνεδρίας Claude Code: αιτήματα/απαντήσεις ως αρχεία του run
+        if provider.name in ("mock", "claude_session"):
+            requests_per_minute = 0          # χωρίς rate limit για τοπικούς παρόχους (mock / συνεδρία)
         sr = StudyRun(self, provider, run_id=run_id, dry_run=dry_run, budget_usd=budget_usd, max_workers=max_workers, requests_per_minute=requests_per_minute,
                       batching=batching, sleep=sleep, question_ids=question_ids)
         results = sr.execute(sel.to_dict("records"), rdir / "checkpoint.jsonl", stop_after=stop_after)
+        if getattr(sr, "pending", 0):
+            from .llm.session_provider import status
+            st_ = status(rdir / "session")
+            raise AnswersPending(f"run {run_id}: {len(results)} ερωτώμενοι ολοκληρώθηκαν, {sr.pending} περιμένουν· "
+                                 f"{len(st_['waiting'])} αιτήματα χωρίς απάντηση στο {rdir / 'session' / 'pending'}. "
+                                 f"Μετά τις απαντήσεις: session-import και ξανά --resume {run_id}.")
         rows = [r for x in results for r in x["rows"]]
         status = {x["respondent_id"]: x["status"] for x in results}
         df = pd.DataFrame(rows)

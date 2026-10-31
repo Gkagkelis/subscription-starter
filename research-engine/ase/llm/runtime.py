@@ -15,8 +15,9 @@ from .anthropic_provider import AnthropicProvider
 from .base import BudgetExceeded, LLMResult, ProviderError
 from .mock import MockProvider
 from .other_providers import GeminiProvider, OpenAIProvider
+from .session_provider import ClaudeSessionProvider
 
-PROVIDERS = {"anthropic": AnthropicProvider, "openai": OpenAIProvider, "google": GeminiProvider, "mock": MockProvider}
+PROVIDERS = {"anthropic": AnthropicProvider, "openai": OpenAIProvider, "google": GeminiProvider, "mock": MockProvider, "claude_session": ClaudeSessionProvider}
 CHARS_PER_TOKEN = 2.5        # συντηρητική παραδοχή για ελληνικό κείμενο· αντικαθίσταται από μετρήσεις dry run όταν υπάρχουν
 
 
@@ -25,7 +26,11 @@ def make_provider(cfg: dict):
     if name not in PROVIDERS:
         raise ValueError(f"Άγνωστος πάροχος {name} (διαθέσιμοι: {', '.join(PROVIDERS)})")
     kw = {k: v for k, v in cfg.items() if k not in ("provider", "model")}
-    return PROVIDERS[name](cfg.get("model", "mock-1"), **kw)
+    if cfg.get("model"):
+        return PROVIDERS[name](cfg["model"], **kw)
+    if name in ("mock", "claude_session"):
+        return PROVIDERS[name](**kw)                 # προεπιλεγμένη ετικέτα του ίδιου του παρόχου (ποτέ «mock-1» σε μη-mock)
+    raise ValueError(f"Ο πάροχος {name} χρειάζεται ρητό μοντέλο (--model)")
 
 
 class Pricing:

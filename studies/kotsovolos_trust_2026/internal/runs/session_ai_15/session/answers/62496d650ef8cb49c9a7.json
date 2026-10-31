@@ -1,0 +1,15 @@
+{
+ "key": "62496d650ef8cb49c9a7",
+ "answer": {
+  "S1": {
+   "probabilities": {
+    "1": 0.9,
+    "2": 0.1
+   },
+   "rationale": "Νέα γυναίκα σε μεγάλο νοικοκυριό στην Αττική· συχνές αγορές κινητών/μικροσυσκευών, παρά το χαμηλό εισόδημα."
+  }
+ },
+ "answered_by": "claude-code-session (κύρια συνεδρία)",
+ "imported_at": "2026-10-31T11:56:43Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

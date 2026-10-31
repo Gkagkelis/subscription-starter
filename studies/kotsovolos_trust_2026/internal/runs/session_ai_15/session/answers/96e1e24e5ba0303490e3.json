@@ -1,0 +1,15 @@
+{
+ "key": "96e1e24e5ba0303490e3",
+ "answer": {
+  "S1": {
+   "probabilities": {
+    "1": 0.62,
+    "2": 0.38
+   },
+   "rationale": "Μόνη, 65+, χαμηλότερο εισόδημα· αγοράζει σπάνια και κυρίως όταν χαλάσει κάτι."
+  }
+ },
+ "answered_by": "claude-code-session (κύρια συνεδρία)",
+ "imported_at": "2026-10-31T11:56:43Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

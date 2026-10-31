@@ -1,0 +1,152 @@
+{
+ "key": "3f782727f4039435daa3",
+ "created_at": "2026-10-31T12:08:15Z",
+ "question_ids": [
+  "Q18a",
+  "Q18b",
+  "Q19"
+ ],
+ "system_prompt_file": "system_prompt.txt",
+ "user_prompt": "ΜΕΛΕΤΗ: Η Εμπιστοσύνη μετά την Αγορά: Τι Κάνει έναν Καταναλωτή να Μείνει ή να Φύγει; — Εμπιστοσύνη πελατών σε retailer ηλεκτρικών ειδών μετά την αγορά: παράδοση, ελαττωματικά προϊόντα, αποκατάσταση, επαναγορά, εταιρική εικόνα. Πληθυσμός: adults_18_plus (GR).\n\nΣΥΝΘΕΤΙΚΟ ΠΡΟΦΙΛ:\nΓυναίκα, ηλικία 65+\nΠεριφέρεια: Αττική (αστική περιοχή)\nΕκπαίδευση: πρωτοβάθμια\nΝοικοκυριό: μονοπρόσωπο, μέγεθος 1\nΕισοδηματικό πεμπτημόριο νοικοκυριού: 1 (1 = χαμηλότερο, 5 = υψηλότερο)\nΆγνωστα (δεν υπάρχουν δεδομένα): απασχόληση, επάγγελμα, προσωπικό ιστορικό αγορών.\n\nΠΡΟΗΓΟΥΜΕΝΕΣ ΑΠΑΝΤΗΣΕΙΣ ΤΟΥ ΙΔΙΟΥ ΠΡΟΣΩΠΟΥ:\n- S1: Ναι\n- D1: Γυναίκα\n- D2: 65+\n- D3: Αττική\n- Q1: Μικρό τοπικό κατάστημα, Υπεραγορά / πολυκατάστημα\n- Q2: Σπανιότερα\n- Q3: 225.0\n- Q4: Εξυπηρέτηση μετά την πώληση, Χαμηλή τιμή, Εύκολες επιστροφές (σειρά σημασίας)\n- Q5: Πολύ\n- Q6: Ναι, τη γνωρίζω\n- Q7: Απόλυτα\n- Q8: Όχι\n- Q9: Διαφωνώ\n- Q10: 2\n- Q11: Μετά από 2–3 ημέρες\n- Q12a: Πολύ\n- Q12b: Μέτρια\n- Q13: Τηλεφώνημα\n- Q14: Θα πήγαινα αυτοπροσώπως στο κατάστημα\n- Q15: 14.0\n- Q16: Αντικατάσταση με καινούργια\n- Q17: none\n\nΕΡΕΥΝΗΤΙΚΟ ΠΛΑΙΣΙΟ (υπόβαθρο, όχι στόχος):\n[Q18a]\n- [lake:eurobarometer:s861_300] Flash Eurobarometer 300: Retailers’ attitudes towards cross-border trade and consumer protection (EL, 2015; πληθυσμός: Επιχειρήσεις (B2B δείγμα); δείγμα: 252)\n- [lake:eurobarometer:s688_224] Flash Eurobarometer 224: Business attitudes towards cross-border sales and consumer protection (EL, 2015; πληθυσμός: Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online); δείγμα: 150)\n- [lake:eurobarometer:s766_282] Flash Eurobarometer 282: Attitudes towards crossborder sales and consumer protection (EL, 2015; πληθυσμός: Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online); δείγμα: 1002)\n[Q18b]\n- [lake:eurobarometer:s861_300] Flash Eurobarometer 300: Retailers’ attitudes towards cross-border trade and consumer protection (EL, 2015; πληθυσμός: Επιχειρήσεις (B2B δείγμα); δείγμα: 252)\n- [lake:eurobarometer:s688_224] Flash Eurobarometer 224: Business attitudes towards cross-border sales and consumer protection (EL, 2015; πληθυσμός: Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online); δείγμα: 150)\n- [lake:eurobarometer:s766_282] Flash Eurobarometer 282: Attitudes towards crossborder sales and consumer protection (EL, 2015; πληθυσμός: Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online); δείγμα: 1002)\n[Q19]\n- [lake:eurobarometer:s861_300] Flash Eurobarometer 300: Retailers’ attitudes towards cross-border trade and consumer protection (EL, 2015; πληθυσμός: Επιχειρήσεις (B2B δείγμα); δείγμα: 252)\n- [lake:eurobarometer:s688_224] Flash Eurobarometer 224: Business attitudes towards cross-border sales and consumer protection (EL, 2015; πληθυσμός: Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online); δείγμα: 150)\n- [lake:eurobarometer:s766_282] Flash Eurobarometer 282: Attitudes towards crossborder sales and consumer protection (EL, 2015; πληθυσμός: Κάτοικοι 15+ (Flash: συνήθως 15+ μέσω τηλεφώνου/online); δείγμα: 1002)\n\nΣΕΝΑΡΙΟ (υποθετικό): Μια τηλεόραση που αγοράσατε παρουσιάζει βλάβη. Το κατάστημα ζητά συγγνώμη, την αντικαθιστά μέσα σε 2 ημέρες και σας δίνει κουπόνι 30 € για επόμενη αγορά.\nΕΡΩΤΗΣΗ Q18a (scenario): Μετά από αυτόν τον χειρισμό, πόσο θα εμπιστευόσασταν ξανά το κατάστημα;\n  [1] Καθόλου\n  [2] Λίγο\n  [3] Μέτρια\n  [4] Πολύ\n  [5] Απόλυτα\n\nΣΕΝΑΡΙΟ (υποθετικό): Μια τηλεόραση που αγοράσατε παρουσιάζει βλάβη. Το κατάστημα την αντικαθιστά ύστερα από 2 εβδομάδες και αρκετά τηλεφωνήματα, χωρίς συγγνώμη ή αποζημίωση.\nΕΡΩΤΗΣΗ Q18b (scenario): Μετά από αυτόν τον χειρισμό, πόσο θα εμπιστευόσασταν ξανά το κατάστημα;\n  [1] Καθόλου\n  [2] Λίγο\n  [3] Μέτρια\n  [4] Πολύ\n  [5] Απόλυτα\n\nΕΡΩΤΗΣΗ Q19 (ranking): Κατατάξτε τις τρεις κινήσεις που θα σας έκαναν πιο εύκολα να εμπιστευτείτε ξανά ένα κατάστημα μετά από κακή εμπειρία.\n  [2] Ειλικρινής συγγνώμη\n  [6] Επέκταση εγγύησης\n  [5] Ένας υπεύθυνος που αναλαμβάνει την υπόθεση\n  [4] Συνεχής ενημέρωση για την πρόοδο\n  [3] Οικονομική αποζημίωση ή κουπόνι\n  [1] Γρήγορη λύση του προβλήματος\n  (κατάταξη: δώσε βαθμό σημασίας 0–1 για κάθε στοιχείο)",
+ "schema": {
+  "type": "object",
+  "properties": {
+   "Q18a": {
+    "type": "object",
+    "properties": {
+     "probabilities": {
+      "type": "object",
+      "properties": {
+       "1": {
+        "type": "number"
+       },
+       "2": {
+        "type": "number"
+       },
+       "3": {
+        "type": "number"
+       },
+       "4": {
+        "type": "number"
+       },
+       "5": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "1",
+       "2",
+       "3",
+       "4",
+       "5"
+      ],
+      "additionalProperties": false
+     },
+     "rationale": {
+      "type": "string",
+      "description": "Σύντομη, ελέγξιμη αιτιολόγηση (έως 30 λέξεις), χωρίς εσωτερική συλλογιστική."
+     }
+    },
+    "required": [
+     "probabilities",
+     "rationale"
+    ],
+    "additionalProperties": false
+   },
+   "Q18b": {
+    "type": "object",
+    "properties": {
+     "probabilities": {
+      "type": "object",
+      "properties": {
+       "1": {
+        "type": "number"
+       },
+       "2": {
+        "type": "number"
+       },
+       "3": {
+        "type": "number"
+       },
+       "4": {
+        "type": "number"
+       },
+       "5": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "1",
+       "2",
+       "3",
+       "4",
+       "5"
+      ],
+      "additionalProperties": false
+     },
+     "rationale": {
+      "type": "string",
+      "description": "Σύντομη, ελέγξιμη αιτιολόγηση (έως 30 λέξεις), χωρίς εσωτερική συλλογιστική."
+     }
+    },
+    "required": [
+     "probabilities",
+     "rationale"
+    ],
+    "additionalProperties": false
+   },
+   "Q19": {
+    "type": "object",
+    "properties": {
+     "importance_scores": {
+      "type": "object",
+      "properties": {
+       "2": {
+        "type": "number"
+       },
+       "6": {
+        "type": "number"
+       },
+       "5": {
+        "type": "number"
+       },
+       "4": {
+        "type": "number"
+       },
+       "3": {
+        "type": "number"
+       },
+       "1": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "2",
+       "6",
+       "5",
+       "4",
+       "3",
+       "1"
+      ],
+      "additionalProperties": false
+     },
+     "rationale": {
+      "type": "string",
+      "description": "Σύντομη, ελέγξιμη αιτιολόγηση (έως 30 λέξεις), χωρίς εσωτερική συλλογιστική."
+     }
+    },
+    "required": [
+     "importance_scores",
+     "rationale"
+    ],
+    "additionalProperties": false
+   }
+  },
+  "required": [
+   "Q18a",
+   "Q18b",
+   "Q19"
+  ],
+  "additionalProperties": false
+ }
+}
