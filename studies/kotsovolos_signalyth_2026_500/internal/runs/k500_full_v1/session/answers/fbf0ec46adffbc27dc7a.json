@@ -1,0 +1,19 @@
+{
+ "key": "fbf0ec46adffbc27dc7a",
+ "answer": {
+  "Q09": {
+   "probabilities": {
+    "1": 0.14,
+    "2": 0.46,
+    "3": 0.3,
+    "4": 0.05,
+    "5": 0.01,
+    "6": 0.04
+   },
+   "rationale": "Γνωρίζει πολύ καλά την αλυσίδα αλλά έχει μάλλον αρνητική εικόνα και αγοράζει μόνο από marketplaces· η εμπιστοσύνη της είναι μάλλον λίγη."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 121)",
+ "imported_at": "2026-10-31T20:15:05Z",
+ "source": "Claude Code session (AI), όχι mock"
+}
