@@ -1,0 +1,19 @@
+{
+ "key": "662e0d7f2a9fc512b8e0",
+ "answer": {
+  "Q09": {
+   "probabilities": {
+    "1": 0.02,
+    "2": 0.08,
+    "3": 0.38,
+    "4": 0.38,
+    "5": 0.05,
+    "6": 0.09
+   },
+   "rationale": "Φοιτήτρια που ψωνίζει κυρίως online από marketplace, με μάλλον θετική εικόνα· εμπιστοσύνη μεταξύ μέτριας και υψηλής."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 113)",
+ "imported_at": "2026-10-31T20:11:49Z",
+ "source": "Claude Code session (AI), όχι mock"
+}
