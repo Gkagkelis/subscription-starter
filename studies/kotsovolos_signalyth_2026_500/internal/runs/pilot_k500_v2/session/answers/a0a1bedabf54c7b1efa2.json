@@ -1,0 +1,16 @@
+{
+ "key": "a0a1bedabf54c7b1efa2",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.88,
+    "2": 0.07,
+    "3": 0.05
+   },
+   "rationale": "Νέος άνδρας σε εύπορο αστικό νοικοκυριό της Αττικής· πολύ πιθανή αγορά κινητού, ακουστικών ή gaming/υπολογιστή μέσα σε δύο χρόνια."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 2)",
+ "imported_at": "2026-10-31T17:52:36Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

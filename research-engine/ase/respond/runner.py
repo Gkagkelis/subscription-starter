@@ -148,8 +148,12 @@ def semantic_check_factory(qs, codes_by_q):
 
 class StudyRun:
     def __init__(self, study, provider, *, run_id: str, dry_run: bool, budget_usd=None, max_workers=4, requests_per_minute=50,
-                 batching="per_question", max_attempts=5, sleep=None, question_ids=None):
+                 batching="per_question", max_attempts=5, sleep=None, question_ids=None, forced_answers=None):
         self.s, self.provider, self.run_id, self.dry_run = study, provider, run_id, dry_run
+        # QA διαδρομών (μόνο dry run): {respondent_id: {question_id: απάντηση}} — ορισμένες πύλες, σημείωση FORCED_QA
+        if forced_answers and not dry_run:
+            raise ValueError("Οι ορισμένες απαντήσεις (QA διαδρομών) επιτρέπονται μόνο σε dry run.")
+        self.forced = forced_answers or {}
         self.cfg = study.cfg
         self.seed = int(self.cfg["panel"].get("random_seed", 20261031))
         self.batching = batching
@@ -204,8 +208,8 @@ class StudyRun:
     def _inference_mode(self, q, mode, pr, err) -> str:
         if err:
             return "ERROR"
-        if mode == "PROFILE":
-            return "PROFILE"
+        if mode in ("PROFILE", "FORCED_QA"):
+            return mode
         if mode in ("A_LAB", "A_EMPIRICAL"):
             return "A_EMPIRICAL"
         if mode == "C_HYBRID":
@@ -244,6 +248,8 @@ class StudyRun:
                 task = QM.dce_task(q, self.seed, self.s.study_id, rid) if q.type == "dce" else None
                 opts = QM.presented_options(q, self.seed, self.s.study_id, rid)
                 prep[q.id] = {"task": task, "opts": opts, "codes": [a["id"] for a in task["alternatives"]] if task else [o.code for o in opts], "mode": self._route(q)}
+                if q.id in self.forced.get(rid, {}):
+                    prep[q.id]["mode"] = "FORCED_QA"
                 if prep[q.id]["mode"] == "A_LAB" and (self.orch.lab_answers.get(rid, {}).get(q.id) or {}).get("code") in (None, []):
                     prep[q.id]["mode"], prep[q.id]["fallback"] = "B_LLM", "Η απάντηση του Lab δεν ήταν διαθέσιμη για αυτό το πρόσωπο (ρητή μετάπτωση σε AI)"
             # προ-αξιολόγηση συνθηκών που δεν εξαρτώνται από ερωτήσεις της ίδιας μονάδας
@@ -307,6 +313,10 @@ class StudyRun:
                     ans = profile_answer(q, prof)
                     src_country, support = "GR (πλαίσιο πληθυσμού)", "PROFILE"
                     assumptions = ["Δημογραφικό από το συνθετικό προφίλ (GLOPOP-S + Eurostat/ΕΛΣΤΑΤ 2025)"]
+                elif mode == "FORCED_QA":
+                    ans = self.forced[rid][q.id]
+                    support = "FORCED_QA"
+                    assumptions = ["QA διαδρομών: η απάντηση ΟΡΙΣΤΗΚΕ από τον έλεγχο (δεν είναι προσομοίωση· εξαιρείται από αποτελέσματα)"]
                 else:
                     emp, emp_status = None, ""
                     ad = self.adapters.get(q.id)

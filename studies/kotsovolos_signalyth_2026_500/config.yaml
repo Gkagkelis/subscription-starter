@@ -57,7 +57,8 @@ llm:
   history_window: 60      # όλο το ιστορικό του προσώπου (37 ερωτήσεις)· οι πύλες Q01/Q04/Q05 μένουν ορατές μέχρι το Q34
 run:
   batching: per_block_dep  # ανά block, με διαχωρισμό όπου μια ερώτηση εξαρτάται από ερώτηση του ίδιου block
-lab: {enabled: true, model: pie-0.7, ref: "2026-10", prompt_anchors: [emp, econ4, class3]}
+lab: {enabled: true, model: pie-0.7, ref: "2026-10", prompt_anchors: [emp, econ4, class3], condition_on: income_quintile, candidates: 40}
+# condition_on: οι άγκυρες PIE επιλέγονται συνεπείς με το εισοδηματικό πεμπτημόριο του προφίλ (SIR· βλ. Study._anchors_conditioned)
 # hybrid: ποσοτικός συνδυασμός εμπειρικού μοντέλου και AI μόνο με επικύρωση (weight + validation_ref)· κανένα προεπιλεγμένο βάρος
 reference_distributions: []   # τα ποσοστά social listening της Signalyth ΔΕΝ είναι κατανομές πληθυσμού· δεν χρησιμοποιούνται
 report:

@@ -1,0 +1,18 @@
+{
+ "key": "6dc2d1a1863447efb0c6",
+ "answer": {
+  "Q26": {
+   "probabilities": {
+    "1": 0.08,
+    "2": 0.06,
+    "3": 0.04,
+    "4": 0.72,
+    "5": 0.1
+   },
+   "rationale": "Ουδέτερη εικόνα, σύσταση 5/10 και αμφίσημη πρόθεση· νεαρός που αγοράζει κυρίως από marketplaces, μάλλον δεν επηρέασε ενεργά κανέναν."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 1)",
+ "imported_at": "2026-10-31T18:08:47Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

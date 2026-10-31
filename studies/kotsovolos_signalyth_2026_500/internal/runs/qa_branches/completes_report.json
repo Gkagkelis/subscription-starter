@@ -1,0 +1,103 @@
+{
+ "target_completes": 4,
+ "achieved_completes": 4,
+ "profiles_used": 4,
+ "screened_out": 0,
+ "replacements": 0,
+ "quota_basis": "general_population",
+ "max_profiles": 600,
+ "incidence_pct": 100.0,
+ "by_group": {
+  "age_band": {
+   "25-34": {
+    "profiles": 1,
+    "completes": 1,
+    "incidence_pct": 100.0
+   },
+   "35-44": {
+    "profiles": 2,
+    "completes": 2,
+    "incidence_pct": 100.0
+   },
+   "65+": {
+    "profiles": 1,
+    "completes": 1,
+    "incidence_pct": 100.0
+   }
+  },
+  "gender": {
+   "female": {
+    "profiles": 1,
+    "completes": 1,
+    "incidence_pct": 100.0
+   },
+   "male": {
+    "profiles": 3,
+    "completes": 3,
+    "incidence_pct": 100.0
+   }
+  },
+  "region": {
+   "Ανατολική Μακεδονία & Θράκη": {
+    "profiles": 1,
+    "completes": 1,
+    "incidence_pct": 100.0
+   },
+   "Αττική": {
+    "profiles": 2,
+    "completes": 2,
+    "incidence_pct": 100.0
+   },
+   "Κρήτη": {
+    "profiles": 1,
+    "completes": 1,
+    "incidence_pct": 100.0
+   }
+  }
+ },
+ "deviation": {
+  "age_band": {
+   "reference": "frame_population",
+   "max_abs_pp": 34.6,
+   "by_level_pp": {
+    "18-24": -8.8,
+    "25-34": 12.8,
+    "35-44": 34.6,
+    "45-54": -18.3,
+    "55-64": -17.1,
+    "65+": -3.3
+   }
+  },
+  "gender": {
+   "reference": "frame_population",
+   "max_abs_pp": 26.4,
+   "by_level_pp": {
+    "female": -26.4,
+    "male": 26.4
+   }
+  },
+  "region": {
+   "reference": "frame_population",
+   "max_abs_pp": 19.6,
+   "by_level_pp": {
+    "Ήπειρος": -3.1,
+    "Ανατολική Μακεδονία & Θράκη": 19.6,
+    "Αττική": 13.6,
+    "Βόρειο Αιγαίο": -2.0,
+    "Δυτική Ελλάδα": -6.1,
+    "Δυτική Μακεδονία": -2.4,
+    "Θεσσαλία": -6.5,
+    "Ιόνια Νησιά": -1.9,
+    "Κεντρική Μακεδονία": -17.1,
+    "Κρήτη": 19.2,
+    "Νότιο Αιγαίο": -3.1,
+    "Πελοπόννησος": -5.2,
+    "Στερεά Ελλάδα": -4.9
+   }
+  }
+ },
+ "stop_reason": "target_reached",
+ "notes": [],
+ "max_profiles_this_run": 5,
+ "documented_target_source": null
+}

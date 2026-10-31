@@ -1,0 +1,16 @@
+{
+ "key": "cb49b1c330ca4b69cf43",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.16,
+    "2": 0.71,
+    "3": 0.13
+   },
+   "rationale": "Γνωρίζει την αλυσίδα μόνο ως όνομα· αγόρασε από e-shop μεγάλης αλυσίδας και μικρό κατάστημα, πιθανότατα άλλης επιχείρησης."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 1)",
+ "imported_at": "2026-10-31T17:56:15Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

@@ -55,6 +55,7 @@ def main(argv=None):
         a.add_argument("--n", type=int); a.add_argument("--questions"); a.add_argument("--budget-usd", type=float); a.add_argument("--confirm", action="store_true")
         a.add_argument("--resume"); a.add_argument("--workers", type=int, default=4); a.add_argument("--rpm", type=float, default=50); a.add_argument("--batching", default=None, help="per_question | per_block | per_block_dep (προεπιλογή: run.batching του config ή per_question)")
         a.add_argument("--effort", default="low")
+        a.add_argument("--force-file", help="QA διαδρομών (μόνο dry-run): JSON {respondent_id: {question_id: απάντηση}}")
     for c in ("session-status", "session-import"):
         a = sp.add_parser(c); a.add_argument("dir"); a.add_argument("--run", required=True)
     a = sp.add_parser("report"); a.add_argument("dir"); a.add_argument("--run", required=True); a.add_argument("--no-pdf", action="store_true")
@@ -71,6 +72,7 @@ def main(argv=None):
     a = sp.add_parser("import-questionnaire", help="partner JSON → questionnaire.yaml (χωρίς απώλεια) + έλεγχος round-trip")
     a.add_argument("source"); a.add_argument("dest"); a.add_argument("--overlay")
     a = sp.add_parser("paths", help="απαρίθμηση διαδρομών skip logic και ικανοποιησιμότητας περιορισμών"); a.add_argument("dir")
+    a = sp.add_parser("audit-run", help="ανεξάρτητος έλεγχος run: διαδρομές, εγκυρότητα, report, στυλ AI, διαρροή σκεπτικού, άγκυρες"); a.add_argument("dir"); a.add_argument("--run", required=True)
     args = ap.parse_args(argv)
 
     if args.cmd == "import-questionnaire":
@@ -137,7 +139,8 @@ def main(argv=None):
     elif args.cmd in ("dry-run", "run"):
         pc = {"provider": args.provider, "model": args.model, "effort": args.effort}
         rid = st.run(pc, n=args.n, question_ids=args.questions.split(",") if args.questions else None, dry_run=args.cmd == "dry-run", confirm=args.confirm,
-                     budget_usd=args.budget_usd, resume_run_id=args.resume, max_workers=args.workers, batching=args.batching or (st.cfg.get("run") or {}).get("batching", "per_question"), requests_per_minute=args.rpm)
+                     budget_usd=args.budget_usd, resume_run_id=args.resume, max_workers=args.workers, batching=args.batching or (st.cfg.get("run") or {}).get("batching", "per_question"), requests_per_minute=args.rpm,
+                     forced_answers=json.loads(Path(args.force_file).read_text(encoding="utf-8")) if getattr(args, "force_file", None) else None)
         man = json.loads((st.internal / "runs" / rid / "execution_manifest.json").read_text(encoding="utf-8"))
         qc = json.loads((st.internal / "runs" / rid / "quality_checks.json").read_text(encoding="utf-8"))
         _print({"run_id": rid, "respondents": man["respondents_completed"], "errors": man["errors"], "ledger": man["ledger"],
@@ -173,6 +176,12 @@ def main(argv=None):
             "questions": {k: {"mode": v["mode"], "option_modes": v["option_modes"], "brand": v["brand_dependent"],
                               "components": [f"{c['spec']['source']['indicator']}:{c['class']}:{'ok' if c['usable'] else 'rejected'}" for c in v["components"]]}
                           for k, v in plan["questions"].items() if v["mode"] != "D_AI" or v["components"]}})
+    elif args.cmd == "audit-run":
+        from ase.qc.audit_run import audit_run
+        from ase.util import write_json
+        res = audit_run(st, args.run)
+        write_json(st.internal / "runs" / args.run / "audit.json", res)
+        _print({"summary": res["summary"], "file": str(st.internal / "runs" / args.run / "audit.json")})
     elif args.cmd == "paths":
         from ase.questionnaire.paths import enumerate_paths
         _print(enumerate_paths(st.qn))

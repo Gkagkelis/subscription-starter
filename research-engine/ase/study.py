@@ -152,7 +152,7 @@ class Study:
 
     # ------------------------------------------------------------ εκτέλεση
     def run(self, provider_cfg: dict, *, n=None, question_ids=None, dry_run=False, confirm=False, budget_usd=None, resume_run_id=None,
-            stop_after=None, max_workers=4, batching="per_question", requests_per_minute=50, sleep=None, run_label=None) -> str:
+            stop_after=None, max_workers=4, batching="per_question", requests_per_minute=50, sleep=None, run_label=None, forced_answers=None) -> str:
         if not dry_run and str(self.cfg.get("status", "")).upper().startswith("DRAFT"):
             # πύλη έγκρισης: ερωτηματολόγιο σε εκκρεμότητα (π.χ. DRAFT_PENDING_PARTNER_APPROVAL) → μόνο dry-run / πιλοτική
             raise ConfirmationRequired(f"Η μελέτη {self.study_id} έχει status «{self.cfg['status']}». Πλήρης εκτέλεση μόνο μετά από έγκριση: "
@@ -198,7 +198,7 @@ class Study:
         if not (rdir / "evidence_registry_used.json").exists():
             write_json(rdir / "evidence_registry_used.json", self.registry)   # το πλαίσιο πηγών που είδε ΑΥΤΗ η εκτέλεση (audit)
         sr = StudyRun(self, provider, run_id=run_id, dry_run=dry_run, budget_usd=budget_usd, max_workers=max_workers, requests_per_minute=requests_per_minute,
-                      batching=batching, sleep=sleep, question_ids=question_ids)
+                      batching=batching, sleep=sleep, question_ids=question_ids, forced_answers=forced_answers)
         added_path = rdir / "added_profiles"                # αρχικά προφίλ documented_target και αντικαταστάτες (completes)
         comp_notes, stop_reason = [], None
         while True:
@@ -306,7 +306,8 @@ class Study:
         if not lab.get("enabled") or not len(df):
             return df
         from .lab.bridge import ANCHOR_COLS, call, respondent_payload
-        path = self.internal / "respondent_state" / f"lab_anchors_{lab['model'].replace('.', '_')}"
+        cond = lab.get("condition_on")            # None (όπως πριν) ή "income_quintile" (βλ. _anchors_conditioned)
+        path = self.internal / "respondent_state" / f"lab_anchors_{lab['model'].replace('.', '_')}{'_incq' if cond == 'income_quintile' else ''}"
         try:
             state = read_table(path)
         except FileNotFoundError:
@@ -316,17 +317,72 @@ class Study:
         miss = df[~key(df).isin(have)]
         if len(miss):
             seed = int(self.cfg["panel"]["random_seed"])
-            res = call("anchors", {"model": lab["model"], "respondents": [
-                respondent_payload(p, derive_seed(seed, self.study_id, p["respondent_id"], p["frame_record"], "lab-anchors")) for p in miss.to_dict("records")]})
             fr = dict(zip(miss["respondent_id"], miss["frame_record"]))
-            new = pd.DataFrame([{"respondent_id": r["id"], "frame_record": fr[r["id"]], **{f"lab_{k}": r["anchors"].get(k) for k in ANCHOR_COLS},
-                                 "lab_model": res["model"], "lab_bridge": res["bridge"]} for r in res["respondents"]])
+            if cond == "income_quintile":
+                new = self._anchors_conditioned(miss, lab, seed, path)
+            else:
+                res = call("anchors", {"model": lab["model"], "respondents": [
+                    respondent_payload(p, derive_seed(seed, self.study_id, p["respondent_id"], p["frame_record"], "lab-anchors")) for p in miss.to_dict("records")]})
+                new = pd.DataFrame([{"respondent_id": r["id"], "frame_record": fr[r["id"]], **{f"lab_{k}": r["anchors"].get(k) for k in ANCHOR_COLS},
+                                     "lab_model": res["model"], "lab_bridge": res["bridge"]} for r in res["respondents"]])
             state = pd.concat([state, new], ignore_index=True) if len(state) else new
             write_table(state, path)
         state = state.drop_duplicates(["respondent_id", "frame_record"], keep="last")
         out = df.drop(columns=[c for c in df.columns if c.startswith("lab_")], errors="ignore").merge(state, on=["respondent_id", "frame_record"], how="left")
         out["lab_prompt_anchors"] = ",".join(lab["prompt_anchors"])
         return out
+
+    def _anchors_conditioned(self, miss: pd.DataFrame, lab: dict, seed: int, path: Path) -> pd.DataFrame:
+        """Άγκυρες PIE ΣΥΝΕΠΕΙΣ με το εισοδηματικό πεμπτημόριο του προφίλ (sampling–importance–resampling).
+
+        Το PIE (διαΝΕΟσις) δεν έχει το πεμπτημόριο ως είσοδο· το inc6 (μηνιαίο εισόδημα νοικοκυριού) παράγεται μόνο από
+        δημογραφικά/απασχόληση και από αυτό εξαρτώνται econ4, class3 κ.λπ. Για κάθε πρόσωπο παράγονται K υποψήφιες αλυσίδες του ΙΔΙΟΥ
+        μοντέλου· επιλέγεται μία με βάρος P(πεμπτημόριο | inc6). Η πιθανότητα προκύπτει από ΚΑΤΑΤΑΞΗ: η κατανομή του inc6 που δίνει το
+        μοντέλο για το πάνελ ορίζει διαστήματα εκατοστημορίων [F(k−1), F(k)]· P(q | k) = επικάλυψη με [0,2(q−1), 0,2q] / πλάτος.
+        Παραδοχή: η κατάταξη εισοδήματος νοικοκυριού στο PIE και στο GLOPOP-S αφορά το ίδιο μέγεθος. Κανένας αριθμός εκτός μοντέλου."""
+        from .lab.bridge import ANCHOR_COLS, call, respondent_payload
+        K = int(lab.get("candidates", 40))
+        recs = miss.to_dict("records")
+        payload = [respondent_payload({**p, "respondent_id": f"{p['respondent_id']}#{k}"},
+                                      derive_seed(seed, self.study_id, p["respondent_id"], p["frame_record"], "lab-anchors", k)) for p in recs for k in range(K)]
+        res = call("anchors", {"model": lab["model"], "respondents": payload})
+        cand = {}
+        for r in res["respondents"]:
+            rid, k = r["id"].rsplit("#", 1)
+            cand.setdefault(rid, []).append(r["anchors"])
+        cdf_p = path.parent / f"{path.name}_inc6_cdf.json"
+        if cdf_p.exists():
+            cdf = read_json(cdf_p)["cdf"]
+        else:
+            vals = pd.Series([int(a["inc6"]) for c in cand.values() for a in c if a.get("inc6") is not None])
+            share = vals.value_counts(normalize=True).reindex(range(1, 7), fill_value=0.0)
+            cdf = [0.0] + list(np.cumsum(share.values).round(6))
+            write_json(cdf_p, {"cdf": cdf, "n_candidates": int(len(vals)), "model": res["model"],
+                               "note": "Κατανομή inc6 του PIE για το πάνελ της μελέτης· ορίζει την αντιστοίχιση inc6 → εκατοστημόρια εισοδήματος"})
+
+        def p_q_given_k(q, k):
+            lo, hi = cdf[k - 1], cdf[k]
+            if hi - lo <= 0:
+                return 0.0
+            return max(0.0, min(hi, 0.2 * q) - max(lo, 0.2 * (q - 1))) / (hi - lo)
+        rows = []
+        for p in recs:
+            rid = p["respondent_id"]
+            cs = cand.get(rid, [])
+            q = pd.to_numeric(p.get("income_quintile"), errors="coerce")
+            w = np.array([(p_q_given_k(int(q), int(a["inc6"])) if (q == q and a.get("inc6") is not None) else 1.0) * _age_emp_plausible(p.get("age_band"), a.get("emp"))
+                          for a in cs])
+            rng = np.random.default_rng(derive_seed(seed, self.study_id, rid, "lab-anchors-sir"))
+            if w.sum() > 0:
+                i = int(rng.choice(len(cs), p=w / w.sum()))
+                status = f"income_quintile_sir:{K}"
+            else:
+                i, status = 0, f"income_quintile_sir:{K}:no_compatible_candidate"
+            a = cs[i]
+            rows.append({"respondent_id": rid, "frame_record": p["frame_record"], **{f"lab_{k}": a.get(k) for k in ANCHOR_COLS},
+                         "lab_model": res["model"], "lab_bridge": res["bridge"], "lab_conditioning": status,
+                         "lab_compatible_candidates": int((w > 0).sum())})
+        return pd.DataFrame(rows)
 
     def evidence_plan(self) -> dict | None:
         """Σχέδιο τεκμηρίωσης (lake + Lab + δηλωμένες σχέσεις μέτρησης). Χτίζεται όταν η μελέτη έχει evidence_map.yaml ή Lab."""
@@ -395,6 +451,8 @@ class Study:
             rows.append({"data_status": SYNTH_LABEL, "question_id": q.id, "type": q.type, "plan_mode": e.get("mode", "—"),
                          "brand_dependent": bool(e.get("brand_dependent")), "rows_answered": int((g["status"] == "ANSWERED").sum()) if len(g) else 0,
                          **{f"n_{m}": int(modes.get(m, 0)) for m in ("A_EMPIRICAL", "C_EVIDENCE_CONSTRAINED", "C_EVIDENCE_INFORMED", "D_AI", "PROFILE", "SKIP")},
+                         # πόσες φορές το εμπειρικό όριο ΑΛΛΑΞΕ πράγματι την κατανομή του AI (ελέγχθηκε ≠ επηρέασε)
+                         "n_bound_binding": int(g["assumptions"].fillna("").astype(str).str.contains("(ενεργό)", regex=False).sum()) if "assumptions" in g else 0,
                          "components": "; ".join(f"{c['spec']['source']['dataset']}:{c['spec']['source']['indicator']}|{c['spec']['relation']}|{c['class']}|"
                                                  f"{_role(c)}|μεταφερμένα κελιά={len((c.get('data') or {}).get('transported_cells') or [])}"
                                                  for c in comps),
@@ -422,6 +480,16 @@ class Study:
         if leaked:
             raise PermissionError(f"Μη επιτρεπτά αρχεία στον φάκελο εξαγωγής: {leaked}")
         return copied
+
+
+def _age_emp_plausible(age, emp) -> float:
+    """Κανόνας αληθοφάνειας για τις άγκυρες PIE (κανόνας της ενοποίησης, όχι εμπειρική εκτίμηση): συνταξιούχος κάτω των 35 ή
+    φοιτητής 45+ αποκλείονται στην επιλογή υποψηφίων· όλα τα άλλα αφήνονται στο μοντέλο."""
+    if emp == "retired" and str(age) in ("18-24", "25-34"):
+        return 0.0
+    if emp == "student" and str(age) in ("45-54", "55-64", "65+"):
+        return 0.0
+    return 1.0
 
 
 def _role(c) -> str:

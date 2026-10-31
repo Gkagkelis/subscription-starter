@@ -1,0 +1,43 @@
+{
+ "label": "ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ",
+ "study_id": "kotsovolos_signalyth_2026_500",
+ "run_id": "qa_branches",
+ "ase_version": "ase-2.2.0",
+ "git_commit": "b720470ce78549e245dd4f851335dc1704f3dcb3",
+ "started_at": "2026-10-31T18:27:51Z",
+ "finished_at": "2026-10-31T18:27:54Z",
+ "dry_run": true,
+ "respondents_requested": 4,
+ "respondents_completed": 4,
+ "status_counts": {
+  "COMPLETE": 4
+ },
+ "question_subset": null,
+ "batching": "per_block_dep",
+ "seed": 20261101,
+ "max_workers": 4,
+ "config_sha256": "d8d0880ed1732d253c0c3bc40c2dbc7ff82fb634b6b534dc4a78c511b4b9e52f",
+ "questionnaire_sha256": "c5fc909087d7b39fe53efe80395dde209bf8c3def94bcb61e21c91bb7705bf4d",
+ "ledger": {
+  "provider": "claude_session",
+  "model": "claude-code-session",
+  "calls": 19,
+  "failed_calls": 0,
+  "input_tokens": 43028,
+  "output_tokens": 3018,
+  "cost_usd": null,
+  "budget_usd": null
+ },
+ "errors": 0,
+ "sample_size_basis": "completes",
+ "completes": {
+  "target_completes": 4,
+  "achieved_completes": 4,
+  "profiles_used": 4,
+  "screened_out": 0,
+  "replacements": 0,
+  "quota_basis": "general_population",
+  "incidence_pct": 100.0,
+  "stop_reason": "target_reached"
+ }
+}

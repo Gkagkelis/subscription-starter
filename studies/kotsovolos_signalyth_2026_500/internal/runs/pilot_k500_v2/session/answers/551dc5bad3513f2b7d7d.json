@@ -1,0 +1,16 @@
+{
+ "key": "551dc5bad3513f2b7d7d",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.31,
+    "2": 0.56,
+    "3": 0.13
+   },
+   "rationale": "Νέος στην Αθήνα με αγορές από marketplaces· γνωρίζει την αλυσίδα, ίσως μέσω οικογενειακών αγορών, αλλά οι δικές του αγορές δείχνουν άλλα κανάλια."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 1)",
+ "imported_at": "2026-10-31T17:56:15Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

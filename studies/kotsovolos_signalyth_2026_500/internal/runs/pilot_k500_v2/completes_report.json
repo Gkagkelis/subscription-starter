@@ -1,0 +1,133 @@
+{
+ "target_completes": 12,
+ "achieved_completes": 12,
+ "profiles_used": 12,
+ "screened_out": 0,
+ "replacements": 0,
+ "quota_basis": "general_population",
+ "max_profiles": 600,
+ "incidence_pct": 100.0,
+ "by_group": {
+  "age_band": {
+   "18-24": {
+    "profiles": 1,
+    "completes": 1,
+    "incidence_pct": 100.0
+   },
+   "25-34": {
+    "profiles": 2,
+    "completes": 2,
+    "incidence_pct": 100.0
+   },
+   "35-44": {
+    "profiles": 3,
+    "completes": 3,
+    "incidence_pct": 100.0
+   },
+   "45-54": {
+    "profiles": 2,
+    "completes": 2,
+    "incidence_pct": 100.0
+   },
+   "55-64": {
+    "profiles": 2,
+    "completes": 2,
+    "incidence_pct": 100.0
+   },
+   "65+": {
+    "profiles": 2,
+    "completes": 2,
+    "incidence_pct": 100.0
+   }
+  },
+  "gender": {
+   "female": {
+    "profiles": 2,
+    "completes": 2,
+    "incidence_pct": 100.0
+   },
+   "male": {
+    "profiles": 10,
+    "completes": 10,
+    "incidence_pct": 100.0
+   }
+  },
+  "region": {
+   "Ανατολική Μακεδονία & Θράκη": {
+    "profiles": 1,
+    "completes": 1,
+    "incidence_pct": 100.0
+   },
+   "Αττική": {
+    "profiles": 5,
+    "completes": 5,
+    "incidence_pct": 100.0
+   },
+   "Βόρειο Αιγαίο": {
+    "profiles": 1,
+    "completes": 1,
+    "incidence_pct": 100.0
+   },
+   "Ιόνια Νησιά": {
+    "profiles": 1,
+    "completes": 1,
+    "incidence_pct": 100.0
+   },
+   "Κεντρική Μακεδονία": {
+    "profiles": 3,
+    "completes": 3,
+    "incidence_pct": 100.0
+   },
+   "Κρήτη": {
+    "profiles": 1,
+    "completes": 1,
+    "incidence_pct": 100.0
+   }
+  }
+ },
+ "deviation": {
+  "age_band": {
+   "reference": "frame_population",
+   "max_abs_pp": 11.6,
+   "by_level_pp": {
+    "18-24": -0.4,
+    "25-34": 4.5,
+    "35-44": 9.6,
+    "45-54": -1.6,
+    "55-64": -0.5,
+    "65+": -11.6
+   }
+  },
+  "gender": {
+   "reference": "frame_population",
+   "max_abs_pp": 34.7,
+   "by_level_pp": {
+    "female": -34.7,
+    "male": 34.7
+   }
+  },
+  "region": {
+   "reference": "frame_population",
+   "max_abs_pp": 7.9,
+   "by_level_pp": {
+    "Ήπειρος": -3.1,
+    "Ανατολική Μακεδονία & Θράκη": 2.9,
+    "Αττική": 5.2,
+    "Βόρειο Αιγαίο": 6.3,
+    "Δυτική Ελλάδα": -6.1,
+    "Δυτική Μακεδονία": -2.4,
+    "Θεσσαλία": -6.5,
+    "Ιόνια Νησιά": 6.4,
+    "Κεντρική Μακεδονία": 7.9,
+    "Κρήτη": 2.5,
+    "Νότιο Αιγαίο": -3.1,
+    "Πελοπόννησος": -5.2,
+    "Στερεά Ελλάδα": -4.9
+   }
+  }
+ },
+ "stop_reason": "target_reached",
+ "notes": [],
+ "max_profiles_this_run": 15,
+ "documented_target_source": null
+}

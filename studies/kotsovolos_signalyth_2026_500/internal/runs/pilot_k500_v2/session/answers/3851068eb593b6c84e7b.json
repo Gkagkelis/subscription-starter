@@ -1,0 +1,16 @@
+{
+ "key": "3851068eb593b6c84e7b",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.28,
+    "2": 0.62,
+    "3": 0.1
+   },
+   "rationale": "Γνωρίζει αρκετά την εταιρεία, όμως δήλωσε αγορές μόνο από αμιγώς ηλεκτρονικά καταστήματα/marketplaces και ζει σε αγροτική περιοχή· πιθανότερο το «Όχι»."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 1)",
+ "imported_at": "2026-10-31T17:56:15Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

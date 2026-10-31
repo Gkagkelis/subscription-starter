@@ -1,0 +1,18 @@
+{
+ "key": "88b001780d22f7a0acaa",
+ "answer": {
+  "Q26": {
+   "probabilities": {
+    "1": 0.42,
+    "2": 0.02,
+    "3": 0.03,
+    "4": 0.45,
+    "5": 0.08
+   },
+   "rationale": "NPS 10, πάρα πολύ εμπιστοσύνη και άψογη online αγορά· ως νέα μητέρα στην Αθήνα ίσως τον πρότεινε, αν και τον ξέρει μόνο ως όνομα."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 1)",
+ "imported_at": "2026-10-31T18:17:50Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

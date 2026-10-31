@@ -1,0 +1,203 @@
+{
+ "run_id": "qa_branches",
+ "questionnaire": {
+  "run_questionnaire_sha256": "c5fc909087d7b39fe53efe80395dde209bf8c3def94bcb61e21c91bb7705bf4d",
+  "current_questionnaire_sha256": "c5fc909087d7b39fe53efe80395dde209bf8c3def94bcb61e21c91bb7705bf4d",
+  "run_used_current_version": true,
+  "source_file": "kotsovolos_500_questionnaire.json",
+  "source_sha256": "b44eb9a7d02c13ceec5fc5ef4fa745a911e4ab6923cd73e2a427415a4231179b",
+  "source_items": 37,
+  "roundtrip_errors": [],
+  "current_yaml_equals_fresh_conversion": true
+ },
+ "records": {
+  "respondents": 4,
+  "records": 148,
+  "status_counts": {
+   "ANSWERED": 125,
+   "SKIPPED": 23
+  },
+  "issues": [],
+  "hard_constraint_violations": {},
+  "soft_rule_hits": {
+   "S12": 1
+  },
+  "soft_rule_max_rate": 0.25,
+  "respondents_with_any_soft_hit": 1
+ },
+ "report": null,
+ "style": {
+  "five_point_items": {
+   "Q08": {
+    "θετικές (4–5)": 2,
+    "ουδέτερες (3)": 1,
+    "αρνητικές (1–2)": 0,
+    "δεν ξέρω": 0,
+    "n": 3
+   },
+   "Q09": {
+    "θετικές (4–5)": 1,
+    "ουδέτερες (3)": 1,
+    "αρνητικές (1–2)": 1,
+    "δεν ξέρω": 0,
+    "n": 3
+   },
+   "Q10": {
+    "θετικές (4–5)": 1,
+    "ουδέτερες (3)": 1,
+    "αρνητικές (1–2)": 1,
+    "δεν ξέρω": 0,
+    "n": 3
+   },
+   "Q12": {
+    "θετικές (4–5)": 1,
+    "ουδέτερες (3)": 1,
+    "αρνητικές (1–2)": 1,
+    "δεν ξέρω": 0,
+    "n": 3
+   },
+   "Q13": {
+    "θετικές (4–5)": 1,
+    "ουδέτερες (3)": 0,
+    "αρνητικές (1–2)": 0,
+    "δεν ξέρω": 2,
+    "n": 3
+   },
+   "Q19": {
+    "θετικές (4–5)": 1,
+    "ουδέτερες (3)": 0,
+    "αρνητικές (1–2)": 0,
+    "δεν ξέρω": 1,
+    "n": 2
+   },
+   "Q20": {
+    "θετικές (4–5)": 0,
+    "ουδέτερες (3)": 1,
+    "αρνητικές (1–2)": 2,
+    "δεν ξέρω": 0,
+    "n": 3
+   },
+   "Q22": {
+    "θετικές (4–5)": 0,
+    "ουδέτερες (3)": 2,
+    "αρνητικές (1–2)": 1,
+    "δεν ξέρω": 0,
+    "n": 3
+   },
+   "Q24": {
+    "θετικές (4–5)": 0,
+    "ουδέτερες (3)": 1,
+    "αρνητικές (1–2)": 1,
+    "δεν ξέρω": 1,
+    "n": 3
+   },
+   "Q28": {
+    "θετικές (4–5)": 0,
+    "ουδέτερες (3)": 2,
+    "αρνητικές (1–2)": 2,
+    "δεν ξέρω": 0,
+    "n": 4
+   },
+   "Q29": {
+    "θετικές (4–5)": 0,
+    "ουδέτερες (3)": 1,
+    "αρνητικές (1–2)": 3,
+    "δεν ξέρω": 0,
+    "n": 4
+   },
+   "Q31": {
+    "θετικές (4–5)": 3,
+    "ουδέτερες (3)": 1,
+    "αρνητικές (1–2)": 0,
+    "δεν ξέρω": 0,
+    "n": 4
+   }
+  },
+  "five_point_overall": {
+   "θετικές (4–5)": 0.263,
+   "ουδέτερες (3)": 0.316,
+   "αρνητικές (1–2)": 0.316,
+   "δεν ξέρω": 0.105
+  },
+  "n_five_point_answers": 38,
+  "zero_to_ten": {
+   "επικριτές (0–6)": 2,
+   "ουδέτεροι (7–8)": 1,
+   "υποστηρικτές (9–10)": 0,
+   "δεν ξέρω": 0
+  },
+  "ai_distribution_mean_peak": 0.383,
+  "ai_distribution_mean_norm_entropy": 0.831,
+  "rationales": 94,
+  "duplicate_rationales": 0,
+  "max_rationale_repeats": 1,
+  "flags": []
+ },
+ "sampling": {
+  "n": 74,
+  "drawn_from_options_below_10pct": 0.095,
+  "expected_under_correct_sampling": 0.133,
+  "z": -0.98,
+  "ok": true,
+  "mean_probability_of_drawn_option": 0.306
+ },
+ "rationale_leak": {
+  "prompts_checked": 67,
+  "banned_or_rationale_hits": [],
+  "reference_distributions": [],
+  "panel_quota_variables": [
+   "age",
+   "gender",
+   "region",
+   "household_type",
+   "education",
+   "income_band"
+  ],
+  "completes_quota_basis": "general_population",
+  "brand_in_prompt_brief": false
+ },
+ "anchors_run": {
+  "available": true,
+  "n": 4,
+  "retired_under_45": 0,
+  "student_45_plus": 0,
+  "working_65_plus_share": 0.0,
+  "retired_65_plus_share": 1.0,
+  "spearman": {
+   "income_quintile~econ4": 0.0,
+   "income_quintile~inc6": 0.816,
+   "education~class3": -0.577
+  },
+  "retired_under_35": 0,
+  "ok": true,
+  "correlations_assessed": false,
+  "note": "υπολογίζεται με την τρέχουσα κατάσταση Lab· ένα παλαιότερο run μπορεί να χρησιμοποίησε άλλες άγκυρες",
+  "criteria": "καμία αδύνατη ηλικία–απασχόληση· Spearman(πεμπτημόριο, inc6) > 0,5 και (πεμπτημόριο, econ4) > 0,3· εκπαίδευση–τάξη μόνο ενημερωτικά"
+ },
+ "anchors_panel": {
+  "available": true,
+  "n": 500,
+  "retired_under_45": 0,
+  "student_45_plus": 0,
+  "working_65_plus_share": 0.156,
+  "retired_65_plus_share": 0.688,
+  "spearman": {
+   "income_quintile~econ4": 0.527,
+   "income_quintile~inc6": 0.958,
+   "education~class3": 0.098
+  },
+  "retired_under_35": 0,
+  "ok": true,
+  "correlations_assessed": true,
+  "note": "",
+  "criteria": "καμία αδύνατη ηλικία–απασχόληση· Spearman(πεμπτημόριο, inc6) > 0,5 και (πεμπτημόριο, econ4) > 0,3· εκπαίδευση–τάξη μόνο ενημερωτικά"
+ },
+ "summary": {
+  "branching_or_validity_issues": 0,
+  "hard_violations": 0,
+  "report_mismatches": null,
+  "rationale_leaks": 0,
+  "sampling_ok": true,
+  "anchors_ok": true
+ }
+}

@@ -36,6 +36,9 @@ def _closed_counts(q, sub: pd.DataFrame):
 
 def aggregate(study, run_id):
     df = study.responses(run_id)
+    if "inference_mode" in df:                       # ερωτώμενοι QA διαδρομών (ορισμένες πύλες) ΔΕΝ μετρούν ποτέ στα αποτελέσματα
+        qa = set(df.loc[df["inference_mode"] == "FORCED_QA", "respondent_id"])
+        df = df[~df["respondent_id"].isin(qa)]
     df = df[df["status"] == "ANSWERED"]
     resp = study.profiles(run_id)
     df = df.merge(resp[["respondent_id"] + XT_VARS], on="respondent_id", how="left")
