@@ -1,0 +1,19 @@
+{
+ "key": "c178a09fab18051ebba7",
+ "answer": {
+  "Q24": {
+   "probabilities": {
+    "1": 0.12,
+    "2": 0.33,
+    "3": 0.3,
+    "4": 0.1,
+    "5": 0.02,
+    "6": 0.13
+   },
+   "rationale": "Τον ξέρει μόνο ως όνομα, τον εμπιστεύεται λίγο και εξετάζει Public, Skroutz και άλλη αλυσίδα· με οικονομική πίεση, λίγο πιθανό."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 149)",
+ "imported_at": "2026-10-31T20:20:44Z",
+ "source": "Claude Code session (AI), όχι mock"
+}
