@@ -1,0 +1,16 @@
+{
+ "key": "e12d544073afcbb6e4e1",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.58,
+    "2": 0.34,
+    "3": 0.08
+   },
+   "rationale": "Τον γνωρίζει πολύ καλά και αγοράζει από ηλεκτρονικά καταστήματα αλυσίδων με έμφαση στην παράδοση· αρκετά πιθανή αγορά online από αυτόν."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 94)",
+ "imported_at": "2026-10-31T20:06:30Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

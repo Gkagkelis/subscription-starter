@@ -1,0 +1,16 @@
+{
+ "key": "b643f07d851c8e1d5f37",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.2,
+    "2": 0.68,
+    "3": 0.12
+   },
+   "rationale": "Φοιτήτρια που ψωνίζει μόνο από online marketplace με κριτήριο την τιμή· γνωρίζει την εταιρεία, ίσως από οικογενειακές αγορές, αλλά η δική της αγορά εκεί είναι λιγότερο πιθανή."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 89)",
+ "imported_at": "2026-10-31T20:06:30Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

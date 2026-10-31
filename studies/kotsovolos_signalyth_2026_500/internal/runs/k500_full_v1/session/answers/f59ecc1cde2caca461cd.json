@@ -1,0 +1,16 @@
+{
+ "key": "f59ecc1cde2caca461cd",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.63,
+    "2": 0.31,
+    "3": 0.06
+   },
+   "rationale": "Νέος γονιός με άνεση, αγοράζει από όλα τα κανάλια αλυσίδων και online, εκτιμά εγγύηση και επιστροφές, γνωρίζει αρκετά την εταιρεία· πιθανή αγορά."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 90)",
+ "imported_at": "2026-10-31T20:06:30Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

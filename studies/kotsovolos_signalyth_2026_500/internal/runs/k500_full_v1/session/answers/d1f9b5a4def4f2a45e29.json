@@ -1,0 +1,16 @@
+{
+ "key": "d1f9b5a4def4f2a45e29",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.53,
+    "2": 0.38,
+    "3": 0.09
+   },
+   "rationale": "Νέα μητέρα στην Αττική που ψωνίζει από μεγάλες αλυσίδες και online, γνωρίζει αρκετά την εταιρεία· πιθανή αγορά, αν και συγκρίνει τιμές και marketplaces."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 85)",
+ "imported_at": "2026-10-31T20:06:30Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

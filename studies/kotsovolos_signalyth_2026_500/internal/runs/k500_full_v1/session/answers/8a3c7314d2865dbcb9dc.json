@@ -1,0 +1,16 @@
+{
+ "key": "8a3c7314d2865dbcb9dc",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.47,
+    "2": 0.43,
+    "3": 0.1
+   },
+   "rationale": "Νέα σε νησί, αγόρασε μόνο από e-shop μεγάλης αλυσίδας και γνωρίζει αρκετά την εταιρεία· ο Κωτσόβολος online είναι εύλογη επιλογή, αλλά και άλλες αλυσίδες."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 88)",
+ "imported_at": "2026-10-31T20:06:30Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

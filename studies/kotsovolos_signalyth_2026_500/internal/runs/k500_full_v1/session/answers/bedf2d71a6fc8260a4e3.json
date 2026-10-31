@@ -1,0 +1,16 @@
+{
+ "key": "bedf2d71a6fc8260a4e3",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.68,
+    "2": 0.27,
+    "3": 0.05
+   },
+   "rationale": "Υψηλό εισόδημα, οικογένεια στην Αττική, αγορές από μεγάλη αλυσίδα φυσικά και online, και καλή γνώση της εταιρείας· πιθανή αγορά από Κωτσόβολο."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 89)",
+ "imported_at": "2026-10-31T20:06:30Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

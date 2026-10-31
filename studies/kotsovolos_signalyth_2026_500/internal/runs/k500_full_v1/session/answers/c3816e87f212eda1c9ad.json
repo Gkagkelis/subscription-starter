@@ -1,0 +1,16 @@
+{
+ "key": "c3816e87f212eda1c9ad",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.09,
+    "2": 0.83,
+    "3": 0.08
+   },
+   "rationale": "Φοιτήτρια σε αγροτική Κρήτη με χαμηλό εισόδημα, αγοράζει από μικρά μαγαζιά, marketplaces και κατασκευαστές· ξέρει την αλυσίδα μόνο ως όνομα, άρα μάλλον όχι."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 84)",
+ "imported_at": "2026-10-31T20:06:30Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

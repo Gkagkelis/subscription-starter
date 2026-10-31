@@ -1,0 +1,19 @@
+{
+ "key": "41a0da2681edf81c82cc",
+ "answer": {
+  "Q08": {
+   "probabilities": {
+    "1": 0.02,
+    "2": 0.05,
+    "3": 0.3,
+    "4": 0.2,
+    "5": 0.03,
+    "6": 0.4
+   },
+   "rationale": "Γνωρίζει την αλυσίδα μόνο ως όνομα και αγοράζει από marketplace· χωρίς εμπειρία, πιθανότερα ουδέτερη ή «δεν ξέρω»."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 92)",
+ "imported_at": "2026-10-31T20:06:30Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

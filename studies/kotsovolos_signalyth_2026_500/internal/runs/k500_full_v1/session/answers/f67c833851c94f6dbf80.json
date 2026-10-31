@@ -1,0 +1,16 @@
+{
+ "key": "f67c833851c94f6dbf80",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.49,
+    "2": 0.44,
+    "3": 0.07
+   },
+   "rationale": "Άνεργος, μόνος, ψωνίζει σε μεγάλη αλυσίδα και marketplace με κριτήριο την τιμή· γνωρίζει αρκετά την εταιρεία, άρα περίπου μοιρασμένη πιθανότητα."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 90)",
+ "imported_at": "2026-10-31T20:06:30Z",
+ "source": "Claude Code session (AI), όχι mock"
+}
