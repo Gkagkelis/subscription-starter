@@ -1,0 +1,16 @@
+{
+ "key": "68b9b1172f95ef160514",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.2,
+    "2": 0.72,
+    "3": 0.08
+   },
+   "rationale": "Νέος που ψώνισε μόνο από αμιγώς ηλεκτρονικά marketplaces· παρότι γνωρίζει αρκετά την εταιρεία, μάλλον δεν αγόρασε από τον Κωτσόβολο."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 8)",
+ "imported_at": "2026-10-31T19:14:53Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

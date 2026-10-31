@@ -1,0 +1,16 @@
+{
+ "key": "f84eef1851d0969910a8",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.57,
+    "2": 0.37,
+    "3": 0.06
+   },
+   "rationale": "Αγοράζει online από e-shop μεγάλης αλυσίδας και marketplaces και γνωρίζει αρκετά την εταιρεία· μάλλον έχει αγοράσει, αλλά μπορεί να προτίμησε άλλη αλυσίδα."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 7)",
+ "imported_at": "2026-10-31T19:10:58Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

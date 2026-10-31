@@ -1,0 +1,16 @@
+{
+ "key": "d76ef0f2b23377ec3262",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.04,
+    "2": 0.88,
+    "3": 0.08
+   },
+   "rationale": "Δεν αγόρασε συσκευή τα τελευταία δύο χρόνια, ζει μόνη με χαμηλό εισόδημα· αγορά από Κωτσόβολο πολύ απίθανη."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 9)",
+ "imported_at": "2026-10-31T19:14:53Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

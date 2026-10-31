@@ -1,0 +1,16 @@
+{
+ "key": "4f5990b2b62112e1ddc1",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.24,
+    "2": 0.63,
+    "3": 0.13
+   },
+   "rationale": "Αγοράζει από e-shop μεγάλων αλυσίδων και marketplaces, άρα δεν αποκλείεται· όμως ξέρει τον Κωτσόβολο μόνο ως όνομα, οπότε μάλλον ψώνισε αλλού."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 6)",
+ "imported_at": "2026-10-31T19:10:58Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

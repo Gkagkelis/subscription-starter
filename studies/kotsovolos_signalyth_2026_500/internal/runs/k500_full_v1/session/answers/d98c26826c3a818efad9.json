@@ -1,0 +1,16 @@
+{
+ "key": "d98c26826c3a818efad9",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.05,
+    "2": 0.89,
+    "3": 0.06
+   },
+   "rationale": "Δεν αγόρασε συσκευή το διάστημα αυτό και ξέρει τον Κωτσόβολο μόνο ως όνομα· σχεδόν σίγουρα όχι."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 9)",
+ "imported_at": "2026-10-31T19:14:53Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

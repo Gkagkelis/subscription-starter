@@ -1,0 +1,16 @@
+{
+ "key": "d7fe82ff6d8e1158f2de",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.05,
+    "2": 0.85,
+    "3": 0.1
+   },
+   "rationale": "Δεν αγόρασε ηλεκτρική συσκευή τα τελευταία δύο χρόνια και ξέρει την αλυσίδα μόνο ως όνομα· η αγορά από αυτήν είναι απίθανη."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 7)",
+ "imported_at": "2026-10-31T19:10:58Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

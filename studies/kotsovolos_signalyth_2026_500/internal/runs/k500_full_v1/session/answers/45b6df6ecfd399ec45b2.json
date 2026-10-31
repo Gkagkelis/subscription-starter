@@ -1,0 +1,16 @@
+{
+ "key": "45b6df6ecfd399ec45b2",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.5,
+    "2": 0.4,
+    "3": 0.1
+   },
+   "rationale": "Αγόρασε από e-shop μεγάλης αλυσίδας και γνωρίζει αρκετά την εταιρεία· σε αγροτική περιοχή, ο Κωτσόβολος είναι μία από λίγες εύλογες επιλογές."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 8)",
+ "imported_at": "2026-10-31T19:11:25Z",
+ "source": "Claude Code session (AI), όχι mock"
+}
