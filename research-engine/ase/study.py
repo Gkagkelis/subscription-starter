@@ -153,6 +153,10 @@ class Study:
     # ------------------------------------------------------------ εκτέλεση
     def run(self, provider_cfg: dict, *, n=None, question_ids=None, dry_run=False, confirm=False, budget_usd=None, resume_run_id=None,
             stop_after=None, max_workers=4, batching="per_question", requests_per_minute=50, sleep=None, run_label=None) -> str:
+        if not dry_run and str(self.cfg.get("status", "")).upper().startswith("DRAFT"):
+            # πύλη έγκρισης: ερωτηματολόγιο σε εκκρεμότητα (π.χ. DRAFT_PENDING_PARTNER_APPROVAL) → μόνο dry-run / πιλοτική
+            raise ConfirmationRequired(f"Η μελέτη {self.study_id} έχει status «{self.cfg['status']}». Πλήρης εκτέλεση μόνο μετά από έγκριση: "
+                                       "ορίστε status: APPROVED στο config.yaml. Για πιλοτική χρησιμοποιήστε dry-run.")
         provider = make_provider(provider_cfg)
         ok, why = provider.available()
         if not ok:
@@ -166,7 +170,14 @@ class Study:
             target_n = int(n or self.cfg["panel"]["sample_size"])
             cap = int(np.ceil(cs["max_profiles"] * target_n / int(self.cfg["panel"]["sample_size"])))
             sel = resp.head(target_n) if cs["quota_basis"] != "documented_target" else resp.head(0)
-        if provider.name != "mock" and not dry_run:
+        if provider.name != "mock" and not dry_run and not getattr(provider, "metered", True):
+            # μη χρεούμενος πάροχος (συνεδρία): ρητή επιβεβαίωση όγκου, χωρίς προϋπολογισμό σε USD
+            est = self.estimate(provider_cfg, n=len(sel), question_ids=question_ids, batching=batching)
+            if not confirm:
+                raise ConfirmationRequired(f"Πλήρης εκτέλεση με {provider.name}: εκτίμηση έως {est['llm_calls']} αιτήματα AI για {len(sel)} "
+                                           f"{'ολοκληρωμένα' if cs is not None else 'προφίλ'}. Απαιτείται --confirm (μη χρεούμενος πάροχος, χωρίς --budget-usd).")
+            budget_usd = None
+        elif provider.name != "mock" and not dry_run:
             est = self.estimate(provider_cfg, n=len(sel), question_ids=question_ids, batching=batching)
             if budget_usd is None or not confirm:
                 raise ConfirmationRequired(f"Πραγματική εκτέλεση με {provider.name}/{provider.model}: εκτίμηση {est['cost_usd_range']} USD για {est['llm_calls']} κλήσεις. "

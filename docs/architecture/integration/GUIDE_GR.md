@@ -93,6 +93,8 @@
 | Αναφορά + CSV + PDF + κάλυψη + ευαισθησία | `python3 -I research-engine/ase_cli.py report studies/<id> --run <run_id>` |
 | Ευαισθησία μόνο | `python3 -I research-engine/ase_cli.py sensitivity studies/<id> --run <run_id>` |
 | Εξαγωγή παραδοτέων | `python3 -I research-engine/ase_cli.py export studies/<id> <φάκελος>` |
+| Εισαγωγή ερωτηματολογίου partner JSON (χωρίς απώλεια, με overlay) | `python3 -I research-engine/ase_cli.py import-questionnaire <json> studies/<id>/questionnaire.yaml --overlay studies/<id>/integration_overlay.yaml` |
+| Διαδρομές skip logic + ικανοποιησιμότητα περιορισμών | `python3 -I research-engine/ase_cli.py paths studies/<id>` |
 | Tests | `python3 -I research-engine/tests/run_tests.py` και `npx vitest run` |
 
 ### Κύκλος συνεδρίας (πάροχος `claude_session`, χωρίς API)
@@ -100,6 +102,14 @@
 2. Η συνεδρία Claude Code γράφει απαντήσεις στο `session/inbox/<key>.json`, ελέγχοντάς τες με το schema κάθε αιτήματος.
 3. Το `session-import` τις ελέγχει. Οι λανθασμένες πάνε στο `rejected/` και ξαναζητούνται.
 4. Ξανά η ίδια εντολή με `--resume <run_id>`. Επαναλαμβάνεται μέχρι να μη μένουν αιτήματα (~1 γύρος ανά block).
+
+### Ερωτηματολόγια με εξαρτήσεις (ase-2.2)
+- **Λογικοί περιορισμοί** (`constraints:` στο ερωτηματολόγιο, `forbid: <έκφραση>` + `reason`): οι αδύνατοι συνδυασμοί αφαιρούνται από την κατανομή κατά την κλήρωση (ακριβής περικοπή), με καταγραφή στη γραμμή· QC «Παραβιάσεις λογικών περιορισμών» = 0.
+- **Batching `per_block_dep`**: όπως `per_block`, αλλά ερώτηση που εξαρτάται από ερώτηση του ίδιου block (συνθήκη/περιορισμός) ή έχει `sequential: true` ζητείται μετά την κλήρωση εκείνης· η εξάρτηση προκύπτει από την κρίση του AI με την πραγματική προηγούμενη απάντηση.
+- **`llm.history_window`**: πόσες προηγούμενες απαντήσεις βλέπει το AI (προεπιλογή 25· για μακριά ερωτηματολόγια όλες).
+- **`study.prompt_brief`**: ουδέτερη περιγραφή στο prompt (χωρίς χορηγό/μάρκα).
+- **`status: DRAFT…`** στο config ⇒ μόνο dry-run· πλήρης εκτέλεση μετά από `status: APPROVED`. Ο πάροχος `claude_session` (μη χρεούμενος) θέλει μόνο `--confirm`.
+- Γραμμές που δεν ρωτήθηκαν: `missing_reason = not_applicable`.
 
 ### Συνέχεια μετά από διακοπή
 - Κάθε run έχει `checkpoint.jsonl` και `execution_manifest.json`. Η ίδια εντολή με `--resume <run_id>` συνεχίζει χωρίς διπλές ολοκληρώσεις (test `test_resume_after_interruption_matches_uninterrupted`).

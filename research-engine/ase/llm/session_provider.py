@@ -37,6 +37,7 @@ def prompt_key(system: str, user: str, schema: dict) -> str:
 
 class ClaudeSessionProvider(LLMProvider):
     name = "claude_session"
+    metered = False         # απαντά η συνεδρία Claude Code μέσω αρχείων· όχι πληρωμένο API
 
     def __init__(self, model=SESSION_MODEL, **kw):
         super().__init__(model or SESSION_MODEL, **kw)

@@ -4,4 +4,4 @@
 μηχανισμός απαντήσεων (εμπειρικά μοντέλα / evidence-grounded LLM / hybrid), εσωτερικό audit, αναφορές πελάτη, εισαγωγή
 πραγματικών δεδομένων για σύγκριση και βαθμονόμηση. Δεν τροποποιεί το production pie-0.2 ούτε τα artifacts της CCE.
 """
-ASE_VERSION = "ase-2.1.0"
+ASE_VERSION = "ase-2.2.0"

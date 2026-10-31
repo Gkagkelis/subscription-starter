@@ -107,6 +107,14 @@ def test_k500_mock_run_coherent_reproducible_and_audited(tmp=None):
     cfg["panel"]["completes"]["max_profiles"] = 60
     cfg["lab"]["enabled"] = False
     import yaml
+    from ase.study import ConfirmationRequired
+    (d / "config.yaml").write_text(yaml.safe_dump(cfg, allow_unicode=True), encoding="utf-8")
+    try:                                                             # πύλη έγκρισης: DRAFT ⇒ καμία πλήρης εκτέλεση
+        Study(d).run({"provider": "mock", "model": "mock-1"}, max_workers=1)
+        raise AssertionError("έπρεπε να απορριφθεί όσο το status είναι DRAFT")
+    except ConfirmationRequired:
+        pass
+    cfg["status"] = "APPROVED"
     (d / "config.yaml").write_text(yaml.safe_dump(cfg, allow_unicode=True), encoding="utf-8")
     st = Study(d)
     st.ensure_panel(regenerate=True)
@@ -141,3 +149,10 @@ def test_k500_mock_run_coherent_reproducible_and_audited(tmp=None):
             assert a.get((r, "Q04")) != "1"
     qc = json.loads((st.internal / "runs" / rid / "quality_checks.json").read_text(encoding="utf-8"))
     assert next(c for c in qc["checks"] if c["check"] == "Παραβιάσεις λογικών περιορισμών")["status"] == "PASS"
+
+
+def test_session_provider_full_run_needs_only_confirm():
+    """Ο πάροχος συνεδρίας δεν χρεώνεται ανά κλήση: πλήρης εκτέλεση με --confirm, χωρίς προϋπολογισμό σε USD."""
+    from ase.llm.base import LLMProvider
+    from ase.llm.session_provider import ClaudeSessionProvider
+    assert LLMProvider.metered is True and ClaudeSessionProvider.metered is False

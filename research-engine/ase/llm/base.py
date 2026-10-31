@@ -34,6 +34,7 @@ class LLMResult:
 
 class LLMProvider:
     name = "base"
+    metered = True          # χρέωση ανά κλήση (API)· False για τη συνεδρία Claude Code (καμία χρέωση ανά κλήση)
 
     def __init__(self, model: str, **kw):
         self.model = model
