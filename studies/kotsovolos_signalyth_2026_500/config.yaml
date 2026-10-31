@@ -2,7 +2,22 @@ study_id: kotsovolos_signalyth_2026_500
 country: GR
 questionnaire: questionnaire.yaml
 # ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ
-status: DRAFT_PENDING_PARTNER_APPROVAL      # η πλήρης εκτέλεση ΔΕΝ ξεκινά πριν από ρητή επιβεβαίωση του χρήστη
+status: APPROVED      # εγκρίθηκε από τον ερευνητικό συνεργάτη· ρητή εντολή εκτέλεσης του χρήστη 2026-10-31
+approval:
+  approved_on: "2026-10-31"
+  approved_by: "ερευνητικός συνεργάτης (μέσω του χρήστη)"
+  # Πάγωμα: η μηχανή αρνείται κάθε μη δοκιμαστική εκτέλεση αν αλλάξει οποιοδήποτε από τα αρχεία (κείμενο, ids, επιλογές, skip logic, περιορισμοί)
+  frozen:
+    source_file: source/kotsovolos_500_questionnaire.json
+    source_sha256: b44eb9a7d02c13ceec5fc5ef4fa745a911e4ab6923cd73e2a427415a4231179b
+    questionnaire_sha256: c5fc909087d7b39fe53efe80395dde209bf8c3def94bcb61e21c91bb7705bf4d
+    overlay_sha256: 5e589fd3f479f2018df8ab71c87d7afc7e4298c3df19d70866aed5f0b5fa7617
+  # Εκκρεμότητες του ελέγχου GO/NO-GO: εγκρίθηκαν όπως είναι (καμία αλλαγή στο JSON)
+  resolutions:
+    A2_Q03_selections: "1–3, όπως στο JSON"
+    A3_Q30_Q33: "ask_if: all, όπως στο JSON"
+    A14_Q06_marketplace: "C4 v2: αγορά μέσω marketplace καταγράφεται ως ηλεκτρονικό κατάστημα / άλλο κανάλι"
+    sampling: "κλήρωση από ολόκληρη την κατανομή του AI (χωρίς περικοπή ουρών)"
 study:
   title: "Κωτσόβολος: εικόνα, εμπιστοσύνη και εμπειρία αγοράς ηλεκτρικών ειδών"
   subtitle: "Συνθετική προσομοίωση · 500 ολοκληρωμένες συνθετικές συνεντεύξεις · Ενήλικοι 18+ κάτοικοι Ελλάδας"

@@ -85,3 +85,19 @@ def test_audit_detects_sampling_error_and_report_mismatch():
     t.at[i, "n"] = int(t.at[i, "n"]) + 1                                  # αλλοιωμένος πίνακας αποτελεσμάτων
     t.to_csv(res, index=False)
     assert AR.audit_report(st, rid)["count_mismatches"]
+
+
+def test_frozen_approved_questionnaire_blocks_run_if_changed():
+    from ase.study import ConfirmationRequired
+    st = _copy(n=4)
+    assert st.cfg["status"] == "APPROVED" and st.cfg["approval"]["frozen"]
+    rid = st.run(MOCK, n=2, max_workers=1, batching="per_block_dep", confirm=True)      # αμετάβλητο ⇒ εκτελείται
+    assert st.responses(rid)["respondent_id"].nunique() >= 2
+    q = st.dir / "questionnaire.yaml"
+    q.write_text(q.read_text(encoding="utf-8").replace("Ποια είναι η ηλικιακή σας ομάδα;", "Ποια είναι η ηλικία σας;"), encoding="utf-8")
+    try:
+        Study(st.dir).run(MOCK, n=2, max_workers=1, batching="per_block_dep", confirm=True)
+        raise AssertionError("έπρεπε να απορριφθεί: άλλαξε το παγωμένο ερωτηματολόγιο")
+    except ConfirmationRequired:
+        pass
+    Study(st.dir).run(MOCK, n=2, max_workers=1, batching="per_block_dep", dry_run=True)    # δοκιμαστική εκτέλεση επιτρέπεται

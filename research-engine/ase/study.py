@@ -157,6 +157,15 @@ class Study:
             # πύλη έγκρισης: ερωτηματολόγιο σε εκκρεμότητα (π.χ. DRAFT_PENDING_PARTNER_APPROVAL) → μόνο dry-run / πιλοτική
             raise ConfirmationRequired(f"Η μελέτη {self.study_id} έχει status «{self.cfg['status']}». Πλήρης εκτέλεση μόνο μετά από έγκριση: "
                                        "ορίστε status: APPROVED στο config.yaml. Για πιλοτική χρησιμοποιήστε dry-run.")
+        frozen = ((self.cfg.get("approval") or {}).get("frozen") or {})
+        if frozen and not dry_run:
+            # εγκεκριμένο ερωτηματολόγιο: κείμενο, ids, επιλογές και skip logic παγωμένα με hash· καμία αλλαγή στη διάρκεια της εκτέλεσης
+            files = {"questionnaire_sha256": self.dir / self.cfg.get("questionnaire", "questionnaire.yaml"),
+                     "source_sha256": self.dir / str(frozen.get("source_file", "")), "overlay_sha256": self.dir / "integration_overlay.yaml"}
+            bad = [k for k, f in files.items() if k in frozen and (not f.is_file() or sha256_file(f) != frozen[k])]
+            if bad:
+                raise ConfirmationRequired(f"Το εγκεκριμένο ερωτηματολόγιο άλλαξε μετά το πάγωμα ({', '.join(bad)}). Η εκτέλεση σταματά· "
+                                           "απαιτείται νέα έγκριση.")
         provider = make_provider(provider_cfg)
         ok, why = provider.available()
         if not ok:

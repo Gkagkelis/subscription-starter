@@ -106,6 +106,7 @@ def test_k500_mock_run_coherent_reproducible_and_audited(tmp=None):
     cfg["panel"]["sample_size"] = 40
     cfg["panel"]["completes"]["max_profiles"] = 60
     cfg["lab"]["enabled"] = False
+    cfg["status"] = "DRAFT_PENDING_PARTNER_APPROVAL"
     import yaml
     from ase.study import ConfirmationRequired
     (d / "config.yaml").write_text(yaml.safe_dump(cfg, allow_unicode=True), encoding="utf-8")
