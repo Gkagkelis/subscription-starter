@@ -1,0 +1,64 @@
+{
+ "key": "7f228a5f2cea73e29892",
+ "created_at": "2026-10-31T19:39:27Z",
+ "question_ids": [
+  "Q20"
+ ],
+ "system_prompt_file": "system_prompt.txt",
+ "user_prompt": "ΜΕΛΕΤΗ: Έρευνα για την αγορά ηλεκτρικών και ηλεκτρονικών ειδών, τα καταστήματα και την εμπειρία πελατών. Πληθυσμός: adults_18_plus (GR).\n\nΣΥΝΘΕΤΙΚΟ ΠΡΟΦΙΛ:\nΆνδρας, ηλικία 25-34\nΠεριφέρεια: Αττική (αστική περιοχή)\nΕκπαίδευση: λύκειο / μεταλυκειακή\nΝοικοκυριό: ζευγάρι με παιδιά, μέγεθος 3-4\nΕισοδηματικό πεμπτημόριο νοικοκυριού: 2 (1 = χαμηλότερο, 5 = υψηλότερο)\nΕκτιμώμενα χαρακτηριστικά (στατιστική εκτίμηση του μοντέλου PIE από ελληνικά μικροδεδομένα διαΝΕΟσις 2023–24 με βάση τα δημογραφικά· ΟΧΙ γνωστά στοιχεία του προσώπου): απασχόληση: μισθωτός/ή ιδιωτικού τομέα; οικονομική κατάσταση νοικοκυριού: τα βγάζει πέρα χωρίς να περισσεύουν; υποκειμενική κοινωνική τάξη: μεσαία\nΆγνωστα (δεν υπάρχουν δεδομένα): επάγγελμα, προσωπικό ιστορικό αγορών.\n\nΠΡΟΗΓΟΥΜΕΝΕΣ ΑΠΑΝΤΗΣΕΙΣ ΤΟΥ ΙΔΙΟΥ ΠΡΟΣΩΠΟΥ:\n- D01 «Ποια είναι η ηλικιακή σας ομάδα;»: 25–34\n- D02 «Πώς αυτοπροσδιορίζεστε ως προς το φύλο;»: Άνδρας\n- D03 «Σε ποια περιφέρεια κατοικείτε;»: Αττική\n- Q01 «Τους τελευταίους 24 μήνες αγοράσατε ηλεκτρική ή ηλεκτρονική συσκευή για εσάς ή το νοικο…»: Ναι\n- Q02 «Από ποιους τύπους καταστημάτων αγοράσατε ηλεκτρικά ή ηλεκτρονικά είδη τους τελευταίους…»: Μεγάλη αλυσίδα φυσικών καταστημάτων, Ηλεκτρονικό κατάστημα μεγάλης αλυσίδας\n- Q03 «Ποιοι τρεις παράγοντες είναι σημαντικότεροι όταν επιλέγετε κατάστημα ηλεκτρικών ειδών;»: Τελική τιμή, Δυνατότητα δόσεων\n- Q04 «Πόσο εξοικειωμένος/η είστε με την αλυσίδα Κωτσόβολος;»: Τη γνωρίζω μόνο ως όνομα\n- Q05 «Έχετε πραγματοποιήσει αγορά από τον Κωτσόβολο τους τελευταίους 24 μήνες;»: Ναι\n- Q06 «Πώς πραγματοποιήσατε την πιο πρόσφατη αγορά σας από τον Κωτσόβολο;»: Από το ηλεκτρονικό κατάστημα\n- Q07 «Ποια κατηγορία προϊόντος αφορούσε η πιο πρόσφατη αγορά σας από τον Κωτσόβολο;»: Κινητό / wearable\n- Q08 «Ποια είναι συνολικά η εικόνα σας για τον Κωτσόβολο;»: Πολύ αρνητική\n- Q09 «Πόσο εμπιστεύεστε τον Κωτσόβολο ως κατάστημα για αγορά ηλεκτρικών ειδών;»: Καθόλου\n- Q10 «Σε ποιο βαθμό συμφωνείτε ότι ο Κωτσόβολος τηρεί τις δεσμεύσεις του προς τους πελάτες;»: Διαφωνώ\n- Q11 «Ποια από τα ακόλουθα επηρεάζουν περισσότερο την εμπιστοσύνη σας σε ένα κατάστημα ηλεκτρ…»: Δίκαιες επιστροφές / αντικαταστάσεις\n- Q12 «Πώς αξιολογείτε συνολικά την πιο πρόσφατη εμπειρία αγοράς σας από τον Κωτσόβολο;»: Πολύ αρνητικά\n- Q13 «Πώς αξιολογείτε τη σαφήνεια της ενημέρωσης για την παραγγελία σας;»: Πολύ κακή\n- Q14 «Στην πιο πρόσφατη αγορά σας, η παράδοση ή παραλαβή έγινε στον χρόνο που σας είχε γνωστο…»: Όχι, υπήρξε σημαντική καθυστέρηση\n- Q15 «Προέκυψε κάποιο πρόβλημα με το προϊόν, την παράδοση, την εγκατάσταση ή την εξυπηρέτηση…»: Ναι\n- Q16 «Τι είδους πρόβλημα αντιμετωπίσατε; Επιλέξτε όσα ισχύουν.»: Καθυστέρηση παράδοσης, Πρόβλημα εγκατάστασης, Δυσκολία επικοινωνίας, Δυσκολία επιστροφής ή αντικατάστασης\n- Q17 «Όταν προέκυψε το πρόβλημα, επικοινωνήσατε με τον Κωτσόβολο για να επιλυθεί;»: Ναι\n- Q18 «Ποια είναι η τρέχουσα κατάσταση του προβλήματος;»: Παραμένει άλυτο\n- Q19 «Πόσο ικανοποιημένος/η είστε από τον τρόπο χειρισμού του προβλήματος;»: Λίγο\n\nΕΡΕΥΝΗΤΙΚΟ ΠΛΑΙΣΙΟ (υπόβαθρο, όχι στόχος):\n[Q20]\n- [src:greca-eltrun-ecommerce-2026] Έρευνα Ηλεκτρονικού Εμπορίου 2026 - Η συμπεριφορά του Έλληνα Καταναλωτή στις Διαδικτυακές Αγορές (GR, 2026-05; πληθυσμός: Greek consumers who shop online (online questionnaire, multiple-choice questions); δείγμα: 600) — αφορά: Greek-specific background on what drives trust in e-shops (known brand/chain, prompt service before and after purchase, clear terms, reviews, trust certifications), delivery and pickup preferences (home delivery, lockers), payment methods, and online purchasing of electrical appliances as a category.\n- [src:ec-ccs-2024-greece-factsheet] Consumer conditions survey - Consumers at home in the single market - 2025 edition: Country factsheet Greece (GR (with EU27 average and range), 2025-03; πληθυσμός: General public aged 18+ in Greece (nationally representative), CATI telephone interviews; fieldwork 4-30 November 2024; δείγμα: 1,000 per country (Greece 1,000), per the factsheet's technical note) — αφορά: Greece-vs-EU27 background on whether consumers think retailers respect their rights, trust in public authorities and consumer organisations, ease of out-of-court/court dispute settlement, share who experienced a problem with goods/services and whether they complained (to retailer, manufacturer, authority, ECC, ADR), reasons for not complaining, and what people did with a product that failed outside the legal guarantee (repair vs replace).\n- [src:ec-consumer-conditions-scoreboard-2025] 2025 Consumer Conditions Scoreboard (EU27 incl. GR (plus IS, NO), 2025-03; πληθυσμός: Consumers aged 18+ in EU27, Iceland and Norway (2024 Consumer Conditions Survey); same survey as the Greece factsheet; δείγμα: unknown (the main report was not opened; the factsheet states 1,000 per country, 500 in LU, MT, CY, IS)) — αφορά: EU-level frame and cross-country comparison for the Greek factsheet indicators (consumer confidence, problems and complaints, redress, online purchasing); the landing page also links the full data set, methodology metadata and an interactive dashboard for comparable European markets.\n  (Υπόβαθρο μόνο: μην μετατρέπεις στατιστικά των πηγών σε πιθανότητες απάντησης του προσώπου.)\n\nΕΡΩΤΗΣΗ Q20 (single_choice): Μετά από αυτή την εμπειρία, η εμπιστοσύνη σας στον Κωτσόβολο:\n  [1] Μειώθηκε πολύ\n  [2] Μειώθηκε λίγο\n  [3] Δεν άλλαξε\n  [4] Αυξήθηκε λίγο\n  [5] Αυξήθηκε πολύ\n  [6] Δεν γνωρίζω / Δεν μπορώ να κρίνω\n  ΣΗΜΕΙΩΣΗ: συνθετικό χαρακτηριστικό σεναρίου — όχι πραγματικό ιστορικό.",
+ "schema": {
+  "type": "object",
+  "properties": {
+   "Q20": {
+    "type": "object",
+    "properties": {
+     "probabilities": {
+      "type": "object",
+      "properties": {
+       "1": {
+        "type": "number"
+       },
+       "2": {
+        "type": "number"
+       },
+       "3": {
+        "type": "number"
+       },
+       "4": {
+        "type": "number"
+       },
+       "5": {
+        "type": "number"
+       },
+       "6": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "1",
+       "2",
+       "3",
+       "4",
+       "5",
+       "6"
+      ],
+      "additionalProperties": false
+     },
+     "rationale": {
+      "type": "string",
+      "description": "Σύντομη, ελέγξιμη αιτιολόγηση (έως 30 λέξεις), χωρίς εσωτερική συλλογιστική."
+     }
+    },
+    "required": [
+     "probabilities",
+     "rationale"
+    ],
+    "additionalProperties": false
+   }
+  },
+  "required": [
+   "Q20"
+  ],
+  "additionalProperties": false
+ }
+}
