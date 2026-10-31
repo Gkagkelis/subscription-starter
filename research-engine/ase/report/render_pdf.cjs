@@ -5,6 +5,10 @@ const { chromium } = require('playwright');
   const b = await chromium.launch();
   const p = await b.newPage();
   await p.goto('file://' + require('path').resolve(inp), { waitUntil: 'load' });
-  await p.pdf({ path: out, format: 'A4', printBackground: true, preferCSSPageSize: true });
+  // σε κάθε σελίδα: υποχρεωτική ετικέτα συνθετικής μελέτης + αρίθμηση
+  const foot = '<div style="width:100%;font:700 8px Arial,sans-serif;color:#12263a;text-align:center;letter-spacing:.06em">'
+    + 'ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ · <span class="pageNumber"></span>/<span class="totalPages"></span></div>';
+  await p.pdf({ path: out, format: 'A4', printBackground: true, preferCSSPageSize: true, displayHeaderFooter: true,
+    headerTemplate: '<div></div>', footerTemplate: foot });
   await b.close();
 })();

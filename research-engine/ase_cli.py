@@ -62,7 +62,29 @@ def main(argv=None):
     a = sp.add_parser("import-real"); a.add_argument("dir"); a.add_argument("data"); a.add_argument("meta"); a.add_argument("mapping")
     a = sp.add_parser("compare"); a.add_argument("dir"); a.add_argument("--run", required=True); a.add_argument("--import", dest="imp", required=True); a.add_argument("--dashboard", action="store_true")
     a = sp.add_parser("calibrate"); a.add_argument("dir"); a.add_argument("--run", required=True); a.add_argument("--import", dest="imp", required=True); a.add_argument("--min-n", type=int, default=200)
+    # ενοποίηση Lab + lake + διεθνές επίπεδο
+    a = sp.add_parser("evidence-index", help="ευρετήριο ελληνικού lake (SQLite/FTS)"); a.add_argument("--force", action="store_true")
+    sp.add_parser("global-ingest", help="λήψη πηγών του config/global_sources.yaml με access eurostat_api")
+    sp.add_parser("validate-transport", help="LOCO επικύρωση μεταφοράς μεταξύ χωρών ΕΕ")
+    a = sp.add_parser("evidence-plan", help="σχέδιο τεκμηρίωσης ανά ερώτηση/επιλογή"); a.add_argument("dir"); a.add_argument("--no-lab", action="store_true")
+    a = sp.add_parser("sensitivity"); a.add_argument("dir"); a.add_argument("--run", required=True)
     args = ap.parse_args(argv)
+
+    if args.cmd == "evidence-index":
+        from ase.evidence.lake_index import build
+        print(build(force=args.force))
+        return
+    if args.cmd == "global-ingest":
+        from ase.global_evidence.eurostat import ingest_catalog
+        from ase.util import load_structured
+        cat = load_structured(Path(__file__).parent / "config" / "global_sources.yaml")
+        _print(ingest_catalog(cat["sources"]))
+        return
+    if args.cmd == "validate-transport":
+        from ase.validation.transport import run as vrun
+        r = vrun()
+        _print([f"{s['indicator']}/{s['family']}: PP {s['mae_pp']} · B0 {s['mae_b0']} · B1 {s['mae_b1']} → {'ΕΓΚΡΙΣΗ' if s['approved'] else 'ΑΠΟΡΡΙΨΗ'}" for s in r["summary"]])
+        return
 
     if args.cmd == "build-frame":
         from ase.population.frame import build_frame
@@ -123,6 +145,19 @@ def main(argv=None):
         _print({q: {k: v[k] for k in ("n_real", "n_synth", "tvd", "max_abs_diff_pp")} for q, v in c["questions"].items()})
         if args.dashboard:
             print(dashboard(st, args.run, args.imp))
+    elif args.cmd == "evidence-plan":
+        from collections import Counter
+        from ase.evidence.plan import build, serializable
+        plan = build(st, use_lab=not args.no_lab)
+        from ase.util import write_json
+        write_json(st.internal / "evidence_plan.json", serializable(plan))
+        _print({"summary": plan["summary"], "lab_error": plan["lab_error"], "lake_error": plan["lake_error"], "file": str(st.internal / "evidence_plan.json"),
+            "questions": {k: {"mode": v["mode"], "option_modes": v["option_modes"], "brand": v["brand_dependent"],
+                              "components": [f"{c['spec']['source']['indicator']}:{c['class']}:{'ok' if c['usable'] else 'rejected'}" for c in v["components"]]}
+                          for k, v in plan["questions"].items() if v["mode"] != "D_AI" or v["components"]}})
+    elif args.cmd == "sensitivity":
+        from ase.analysis.sensitivity import run as srun
+        _print(srun(st, args.run))
     elif args.cmd == "calibrate":
         from ase.calibration.realdata import calibrate
         print(calibrate(st, args.run, args.imp, min_n=args.min_n))

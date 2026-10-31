@@ -199,3 +199,32 @@ def test_bridge_cache_keys_and_typed_errors():
         raise AssertionError
     except LabBridgeError:
         pass
+
+
+def test_synthetic_label_on_every_output_and_brand_sensitivity_in_report():
+    """Κάθε έξοδος φέρει «ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ»· οι ερωτήσεις μάρκας παίρνουν ανάλυση ευαισθησίας
+    (εσωτερικό JSON + σύντομη ενότητα στην αναφορά) χωρίς ετικέτες προέλευσης ανά ερώτηση."""
+    import pandas as pd
+    from ase.study import SYNTH_LABEL
+    q = copy.deepcopy(QUESTIONNAIRE)
+    q["blocks"][1]["questions"][1] = {"id": "L1", "text": "Πόσο εμπιστεύεστε την Κωτσόβολος;", "type": "likert", "condition": "K1 == '1'", "scale": {"points": 5}}
+    d = make_study("int_label", n=10, questionnaire=q)
+    (d / "evidence_map.yaml").write_text("components: []\n", encoding="utf-8")
+    st = Study(d)
+    rid = st.run({"provider": "mock", "model": "mock-1"}, max_workers=1)
+    assert read_json(st.internal / "runs" / rid / "execution_manifest.json")["label"] == SYNTH_LABEL
+    df = st.responses(rid)
+    assert (df["data_status"] == SYNTH_LABEL).all()
+    assert df[df.question_id == "L1"]["brand_dependent"].astype(str).isin(["True", "true", "1"]).any()
+    out = st.build_deliverables(rid, pdf=False)
+    for f in ("results.csv", "crosstabs.csv"):
+        t = pd.read_csv(out / f, dtype=str)
+        assert t.columns[0] == "data_status" and (t["data_status"] == SYNTH_LABEL).all(), f
+    html = (out / "executive_report.html").read_text(encoding="utf-8")
+    assert html.count(SYNTH_LABEL) >= 2 and "Ευαισθησία συμπερασμάτων" in html
+    for banned in ("AI-only", "evidence-grounded", "χωρίς εμπειρική στήριξη", "C_EVIDENCE", "D_AI", "A_EMPIRICAL"):
+        assert banned not in html, banned
+    sens = read_json(st.internal / "runs" / rid / "sensitivity.json")
+    assert sens["label"] == SYNTH_LABEL and "L1" in sens["questions"]
+    sh = sens["questions"]["L1"]["share_by_logit_shift"]
+    assert sh["-1.0"] <= sh["0.0"] <= sh["1.0"]                                     # μονοτονία ως προς τη βάση της μάρκας

@@ -32,6 +32,7 @@ from .util import derive_seed, now_iso, read_json, read_table, sha256_file, writ
 
 DELIVERABLE_FILES = ("results.csv", "crosstabs.csv", "executive_report.html", "executive_report.pdf")
 DRY_RUN_MAX = 20
+SYNTH_LABEL = "ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ"
 DISCLOSURE = ("Η παρούσα μελέτη βασίζεται σε συνθετικά καταναλωτικά προφίλ και προσομοιωμένες απαντήσεις. "
               "Δεν αποτελεί δειγματοληπτική έρευνα με συνεντεύξεις πραγματικών καταναλωτών.")
 
@@ -219,6 +220,8 @@ class Study:
         rows = [r for x in results for r in x["rows"]]
         status = {x["respondent_id"]: x["status"] for x in results}
         df = pd.DataFrame(rows)
+        if len(df):
+            df.insert(0, "data_status", SYNTH_LABEL)
         write_table(df, rdir / "individual_responses")
         write_json(rdir / "respondent_status.json", status)
         write_json(rdir / "model_provenance.json", {
@@ -226,7 +229,7 @@ class Study:
             "prompt_version": P.PROMPT_VERSION, "system_prompt_sha256": __import__("hashlib").sha256(P.SYSTEM.encode()).hexdigest(),
             "empirical_models": {qid: ad.describe() for qid, ad in sr.adapters.items()}, "mock": provider.name == "mock",
             "note": "Mock provider: χωρίς ερευνητική αξία — μόνο δοκιμή υποδομής." if provider.name == "mock" else ""})
-        manifest = {"study_id": self.study_id, "run_id": run_id, "ase_version": ASE_VERSION, "git_commit": _git_commit(), "started_at": started, "finished_at": now_iso(),
+        manifest = {"label": SYNTH_LABEL, "study_id": self.study_id, "run_id": run_id, "ase_version": ASE_VERSION, "git_commit": _git_commit(), "started_at": started, "finished_at": now_iso(),
                     "dry_run": dry_run, "respondents_requested": int(len(sel)), "respondents_completed": len(results),
                     "status_counts": pd.Series(list(status.values())).value_counts().to_dict(), "question_subset": sorted(question_ids) if question_ids else None,
                     "batching": batching, "seed": int(self.cfg["panel"]["random_seed"]), "max_workers": max_workers,
@@ -340,9 +343,15 @@ class Study:
         out = out_dir or (self.internal / "runs" / run_id / "preview" if preview else self.deliv)
         out.mkdir(parents=True, exist_ok=True)
         res, xt = aggregate(self, run_id)
+        for t in (res, xt):
+            t.insert(0, "data_status", SYNTH_LABEL)
         res.to_csv(out / "results.csv", index=False)
         xt.to_csv(out / "crosstabs.csv", index=False)
-        html = render_report(self, run_id, res, xt, preview=preview)
+        from .analysis.sensitivity import run as sensitivity
+        sens = sensitivity(self, run_id)
+        write_json(self.internal / "runs" / run_id / "sensitivity.json", {"label": SYNTH_LABEL, "questions": sens,
+                   "method": "Μετατόπιση της άγνωστης βάσης της μάρκας στην κλίμακα logit (δ ∈ −1…+1) πάνω στις αποθηκευμένες ατομικές κατανομές."})
+        html = render_report(self, run_id, res.drop(columns="data_status"), xt.drop(columns="data_status"), preview=preview, sensitivity=sens)
         (out / "executive_report.html").write_text(html, encoding="utf-8")
         if pdf:
             js = Path(__file__).parent / "report" / "render_pdf.cjs"

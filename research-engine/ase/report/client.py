@@ -13,7 +13,7 @@ import json
 import numpy as np
 import pandas as pd
 
-from ..study import DISCLOSURE
+from ..study import DISCLOSURE, SYNTH_LABEL
 from ..util import read_json, read_table
 
 esc = html.escape
@@ -55,6 +55,8 @@ main { max-width: 900px; margin: 0 auto; padding: 0 28px 40px; }
 .cover .sub { font-size:17px; color:#d7e2ea; } .cover .meta { margin-top:auto; display:grid; grid-template-columns:repeat(3,1fr); gap:12px; border-top:1px solid rgba(255,255,255,.25); padding-top:14px; }
 .cover .meta span { display:block; font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:#a8b8c6; } .cover .meta b { font-size:16px; }
 .disc { margin-top:26px; background:rgba(255,255,255,.08); border-left:4px solid #5eead4; padding:12px 16px; font-size:13.5px; }
+.synth { margin-top:22px; display:inline-block; background:#fff; color:#12263a; font-weight:800; letter-spacing:.04em; padding:8px 14px; border-radius:6px; font-size:14px; }
+.synthbar { background:#12263a; color:#fff; text-align:center; font-weight:700; font-size:11px; letter-spacing:.06em; padding:5px; margin:18px -28px 0; }
 .preview { background:#fdf1e3; color:#8a4b0f; border:1px solid #f0c98f; padding:10px 14px; border-radius:8px; font-weight:700; margin:14px 0; }
 h2 { color:var(--navy); font-size:24px; margin:30px 0 6px; border-bottom:2px solid var(--navy); padding-bottom:6px; } h3 { color:var(--navy); font-size:15px; margin:18px 0 4px; }
 .lead { font-size:15px; } .card { border:1px solid var(--line); border-radius:10px; padding:10px 14px; margin:10px 0; }
@@ -98,7 +100,7 @@ def _segments(study, run_id):
     return sorted(out, key=lambda x: -x["size_pct"])
 
 
-def render_report(study, run_id, res: pd.DataFrame, xt: pd.DataFrame, preview: bool) -> str:
+def render_report(study, run_id, res: pd.DataFrame, xt: pd.DataFrame, preview: bool, sensitivity: dict | None = None) -> str:
     cfg, rep = study.cfg, cfg_report(study.cfg)
     man = read_json(study.internal / "runs" / run_id / "execution_manifest.json")
     panel = read_json(study.internal / "panel_report.json")
@@ -108,6 +110,7 @@ def render_report(study, run_id, res: pd.DataFrame, xt: pd.DataFrame, preview: b
     period = rep.get("period") or man["finished_at"][:10]
     P = []
     P.append(f'''<section class="cover"><div class="k">Greek Synthetic Research Lab · Adaptive Synthetic Research Engine</div>
+<div class="synth">{SYNTH_LABEL}</div>
 <h1>{esc(cfg["study"]["title"])}</h1><div class="sub">{esc(cfg["study"].get("subtitle", ""))}</div>
 <div class="disc"><b>Σημαντικό:</b> {esc(DISCLOSURE)}</div>
 {'<div class="preview">ΠΡΟΕΠΙΣΚΟΠΗΣΗ — DRY RUN / ΔΟΚΙΜΑΣΤΙΚΗ ΕΚΤΕΛΕΣΗ. Τα αποτελέσματα δεν αποτελούν ευρήματα της μελέτης.</div>' if preview else ''}
@@ -189,6 +192,18 @@ def render_report(study, run_id, res: pd.DataFrame, xt: pd.DataFrame, preview: b
         P.append('<section class="sec"><h2>Συνθετικά καταναλωτικά τμήματα</h2><p>Ομαδοποίηση των συνθετικών ερωτωμένων με βάση τις απαντήσεις τους στις κλίμακες στάσεων.</p>'
                  + "".join(f'<div class="card"><h3>Τμήμα {i + 1} · {f1(s["size_pct"])}%</h3><p>Υψηλότερα από τον μέσο όρο: {esc("; ".join(s["higher"]))}<br>Χαμηλότερα: {esc("; ".join(s["lower"]))}</p></div>' for i, s in enumerate(seg))
                  + "</section>")
+    if sensitivity:
+        S = ['<section class="sec"><h2>Ευαισθησία συμπερασμάτων</h2><p>Για ερωτήσεις που αφορούν τη συγκεκριμένη μάρκα, δείχνουμε πόσο θα άλλαζε το μερίδιο των θετικών απαντήσεων '
+             'αν η γενική στάση του κοινού απέναντι στη μάρκα ήταν χαμηλότερη ή υψηλότερη από αυτή που υποθέτει η προσομοίωση. Μικρό εύρος σημαίνει ότι το συμπέρασμα είναι σταθερό· '
+             'μεγάλο εύρος σημαίνει ότι εξαρτάται από τη θέση της μάρκας στην αγορά, την οποία μια πραγματική μέτρηση θα προσδιόριζε.</p>',
+             '<table class="t"><tr><th>Ερώτηση</th><th>Θετικές απαντήσεις</th><th>Χαμηλότερη βάση</th><th>Βασική εκτίμηση</th><th>Υψηλότερη βάση</th></tr>']
+        qby = study.qn.by_id()
+        for qid, v in sensitivity.items():
+            sh = v["share_by_logit_shift"]
+            S.append(f'<tr><td>{esc(qby[qid].text[:90])}</td><td>{esc(" / ".join(v["labels"])[:60])}</td><td>{f1(sh.get("-1.0", sh.get("-1")))}%</td>'
+                     f'<td>{f1(sh.get("0.0", sh.get("0")))}%</td><td>{f1(sh.get("1.0", sh.get("1")))}%</td></tr>')
+        S.append('</table><div class="cap">Χαμηλότερη/υψηλότερη βάση: μετατόπιση της στάσης απέναντι στη μάρκα κατά μία μονάδα στην κλίμακα logit. Δεν είναι διάστημα εμπιστοσύνης.</div></section>')
+        P.append("".join(S))
     imp = rep.get("implications") or []
     con = rep.get("conclusions") or []
     P.append('<section class="sec"><h2>Επιχειρηματικές επιπτώσεις</h2>' + ("<ul class='f'>" + "".join(f"<li>{esc(x)}</li>" for x in imp) + "</ul>" if imp else
@@ -200,7 +215,7 @@ def render_report(study, run_id, res: pd.DataFrame, xt: pd.DataFrame, preview: b
 <p><b>Προσομοίωση απαντήσεων.</b> Για κάθε ερώτηση, ένα μοντέλο τεχνητής νοημοσύνης εκτιμά πώς θα απαντούσε ένα πρόσωπο με το συγκεκριμένο προφίλ, με βάση το προφίλ, τις προηγούμενες απαντήσεις του και, όπου υπάρχει, δημόσιο ερευνητικό υπόβαθρο για το θέμα, το οποίο λειτουργεί ως πλαίσιο και όχι ως πηγή ποσοστών. Η απάντηση κάθε προσώπου επιλέγεται από αυτή την εκτίμηση με αναπαραγώγιμη τυχαιότητα. Ερωτήσεις για προσωπική εμπειρία απαντώνται ως υποθετικά χαρακτηριστικά σεναρίου. Όπου υπάρχει κατάλληλο εμπειρικό μοντέλο, χρησιμοποιείται εντός των ορίων του.</p>
 <p><b>Ερμηνεία.</b> Τα ποσοστά περιγράφουν το συνθετικό πάνελ· δεν αποτελούν επαληθευμένες εκτιμήσεις του πραγματικού πληθυσμού και δεν συνοδεύονται από περιθώριο σφάλματος δειγματοληψίας. Η δημογραφική ομοιότητα του πάνελ με τον πληθυσμό δεν τεκμηριώνει την εγκυρότητα των απαντήσεων. Τα σενάρια για εταιρείες είναι υποθετικά ερευνητικά παραδείγματα και όχι περιγραφές πραγματικών πολιτικών.</p>
 <p class="cap">Πηγές πληθυσμού: {esc(fm["glopop"]["attribution"])}; {esc("; ".join(s["source"] for s in fm["targets_sources"]))}.</p></section>''')
-    return f'<!doctype html><html lang="el"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{esc(cfg["study"]["title"])}</title><style>{CSS}</style></head><body><main>{"".join(P)}</main></body></html>'
+    return f'<!doctype html><html lang="el"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{esc(cfg["study"]["title"])}</title><style>{CSS}</style></head><body><main>{"".join(P)}<div class="synthbar">{SYNTH_LABEL}</div></main></body></html>'
 
 
 def _sample_text(n, n_prof, comp) -> str:
