@@ -1,0 +1,16 @@
+{
+ "key": "5a902b0fc2d855b936c4",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.56,
+    "2": 0.36,
+    "3": 0.08
+   },
+   "rationale": "Συνταξιούχος με βασική εκπαίδευση, ζευγάρι σε αστική Κ. Μακεδονία· αγοράζει κυρίως όταν χαλάσει κάτι."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 1)",
+ "imported_at": "2026-10-31T19:06:44Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

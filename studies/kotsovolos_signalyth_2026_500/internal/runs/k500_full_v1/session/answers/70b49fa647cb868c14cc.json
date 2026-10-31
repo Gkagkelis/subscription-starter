@@ -1,0 +1,16 @@
+{
+ "key": "70b49fa647cb868c14cc",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.84,
+    "2": 0.12,
+    "3": 0.04
+   },
+   "rationale": "Νέος 25-34 που μένει μόνος σε αστική Θεσσαλία· κινητό, laptop ή μικροσυσκευές για το σπίτι αγοράζονται συχνά σε αυτή την ηλικία."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 2)",
+ "imported_at": "2026-10-31T19:06:44Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

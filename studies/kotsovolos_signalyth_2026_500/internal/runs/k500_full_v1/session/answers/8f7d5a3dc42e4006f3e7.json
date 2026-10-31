@@ -1,0 +1,16 @@
+{
+ "key": "8f7d5a3dc42e4006f3e7",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.6,
+    "2": 0.3,
+    "3": 0.1
+   },
+   "rationale": "Συνταξιούχος 65+ στην Αθήνα με στενά οικονομικά· πιθανή κάποια αγορά ή αντικατάσταση, αλλά όχι συχνές αγορές."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 2)",
+ "imported_at": "2026-10-31T19:06:44Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

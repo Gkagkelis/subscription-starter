@@ -1,0 +1,16 @@
+{
+ "key": "aeff1a3be542f72cf8db",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.5,
+    "2": 0.37,
+    "3": 0.13
+   },
+   "rationale": "Ηλικιωμένος σε αγροτική Θράκη με χαμηλή εκπαίδευση και στενά οικονομικά· αγορές μόνο όταν χαλάσει κάτι, πιθανή ασάφεια ανάμνησης."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 2)",
+ "imported_at": "2026-10-31T19:06:44Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

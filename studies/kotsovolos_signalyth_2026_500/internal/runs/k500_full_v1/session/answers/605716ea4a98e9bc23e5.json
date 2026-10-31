@@ -1,0 +1,16 @@
+{
+ "key": "605716ea4a98e9bc23e5",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.83,
+    "2": 0.14,
+    "3": 0.03
+   },
+   "rationale": "Νέος μισθωτός με οικογένεια στην Αθήνα· παιδιά και νέο νοικοκυριό συνήθως σημαίνουν αγορές συσκευών."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 1)",
+ "imported_at": "2026-10-31T19:06:44Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

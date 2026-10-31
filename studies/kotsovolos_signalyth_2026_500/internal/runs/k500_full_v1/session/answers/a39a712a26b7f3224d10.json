@@ -1,0 +1,16 @@
+{
+ "key": "a39a712a26b7f3224d10",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.67,
+    "2": 0.28,
+    "3": 0.05
+   },
+   "rationale": "Αγοράζει από μεγάλη αλυσίδα και online, γνωρίζει αρκετά την εταιρεία και ζει στην Αττική· μάλλον έχει αγοράσει, αν και το marketplace είναι εναλλακτική."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 7)",
+ "imported_at": "2026-10-31T19:10:15Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

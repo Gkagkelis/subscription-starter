@@ -1,0 +1,16 @@
+{
+ "key": "4964bed685376cd9bb9d",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.68,
+    "2": 0.27,
+    "3": 0.05
+   },
+   "rationale": "Μεσήλικας σε αγροτικά Ιόνια, άνετος οικονομικά αλλά χωρίς παιδιά και χαμηλή εκπαίδευση· μέτρια πιθανή αγορά."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 1)",
+ "imported_at": "2026-10-31T19:06:44Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

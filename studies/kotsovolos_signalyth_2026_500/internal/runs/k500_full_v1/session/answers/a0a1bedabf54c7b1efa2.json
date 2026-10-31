@@ -1,0 +1,16 @@
+{
+ "key": "a0a1bedabf54c7b1efa2",
+ "answer": {
+  "Q01": {
+   "probabilities": {
+    "1": 0.87,
+    "2": 0.09,
+    "3": 0.04
+   },
+   "rationale": "Νεαρός 18-24 σε εύπορη οικογένεια στην Αττική· κινητά, gaming ή συσκευές του σπιτιού αγοράζονται συχνά από τον ίδιο ή το νοικοκυριό."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 2)",
+ "imported_at": "2026-10-31T19:06:44Z",
+ "source": "Claude Code session (AI), όχι mock"
+}
