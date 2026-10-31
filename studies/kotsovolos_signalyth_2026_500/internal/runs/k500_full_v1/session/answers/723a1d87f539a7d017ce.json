@@ -1,0 +1,22 @@
+{
+ "key": "723a1d87f539a7d017ce",
+ "answer": {
+  "Q23": {
+   "inclusion_probabilities": {
+    "1": 0.45,
+    "2": 0.35,
+    "3": 0.78,
+    "4": 0.25,
+    "5": 0.12,
+    "6": 0.08,
+    "7": 0.1,
+    "8": 0.04,
+    "9": 0.04
+   },
+   "rationale": "Αγοράζει online από αλυσίδες και marketplaces με κριτήριο τιμή και επιστροφές· πρώτο το Skroutz, μετά Public/Πλαίσιο· δεν γνωρίζει τον Κωτσόβολο."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 104)",
+ "imported_at": "2026-10-31T20:08:58Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

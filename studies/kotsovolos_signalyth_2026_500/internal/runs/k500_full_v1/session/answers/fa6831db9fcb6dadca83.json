@@ -1,0 +1,16 @@
+{
+ "key": "fa6831db9fcb6dadca83",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.04,
+    "2": 0.9,
+    "3": 0.06
+   },
+   "rationale": "Δήλωσε ότι δεν αγόρασε καμία ηλεκτρική συσκευή τους τελευταίους 24 μήνες, άρα αγορά από Κωτσόβολο είναι πρακτικά απίθανη."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 102)",
+ "imported_at": "2026-10-31T20:08:59Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

@@ -1,0 +1,19 @@
+{
+ "key": "10d69a6439e660634135",
+ "answer": {
+  "Q08": {
+   "probabilities": {
+    "1": 0.02,
+    "2": 0.06,
+    "3": 0.33,
+    "4": 0.2,
+    "5": 0.03,
+    "6": 0.36
+   },
+   "rationale": "Νέος αυτοαπασχολούμενος που αγοράζει online από marketplace και e-shop αλυσίδων· ξέρει τον Κωτσόβολο μόνο ως όνομα, άρα ουδέτερος ή χωρίς άποψη."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 95)",
+ "imported_at": "2026-10-31T20:08:58Z",
+ "source": "Claude Code session (AI), όχι mock"
+}
