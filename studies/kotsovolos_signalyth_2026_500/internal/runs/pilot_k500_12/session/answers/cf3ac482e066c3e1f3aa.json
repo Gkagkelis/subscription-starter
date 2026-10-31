@@ -1,0 +1,16 @@
+{
+ "key": "cf3ac482e066c3e1f3aa",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.3,
+    "2": 0.6,
+    "3": 0.1
+   },
+   "rationale": "Νέος, αγοράζει από αμιγώς ηλεκτρονικά καταστήματα/marketplace με κριτήριο την τιμή· γνωρίζει αρκετά την εταιρεία, άρα πιθανή αλλά όχι κύρια επιλογή μια αγορά από εκεί."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 3)",
+ "imported_at": "2026-10-31T15:50:19Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

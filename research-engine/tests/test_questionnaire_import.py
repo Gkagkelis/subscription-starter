@@ -87,7 +87,7 @@ def test_per_block_dep_splits_on_dependencies_only():
     units = QM.split_units(st.qn, st.qn.questions)
     ids = [[q.id for q in u] for u in units]
     assert ["Q01"] in ids and ["Q05"] in ids and ["Q02", "Q03", "Q04"] in ids and ["Q06", "Q07"] in ids
-    assert ["Q08", "Q09", "Q10", "Q11"] in ids
+    assert ["Q08"] in ids and ["Q09"] in ids and ["Q10", "Q11"] in ids                     # sequential: συνέπεια εικόνας/εμπιστοσύνης
     for u in units:                                                                          # καμία εξάρτηση μέσα στην ίδια μονάδα
         uid = {q.id for q in u}
         for q in u:

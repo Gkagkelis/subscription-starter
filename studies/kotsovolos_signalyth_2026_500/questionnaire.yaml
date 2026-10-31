@@ -359,6 +359,7 @@ blocks:
       positive:
       - '4'
       - '5'
+    sequential: true
   - id: Q10
     text: Σε ποιο βαθμό συμφωνείτε ότι ο Κωτσόβολος τηρεί τις δεσμεύσεις του προς τους πελάτες;
     type: single_choice
@@ -386,6 +387,7 @@ blocks:
       positive:
       - '4'
       - '5'
+    sequential: true
   - id: Q11
     text: Ποια από τα ακόλουθα επηρεάζουν περισσότερο την εμπιστοσύνη σας σε ένα κατάστημα ηλεκτρικών ειδών; Επιλέξτε έως τρία.
     type: multiple_choice
@@ -475,6 +477,7 @@ blocks:
       positive:
       - '4'
       - '5'
+    sequential: true
   - id: Q14
     text: Στην πιο πρόσφατη αγορά σας, η παράδοση ή παραλαβή έγινε στον χρόνο που σας είχε γνωστοποιηθεί;
     type: single_choice
@@ -500,6 +503,7 @@ blocks:
       positive:
       - '1'
       - '2'
+    sequential: true
   - id: Q15
     text: Προέκυψε κάποιο πρόβλημα με το προϊόν, την παράδοση, την εγκατάσταση ή την εξυπηρέτηση μετά την αγορά;
     type: single_choice
@@ -520,6 +524,7 @@ blocks:
     analysis:
       positive:
       - '1'
+    sequential: true
   - id: Q16
     text: Τι είδους πρόβλημα αντιμετωπίσατε; Επιλέξτε όσα ισχύουν.
     type: multiple_choice
@@ -569,6 +574,7 @@ blocks:
     analysis:
       positive:
       - '1'
+    sequential: true
   - id: Q18
     text: Ποια είναι η τρέχουσα κατάσταση του προβλήματος;
     type: single_choice
@@ -591,6 +597,7 @@ blocks:
     analysis:
       positive:
       - '1'
+    sequential: true
   - id: Q19
     text: Πόσο ικανοποιημένος/η είστε από τον τρόπο χειρισμού του προβλήματος;
     type: single_choice
@@ -645,6 +652,7 @@ blocks:
       positive:
       - '4'
       - '5'
+    sequential: true
   - id: Q21
     text: Ποιο συναίσθημα περιγράφει καλύτερα την εμπειρία σας με το συγκεκριμένο πρόβλημα;
     type: single_choice
@@ -676,6 +684,7 @@ blocks:
       positive:
       - '5'
       - '6'
+    sequential: true
 - id: B05
   title: Ανταγωνισμός & επιλογή
   questions:
@@ -764,6 +773,7 @@ blocks:
       positive:
       - '4'
       - '5'
+    sequential: true
   - id: Q25
     text: Πόσο πιθανό είναι να συστήσετε τον Κωτσόβολο σε φίλο ή συγγενή;
     type: single_choice
@@ -803,6 +813,7 @@ blocks:
       positive:
       - '10'
       - '11'
+    sequential: true
   - id: Q26
     text: Έχετε αποτρέψει ή ενθαρρύνει κάποιον να αγοράσει από τον Κωτσόβολο τους τελευταίους 12 μήνες;
     type: single_choice
@@ -827,6 +838,7 @@ blocks:
     analysis:
       positive:
       - '1'
+    sequential: true
 - id: B06
   title: Κοινωνική εικόνα
   questions:
@@ -895,6 +907,7 @@ blocks:
       rationale: Διαχωρισμός CSR και service recovery
       source_pages: 5,11–12
     intent: hypothetical_choice
+    sequential: true
 - id: B07
   title: Αποκατάσταση & προτεραιότητες
   questions:
@@ -1039,9 +1052,10 @@ constraints:
     απάντησε Q01=«Όχι» δεν μπορεί να απαντήσει Q05=«Ναι».'
   origin: integration_overlay
 - id: C2
-  forbid: Q01 == '1' and Q05 == '1' and not (contains(Q02, '1') or contains(Q02, '2') or contains(Q02, '6') or contains(Q02, '7'))
-  reason: Ο Κωτσόβολος είναι μεγάλη αλυσίδα (φυσικά καταστήματα και e-shop). Αγοραστής του στους 24 μήνες πρέπει να έχει δηλώσει στο Q02 «Μεγάλη αλυσίδα φυσικών καταστημάτων»
-    ή «Ηλεκτρονικό κατάστημα μεγάλης αλυσίδας» (ή «Άλλο» / «Δεν θυμάμαι»).
+  forbid: Q01 == '1' and Q05 == '1' and not (contains(Q02, '1') or contains(Q02, '2') or contains(Q02, '4') or contains(Q02, '6') or contains(Q02, '7'))
+  reason: 'Ο Κωτσόβολος είναι μεγάλη αλυσίδα (φυσικά καταστήματα, e-shop) και πουλά και μέσω marketplace. Αγοραστής του στους 24 μήνες πρέπει να έχει δηλώσει στο
+    Q02 «Μεγάλη αλυσίδα φυσικών καταστημάτων», «Ηλεκτρονικό κατάστημα μεγάλης αλυσίδας», «Αμιγώς ηλεκτρονικό κατάστημα / marketplace» (ή «Άλλο» / «Δεν θυμάμαι»).
+    Απαγορεύεται μόνο όταν το Q02 περιέχει ΜΟΝΟ μικρό κατάστημα ή κατασκευαστή. (v2 μετά την πιλοτική: η v1 δεν επέτρεπε το marketplace.)'
   origin: integration_overlay
 - id: C3
   forbid: Q06 == '1' and Q01 == '1' and not (contains(Q02, '1') or contains(Q02, '7'))
@@ -1099,4 +1113,16 @@ consistency_rules:
 - id: S11
   when: Q12 == '5' and Q18 == '3'
   note: Πολύ θετική συνολική εμπειρία με πρόβλημα που παραμένει άλυτο
+  origin: integration_overlay
+- id: S12
+  when: Q04 == '2' and Q05 == '1'
+  note: Γνωρίζει την αλυσίδα «μόνο ως όνομα», αλλά δηλώνει αγορά από αυτήν (δυνατό για περιστασιακό αγοραστή· εύρημα πιλοτικής)
+  origin: integration_overlay
+- id: S13
+  when: Q04 == '2' and Q09 in ['4', '5']
+  note: Γνωρίζει την αλυσίδα μόνο ως όνομα, αλλά την εμπιστεύεται πολύ / πάρα πολύ (εύρημα πιλοτικής)
+  origin: integration_overlay
+- id: S14
+  when: Q08 in ['4', '5'] and Q09 == '1'
+  note: Θετική εικόνα, αλλά καμία εμπιστοσύνη (εύρημα πιλοτικής)
   origin: integration_overlay

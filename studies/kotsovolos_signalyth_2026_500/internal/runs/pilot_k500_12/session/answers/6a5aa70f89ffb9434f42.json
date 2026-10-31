@@ -1,0 +1,16 @@
+{
+ "key": "6a5aa70f89ffb9434f42",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.07,
+    "2": 0.85,
+    "3": 0.08
+   },
+   "rationale": "Χαμηλό εισόδημα, ψωνίζει online και σε μικρά καταστήματα, γνωρίζει την αλυσίδα μόνο ως όνομα· πιθανότατα δεν αγόρασε από εκεί."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 1)",
+ "imported_at": "2026-10-31T15:50:19Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

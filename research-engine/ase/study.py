@@ -248,6 +248,12 @@ class Study:
             write_json(rdir / "completes_report.json", crep)
             manifest["completes"] = {k: crep[k] for k in ("target_completes", "achieved_completes", "profiles_used", "screened_out", "replacements",
                                                           "quota_basis", "incidence_pct", "stop_reason")}
+        prev_p = rdir / "execution_manifest.json"
+        if resume_run_id and prev_p.exists():
+            # σε resume όπου όλοι οι ερωτώμενοι ήταν ήδη ολοκληρωμένοι, ο ledger αυτής της κλήσης είναι 0: κρατάμε τον προηγούμενο
+            pl = (read_json(prev_p) or {}).get("ledger") or {}
+            if int(pl.get("calls") or 0) > int(manifest["ledger"].get("calls") or 0):
+                manifest["ledger"] = {**pl, "note": "από προηγούμενη κλήση του ίδιου run (αυτή η συνέχεια δεν χρειάστηκε νέες κλήσεις)"}
         write_json(rdir / "execution_manifest.json", manifest)
         self.write_assumptions()
         from .qc.checks import run_qc

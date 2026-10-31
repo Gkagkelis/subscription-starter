@@ -171,7 +171,9 @@ class StudyRun:
             from .orchestrator import Orchestrator
             self.orch = Orchestrator(study, pl)
         brief = self.cfg.get("study", {})
-        self.brief = f"{brief.get('title', '')} — {brief.get('topic', '')}. Πληθυσμός: {self.cfg['panel'].get('population')} ({self.cfg.get('country', 'GR')})."
+        # prompt_brief: ουδέτερη περιγραφή χωρίς τον χορηγό/τη μάρκα (όπως σε πραγματική έρευνα, όπου ο χορηγός δεν αποκαλύπτεται)
+        self.brief = (brief.get("prompt_brief") or f"{brief.get('title', '')} — {brief.get('topic', '')}") + \
+            f". Πληθυσμός: {self.cfg['panel'].get('population')} ({self.cfg.get('country', 'GR')})."
         for txt in (brief.get("instructions_to_model") or "", self.brief):
             v = P.guard(txt)
             if v:

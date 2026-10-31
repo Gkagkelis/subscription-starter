@@ -210,7 +210,9 @@ def split_units(qn: "Questionnaire", order: list) -> list:
             deps = set(condition_refs(q.condition)) if q.condition else set()
             for c in constraints_for(qn, q.id):
                 deps |= set(c["refs"]) - {q.id}
-            if cur and deps & ids:
+            # «sequential: true» (overlay): στενά συνδεδεμένες αξιολογήσεις ρωτώνται ΜΕΤΑ την κλήρωση της προηγούμενης, ώστε η
+            # εξάρτηση να προκύπτει από την κρίση του AI για το ίδιο πρόσωπο (όχι από επινοημένη παράμετρο συσχέτισης)
+            if cur and (deps & ids or (q.raw or {}).get("sequential")):
                 units.append(cur)
                 cur, ids = [], set()
             cur.append(q)
