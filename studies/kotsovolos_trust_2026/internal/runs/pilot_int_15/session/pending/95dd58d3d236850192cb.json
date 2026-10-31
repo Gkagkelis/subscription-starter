@@ -1,0 +1,175 @@
+{
+ "key": "95dd58d3d236850192cb",
+ "created_at": "2026-10-31T14:53:20Z",
+ "question_ids": [
+  "Q20a",
+  "Q20b",
+  "Q21",
+  "Q22"
+ ],
+ "system_prompt_file": "system_prompt.txt",
+ "user_prompt": "ΜΕΛΕΤΗ: Η Εμπιστοσύνη μετά την Αγορά: Τι Κάνει έναν Καταναλωτή να Μείνει ή να Φύγει; — Εμπιστοσύνη πελατών σε retailer ηλεκτρικών ειδών μετά την αγορά: παράδοση, ελαττωματικά προϊόντα, αποκατάσταση, επαναγορά, εταιρική εικόνα. Πληθυσμός: adults_18_plus (GR).\n\nΣΥΝΘΕΤΙΚΟ ΠΡΟΦΙΛ:\nΆνδρας, ηλικία 18-24\nΠεριφέρεια: Αττική (αστική περιοχή)\nΕκπαίδευση: λύκειο / μεταλυκειακή\nΝοικοκυριό: ζευγάρι με παιδιά, μέγεθος 5-6\nΕισοδηματικό πεμπτημόριο νοικοκυριού: 4 (1 = χαμηλότερο, 5 = υψηλότερο)\nΕκτιμώμενα χαρακτηριστικά (στατιστική εκτίμηση του μοντέλου PIE από ελληνικά μικροδεδομένα διαΝΕΟσις 2023–24 με βάση τα δημογραφικά· ΟΧΙ γνωστά στοιχεία του προσώπου): απασχόληση: φοιτητής/τρια; οικονομική κατάσταση νοικοκυριού: δεν τα βγάζει πέρα; υποκειμενική κοινωνική τάξη: χαμηλή\nΆγνωστα (δεν υπάρχουν δεδομένα): επάγγελμα, προσωπικό ιστορικό αγορών.\n\nΠΡΟΗΓΟΥΜΕΝΕΣ ΑΠΑΝΤΗΣΕΙΣ ΤΟΥ ΙΔΙΟΥ ΠΡΟΣΩΠΟΥ:\n- S1: Ναι\n- D1: Άνδρας\n- D2: 18–24\n- D3: Αττική\n- Q1: Ηλεκτρονικό κατάστημα αλυσίδας ηλεκτρικών ειδών\n- Q2: Δεν αγοράζω εγώ τέτοιες συσκευές\n- Q3: 469.0\n- Q4: Αξιόπιστη και έγκαιρη παράδοση, Χαμηλή τιμή, Εγγύηση και επισκευές (σειρά σημασίας)\n- Q5: Μέτρια\n- Q6: Ναι, τη γνωρίζω\n- Q7: Μέτρια\n- Q8: Όχι\n- Q9: Ούτε συμφωνώ ούτε διαφωνώ\n- Q10: 4\n- Q11: Μετά από 2–3 ημέρες\n- Q12a: Λίγο\n- Q12b: Καθόλου ικανοποιημένος/η\n- Q13: Ειδοποίηση στην εφαρμογή\n- Q14: Θα επικοινωνούσα με το κατάστημα αγοράς\n- Q15: 8.0\n- Q16: Επιστροφή χρημάτων\n- Q17: none\n- Q18a: Μέτρια\n- Q18b: Καθόλου\n- Q19: Γρήγορη λύση του προβλήματος, Ένας υπεύθυνος που αναλαμβάνει την υπόθεση, Οικονομική αποζημίωση ή κουπόνι (σειρά σημασίας)\n\nΕΡΕΥΝΗΤΙΚΟ ΠΛΑΙΣΙΟ (υπόβαθρο, όχι στόχος):\n[Q20a]\n- [src:greca-eltrun-ecommerce-2026] Έρευνα Ηλεκτρονικού Εμπορίου 2026 - Η συμπεριφορά του Έλληνα Καταναλωτή στις Διαδικτυακές Αγορές (GR, 2026-05; πληθυσμός: Greek consumers who shop online (online questionnaire, multiple-choice questions); δείγμα: 600) — αφορά: Greek-specific background on what drives trust in e-shops (known brand/chain, prompt service before and after purchase, clear terms, reviews, trust certifications), delivery and pickup preferences (home delivery, lockers), payment methods, and online purchasing of electrical appliances as a category.\n- [src:stk-annual-report-2024] Ετήσια Έκθεση 2024 - Συνήγορος του Καταναλωτή (GR, 2026-05; πληθυσμός: Complaints (αναφορές) submitted by consumers to the Consumer Ombudsman in 2024 (and to ECC Greece for the combined total); δείγμα: administrative data (18,192 complaints to the Ombudsman in 2024; 19,061 including ECC Greece)) — αφορά: Greek complaint landscape by sector and complaint type, including consumer-goods sub-sectors ICT goods, large household appliances and non-ICT/entertainment electronics, complaint content such as delivery of goods (non- or partial delivery, delay, customer service), product quality, sales method (e-commerce vs face to face) and mediation outcomes; also case examples on courier/postal non-delivery and damaged parcels.\n- [src:eurostat-isoc-ec-iprb21] Internet purchases - problems encountered (2021 onwards) (EU27 incl. GR (Greece reported separately), 2026-04; πληθυσμός: Individuals (all individuals and breakdowns by age, sex, education etc.) who bought via a website or app in the previous 3 months; Greece data available for 2021, 2023 and 2025; δείγμα: unknown) — αφορά: Share of Greek online buyers reporting delivery slower than indicated, wrong or damaged goods delivered, difficult complaints/redress or no satisfactory response after complaint, and difficulty finding information on guarantees/legal rights (Eurostat 2021/2023/2025), compared with other EU countries. DOI 10.2908/ISOC_EC_IPRB21.\n  (Υπόβαθρο μόνο: μην μετατρέπεις στατιστικά των πηγών σε πιθανότητες απάντησης του προσώπου.)\n[Q20b]\n- [src:greca-eltrun-ecommerce-2026] Έρευνα Ηλεκτρονικού Εμπορίου 2026 - Η συμπεριφορά του Έλληνα Καταναλωτή στις Διαδικτυακές Αγορές (GR, 2026-05; πληθυσμός: Greek consumers who shop online (online questionnaire, multiple-choice questions); δείγμα: 600) — αφορά: Greek-specific background on what drives trust in e-shops (known brand/chain, prompt service before and after purchase, clear terms, reviews, trust certifications), delivery and pickup preferences (home delivery, lockers), payment methods, and online purchasing of electrical appliances as a category.\n- [src:stk-annual-report-2024] Ετήσια Έκθεση 2024 - Συνήγορος του Καταναλωτή (GR, 2026-05; πληθυσμός: Complaints (αναφορές) submitted by consumers to the Consumer Ombudsman in 2024 (and to ECC Greece for the combined total); δείγμα: administrative data (18,192 complaints to the Ombudsman in 2024; 19,061 including ECC Greece)) — αφορά: Greek complaint landscape by sector and complaint type, including consumer-goods sub-sectors ICT goods, large household appliances and non-ICT/entertainment electronics, complaint content such as delivery of goods (non- or partial delivery, delay, customer service), product quality, sales method (e-commerce vs face to face) and mediation outcomes; also case examples on courier/postal non-delivery and damaged parcels.\n- [src:eurostat-isoc-ec-iprb21] Internet purchases - problems encountered (2021 onwards) (EU27 incl. GR (Greece reported separately), 2026-04; πληθυσμός: Individuals (all individuals and breakdowns by age, sex, education etc.) who bought via a website or app in the previous 3 months; Greece data available for 2021, 2023 and 2025; δείγμα: unknown) — αφορά: Share of Greek online buyers reporting delivery slower than indicated, wrong or damaged goods delivered, difficult complaints/redress or no satisfactory response after complaint, and difficulty finding information on guarantees/legal rights (Eurostat 2021/2023/2025), compared with other EU countries. DOI 10.2908/ISOC_EC_IPRB21.\n  (Υπόβαθρο μόνο: μην μετατρέπεις στατιστικά των πηγών σε πιθανότητες απάντησης του προσώπου.)\n[Q21]\n- Δεν βρέθηκε συναφής τεκμηρίωση για αυτή την ερώτηση.\n[Q22]\n- Δεν βρέθηκε συναφής τεκμηρίωση για αυτή την ερώτηση.\n\nΣΕΝΑΡΙΟ (υποθετικό): Την τελευταία φορά που αγοράσατε από ένα κατάστημα ηλεκτρικών ειδών είχατε πρόβλημα με την παράδοση, το οποίο όμως λύθηκε γρήγορα και σωστά. Τώρα χρειάζεστε νέα συσκευή.\nΕΡΩΤΗΣΗ Q20a (scenario): Πόσο πιθανό είναι να ξαναγοράσετε από αυτό το κατάστημα;\n  [1] Καθόλου πιθανό\n  [2] Λίγο πιθανό\n  [3] Μέτρια\n  [4] Πολύ πιθανό\n  [5] Σίγουρα\n\nΣΕΝΑΡΙΟ (υποθετικό): Την τελευταία φορά που αγοράσατε από ένα κατάστημα ηλεκτρικών ειδών είχατε πρόβλημα με την παράδοση, το οποίο δεν λύθηκε ικανοποιητικά. Τώρα χρειάζεστε νέα συσκευή.\nΕΡΩΤΗΣΗ Q20b (scenario): Πόσο πιθανό είναι να ξαναγοράσετε από αυτό το κατάστημα;\n  [1] Καθόλου πιθανό\n  [2] Λίγο πιθανό\n  [3] Μέτρια\n  [4] Πολύ πιθανό\n  [5] Σίγουρα\n\nΕΡΩΤΗΣΗ Q21 (single_choice): Αν αποφασίζατε να αγοράσετε αλλού μετά από κακή εμπειρία, πού θα στρεφόσασταν πιθανότερα;\n  [1] Σε άλλη αλυσίδα ηλεκτρικών ειδών\n  [2] Σε online marketplace\n  [3] Στο e-shop του κατασκευαστή\n  [4] Σε μικρό τοπικό κατάστημα\n  [5] Θα αγόραζα πάλι από το ίδιο κατάστημα\n\nΕΡΩΤΗΣΗ Q22 (numeric): Σε κλίμακα 0–10, πόσο πιθανό είναι να συστήνατε τον Κωτσόβολο σε έναν φίλο ή συγγενή;\nΕΥΡΟΣ: 0–10\n  (αριθμητική: δώσε χαμηλή, τυπική και υψηλή εκτίμηση )",
+ "schema": {
+  "type": "object",
+  "properties": {
+   "Q20a": {
+    "type": "object",
+    "properties": {
+     "probabilities": {
+      "type": "object",
+      "properties": {
+       "1": {
+        "type": "number"
+       },
+       "2": {
+        "type": "number"
+       },
+       "3": {
+        "type": "number"
+       },
+       "4": {
+        "type": "number"
+       },
+       "5": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "1",
+       "2",
+       "3",
+       "4",
+       "5"
+      ],
+      "additionalProperties": false
+     },
+     "rationale": {
+      "type": "string",
+      "description": "Σύντομη, ελέγξιμη αιτιολόγηση (έως 30 λέξεις), χωρίς εσωτερική συλλογιστική."
+     }
+    },
+    "required": [
+     "probabilities",
+     "rationale"
+    ],
+    "additionalProperties": false
+   },
+   "Q20b": {
+    "type": "object",
+    "properties": {
+     "probabilities": {
+      "type": "object",
+      "properties": {
+       "1": {
+        "type": "number"
+       },
+       "2": {
+        "type": "number"
+       },
+       "3": {
+        "type": "number"
+       },
+       "4": {
+        "type": "number"
+       },
+       "5": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "1",
+       "2",
+       "3",
+       "4",
+       "5"
+      ],
+      "additionalProperties": false
+     },
+     "rationale": {
+      "type": "string",
+      "description": "Σύντομη, ελέγξιμη αιτιολόγηση (έως 30 λέξεις), χωρίς εσωτερική συλλογιστική."
+     }
+    },
+    "required": [
+     "probabilities",
+     "rationale"
+    ],
+    "additionalProperties": false
+   },
+   "Q21": {
+    "type": "object",
+    "properties": {
+     "probabilities": {
+      "type": "object",
+      "properties": {
+       "1": {
+        "type": "number"
+       },
+       "2": {
+        "type": "number"
+       },
+       "3": {
+        "type": "number"
+       },
+       "4": {
+        "type": "number"
+       },
+       "5": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "1",
+       "2",
+       "3",
+       "4",
+       "5"
+      ],
+      "additionalProperties": false
+     },
+     "rationale": {
+      "type": "string",
+      "description": "Σύντομη, ελέγξιμη αιτιολόγηση (έως 30 λέξεις), χωρίς εσωτερική συλλογιστική."
+     }
+    },
+    "required": [
+     "probabilities",
+     "rationale"
+    ],
+    "additionalProperties": false
+   },
+   "Q22": {
+    "type": "object",
+    "properties": {
+     "low": {
+      "type": "number"
+     },
+     "typical": {
+      "type": "number"
+     },
+     "high": {
+      "type": "number"
+     },
+     "rationale": {
+      "type": "string",
+      "description": "Σύντομη, ελέγξιμη αιτιολόγηση (έως 30 λέξεις), χωρίς εσωτερική συλλογιστική."
+     }
+    },
+    "required": [
+     "low",
+     "typical",
+     "high",
+     "rationale"
+    ],
+    "additionalProperties": false
+   }
+  },
+  "required": [
+   "Q20a",
+   "Q20b",
+   "Q21",
+   "Q22"
+  ],
+  "additionalProperties": false
+ }
+}

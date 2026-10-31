@@ -1,0 +1,15 @@
+{
+ "key": "9b3f76671feb00ca41ea",
+ "answer": {
+  "S1": {
+   "probabilities": {
+    "1": 0.87,
+    "2": 0.13
+   },
+   "rationale": "Νεαρή φοιτήτρια στην Αθήνα από εύπορο νοικοκυριό· πολύ πιθανή αγορά κινητού, ακουστικών ή laptop, ίσως με χρήματα γονιών, μέσα σε δύο χρόνια."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 2)",
+ "imported_at": "2026-10-31T14:42:24Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

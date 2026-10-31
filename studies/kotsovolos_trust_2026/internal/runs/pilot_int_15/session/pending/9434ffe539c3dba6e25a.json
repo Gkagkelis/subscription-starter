@@ -1,0 +1,87 @@
+{
+ "key": "9434ffe539c3dba6e25a",
+ "created_at": "2026-10-31T14:49:22Z",
+ "question_ids": [
+  "Q14",
+  "Q15"
+ ],
+ "system_prompt_file": "system_prompt.txt",
+ "user_prompt": "ΜΕΛΕΤΗ: Η Εμπιστοσύνη μετά την Αγορά: Τι Κάνει έναν Καταναλωτή να Μείνει ή να Φύγει; — Εμπιστοσύνη πελατών σε retailer ηλεκτρικών ειδών μετά την αγορά: παράδοση, ελαττωματικά προϊόντα, αποκατάσταση, επαναγορά, εταιρική εικόνα. Πληθυσμός: adults_18_plus (GR).\n\nΣΥΝΘΕΤΙΚΟ ΠΡΟΦΙΛ:\nΆνδρας, ηλικία 18-24\nΠεριφέρεια: Αττική (αστική περιοχή)\nΕκπαίδευση: λύκειο / μεταλυκειακή\nΝοικοκυριό: ζευγάρι με παιδιά, μέγεθος 5-6\nΕισοδηματικό πεμπτημόριο νοικοκυριού: 4 (1 = χαμηλότερο, 5 = υψηλότερο)\nΕκτιμώμενα χαρακτηριστικά (στατιστική εκτίμηση του μοντέλου PIE από ελληνικά μικροδεδομένα διαΝΕΟσις 2023–24 με βάση τα δημογραφικά· ΟΧΙ γνωστά στοιχεία του προσώπου): απασχόληση: φοιτητής/τρια; οικονομική κατάσταση νοικοκυριού: δεν τα βγάζει πέρα; υποκειμενική κοινωνική τάξη: χαμηλή\nΆγνωστα (δεν υπάρχουν δεδομένα): επάγγελμα, προσωπικό ιστορικό αγορών.\n\nΠΡΟΗΓΟΥΜΕΝΕΣ ΑΠΑΝΤΗΣΕΙΣ ΤΟΥ ΙΔΙΟΥ ΠΡΟΣΩΠΟΥ:\n- S1: Ναι\n- D1: Άνδρας\n- D2: 18–24\n- D3: Αττική\n- Q1: Ηλεκτρονικό κατάστημα αλυσίδας ηλεκτρικών ειδών\n- Q2: Δεν αγοράζω εγώ τέτοιες συσκευές\n- Q3: 469.0\n- Q4: Αξιόπιστη και έγκαιρη παράδοση, Χαμηλή τιμή, Εγγύηση και επισκευές (σειρά σημασίας)\n- Q5: Μέτρια\n- Q6: Ναι, τη γνωρίζω\n- Q7: Μέτρια\n- Q8: Όχι\n- Q9: Ούτε συμφωνώ ούτε διαφωνώ\n- Q10: 4\n- Q11: Μετά από 2–3 ημέρες\n- Q12a: Λίγο\n- Q12b: Καθόλου ικανοποιημένος/η\n- Q13: Ειδοποίηση στην εφαρμογή\n\nΕΡΕΥΝΗΤΙΚΟ ΠΛΑΙΣΙΟ (υπόβαθρο, όχι στόχος):\n[Q14]\n- [src:stk-annual-report-2024] Ετήσια Έκθεση 2024 - Συνήγορος του Καταναλωτή (GR, 2026-05; πληθυσμός: Complaints (αναφορές) submitted by consumers to the Consumer Ombudsman in 2024 (and to ECC Greece for the combined total); δείγμα: administrative data (18,192 complaints to the Ombudsman in 2024; 19,061 including ECC Greece)) — αφορά: Greek complaint landscape by sector and complaint type, including consumer-goods sub-sectors ICT goods, large household appliances and non-ICT/entertainment electronics, complaint content such as delivery of goods (non- or partial delivery, delay, customer service), product quality, sales method (e-commerce vs face to face) and mediation outcomes; also case examples on courier/postal non-delivery and damaged parcels.\n- [src:gr-law-4967-2022] Ν. 4967/2022 - Ενσωμάτωση της Οδηγίας (ΕΕ) 2019/770 ... και της Οδηγίας (ΕΕ) 2019/771 ... και λοιπές διατάξεις (GR, 2022-09; πληθυσμός: Consumer sales contracts in Greece (legal text); δείγμα: legal text) — αφορά: Greek legal framing for conformity and seller liability: it rewrites Civil Code arts. 534 ff. (conformity, burden of proof, buyer's rights, price reduction and rescission, prescription in art. 554) and Law 2251/1994 arts. 5 (seller liability) and 5a (commercial guarantee).\n- [src:eurostat-isoc-ec-iprb21] Internet purchases - problems encountered (2021 onwards) (EU27 incl. GR (Greece reported separately), 2026-04; πληθυσμός: Individuals (all individuals and breakdowns by age, sex, education etc.) who bought via a website or app in the previous 3 months; Greece data available for 2021, 2023 and 2025; δείγμα: unknown) — αφορά: Share of Greek online buyers reporting delivery slower than indicated, wrong or damaged goods delivered, difficult complaints/redress or no satisfactory response after complaint, and difficulty finding information on guarantees/legal rights (Eurostat 2021/2023/2025), compared with other EU countries. DOI 10.2908/ISOC_EC_IPRB21.\n  (Υπόβαθρο μόνο: μην μετατρέπεις στατιστικά των πηγών σε πιθανότητες απάντησης του προσώπου.)\n[Q15]\n- Δεν βρέθηκε συναφής τεκμηρίωση για αυτή την ερώτηση.\n\nΣΕΝΑΡΙΟ (υποθετικό): Δέκα ημέρες μετά την αγορά, το νέο σας πλυντήριο (550 €) σταματά να λειτουργεί. Είναι εντός εγγύησης.\nΕΡΩΤΗΣΗ Q14 (scenario): Τι θα κάνατε πρώτα;\n  [1] Θα επικοινωνούσα με το κατάστημα αγοράς\n  [2] Θα επικοινωνούσα με τον κατασκευαστή\n  [3] Θα πήγαινα αυτοπροσώπως στο κατάστημα\n  [4] Θα έγραφα κριτική ή ανάρτηση online\n  [5] Θα απευθυνόμουν σε φορέα προστασίας καταναλωτή\n\nΕΡΩΤΗΣΗ Q15 (numeric): Σε αυτό το σενάριο, μέσα σε πόσες ημέρες θα θεωρούσατε λογική τη λύση του προβλήματος;\nΕΥΡΟΣ: 1–60\n  (αριθμητική: δώσε χαμηλή, τυπική και υψηλή εκτίμηση ημέρες)",
+ "schema": {
+  "type": "object",
+  "properties": {
+   "Q14": {
+    "type": "object",
+    "properties": {
+     "probabilities": {
+      "type": "object",
+      "properties": {
+       "1": {
+        "type": "number"
+       },
+       "2": {
+        "type": "number"
+       },
+       "3": {
+        "type": "number"
+       },
+       "4": {
+        "type": "number"
+       },
+       "5": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "1",
+       "2",
+       "3",
+       "4",
+       "5"
+      ],
+      "additionalProperties": false
+     },
+     "rationale": {
+      "type": "string",
+      "description": "Σύντομη, ελέγξιμη αιτιολόγηση (έως 30 λέξεις), χωρίς εσωτερική συλλογιστική."
+     }
+    },
+    "required": [
+     "probabilities",
+     "rationale"
+    ],
+    "additionalProperties": false
+   },
+   "Q15": {
+    "type": "object",
+    "properties": {
+     "low": {
+      "type": "number"
+     },
+     "typical": {
+      "type": "number"
+     },
+     "high": {
+      "type": "number"
+     },
+     "rationale": {
+      "type": "string",
+      "description": "Σύντομη, ελέγξιμη αιτιολόγηση (έως 30 λέξεις), χωρίς εσωτερική συλλογιστική."
+     }
+    },
+    "required": [
+     "low",
+     "typical",
+     "high",
+     "rationale"
+    ],
+    "additionalProperties": false
+   }
+  },
+  "required": [
+   "Q14",
+   "Q15"
+  ],
+  "additionalProperties": false
+ }
+}

@@ -1,0 +1,200 @@
+{
+ "key": "5d8fbbbd019a98e32e3c",
+ "created_at": "2026-10-31T14:56:07Z",
+ "question_ids": [
+  "Q27",
+  "Q28",
+  "Q29",
+  "Q30"
+ ],
+ "system_prompt_file": "system_prompt.txt",
+ "user_prompt": "ΜΕΛΕΤΗ: Η Εμπιστοσύνη μετά την Αγορά: Τι Κάνει έναν Καταναλωτή να Μείνει ή να Φύγει; — Εμπιστοσύνη πελατών σε retailer ηλεκτρικών ειδών μετά την αγορά: παράδοση, ελαττωματικά προϊόντα, αποκατάσταση, επαναγορά, εταιρική εικόνα. Πληθυσμός: adults_18_plus (GR).\n\nΣΥΝΘΕΤΙΚΟ ΠΡΟΦΙΛ:\nΓυναίκα, ηλικία 18-24\nΠεριφέρεια: Αττική (αστική περιοχή)\nΕκπαίδευση: λύκειο / μεταλυκειακή\nΝοικοκυριό: ζευγάρι με παιδιά, μέγεθος 5-6\nΕισοδηματικό πεμπτημόριο νοικοκυριού: 2 (1 = χαμηλότερο, 5 = υψηλότερο)\nΕκτιμώμενα χαρακτηριστικά (στατιστική εκτίμηση του μοντέλου PIE από ελληνικά μικροδεδομένα διαΝΕΟσις 2023–24 με βάση τα δημογραφικά· ΟΧΙ γνωστά στοιχεία του προσώπου): απασχόληση: μισθωτός/ή ιδιωτικού τομέα; οικονομική κατάσταση νοικοκυριού: τα βγάζει πέρα χωρίς να περισσεύουν; υποκειμενική κοινωνική τάξη: χαμηλή\nΆγνωστα (δεν υπάρχουν δεδομένα): επάγγελμα, προσωπικό ιστορικό αγορών.\n\nΠΡΟΗΓΟΥΜΕΝΕΣ ΑΠΑΝΤΗΣΕΙΣ ΤΟΥ ΙΔΙΟΥ ΠΡΟΣΩΠΟΥ:\n- Q5: Εξαιρετικά σημαντική\n- Q6: Ναι, τη γνωρίζω\n- Q7: Πολύ\n- Q8: Όχι\n- Q9: Συμφωνώ\n- Q10: 4\n- Q11: Μετά από 2–3 ημέρες\n- Q12a: Λίγο\n- Q12b: Καθόλου ικανοποιημένος/η\n- Q13: Τηλεφώνημα, Email, Ειδοποίηση στην εφαρμογή\n- Q14: Θα επικοινωνούσα με το κατάστημα αγοράς\n- Q15: 6.0\n- Q16: Αντικατάσταση με καινούργια\n- Q17: B\n- Q18a: Μέτρια\n- Q18b: Λίγο\n- Q19: Ένας υπεύθυνος που αναλαμβάνει την υπόθεση, Ειλικρινής συγγνώμη, Επέκταση εγγύησης (σειρά σημασίας)\n- Q20a: Πολύ πιθανό\n- Q20b: Καθόλου πιθανό\n- Q21: Σε άλλη αλυσίδα ηλεκτρικών ειδών\n- Q22: 6.0\n- Q23: Σίγουρα το Β\n- Q24: 2\n- Q25: Έχω ακούσει αόριστα\n- Q26: Να μην με αφήνουν να τρέχω όταν χαλάσει κάτι. Να υπάρχει ένας άνθρωπος που να ξέρει την υπόθεσή μου, να μου πει ένα ειλικρινές συγγνώμη και να μου δώσει καινούργιο προϊόν γρήγορα, γιατί με πέντε άτομα στο σπίτι δεν μπορούμε να περιμένουμε εβδομάδες.\n\nΕΡΕΥΝΗΤΙΚΟ ΠΛΑΙΣΙΟ (υπόβαθρο, όχι στόχος):\n[Q27]\n- Δεν βρέθηκε συναφής τεκμηρίωση για αυτή την ερώτηση.\n[Q28]\n- Δεν βρέθηκε συναφής τεκμηρίωση για αυτή την ερώτηση.\n- [isoc_ci_ac_i] Σχετικό εμπειρικό στοιχείο για τις επιλογές 1, 2, 3, 6 (ΣΥΓΓΕΝΗΣ μέτρηση, όχι η ίδια ερώτηση· μην το μετατρέπεις σε πιθανότητα): Eurostat 2025, Ελλάδα — αναζήτησαν online πληροφορίες για αγαθά/υπηρεσίες στο τρίμηνο: σύνολο 69% των ατόμων; 16–24 84%; γυναίκες 68%; μέση εκπαίδευση 69%\n[Q29]\n- [src:greca-eltrun-ecommerce-2026] Έρευνα Ηλεκτρονικού Εμπορίου 2026 - Η συμπεριφορά του Έλληνα Καταναλωτή στις Διαδικτυακές Αγορές (GR, 2026-05; πληθυσμός: Greek consumers who shop online (online questionnaire, multiple-choice questions); δείγμα: 600) — αφορά: Greek-specific background on what drives trust in e-shops (known brand/chain, prompt service before and after purchase, clear terms, reviews, trust certifications), delivery and pickup preferences (home delivery, lockers), payment methods, and online purchasing of electrical appliances as a category.\n- [src:stk-annual-report-2024] Ετήσια Έκθεση 2024 - Συνήγορος του Καταναλωτή (GR, 2026-05; πληθυσμός: Complaints (αναφορές) submitted by consumers to the Consumer Ombudsman in 2024 (and to ECC Greece for the combined total); δείγμα: administrative data (18,192 complaints to the Ombudsman in 2024; 19,061 including ECC Greece)) — αφορά: Greek complaint landscape by sector and complaint type, including consumer-goods sub-sectors ICT goods, large household appliances and non-ICT/entertainment electronics, complaint content such as delivery of goods (non- or partial delivery, delay, customer service), product quality, sales method (e-commerce vs face to face) and mediation outcomes; also case examples on courier/postal non-delivery and damaged parcels.\n- [src:gr-law-4967-2022] Ν. 4967/2022 - Ενσωμάτωση της Οδηγίας (ΕΕ) 2019/770 ... και της Οδηγίας (ΕΕ) 2019/771 ... και λοιπές διατάξεις (GR, 2022-09; πληθυσμός: Consumer sales contracts in Greece (legal text); δείγμα: legal text) — αφορά: Greek legal framing for conformity and seller liability: it rewrites Civil Code arts. 534 ff. (conformity, burden of proof, buyer's rights, price reduction and rescission, prescription in art. 554) and Law 2251/1994 arts. 5 (seller liability) and 5a (commercial guarantee).\n  (Υπόβαθρο μόνο: μην μετατρέπεις στατιστικά των πηγών σε πιθανότητες απάντησης του προσώπου.)\n- [isoc_ec_iprb21] Σχετικό εμπειρικό στοιχείο για όλη την ερώτηση (ΣΥΓΓΕΝΗΣ μέτρηση, όχι η ίδια ερώτηση· μην το μετατρέπεις σε πιθανότητα): Eurostat 2025, Ελλάδα — από όσους αγόρασαν online στο τρίμηνο: παράδοση πιο αργή από την αναγγελθείσα: σύνολο 6% των αγοραστών online; 16–24 4%; γυναίκες 5%; μέση εκπαίδευση 8%\nEurostat 2025, Ελλάδα — από όσους αγόρασαν online: λάθος ή κατεστραμμένο προϊόν: σύνολο 3% των αγοραστών online; 16–24 0%; γυναίκες 4%; μέση εκπαίδευση 3%\nEurostat 2025, Ελλάδα — από όσους αγόρασαν online: δύσκολα παράπονα/αποζημίωση: σύνολο 2% των αγοραστών online; 16–24 1%; γυναίκες 2%; μέση εκπαίδευση 3%\nEurostat 2025, Ελλάδα — από όσους αγόρασαν online: δυσκολία να βρουν πληροφορίες για εγγυήσεις/δικαιώματα: σύνολο 2% των αγοραστών online; 16–24 0%; γυναίκες 2%; μέση εκπαίδευση 1%\n[Q30]\n- [src:greca-eltrun-ecommerce-2026] Έρευνα Ηλεκτρονικού Εμπορίου 2026 - Η συμπεριφορά του Έλληνα Καταναλωτή στις Διαδικτυακές Αγορές (GR, 2026-05; πληθυσμός: Greek consumers who shop online (online questionnaire, multiple-choice questions); δείγμα: 600) — αφορά: Greek-specific background on what drives trust in e-shops (known brand/chain, prompt service before and after purchase, clear terms, reviews, trust certifications), delivery and pickup preferences (home delivery, lockers), payment methods, and online purchasing of electrical appliances as a category.\n- [src:stk-annual-report-2024] Ετήσια Έκθεση 2024 - Συνήγορος του Καταναλωτή (GR, 2026-05; πληθυσμός: Complaints (αναφορές) submitted by consumers to the Consumer Ombudsman in 2024 (and to ECC Greece for the combined total); δείγμα: administrative data (18,192 complaints to the Ombudsman in 2024; 19,061 including ECC Greece)) — αφορά: Greek complaint landscape by sector and complaint type, including consumer-goods sub-sectors ICT goods, large household appliances and non-ICT/entertainment electronics, complaint content such as delivery of goods (non- or partial delivery, delay, customer service), product quality, sales method (e-commerce vs face to face) and mediation outcomes; also case examples on courier/postal non-delivery and damaged parcels.\n- [src:gr-law-4967-2022] Ν. 4967/2022 - Ενσωμάτωση της Οδηγίας (ΕΕ) 2019/770 ... και της Οδηγίας (ΕΕ) 2019/771 ... και λοιπές διατάξεις (GR, 2022-09; πληθυσμός: Consumer sales contracts in Greece (legal text); δείγμα: legal text) — αφορά: Greek legal framing for conformity and seller liability: it rewrites Civil Code arts. 534 ff. (conformity, burden of proof, buyer's rights, price reduction and rescission, prescription in art. 554) and Law 2251/1994 arts. 5 (seller liability) and 5a (commercial guarantee).\n  (Υπόβαθρο μόνο: μην μετατρέπεις στατιστικά των πηγών σε πιθανότητες απάντησης του προσώπου.)\n\nΕΡΩΤΗΣΗ Q27 (likert): Πόσο επηρεάζουν οι online κριτικές άλλων πελατών την επιλογή καταστήματος ηλεκτρικών ειδών;\n  [1] Καθόλου\n  [2] 2\n  [3] 3\n  [4] 4\n  [5] Πάρα πολύ\n\nΕΡΩΤΗΣΗ Q28 (multiple_choice): Πού ενημερώνεστε συνήθως πριν από την αγορά μιας ηλεκτρικής συσκευής;\n  [6] Μέσα κοινωνικής δικτύωσης\n  [4] Φίλοι και συγγενείς\n  [1] Πλατφόρμες σύγκρισης τιμών\n  [3] Online κριτικές και βίντεο\n  [2] Ιστοσελίδες καταστημάτων\n  [5] Πωλητές στο κατάστημα\n  (πολλαπλή επιλογή: 1–4 επιλογές· δώσε πιθανότητα επιλογής για κάθε κωδικό)\n  ΣΗΜΕΙΩΣΗ: συνθετικό χαρακτηριστικό σεναρίου — όχι πραγματικό ιστορικό.\n\nΕΡΩΤΗΣΗ Q29 (single_choice): Ποιο είναι το μεγαλύτερο πρόβλημα που αντιμετωπίζουν συνήθως οι καταναλωτές με τα καταστήματα ηλεκτρικών ειδών, κατά τη γνώμη σας;\n  [6] Ελλιπής ενημέρωση για τα προϊόντα\n  [5] Υψηλές τιμές\n  [1] Καθυστερήσεις στην παράδοση\n  [3] Αργές επισκευές εγγύησης\n  [2] Δύσκολη επικοινωνία με την εξυπηρέτηση\n  [4] Δύσκολες επιστροφές\n\nΕΡΩΤΗΣΗ Q30 (likert): Σε ποιο βαθμό συμφωνείτε: «Θα πλήρωνα λίγο περισσότερο για ένα κατάστημα που ξέρω ότι θα με εξυπηρετήσει σωστά αν κάτι πάει στραβά»;\n  [1] Διαφωνώ απόλυτα\n  [2] Διαφωνώ\n  [3] Ούτε συμφωνώ ούτε διαφωνώ\n  [4] Συμφωνώ\n  [5] Συμφωνώ απόλυτα",
+ "schema": {
+  "type": "object",
+  "properties": {
+   "Q27": {
+    "type": "object",
+    "properties": {
+     "probabilities": {
+      "type": "object",
+      "properties": {
+       "1": {
+        "type": "number"
+       },
+       "2": {
+        "type": "number"
+       },
+       "3": {
+        "type": "number"
+       },
+       "4": {
+        "type": "number"
+       },
+       "5": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "1",
+       "2",
+       "3",
+       "4",
+       "5"
+      ],
+      "additionalProperties": false
+     },
+     "rationale": {
+      "type": "string",
+      "description": "Σύντομη, ελέγξιμη αιτιολόγηση (έως 30 λέξεις), χωρίς εσωτερική συλλογιστική."
+     }
+    },
+    "required": [
+     "probabilities",
+     "rationale"
+    ],
+    "additionalProperties": false
+   },
+   "Q28": {
+    "type": "object",
+    "properties": {
+     "inclusion_probabilities": {
+      "type": "object",
+      "properties": {
+       "6": {
+        "type": "number"
+       },
+       "4": {
+        "type": "number"
+       },
+       "1": {
+        "type": "number"
+       },
+       "3": {
+        "type": "number"
+       },
+       "2": {
+        "type": "number"
+       },
+       "5": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "6",
+       "4",
+       "1",
+       "3",
+       "2",
+       "5"
+      ],
+      "additionalProperties": false
+     },
+     "rationale": {
+      "type": "string",
+      "description": "Σύντομη, ελέγξιμη αιτιολόγηση (έως 30 λέξεις), χωρίς εσωτερική συλλογιστική."
+     }
+    },
+    "required": [
+     "inclusion_probabilities",
+     "rationale"
+    ],
+    "additionalProperties": false
+   },
+   "Q29": {
+    "type": "object",
+    "properties": {
+     "probabilities": {
+      "type": "object",
+      "properties": {
+       "6": {
+        "type": "number"
+       },
+       "5": {
+        "type": "number"
+       },
+       "1": {
+        "type": "number"
+       },
+       "3": {
+        "type": "number"
+       },
+       "2": {
+        "type": "number"
+       },
+       "4": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "6",
+       "5",
+       "1",
+       "3",
+       "2",
+       "4"
+      ],
+      "additionalProperties": false
+     },
+     "rationale": {
+      "type": "string",
+      "description": "Σύντομη, ελέγξιμη αιτιολόγηση (έως 30 λέξεις), χωρίς εσωτερική συλλογιστική."
+     }
+    },
+    "required": [
+     "probabilities",
+     "rationale"
+    ],
+    "additionalProperties": false
+   },
+   "Q30": {
+    "type": "object",
+    "properties": {
+     "probabilities": {
+      "type": "object",
+      "properties": {
+       "1": {
+        "type": "number"
+       },
+       "2": {
+        "type": "number"
+       },
+       "3": {
+        "type": "number"
+       },
+       "4": {
+        "type": "number"
+       },
+       "5": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "1",
+       "2",
+       "3",
+       "4",
+       "5"
+      ],
+      "additionalProperties": false
+     },
+     "rationale": {
+      "type": "string",
+      "description": "Σύντομη, ελέγξιμη αιτιολόγηση (έως 30 λέξεις), χωρίς εσωτερική συλλογιστική."
+     }
+    },
+    "required": [
+     "probabilities",
+     "rationale"
+    ],
+    "additionalProperties": false
+   }
+  },
+  "required": [
+   "Q27",
+   "Q28",
+   "Q29",
+   "Q30"
+  ],
+  "additionalProperties": false
+ }
+}

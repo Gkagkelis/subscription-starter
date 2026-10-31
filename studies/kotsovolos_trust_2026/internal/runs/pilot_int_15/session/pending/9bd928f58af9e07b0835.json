@@ -1,0 +1,92 @@
+{
+ "key": "9bd928f58af9e07b0835",
+ "created_at": "2026-10-31T14:50:35Z",
+ "question_ids": [
+  "Q16",
+  "Q17"
+ ],
+ "system_prompt_file": "system_prompt.txt",
+ "user_prompt": "ΜΕΛΕΤΗ: Η Εμπιστοσύνη μετά την Αγορά: Τι Κάνει έναν Καταναλωτή να Μείνει ή να Φύγει; — Εμπιστοσύνη πελατών σε retailer ηλεκτρικών ειδών μετά την αγορά: παράδοση, ελαττωματικά προϊόντα, αποκατάσταση, επαναγορά, εταιρική εικόνα. Πληθυσμός: adults_18_plus (GR).\n\nΣΥΝΘΕΤΙΚΟ ΠΡΟΦΙΛ:\nΓυναίκα, ηλικία 18-24\nΠεριφέρεια: Αττική (αστική περιοχή)\nΕκπαίδευση: λύκειο / μεταλυκειακή\nΝοικοκυριό: ζευγάρι με παιδιά, μέγεθος 5-6\nΕισοδηματικό πεμπτημόριο νοικοκυριού: 2 (1 = χαμηλότερο, 5 = υψηλότερο)\nΕκτιμώμενα χαρακτηριστικά (στατιστική εκτίμηση του μοντέλου PIE από ελληνικά μικροδεδομένα διαΝΕΟσις 2023–24 με βάση τα δημογραφικά· ΟΧΙ γνωστά στοιχεία του προσώπου): απασχόληση: μισθωτός/ή ιδιωτικού τομέα; οικονομική κατάσταση νοικοκυριού: τα βγάζει πέρα χωρίς να περισσεύουν; υποκειμενική κοινωνική τάξη: χαμηλή\nΆγνωστα (δεν υπάρχουν δεδομένα): επάγγελμα, προσωπικό ιστορικό αγορών.\n\nΠΡΟΗΓΟΥΜΕΝΕΣ ΑΠΑΝΤΗΣΕΙΣ ΤΟΥ ΙΔΙΟΥ ΠΡΟΣΩΠΟΥ:\n- S1: Ναι\n- D1: Γυναίκα\n- D2: 18–24\n- D3: Αττική\n- Q1: Online marketplace / πλατφόρμα σύγκρισης τιμών, Κατάστημα ή e-shop του κατασκευαστή\n- Q2: Κάθε 4–6 χρόνια\n- Q3: 325.0\n- Q4: Εγγύηση και επισκευές, Κοντινό κατάστημα, Ποικιλία προϊόντων (σειρά σημασίας)\n- Q5: Εξαιρετικά σημαντική\n- Q6: Ναι, τη γνωρίζω\n- Q7: Πολύ\n- Q8: Όχι\n- Q9: Συμφωνώ\n- Q10: 4\n- Q11: Μετά από 2–3 ημέρες\n- Q12a: Λίγο\n- Q12b: Καθόλου ικανοποιημένος/η\n- Q13: Τηλεφώνημα, Email, Ειδοποίηση στην εφαρμογή\n- Q14: Θα επικοινωνούσα με το κατάστημα αγοράς\n- Q15: 6.0\n\nΕΡΕΥΝΗΤΙΚΟ ΠΛΑΙΣΙΟ (υπόβαθρο, όχι στόχος):\n[Q16]\n- [src:stk-annual-report-2024] Ετήσια Έκθεση 2024 - Συνήγορος του Καταναλωτή (GR, 2026-05; πληθυσμός: Complaints (αναφορές) submitted by consumers to the Consumer Ombudsman in 2024 (and to ECC Greece for the combined total); δείγμα: administrative data (18,192 complaints to the Ombudsman in 2024; 19,061 including ECC Greece)) — αφορά: Greek complaint landscape by sector and complaint type, including consumer-goods sub-sectors ICT goods, large household appliances and non-ICT/entertainment electronics, complaint content such as delivery of goods (non- or partial delivery, delay, customer service), product quality, sales method (e-commerce vs face to face) and mediation outcomes; also case examples on courier/postal non-delivery and damaged parcels.\n- [src:gr-law-4967-2022] Ν. 4967/2022 - Ενσωμάτωση της Οδηγίας (ΕΕ) 2019/770 ... και της Οδηγίας (ΕΕ) 2019/771 ... και λοιπές διατάξεις (GR, 2022-09; πληθυσμός: Consumer sales contracts in Greece (legal text); δείγμα: legal text) — αφορά: Greek legal framing for conformity and seller liability: it rewrites Civil Code arts. 534 ff. (conformity, burden of proof, buyer's rights, price reduction and rescission, prescription in art. 554) and Law 2251/1994 arts. 5 (seller liability) and 5a (commercial guarantee).\n- [src:eurostat-isoc-ec-iprb21] Internet purchases - problems encountered (2021 onwards) (EU27 incl. GR (Greece reported separately), 2026-04; πληθυσμός: Individuals (all individuals and breakdowns by age, sex, education etc.) who bought via a website or app in the previous 3 months; Greece data available for 2021, 2023 and 2025; δείγμα: unknown) — αφορά: Share of Greek online buyers reporting delivery slower than indicated, wrong or damaged goods delivered, difficult complaints/redress or no satisfactory response after complaint, and difficulty finding information on guarantees/legal rights (Eurostat 2021/2023/2025), compared with other EU countries. DOI 10.2908/ISOC_EC_IPRB21.\n  (Υπόβαθρο μόνο: μην μετατρέπεις στατιστικά των πηγών σε πιθανότητες απάντησης του προσώπου.)\n[Q17]\n- Δεν βρέθηκε συναφής τεκμηρίωση για αυτή την ερώτηση.\n\nΕΡΩΤΗΣΗ Q16 (single_choice): Αν μια νέα συσκευή αποδεικνυόταν ελαττωματική, ποια λύση θα προτιμούσατε;\n  [1] Επισκευή\n  [2] Αντικατάσταση με καινούργια\n  [3] Επιστροφή χρημάτων\n  [4] Πιστωτικό σημείωμα για μελλοντική αγορά\n\nΕΡΩΤΗΣΗ Q17 (dce): Ποια από τις δύο προσφορές για το ίδιο πλυντήριο θα επιλέγατε;\n  [A] Κατάστημα Α — Τιμή: 629 €; Παράδοση στην ώρα της: συχνά καθυστερεί; Εξυπηρέτηση μετά την πώληση: τεχνικός στο σπίτι σε 48 ώρες; Επιστροφή: 14 ημέρες\n  [B] Κατάστημα Β — Τιμή: 529 €; Παράδοση στην ώρα της: συχνά καθυστερεί; Εξυπηρέτηση μετά την πώληση: τηλεφωνικό κέντρο; Επιστροφή: 30 ημέρες\n  [none] Καμία από τις δύο — —",
+ "schema": {
+  "type": "object",
+  "properties": {
+   "Q16": {
+    "type": "object",
+    "properties": {
+     "probabilities": {
+      "type": "object",
+      "properties": {
+       "1": {
+        "type": "number"
+       },
+       "2": {
+        "type": "number"
+       },
+       "3": {
+        "type": "number"
+       },
+       "4": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "1",
+       "2",
+       "3",
+       "4"
+      ],
+      "additionalProperties": false
+     },
+     "rationale": {
+      "type": "string",
+      "description": "Σύντομη, ελέγξιμη αιτιολόγηση (έως 30 λέξεις), χωρίς εσωτερική συλλογιστική."
+     }
+    },
+    "required": [
+     "probabilities",
+     "rationale"
+    ],
+    "additionalProperties": false
+   },
+   "Q17": {
+    "type": "object",
+    "properties": {
+     "probabilities": {
+      "type": "object",
+      "properties": {
+       "A": {
+        "type": "number"
+       },
+       "B": {
+        "type": "number"
+       },
+       "none": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "A",
+       "B",
+       "none"
+      ],
+      "additionalProperties": false
+     },
+     "rationale": {
+      "type": "string",
+      "description": "Σύντομη, ελέγξιμη αιτιολόγηση (έως 30 λέξεις), χωρίς εσωτερική συλλογιστική."
+     }
+    },
+    "required": [
+     "probabilities",
+     "rationale"
+    ],
+    "additionalProperties": false
+   }
+  },
+  "required": [
+   "Q16",
+   "Q17"
+  ],
+  "additionalProperties": false
+ }
+}

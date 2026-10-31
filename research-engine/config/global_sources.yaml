@@ -15,7 +15,7 @@ sources:
     indicators: [I_BEEQU1, I_BHARD1]
     units: [PC_IND, PC_IND_BUY3]
     priority: 1
-    status: queued
+    status: ingested   # 2026-10-31 μέσω `ase_cli.py global-ingest` (EU-27, 2021–2025)
   - id: eurostat_isoc_ec_iprb21
     title: "Eurostat — Internet purchases: problems encountered (2021 onwards)"
     access: eurostat_api
@@ -27,7 +27,7 @@ sources:
     indicators: [I_BSPD1, I_BWDN1, I_BCR1, I_BDGL1, I_BARR2Y, I_BCPR1]
     units: [PC_IND, PC_IND_BUY3]
     priority: 1
-    status: queued
+    status: ingested   # 2026-10-31 μέσω `ase_cli.py global-ingest` (EU-27, 2021–2025)
   - id: eurostat_isoc_ci_ac_i
     title: "Eurostat — Individuals: internet activities"
     access: eurostat_api
@@ -39,7 +39,7 @@ sources:
     indicators: [I_IUIF, I_IUCHAT1, I_IUPH1]
     units: [PC_IND]
     priority: 2
-    status: queued
+    status: ingested   # 2026-10-31 μέσω `ase_cli.py global-ingest` (EU-27, 2021–2025)
   - id: ec_consumer_conditions_survey_2024
     title: "European Commission — Consumer Conditions Survey 2024 (Scoreboard 2025)"
     access: manual_download

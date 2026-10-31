@@ -351,12 +351,35 @@ class Study:
         sens = sensitivity(self, run_id)
         write_json(self.internal / "runs" / run_id / "sensitivity.json", {"label": SYNTH_LABEL, "questions": sens,
                    "method": "Μετατόπιση της άγνωστης βάσης της μάρκας στην κλίμακα logit (δ ∈ −1…+1) πάνω στις αποθηκευμένες ατομικές κατανομές."})
+        self.evidence_coverage(run_id)
         html = render_report(self, run_id, res.drop(columns="data_status"), xt.drop(columns="data_status"), preview=preview, sensitivity=sens)
         (out / "executive_report.html").write_text(html, encoding="utf-8")
         if pdf:
             js = Path(__file__).parent / "report" / "render_pdf.cjs"
             subprocess.run(["node", str(js), str(out / "executive_report.html"), str(out / "executive_report.pdf")], check=True, cwd="/tmp")
         return out
+
+    def evidence_coverage(self, run_id) -> Path:
+        """ΕΣΩΤΕΡΙΚΟ: κάλυψη τεκμηρίωσης ανά ερώτηση/συνιστώσα (άμεσο / μεταφερμένο / πλαίσιο / AI) από τις ατομικές γραμμές του run."""
+        rdir = self.internal / "runs" / run_id
+        df = self.responses(run_id)
+        plan = read_json(rdir / "evidence_plan_used.json") if (rdir / "evidence_plan_used.json").exists() else {"questions": {}}
+        rows = []
+        for q in self.qn.questions:
+            g = df[df["question_id"] == q.id] if "question_id" in df else df.iloc[0:0]
+            modes = g["inference_mode"].value_counts().to_dict() if "inference_mode" in g else {}
+            e = plan["questions"].get(q.id) or {}
+            comps = e.get("components") or []
+            rows.append({"data_status": SYNTH_LABEL, "question_id": q.id, "type": q.type, "plan_mode": e.get("mode", "—"),
+                         "brand_dependent": bool(e.get("brand_dependent")), "rows_answered": int((g["status"] == "ANSWERED").sum()) if len(g) else 0,
+                         **{f"n_{m}": int(modes.get(m, 0)) for m in ("A_EMPIRICAL", "C_EVIDENCE_CONSTRAINED", "C_EVIDENCE_INFORMED", "D_AI", "PROFILE", "SKIP")},
+                         "components": "; ".join(f"{c['spec']['source']['dataset']}:{c['spec']['source']['indicator']}|{c['spec']['relation']}|{c['class']}|"
+                                                 f"{_role(c)}|μεταφερμένα κελιά={len((c.get('data') or {}).get('transported_cells') or [])}"
+                                                 for c in comps),
+                         "lab_tier": (e.get("lab") or {}).get("tier"), "lab_abstain": (e.get("lab") or {}).get("abstain")})
+        p = rdir / "evidence_coverage.csv"
+        pd.DataFrame(rows).to_csv(p, index=False)
+        return p
 
     def export(self, dest: Path, source: Path | None = None) -> list:
         """Αντιγράφει ΜΟΝΟ τα επιτρεπτά παραδοτέα· ό,τι άλλο (internal, audit) αποκλείεται ρητά."""
@@ -377,6 +400,16 @@ class Study:
         if leaked:
             raise PermissionError(f"Μη επιτρεπτά αρχεία στον φάκελο εξαγωγής: {leaked}")
         return copied
+
+
+def _role(c) -> str:
+    """Πραγματικός ρόλος μιας δηλωμένης συνιστώσας στην εκτέλεση (ίδιοι κανόνες με τον Orchestrator)."""
+    if not c.get("usable"):
+        return "απόρριψη"
+    rel = c["spec"]["relation"]
+    if rel in ("lower_bound", "lower_bound_union"):
+        return "όριο ανά πρόσωπο" if c["class"] == "DIRECT_EMPIRICAL" else "μόνο καταγραφή (υποβαθμίστηκε· δεν εφαρμόζεται)"
+    return "πλαίσιο στο prompt" if rel == "proxy" else "μόνο καταγραφή"
 
 
 def qc_markdown(study, run_id, qc, man) -> str:

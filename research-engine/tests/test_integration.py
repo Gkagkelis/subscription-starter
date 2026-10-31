@@ -207,7 +207,7 @@ def test_synthetic_label_on_every_output_and_brand_sensitivity_in_report():
     import pandas as pd
     from ase.study import SYNTH_LABEL
     q = copy.deepcopy(QUESTIONNAIRE)
-    q["blocks"][1]["questions"][1] = {"id": "L1", "text": "Πόσο εμπιστεύεστε την Κωτσόβολος;", "type": "likert", "condition": "K1 == '1'", "scale": {"points": 5}}
+    q["blocks"][1]["questions"][1] = {"id": "L1", "text": "Πόσο εμπιστεύεστε την Κωτσόβολος;", "type": "likert", "scale": {"points": 5}}
     d = make_study("int_label", n=10, questionnaire=q)
     (d / "evidence_map.yaml").write_text("components: []\n", encoding="utf-8")
     st = Study(d)
@@ -228,3 +228,15 @@ def test_synthetic_label_on_every_output_and_brand_sensitivity_in_report():
     assert sens["label"] == SYNTH_LABEL and "L1" in sens["questions"]
     sh = sens["questions"]["L1"]["share_by_logit_shift"]
     assert sh["-1.0"] <= sh["0.0"] <= sh["1.0"]                                     # μονοτονία ως προς τη βάση της μάρκας
+
+
+def test_history_shows_question_text():
+    """Εύρημα πιλοτικής: το ιστορικό του ίδιου προσώπου πρέπει να δείχνει ΤΙ ρωτήθηκε, όχι μόνο «Q9: Συμφωνώ»."""
+    st = Study(make_study("int_hist", n=4))
+    PROVIDERS["recmock"] = Recording
+    Recording.prompts = []
+    try:
+        st.run({"provider": "recmock", "model": "mock-1"}, max_workers=1)
+    finally:
+        PROVIDERS.pop("recmock", None)
+    assert any("K1 «Γνωρίζετε το κατάστημα Χ;»:" in p for p in Recording.prompts)

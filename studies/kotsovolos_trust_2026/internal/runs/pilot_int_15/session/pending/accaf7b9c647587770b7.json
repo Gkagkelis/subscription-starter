@@ -1,0 +1,116 @@
+{
+ "key": "accaf7b9c647587770b7",
+ "created_at": "2026-10-31T14:43:45Z",
+ "question_ids": [
+  "Q4",
+  "Q5"
+ ],
+ "system_prompt_file": "system_prompt.txt",
+ "user_prompt": "ΜΕΛΕΤΗ: Η Εμπιστοσύνη μετά την Αγορά: Τι Κάνει έναν Καταναλωτή να Μείνει ή να Φύγει; — Εμπιστοσύνη πελατών σε retailer ηλεκτρικών ειδών μετά την αγορά: παράδοση, ελαττωματικά προϊόντα, αποκατάσταση, επαναγορά, εταιρική εικόνα. Πληθυσμός: adults_18_plus (GR).\n\nΣΥΝΘΕΤΙΚΟ ΠΡΟΦΙΛ:\nΆνδρας, ηλικία 25-34\nΠεριφέρεια: Στερεά Ελλάδα (αγροτική περιοχή)\nΕκπαίδευση: τριτοβάθμια\nΝοικοκυριό: ζευγάρι με παιδιά, μέγεθος 3-4\nΕισοδηματικό πεμπτημόριο νοικοκυριού: 3 (1 = χαμηλότερο, 5 = υψηλότερο)\nΕκτιμώμενα χαρακτηριστικά (στατιστική εκτίμηση του μοντέλου PIE από ελληνικά μικροδεδομένα διαΝΕΟσις 2023–24 με βάση τα δημογραφικά· ΟΧΙ γνωστά στοιχεία του προσώπου): απασχόληση: δημόσιος υπάλληλος; οικονομική κατάσταση νοικοκυριού: τα βγάζει πέρα χωρίς να περισσεύουν; υποκειμενική κοινωνική τάξη: μεσαία\nΆγνωστα (δεν υπάρχουν δεδομένα): επάγγελμα, προσωπικό ιστορικό αγορών.\n\nΠΡΟΗΓΟΥΜΕΝΕΣ ΑΠΑΝΤΗΣΕΙΣ ΤΟΥ ΙΔΙΟΥ ΠΡΟΣΩΠΟΥ:\n- S1: Ναι\n- D1: Άνδρας\n- D2: 25–34\n- D3: Στερεά Ελλάδα\n- Q1: Ηλεκτρονικό κατάστημα αλυσίδας ηλεκτρικών ειδών\n- Q2: Κάθε χρόνο ή συχνότερα\n- Q3: 694.0\n\nΕΡΕΥΝΗΤΙΚΟ ΠΛΑΙΣΙΟ (υπόβαθρο, όχι στόχος):\n[Q4]\n- [src:greca-eltrun-ecommerce-2026] Έρευνα Ηλεκτρονικού Εμπορίου 2026 - Η συμπεριφορά του Έλληνα Καταναλωτή στις Διαδικτυακές Αγορές (GR, 2026-05; πληθυσμός: Greek consumers who shop online (online questionnaire, multiple-choice questions); δείγμα: 600) — αφορά: Greek-specific background on what drives trust in e-shops (known brand/chain, prompt service before and after purchase, clear terms, reviews, trust certifications), delivery and pickup preferences (home delivery, lockers), payment methods, and online purchasing of electrical appliances as a category.\n- [src:stk-annual-report-2024] Ετήσια Έκθεση 2024 - Συνήγορος του Καταναλωτή (GR, 2026-05; πληθυσμός: Complaints (αναφορές) submitted by consumers to the Consumer Ombudsman in 2024 (and to ECC Greece for the combined total); δείγμα: administrative data (18,192 complaints to the Ombudsman in 2024; 19,061 including ECC Greece)) — αφορά: Greek complaint landscape by sector and complaint type, including consumer-goods sub-sectors ICT goods, large household appliances and non-ICT/entertainment electronics, complaint content such as delivery of goods (non- or partial delivery, delay, customer service), product quality, sales method (e-commerce vs face to face) and mediation outcomes; also case examples on courier/postal non-delivery and damaged parcels.\n- [src:gr-law-4967-2022] Ν. 4967/2022 - Ενσωμάτωση της Οδηγίας (ΕΕ) 2019/770 ... και της Οδηγίας (ΕΕ) 2019/771 ... και λοιπές διατάξεις (GR, 2022-09; πληθυσμός: Consumer sales contracts in Greece (legal text); δείγμα: legal text) — αφορά: Greek legal framing for conformity and seller liability: it rewrites Civil Code arts. 534 ff. (conformity, burden of proof, buyer's rights, price reduction and rescission, prescription in art. 554) and Law 2251/1994 arts. 5 (seller liability) and 5a (commercial guarantee).\n  (Υπόβαθρο μόνο: μην μετατρέπεις στατιστικά των πηγών σε πιθανότητες απάντησης του προσώπου.)\n[Q5]\n- [src:greca-eltrun-ecommerce-2026] Έρευνα Ηλεκτρονικού Εμπορίου 2026 - Η συμπεριφορά του Έλληνα Καταναλωτή στις Διαδικτυακές Αγορές (GR, 2026-05; πληθυσμός: Greek consumers who shop online (online questionnaire, multiple-choice questions); δείγμα: 600) — αφορά: Greek-specific background on what drives trust in e-shops (known brand/chain, prompt service before and after purchase, clear terms, reviews, trust certifications), delivery and pickup preferences (home delivery, lockers), payment methods, and online purchasing of electrical appliances as a category.\n- [src:stk-annual-report-2024] Ετήσια Έκθεση 2024 - Συνήγορος του Καταναλωτή (GR, 2026-05; πληθυσμός: Complaints (αναφορές) submitted by consumers to the Consumer Ombudsman in 2024 (and to ECC Greece for the combined total); δείγμα: administrative data (18,192 complaints to the Ombudsman in 2024; 19,061 including ECC Greece)) — αφορά: Greek complaint landscape by sector and complaint type, including consumer-goods sub-sectors ICT goods, large household appliances and non-ICT/entertainment electronics, complaint content such as delivery of goods (non- or partial delivery, delay, customer service), product quality, sales method (e-commerce vs face to face) and mediation outcomes; also case examples on courier/postal non-delivery and damaged parcels.\n- [src:gr-law-4967-2022] Ν. 4967/2022 - Ενσωμάτωση της Οδηγίας (ΕΕ) 2019/770 ... και της Οδηγίας (ΕΕ) 2019/771 ... και λοιπές διατάξεις (GR, 2022-09; πληθυσμός: Consumer sales contracts in Greece (legal text); δείγμα: legal text) — αφορά: Greek legal framing for conformity and seller liability: it rewrites Civil Code arts. 534 ff. (conformity, burden of proof, buyer's rights, price reduction and rescission, prescription in art. 554) and Law 2251/1994 arts. 5 (seller liability) and 5a (commercial guarantee).\n  (Υπόβαθρο μόνο: μην μετατρέπεις στατιστικά των πηγών σε πιθανότητες απάντησης του προσώπου.)\n\nΕΡΩΤΗΣΗ Q4 (ranking): Κατατάξτε τα τρία πιο σημαντικά κριτήρια όταν επιλέγετε από πού θα αγοράσετε μια ηλεκτρική συσκευή.\n  [3] Εξυπηρέτηση μετά την πώληση\n  [6] Συμβουλές προσωπικού\n  [5] Ποικιλία προϊόντων\n  [8] Κοντινό κατάστημα\n  [4] Εγγύηση και επισκευές\n  [7] Εύκολες επιστροφές\n  [2] Αξιόπιστη και έγκαιρη παράδοση\n  [1] Χαμηλή τιμή\n  (κατάταξη: δώσε βαθμό σημασίας 0–1 για κάθε στοιχείο)\n\nΕΡΩΤΗΣΗ Q5 (likert): Πόσο σημαντική είναι για εσάς η εξυπηρέτηση μετά την αγορά, όταν επιλέγετε κατάστημα ηλεκτρικών ειδών;\n  [1] Καθόλου σημαντική\n  [2] Λίγο\n  [3] Μέτρια\n  [4] Πολύ\n  [5] Εξαιρετικά σημαντική",
+ "schema": {
+  "type": "object",
+  "properties": {
+   "Q4": {
+    "type": "object",
+    "properties": {
+     "importance_scores": {
+      "type": "object",
+      "properties": {
+       "3": {
+        "type": "number"
+       },
+       "6": {
+        "type": "number"
+       },
+       "5": {
+        "type": "number"
+       },
+       "8": {
+        "type": "number"
+       },
+       "4": {
+        "type": "number"
+       },
+       "7": {
+        "type": "number"
+       },
+       "2": {
+        "type": "number"
+       },
+       "1": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "3",
+       "6",
+       "5",
+       "8",
+       "4",
+       "7",
+       "2",
+       "1"
+      ],
+      "additionalProperties": false
+     },
+     "rationale": {
+      "type": "string",
+      "description": "Σύντομη, ελέγξιμη αιτιολόγηση (έως 30 λέξεις), χωρίς εσωτερική συλλογιστική."
+     }
+    },
+    "required": [
+     "importance_scores",
+     "rationale"
+    ],
+    "additionalProperties": false
+   },
+   "Q5": {
+    "type": "object",
+    "properties": {
+     "probabilities": {
+      "type": "object",
+      "properties": {
+       "1": {
+        "type": "number"
+       },
+       "2": {
+        "type": "number"
+       },
+       "3": {
+        "type": "number"
+       },
+       "4": {
+        "type": "number"
+       },
+       "5": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "1",
+       "2",
+       "3",
+       "4",
+       "5"
+      ],
+      "additionalProperties": false
+     },
+     "rationale": {
+      "type": "string",
+      "description": "Σύντομη, ελέγξιμη αιτιολόγηση (έως 30 λέξεις), χωρίς εσωτερική συλλογιστική."
+     }
+    },
+    "required": [
+     "probabilities",
+     "rationale"
+    ],
+    "additionalProperties": false
+   }
+  },
+  "required": [
+   "Q4",
+   "Q5"
+  ],
+  "additionalProperties": false
+ }
+}

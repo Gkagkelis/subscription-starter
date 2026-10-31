@@ -6,14 +6,16 @@
 | Φάση | Περιεχόμενο | Κατάσταση | Παραδοτέα / εντολή συνέχειας |
 |---|---|---|---|
 | 1 | Έλεγχος repo και δεδομένων | DONE | `docs/architecture/integration/AUDIT.md` |
-| 2 | Κοινά συμβόλαια, κανονική κατάσταση ερωτώμενου | — | `research-engine/ase/contracts.py` |
-| 3 | Ελληνικό lake στο inference (ευρετήριο, ανάκτηση, έλεγχος καταλληλότητας) | — | `research-engine/ase/evidence/lake_index.py`, `suitability.py`, `ase_cli.py evidence-index` |
-| 4 | Υβριδικός ενορχηστρωτής (ερώτηση/επιλογή) | — | `research-engine/ase/respond/orchestrator.py` |
-| 5 | Διεθνές επίπεδο τεκμηρίωσης | — | `research-engine/ase/global_evidence/`, `ase_cli.py global-ingest` |
-| 6 | Μεταφερσιμότητα μεταξύ χωρών | — | `research-engine/ase/transport/` |
-| 7 | Επικύρωση | — | `research-engine/ase/validation/`, `ase_cli.py validate-transport` |
-| 8 | Πιλοτική εκτέλεση Κωτσόβολου | — | `studies/kotsovolos_trust_2026/internal/runs/<pilot>` |
-| 9 | Πλήρης εκτέλεση Κωτσόβολου | — | βλ. πύλες εκτέλεσης |
+| 2 | Κοινή ταυτότητα και κατάσταση ερωτώμενου | DONE | `scripts/synthetic-lab/bridge/lab_bridge.ts`, `research-engine/ase/lab/bridge.py`, `Study.with_lab_state` (commit `e67077b`) |
+| 3 | Ελληνικό lake στο inference (ευρετήριο, ανάκτηση, πύλη καταλληλότητας) | DONE | `ase/evidence/{lake_index,interpret,suitability,plan}.py` · `ase_cli.py evidence-index` / `evidence-plan` (commit `f1c71c7`) |
+| 4 | Υβριδικός ενορχηστρωτής (ερώτηση/επιλογή) | DONE | `ase/respond/orchestrator.py`, `runner.py` (commit `f1c71c7`) |
+| 5 | Διεθνές επίπεδο τεκμηρίωσης | DONE (αρχικό σύνολο) | `config/global_sources.yaml`, `ase/global_evidence/eurostat.py` · `ase_cli.py global-ingest` |
+| 6 | Μεταφερσιμότητα μεταξύ χωρών | DONE | `ase/transport/pooling.py` (PP-logit) |
+| 7 | Επικύρωση και ευαισθησία | DONE (μεταφορά) · BLOCKED (απαντήσεις AI: δεν υπάρχει holdout) | `ase/validation/transport.py` · `ase_cli.py validate-transport` · `ase/analysis/sensitivity.py` |
+| 8 | Πιλοτική εκτέλεση Κωτσόβολου | DONE | `studies/kotsovolos_trust_2026/internal/runs/pilot_int_15/PILOT_REPORT.md` |
+| 9 | Πλήρης εκτέλεση Κωτσόβολου | **BLOCKED** | Βάση δείγματος μη ορισμένη (`sample_size_basis` μόνο σε σχόλιο) + έγκριση για ~5.300 αιτήματα συνεδρίας. Εντολή συνέχειας στο `PILOT_REPORT.md` |
+
+Αποδοχή: `docs/architecture/integration/ACCEPTANCE.md` (32 κριτήρια). Οδηγός και runbook: `docs/architecture/integration/GUIDE_GR.md`.
 
 **Περιορισμοί περιβάλλοντος**
 

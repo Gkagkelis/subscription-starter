@@ -1,0 +1,104 @@
+{
+ "key": "997502f20c5c0e6092a0",
+ "created_at": "2026-10-31T14:46:55Z",
+ "question_ids": [
+  "Q10",
+  "Q11"
+ ],
+ "system_prompt_file": "system_prompt.txt",
+ "user_prompt": "ΜΕΛΕΤΗ: Η Εμπιστοσύνη μετά την Αγορά: Τι Κάνει έναν Καταναλωτή να Μείνει ή να Φύγει; — Εμπιστοσύνη πελατών σε retailer ηλεκτρικών ειδών μετά την αγορά: παράδοση, ελαττωματικά προϊόντα, αποκατάσταση, επαναγορά, εταιρική εικόνα. Πληθυσμός: adults_18_plus (GR).\n\nΣΥΝΘΕΤΙΚΟ ΠΡΟΦΙΛ:\nΓυναίκα, ηλικία 65+\nΠεριφέρεια: Νότιο Αιγαίο (αγροτική περιοχή)\nΕκπαίδευση: χωρίς ολοκληρωμένη πρωτοβάθμια\nΝοικοκυριό: ζευγάρι με παιδιά και συγγενείς, μέγεθος 7-10\nΕισοδηματικό πεμπτημόριο νοικοκυριού: 4 (1 = χαμηλότερο, 5 = υψηλότερο)\nΕκτιμώμενα χαρακτηριστικά (στατιστική εκτίμηση του μοντέλου PIE από ελληνικά μικροδεδομένα διαΝΕΟσις 2023–24 με βάση τα δημογραφικά· ΟΧΙ γνωστά στοιχεία του προσώπου): απασχόληση: οικιακά; οικονομική κατάσταση νοικοκυριού: τα βγάζει πέρα χωρίς να περισσεύουν; υποκειμενική κοινωνική τάξη: μεσαία\nΆγνωστα (δεν υπάρχουν δεδομένα): επάγγελμα, προσωπικό ιστορικό αγορών.\n\nΠΡΟΗΓΟΥΜΕΝΕΣ ΑΠΑΝΤΗΣΕΙΣ ΤΟΥ ΙΔΙΟΥ ΠΡΟΣΩΠΟΥ:\n- S1: Ναι\n- D1: Γυναίκα\n- D2: 65+\n- D3: Νότιο Αιγαίο\n- Q1: Μικρό τοπικό κατάστημα\n- Q2: Σπανιότερα\n- Q3: 526.0\n- Q4: Εγγύηση και επισκευές, Κοντινό κατάστημα, Συμβουλές προσωπικού (σειρά σημασίας)\n- Q5: Εξαιρετικά σημαντική\n- Q6: Ναι, τη γνωρίζω\n- Q7: Μέτρια\n- Q8: Όχι\n- Q9: Ούτε συμφωνώ ούτε διαφωνώ\n\nΕΡΕΥΝΗΤΙΚΟ ΠΛΑΙΣΙΟ (υπόβαθρο, όχι στόχος):\n[Q10]\n- [src:greca-eltrun-ecommerce-2026] Έρευνα Ηλεκτρονικού Εμπορίου 2026 - Η συμπεριφορά του Έλληνα Καταναλωτή στις Διαδικτυακές Αγορές (GR, 2026-05; πληθυσμός: Greek consumers who shop online (online questionnaire, multiple-choice questions); δείγμα: 600) — αφορά: Greek-specific background on what drives trust in e-shops (known brand/chain, prompt service before and after purchase, clear terms, reviews, trust certifications), delivery and pickup preferences (home delivery, lockers), payment methods, and online purchasing of electrical appliances as a category.\n- [src:stk-annual-report-2024] Ετήσια Έκθεση 2024 - Συνήγορος του Καταναλωτή (GR, 2026-05; πληθυσμός: Complaints (αναφορές) submitted by consumers to the Consumer Ombudsman in 2024 (and to ECC Greece for the combined total); δείγμα: administrative data (18,192 complaints to the Ombudsman in 2024; 19,061 including ECC Greece)) — αφορά: Greek complaint landscape by sector and complaint type, including consumer-goods sub-sectors ICT goods, large household appliances and non-ICT/entertainment electronics, complaint content such as delivery of goods (non- or partial delivery, delay, customer service), product quality, sales method (e-commerce vs face to face) and mediation outcomes; also case examples on courier/postal non-delivery and damaged parcels.\n- [src:eurostat-isoc-ec-iprb21] Internet purchases - problems encountered (2021 onwards) (EU27 incl. GR (Greece reported separately), 2026-04; πληθυσμός: Individuals (all individuals and breakdowns by age, sex, education etc.) who bought via a website or app in the previous 3 months; Greece data available for 2021, 2023 and 2025; δείγμα: unknown) — αφορά: Share of Greek online buyers reporting delivery slower than indicated, wrong or damaged goods delivered, difficult complaints/redress or no satisfactory response after complaint, and difficulty finding information on guarantees/legal rights (Eurostat 2021/2023/2025), compared with other EU countries. DOI 10.2908/ISOC_EC_IPRB21.\n  (Υπόβαθρο μόνο: μην μετατρέπεις στατιστικά των πηγών σε πιθανότητες απάντησης του προσώπου.)\n- [isoc_ec_iprb21] Σχετικό εμπειρικό στοιχείο για όλη την ερώτηση (ΣΥΓΓΕΝΗΣ μέτρηση, όχι η ίδια ερώτηση· μην το μετατρέπεις σε πιθανότητα): Eurostat 2025, Ελλάδα — από όσους αγόρασαν online στο τρίμηνο: παράδοση πιο αργή από την αναγγελθείσα: σύνολο 6% των αγοραστών online; 65–74 5%; γυναίκες 5%; χαμηλή εκπαίδευση 3%\n[Q11]\n- [src:greca-eltrun-ecommerce-2026] Έρευνα Ηλεκτρονικού Εμπορίου 2026 - Η συμπεριφορά του Έλληνα Καταναλωτή στις Διαδικτυακές Αγορές (GR, 2026-05; πληθυσμός: Greek consumers who shop online (online questionnaire, multiple-choice questions); δείγμα: 600) — αφορά: Greek-specific background on what drives trust in e-shops (known brand/chain, prompt service before and after purchase, clear terms, reviews, trust certifications), delivery and pickup preferences (home delivery, lockers), payment methods, and online purchasing of electrical appliances as a category.\n- [src:stk-annual-report-2024] Ετήσια Έκθεση 2024 - Συνήγορος του Καταναλωτή (GR, 2026-05; πληθυσμός: Complaints (αναφορές) submitted by consumers to the Consumer Ombudsman in 2024 (and to ECC Greece for the combined total); δείγμα: administrative data (18,192 complaints to the Ombudsman in 2024; 19,061 including ECC Greece)) — αφορά: Greek complaint landscape by sector and complaint type, including consumer-goods sub-sectors ICT goods, large household appliances and non-ICT/entertainment electronics, complaint content such as delivery of goods (non- or partial delivery, delay, customer service), product quality, sales method (e-commerce vs face to face) and mediation outcomes; also case examples on courier/postal non-delivery and damaged parcels.\n- [src:eurostat-isoc-ec-iprb21] Internet purchases - problems encountered (2021 onwards) (EU27 incl. GR (Greece reported separately), 2026-04; πληθυσμός: Individuals (all individuals and breakdowns by age, sex, education etc.) who bought via a website or app in the previous 3 months; Greece data available for 2021, 2023 and 2025; δείγμα: unknown) — αφορά: Share of Greek online buyers reporting delivery slower than indicated, wrong or damaged goods delivered, difficult complaints/redress or no satisfactory response after complaint, and difficulty finding information on guarantees/legal rights (Eurostat 2021/2023/2025), compared with other EU countries. DOI 10.2908/ISOC_EC_IPRB21.\n  (Υπόβαθρο μόνο: μην μετατρέπεις στατιστικά των πηγών σε πιθανότητες απάντησης του προσώπου.)\n\nΕΡΩΤΗΣΗ Q10 (likert): Πόσο σημαντικό είναι για εσάς να παραδίδεται μια μεγάλη συσκευή ακριβώς τη μέρα και ώρα που συμφωνήθηκε;\n  [1] Καθόλου σημαντικό\n  [2] 2\n  [3] 3\n  [4] 4\n  [5] Εξαιρετικά σημαντικό\n\nΕΡΩΤΗΣΗ Q11 (single_choice): Αν μια παράδοση καθυστερούσε, μετά από πόσο χρόνο θα επικοινωνούσατε με το κατάστημα;\n  [1] Αμέσως, την ίδια μέρα\n  [2] Μετά από 1 ημέρα\n  [3] Μετά από 2–3 ημέρες\n  [4] Μετά από μία εβδομάδα\n  [5] Θα περίμενα να επικοινωνήσουν εκείνοι",
+ "schema": {
+  "type": "object",
+  "properties": {
+   "Q10": {
+    "type": "object",
+    "properties": {
+     "probabilities": {
+      "type": "object",
+      "properties": {
+       "1": {
+        "type": "number"
+       },
+       "2": {
+        "type": "number"
+       },
+       "3": {
+        "type": "number"
+       },
+       "4": {
+        "type": "number"
+       },
+       "5": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "1",
+       "2",
+       "3",
+       "4",
+       "5"
+      ],
+      "additionalProperties": false
+     },
+     "rationale": {
+      "type": "string",
+      "description": "Σύντομη, ελέγξιμη αιτιολόγηση (έως 30 λέξεις), χωρίς εσωτερική συλλογιστική."
+     }
+    },
+    "required": [
+     "probabilities",
+     "rationale"
+    ],
+    "additionalProperties": false
+   },
+   "Q11": {
+    "type": "object",
+    "properties": {
+     "probabilities": {
+      "type": "object",
+      "properties": {
+       "1": {
+        "type": "number"
+       },
+       "2": {
+        "type": "number"
+       },
+       "3": {
+        "type": "number"
+       },
+       "4": {
+        "type": "number"
+       },
+       "5": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "1",
+       "2",
+       "3",
+       "4",
+       "5"
+      ],
+      "additionalProperties": false
+     },
+     "rationale": {
+      "type": "string",
+      "description": "Σύντομη, ελέγξιμη αιτιολόγηση (έως 30 λέξεις), χωρίς εσωτερική συλλογιστική."
+     }
+    },
+    "required": [
+     "probabilities",
+     "rationale"
+    ],
+    "additionalProperties": false
+   }
+  },
+  "required": [
+   "Q10",
+   "Q11"
+  ],
+  "additionalProperties": false
+ }
+}

@@ -335,7 +335,9 @@ class StudyRun:
                         shown = f"{shown} (σειρά σημασίας)" if q.type == "ranking" else shown
                     else:
                         shown = lab.get(str(ans), ans)
-                    history.append(f"{q.id}: {shown}")
+                    qt = " ".join(str(q.text).split())
+                    qt = qt if len(qt) <= 90 else qt[:87].rstrip() + "…"
+                    history.append(f"{q.id} «{qt}»: {shown}")      # με το κείμενο της ερώτησης (εύρημα πιλοτικής pilot_int_15)
                 if q.screening and not errs and str(ans) in [str(x) for x in q.screening.get("terminate_if", [])]:
                     status = "SCREENED_OUT"
                     return {"respondent_id": rid, "status": status, "rows": rows}

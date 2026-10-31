@@ -1,0 +1,38 @@
+data_status,question_id,type,plan_mode,brand_dependent,rows_answered,n_A_EMPIRICAL,n_C_EVIDENCE_CONSTRAINED,n_C_EVIDENCE_INFORMED,n_D_AI,n_PROFILE,n_SKIP,components,lab_tier,lab_abstain
+ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ,S1,single_choice,C_EVIDENCE_CONSTRAINED,False,15,0,15,0,0,0,0,isoc_ec_ibgs:I_BEEQU1|lower_bound|DIRECT_EMPIRICAL|όριο ανά πρόσωπο|μεταφερμένα κελιά=5; isoc_ec_ibgs:I_BHARD1|lower_bound|CONTEXTUAL_EVIDENCE|μόνο καταγραφή (υποβαθμίστηκε· δεν εφαρμόζεται)|μεταφερμένα κελιά=5,5,True
+ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ,D1,single_choice,PROFILE,False,13,0,0,0,0,13,0,,5,True
+ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ,D2,single_choice,PROFILE,False,13,0,0,0,0,13,0,,5,True
+ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ,D3,single_choice,PROFILE,False,13,0,0,0,0,13,0,,5,True
+ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ,Q1,multiple_choice,C_EVIDENCE_CONSTRAINED,False,13,0,13,0,0,0,0,isoc_ec_ibgs:I_BEEQU1|lower_bound_union|DIRECT_EMPIRICAL|όριο ανά πρόσωπο|μεταφερμένα κελιά=5,5,True
+ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ,Q2,single_choice,D_AI,False,13,0,0,0,13,0,0,,5,True
+ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ,Q3,numeric,D_AI,False,13,0,0,0,13,0,0,,5,True
+ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ,Q4,ranking,D_AI,False,13,0,0,0,13,0,0,,5,True
+ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ,Q5,likert,D_AI,False,13,0,0,0,13,0,0,,5,True
+ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ,Q6,single_choice,D_AI,True,13,0,0,0,13,0,0,,5,True
+ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ,Q7,likert,D_AI,True,12,0,0,0,12,0,1,,5,True
+ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ,Q8,single_choice,D_AI,True,12,0,0,0,12,0,1,,5,True
+ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ,Q9,likert,D_AI,True,12,0,0,0,12,0,1,,5,True
+ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ,Q10,likert,C_EVIDENCE_INFORMED,False,13,0,0,13,0,0,0,isoc_ec_iprb21:['I_BSPD1']|proxy|CONTEXTUAL_EVIDENCE|πλαίσιο στο prompt|μεταφερμένα κελιά=0,5,True
+ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ,Q11,single_choice,D_AI,False,13,0,0,0,13,0,0,,5,True
+ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ,Q12a,scenario,D_AI,False,13,0,0,0,13,0,0,,5,True
+ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ,Q12b,scenario,D_AI,False,13,0,0,0,13,0,0,,5,True
+ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ,Q13,multiple_choice,C_EVIDENCE_INFORMED,False,13,0,0,13,0,0,0,isoc_ci_ac_i:I_IUCHAT1|proxy|CONTEXTUAL_EVIDENCE|πλαίσιο στο prompt|μεταφερμένα κελιά=0,5,True
+ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ,Q14,scenario,D_AI,False,13,0,0,0,13,0,0,,5,True
+ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ,Q15,numeric,D_AI,False,13,0,0,0,13,0,0,,5,True
+ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ,Q16,single_choice,D_AI,False,13,0,0,0,13,0,0,,5,True
+ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ,Q17,dce,D_AI,False,13,0,0,0,13,0,0,,5,True
+ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ,Q18a,scenario,D_AI,False,13,0,0,0,13,0,0,,5,True
+ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ,Q18b,scenario,D_AI,False,13,0,0,0,13,0,0,,5,True
+ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ,Q19,ranking,D_AI,False,13,0,0,0,13,0,0,,5,True
+ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ,Q20a,scenario,D_AI,False,13,0,0,0,13,0,0,,5,True
+ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ,Q20b,scenario,D_AI,False,13,0,0,0,13,0,0,,5,True
+ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ,Q21,single_choice,D_AI,False,13,0,0,0,13,0,0,,5,True
+ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ,Q22,numeric,D_AI,True,12,0,0,0,12,0,1,,5,True
+ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ,Q23,scenario,D_AI,False,13,0,0,0,13,0,0,,5,True
+ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ,Q24,likert,D_AI,False,13,0,0,0,13,0,0,,5,True
+ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ,Q25,single_choice,D_AI,True,12,0,0,0,12,0,1,,5,True
+ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ,Q26,open,D_AI,False,13,0,0,0,13,0,0,,5,True
+ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ,Q27,likert,D_AI,False,13,0,0,0,13,0,0,,5,True
+ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ,Q28,multiple_choice,C_EVIDENCE_INFORMED,False,13,0,0,13,0,0,0,isoc_ci_ac_i:I_IUIF|proxy|CONTEXTUAL_EVIDENCE|πλαίσιο στο prompt|μεταφερμένα κελιά=0,5,True
+ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ,Q29,single_choice,C_EVIDENCE_INFORMED,False,13,0,0,13,0,0,0,"isoc_ec_iprb21:['I_BSPD1', 'I_BWDN1', 'I_BCR1', 'I_BDGL1']|proxy|CONTEXTUAL_EVIDENCE|πλαίσιο στο prompt|μεταφερμένα κελιά=0",5,True
+ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ,Q30,likert,D_AI,False,13,0,0,0,13,0,0,,5,True

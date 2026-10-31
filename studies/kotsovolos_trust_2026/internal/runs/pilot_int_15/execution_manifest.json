@@ -1,0 +1,34 @@
+{
+ "label": "ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ",
+ "study_id": "kotsovolos_trust_2026",
+ "run_id": "pilot_int_15",
+ "ase_version": "ase-2.1.0",
+ "git_commit": "a79daf796ecb0c69f2a558e58528865194c0a6ae",
+ "started_at": "2026-10-31T14:57:47Z",
+ "finished_at": "2026-10-31T14:57:53Z",
+ "dry_run": true,
+ "respondents_requested": 15,
+ "respondents_completed": 15,
+ "status_counts": {
+  "COMPLETE": 13,
+  "SCREENED_OUT": 2
+ },
+ "question_subset": null,
+ "batching": "per_block",
+ "seed": 20261031,
+ "max_workers": 4,
+ "config_sha256": "cb8fa46be82d8a48b68da303240c378864448e5c6510136ced83a4603a0679c5",
+ "questionnaire_sha256": "87a63813d4fb09314ae6a1029b58b3c3c8b294c4ce0feb7519b1cd7ec6cd1e19",
+ "ledger": {
+  "provider": "claude_session",
+  "model": "claude-code-session",
+  "calls": 156,
+  "failed_calls": 0,
+  "input_tokens": 432965,
+  "output_tokens": 40708,
+  "cost_usd": null,
+  "budget_usd": null
+ },
+ "errors": 0,
+ "sample_size_basis": "initial_profiles"
+}

@@ -258,5 +258,5 @@ def test_claude_session_provider_rounds_import_and_history():
     assert len(llm) and (llm["provider"] == "claude_session").all() and (llm["model"] == "claude-code-session").all()
     assert not read_json(st.internal / "runs" / rid / "model_provenance.json")["mock"]
     later = [json.loads(p.read_text(encoding="utf-8"))["user_prompt"] for p in (root / "pending").glob("*.json")]
-    assert any("S1: Ναι" in u for u in later)                    # οι επόμενοι γύροι βλέπουν τις προηγούμενες απαντήσεις
+    assert any(re.search(r"S1 «[^»]*»: Ναι", u) for u in later)                    # οι επόμενοι γύροι βλέπουν τις προηγούμενες απαντήσεις
     assert all(len(json.loads(x)) for x in df[df["attempts"] != ""]["attempts"])
