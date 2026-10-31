@@ -1,0 +1,16 @@
+{
+ "key": "8b867212a74f084037b5",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.08,
+    "2": 0.86,
+    "3": 0.06
+   },
+   "rationale": "Αγοράζει μόνο από αμιγώς ηλεκτρονικά καταστήματα/marketplace και γνωρίζει τον Κωτσόβολο μόνο ως όνομα."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 83)",
+ "imported_at": "2026-10-31T20:04:37Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

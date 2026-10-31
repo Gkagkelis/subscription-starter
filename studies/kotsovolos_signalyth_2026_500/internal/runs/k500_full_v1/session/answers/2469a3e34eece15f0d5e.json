@@ -1,0 +1,16 @@
+{
+ "key": "2469a3e34eece15f0d5e",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.6,
+    "2": 0.32,
+    "3": 0.08
+   },
+   "rationale": "Συνταξιούχος στην Αττική που αγοράζει από μεγάλη αλυσίδα, εκτιμά εξυπηρέτηση και after-sales και γνωρίζει αρκετά την εταιρεία."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 79)",
+ "imported_at": "2026-10-31T20:04:37Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

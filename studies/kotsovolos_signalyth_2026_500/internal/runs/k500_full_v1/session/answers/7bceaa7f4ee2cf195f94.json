@@ -1,0 +1,16 @@
+{
+ "key": "7bceaa7f4ee2cf195f94",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.1,
+    "2": 0.8,
+    "3": 0.1
+   },
+   "rationale": "Φοιτήτρια που αγόρασε μόνο από marketplace και ξέρει την αλυσίδα μόνο ως όνομα· αγορά από Κωτσόβολο μάλλον όχι."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 82)",
+ "imported_at": "2026-10-31T20:04:37Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

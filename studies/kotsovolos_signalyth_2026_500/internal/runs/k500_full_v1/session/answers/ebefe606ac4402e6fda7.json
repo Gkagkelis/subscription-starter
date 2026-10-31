@@ -1,0 +1,16 @@
+{
+ "key": "ebefe606ac4402e6fda7",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.04,
+    "2": 0.89,
+    "3": 0.07
+   },
+   "rationale": "Αγρότισσα στην αγροτική Ήπειρο με χαμηλό εισόδημα, χωρίς αγορά ηλεκτρικής συσκευής τα τελευταία δύο χρόνια."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 86)",
+ "imported_at": "2026-10-31T20:04:37Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

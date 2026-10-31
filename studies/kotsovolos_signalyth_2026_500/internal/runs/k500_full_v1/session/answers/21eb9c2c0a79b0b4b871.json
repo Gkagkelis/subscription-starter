@@ -1,0 +1,16 @@
+{
+ "key": "21eb9c2c0a79b0b4b871",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.15,
+    "2": 0.72,
+    "3": 0.13
+   },
+   "rationale": "Γνωρίζει την αλυσίδα μόνο ως όνομα και ζει σε αγροτική Κρήτη· η αγορά από μεγάλη αλυσίδα έγινε πιθανότατα αλλού."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 79)",
+ "imported_at": "2026-10-31T20:04:37Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

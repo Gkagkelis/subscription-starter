@@ -1,0 +1,16 @@
+{
+ "key": "8f69ace93e0c465fdf8b",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.75,
+    "2": 0.2,
+    "3": 0.05
+   },
+   "rationale": "Αγόρασε από μεγάλη αλυσίδα φυσικών καταστημάτων και δηλώνει ότι γνωρίζει τον Κωτσόβολο πολύ καλά."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 83)",
+ "imported_at": "2026-10-31T20:04:37Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

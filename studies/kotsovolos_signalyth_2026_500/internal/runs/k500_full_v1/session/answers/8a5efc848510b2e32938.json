@@ -1,0 +1,16 @@
+{
+ "key": "8a5efc848510b2e32938",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.8,
+    "2": 0.15,
+    "3": 0.05
+   },
+   "rationale": "Αγόρασε πρόσφατα από μεγάλες αλυσίδες φυσικά και online και γνωρίζει τον Κωτσόβολο πολύ καλά· πιθανή αγορά εκεί."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 83)",
+ "imported_at": "2026-10-31T20:04:37Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

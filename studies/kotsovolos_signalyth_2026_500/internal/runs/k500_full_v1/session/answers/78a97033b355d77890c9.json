@@ -1,0 +1,16 @@
+{
+ "key": "78a97033b355d77890c9",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.2,
+    "2": 0.7,
+    "3": 0.1
+   },
+   "rationale": "Αγόρασε από e-shop μεγάλης αλυσίδας, αλλά γνωρίζει τον Κωτσόβολο μόνο ως όνομα· η αγορά από αυτόν είναι μάλλον απίθανη."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 82)",
+ "imported_at": "2026-10-31T20:04:37Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

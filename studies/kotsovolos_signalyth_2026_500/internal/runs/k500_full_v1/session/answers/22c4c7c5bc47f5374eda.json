@@ -1,0 +1,16 @@
+{
+ "key": "22c4c7c5bc47f5374eda",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.6,
+    "2": 0.31,
+    "3": 0.09
+   },
+   "rationale": "Ψωνίζει σε μεγάλες αλυσίδες φυσικά και online, ενδιαφέρεται για δόσεις και γνωρίζει αρκετά την εταιρεία· πιθανή αγορά, όχι βέβαιη."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 79)",
+ "imported_at": "2026-10-31T20:04:37Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

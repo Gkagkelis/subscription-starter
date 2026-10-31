@@ -1,0 +1,16 @@
+{
+ "key": "afa1c5b3671a8f292c80",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.12,
+    "2": 0.8,
+    "3": 0.08
+   },
+   "rationale": "Αγοράζει από μεγάλες αλυσίδες και marketplaces στο Νότιο Αιγαίο, αλλά γνωρίζει τον Κωτσόβολο μόνο ως όνομα· μάλλον δεν έχει ψωνίσει από εκεί."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 84)",
+ "imported_at": "2026-10-31T20:04:37Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

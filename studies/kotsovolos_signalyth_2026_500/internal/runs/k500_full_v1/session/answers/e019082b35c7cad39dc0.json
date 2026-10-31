@@ -1,0 +1,16 @@
+{
+ "key": "e019082b35c7cad39dc0",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.14,
+    "2": 0.76,
+    "3": 0.1
+   },
+   "rationale": "Στο Βόρειο Αιγαίο, ψωνίζει online και από μικρά καταστήματα· γνωρίζει την αλυσίδα μόνο ως όνομα, άρα μάλλον όχι."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 86)",
+ "imported_at": "2026-10-31T20:04:37Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

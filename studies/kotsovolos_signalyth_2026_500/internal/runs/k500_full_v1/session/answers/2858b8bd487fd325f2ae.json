@@ -1,0 +1,16 @@
+{
+ "key": "2858b8bd487fd325f2ae",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.54,
+    "2": 0.37,
+    "3": 0.09
+   },
+   "rationale": "Αγοράζει από μεγάλη αλυσίδα και marketplace, εκτιμά φήμη και επιστροφές, γνωρίζει αρκετά την εταιρεία· αγορά εκεί μάλλον πιθανή."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 79)",
+ "imported_at": "2026-10-31T20:04:37Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

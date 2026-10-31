@@ -1,0 +1,16 @@
+{
+ "key": "8ddbdcb02f5fa20e9a00",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.5,
+    "2": 0.41,
+    "3": 0.09
+   },
+   "rationale": "Νεαρή φοιτήτρια, ψωνίζει online από αλυσίδες και marketplaces και γνωρίζει αρκετά την εταιρεία· αβέβαιο από ποια αλυσίδα."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 83)",
+ "imported_at": "2026-10-31T20:04:37Z",
+ "source": "Claude Code session (AI), όχι mock"
+}
