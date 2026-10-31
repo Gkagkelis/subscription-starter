@@ -49,3 +49,8 @@ certificates
 scripts/synthetic-lab/lane_*.log
 scripts/synthetic-lab/**/__pycache__/
 *.tmp.ts
+
+# ASE v2.0: checkpoints εκτελέσεων και πραγματικά δεδομένα πελατών μένουν μόνο τοπικά
+studies/*/internal/runs/*/checkpoint.jsonl
+studies/*/internal/real_data/
+research-engine/**/__pycache__/

@@ -1,0 +1,17 @@
+{
+ "provider": {
+  "provider": "mock",
+  "model": "mock-1",
+  "options": {
+   "effort": "low"
+  }
+ },
+ "model_versions_seen": [
+  "mock-1.0"
+ ],
+ "prompt_version": "ase-prompt-1.0",
+ "system_prompt_sha256": "7994692fe471e998624922343667dc3848d44f082402d42d043bfb3de1cd24be",
+ "empirical_models": {},
+ "mock": true,
+ "note": "Mock provider: χωρίς ερευνητική αξία — μόνο δοκιμή υποδομής."
+}

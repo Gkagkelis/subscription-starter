@@ -1,0 +1,17 @@
+# Τιμές ανά 1 εκατ. tokens (USD) για την ΕΚΤΙΜΗΣΗ κόστους πριν από την εκτέλεση.
+# Anthropic: first-party API rates όπως καταγράφονται στην τεκμηρίωση του claude-api skill (cache 2026-10-06).
+#   Επαλήθευση πριν από προϋπολογισμό: https://platform.claude.com/docs/en/about-claude/pricing.md
+#   Το Message Batches API τιμολογείται στο 50% (μη υλοποιημένο ακόμη στο ASE — δηλώνεται ως μελλοντική επιλογή).
+# OpenAI / Google: ΔΕΝ συμπληρώνονται εδώ (καμία επινοημένη τιμή). Ο χρήστης τις προσθέτει από τον επίσημο τιμοκατάλογο·
+#   χωρίς τιμή, η εκτίμηση δίνει μόνο tokens και η πραγματική εκτέλεση με όριο προϋπολογισμού αρνείται να ξεκινήσει.
+currency: USD
+source_note: "Anthropic: claude-api skill model table (cached 2026-10-06), first-party API. OpenAI/Google: not configured."
+providers:
+  anthropic:
+    claude-opus-5-5: {input_per_mtok: 4.00, output_per_mtok: 20.00}
+    claude-sonnet-5-5: {input_per_mtok: 2.00, output_per_mtok: 10.00}
+    claude-haiku-5-5: {input_per_mtok: 0.10, output_per_mtok: 0.50, note: "για prompts έως 100K tokens"}
+  openai: {}
+  google: {}
+  mock:
+    mock-1: {input_per_mtok: 0.0, output_per_mtok: 0.0}

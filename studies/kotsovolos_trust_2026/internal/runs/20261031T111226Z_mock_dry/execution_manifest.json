@@ -1,0 +1,32 @@
+{
+ "study_id": "kotsovolos_trust_2026",
+ "run_id": "20261031T111226Z_mock_dry",
+ "ase_version": "ase-2.0.0",
+ "git_commit": "678220c6b509ef58853c18d3c815f6262a452403",
+ "started_at": "2026-10-31T11:12:26Z",
+ "finished_at": "2026-10-31T11:12:28Z",
+ "dry_run": true,
+ "respondents_requested": 15,
+ "respondents_completed": 15,
+ "status_counts": {
+  "COMPLETE": 9,
+  "SCREENED_OUT": 6
+ },
+ "question_subset": null,
+ "batching": "per_question",
+ "seed": 20261031,
+ "max_workers": 4,
+ "config_sha256": "cafba5726d829bf5fe2fb475fb11f2299af93231a4e2d695f4039e936d685a9c",
+ "questionnaire_sha256": "87a63813d4fb09314ae6a1029b58b3c3c8b294c4ce0feb7519b1cd7ec6cd1e19",
+ "ledger": {
+  "provider": "mock",
+  "model": "mock-1",
+  "calls": 288,
+  "failed_calls": 0,
+  "input_tokens": 311624,
+  "output_tokens": 21721,
+  "cost_usd": 0.0,
+  "budget_usd": null
+ },
+ "errors": 0
+}

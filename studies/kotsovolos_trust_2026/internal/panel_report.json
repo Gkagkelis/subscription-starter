@@ -1,0 +1,398 @@
+{
+ "quotas": [
+  {
+   "variable": "age_band",
+   "level": "18-24",
+   "target_pct": 8.77,
+   "achieved_pct": 8.6,
+   "deviation_pp": -0.17,
+   "within_tolerance": true
+  },
+  {
+   "variable": "age_band",
+   "level": "25-34",
+   "target_pct": 12.16,
+   "achieved_pct": 12.8,
+   "deviation_pp": 0.64,
+   "within_tolerance": true
+  },
+  {
+   "variable": "age_band",
+   "level": "35-44",
+   "target_pct": 15.42,
+   "achieved_pct": 15.2,
+   "deviation_pp": -0.22,
+   "within_tolerance": true
+  },
+  {
+   "variable": "age_band",
+   "level": "45-54",
+   "target_pct": 18.25,
+   "achieved_pct": 18.2,
+   "deviation_pp": -0.05,
+   "within_tolerance": true
+  },
+  {
+   "variable": "age_band",
+   "level": "55-64",
+   "target_pct": 17.13,
+   "achieved_pct": 17.0,
+   "deviation_pp": -0.13,
+   "within_tolerance": true
+  },
+  {
+   "variable": "age_band",
+   "level": "65+",
+   "target_pct": 28.27,
+   "achieved_pct": 28.2,
+   "deviation_pp": -0.07,
+   "within_tolerance": true
+  },
+  {
+   "variable": "gender",
+   "level": "female",
+   "target_pct": 51.38,
+   "achieved_pct": 51.4,
+   "deviation_pp": 0.02,
+   "within_tolerance": true
+  },
+  {
+   "variable": "gender",
+   "level": "male",
+   "target_pct": 48.62,
+   "achieved_pct": 48.6,
+   "deviation_pp": -0.02,
+   "within_tolerance": true
+  },
+  {
+   "variable": "region",
+   "level": "Ήπειρος",
+   "target_pct": 3.15,
+   "achieved_pct": 3.0,
+   "deviation_pp": -0.15,
+   "within_tolerance": true
+  },
+  {
+   "variable": "region",
+   "level": "Ανατολική Μακεδονία & Θράκη",
+   "target_pct": 5.45,
+   "achieved_pct": 5.0,
+   "deviation_pp": -0.45,
+   "within_tolerance": true
+  },
+  {
+   "variable": "region",
+   "level": "Αττική",
+   "target_pct": 36.44,
+   "achieved_pct": 36.6,
+   "deviation_pp": 0.16,
+   "within_tolerance": true
+  },
+  {
+   "variable": "region",
+   "level": "Βόρειο Αιγαίο",
+   "target_pct": 1.99,
+   "achieved_pct": 2.4,
+   "deviation_pp": 0.41,
+   "within_tolerance": true
+  },
+  {
+   "variable": "region",
+   "level": "Δυτική Ελλάδα",
+   "target_pct": 6.12,
+   "achieved_pct": 6.4,
+   "deviation_pp": 0.28,
+   "within_tolerance": true
+  },
+  {
+   "variable": "region",
+   "level": "Δυτική Μακεδονία",
+   "target_pct": 2.39,
+   "achieved_pct": 2.6,
+   "deviation_pp": 0.21,
+   "within_tolerance": true
+  },
+  {
+   "variable": "region",
+   "level": "Θεσσαλία",
+   "target_pct": 6.52,
+   "achieved_pct": 6.6,
+   "deviation_pp": 0.08,
+   "within_tolerance": true
+  },
+  {
+   "variable": "region",
+   "level": "Ιόνια Νησιά",
+   "target_pct": 1.9,
+   "achieved_pct": 2.2,
+   "deviation_pp": 0.3,
+   "within_tolerance": true
+  },
+  {
+   "variable": "region",
+   "level": "Κεντρική Μακεδονία",
+   "target_pct": 17.09,
+   "achieved_pct": 17.0,
+   "deviation_pp": -0.09,
+   "within_tolerance": true
+  },
+  {
+   "variable": "region",
+   "level": "Κρήτη",
+   "target_pct": 5.81,
+   "achieved_pct": 5.4,
+   "deviation_pp": -0.41,
+   "within_tolerance": true
+  },
+  {
+   "variable": "region",
+   "level": "Νότιο Αιγαίο",
+   "target_pct": 3.07,
+   "achieved_pct": 2.8,
+   "deviation_pp": -0.27,
+   "within_tolerance": true
+  },
+  {
+   "variable": "region",
+   "level": "Πελοπόννησος",
+   "target_pct": 5.16,
+   "achieved_pct": 5.0,
+   "deviation_pp": -0.16,
+   "within_tolerance": true
+  },
+  {
+   "variable": "region",
+   "level": "Στερεά Ελλάδα",
+   "target_pct": 4.92,
+   "achieved_pct": 5.0,
+   "deviation_pp": 0.08,
+   "within_tolerance": true
+  },
+  {
+   "variable": "household_type",
+   "level": "couple",
+   "target_pct": 22.14,
+   "achieved_pct": 22.2,
+   "deviation_pp": 0.06,
+   "within_tolerance": true
+  },
+  {
+   "variable": "household_type",
+   "level": "couple_with_children",
+   "target_pct": 46.56,
+   "achieved_pct": 46.6,
+   "deviation_pp": 0.04,
+   "within_tolerance": true
+  },
+  {
+   "variable": "household_type",
+   "level": "couple_with_children_and_relatives",
+   "target_pct": 6.82,
+   "achieved_pct": 6.8,
+   "deviation_pp": -0.02,
+   "within_tolerance": true
+  },
+  {
+   "variable": "household_type",
+   "level": "couple_with_relatives",
+   "target_pct": 1.28,
+   "achieved_pct": 1.2,
+   "deviation_pp": -0.08,
+   "within_tolerance": true
+  },
+  {
+   "variable": "household_type",
+   "level": "other",
+   "target_pct": 4.06,
+   "achieved_pct": 4.0,
+   "deviation_pp": -0.06,
+   "within_tolerance": true
+  },
+  {
+   "variable": "household_type",
+   "level": "single",
+   "target_pct": 12.18,
+   "achieved_pct": 12.2,
+   "deviation_pp": 0.02,
+   "within_tolerance": true
+  },
+  {
+   "variable": "household_type",
+   "level": "single_parent",
+   "target_pct": 5.25,
+   "achieved_pct": 5.2,
+   "deviation_pp": -0.05,
+   "within_tolerance": true
+  },
+  {
+   "variable": "household_type",
+   "level": "single_parent_with_relatives",
+   "target_pct": 1.72,
+   "achieved_pct": 1.8,
+   "deviation_pp": 0.08,
+   "within_tolerance": true
+  },
+  {
+   "variable": "education",
+   "level": "less_than_primary",
+   "target_pct": 6.53,
+   "achieved_pct": 6.6,
+   "deviation_pp": 0.07,
+   "within_tolerance": true
+  },
+  {
+   "variable": "education",
+   "level": "lower_secondary",
+   "target_pct": 8.31,
+   "achieved_pct": 8.2,
+   "deviation_pp": -0.11,
+   "within_tolerance": true
+  },
+  {
+   "variable": "education",
+   "level": "primary",
+   "target_pct": 18.12,
+   "achieved_pct": 18.2,
+   "deviation_pp": 0.08,
+   "within_tolerance": true
+  },
+  {
+   "variable": "education",
+   "level": "tertiary",
+   "target_pct": 26.38,
+   "achieved_pct": 26.4,
+   "deviation_pp": 0.02,
+   "within_tolerance": true
+  },
+  {
+   "variable": "education",
+   "level": "upper_secondary",
+   "target_pct": 40.66,
+   "achieved_pct": 40.6,
+   "deviation_pp": -0.06,
+   "within_tolerance": true
+  },
+  {
+   "variable": "income_quintile",
+   "level": "1",
+   "target_pct": 20.24,
+   "achieved_pct": 20.2,
+   "deviation_pp": -0.04,
+   "within_tolerance": true
+  },
+  {
+   "variable": "income_quintile",
+   "level": "2",
+   "target_pct": 20.12,
+   "achieved_pct": 20.2,
+   "deviation_pp": 0.08,
+   "within_tolerance": true
+  },
+  {
+   "variable": "income_quintile",
+   "level": "3",
+   "target_pct": 19.62,
+   "achieved_pct": 19.6,
+   "deviation_pp": -0.02,
+   "within_tolerance": true
+  },
+  {
+   "variable": "income_quintile",
+   "level": "4",
+   "target_pct": 19.95,
+   "achieved_pct": 20.0,
+   "deviation_pp": 0.05,
+   "within_tolerance": true
+  },
+  {
+   "variable": "income_quintile",
+   "level": "5",
+   "target_pct": 20.07,
+   "achieved_pct": 20.0,
+   "deviation_pp": -0.07,
+   "within_tolerance": true
+  }
+ ],
+ "max_abs_deviation_pp": 0.64,
+ "tolerance_pp": 2.0,
+ "all_within_tolerance": true,
+ "study_id": "kotsovolos_trust_2026",
+ "created_at": "2026-10-31T10:46:42Z",
+ "sample_size": 500,
+ "seed": 20261031,
+ "frame_id": "gr_adults_2025_v1",
+ "frame_manifest": {
+  "created_at": "2026-10-31T10:29:59Z",
+  "rows": 250000,
+  "represented_adults": 8705195.0,
+  "assumptions": [
+   "A1: Τα χαρακτηριστικά των 18–24 προσεγγίζονται από τη ζώνη 15–24 του GLOPOP-S· το συνολικό βάρος βαθμονομείται στον επίσημο πληθυσμό 18–24 (2025).",
+   "A2: Πληθυσμός 18–24 ανά περιφέρεια = 20–24 + 15–19 × εθνικό μερίδιο 18–19 στους 15–19 ανά φύλο (Eurostat 2025).",
+   "A3: Εκπαίδευση βαθμονομείται μόνο για 25–64 (κάλυψη LFS)· για 18–24 και 65+ ισχύει η κατανομή του GLOPOP-S.",
+   "A4: Εισοδηματικά πεμπτημόρια = GLOPOP-S (LIS 2015), χωρίς επικαιροποίηση· νοικοκυριό/περιοχή επίσης από GLOPOP-S 2015.",
+   "A5: Δεν υπάρχουν πραγματικά δεδομένα για απασχόληση, επάγγελμα, οικογενειακή κατάσταση πέρα από τον τύπο νοικοκυριού· δηλώνονται άγνωστα.",
+   "A6: Γνωστό ζήτημα πηγής: πληθυσμοί Βορείου/Νοτίου Αιγαίου πιθανόν αντεστραμμένοι στο GLOPOP-S· τα βάρη διορθώνονται από το raking στους επίσημους στόχους."
+  ],
+  "targets_sources": [
+   {
+    "id": "eurostat-demo_r_pjangroup-2025",
+    "source": "Eurostat, demo_r_pjangroup (Population on 1 January by age group, sex and NUTS 2 region) — δεδομένα ΕΛΣΤΑΤ",
+    "licence": "Eurostat — CC BY 4.0 (Commission Decision 2011/833/EU), επαναχρησιμοποίηση με αναφορά πηγής",
+    "updated": "2026-08-28T23:00:00+0200"
+   },
+   {
+    "id": "eurostat-demo_r_pjangroup-15-24-2025",
+    "source": "Eurostat demo_r_pjangroup (Y15-19, Y20-24, NUTS2, 2025)",
+    "licence": "CC BY 4.0",
+    "updated": "2026-08-28T23:00:00+0200"
+   },
+   {
+    "id": "eurostat-demo_pjan-15-19-EL-2025",
+    "source": "Eurostat demo_pjan (ηλικίες 15–19, Ελλάδα, 2025)",
+    "licence": "CC BY 4.0",
+    "updated": "2026-09-25T23:00:00+0200"
+   },
+   {
+    "id": "eurostat-edat_lfs_9901-2025",
+    "source": "Eurostat, edat_lfs_9901 (Population in private households by educational attainment level, LFS) — δεδομένα ΕΛΣΤΑΤ· demo_pjangroup για 65-74/75+",
+    "licence": "Eurostat — CC BY 4.0 (Commission Decision 2011/833/EU), επαναχρησιμοποίηση με αναφορά πηγής",
+    "updated": "2026-09-10T23:00:00+0200"
+   }
+  ],
+  "glopop": {
+   "dataset": "GLOPOP-S v5.0",
+   "doi": "https://doi.org/10.7910/DVN/KJC3RH",
+   "licence": "CC BY 4.0",
+   "reference_year": 2015,
+   "attribution": "GLOPOP-S (Ton et al.), Harvard Dataverse, doi:10.7910/DVN/KJC3RH, v5.0 — CC BY 4.0"
+  }
+ },
+ "target_population": {
+  "population": "adults_18_plus",
+  "geography": "nationwide",
+  "filters": {},
+  "frame_records": 250000,
+  "represented_people": 8705195.0
+ },
+ "strata": [
+  "region",
+  "age_band",
+  "gender"
+ ],
+ "secondary_quotas": [
+  "household_type",
+  "education",
+  "income_quintile"
+ ],
+ "balance_swaps": 76,
+ "excluded_overlap_records": 0,
+ "extensions": [],
+ "unknown_attributes": [
+  "employment",
+  "occupation",
+  "marital_status",
+  "personal_purchase_history",
+  "brand_relationships"
+ ],
+ "disclaimer": "Η δημογραφική ομοιότητα του συνθετικού πάνελ με τον πληθυσμό-στόχο δεν αποτελεί τεκμήριο ότι οι προσομοιωμένες απαντήσεις αντιστοιχούν σε πραγματικές συμπεριφορές ή απόψεις."
+}

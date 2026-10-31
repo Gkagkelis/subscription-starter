@@ -1,0 +1,36 @@
+study_id: kotsovolos_trust_2026
+country: GR
+questionnaire: questionnaire.yaml
+study:
+  title: "Η Εμπιστοσύνη μετά την Αγορά: Τι Κάνει έναν Καταναλωτή να Μείνει ή να Φύγει;"
+  subtitle: "Πιλοτική συνθετική μελέτη · Συνθετικά ελληνικά προφίλ 18+ · Πανελλαδική κάλυψη"
+  client: "Κωτσόβολος (πιλοτική μελέτη)"
+  topic: "Εμπιστοσύνη πελατών σε retailer ηλεκτρικών ειδών μετά την αγορά: παράδοση, ελαττωματικά προϊόντα, αποκατάσταση, επαναγορά, εταιρική εικόνα"
+  summary_intro: "Η πιλοτική μελέτη εξετάζει πώς διαμορφώνεται η εμπιστοσύνη μετά την αγορά ηλεκτρικών ειδών, με έμφαση στην παράδοση, στα προβλήματα προϊόντων και στην αποκατάσταση."
+  brand_intelligence_report: null   # δεν βρέθηκε στο repository (docs/architecture/ADAPTIVE_ENGINE_BASELINE.md §9)
+panel:
+  population: adults_18_plus
+  sample_size: 500
+  geography: nationwide
+  sampling:
+    strategy: demographic_quota
+    variables: [age, gender, region, household_type, education, income_band]
+    tolerance_pp: 2
+  random_seed: 20261031
+research:
+  search_terms_en: [trust, retail, "consumer protection", delivery, complaint, "e-commerce", "online shopping", electronic, "after-sales", warranty]
+  search_terms_el: [εμπιστοσύνη, παράδοση, επιστροφή, παράπονο, ηλεκτρικ, εγγύηση, εξυπηρέτηση]
+  use_lake: true
+  use_official: true
+  web: {enabled: false}
+  max_sources: 40
+  per_question: 3
+llm:
+  max_tokens: 1500
+hybrid_weight: 0.5
+reference_distributions: []   # ποσοστά Brand Intelligence (π.χ. sentiment) για τον έλεγχο μη αντιγραφής — όταν υπάρξει η αναφορά
+report:
+  key_questions: [Q4, Q7, Q12a, Q12b, Q16, Q17, Q18a, Q18b, Q20a, Q20b]
+  crosstab_questions: [Q7, Q16, Q23]
+  implications: []
+  conclusions: []
