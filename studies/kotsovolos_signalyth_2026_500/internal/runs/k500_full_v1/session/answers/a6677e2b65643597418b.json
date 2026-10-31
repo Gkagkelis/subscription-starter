@@ -1,0 +1,16 @@
+{
+ "key": "a6677e2b65643597418b",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.21,
+    "2": 0.7,
+    "3": 0.09
+   },
+   "rationale": "Μεγάλη οικογένεια, ψωνίζει σε αλυσίδα και marketplace με έμφαση σε τιμή και δόσεις, αλλά ξέρει τον Κωτσόβολο μόνο ως όνομα."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 83)",
+ "imported_at": "2026-10-31T20:05:37Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

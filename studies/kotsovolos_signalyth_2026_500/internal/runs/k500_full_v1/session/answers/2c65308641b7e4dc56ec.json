@@ -1,0 +1,16 @@
+{
+ "key": "2c65308641b7e4dc56ec",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.58,
+    "2": 0.33,
+    "3": 0.09
+   },
+   "rationale": "Ψωνίζει σε μεγάλη αλυσίδα φυσικά και online στη Θεσσαλία και γνωρίζει αρκετά την εταιρεία· αγορά εκεί μάλλον πιθανή."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 79)",
+ "imported_at": "2026-10-31T20:05:36Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

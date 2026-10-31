@@ -1,0 +1,16 @@
+{
+ "key": "f6d360ee8035d7cd4f3f",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.64,
+    "2": 0.24,
+    "3": 0.12
+   },
+   "rationale": "Συνταξιούχος στην Αττική, αγοράζει από μεγάλες αλυσίδες φυσικά και online και γνωρίζει πολύ καλά τον Κωτσόβολο· πιθανή αγορά."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 86)",
+ "imported_at": "2026-10-31T20:05:37Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

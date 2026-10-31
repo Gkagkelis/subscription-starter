@@ -1,0 +1,16 @@
+{
+ "key": "2b2beeaee28be720ef48",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.6,
+    "2": 0.33,
+    "3": 0.07
+   },
+   "rationale": "Οικογένεια στην Αττική που αγόρασε από αλυσίδες σε φυσικό και online κανάλι και γνωρίζει πολύ καλά τον Κωτσόβολο· πιθανότατα ναι."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 87)",
+ "imported_at": "2026-10-31T20:05:36Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

@@ -1,0 +1,16 @@
+{
+ "key": "34a2a8d23828d80c433f",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.2,
+    "2": 0.67,
+    "3": 0.13
+   },
+   "rationale": "Φοιτητής που ψωνίζει σε αλυσίδες και marketplaces, αλλά γνωρίζει τον Κωτσόβολο μόνο ως όνομα· μάλλον αγόρασε από άλλους παρόχους."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 79)",
+ "imported_at": "2026-10-31T20:05:36Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

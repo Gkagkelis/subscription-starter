@@ -1,0 +1,16 @@
+{
+ "key": "1410d0db5a8a706b0918",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.55,
+    "2": 0.35,
+    "3": 0.1
+   },
+   "rationale": "Φοιτητής με άνεση που ψωνίζει σε αλυσίδες φυσικά και online και σε marketplaces· γνωρίζει αρκετά την εταιρεία."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 78)",
+ "imported_at": "2026-10-31T20:05:36Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

@@ -1,0 +1,16 @@
+{
+ "key": "564f63d737edc82de0ef",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.6,
+    "2": 0.34,
+    "3": 0.06
+   },
+   "rationale": "Οικογένεια στα Ιόνια, ψωνίζει σε μεγάλη αλυσίδα φυσικά και online με δόσεις, γνωρίζει αρκετά την εταιρεία· αρκετά πιθανή αγορά."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 80)",
+ "imported_at": "2026-10-31T20:05:37Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

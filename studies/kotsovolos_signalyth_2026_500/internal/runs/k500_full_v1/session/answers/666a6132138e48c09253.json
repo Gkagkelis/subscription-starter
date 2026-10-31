@@ -1,0 +1,16 @@
+{
+ "key": "666a6132138e48c09253",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.52,
+    "2": 0.41,
+    "3": 0.07
+   },
+   "rationale": "Αγόρασε από μεγάλη αλυσίδα και online marketplace στη Θεσσαλονίκη· γνωρίζει αρκετά τον Κωτσόβολο, αλλά η έμφαση στην τιμή αφήνει περιθώριο για άλλη αλυσίδα."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 88)",
+ "imported_at": "2026-10-31T20:05:37Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

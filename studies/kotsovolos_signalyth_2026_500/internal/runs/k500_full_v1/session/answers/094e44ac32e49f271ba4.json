@@ -1,0 +1,16 @@
+{
+ "key": "094e44ac32e49f271ba4",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.45,
+    "2": 0.42,
+    "3": 0.13
+   },
+   "rationale": "Φοιτητής που ψωνίζει σε αλυσίδα, μικρά καταστήματα και marketplaces με έμφαση στην τιμή· η αγορά από την αλυσίδα είναι αβέβαιη."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 78)",
+ "imported_at": "2026-10-31T20:05:36Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

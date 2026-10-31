@@ -1,0 +1,16 @@
+{
+ "key": "986c43f000f03266d3fe",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.19,
+    "2": 0.72,
+    "3": 0.09
+   },
+   "rationale": "Αγόρασε από μεγάλη αλυσίδα και marketplace, όμως γνωρίζει τον Κωτσόβολο μόνο ως όνομα· πιθανότερα άλλο κατάστημα."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 83)",
+ "imported_at": "2026-10-31T20:05:37Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

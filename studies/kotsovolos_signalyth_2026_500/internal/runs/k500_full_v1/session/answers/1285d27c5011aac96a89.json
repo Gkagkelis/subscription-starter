@@ -1,0 +1,16 @@
+{
+ "key": "1285d27c5011aac96a89",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.1,
+    "2": 0.68,
+    "3": 0.22
+   },
+   "rationale": "Δεν θυμάται αν αγόρασε συσκευή γενικά και γνωρίζει την αλυσίδα μόνο ως όνομα, σε νησιωτική περιοχή."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 78)",
+ "imported_at": "2026-10-31T20:05:36Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

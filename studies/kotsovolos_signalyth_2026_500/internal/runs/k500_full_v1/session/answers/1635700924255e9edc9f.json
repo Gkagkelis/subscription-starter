@@ -1,0 +1,16 @@
+{
+ "key": "1635700924255e9edc9f",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.58,
+    "2": 0.33,
+    "3": 0.09
+   },
+   "rationale": "Ψώνισε από μεγάλη αλυσίδα και μικρό κατάστημα στην Πάτρα, με άνεση και αρκετή γνώση της εταιρείας."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 78)",
+ "imported_at": "2026-10-31T20:05:36Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

@@ -1,0 +1,16 @@
+{
+ "key": "6e4fa7aef2cb6fa0279f",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.04,
+    "2": 0.91,
+    "3": 0.05
+   },
+   "rationale": "Δεν αγόρασε συσκευή, ζει μόνη σε αγροτικό νησί του Βορείου Αιγαίου και ξέρει την αλυσίδα μόνο ως όνομα· πρακτικά όχι."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 81)",
+ "imported_at": "2026-10-31T20:05:37Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

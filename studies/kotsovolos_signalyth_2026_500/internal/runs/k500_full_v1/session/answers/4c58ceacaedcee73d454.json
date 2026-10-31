@@ -1,0 +1,16 @@
+{
+ "key": "4c58ceacaedcee73d454",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.5,
+    "2": 0.43,
+    "3": 0.07
+   },
+   "rationale": "Σε αγροτικό νησί, συνδυάζει μεγάλη αλυσίδα και marketplace, νοιάζεται για την παράδοση· γνωρίζει την εταιρεία, άρα περίπου ισόπαλα."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 80)",
+ "imported_at": "2026-10-31T20:05:36Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

@@ -1,0 +1,16 @@
+{
+ "key": "5c74a4dd92d8c7781e6b",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.3,
+    "2": 0.63,
+    "3": 0.07
+   },
+   "rationale": "Αγόρασε συσκευές αλλά από μικρό κατάστημα και marketplace, όχι μεγάλη αλυσίδα· γνωρίζει αρκετά τον Κωτσόβολο, άρα μικρότερη πιθανότητα αγοράς εκεί."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 88)",
+ "imported_at": "2026-10-31T20:05:37Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

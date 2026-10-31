@@ -1,0 +1,16 @@
+{
+ "key": "4c85b96abe9cbf323b73",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.12,
+    "2": 0.78,
+    "3": 0.1
+   },
+   "rationale": "Αγόρασε online και από μικρό τοπικό κατάστημα στο νησί, γνωρίζει τον Κωτσόβολο μόνο ως όνομα· μάλλον όχι."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 87)",
+ "imported_at": "2026-10-31T20:05:36Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

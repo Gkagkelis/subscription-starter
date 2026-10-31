@@ -1,0 +1,16 @@
+{
+ "key": "33ee62d1f8e534e4eab1",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.04,
+    "2": 0.87,
+    "3": 0.09
+   },
+   "rationale": "Δεν αγόρασε καμία ηλεκτρική συσκευή τους τελευταίους 24 μήνες και δυσκολεύεται οικονομικά· σχεδόν σίγουρα όχι."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 87)",
+ "imported_at": "2026-10-31T20:05:36Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

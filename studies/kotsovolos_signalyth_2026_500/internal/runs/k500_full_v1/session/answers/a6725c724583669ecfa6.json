@@ -1,0 +1,16 @@
+{
+ "key": "a6725c724583669ecfa6",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.22,
+    "2": 0.7,
+    "3": 0.08
+   },
+   "rationale": "Γνωρίζει πολύ καλά την αλυσίδα, αλλά δηλώνει αγορές μόνο από αμιγώς online marketplace· με χαμηλό εισόδημα, μάλλον δεν αγόρασε από Κωτσόβολο."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 89)",
+ "imported_at": "2026-10-31T20:05:37Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

@@ -1,0 +1,16 @@
+{
+ "key": "402789eaf739c7a3d4a5",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.25,
+    "2": 0.68,
+    "3": 0.07
+   },
+   "rationale": "Νεαρή άνεργη, ψωνίζει μόνο από marketplace για χαμηλή τιμή· παρότι γνωρίζει την αλυσίδα, λιγότερο πιθανό να αγόρασε από εκεί."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 80)",
+ "imported_at": "2026-10-31T20:05:36Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

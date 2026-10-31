@@ -1,0 +1,16 @@
+{
+ "key": "4c9e7290c430ba150925",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.22,
+    "2": 0.7,
+    "3": 0.08
+   },
+   "rationale": "Αγόρασε μόνο από μικρό τοπικό κατάστημα στα Ιόνια, παρότι γνωρίζει αρκετά τον Κωτσόβολο· μάλλον όχι."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 87)",
+ "imported_at": "2026-10-31T20:05:36Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

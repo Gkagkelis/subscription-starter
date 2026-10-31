@@ -1,0 +1,16 @@
+{
+ "key": "a7856c437cc810be9b30",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.05,
+    "2": 0.85,
+    "3": 0.1
+   },
+   "rationale": "Δεν αγόρασε ηλεκτρική συσκευή τα τελευταία 24 μήνες, παρότι λέει ότι γνωρίζει καλά την αλυσίδα."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 83)",
+ "imported_at": "2026-10-31T20:05:37Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

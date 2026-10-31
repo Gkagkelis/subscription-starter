@@ -1,0 +1,16 @@
+{
+ "key": "0b15ef88b949d76f5312",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.5,
+    "2": 0.43,
+    "3": 0.07
+   },
+   "rationale": "Μεγάλο εύπορο νοικοκυριό που αγόρασε από μεγάλη αλυσίδα και online, γνωρίζει αρκετά την εταιρεία· πιθανή αλλά όχι βέβαιη αγορά."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 87)",
+ "imported_at": "2026-10-31T20:05:36Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

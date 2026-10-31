@@ -1,0 +1,16 @@
+{
+ "key": "1aa0049bc1d543c6fedb",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.05,
+    "2": 0.86,
+    "3": 0.09
+   },
+   "rationale": "Δήλωσε ότι δεν αγόρασε ηλεκτρική συσκευή τα τελευταία δύο χρόνια."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 78)",
+ "imported_at": "2026-10-31T20:05:36Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

@@ -1,0 +1,16 @@
+{
+ "key": "6cdfb8638b9b9b6262b8",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.62,
+    "2": 0.33,
+    "3": 0.05
+   },
+   "rationale": "Γνωρίζει πολύ καλά την αλυσίδα, αγοράζει από μεγάλες αλυσίδες και online, εκτιμά after-sales· η αγροτική περιοχή μειώνει λίγο, αλλά το e-shop καλύπτει."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 81)",
+ "imported_at": "2026-10-31T20:05:37Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

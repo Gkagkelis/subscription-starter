@@ -1,0 +1,16 @@
+{
+ "key": "2d0b75a4052a53ad3aba",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.45,
+    "2": 0.45,
+    "3": 0.1
+   },
+   "rationale": "Αγόρασε από μεγάλη αλυσίδα και γνωρίζει αρκετά τον Κωτσόβολο, αλλά με πολύ περιορισμένο εισόδημα· αβέβαιο."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 87)",
+ "imported_at": "2026-10-31T20:05:36Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

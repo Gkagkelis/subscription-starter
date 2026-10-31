@@ -1,0 +1,16 @@
+{
+ "key": "5502f9ee121432b82baf",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.55,
+    "2": 0.4,
+    "3": 0.05
+   },
+   "rationale": "Αγοράζει online από μεγάλες αλυσίδες και marketplace, εκτιμά εγγύηση και φήμη· γνωρίζει αρκετά την εταιρεία."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 80)",
+ "imported_at": "2026-10-31T20:05:36Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

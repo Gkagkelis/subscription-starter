@@ -1,0 +1,16 @@
+{
+ "key": "3d8fe27f90cfec3ebc9d",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.55,
+    "2": 0.4,
+    "3": 0.05
+   },
+   "rationale": "Νέος πατέρας στη Θεσσαλονίκη, αγοράζει μόνο online από μεγάλες αλυσίδες με κριτήριο την τιμή· γνωρίζει την εταιρεία, άρα αρκετά πιθανή αγορά."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 80)",
+ "imported_at": "2026-10-31T20:05:36Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

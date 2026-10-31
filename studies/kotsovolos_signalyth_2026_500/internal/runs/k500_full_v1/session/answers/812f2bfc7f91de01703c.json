@@ -1,0 +1,16 @@
+{
+ "key": "812f2bfc7f91de01703c",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.24,
+    "2": 0.66,
+    "3": 0.1
+   },
+   "rationale": "Αγοράζει από αλυσίδες και online, αλλά γνωρίζει τον Κωτσόβολο μόνο ως όνομα και ζει σε αγροτικό νησί· μάλλον αγόρασε αλλού."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 82)",
+ "imported_at": "2026-10-31T20:05:37Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

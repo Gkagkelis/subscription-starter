@@ -1,0 +1,16 @@
+{
+ "key": "04cae12f47014b6de28f",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.72,
+    "2": 0.22,
+    "3": 0.06
+   },
+   "rationale": "Ψώνισε από αλυσίδες φυσικά και online και γνωρίζει πολύ καλά την εταιρεία· αστική Κεντρική Μακεδονία με εύκολη πρόσβαση."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 78)",
+ "imported_at": "2026-10-31T20:05:36Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

@@ -1,0 +1,16 @@
+{
+ "key": "8749bcca0fa730ad9a20",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.2,
+    "2": 0.72,
+    "3": 0.08
+   },
+   "rationale": "Αγόρασε μόνο από αμιγώς ηλεκτρονικό marketplace, παρότι γνωρίζει αρκετά την εταιρεία· αγορά από Κωτσόβολο λιγότερο πιθανή."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 82)",
+ "imported_at": "2026-10-31T20:05:37Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

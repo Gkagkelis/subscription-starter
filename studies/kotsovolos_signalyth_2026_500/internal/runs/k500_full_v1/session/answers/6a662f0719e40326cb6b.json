@@ -1,0 +1,16 @@
+{
+ "key": "6a662f0719e40326cb6b",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.08,
+    "2": 0.86,
+    "3": 0.06
+   },
+   "rationale": "Αγόρασε από μικρό τοπικό κατάστημα και marketplace, όχι από αλυσίδα, και ξέρει τον Κωτσόβολο μόνο ως όνομα· σχεδόν σίγουρα όχι."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 81)",
+ "imported_at": "2026-10-31T20:05:37Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

@@ -1,0 +1,16 @@
+{
+ "key": "d4d6aad3642a6bc7ad81",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.3,
+    "2": 0.57,
+    "3": 0.13
+   },
+   "rationale": "Αγοράζει από μεγάλες αλυσίδες και online με κριτήριο τις δόσεις, όμως γνωρίζει τον Κωτσόβολο μόνο ως όνομα· μάλλον όχι, με αρκετή αβεβαιότητα."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 90)",
+ "imported_at": "2026-10-31T20:05:37Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

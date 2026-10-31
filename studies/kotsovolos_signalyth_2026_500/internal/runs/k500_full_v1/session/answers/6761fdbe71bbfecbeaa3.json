@@ -1,0 +1,16 @@
+{
+ "key": "6761fdbe71bbfecbeaa3",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.5,
+    "2": 0.44,
+    "3": 0.06
+   },
+   "rationale": "Αγόρασε από μεγάλη αλυσίδα και marketplace, θέλει δόσεις και διαθεσιμότητα, γνωρίζει αρκετά την εταιρεία· περίπου ισοπίθανο να ψώνισε από Κωτσόβολο."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 81)",
+ "imported_at": "2026-10-31T20:05:37Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

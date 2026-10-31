@@ -1,0 +1,16 @@
+{
+ "key": "942c49e42693194da1d5",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.71,
+    "2": 0.24,
+    "3": 0.05
+   },
+   "rationale": "Αγοράζει από μεγάλη αλυσίδα και marketplace και γνωρίζει πολύ καλά τον Κωτσόβολο· η τιμή μπορεί να τη στρέψει αλλού."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 83)",
+ "imported_at": "2026-10-31T20:05:37Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

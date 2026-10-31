@@ -1,0 +1,16 @@
+{
+ "key": "2f5188aace50405f0ff8",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.22,
+    "2": 0.7,
+    "3": 0.08
+   },
+   "rationale": "Αγόρασε από μεγάλη φυσική αλυσίδα, αλλά γνωρίζει τον Κωτσόβολο μόνο ως όνομα· πιθανότερα άλλη αλυσίδα."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 87)",
+ "imported_at": "2026-10-31T20:05:36Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

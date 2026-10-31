@@ -1,0 +1,16 @@
+{
+ "key": "34cd96e5fb2114fe6cc3",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.14,
+    "2": 0.78,
+    "3": 0.08
+   },
+   "rationale": "Δεν αγόρασε συσκευή στο διάστημα· γνωρίζει αρκετά την αλυσίδα, οπότε μικρή πιθανότητα για αξεσουάρ ή δώρο από εκεί."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 79)",
+ "imported_at": "2026-10-31T20:05:36Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

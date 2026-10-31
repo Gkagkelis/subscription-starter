@@ -1,0 +1,16 @@
+{
+ "key": "387b93e610f48ce406c5",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.18,
+    "2": 0.72,
+    "3": 0.1
+   },
+   "rationale": "Αγόρασε από marketplace και απευθείας από κατασκευαστή, όχι από αλυσίδα· γνωρίζει όμως αρκετά την εταιρεία, άρα μικρή πιθανότητα αγοράς εκεί."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 79)",
+ "imported_at": "2026-10-31T20:05:36Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

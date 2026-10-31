@@ -1,0 +1,16 @@
+{
+ "key": "0b5b2cd9ed250e8a8833",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.25,
+    "2": 0.62,
+    "3": 0.13
+   },
+   "rationale": "Αγόρασε από μεγάλες αλυσίδες αλλά γνωρίζει την εταιρεία μόνο ως όνομα, άρα πιθανότερα ψώνισε από άλλη αλυσίδα."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 78)",
+ "imported_at": "2026-10-31T20:05:36Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

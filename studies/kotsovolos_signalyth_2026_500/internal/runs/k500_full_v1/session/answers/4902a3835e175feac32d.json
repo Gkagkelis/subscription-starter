@@ -1,0 +1,16 @@
+{
+ "key": "4902a3835e175feac32d",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.22,
+    "2": 0.7,
+    "3": 0.08
+   },
+   "rationale": "Σε αγροτικό νησί του Αιγαίου, αγοράζει από τοπικό μαγαζί και marketplace, χωρίς μεγάλη αλυσίδα· χαμηλή πιθανότητα αγοράς από την αλυσίδα."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 80)",
+ "imported_at": "2026-10-31T20:05:36Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

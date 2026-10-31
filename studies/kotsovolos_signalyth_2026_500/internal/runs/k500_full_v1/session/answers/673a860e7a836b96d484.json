@@ -1,0 +1,16 @@
+{
+ "key": "673a860e7a836b96d484",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.15,
+    "2": 0.78,
+    "3": 0.07
+   },
+   "rationale": "Αγόρασε μόνο από marketplace, όχι από μεγάλη αλυσίδα, παρότι γνωρίζει αρκετά την εταιρεία· αγορά από Κωτσόβολο μάλλον δεν έγινε."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 81)",
+ "imported_at": "2026-10-31T20:05:37Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

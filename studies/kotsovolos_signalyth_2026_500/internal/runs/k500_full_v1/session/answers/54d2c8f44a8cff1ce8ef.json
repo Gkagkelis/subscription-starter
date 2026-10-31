@@ -1,0 +1,16 @@
+{
+ "key": "54d2c8f44a8cff1ce8ef",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.42,
+    "2": 0.5,
+    "3": 0.08
+   },
+   "rationale": "Ψωνίζει σε πολλά κανάλια, φυσικά και online, συγκρίνοντας τιμές· γνωρίζει την εταιρεία μόνο ως όνομα, άρα κάτω από το μισό."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 80)",
+ "imported_at": "2026-10-31T20:05:36Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

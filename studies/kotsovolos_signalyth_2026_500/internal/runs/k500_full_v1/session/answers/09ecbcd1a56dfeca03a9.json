@@ -1,0 +1,16 @@
+{
+ "key": "09ecbcd1a56dfeca03a9",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.68,
+    "2": 0.24,
+    "3": 0.08
+   },
+   "rationale": "Αγόρασε από μεγάλη αλυσίδα φυσικών καταστημάτων σε αστική Κρήτη και γνωρίζει πολύ καλά την εταιρεία."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 78)",
+ "imported_at": "2026-10-31T20:05:36Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

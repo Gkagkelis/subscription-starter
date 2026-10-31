@@ -1,0 +1,16 @@
+{
+ "key": "df8b42db9ac79b528778",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.3,
+    "2": 0.6,
+    "3": 0.1
+   },
+   "rationale": "Αγρότης στην Ήπειρο που αγοράζει από τοπικό κατάστημα και marketplace· γνωρίζει αρκετά την αλυσίδα, αλλά τα κανάλια του δείχνουν μάλλον όχι."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 90)",
+ "imported_at": "2026-10-31T20:05:37Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

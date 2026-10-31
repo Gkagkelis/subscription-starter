@@ -1,0 +1,16 @@
+{
+ "key": "93cdc42258cdb87ee934",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.05,
+    "2": 0.85,
+    "3": 0.1
+   },
+   "rationale": "Ψώνισε μόνο από μικρό τοπικό κατάστημα σε αγροτική Κρήτη και γνωρίζει την αλυσίδα μόνο ως όνομα."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 83)",
+ "imported_at": "2026-10-31T20:05:37Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

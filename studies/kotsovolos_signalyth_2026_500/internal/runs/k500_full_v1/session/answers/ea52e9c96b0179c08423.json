@@ -1,0 +1,16 @@
+{
+ "key": "ea52e9c96b0179c08423",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.45,
+    "2": 0.47,
+    "3": 0.08
+   },
+   "rationale": "Νέα μητέρα σε νησί, αγοράζει online από e-shop μεγάλων αλυσίδων και marketplaces με κριτήριο την τιμή· γνωρίζει αρκετά την εταιρεία, άρα μοιρασμένη πιθανότητα."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 90)",
+ "imported_at": "2026-10-31T20:05:37Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

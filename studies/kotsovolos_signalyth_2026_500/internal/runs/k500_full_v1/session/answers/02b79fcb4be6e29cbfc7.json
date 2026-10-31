@@ -1,0 +1,16 @@
+{
+ "key": "02b79fcb4be6e29cbfc7",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.65,
+    "2": 0.28,
+    "3": 0.07
+   },
+   "rationale": "Γνωρίζει πολύ καλά την αλυσίδα και αγόρασε από ηλεκτρονικό κατάστημα μεγάλης αλυσίδας· πιθανή αγορά, αν και ψωνίζει και σε marketplaces."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 78)",
+ "imported_at": "2026-10-31T20:05:36Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

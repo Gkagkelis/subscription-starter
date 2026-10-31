@@ -1,0 +1,16 @@
+{
+ "key": "4993b78e55033f23fd9f",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.3,
+    "2": 0.62,
+    "3": 0.08
+   },
+   "rationale": "Νεαρός που ξέρει την εταιρεία μόνο ως όνομα· έχει αγοράσει από μεγάλη αλυσίδα, αλλά μάλλον όχι από αυτήν."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 80)",
+ "imported_at": "2026-10-31T20:05:36Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

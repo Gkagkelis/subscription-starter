@@ -1,0 +1,16 @@
+{
+ "key": "f4336456455a6dd4df68",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.24,
+    "2": 0.63,
+    "3": 0.13
+   },
+   "rationale": "Αγόρασε από μεγάλες αλυσίδες φυσικά και online, αλλά γνωρίζει τον Κωτσόβολο μόνο ως όνομα· μάλλον ψώνισε από άλλη αλυσίδα."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 86)",
+ "imported_at": "2026-10-31T20:05:37Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

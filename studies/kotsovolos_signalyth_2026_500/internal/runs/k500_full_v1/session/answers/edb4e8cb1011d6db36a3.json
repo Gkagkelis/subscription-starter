@@ -1,0 +1,16 @@
+{
+ "key": "edb4e8cb1011d6db36a3",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.08,
+    "2": 0.5,
+    "3": 0.42
+   },
+   "rationale": "Δεν θυμάται καν αν αγόρασε ηλεκτρική συσκευή και γνωρίζει την αλυσίδα μόνο ως όνομα· πιθανότερα όχι ή δεν θυμάται."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 90)",
+ "imported_at": "2026-10-31T20:05:37Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

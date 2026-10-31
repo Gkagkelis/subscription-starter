@@ -1,0 +1,16 @@
+{
+ "key": "4216da04ba0131aad32c",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.6,
+    "2": 0.34,
+    "3": 0.06
+   },
+   "rationale": "Άνετο νοικοκυριό στην Αττική, ψωνίζει σε μεγάλες αλυσίδες και δίνει βάρος στη φήμη· γνωρίζει αρκετά την εταιρεία."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 80)",
+ "imported_at": "2026-10-31T20:05:36Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

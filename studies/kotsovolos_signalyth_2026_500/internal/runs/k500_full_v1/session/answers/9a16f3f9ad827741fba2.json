@@ -1,0 +1,16 @@
+{
+ "key": "9a16f3f9ad827741fba2",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.64,
+    "2": 0.3,
+    "3": 0.06
+   },
+   "rationale": "Αγοράζει από μεγάλες αλυσίδες φυσικά και online, εκτιμά εξυπηρέτηση και φήμη και γνωρίζει αρκετά τον Κωτσόβολο."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 83)",
+ "imported_at": "2026-10-31T20:05:37Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

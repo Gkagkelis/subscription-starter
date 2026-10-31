@@ -1,0 +1,16 @@
+{
+ "key": "180ba7cdcc4ece8cf2d1",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.18,
+    "2": 0.72,
+    "3": 0.1
+   },
+   "rationale": "Αγόρασε από μικρό κατάστημα και marketplace, όχι από μεγάλη αλυσίδα, άρα η αγορά από την αλυσίδα είναι λιγότερο πιθανή."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 78)",
+ "imported_at": "2026-10-31T20:05:36Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

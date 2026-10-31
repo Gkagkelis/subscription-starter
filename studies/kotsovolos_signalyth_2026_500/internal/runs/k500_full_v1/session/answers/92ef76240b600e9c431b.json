@@ -1,0 +1,16 @@
+{
+ "key": "92ef76240b600e9c431b",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.76,
+    "2": 0.19,
+    "3": 0.05
+   },
+   "rationale": "Αγοράζει από μεγάλη αλυσίδα και marketplace, άνετο νοικοκυριό στην Αττική, γνωρίζει τον Κωτσόβολο πολύ καλά."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 83)",
+ "imported_at": "2026-10-31T20:05:37Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

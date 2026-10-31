@@ -1,0 +1,16 @@
+{
+ "key": "125b0bc5bc24b6c605b7",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.28,
+    "2": 0.55,
+    "3": 0.17
+   },
+   "rationale": "Φοιτήτρια που αγόρασε μόνο online από αλυσίδα, αλλά γνωρίζει την εταιρεία μόνο ως όνομα."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 78)",
+ "imported_at": "2026-10-31T20:05:36Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

@@ -1,0 +1,16 @@
+{
+ "key": "219bd80c8c5c77d7820e",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.22,
+    "2": 0.66,
+    "3": 0.12
+   },
+   "rationale": "Αγοράζει από πολλά κανάλια με βάση την τιμή, όμως γνωρίζει τον Κωτσόβολο μόνο ως όνομα· μάλλον όχι."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 87)",
+ "imported_at": "2026-10-31T20:05:36Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

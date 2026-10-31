@@ -1,0 +1,16 @@
+{
+ "key": "0a05f8c8bf97feaf2a19",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.2,
+    "2": 0.72,
+    "3": 0.08
+   },
+   "rationale": "Αγόρασε από μεγάλη αλυσίδα, αλλά γνωρίζει τον Κωτσόβολο μόνο ως όνομα και ζει σε νησιωτική αγροτική περιοχή· μάλλον όχι."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 87)",
+ "imported_at": "2026-10-31T20:05:36Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

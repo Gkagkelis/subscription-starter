@@ -1,0 +1,16 @@
+{
+ "key": "8819ba1a63d9ef9b1cee",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.58,
+    "2": 0.34,
+    "3": 0.08
+   },
+   "rationale": "Εύπορος σε αγροτική Πελοπόννησο, αγοράζει από e-shop μεγάλης αλυσίδας με έμφαση στην παράδοση και γνωρίζει αρκετά την εταιρεία· μάλλον ναι."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 82)",
+ "imported_at": "2026-10-31T20:05:37Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

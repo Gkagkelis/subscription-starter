@@ -1,0 +1,16 @@
+{
+ "key": "9b8b7c6264ecf4072ceb",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.47,
+    "2": 0.43,
+    "3": 0.1
+   },
+   "rationale": "Νεαρός φοιτητής, ψωνίζει σε αλυσίδα και marketplace και γνωρίζει αρκετά την εταιρεία· ίσως αγοράζουν οι γονείς."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 83)",
+ "imported_at": "2026-10-31T20:05:37Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

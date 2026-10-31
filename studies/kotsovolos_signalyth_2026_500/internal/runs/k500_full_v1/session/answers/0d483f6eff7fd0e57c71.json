@@ -1,0 +1,16 @@
+{
+ "key": "0d483f6eff7fd0e57c71",
+ "answer": {
+  "Q05": {
+   "probabilities": {
+    "1": 0.6,
+    "2": 0.32,
+    "3": 0.08
+   },
+   "rationale": "Γνωρίζει πολύ καλά την αλυσίδα και αγόρασε από μεγάλη αλυσίδα, παρά τα οικονομικά προβλήματα του νοικοκυριού."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 78)",
+ "imported_at": "2026-10-31T20:05:36Z",
+ "source": "Claude Code session (AI), όχι mock"
+}
