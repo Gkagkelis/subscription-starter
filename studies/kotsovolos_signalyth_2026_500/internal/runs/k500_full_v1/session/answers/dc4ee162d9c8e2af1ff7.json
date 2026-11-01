@@ -1,0 +1,16 @@
+{
+ "key": "dc4ee162d9c8e2af1ff7",
+ "answer": {
+  "Q15": {
+   "probabilities": {
+    "1": 0.07,
+    "2": 0.83,
+    "3": 0.1
+   },
+   "rationale": "Μικροσυσκευή, μάλλον θετική εμπειρία, σαφής ενημέρωση και έγκαιρη παράδοση· πρόβλημα μετά την αγορά είναι απίθανο."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 199)",
+ "imported_at": "2026-11-01T00:43:20Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

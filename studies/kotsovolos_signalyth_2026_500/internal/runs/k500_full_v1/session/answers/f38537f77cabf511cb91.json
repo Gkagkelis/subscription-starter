@@ -1,0 +1,18 @@
+{
+ "key": "f38537f77cabf511cb91",
+ "answer": {
+  "Q14": {
+   "probabilities": {
+    "1": 0.55,
+    "2": 0.28,
+    "3": 0.05,
+    "4": 0.04,
+    "5": 0.08
+   },
+   "rationale": "Online αγορά κινητού με μάλλον θετική εμπειρία και καλή ενημέρωση· η παράδοση μάλλον έγινε στην ώρα της."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 200)",
+ "imported_at": "2026-11-01T00:43:20Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

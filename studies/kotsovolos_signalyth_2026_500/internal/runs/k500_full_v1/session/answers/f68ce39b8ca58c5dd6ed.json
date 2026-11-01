@@ -1,0 +1,18 @@
+{
+ "key": "f68ce39b8ca58c5dd6ed",
+ "answer": {
+  "Q14": {
+   "probabilities": {
+    "1": 0.4,
+    "2": 0.36,
+    "3": 0.08,
+    "4": 0.06,
+    "5": 0.1
+   },
+   "rationale": "Online μικροσυσκευή με μάλλον θετική εμπειρία αλλά μέτρια ενημέρωση· πιθανή παράδοση στην ώρα της ή με μικρή απόκλιση."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 200)",
+ "imported_at": "2026-11-01T00:43:20Z",
+ "source": "Claude Code session (AI), όχι mock"
+}
