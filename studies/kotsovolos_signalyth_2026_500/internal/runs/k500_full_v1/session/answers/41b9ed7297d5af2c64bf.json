@@ -1,0 +1,16 @@
+{
+ "key": "41b9ed7297d5af2c64bf",
+ "answer": {
+  "Q15": {
+   "probabilities": {
+    "1": 0.1,
+    "2": 0.82,
+    "3": 0.08
+   },
+   "rationale": "Παράδοση πλήρως εγκαίρως, μάλλον θετική εμπειρία και πολύ θετική εικόνα· πρόβλημα μετά την αγορά είναι απίθανο."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 181)",
+ "imported_at": "2026-11-01T00:39:25Z",
+ "source": "Claude Code session (AI), όχι mock"
+}

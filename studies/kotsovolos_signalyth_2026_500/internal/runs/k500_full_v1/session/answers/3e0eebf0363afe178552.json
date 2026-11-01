@@ -1,0 +1,18 @@
+{
+ "key": "3e0eebf0363afe178552",
+ "answer": {
+  "Q26": {
+   "probabilities": {
+    "1": 0.06,
+    "2": 0.02,
+    "3": 0.01,
+    "4": 0.76,
+    "5": 0.15
+   },
+   "rationale": "Νέος που αγοράζει από marketplaces και δεν μπορεί να κρίνει την αλυσίδα· σχεδόν σίγουρα δεν συζήτησε, με κάποια αβεβαιότητα μνήμης."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 181)",
+ "imported_at": "2026-11-01T00:39:25Z",
+ "source": "Claude Code session (AI), όχι mock"
+}
