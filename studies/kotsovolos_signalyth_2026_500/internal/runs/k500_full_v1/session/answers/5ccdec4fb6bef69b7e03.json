@@ -1,0 +1,18 @@
+{
+ "key": "5ccdec4fb6bef69b7e03",
+ "answer": {
+  "Q26": {
+   "probabilities": {
+    "1": 0.03,
+    "2": 0.07,
+    "3": 0.01,
+    "4": 0.83,
+    "5": 0.06
+   },
+   "rationale": "Γνωρίζει την αλυσίδα μόνο ως όνομα και αγοράζει από marketplaces· η σύσταση 0 δείχνει απροθυμία, αλλά πιθανότατα δεν έχει μιλήσει καθόλου για αυτήν."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 173)",
+ "imported_at": "2026-10-31T20:25:12Z",
+ "source": "Claude Code session (AI), όχι mock"
+}
