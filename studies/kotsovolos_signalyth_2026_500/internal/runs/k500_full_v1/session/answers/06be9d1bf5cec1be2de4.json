@@ -1,0 +1,16 @@
+{
+ "key": "06be9d1bf5cec1be2de4",
+ "answer": {
+  "Q15": {
+   "probabilities": {
+    "1": 0.13,
+    "2": 0.8,
+    "3": 0.07
+   },
+   "rationale": "Online αγορά τηλεόρασης με παράδοση πλήρως στην ώρα της και μάλλον θετική εμπειρία· πρόβλημα μετά την αγορά μάλλον δεν προέκυψε."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 178)",
+ "imported_at": "2026-11-01T00:40:49Z",
+ "source": "Claude Code session (AI), όχι mock"
+}
