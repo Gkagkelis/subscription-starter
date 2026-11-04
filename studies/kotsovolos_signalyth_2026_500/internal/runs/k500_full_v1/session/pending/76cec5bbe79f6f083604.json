@@ -1,0 +1,64 @@
+{
+ "key": "76cec5bbe79f6f083604",
+ "created_at": "2026-11-01T00:49:43Z",
+ "question_ids": [
+  "Q29"
+ ],
+ "system_prompt_file": "system_prompt.txt",
+ "user_prompt": "ΜΕΛΕΤΗ: Έρευνα για την αγορά ηλεκτρικών και ηλεκτρονικών ειδών, τα καταστήματα και την εμπειρία πελατών. Πληθυσμός: adults_18_plus (GR).\n\nΣΥΝΘΕΤΙΚΟ ΠΡΟΦΙΛ:\nΓυναίκα, ηλικία 65+\nΠεριφέρεια: Δυτική Ελλάδα (αστική περιοχή)\nΕκπαίδευση: γυμνάσιο\nΝοικοκυριό: ζευγάρι χωρίς παιδιά, μέγεθος 2\nΕισοδηματικό πεμπτημόριο νοικοκυριού: 4 (1 = χαμηλότερο, 5 = υψηλότερο)\nΕκτιμώμενα χαρακτηριστικά (στατιστική εκτίμηση του μοντέλου PIE από ελληνικά μικροδεδομένα διαΝΕΟσις 2023–24 με βάση τα δημογραφικά· ΟΧΙ γνωστά στοιχεία του προσώπου): απασχόληση: δημόσιος υπάλληλος; οικονομική κατάσταση νοικοκυριού: τα βγάζει πέρα χωρίς να περισσεύουν; υποκειμενική κοινωνική τάξη: μεσαία\nΆγνωστα (δεν υπάρχουν δεδομένα): επάγγελμα, προσωπικό ιστορικό αγορών.\n\nΠΡΟΗΓΟΥΜΕΝΕΣ ΑΠΑΝΤΗΣΕΙΣ ΤΟΥ ΙΔΙΟΥ ΠΡΟΣΩΠΟΥ:\n- D01 «Ποια είναι η ηλικιακή σας ομάδα;»: 65+\n- D02 «Πώς αυτοπροσδιορίζεστε ως προς το φύλο;»: Γυναίκα\n- D03 «Σε ποια περιφέρεια κατοικείτε;»: Δυτική Ελλάδα\n- Q01 «Τους τελευταίους 24 μήνες αγοράσατε ηλεκτρική ή ηλεκτρονική συσκευή για εσάς ή το νοικο…»: Ναι\n- Q02 «Από ποιους τύπους καταστημάτων αγοράσατε ηλεκτρικά ή ηλεκτρονικά είδη τους τελευταίους…»: Μεγάλη αλυσίδα φυσικών καταστημάτων\n- Q03 «Ποιοι τρεις παράγοντες είναι σημαντικότεροι όταν επιλέγετε κατάστημα ηλεκτρικών ειδών;»: Αξιοπιστία παράδοσης, Εγγύηση / επισκευή / after-sales\n- Q04 «Πόσο εξοικειωμένος/η είστε με την αλυσίδα Κωτσόβολος;»: Τη γνωρίζω πολύ καλά\n- Q05 «Έχετε πραγματοποιήσει αγορά από τον Κωτσόβολο τους τελευταίους 24 μήνες;»: Όχι\n- Q08 «Ποια είναι συνολικά η εικόνα σας για τον Κωτσόβολο;»: Μάλλον αρνητική\n- Q09 «Πόσο εμπιστεύεστε τον Κωτσόβολο ως κατάστημα για αγορά ηλεκτρικών ειδών;»: Λίγο\n- Q10 «Σε ποιο βαθμό συμφωνείτε ότι ο Κωτσόβολος τηρεί τις δεσμεύσεις του προς τους πελάτες;»: Συμφωνώ\n- Q11 «Ποια από τα ακόλουθα επηρεάζουν περισσότερο την εμπιστοσύνη σας σε ένα κατάστημα ηλεκτρ…»: Ποιότητα προϊόντων, Αξιόπιστη εγγύηση / επισκευή\n- Q22 «Σε σύγκριση με άλλα καταστήματα ηλεκτρικών ειδών που γνωρίζετε, πώς αξιολογείτε τον Κωτ…»: Περίπου το ίδιο\n- Q23 «Ποιες εναλλακτικές θα εξετάζατε για την επόμενη αγορά ηλεκτρικών ειδών; Επιλέξτε έως τρ…»: Public\n- Q24 «Πόσο πιθανό είναι να επιλέξετε τον Κωτσόβολο στην επόμενη σχετική αγορά σας;»: Αρκετά πιθανό\n- Q25 «Πόσο πιθανό είναι να συστήσετε τον Κωτσόβολο σε φίλο ή συγγενή;»: 6\n- Q26 «Έχετε αποτρέψει ή ενθαρρύνει κάποιον να αγοράσει από τον Κωτσόβολο τους τελευταίους 12…»: Όχι\n- Q27 «Πριν από αυτό το ερωτηματολόγιο, γνωρίζατε κάποια κοινωνική ή εθελοντική δράση του Κωτσ…»: Όχι\n- Q28 «Σε ποιο βαθμό επηρεάζουν γενικά οι κοινωνικές δράσεις μιας εταιρείας την εικόνα που έχε…»: Μέτρια\n\nΕΡΕΥΝΗΤΙΚΟ ΠΛΑΙΣΙΟ (υπόβαθρο, όχι στόχος):\n[Q29]\n- [src:greca-eltrun-ecommerce-2026] Έρευνα Ηλεκτρονικού Εμπορίου 2026 - Η συμπεριφορά του Έλληνα Καταναλωτή στις Διαδικτυακές Αγορές (GR, 2026-05; πληθυσμός: Greek consumers who shop online (online questionnaire, multiple-choice questions); δείγμα: 600) — αφορά: Greek-specific background on what drives trust in e-shops (known brand/chain, prompt service before and after purchase, clear terms, reviews, trust certifications), delivery and pickup preferences (home delivery, lockers), payment methods, and online purchasing of electrical appliances as a category.\n- [src:stk-annual-report-2024] Ετήσια Έκθεση 2024 - Συνήγορος του Καταναλωτή (GR, 2026-05; πληθυσμός: Complaints (αναφορές) submitted by consumers to the Consumer Ombudsman in 2024 (and to ECC Greece for the combined total); δείγμα: administrative data (18,192 complaints to the Ombudsman in 2024; 19,061 including ECC Greece)) — αφορά: Greek complaint landscape by sector and complaint type, including consumer-goods sub-sectors ICT goods, large household appliances and non-ICT/entertainment electronics, complaint content such as delivery of goods (non- or partial delivery, delay, customer service), product quality, sales method (e-commerce vs face to face) and mediation outcomes; also case examples on courier/postal non-delivery and damaged parcels.\n- [src:gr-law-4967-2022] Ν. 4967/2022 - Ενσωμάτωση της Οδηγίας (ΕΕ) 2019/770 ... και της Οδηγίας (ΕΕ) 2019/771 ... και λοιπές διατάξεις (GR, 2022-09; πληθυσμός: Consumer sales contracts in Greece (legal text); δείγμα: legal text) — αφορά: Greek legal framing for conformity and seller liability: it rewrites Civil Code arts. 534 ff. (conformity, burden of proof, buyer's rights, price reduction and rescission, prescription in art. 554) and Law 2251/1994 arts. 5 (seller liability) and 5a (commercial guarantee).\n  (Υπόβαθρο μόνο: μην μετατρέπεις στατιστικά των πηγών σε πιθανότητες απάντησης του προσώπου.)\n\nΕΡΩΤΗΣΗ Q29 (single_choice): Αν μια εταιρεία έχει σημαντική κοινωνική προσφορά αλλά σας έχει απογοητεύσει στην εξυπηρέτηση, πόσο μπορεί η κοινωνική προσφορά να αποκαταστήσει την εμπιστοσύνη σας;\n  [1] Καθόλου\n  [2] Λίγο\n  [3] Μέτρια\n  [4] Πολύ\n  [5] Πάρα πολύ\n  [6] Δεν γνωρίζω / Δεν μπορώ να κρίνω",
+ "schema": {
+  "type": "object",
+  "properties": {
+   "Q29": {
+    "type": "object",
+    "properties": {
+     "probabilities": {
+      "type": "object",
+      "properties": {
+       "1": {
+        "type": "number"
+       },
+       "2": {
+        "type": "number"
+       },
+       "3": {
+        "type": "number"
+       },
+       "4": {
+        "type": "number"
+       },
+       "5": {
+        "type": "number"
+       },
+       "6": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "1",
+       "2",
+       "3",
+       "4",
+       "5",
+       "6"
+      ],
+      "additionalProperties": false
+     },
+     "rationale": {
+      "type": "string",
+      "description": "Σύντομη, ελέγξιμη αιτιολόγηση (έως 30 λέξεις), χωρίς εσωτερική συλλογιστική."
+     }
+    },
+    "required": [
+     "probabilities",
+     "rationale"
+    ],
+    "additionalProperties": false
+   }
+  },
+  "required": [
+   "Q29"
+  ],
+  "additionalProperties": false
+ }
+}

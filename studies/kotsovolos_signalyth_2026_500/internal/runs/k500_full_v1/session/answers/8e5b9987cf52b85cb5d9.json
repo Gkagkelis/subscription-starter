@@ -1,0 +1,16 @@
+{
+ "key": "8e5b9987cf52b85cb5d9",
+ "answer": {
+  "Q15": {
+   "probabilities": {
+    "1": 0.1,
+    "2": 0.8,
+    "3": 0.1
+   },
+   "rationale": "Αξιολόγησε την τελευταία αγορά πολύ θετικά και την ενημέρωση καλή· μάλλον δεν προέκυψε πρόβλημα μετά την online αγορά."
+  }
+ },
+ "answered_by": "claude-code-session (βοηθός 209)",
+ "imported_at": "2026-11-01T00:49:25Z",
+ "source": "Claude Code session (AI), όχι mock"
+}
