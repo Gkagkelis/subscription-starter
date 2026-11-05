@@ -1,0 +1,7698 @@
+{
+ "preregistration": "docs/synthetic-lab/VIEWSCOPE_V2_PREREGISTRATION.md §Δ",
+ "model": "pie-0.7",
+ "dev": [
+  "ess10",
+  "wellcome2020",
+  "tisp",
+  "hbs2018"
+ ],
+ "test": {},
+ "attenChosenOnDev": {
+  "DEMO": 0.5,
+  "CORE": 0.5
+ },
+ "settings": {
+  "simMin": 0.55,
+  "topK": 3,
+  "maxItemsPerSurvey": 60,
+  "signMin": 0.05,
+  "seeds": 3
+ },
+ "devSummary": {
+  "ess10": {
+   "INDEP": {
+    "pairs": 1767,
+    "corrErr": 0.10625611926328096,
+    "signAgree": 0.48281786941580757,
+    "signPairs": 582,
+    "subErr": 0.05110603660212698,
+    "diversityRatio": 1.041082278805689
+   },
+   "DEMO@0.25": {
+    "pairs": 1767,
+    "corrErr": 0.1060342340416439,
+    "signAgree": 0.5343642611683849,
+    "signPairs": 582,
+    "subErr": 0.04974558566023591,
+    "diversityRatio": 1.0414047071902248
+   },
+   "DEMO@0.5": {
+    "pairs": 1767,
+    "corrErr": 0.10561577139529157,
+    "signAgree": 0.5601374570446735,
+    "signPairs": 582,
+    "subErr": 0.05027446085053579,
+    "diversityRatio": 1.0416562721935438
+   },
+   "DEMO@0.75": {
+    "pairs": 1767,
+    "corrErr": 0.10432623745644329,
+    "signAgree": 0.5618556701030928,
+    "signPairs": 582,
+    "subErr": 0.0538064284972969,
+    "diversityRatio": 1.0417625672653685
+   },
+   "DEMO@1.0": {
+    "pairs": 1767,
+    "corrErr": 0.10496590828405097,
+    "signAgree": 0.5463917525773195,
+    "signPairs": 582,
+    "subErr": 0.05985306646878869,
+    "diversityRatio": 1.0402283750620291
+   },
+   "CORE@0.25": {
+    "pairs": 1767,
+    "corrErr": 0.10555822615560156,
+    "signAgree": 0.5584192439862543,
+    "signPairs": 582,
+    "subErr": 0.048064258607115426,
+    "diversityRatio": 1.0417873694487945
+   },
+   "CORE@0.5": {
+    "pairs": 1767,
+    "corrErr": 0.10304002041170858,
+    "signAgree": 0.6305841924398625,
+    "signPairs": 582,
+    "subErr": 0.0479555143391538,
+    "diversityRatio": 1.041776739941612
+   },
+   "CORE@0.75": {
+    "pairs": 1767,
+    "corrErr": 0.09961897055995049,
+    "signAgree": 0.6494845360824743,
+    "signPairs": 582,
+    "subErr": 0.051986220687894664,
+    "diversityRatio": 1.042315301638858
+   },
+   "CORE@1.0": {
+    "pairs": 1767,
+    "corrErr": 0.09862418139462781,
+    "signAgree": 0.6323024054982818,
+    "signPairs": 582,
+    "subErr": 0.06019707340184169,
+    "diversityRatio": 1.040667728025572
+   }
+  },
+  "wellcome2020": {
+   "INDEP": {
+    "pairs": 1261,
+    "corrErr": 0.10505411951156579,
+    "signAgree": 0.47534516765285995,
+    "signPairs": 507,
+    "subErr": 0.07564921767461752,
+    "diversityRatio": 0.9590909077832585
+   },
+   "DEMO@0.25": {
+    "pairs": 1261,
+    "corrErr": 0.10439001668769439,
+    "signAgree": 0.47731755424063116,
+    "signPairs": 507,
+    "subErr": 0.07008890634896209,
+    "diversityRatio": 0.9586385173548271
+   },
+   "DEMO@0.5": {
+    "pairs": 1261,
+    "corrErr": 0.10412034249658655,
+    "signAgree": 0.48717948717948717,
+    "signPairs": 507,
+    "subErr": 0.06572390202561999,
+    "diversityRatio": 0.9586037180911015
+   },
+   "DEMO@0.75": {
+    "pairs": 1261,
+    "corrErr": 0.10430108479617567,
+    "signAgree": 0.4911242603550296,
+    "signPairs": 507,
+    "subErr": 0.06263798705673575,
+    "diversityRatio": 0.9587699812400123
+   },
+   "DEMO@1.0": {
+    "pairs": 1261,
+    "corrErr": 0.10509657102809415,
+    "signAgree": 0.4970414201183432,
+    "signPairs": 507,
+    "subErr": 0.06262007803649687,
+    "diversityRatio": 0.9591334402167007
+   },
+   "CORE@0.25": {
+    "pairs": 1261,
+    "corrErr": 0.10451301955641885,
+    "signAgree": 0.4891518737672584,
+    "signPairs": 507,
+    "subErr": 0.06924274509965224,
+    "diversityRatio": 0.9582209261901213
+   },
+   "CORE@0.5": {
+    "pairs": 1261,
+    "corrErr": 0.10382298032071217,
+    "signAgree": 0.4812623274161736,
+    "signPairs": 507,
+    "subErr": 0.06387057250172959,
+    "diversityRatio": 0.9581590608323871
+   },
+   "CORE@0.75": {
+    "pairs": 1261,
+    "corrErr": 0.10349898588811558,
+    "signAgree": 0.48717948717948717,
+    "signPairs": 507,
+    "subErr": 0.0611398075551475,
+    "diversityRatio": 0.9575288075004702
+   },
+   "CORE@1.0": {
+    "pairs": 1261,
+    "corrErr": 0.10487658357769557,
+    "signAgree": 0.52465483234714,
+    "signPairs": 507,
+    "subErr": 0.060084727509583324,
+    "diversityRatio": 0.9582557254538469
+   }
+  },
+  "tisp": {
+   "INDEP": {
+    "pairs": 1770,
+    "corrErr": 0.14219574354582032,
+    "signAgree": 0.5075669383003493,
+    "signPairs": 859,
+    "subErr": 0.055138394858207596,
+    "diversityRatio": 0.9969814709342166
+   },
+   "DEMO@0.25": {
+    "pairs": 1770,
+    "corrErr": 0.13638074290934135,
+    "signAgree": 0.6437718277066357,
+    "signPairs": 859,
+    "subErr": 0.05911531837732625,
+    "diversityRatio": 0.9973124028340442
+   },
+   "DEMO@0.5": {
+    "pairs": 1770,
+    "corrErr": 0.1253939881852503,
+    "signAgree": 0.660069848661234,
+    "signPairs": 859,
+    "subErr": 0.06683191102722225,
+    "diversityRatio": 0.9977855320345789
+   },
+   "DEMO@0.75": {
+    "pairs": 1770,
+    "corrErr": 0.1350328598502257,
+    "signAgree": 0.640279394644936,
+    "signPairs": 859,
+    "subErr": 0.07485425755866192,
+    "diversityRatio": 0.9997375131624675
+   },
+   "DEMO@1.0": {
+    "pairs": 1770,
+    "corrErr": 0.189043622356299,
+    "signAgree": 0.6507566938300349,
+    "signPairs": 859,
+    "subErr": 0.0849892658562179,
+    "diversityRatio": 0.9986852531372347
+   },
+   "CORE@0.25": {
+    "pairs": 1770,
+    "corrErr": 0.13574172593348863,
+    "signAgree": 0.6658905704307334,
+    "signPairs": 859,
+    "subErr": 0.05605275183588878,
+    "diversityRatio": 0.9968677130936511
+   },
+   "CORE@0.5": {
+    "pairs": 1770,
+    "corrErr": 0.12323408804436047,
+    "signAgree": 0.7171129220023282,
+    "signPairs": 859,
+    "subErr": 0.0617328200203088,
+    "diversityRatio": 0.997529576893306
+   },
+   "CORE@0.75": {
+    "pairs": 1770,
+    "corrErr": 0.13082871006402264,
+    "signAgree": 0.7485448195576252,
+    "signPairs": 859,
+    "subErr": 0.07273398572975012,
+    "diversityRatio": 0.99782431311659
+   },
+   "CORE@1.0": {
+    "pairs": 1770,
+    "corrErr": 0.18452090093621393,
+    "signAgree": 0.7438882421420256,
+    "signPairs": 859,
+    "subErr": 0.08661506742220734,
+    "diversityRatio": 0.9975140644605015
+   }
+  },
+  "hbs2018": {
+   "INDEP": {
+    "pairs": 91,
+    "corrErr": 0.1391325481243958,
+    "signAgree": 0.574468085106383,
+    "signPairs": 47,
+    "subErr": 0.19517468523202472,
+    "diversityRatio": 1.014228475162774
+   },
+   "DEMO@0.25": {
+    "pairs": 91,
+    "corrErr": 0.13948598432580095,
+    "signAgree": 0.5531914893617021,
+    "signPairs": 47,
+    "subErr": 0.19414736502351573,
+    "diversityRatio": 1.0142512407230344
+   },
+   "DEMO@0.5": {
+    "pairs": 91,
+    "corrErr": 0.14052392422849772,
+    "signAgree": 0.574468085106383,
+    "signPairs": 47,
+    "subErr": 0.19465991947727618,
+    "diversityRatio": 1.0132267905113146
+   },
+   "DEMO@0.75": {
+    "pairs": 91,
+    "corrErr": 0.14252473505619642,
+    "signAgree": 0.6382978723404256,
+    "signPairs": 47,
+    "subErr": 0.19642715323588483,
+    "diversityRatio": 1.015480580977098
+   },
+   "DEMO@1.0": {
+    "pairs": 91,
+    "corrErr": 0.14524436432626706,
+    "signAgree": 0.5319148936170213,
+    "signPairs": 47,
+    "subErr": 0.19916498297860946,
+    "diversityRatio": 1.01454719300642
+   },
+   "CORE@0.25": {
+    "pairs": 91,
+    "corrErr": 0.13925694406298078,
+    "signAgree": 0.574468085106383,
+    "signPairs": 47,
+    "subErr": 0.19331225248120606,
+    "diversityRatio": 1.014228475162774
+   },
+   "CORE@0.5": {
+    "pairs": 91,
+    "corrErr": 0.14056284081951476,
+    "signAgree": 0.6382978723404256,
+    "signPairs": 47,
+    "subErr": 0.1932141794074751,
+    "diversityRatio": 1.0129536037881892
+   },
+   "CORE@0.75": {
+    "pairs": 91,
+    "corrErr": 0.14202067240918806,
+    "signAgree": 0.5957446808510638,
+    "signPairs": 47,
+    "subErr": 0.19576023573351917,
+    "diversityRatio": 1.0137959295178254
+   },
+   "CORE@1.0": {
+    "pairs": 91,
+    "corrErr": 0.14513177562496252,
+    "signAgree": 0.5319148936170213,
+    "signPairs": 47,
+    "subErr": 0.19914128109311552,
+    "diversityRatio": 1.0135455083549607
+   }
+  }
+ },
+ "byDomain": {
+  "political": {
+   "metrics": {
+    "INDEP": {
+     "corrErr": 0.2578039060742969,
+     "signAgree": 0.5047619047619047,
+     "subErr": 0.06649370304028553,
+     "diversityRatio": 1.0203478727397657,
+     "pairs": 133
+    },
+    "DEMO@0.5": {
+     "corrErr": 0.22483145930257084,
+     "signAgree": 0.5904761904761905,
+     "subErr": 0.05516336845876038,
+     "diversityRatio": 1.0203497418748138,
+     "pairs": 133
+    },
+    "CORE@0.5": {
+     "corrErr": 0.21754448919694486,
+     "signAgree": 0.6285714285714286,
+     "subErr": 0.05563259949952655,
+     "diversityRatio": 1.0201820327111255,
+     "pairs": 133
+    }
+   },
+   "coreMinusIndepPerItem": {
+    "mean": -0.05077713832941968,
+    "ci95": [
+     -0.0765183012981672,
+     -0.027692773809026353
+    ],
+    "items": 33
+   },
+   "perFile": {
+    "INDEP": [
+     {
+      "pairs": 66,
+      "corrErr": 0.23388852313409667,
+      "signAgree": 0.5094339622641509,
+      "signPairs": 53,
+      "subErr": 0.03788610134903053,
+      "diversityRatio": 1.038659031517337,
+      "file": "ess11"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": NaN,
+      "diversityRatio": 0.9623534079716459,
+      "file": "culture"
+     },
+     {
+      "pairs": 21,
+      "corrErr": 0.3912138575621749,
+      "signAgree": 0.47058823529411764,
+      "signPairs": 17,
+      "subErr": 0.09707970422794888,
+      "diversityRatio": 1.0003500535452123,
+      "file": "covidistress"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": NaN,
+      "diversityRatio": 0.996838693939803,
+      "file": "dinas"
+     },
+     {
+      "pairs": 10,
+      "corrErr": 0.2613797240113863,
+      "signAgree": 0.5,
+      "signPairs": 6,
+      "subErr": 0.061929392283126196,
+      "diversityRatio": 1.0017386510030473,
+      "file": "demotec2022"
+     },
+     {
+      "pairs": 36,
+      "corrErr": 0.2228330203364324,
+      "signAgree": 0.5172413793103449,
+      "signPairs": 29,
+      "subErr": 0.06907961430103653,
+      "diversityRatio": 1.0036120377712412,
+      "file": "qog2024"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": NaN,
+      "diversityRatio": 0.9974943195807392,
+      "file": "hbs2019"
+     }
+    ],
+    "DEMO@0.5": [
+     {
+      "pairs": 66,
+      "corrErr": 0.2316860680564154,
+      "signAgree": 0.5283018867924528,
+      "signPairs": 53,
+      "subErr": 0.04160962573605636,
+      "diversityRatio": 1.0387103959744393,
+      "file": "ess11"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": NaN,
+      "diversityRatio": 0.9620166758158155,
+      "file": "culture"
+     },
+     {
+      "pairs": 21,
+      "corrErr": 0.2225541178188129,
+      "signAgree": 0.8823529411764706,
+      "signPairs": 17,
+      "subErr": 0.06712681541046699,
+      "diversityRatio": 1.00074136342247,
+      "file": "covidistress"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": NaN,
+      "diversityRatio": 0.9995552239960653,
+      "file": "dinas"
+     },
+     {
+      "pairs": 10,
+      "corrErr": 0.2582761135198,
+      "signAgree": 0.8333333333333334,
+      "signPairs": 6,
+      "subErr": 0.047154062478502005,
+      "diversityRatio": 1.0055374552535252,
+      "file": "demotec2022"
+     },
+     {
+      "pairs": 36,
+      "corrErr": 0.20430294405903987,
+      "signAgree": 0.4827586206896552,
+      "signPairs": 29,
+      "subErr": 0.06476297021001617,
+      "diversityRatio": 1.0022412875175033,
+      "file": "qog2024"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": NaN,
+      "diversityRatio": 0.9965747940835087,
+      "file": "hbs2019"
+     }
+    ],
+    "CORE@0.5": [
+     {
+      "pairs": 66,
+      "corrErr": 0.22152377474541207,
+      "signAgree": 0.6792452830188679,
+      "signPairs": 53,
+      "subErr": 0.04473937211811806,
+      "diversityRatio": 1.0377968424159747,
+      "file": "ess11"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": NaN,
+      "diversityRatio": 0.9608748828736318,
+      "file": "culture"
+     },
+     {
+      "pairs": 21,
+      "corrErr": 0.2249262979444245,
+      "signAgree": 0.9411764705882353,
+      "signPairs": 17,
+      "subErr": 0.0634851410882754,
+      "diversityRatio": 1.0012971729933522,
+      "file": "covidistress"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": NaN,
+      "diversityRatio": 0.9980531426708381,
+      "file": "dinas"
+     },
+     {
+      "pairs": 10,
+      "corrErr": 0.22071648716462078,
+      "signAgree": 0.6666666666666666,
+      "signPairs": 6,
+      "subErr": 0.048548711521462756,
+      "diversityRatio": 1.0024019342848767,
+      "file": "demotec2022"
+     },
+     {
+      "pairs": 36,
+      "corrErr": 0.20506196670881519,
+      "signAgree": 0.3448275862068966,
+      "signPairs": 29,
+      "subErr": 0.06575717327024998,
+      "diversityRatio": 1.0038432993171171,
+      "file": "qog2024"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": NaN,
+      "diversityRatio": 0.9974596205053721,
+      "file": "hbs2019"
+     }
+    ]
+   }
+  },
+  "social": {
+   "metrics": {
+    "INDEP": {
+     "corrErr": 0.12706154293144667,
+     "signAgree": 0.4952681388012618,
+     "subErr": 0.06392008707626302,
+     "diversityRatio": 1.0146210742164745,
+     "pairs": 2866
+    },
+    "DEMO@0.5": {
+     "corrErr": 0.12687795916433808,
+     "signAgree": 0.5425867507886435,
+     "subErr": 0.06155891208405471,
+     "diversityRatio": 1.01468370543851,
+     "pairs": 2866
+    },
+    "CORE@0.5": {
+     "corrErr": 0.1265143068858056,
+     "signAgree": 0.5788643533123028,
+     "subErr": 0.06094041607665855,
+     "diversityRatio": 1.0147985792731602,
+     "pairs": 2866
+    }
+   },
+   "coreMinusIndepPerItem": {
+    "mean": -0.0024080389143310388,
+    "ci95": [
+     -0.0044407175485137625,
+     -0.00047233056284002694
+    ],
+    "items": 149
+   },
+   "perFile": {
+    "INDEP": [
+     {
+      "pairs": 1033,
+      "corrErr": 0.10125462777644427,
+      "signAgree": 0.47761194029850745,
+      "signPairs": 335,
+      "subErr": 0.05626021468115039,
+      "diversityRatio": 1.038659031517337,
+      "file": "ess11"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": NaN,
+      "diversityRatio": 0.9623534079716459,
+      "file": "culture"
+     },
+     {
+      "pairs": 1225,
+      "corrErr": 0.12839437729117506,
+      "signAgree": 0.5017123287671232,
+      "signPairs": 584,
+      "subErr": 0.060816305381406234,
+      "diversityRatio": 1.0003500535452123,
+      "file": "covidistress"
+     },
+     {
+      "pairs": 91,
+      "corrErr": 0.2517571170853723,
+      "signAgree": 0.4642857142857143,
+      "signPairs": 84,
+      "subErr": 0.10224852054042298,
+      "diversityRatio": 0.996838693939803,
+      "file": "dinas"
+     },
+     {
+      "pairs": 21,
+      "corrErr": 0.23183663599151,
+      "signAgree": 0.5714285714285714,
+      "signPairs": 14,
+      "subErr": 0.03374258084164427,
+      "diversityRatio": 1.0017386510030473,
+      "file": "demotec2022"
+     },
+     {
+      "pairs": 496,
+      "corrErr": 0.15020317007294184,
+      "signAgree": 0.5099601593625498,
+      "signPairs": 251,
+      "subErr": 0.06653281393669122,
+      "diversityRatio": 1.0036120377712412,
+      "file": "qog2024"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": NaN,
+      "diversityRatio": 0.9974943195807392,
+      "file": "hbs2019"
+     }
+    ],
+    "DEMO@0.5": [
+     {
+      "pairs": 1033,
+      "corrErr": 0.10010080519485731,
+      "signAgree": 0.48059701492537316,
+      "signPairs": 335,
+      "subErr": 0.053968271788051136,
+      "diversityRatio": 1.0387103959744393,
+      "file": "ess11"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": NaN,
+      "diversityRatio": 0.9620166758158155,
+      "file": "culture"
+     },
+     {
+      "pairs": 1225,
+      "corrErr": 0.12952503423385758,
+      "signAgree": 0.5873287671232876,
+      "signPairs": 584,
+      "subErr": 0.0660535340816001,
+      "diversityRatio": 1.00074136342247,
+      "file": "covidistress"
+     },
+     {
+      "pairs": 91,
+      "corrErr": 0.24752705164388217,
+      "signAgree": 0.4642857142857143,
+      "signPairs": 84,
+      "subErr": 0.09041059674470828,
+      "diversityRatio": 0.9995552239960653,
+      "file": "dinas"
+     },
+     {
+      "pairs": 21,
+      "corrErr": 0.23111535366028124,
+      "signAgree": 0.5,
+      "signPairs": 14,
+      "subErr": 0.03215638136734752,
+      "diversityRatio": 1.0055374552535252,
+      "file": "demotec2022"
+     },
+     {
+      "pairs": 496,
+      "corrErr": 0.1495595728543763,
+      "signAgree": 0.549800796812749,
+      "signPairs": 251,
+      "subErr": 0.06520577643856648,
+      "diversityRatio": 1.0022412875175033,
+      "file": "qog2024"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": NaN,
+      "diversityRatio": 0.9965747940835087,
+      "file": "hbs2019"
+     }
+    ],
+    "CORE@0.5": [
+     {
+      "pairs": 1033,
+      "corrErr": 0.0991627547188275,
+      "signAgree": 0.5611940298507463,
+      "signPairs": 335,
+      "subErr": 0.0516826951953373,
+      "diversityRatio": 1.0377968424159747,
+      "file": "ess11"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": NaN,
+      "diversityRatio": 0.9608748828736318,
+      "file": "culture"
+     },
+     {
+      "pairs": 1225,
+      "corrErr": 0.13050783105224426,
+      "signAgree": 0.5976027397260274,
+      "signPairs": 584,
+      "subErr": 0.06371923497435207,
+      "diversityRatio": 1.0012971729933522,
+      "file": "covidistress"
+     },
+     {
+      "pairs": 91,
+      "corrErr": 0.24720583794318524,
+      "signAgree": 0.5,
+      "signPairs": 84,
+      "subErr": 0.0909689965949065,
+      "diversityRatio": 0.9980531426708381,
+      "file": "dinas"
+     },
+     {
+      "pairs": 21,
+      "corrErr": 0.19591305272085946,
+      "signAgree": 0.8571428571428571,
+      "signPairs": 14,
+      "subErr": 0.035358120204344895,
+      "diversityRatio": 1.0024019342848767,
+      "file": "demotec2022"
+     },
+     {
+      "pairs": 496,
+      "corrErr": 0.14853403127258638,
+      "signAgree": 0.5697211155378487,
+      "signPairs": 251,
+      "subErr": 0.06297303341435201,
+      "diversityRatio": 1.0038432993171171,
+      "file": "qog2024"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": NaN,
+      "diversityRatio": 0.9974596205053721,
+      "file": "hbs2019"
+     }
+    ]
+   }
+  },
+  "economic": {
+   "metrics": {
+    "INDEP": {
+     "corrErr": 0.3632096248832594,
+     "signAgree": 0.375,
+     "subErr": 0.07467297282304662,
+     "diversityRatio": 0.9766411916115532,
+     "pairs": 8
+    },
+    "DEMO@0.5": {
+     "corrErr": 0.3270901183584683,
+     "signAgree": 0.75,
+     "subErr": 0.07503603074074781,
+     "diversityRatio": 0.9764439767864752,
+     "pairs": 8
+    },
+    "CORE@0.5": {
+     "corrErr": 0.32137286087960265,
+     "signAgree": 0.75,
+     "subErr": 0.0775859841126321,
+     "diversityRatio": 0.9755429140813897,
+     "pairs": 8
+    }
+   },
+   "coreMinusIndepPerItem": {
+    "mean": -0.05542976678397108,
+    "ci95": [
+     -0.10548707114704281,
+     -0.015597084128252593
+    ],
+    "items": 8
+   },
+   "perFile": {
+    "INDEP": [
+     {
+      "pairs": 1,
+      "corrErr": 0.22497266050095382,
+      "signAgree": 0.0,
+      "signPairs": 1,
+      "subErr": 0.04047743328863693,
+      "diversityRatio": 1.038659031517337,
+      "file": "ess11"
+     },
+     {
+      "pairs": 6,
+      "corrErr": 0.4113429881295745,
+      "signAgree": 0.5,
+      "signPairs": 6,
+      "subErr": 0.09881480679206325,
+      "diversityRatio": 0.9623534079716459,
+      "file": "culture"
+     },
+     {
+      "pairs": 1,
+      "corrErr": 0.21264640978767466,
+      "signAgree": 0.0,
+      "signPairs": 1,
+      "subErr": 0.08472667838843968,
+      "diversityRatio": 1.0003500535452123,
+      "file": "covidistress"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": NaN,
+      "diversityRatio": 0.996838693939803,
+      "file": "dinas"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": NaN,
+      "diversityRatio": 1.0017386510030473,
+      "file": "demotec2022"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": 0.04043142615239699,
+      "diversityRatio": 1.0036120377712412,
+      "file": "qog2024"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": NaN,
+      "diversityRatio": 0.9974943195807392,
+      "file": "hbs2019"
+     }
+    ],
+    "DEMO@0.5": [
+     {
+      "pairs": 1,
+      "corrErr": 0.22417251078179648,
+      "signAgree": 0.0,
+      "signPairs": 1,
+      "subErr": 0.06957606375440593,
+      "diversityRatio": 1.0387103959744393,
+      "file": "ess11"
+     },
+     {
+      "pairs": 6,
+      "corrErr": 0.3913924419237123,
+      "signAgree": 0.8333333333333334,
+      "signPairs": 6,
+      "subErr": 0.10005887750973251,
+      "diversityRatio": 0.9620166758158155,
+      "file": "culture"
+     },
+     {
+      "pairs": 1,
+      "corrErr": 0.044193784543675924,
+      "signAgree": 1.0,
+      "signPairs": 1,
+      "subErr": 0.055473150958104976,
+      "diversityRatio": 1.00074136342247,
+      "file": "covidistress"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": NaN,
+      "diversityRatio": 0.9995552239960653,
+      "file": "dinas"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": NaN,
+      "diversityRatio": 1.0055374552535252,
+      "file": "demotec2022"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": 0.0450917153662521,
+      "diversityRatio": 1.0022412875175033,
+      "file": "qog2024"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": NaN,
+      "diversityRatio": 0.9965747940835087,
+      "file": "hbs2019"
+     }
+    ],
+    "CORE@0.5": [
+     {
+      "pairs": 1,
+      "corrErr": 0.22199711273464448,
+      "signAgree": 0.0,
+      "signPairs": 1,
+      "subErr": 0.06641898276404247,
+      "diversityRatio": 1.0377968424159747,
+      "file": "ess11"
+     },
+     {
+      "pairs": 6,
+      "corrErr": 0.38309922690623205,
+      "signAgree": 0.8333333333333334,
+      "signPairs": 6,
+      "subErr": 0.10487330925245297,
+      "diversityRatio": 0.9608748828736318,
+      "file": "culture"
+     },
+     {
+      "pairs": 1,
+      "corrErr": 0.050390412864784684,
+      "signAgree": 1.0,
+      "signPairs": 1,
+      "subErr": 0.061465660321400856,
+      "diversityRatio": 1.0012971729933522,
+      "file": "covidistress"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": NaN,
+      "diversityRatio": 0.9980531426708381,
+      "file": "dinas"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": NaN,
+      "diversityRatio": 1.0024019342848767,
+      "file": "demotec2022"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": 0.03826741172171296,
+      "diversityRatio": 1.0038432993171171,
+      "file": "qog2024"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": NaN,
+      "diversityRatio": 0.9974596205053721,
+      "file": "hbs2019"
+     }
+    ]
+   }
+  },
+  "consumer": {
+   "metrics": {
+    "INDEP": {
+     "corrErr": 0.11448492197007215,
+     "signAgree": 0.5088757396449705,
+     "subErr": 0.11890170472758123,
+     "diversityRatio": 0.9652702154212772,
+     "pairs": 1679
+    },
+    "DEMO@0.5": {
+     "corrErr": 0.11154028324222738,
+     "signAgree": 0.5902366863905325,
+     "subErr": 0.12269672953870554,
+     "diversityRatio": 0.9648936659425095,
+     "pairs": 1679
+    },
+    "CORE@0.5": {
+     "corrErr": 0.11112788536082491,
+     "signAgree": 0.6242603550295858,
+     "subErr": 0.11845052217575262,
+     "diversityRatio": 0.9639124680267888,
+     "pairs": 1679
+    }
+   },
+   "coreMinusIndepPerItem": {
+    "mean": -0.002693581491115217,
+    "ci95": [
+     -0.004178460139103768,
+     -0.0012863472215112798
+    ],
+    "items": 76
+   },
+   "perFile": {
+    "INDEP": [
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": NaN,
+      "diversityRatio": 1.038659031517337,
+      "file": "ess11"
+     },
+     {
+      "pairs": 1540,
+      "corrErr": 0.11294354739249987,
+      "signAgree": 0.5099337748344371,
+      "signPairs": 604,
+      "subErr": 0.10891947021055236,
+      "diversityRatio": 0.9623534079716459,
+      "file": "culture"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": 0.054072926476011564,
+      "diversityRatio": 1.0003500535452123,
+      "file": "covidistress"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": NaN,
+      "diversityRatio": 0.996838693939803,
+      "file": "dinas"
+     },
+     {
+      "pairs": 3,
+      "corrErr": 0.2861196231557572,
+      "signAgree": 0.6666666666666666,
+      "signPairs": 3,
+      "subErr": 0.06363232657109612,
+      "diversityRatio": 1.0017386510030473,
+      "file": "demotec2022"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": 0.18315963897307488,
+      "diversityRatio": 1.0036120377712412,
+      "file": "qog2024"
+     },
+     {
+      "pairs": 136,
+      "corrErr": 0.12815266274877982,
+      "signAgree": 0.4927536231884058,
+      "signPairs": 69,
+      "subErr": 0.18415331740109522,
+      "diversityRatio": 0.9974943195807392,
+      "file": "hbs2019"
+     }
+    ],
+    "DEMO@0.5": [
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": NaN,
+      "diversityRatio": 1.0387103959744393,
+      "file": "ess11"
+     },
+     {
+      "pairs": 1540,
+      "corrErr": 0.10965005816004818,
+      "signAgree": 0.5993377483443708,
+      "signPairs": 604,
+      "subErr": 0.11807819742366125,
+      "diversityRatio": 0.9620166758158155,
+      "file": "culture"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": 0.0625764480174809,
+      "diversityRatio": 1.00074136342247,
+      "file": "covidistress"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": NaN,
+      "diversityRatio": 0.9995552239960653,
+      "file": "dinas"
+     },
+     {
+      "pairs": 3,
+      "corrErr": 0.2982434480698281,
+      "signAgree": 0.6666666666666666,
+      "signPairs": 3,
+      "subErr": 0.06503974583142336,
+      "diversityRatio": 1.0055374552535252,
+      "file": "demotec2022"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": 0.06716244795046694,
+      "diversityRatio": 1.0022412875175033,
+      "file": "qog2024"
+     },
+     {
+      "pairs": 136,
+      "corrErr": 0.12882585038982436,
+      "signAgree": 0.5072463768115942,
+      "signPairs": 69,
+      "subErr": 0.184972245361032,
+      "diversityRatio": 0.9965747940835087,
+      "file": "hbs2019"
+     }
+    ],
+    "CORE@0.5": [
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": NaN,
+      "diversityRatio": 1.0377968424159747,
+      "file": "ess11"
+     },
+     {
+      "pairs": 1540,
+      "corrErr": 0.10923284147566457,
+      "signAgree": 0.6374172185430463,
+      "signPairs": 604,
+      "subErr": 0.11738777333503932,
+      "diversityRatio": 0.9608748828736318,
+      "file": "culture"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": 0.08675377353040101,
+      "diversityRatio": 1.0012971729933522,
+      "file": "covidistress"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": NaN,
+      "diversityRatio": 0.9980531426708381,
+      "file": "dinas"
+     },
+     {
+      "pairs": 3,
+      "corrErr": 0.2835803878768967,
+      "signAgree": 0.6666666666666666,
+      "signPairs": 3,
+      "subErr": 0.05628633328807964,
+      "diversityRatio": 1.0024019342848767,
+      "file": "demotec2022"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": 0.06152043264748685,
+      "diversityRatio": 1.0038432993171171,
+      "file": "qog2024"
+     },
+     {
+      "pairs": 136,
+      "corrErr": 0.12878237121081526,
+      "signAgree": 0.5072463768115942,
+      "signPairs": 69,
+      "subErr": 0.18167745990413892,
+      "diversityRatio": 0.9974596205053721,
+      "file": "hbs2019"
+     }
+    ]
+   }
+  },
+  "cross": {
+   "metrics": {
+    "INDEP": {
+     "corrErr": 0.12127120174805629,
+     "signAgree": 0.48599269183922045,
+     "subErr": null,
+     "diversityRatio": 1.0102213836197778,
+     "pairs": 1855
+    },
+    "DEMO@0.5": {
+     "corrErr": 0.11824491889924242,
+     "signAgree": 0.5347137637028014,
+     "subErr": null,
+     "diversityRatio": 1.0101807380936199,
+     "pairs": 1855
+    },
+    "CORE@0.5": {
+     "corrErr": 0.11602151876738036,
+     "signAgree": 0.561510353227771,
+     "subErr": null,
+     "diversityRatio": 1.01007196424212,
+     "pairs": 1855
+    }
+   },
+   "coreMinusIndepPerItem": {
+    "mean": -0.005832072353231241,
+    "ci95": [
+     -0.008161221433260134,
+     -0.0037817414705867227
+    ],
+    "items": 238
+   },
+   "perFile": {
+    "INDEP": [
+     {
+      "pairs": 666,
+      "corrErr": 0.11136451074402054,
+      "signAgree": 0.4883720930232558,
+      "signPairs": 258,
+      "subErr": NaN,
+      "diversityRatio": 1.038659031517337,
+      "file": "ess11"
+     },
+     {
+      "pairs": 224,
+      "corrErr": 0.08504440309775418,
+      "signAgree": 0.5333333333333333,
+      "signPairs": 75,
+      "subErr": NaN,
+      "diversityRatio": 0.9623534079716459,
+      "file": "culture"
+     },
+     {
+      "pairs": 523,
+      "corrErr": 0.10600326278109576,
+      "signAgree": 0.4864864864864865,
+      "signPairs": 222,
+      "subErr": NaN,
+      "diversityRatio": 1.0003500535452123,
+      "file": "covidistress"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": NaN,
+      "diversityRatio": 0.996838693939803,
+      "file": "dinas"
+     },
+     {
+      "pairs": 71,
+      "corrErr": 0.1791927461721019,
+      "signAgree": 0.475,
+      "signPairs": 40,
+      "subErr": NaN,
+      "diversityRatio": 1.0017386510030473,
+      "file": "demotec2022"
+     },
+     {
+      "pairs": 371,
+      "corrErr": 0.17136651585039755,
+      "signAgree": 0.4690265486725664,
+      "signPairs": 226,
+      "subErr": NaN,
+      "diversityRatio": 1.0036120377712412,
+      "file": "qog2024"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": NaN,
+      "diversityRatio": 0.9974943195807392,
+      "file": "hbs2019"
+     }
+    ],
+    "DEMO@0.5": [
+     {
+      "pairs": 666,
+      "corrErr": 0.11061660978398323,
+      "signAgree": 0.5348837209302325,
+      "signPairs": 258,
+      "subErr": NaN,
+      "diversityRatio": 1.0387103959744393,
+      "file": "ess11"
+     },
+     {
+      "pairs": 224,
+      "corrErr": 0.08108743727897792,
+      "signAgree": 0.7333333333333333,
+      "signPairs": 75,
+      "subErr": NaN,
+      "diversityRatio": 0.9620166758158155,
+      "file": "culture"
+     },
+     {
+      "pairs": 523,
+      "corrErr": 0.09989483898528047,
+      "signAgree": 0.5225225225225225,
+      "signPairs": 222,
+      "subErr": NaN,
+      "diversityRatio": 1.00074136342247,
+      "file": "covidistress"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": NaN,
+      "diversityRatio": 0.9995552239960653,
+      "file": "dinas"
+     },
+     {
+      "pairs": 71,
+      "corrErr": 0.17855586989171754,
+      "signAgree": 0.475,
+      "signPairs": 40,
+      "subErr": NaN,
+      "diversityRatio": 1.0055374552535252,
+      "file": "demotec2022"
+     },
+     {
+      "pairs": 371,
+      "corrErr": 0.16869975455487105,
+      "signAgree": 0.4911504424778761,
+      "signPairs": 226,
+      "subErr": NaN,
+      "diversityRatio": 1.0022412875175033,
+      "file": "qog2024"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": NaN,
+      "diversityRatio": 0.9965747940835087,
+      "file": "hbs2019"
+     }
+    ],
+    "CORE@0.5": [
+     {
+      "pairs": 666,
+      "corrErr": 0.10696804946646543,
+      "signAgree": 0.6201550387596899,
+      "signPairs": 258,
+      "subErr": NaN,
+      "diversityRatio": 1.0377968424159747,
+      "file": "ess11"
+     },
+     {
+      "pairs": 224,
+      "corrErr": 0.08016452841404285,
+      "signAgree": 0.64,
+      "signPairs": 75,
+      "subErr": NaN,
+      "diversityRatio": 0.9608748828736318,
+      "file": "culture"
+     },
+     {
+      "pairs": 523,
+      "corrErr": 0.09987269519435737,
+      "signAgree": 0.4954954954954955,
+      "signPairs": 222,
+      "subErr": NaN,
+      "diversityRatio": 1.0012971729933522,
+      "file": "covidistress"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": NaN,
+      "diversityRatio": 0.9980531426708381,
+      "file": "dinas"
+     },
+     {
+      "pairs": 71,
+      "corrErr": 0.15703261163471652,
+      "signAgree": 0.8,
+      "signPairs": 40,
+      "subErr": NaN,
+      "diversityRatio": 1.0024019342848767,
+      "file": "demotec2022"
+     },
+     {
+      "pairs": 371,
+      "corrErr": 0.1688399110279385,
+      "signAgree": 0.4911504424778761,
+      "signPairs": 226,
+      "subErr": NaN,
+      "diversityRatio": 1.0038432993171171,
+      "file": "qog2024"
+     },
+     {
+      "pairs": 0,
+      "corrErr": NaN,
+      "signAgree": NaN,
+      "signPairs": 0,
+      "subErr": NaN,
+      "diversityRatio": 0.9974596205053721,
+      "file": "hbs2019"
+     }
+    ]
+   }
+  },
+  "ALL": {
+   "metrics": {
+    "INDEP": {
+     "corrErr": 0.1251383950128221,
+     "signAgree": 0.4958304378040306,
+     "subErr": 0.09010369470881281,
+     "diversityRatio": 1.0007755318175675,
+     "pairs": 6541
+    },
+    "DEMO@0.5": {
+     "corrErr": 0.1227292456995715,
+     "signAgree": 0.5538568450312717,
+     "subErr": 0.08835254081409306,
+     "diversityRatio": 1.0006945882206928,
+     "pairs": 6541
+    },
+    "CORE@0.5": {
+     "corrErr": 0.12167834280985548,
+     "signAgree": 0.5868658790826963,
+     "subErr": 0.0872677060622051,
+     "diversityRatio": 1.0004576990286222,
+     "pairs": 6541
+    }
+   },
+   "coreMinusIndepPerItem": {
+    "mean": -0.00424088830192724,
+    "ci95": [
+     -0.00561735753530219,
+     -0.0029465458503781616
+    ],
+    "items": 269
+   },
+   "perFile": {
+    "INDEP": [
+     {
+      "pairs": 1766,
+      "corrErr": 0.11009422980517324,
+      "signAgree": 0.48377125193199383,
+      "signPairs": 647,
+      "subErr": 0.05205929930164264,
+      "diversityRatio": 1.038659031517337,
+      "file": "ess11"
+     },
+     {
+      "pairs": 1770,
+      "corrErr": 0.1104243317554374,
+      "signAgree": 0.5124087591240876,
+      "signPairs": 685,
+      "subErr": 0.10824582598265307,
+      "diversityRatio": 0.9623534079716459,
+      "file": "culture"
+     },
+     {
+      "pairs": 1770,
+      "corrErr": 0.1249440429575118,
+      "signAgree": 0.4963592233009709,
+      "signPairs": 824,
+      "subErr": 0.06573165803198074,
+      "diversityRatio": 1.0003500535452123,
+      "file": "covidistress"
+     },
+     {
+      "pairs": 91,
+      "corrErr": 0.2517571170853723,
+      "signAgree": 0.4642857142857143,
+      "signPairs": 84,
+      "subErr": 0.10224852054042298,
+      "diversityRatio": 0.996838693939803,
+      "file": "dinas"
+     },
+     {
+      "pairs": 105,
+      "corrErr": 0.20060390898687697,
+      "signAgree": 0.5079365079365079,
+      "signPairs": 63,
+      "subErr": 0.04911613380136195,
+      "diversityRatio": 1.0017386510030473,
+      "file": "demotec2022"
+     },
+     {
+      "pairs": 903,
+      "corrErr": 0.16179373030873556,
+      "signAgree": 0.49209486166007904,
+      "signPairs": 506,
+      "subErr": 0.06917110790253302,
+      "diversityRatio": 1.0036120377712412,
+      "file": "qog2024"
+     },
+     {
+      "pairs": 136,
+      "corrErr": 0.12815266274877982,
+      "signAgree": 0.4927536231884058,
+      "signPairs": 69,
+      "subErr": 0.18415331740109522,
+      "diversityRatio": 0.9974943195807392,
+      "file": "hbs2019"
+     }
+    ],
+    "DEMO@0.5": [
+     {
+      "pairs": 1766,
+      "corrErr": 0.10905449993483898,
+      "signAgree": 0.5054095826893354,
+      "signPairs": 647,
+      "subErr": 0.052016802309864,
+      "diversityRatio": 1.0387103959744393,
+      "file": "ess11"
+     },
+     {
+      "pairs": 1770,
+      "corrErr": 0.10699041252458051,
+      "signAgree": 0.6160583941605839,
+      "signPairs": 685,
+      "subErr": 0.11687690942939935,
+      "diversityRatio": 0.9620166758158155,
+      "file": "culture"
+     },
+     {
+      "pairs": 1770,
+      "corrErr": 0.121825422590122,
+      "signAgree": 0.5764563106796117,
+      "signPairs": 824,
+      "subErr": 0.06576811936478275,
+      "diversityRatio": 1.00074136342247,
+      "file": "covidistress"
+     },
+     {
+      "pairs": 91,
+      "corrErr": 0.24752705164388217,
+      "signAgree": 0.4642857142857143,
+      "signPairs": 84,
+      "subErr": 0.09041059674470828,
+      "diversityRatio": 0.9995552239960653,
+      "file": "dinas"
+     },
+     {
+      "pairs": 105,
+      "corrErr": 0.2000798158912889,
+      "signAgree": 0.5238095238095238,
+      "signPairs": 63,
+      "subErr": 0.04373228129721419,
+      "diversityRatio": 1.0055374552535252,
+      "file": "demotec2022"
+     },
+     {
+      "pairs": 903,
+      "corrErr": 0.1596058284183314,
+      "signAgree": 0.5197628458498024,
+      "signPairs": 506,
+      "subErr": 0.064690831191651,
+      "diversityRatio": 1.0022412875175033,
+      "file": "qog2024"
+     },
+     {
+      "pairs": 136,
+      "corrErr": 0.12882585038982436,
+      "signAgree": 0.5072463768115942,
+      "signPairs": 69,
+      "subErr": 0.184972245361032,
+      "diversityRatio": 0.9965747940835087,
+      "file": "hbs2019"
+     }
+    ],
+    "CORE@0.5": [
+     {
+      "pairs": 1766,
+      "corrErr": 0.10674881812862211,
+      "signAgree": 0.5935085007727975,
+      "signPairs": 647,
+      "subErr": 0.05078524016551695,
+      "diversityRatio": 1.0377968424159747,
+      "file": "ess11"
+     },
+     {
+      "pairs": 1770,
+      "corrErr": 0.10648250033825223,
+      "signAgree": 0.6394160583941606,
+      "signPairs": 685,
+      "subErr": 0.11655347572953355,
+      "diversityRatio": 0.9608748828736318,
+      "file": "culture"
+     },
+     {
+      "pairs": 1770,
+      "corrErr": 0.12253070920641003,
+      "signAgree": 0.5776699029126213,
+      "signPairs": 824,
+      "subErr": 0.06400071384181223,
+      "diversityRatio": 1.0012971729933522,
+      "file": "covidistress"
+     },
+     {
+      "pairs": 91,
+      "corrErr": 0.24720583794318524,
+      "signAgree": 0.5,
+      "signPairs": 84,
+      "subErr": 0.0909689965949065,
+      "diversityRatio": 0.9980531426708381,
+      "file": "dinas"
+     },
+     {
+      "pairs": 105,
+      "corrErr": 0.1744894816045697,
+      "signAgree": 0.7936507936507936,
+      "signPairs": 63,
+      "subErr": 0.04394062659346447,
+      "diversityRatio": 1.0024019342848767,
+      "file": "demotec2022"
+     },
+     {
+      "pairs": 903,
+      "corrErr": 0.15913036246299597,
+      "signAgree": 0.5217391304347826,
+      "signPairs": 506,
+      "subErr": 0.06294742960606312,
+      "diversityRatio": 1.0038432993171171,
+      "file": "qog2024"
+     },
+     {
+      "pairs": 136,
+      "corrErr": 0.12878237121081526,
+      "signAgree": 0.5072463768115942,
+      "signPairs": 69,
+      "subErr": 0.18167745990413892,
+      "diversityRatio": 0.9974596205053721,
+      "file": "hbs2019"
+     }
+    ]
+   }
+  }
+ },
+ "decision": {
+  "political": {
+   "criteria": {
+    "corr": true,
+    "sign": true,
+    "subgroup": true,
+    "diversity": true
+   },
+   "keepCore": true
+  },
+  "social": {
+   "criteria": {
+    "corr": true,
+    "sign": true,
+    "subgroup": true,
+    "diversity": true
+   },
+   "keepCore": true
+  },
+  "economic": {
+   "criteria": {
+    "corr": true,
+    "sign": true,
+    "subgroup": true,
+    "diversity": true
+   },
+   "keepCore": true
+  },
+  "consumer": {
+   "criteria": {
+    "corr": true,
+    "sign": true,
+    "subgroup": true,
+    "diversity": true
+   },
+   "keepCore": true
+  },
+  "cross": {
+   "criteria": {
+    "corr": true,
+    "sign": true,
+    "subgroup": false,
+    "diversity": true
+   },
+   "keepCore": false
+  },
+  "ALL": {
+   "criteria": {
+    "corr": true,
+    "sign": true,
+    "subgroup": true,
+    "diversity": true
+   },
+   "keepCore": true
+  }
+ },
+ "testFiles": [
+  {
+   "file": "ess11",
+   "n": 2757,
+   "items": 60,
+   "linked": 49,
+   "domains": {
+    "economic": 2,
+    "social": 46,
+    "political": 12
+   }
+  },
+  {
+   "file": "culture",
+   "n": 1486,
+   "items": 60,
+   "linked": 55,
+   "domains": {
+    "economic": 4,
+    "consumer": 56
+   }
+  },
+  {
+   "file": "covidistress",
+   "n": 642,
+   "items": 60,
+   "linked": 54,
+   "domains": {
+    "economic": 2,
+    "social": 50,
+    "political": 7,
+    "consumer": 1
+   }
+  },
+  {
+   "file": "dinas",
+   "n": 1928,
+   "items": 14,
+   "linked": 9,
+   "domains": {
+    "social": 14
+   }
+  },
+  {
+   "file": "demotec2022",
+   "n": 3000,
+   "items": 15,
+   "linked": 14,
+   "domains": {
+    "social": 7,
+    "political": 5,
+    "consumer": 3
+   }
+  },
+  {
+   "file": "qog2024",
+   "n": 8246,
+   "items": 43,
+   "linked": 31,
+   "domains": {
+    "economic": 1,
+    "social": 32,
+    "political": 9,
+    "consumer": 1
+   }
+  },
+  {
+   "file": "hbs2019",
+   "n": 6172,
+   "items": 17,
+   "linked": 3,
+   "domains": {
+    "consumer": 17
+   }
+  }
+ ],
+ "links": {
+  "ess11": [
+   {
+    "target": {
+     "id": "ess11::ppltrst",
+     "text": "Most people can be trusted or you can't be too careful",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2024c::Q19",
+      "sim": 0.8276638126468475,
+      "sign": -1,
+      "weight": 0.3619955781519416
+     },
+     {
+      "itemId": "dn2022b::Q33",
+      "sim": 0.8257046298732377,
+      "sign": -1,
+      "weight": 0.36113868977528274
+     },
+     {
+      "itemId": "dn2017::trust_Church",
+      "sim": 0.6330236092067165,
+      "sign": -1,
+      "weight": 0.27686573207277565
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::pplfair",
+     "text": "Most people try to take advantage of you, or try to be fair",
+     "domain": "social"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "ess11::trstprl",
+     "text": "Trust in country's parliament",
+     "domain": "political"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2015a::Q016_6",
+      "sim": 0.8289389773999335,
+      "sign": -1,
+      "weight": 0.3366860300656192
+     },
+     {
+      "itemId": "dn2015n::Q056_6",
+      "sim": 0.8289389773999335,
+      "sign": -1,
+      "weight": 0.3366860300656192
+     },
+     {
+      "itemId": "undpolar2022::inst_trust_1",
+      "sim": 0.8041754224619562,
+      "sign": 1,
+      "weight": 0.3266279398687616
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::trstlgl",
+     "text": "Trust in the legal system",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2017::trust_Justice",
+      "sim": 0.7952434341828045,
+      "sign": -1,
+      "weight": 0.34623785423172043
+     },
+     {
+      "itemId": "dn2017::trust_Gov",
+      "sim": 0.7514128520260933,
+      "sign": -1,
+      "weight": 0.327154632587443
+     },
+     {
+      "itemId": "undpolar2022::inst_trust_3",
+      "sim": 0.7501562213298827,
+      "sign": 1,
+      "weight": 0.32660751318083664
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::trstplc",
+     "text": "Trust in the police",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2015n::Q056_10",
+      "sim": 0.831810301638771,
+      "sign": -1,
+      "weight": 0.34735197184020994
+     },
+     {
+      "itemId": "dn2015a::Q016_10",
+      "sim": 0.831810301638771,
+      "sign": -1,
+      "weight": 0.34735197184020994
+     },
+     {
+      "itemId": "dn2017::trust_IndAuth",
+      "sim": 0.7310982095507993,
+      "sign": -1,
+      "weight": 0.3052960563195801
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::trstplt",
+     "text": "Trust in politicians",
+     "domain": "political"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2017::trust_Parties",
+      "sim": 0.8242310688240462,
+      "sign": -1,
+      "weight": 0.348045538391121
+     },
+     {
+      "itemId": "dn2017::trust_Gov",
+      "sim": 0.7823608465385499,
+      "sign": -1,
+      "weight": 0.3303651273885331
+     },
+     {
+      "itemId": "dn2017::trust_Parliament",
+      "sim": 0.7615782747629416,
+      "sign": -1,
+      "weight": 0.3215893342203459
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::trstprt",
+     "text": "Trust in political parties",
+     "domain": "political"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2017::trust_Parties",
+      "sim": 0.8880166604925037,
+      "sign": -1,
+      "weight": 0.34871023424344405
+     },
+     {
+      "itemId": "dn2015n::Q056_8",
+      "sim": 0.8292790202370656,
+      "sign": -1,
+      "weight": 0.32564488287827803
+     },
+     {
+      "itemId": "dn2015a::Q016_8",
+      "sim": 0.8292790202370656,
+      "sign": -1,
+      "weight": 0.32564488287827803
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::trstep",
+     "text": "Trust in the European Parliament",
+     "domain": "political"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2017::trust_EU",
+      "sim": 0.8542434680959096,
+      "sign": -1,
+      "weight": 0.35786123438241085
+     },
+     {
+      "itemId": "dn2015n::Q056_18",
+      "sim": 0.7664183675645381,
+      "sign": -1,
+      "weight": 0.32106938280879455
+     },
+     {
+      "itemId": "dn2015a::Q016_18",
+      "sim": 0.7664183675645381,
+      "sign": -1,
+      "weight": 0.32106938280879455
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::trstun",
+     "text": "Trust in the United Nations",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2017::trust_NGOs",
+      "sim": 0.7495671066739559,
+      "sign": -1,
+      "weight": 0.33993672749591075
+     },
+     {
+      "itemId": "dn2017::trust_LabUnions",
+      "sim": 0.7325654335623731,
+      "sign": -1,
+      "weight": 0.33222628627183953
+     },
+     {
+      "itemId": "dn2017::trust_SocialCare",
+      "sim": 0.7228869414640495,
+      "sign": -1,
+      "weight": 0.3278369862322498
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::contplt",
+     "text": "Contacted politician or government official last 12 months",
+     "domain": "political"
+    },
+    "analogs": [
+     {
+      "itemId": "undpolar2022::polparticip_1",
+      "sim": 0.7797994127271619,
+      "sign": -1,
+      "weight": 1.0
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::donprty",
+     "text": "Donated to or participated in political party or pressure group last 12 months",
+     "domain": "political"
+    },
+    "analogs": [
+     {
+      "itemId": "undpolar2022::polparticip_2",
+      "sim": 0.6077880842898751,
+      "sign": -1,
+      "weight": 1.0
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::badge",
+     "text": "Worn or displayed campaign badge/sticker last 12 months",
+     "domain": "social"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "ess11::sgnptit",
+     "text": "Signed petition last 12 months",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "undpolar2022::polparticip_3",
+      "sim": 0.8249764852470585,
+      "sign": -1,
+      "weight": 1.0
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::pbldmna",
+     "text": "Taken part in public demonstration last 12 months",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "undpolar2022::polparticip_4",
+      "sim": 0.8512946680541632,
+      "sign": -1,
+      "weight": 1.0
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::bctprd",
+     "text": "Boycotted certain products last 12 months",
+     "domain": "social"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "ess11::pstplonl",
+     "text": "Posted or shared anything about politics online last 12 months",
+     "domain": "political"
+    },
+    "analogs": [
+     {
+      "itemId": "undpolar2022::polparticip_5",
+      "sim": 0.8073785477638489,
+      "sign": -1,
+      "weight": 0.380334676108803
+     },
+     {
+      "itemId": "maple2019pre::Q80_1_w3",
+      "sim": 0.6812602956775767,
+      "sign": -1,
+      "weight": 0.3209237037817668
+     },
+     {
+      "itemId": "maple2019pre::Q80_3_w3",
+      "sim": 0.6341719294918337,
+      "sign": -1,
+      "weight": 0.29874162010943023
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::volunfp",
+     "text": "Volunteered for not-for-profit or charitable organisation",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2024c::Q23_10",
+      "sim": 0.7610156097840349,
+      "sign": 1,
+      "weight": 0.36939846257806463
+     },
+     {
+      "itemId": "dn2024a::Q26_21",
+      "sim": 0.7348808935998898,
+      "sign": -1,
+      "weight": 0.35671262032434664
+     },
+     {
+      "itemId": "dn2022b::Q18_10",
+      "sim": 0.5642517833004308,
+      "sign": 1,
+      "weight": 0.27388891709758867
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::prtdgcl",
+     "text": "How close to party",
+     "domain": "political"
+    },
+    "analogs": [
+     {
+      "itemId": "maple2019feb::Q36_w1",
+      "sim": 0.7198396585017229,
+      "sign": 1,
+      "weight": 0.3333333333333333
+     },
+     {
+      "itemId": "maple2019pre::Q36_w3",
+      "sim": 0.7198396585017229,
+      "sign": 1,
+      "weight": 0.3333333333333333
+     },
+     {
+      "itemId": "maple2019post::Q36_w4",
+      "sim": 0.7198396585017229,
+      "sign": 1,
+      "weight": 0.3333333333333333
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::stflife",
+     "text": "How satisfied with life as a whole",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "undpolar2022::life_satisfaction_cat",
+      "sim": 0.8198004141548415,
+      "sign": 1,
+      "weight": 0.5760654330039783
+     },
+     {
+      "itemId": "undpolar2022::hhincome",
+      "sim": 0.6033025307309001,
+      "sign": -1,
+      "weight": 0.4239345669960216
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::stfeco",
+     "text": "How satisfied with present state of economy in country",
+     "domain": "economic"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2024a::Q7_5",
+      "sim": 0.788036682189766,
+      "sign": -1,
+      "weight": 0.3729764590475172
+     },
+     {
+      "itemId": "dn2024b::q3_6",
+      "sim": 0.67492763759933,
+      "sign": -1,
+      "weight": 0.31944213521330067
+     },
+     {
+      "itemId": "maple2019feb::Q9_w1",
+      "sim": 0.6498679061433458,
+      "sign": -1,
+      "weight": 0.3075814057391822
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::stfgov",
+     "text": "How satisfied with the national government",
+     "domain": "political"
+    },
+    "analogs": [
+     {
+      "itemId": "undpolar2022::identities_1",
+      "sim": 0.6937513417259701,
+      "sign": 1,
+      "weight": 0.33669498047493684
+     },
+     {
+      "itemId": "dn2024a::Q26_9",
+      "sim": 0.6858643322890178,
+      "sign": 1,
+      "weight": 0.33286721636312455
+     },
+     {
+      "itemId": "undpolar2022::satisf_democracy",
+      "sim": 0.6808585889139543,
+      "sign": 1,
+      "weight": 0.3304378031619386
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::stfdem",
+     "text": "How satisfied with the way democracy works in country",
+     "domain": "political"
+    },
+    "analogs": [
+     {
+      "itemId": "maple2019feb::Q15_w1",
+      "sim": 0.9337627427026884,
+      "sign": -1,
+      "weight": 0.3333333333333333
+     },
+     {
+      "itemId": "maple2019post::Q15_w4",
+      "sim": 0.9337627427026884,
+      "sign": -1,
+      "weight": 0.3333333333333333
+     },
+     {
+      "itemId": "maple2019pre::Q15_w3",
+      "sim": 0.9337627427026884,
+      "sign": -1,
+      "weight": 0.3333333333333333
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::stfedu",
+     "text": "State of education in country nowadays",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2024b::q22_5",
+      "sim": 0.5951960784928638,
+      "sign": -1,
+      "weight": 0.336202358795381
+     },
+     {
+      "itemId": "dn2024c::Q5_11",
+      "sim": 0.5897479050836272,
+      "sign": -1,
+      "weight": 0.33312490446142473
+     },
+     {
+      "itemId": "dn2018b::B12A_7",
+      "sim": 0.5854067082671413,
+      "sign": 1,
+      "weight": 0.33067273674319425
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::stfhlth",
+     "text": "State of health services in country nowadays",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2024c::Q5_10",
+      "sim": 0.7159744339949466,
+      "sign": -1,
+      "weight": 0.3784527337377454
+     },
+     {
+      "itemId": "dn2022b::Q04_10",
+      "sim": 0.6214428902485604,
+      "sign": -1,
+      "weight": 0.3284848585502891
+     },
+     {
+      "itemId": "dn2024c::Q5_1",
+      "sim": 0.5544290548900417,
+      "sign": -1,
+      "weight": 0.2930624077119655
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::gincdif",
+     "text": "Government should reduce differences in income levels",
+     "domain": "political"
+    },
+    "analogs": [
+     {
+      "itemId": "undpolar2022::egalitarianism_right",
+      "sim": 0.6884228061419968,
+      "sign": 1,
+      "weight": 0.5295929610361036
+     },
+     {
+      "itemId": "dn2024b::q21_4",
+      "sim": 0.6114864766308633,
+      "sign": 1,
+      "weight": 0.47040703896389624
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::freehms",
+     "text": "Gays and lesbians free to live life as they wish",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "undpolar2022::lgbt_rights_right",
+      "sim": 0.849826673463923,
+      "sign": 1,
+      "weight": 0.5
+     },
+     {
+      "itemId": "undpolar2022::lgbt_rights_left",
+      "sim": 0.849826673463923,
+      "sign": -1,
+      "weight": 0.5
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::hmsfmlsh",
+     "text": "Ashamed if close family member gay or lesbian",
+     "domain": "social"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "ess11::hmsacld",
+     "text": "Gay and lesbian couples right to adopt children",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2015n::Q044_3",
+      "sim": 0.7686363236407532,
+      "sign": 1,
+      "weight": 0.35408591285307683
+     },
+     {
+      "itemId": "dn2024a::Q10_2",
+      "sim": 0.7166467735964683,
+      "sign": 1,
+      "weight": 0.3301360073905616
+     },
+     {
+      "itemId": "dn2017::homosex_childadopt",
+      "sim": 0.685479126674489,
+      "sign": 1,
+      "weight": 0.31577807975636163
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::euftf",
+     "text": "European Union: European unification go further or gone too far",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2024a::Q26_13",
+      "sim": 0.7495486310678177,
+      "sign": 1,
+      "weight": 0.3451711567629941
+     },
+     {
+      "itemId": "dn2015a::Q006_5",
+      "sim": 0.7174763864180423,
+      "sign": -1,
+      "weight": 0.33040171642664445
+     },
+     {
+      "itemId": "dn2015n::Q012_5",
+      "sim": 0.7045024012505855,
+      "sign": -1,
+      "weight": 0.32442712681036134
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::lrnobed",
+     "text": "Obedience and respect for authority most important virtues children should learn",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018a::Q14B",
+      "sim": 0.6115308511037165,
+      "sign": 1,
+      "weight": 0.34642479586510855
+     },
+     {
+      "itemId": "dn2018b::B25",
+      "sim": 0.5920099717818784,
+      "sign": 1,
+      "weight": 0.3353664549458076
+     },
+     {
+      "itemId": "dn2018b::B22B_1",
+      "sim": 0.5617221097996143,
+      "sign": 1,
+      "weight": 0.3182087491890838
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::loylead",
+     "text": "Country needs most loyalty towards its leaders",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2020b::Q245",
+      "sim": 0.5529426515316517,
+      "sign": 1,
+      "weight": 0.5001967635276611
+     },
+     {
+      "itemId": "undpolar2022::collectiv_narcissism_3",
+      "sim": 0.5525076269387603,
+      "sign": -1,
+      "weight": 0.49980323647233904
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::imbgeco",
+     "text": "Immigration bad or good for country's economy",
+     "domain": "economic"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2017::immigrants_economic",
+      "sim": 0.7540680160389401,
+      "sign": -1,
+      "weight": 0.34629921055432605
+     },
+     {
+      "itemId": "dn2020a::Q154",
+      "sim": 0.7323339162275875,
+      "sign": -1,
+      "weight": 0.3363180133059446
+     },
+     {
+      "itemId": "dn2015a::Q013_4",
+      "sim": 0.6911023560969739,
+      "sign": -1,
+      "weight": 0.3173827761397294
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::imueclt",
+     "text": "Country's cultural life undermined or enriched by immigrants",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2020a::Q155",
+      "sim": 0.7929285749943138,
+      "sign": -1,
+      "weight": 0.34945005681859537
+     },
+     {
+      "itemId": "dn2017::immigrants_cultural",
+      "sim": 0.7860806439128498,
+      "sign": -1,
+      "weight": 0.3464321180269147
+     },
+     {
+      "itemId": "dn2017::immigrants_economic",
+      "sim": 0.6900663171312656,
+      "sign": -1,
+      "weight": 0.30411782515449
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::imwbcnt",
+     "text": "Immigrants make country worse or better place to live",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2017::immigrants_economic",
+      "sim": 0.68050810559783,
+      "sign": -1,
+      "weight": 0.33842012130603655
+     },
+     {
+      "itemId": "dn2017::immigrants_unempl",
+      "sim": 0.6803592161687237,
+      "sign": -1,
+      "weight": 0.3383460778402132
+     },
+     {
+      "itemId": "dn2020a::Q153",
+      "sim": 0.6499708724034673,
+      "sign": -1,
+      "weight": 0.3232338008537502
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::happy",
+     "text": "How happy are you",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "undpolar2022::life_satisfaction_cat",
+      "sim": 0.6434278774768486,
+      "sign": 1,
+      "weight": 0.5343692667095397
+     },
+     {
+      "itemId": "dn2015n::Q016",
+      "sim": 0.5606606013364146,
+      "sign": -1,
+      "weight": 0.46563073329046023
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::inprdsc",
+     "text": "How many people with whom you can discuss intimate and personal matters",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2024b::q2_4",
+      "sim": 0.5637791276414632,
+      "sign": 1,
+      "weight": 0.5033600215356342
+     },
+     {
+      "itemId": "dn2018b::B21_16",
+      "sim": 0.5562524670837287,
+      "sign": -1,
+      "weight": 0.4966399784643659
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::crmvct",
+     "text": "Respondent or household member victim of burglary/assault last 5 years",
+     "domain": "social"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "ess11::atchctr",
+     "text": "How emotionally attached to [country]",
+     "domain": "social"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "ess11::atcherp",
+     "text": "How emotionally attached to Europe",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "undpolar2022::identities_2",
+      "sim": 0.651390089749166,
+      "sign": 1,
+      "weight": 0.35828493480801005
+     },
+     {
+      "itemId": "dn2015n::Q004_5",
+      "sim": 0.5891458685612037,
+      "sign": -1,
+      "weight": 0.32404866520327585
+     },
+     {
+      "itemId": "dn2015n::Q004_3",
+      "sim": 0.5775424102323067,
+      "sign": -1,
+      "weight": 0.31766639998871415
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::rlgblg",
+     "text": "Belonging to particular religion or denomination",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "maple2019feb::Q67_w1",
+      "sim": 0.675332027466157,
+      "sign": -1,
+      "weight": 0.3333333333333333
+     },
+     {
+      "itemId": "maple2019pre::Q67_w3",
+      "sim": 0.675332027466157,
+      "sign": -1,
+      "weight": 0.3333333333333333
+     },
+     {
+      "itemId": "maple2019post::Q67_w4",
+      "sim": 0.675332027466157,
+      "sign": -1,
+      "weight": 0.3333333333333333
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::rlgdgr",
+     "text": "How religious are you",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "maple2019feb::Q67_w1",
+      "sim": 0.8251276482359194,
+      "sign": 1,
+      "weight": 0.3333333333333333
+     },
+     {
+      "itemId": "maple2019post::Q67_w4",
+      "sim": 0.8251276482359194,
+      "sign": 1,
+      "weight": 0.3333333333333333
+     },
+     {
+      "itemId": "maple2019pre::Q67_w3",
+      "sim": 0.8251276482359194,
+      "sign": 1,
+      "weight": 0.3333333333333333
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::dscrgrp",
+     "text": "Member of a group discriminated against in this country",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2017::InOUrCountry_minorities",
+      "sim": 0.6964417877121512,
+      "sign": 1,
+      "weight": 0.35452392531036414
+     },
+     {
+      "itemId": "dn2022b::Q32_4",
+      "sim": 0.6378583979510906,
+      "sign": 1,
+      "weight": 0.32470203112979495
+     },
+     {
+      "itemId": "dn2024a::Q25_4",
+      "sim": 0.6301420930982234,
+      "sign": 1,
+      "weight": 0.32077404355984096
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::dscrrce",
+     "text": "Discrimination of respondent's group: colour or race",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2017::InOUrCountry_minorities",
+      "sim": 0.6901837049075235,
+      "sign": -1,
+      "weight": 0.5180148164482254
+     },
+     {
+      "itemId": "dn2024a::Q25_4",
+      "sim": 0.6421791600000404,
+      "sign": -1,
+      "weight": 0.48198518355177455
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::dscrntn",
+     "text": "Discrimination of respondent's group: nationality",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2017::InOUrCountry_minorities",
+      "sim": 0.6185163539635306,
+      "sign": -1,
+      "weight": 0.3515108127208239
+     },
+     {
+      "itemId": "dn2022b::Q32_4",
+      "sim": 0.5728920194636248,
+      "sign": -1,
+      "weight": 0.3255819156154545
+     },
+     {
+      "itemId": "dn2024a::Q14_2::m12",
+      "sim": 0.5681857317327539,
+      "sign": 1,
+      "weight": 0.32290727166372163
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::dscrrlg",
+     "text": "Discrimination of respondent's group: religion",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "maple2019pre::Q67_w3",
+      "sim": 0.5712049376526716,
+      "sign": 1,
+      "weight": 0.3333333333333333
+     },
+     {
+      "itemId": "maple2019feb::Q67_w1",
+      "sim": 0.5712049376526716,
+      "sign": 1,
+      "weight": 0.3333333333333333
+     },
+     {
+      "itemId": "maple2019post::Q67_w4",
+      "sim": 0.5712049376526716,
+      "sign": 1,
+      "weight": 0.3333333333333333
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::dscrage",
+     "text": "Discrimination of respondent's group: age",
+     "domain": "social"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "ess11::dscrgnd",
+     "text": "Discrimination of respondent's group: gender",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2017::InOUrCountry_minorities",
+      "sim": 0.6013676109767206,
+      "sign": -1,
+      "weight": 0.3359661342282241
+     },
+     {
+      "itemId": "dn2022a::Q21_3",
+      "sim": 0.5963796870096147,
+      "sign": -1,
+      "weight": 0.33317952999070766
+     },
+     {
+      "itemId": "dn2020a::Q223",
+      "sim": 0.5922176708286688,
+      "sign": -1,
+      "weight": 0.3308543357810683
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::dscrsex",
+     "text": "Discrimination of respondent's group: sexuality",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2015n::Q044_2",
+      "sim": 0.6812087312651103,
+      "sign": -1,
+      "weight": 0.36793934311474014
+     },
+     {
+      "itemId": "dn2015n::Q044_1",
+      "sim": 0.5941388297926496,
+      "sign": -1,
+      "weight": 0.3209105237786379
+     },
+     {
+      "itemId": "dn2022a::Q21_3",
+      "sim": 0.5760682878113257,
+      "sign": -1,
+      "weight": 0.3111501331066221
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::dscroth",
+     "text": "Discrimination of respondent's group: other grounds",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2017::InOUrCountry_minorities",
+      "sim": 0.6179110752548446,
+      "sign": -1,
+      "weight": 0.5054566780466484
+     },
+     {
+      "itemId": "dn2024a::Q14_2::m12",
+      "sim": 0.6045697071591486,
+      "sign": 1,
+      "weight": 0.4945433219533516
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::dscrdk",
+     "text": "Discrimination of respondent's group: don't know",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2024a::Q14_2::m12",
+      "sim": 0.6039839218061894,
+      "sign": 1,
+      "weight": 0.5067327075296985
+     },
+     {
+      "itemId": "dn2017::InOUrCountry_minorities",
+      "sim": 0.5879342489205172,
+      "sign": -1,
+      "weight": 0.49326729247030154
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::dscrnap",
+     "text": "Discrimination of respondent's group: not applicable",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2017::InOUrCountry_minorities",
+      "sim": 0.5923376287729497,
+      "sign": -1,
+      "weight": 1.0
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::ctzcntr",
+     "text": "Citizen of country",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "undpolar2022::identities_1",
+      "sim": 0.6701337764042503,
+      "sign": -1,
+      "weight": 0.3695077712529024
+     },
+     {
+      "itemId": "undpolar2022::inst_trust_2",
+      "sim": 0.5743223708438602,
+      "sign": -1,
+      "weight": 0.31667793312835574
+     },
+     {
+      "itemId": "dn2024a::Q26_6",
+      "sim": 0.569128920616647,
+      "sign": -1,
+      "weight": 0.3138142956187418
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::brncntr",
+     "text": "Born in country",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2017::GreeksQualifications_Born",
+      "sim": 0.587324920806144,
+      "sign": -1,
+      "weight": 1.0
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::facntr",
+     "text": "Father born in country",
+     "domain": "social"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "ess11::mocntr",
+     "text": "Mother born in country",
+     "domain": "social"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "ess11::ccrdprs",
+     "text": "To what extent feel personal responsibility to reduce climate change",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2020a::Q31",
+      "sim": 0.6892263696616983,
+      "sign": -1,
+      "weight": 0.33513293783785386
+     },
+     {
+      "itemId": "dn2022a::Q11",
+      "sim": 0.6885861898693824,
+      "sign": -1,
+      "weight": 0.3348216535574097
+     },
+     {
+      "itemId": "dn2024a::Q3",
+      "sim": 0.678763478945818,
+      "sign": -1,
+      "weight": 0.33004540860473636
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::wrclmch",
+     "text": "How worried about climate change",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2022a::Q11",
+      "sim": 0.7350111878660802,
+      "sign": -1,
+      "weight": 0.33690217883857837
+     },
+     {
+      "itemId": "dn2020a::Q31",
+      "sim": 0.7306786836503425,
+      "sign": -1,
+      "weight": 0.3349163177602633
+     },
+     {
+      "itemId": "dn2024a::Q3",
+      "sim": 0.7159855049976895,
+      "sign": -1,
+      "weight": 0.32818150340115837
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "ess11::testjc34",
+     "text": "Imagine large numbers of people limit energy use, how likely reduce climate chan",
+     "domain": "social"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "ess11::testjc35",
+     "text": "How likely, large numbers of people limit energy use",
+     "domain": "social"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "ess11::testjc36",
+     "text": "How likely, governments in enough countries take action to reduce climate change",
+     "domain": "political"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2024b::q21_4",
+      "sim": 0.6027357045529953,
+      "sign": -1,
+      "weight": 0.3520781847737061
+     },
+     {
+      "itemId": "dn2022a::Q11",
+      "sim": 0.5558712640612616,
+      "sign": -1,
+      "weight": 0.3247030898288965
+     },
+     {
+      "itemId": "dn2020a::Q31",
+      "sim": 0.5533301255297504,
+      "sign": -1,
+      "weight": 0.3232187253973974
+     }
+    ]
+   }
+  ],
+  "culture": [
+   {
+    "target": {
+     "id": "culture::internet_often",
+     "text": "ΧΡΗΣΙΜΟΠΟΙΕΙΤΕ ΣΥΧΝΑ ΤΟ ΔΙΑΔΙΚΤΥΟ?",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B21_4",
+      "sim": 0.7861082783496143,
+      "sign": 1,
+      "weight": 0.3366159980242829
+     },
+     {
+      "itemId": "dn2018b::B21_10",
+      "sim": 0.7822380501601484,
+      "sign": 1,
+      "weight": 0.3349587444875132
+     },
+     {
+      "itemId": "dn2018b::B21_2",
+      "sim": 0.7669802244870019,
+      "sign": 1,
+      "weight": 0.32842525748820384
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::participate_more",
+     "text": "ΘΑ ΣΥΜΜΕΤΕΙΧΑΤΕ ΣΕ ΠΕΡΙΣΣΟΤΕΡΕΣ ΠΟΛΙΤΙΣΤΙΚΕΣ ΔΡΑΣΤΗΡΙΟΤΗΤΕΣ?",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B22B_10",
+      "sim": 0.8898303097847776,
+      "sign": 1,
+      "weight": 0.36208763824452006
+     },
+     {
+      "itemId": "dn2018b::B22B_6",
+      "sim": 0.8058356474867446,
+      "sign": 1,
+      "weight": 0.3279087295669803
+     },
+     {
+      "itemId": "dn2018b::B22B_7",
+      "sim": 0.7618338737055014,
+      "sign": 1,
+      "weight": 0.3100036321884997
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::bother_library_closed",
+     "text": "ΘΑ ΣΑΣ ΕΝΟΧΛΟΥΣΕ ΑΝ ΕΚΛΕΙΝΕ Η ΒΙΒΛΙΟΘΗΚΗ ΤΗΣ ΤΟΠΙΚΗΣ ΓΕΙΤΟΝΙΑΣ?",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018a::Q17_2",
+      "sim": 0.9413117469246542,
+      "sign": 1,
+      "weight": 0.33582462845601124
+     },
+     {
+      "itemId": "dn2018b::B21_11",
+      "sim": 0.9329898320759338,
+      "sign": 1,
+      "weight": 0.33285568222619455
+     },
+     {
+      "itemId": "dn2018b::B12A_2",
+      "sim": 0.9286844653894055,
+      "sign": -1,
+      "weight": 0.33131968931779415
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::bother_culturalcentre_closed",
+     "text": "ΘΑ ΣΑΣ ΕΝΟΧΛΟΥΣΕ ΑΝ ΕΚΛΕΙΝΕ ΤΟ ΠΟΛΙΤΙΣΤΙΚΟ ΚΕΝΤΡΟ ΤΗΣ ΓΕΙΤΟΝΙΑΣ?",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018a::Q17_2",
+      "sim": 0.9363138437916951,
+      "sign": 1,
+      "weight": 0.33465773066992627
+     },
+     {
+      "itemId": "dn2018b::B12A_5",
+      "sim": 0.9310741915910135,
+      "sign": -1,
+      "weight": 0.3327849717370039
+     },
+     {
+      "itemId": "dn2018b::B12A_2",
+      "sim": 0.9304371991258696,
+      "sign": -1,
+      "weight": 0.33255729759306984
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::assoc_support_entrepreneurship",
+     "text": "ΚΑΤΑ ΤΗ ΓΝΩΜΗ ΣΑΣ ΤΑ ΑΘΛΗΤΙΚΑ ΚΑΙ ΠΟΛΙΤΙΣΤΙΚΑ ΣΩΜΑΤΕΙΑ ΠΟΥ ΥΠΑΡΧΟΥΝ ΣΤΗΝ ΠΕΡΙΟΧΗ ΣΑΣ ΘΑ ΜΠΟΡΟΥΣΑΝ ΝΑ ΣΤΗΡΙΞΟΥΝ ΤΗΝ ΕΠΙΧΕΙΡΗΜΑΤΙΚΟΤΗΤΑ",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B11_6",
+      "sim": 0.9263380623775943,
+      "sign": 1,
+      "weight": 0.5002917578474528
+     },
+     {
+      "itemId": "dn2018b::B20_1",
+      "sim": 0.9252576272320874,
+      "sign": 1,
+      "weight": 0.49970824215254717
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::know_socent_sports",
+     "text": "ΓΝΩΡΙΖΕΤΕ ΕΑΝ ΥΠΑΡΧΟΥΝ ΣΤΗΝ ΠΕΡΙΟΧΗ ΣΑΣ ΚΟΙΝΩΝΙΚΕΣ ΕΠΙΧΕΙΡΗΣΕΙΣ ΜΕ ΑΝΤΙΚΕΙΜΕΝΟ ΤΗΝ ΠΑΡΟΧΗ ΥΠΗΡΕΣΙΩΝ ΚΑΙ ΔΡΑΣΤΗΡΙΟΤΗΤΩΝ ΠΟΥ ΑΦΟΡΟΥΝ ΣΤΟΝ ΑΘΛΗ",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B12A_8",
+      "sim": 0.9602060029873061,
+      "sign": -1,
+      "weight": 0.3344652301647009
+     },
+     {
+      "itemId": "dn2018b::B12A_9",
+      "sim": 0.9595694822220247,
+      "sign": -1,
+      "weight": 0.3342435130919039
+     },
+     {
+      "itemId": "dn2018b::B12A_2",
+      "sim": 0.9510939397364887,
+      "sign": -1,
+      "weight": 0.33129125674339516
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::socent_sports_contribute",
+     "text": "ΕΑΝ ΝΑΙ, ΠΙΣΤΕΥΕΤΕ ΟΤΙ ΑΥΤΕΣ ΣΥΜΒΑΛΛΟΥΝ ΣΤΗΝ ΟΙΚΟΝΟΜΙΚΗ ΑΝΑΠΤΥΞΗ ΤΗΣ ΠΕΡΙΟΧΗΣ?",
+     "domain": "economic"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B22B_6",
+      "sim": 0.7072286995690875,
+      "sign": 1,
+      "weight": 0.33819824601787757
+     },
+     {
+      "itemId": "dn2018b::B22B_3",
+      "sim": 0.6959594844740146,
+      "sign": 1,
+      "weight": 0.3328092837465868
+     },
+     {
+      "itemId": "dn2018b::B22B_7",
+      "sim": 0.6879778935352615,
+      "sign": 1,
+      "weight": 0.3289924702355356
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::socent_sports_should_create",
+     "text": "ΕΑΝ ΟΧΙ, ΠΙΣΤΕΥΕΤΕ ΟΤΙ ΕΙΝΑΙ ΣΗΜΑΝΤΙΚΟ ΝΑ ΔΗΜΙΟΥΡΓΗΘΟΥΝ ΑΥΤΟΥ ΕΙΔΟΥΣ ΟΙ ΚΟΙΝΩΝΙΚΕΣ ΕΠΙΧΕΙΡΗΣΕΙΣ ΩΣΤΕ ΝΑ ΑΠΟΤΕΛΕΣΟΥΝ ΜΟΧΛΟ ΟΙΚΟΝΟΜΙΚΗΣ ΑΝΑΠΤΥ",
+     "domain": "economic"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B22B_11",
+      "sim": 0.7424581789380029,
+      "sign": 1,
+      "weight": 0.3436349615453519
+     },
+     {
+      "itemId": "dn2018b::B22B_5",
+      "sim": 0.7153574825193186,
+      "sign": 1,
+      "weight": 0.33109183516346247
+     },
+     {
+      "itemId": "dn2018b::B22B_7",
+      "sim": 0.7027857383511075,
+      "sign": 1,
+      "weight": 0.3252732032911857
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::know_socent_culture",
+     "text": "ΓΝΩΡΙΖΕΤΕ ΕΑΝ ΥΠΑΡΧΟΥΝ ΣΤΗΝ ΠΕΡΙΟΧΗ ΣΑΣ ΚΟΙΝΩΝΙΚΕΣ ΕΠΙΧΕΙΡΗΣΕΙΣ ΜΕ ΑΝΤΙΚΕΙΜΕΝΟ ΤΗΝ ΠΑΡΟΧΗ ΥΠΗΡΕΣΙΩΝ ΚΑΙ ΔΡΑΣΤΗΡΙΟΤΗΤΩΝ ΠΟΥ ΑΦΟΡΟΥΝ ΣΤΟΝ ΠΟΛΙ",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B12A_8",
+      "sim": 0.9446587868937089,
+      "sign": -1,
+      "weight": 0.33508725621593005
+     },
+     {
+      "itemId": "dn2018b::B12A_9",
+      "sim": 0.9377093943352187,
+      "sign": -1,
+      "weight": 0.33262218320004344
+     },
+     {
+      "itemId": "dn2018b::B12A_6",
+      "sim": 0.9367745028633948,
+      "sign": -1,
+      "weight": 0.33229056058402645
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::socent_culture_contribute",
+     "text": "ΕΑΝ ΝΑΙ, ΠΙΣΤΕΥΕΤΕ ΟΤΙ ΑΥΤΕΣ ΣΥΜΒΑΛΛΟΥΝ ΣΤΗΝ ΟΙΚΟΝΟΜΙΚΗ ΑΝΑΠΤΥΞΗ ΤΗΣ ΠΕΡΙΟΧΗΣ?.1",
+     "domain": "economic"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B2_3",
+      "sim": 0.8497766968329944,
+      "sign": 1,
+      "weight": 0.3384942413071774
+     },
+     {
+      "itemId": "dn2018b::B12A_8",
+      "sim": 0.830673321515421,
+      "sign": -1,
+      "weight": 0.3308847333521727
+     },
+     {
+      "itemId": "dn2018b::B2_4",
+      "sim": 0.8300112927550646,
+      "sign": 1,
+      "weight": 0.3306210253406498
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::socent_culture_should_create",
+     "text": "ΕΑΝ ΟΧΙ, ΠΙΣΤΕΥΕΤΕ ΟΤΙ ΕΙΝΑΙ ΣΗΜΑΝΤΙΚΟ ΝΑ ΔΗΜΙΟΥΡΓΗΘΟΥΝ ΑΥΤΟΥ ΕΙΔΟΥΣ ΟΙ ΚΟΙΝΩΝΙΚΕΣ ΕΠΙΧΕΙΡΗΣΕΙΣ ΩΣΤΕ ΝΑ ΑΠΟΤΕΛΕΣΟΥΝ ΜΟΧΛΟ ΟΙΚΟΝΟΜΙΚΗΣ ΑΝΑΠΤΥ",
+     "domain": "economic"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B4",
+      "sim": 0.8111468919471632,
+      "sign": 1,
+      "weight": 0.34359241707942434
+     },
+     {
+      "itemId": "dn2018b::B22B_8",
+      "sim": 0.7909584367314636,
+      "sign": 1,
+      "weight": 0.3350408215625993
+     },
+     {
+      "itemId": "dn2018b::B22B_5",
+      "sim": 0.7586769576186274,
+      "sign": 1,
+      "weight": 0.3213667613579763
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::freq6m_concerts",
+     "text": "ΕΧΕΤΕ ΚΑΝΕΙ ΚΑΠΟΙΑ ΑΠΟ ΑΥΤΕΣ ΤΙΣ ΔΡΑΣΤΗΡΙΟΤΗΤΕΣ ΤΟΥΣ ΤΕΛΕΥΤΑΙΟΥΣ ΕΞΙ ΜΗΝΕΣ? Συναυλίες",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B2_1",
+      "sim": 0.9698453402024438,
+      "sign": -1,
+      "weight": 1.0
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::freq6m_film_cinema",
+     "text": "ΕΧΕΤΕ ΚΑΝΕΙ ΚΑΠΟΙΑ ΑΠΟ ΑΥΤΕΣ ΤΙΣ ΔΡΑΣΤΗΡΙΟΤΗΤΕΣ ΤΟΥΣ ΤΕΛΕΥΤΑΙΟΥΣ ΕΞΙ ΜΗΝΕΣ? Να πάω να δω μια ταινία",
+     "domain": "consumer"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "culture::freq6m_dance_shows",
+     "text": "ΕΧΕΤΕ ΚΑΝΕΙ ΚΑΠΟΙΑ ΑΠΟ ΑΥΤΕΣ ΤΙΣ ΔΡΑΣΤΗΡΙΟΤΗΤΕΣ ΤΟΥΣ ΤΕΛΕΥΤΑΙΟΥΣ ΕΞΙ ΜΗΝΕΣ? Παραστάσεις χορού",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B20_3",
+      "sim": 0.8265982607913182,
+      "sign": -1,
+      "weight": 0.33426627041304474
+     },
+     {
+      "itemId": "dn2018b::B20_1",
+      "sim": 0.8246758147691984,
+      "sign": -1,
+      "weight": 0.33348885665310146
+     },
+     {
+      "itemId": "dn2018b::B16_3",
+      "sim": 0.8215996001768252,
+      "sign": -1,
+      "weight": 0.33224487293385385
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::freq6m_film_home",
+     "text": "ΕΧΕΤΕ ΚΑΝΕΙ ΚΑΠΟΙΑ ΑΠΟ ΑΥΤΕΣ ΤΙΣ ΔΡΑΣΤΗΡΙΟΤΗΤΕΣ ΤΟΥΣ ΤΕΛΕΥΤΑΙΟΥΣ ΕΞΙ ΜΗΝΕΣ? Ταινίες",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B20_3",
+      "sim": 0.9221194927054776,
+      "sign": -1,
+      "weight": 1.0
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::freq6m_theatre",
+     "text": "ΕΧΕΤΕ ΚΑΝΕΙ ΚΑΠΟΙΑ ΑΠΟ ΑΥΤΕΣ ΤΙΣ ΔΡΑΣΤΗΡΙΟΤΗΤΕΣ ΤΟΥΣ ΤΕΛΕΥΤΑΙΟΥΣ ΕΞΙ ΜΗΝΕΣ? Θεατρικές παραστάσεις",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B20_3",
+      "sim": 0.8233698971977813,
+      "sign": -1,
+      "weight": 0.3337690753140577
+     },
+     {
+      "itemId": "dn2018b::B11_5",
+      "sim": 0.8224953791095988,
+      "sign": -1,
+      "weight": 0.3334145723201645
+     },
+     {
+      "itemId": "dn2018b::B16_3",
+      "sim": 0.8210196393278902,
+      "sign": -1,
+      "weight": 0.33281635236577783
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::freq6m_theatre_takingpart",
+     "text": "ΕΧΕΤΕ ΚΑΝΕΙ ΚΑΠΟΙΑ ΑΠΟ ΑΥΤΕΣ ΤΙΣ ΔΡΑΣΤΗΡΙΟΤΗΤΕΣ ΤΟΥΣ ΤΕΛΕΥΤΑΙΟΥΣ ΕΞΙ ΜΗΝΕΣ? Συμμετοχή σε θεατρικές παραστάσεις",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B20_3",
+      "sim": 0.8238107232703108,
+      "sign": -1,
+      "weight": 1.0
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::imp_cinema_photography",
+     "text": "ΜΠΟΡΕΙΤΕ ΝΑ ΜΟΥ ΠΕΙΤΕ ΠΟΣΟ ΣΗΜΑΝΤΙΚΕΣ ΕΙΝΑΙ ΑΥΤΕΣ ΟΙ ΔΡΑΣΤΗΡΙΟΤΗΤΕΣ ΣΤΗ ΖΩΗ ΣΑΣ. 0: ΟΧΙ σημαντικό, 10: Πολύ σημαντικό. Κινηματογράφος, φωτογ",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B12A_6",
+      "sim": 0.7611918431664482,
+      "sign": 1,
+      "weight": 0.3353482099475405
+     },
+     {
+      "itemId": "dn2018b::B12A_9",
+      "sim": 0.7554708873428124,
+      "sign": 1,
+      "weight": 0.33282780420243363
+     },
+     {
+      "itemId": "dn2018b::B12A_2",
+      "sim": 0.7531923651404931,
+      "sign": 1,
+      "weight": 0.3318239858500259
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::imp_music",
+     "text": "ΜΠΟΡΕΙΤΕ ΝΑ ΜΟΥ ΠΕΙΤΕ ΠΟΣΟ ΣΗΜΑΝΤΙΚΕΣ ΕΙΝΑΙ ΑΥΤΕΣ ΟΙ ΔΡΑΣΤΗΡΙΟΤΗΤΕΣ ΣΤΗ ΖΩΗ ΣΑΣ. 0: ΟΧΙ σημαντικό, 10: Πολύ σημαντικό. Μουσική (ακρόαση, τρα",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018a::Q30C2",
+      "sim": 0.7216608942648541,
+      "sign": 1,
+      "weight": 0.3339101170666989
+     },
+     {
+      "itemId": "dn2018a::Q30C1",
+      "sim": 0.719862595987899,
+      "sign": 1,
+      "weight": 0.3330780503814303
+     },
+     {
+      "itemId": "dn2018a::Q30C6",
+      "sim": 0.7197194831690483,
+      "sign": 1,
+      "weight": 0.3330118325518708
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::imp_visual_arts",
+     "text": "ΜΠΟΡΕΙΤΕ ΝΑ ΜΟΥ ΠΕΙΤΕ ΠΟΣΟ ΣΗΜΑΝΤΙΚΕΣ ΕΙΝΑΙ ΑΥΤΕΣ ΟΙ ΔΡΑΣΤΗΡΙΟΤΗΤΕΣ ΣΤΗ ΖΩΗ ΣΑΣ. 0: ΟΧΙ σημαντικό, 10: Πολύ σημαντικό. Ζωγραφική, σχέδιο, ει",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B12A_9",
+      "sim": 0.7087691794899604,
+      "sign": 1,
+      "weight": 0.3353301876840061
+     },
+     {
+      "itemId": "dn2018b::B12A_8",
+      "sim": 0.7059737313980157,
+      "sign": 1,
+      "weight": 0.3340076158786021
+     },
+     {
+      "itemId": "dn2018b::B12A_2",
+      "sim": 0.6989027002785902,
+      "sign": 1,
+      "weight": 0.3306621964373918
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::imp_dance",
+     "text": "ΜΠΟΡΕΙΤΕ ΝΑ ΜΟΥ ΠΕΙΤΕ ΠΟΣΟ ΣΗΜΑΝΤΙΚΕΣ ΕΙΝΑΙ ΑΥΤΕΣ ΟΙ ΔΡΑΣΤΗΡΙΟΤΗΤΕΣ ΣΤΗ ΖΩΗ ΣΑΣ. 0: ΟΧΙ σημαντικό, 10: Πολύ σημαντικό. Χορός",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B12A_2",
+      "sim": 0.7025234192026397,
+      "sign": 1,
+      "weight": 0.33517554772653047
+     },
+     {
+      "itemId": "dn2018b::B12A_9",
+      "sim": 0.6970954865731954,
+      "sign": 1,
+      "weight": 0.3325858685181681
+     },
+     {
+      "itemId": "dn2018b::B12A_8",
+      "sim": 0.6963675824026765,
+      "sign": 1,
+      "weight": 0.3322385837553014
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::imp_theatre",
+     "text": "ΜΠΟΡΕΙΤΕ ΝΑ ΜΟΥ ΠΕΙΤΕ ΠΟΣΟ ΣΗΜΑΝΤΙΚΕΣ ΕΙΝΑΙ ΑΥΤΕΣ ΟΙ ΔΡΑΣΤΗΡΙΟΤΗΤΕΣ ΣΤΗ ΖΩΗ ΣΑΣ. 0: ΟΧΙ σημαντικό, 10: Πολύ σημαντικό. Θέατρο",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B12A_2",
+      "sim": 0.6823925334316561,
+      "sign": 1,
+      "weight": 0.33409201788849535
+     },
+     {
+      "itemId": "dn2018a::Q30C6",
+      "sim": 0.681325402609368,
+      "sign": 1,
+      "weight": 0.33356956215766204
+     },
+     {
+      "itemId": "dn2018a::Q30C1",
+      "sim": 0.6788107593299846,
+      "sign": 1,
+      "weight": 0.3323384199538426
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::imp_popular_events",
+     "text": "ΜΠΟΡΕΙΤΕ ΝΑ ΜΟΥ ΠΕΙΤΕ ΠΟΣΟ ΣΗΜΑΝΤΙΚΕΣ ΕΙΝΑΙ ΑΥΤΕΣ ΟΙ ΔΡΑΣΤΗΡΙΟΤΗΤΕΣ ΣΤΗ ΖΩΗ ΣΑΣ. 0: ΟΧΙ σημαντικό, 10: Πολύ σημαντικό. Δημοφιλείς εκδηλώσεις",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B12A_8",
+      "sim": 0.6779685491052047,
+      "sign": 1,
+      "weight": 0.338745024229562
+     },
+     {
+      "itemId": "dn2018b::B12A_9",
+      "sim": 0.6629772074288455,
+      "sign": 1,
+      "weight": 0.3312546437302095
+     },
+     {
+      "itemId": "dn2018a::Q20",
+      "sim": 0.6604668122473478,
+      "sign": -1,
+      "weight": 0.3300003320402284
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::imp_reading",
+     "text": "ΜΠΟΡΕΙΤΕ ΝΑ ΜΟΥ ΠΕΙΤΕ ΠΟΣΟ ΣΗΜΑΝΤΙΚΕΣ ΕΙΝΑΙ ΑΥΤΕΣ ΟΙ ΔΡΑΣΤΗΡΙΟΤΗΤΕΣ ΣΤΗ ΖΩΗ ΣΑΣ. 0: ΟΧΙ σημαντικό, 10: Πολύ σημαντικό. Ανάγνωση, βιβλία, λογ",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B21_21",
+      "sim": 0.6818262237508251,
+      "sign": -1,
+      "weight": 0.33864151419517247
+     },
+     {
+      "itemId": "dn2018a::Q14A",
+      "sim": 0.6666443119115162,
+      "sign": -1,
+      "weight": 0.33110113889931103
+     },
+     {
+      "itemId": "dn2018a::Q30C6",
+      "sim": 0.6649454076583641,
+      "sign": 1,
+      "weight": 0.33025734690551656
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::imp_arts_courses_school",
+     "text": "ΟΙ ΜΑΘΗΤΕΣ ΤΗΣ ΠΡΩΤΟΒΑΘΜΙΑΣ ΚΑΙ ΔΕΥΤΕΡΟΒΑΘΜΙΑΣ ΕΚΠΑΊΔΕΥΣΗς ΕΧΟΥΝ ΜΑΘΗΜΑΤΑ ΕΙΚΑΣΤΙΚΩΝ ΤΕΧΝΩΝ ΚΑΙ ΜΟΥΣΙΚΗΣ ΚΑΙ ΣΕ ΜΕΡΙΚΕΣ ΠΕΡΙΠΤΩΣΕΙΣ ΚΑΙ ΜΑΘΗ",
+     "domain": "consumer"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "culture::agree_arts_viewpoints",
+     "text": "ΜΠΟΡΕΙΤΕ ΝΑ ΜΟΥ ΠΕΙΤΕ ΣΕ ΠΟΙΟ ΒΑΘΜΟ ΣΥΜΦΩΝΕΙΤΕ ΜΕ ΤΙΣ ΠΑΡΑΚΑΤΩ ΔΗΛΩΣΕΙΣ; 0: Διαφωνώ εντελώς, 10: Συμφωνώ απολύτως. Μέσα από τις τέχνες και τ",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2015n::Q015",
+      "sim": 0.644106926796623,
+      "sign": -1,
+      "weight": 0.33572453712046546
+     },
+     {
+      "itemId": "dn2015n::Q024",
+      "sim": 0.6372254328080493,
+      "sign": -1,
+      "weight": 0.3321377314397673
+     },
+     {
+      "itemId": "dn2015a::Q010",
+      "sim": 0.6372254328080493,
+      "sign": -1,
+      "weight": 0.3321377314397673
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::agree_culture_meet_people",
+     "text": "ΜΠΟΡΕΙΤΕ ΝΑ ΜΟΥ ΠΕΙΤΕ ΣΕ ΠΟΙΟ ΒΑΘΜΟ ΣΥΜΦΩΝΕΙΤΕ ΜΕ ΤΙΣ ΠΑΡΑΚΑΤΩ ΔΗΛΩΣΕΙΣ; 0: Διαφωνώ εντελώς, 10: Συμφωνώ απολύτως. Η συμμετοχή σε πολιτιστικ",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2015a::Q013_5",
+      "sim": 0.5724163257452675,
+      "sign": -1,
+      "weight": 0.33529936031211915
+     },
+     {
+      "itemId": "dn2015n::Q037_5",
+      "sim": 0.5724163257452675,
+      "sign": -1,
+      "weight": 0.33529936031211915
+     },
+     {
+      "itemId": "dn2018b::B10",
+      "sim": 0.5623472405689784,
+      "sign": -1,
+      "weight": 0.3294012793757617
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::agree_arts_necessary",
+     "text": "ΜΠΟΡΕΙΤΕ ΝΑ ΜΟΥ ΠΕΙΤΕ ΣΕ ΠΟΙΟ ΒΑΘΜΟ ΣΥΜΦΩΝΕΙΤΕ ΜΕ ΤΙΣ ΠΑΡΑΚΑΤΩ ΔΗΛΩΣΕΙΣ; 0: Διαφωνώ εντελώς, 10: Συμφωνώ απολύτως. Οι τέχνες και ο πολιτισμό",
+     "domain": "consumer"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "culture::agree_culture_harmony",
+     "text": "ΜΠΟΡΕΙΤΕ ΝΑ ΜΟΥ ΠΕΙΤΕ ΣΕ ΠΟΙΟ ΒΑΘΜΟ ΣΥΜΦΩΝΕΙΤΕ ΜΕ ΤΙΣ ΠΑΡΑΚΑΤΩ ΔΗΛΩΣΕΙΣ; 0: Διαφωνώ εντελώς, 10: Συμφωνώ απολύτως. Οι πολιτιστικές δραστηριό",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2015a::Q013_5",
+      "sim": 0.6025841575559463,
+      "sign": -1,
+      "weight": 0.34156103074362953
+     },
+     {
+      "itemId": "dn2015n::Q037_5",
+      "sim": 0.6025841575559463,
+      "sign": -1,
+      "weight": 0.34156103074362953
+     },
+     {
+      "itemId": "dn2024b::q22_3",
+      "sim": 0.5590380881889473,
+      "sign": -1,
+      "weight": 0.3168779385127409
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::agree_sports_harmony",
+     "text": "ΜΠΟΡΕΙΤΕ ΝΑ ΜΟΥ ΠΕΙΤΕ ΣΕ ΠΟΙΟ ΒΑΘΜΟ ΣΥΜΦΩΝΕΙΤΕ ΜΕ ΤΙΣ ΠΑΡΑΚΑΤΩ ΔΗΛΩΣΕΙΣ; 0: Διαφωνώ εντελώς, 10: Συμφωνώ απολύτως. Οι αθλητικές δραστηριότητ",
+     "domain": "consumer"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "culture::done6m_storytelling",
+     "text": "ΜΠΟΡΕΙΤΕ ΝΑ ΜΟΥ ΠΕΙΤΕ ΑΝ ΕΧΕΤΕ ΚΑΝΕΙ ΚΑΠΟΙΑ ΑΠΟ ΤΙΣ ΠΑΡΑΚΑΤΩ ΔΡΑΣΤΗΡΙΟΤΗΤΕΣ ΤΟΥΣ ΤΕΛΕΥΤΑΙΟΥΣ ΕΞΙ ΜΗΝΕΣ? [πολλαπλή επιλογή] Επιλογή: Αφήγηση ",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018a::Q14A",
+      "sim": 0.8567804443991337,
+      "sign": -1,
+      "weight": 0.3374502963578314
+     },
+     {
+      "itemId": "dn2018a::Q30C4",
+      "sim": 0.8455823767169839,
+      "sign": 1,
+      "weight": 0.33303984175107787
+     },
+     {
+      "itemId": "dn2018b::B12A_5",
+      "sim": 0.8366198191320509,
+      "sign": 1,
+      "weight": 0.3295098618910907
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::done6m_artscrafts",
+     "text": "ΜΠΟΡΕΙΤΕ ΝΑ ΜΟΥ ΠΕΙΤΕ ΑΝ ΕΧΕΤΕ ΚΑΝΕΙ ΚΑΠΟΙΑ ΑΠΟ ΤΙΣ ΠΑΡΑΚΑΤΩ ΔΡΑΣΤΗΡΙΟΤΗΤΕΣ ΤΟΥΣ ΤΕΛΕΥΤΑΙΟΥΣ ΕΞΙ ΜΗΝΕΣ? [πολλαπλή επιλογή] Επιλογή: Δραστηρι",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B12A_5",
+      "sim": 0.7773992943154268,
+      "sign": 1,
+      "weight": 0.3373930069157565
+     },
+     {
+      "itemId": "dn2018b::B19B_1",
+      "sim": 0.7660981374912472,
+      "sign": -1,
+      "weight": 0.33248827994929575
+     },
+     {
+      "itemId": "dn2018b::B12A_4",
+      "sim": 0.7606383338452064,
+      "sign": 1,
+      "weight": 0.33011871313494784
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::done6m_groupsports",
+     "text": "ΜΠΟΡΕΙΤΕ ΝΑ ΜΟΥ ΠΕΙΤΕ ΑΝ ΕΧΕΤΕ ΚΑΝΕΙ ΚΑΠΟΙΑ ΑΠΟ ΤΙΣ ΠΑΡΑΚΑΤΩ ΔΡΑΣΤΗΡΙΟΤΗΤΕΣ ΤΟΥΣ ΤΕΛΕΥΤΑΙΟΥΣ ΕΞΙ ΜΗΝΕΣ? [πολλαπλή επιλογή] Επιλογή: Εξάσκηση",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B16_1",
+      "sim": 0.6944206369717462,
+      "sign": -1,
+      "weight": 0.33391433779749485
+     },
+     {
+      "itemId": "dn2018a::Q20",
+      "sim": 0.6941467171576161,
+      "sign": -1,
+      "weight": 0.33378262259711755
+     },
+     {
+      "itemId": "dn2018b::B12A_5",
+      "sim": 0.6910697215115267,
+      "sign": 1,
+      "weight": 0.33230303960538754
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::done6m_popularevents",
+     "text": "ΜΠΟΡΕΙΤΕ ΝΑ ΜΟΥ ΠΕΙΤΕ ΑΝ ΕΧΕΤΕ ΚΑΝΕΙ ΚΑΠΟΙΑ ΑΠΟ ΤΙΣ ΠΑΡΑΚΑΤΩ ΔΡΑΣΤΗΡΙΟΤΗΤΕΣ ΤΟΥΣ ΤΕΛΕΥΤΑΙΟΥΣ ΕΞΙ ΜΗΝΕΣ? [πολλαπλή επιλογή] Επιλογή: Συμμετοχ",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018a::Q20",
+      "sim": 0.6767475867767206,
+      "sign": -1,
+      "weight": 0.3362131557855461
+     },
+     {
+      "itemId": "dn2018b::B12A_3",
+      "sim": 0.6701490675899691,
+      "sign": 1,
+      "weight": 0.3329349631438025
+     },
+     {
+      "itemId": "dn2018b::B20_1",
+      "sim": 0.6659561300388817,
+      "sign": -1,
+      "weight": 0.33085188107065144
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::done6m_religious",
+     "text": "ΜΠΟΡΕΙΤΕ ΝΑ ΜΟΥ ΠΕΙΤΕ ΑΝ ΕΧΕΤΕ ΚΑΝΕΙ ΚΑΠΟΙΑ ΑΠΟ ΤΙΣ ΠΑΡΑΚΑΤΩ ΔΡΑΣΤΗΡΙΟΤΗΤΕΣ ΤΟΥΣ ΤΕΛΕΥΤΑΙΟΥΣ ΕΞΙ ΜΗΝΕΣ? [πολλαπλή επιλογή] Επιλογή: Επίσκεψη",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B2_2",
+      "sim": 0.7772581430582927,
+      "sign": -1,
+      "weight": 0.3352250353763446
+     },
+     {
+      "itemId": "dn2018b::B12A_3",
+      "sim": 0.7709040644632982,
+      "sign": 1,
+      "weight": 0.3324845736123675
+     },
+     {
+      "itemId": "dn2018a::Q30C4",
+      "sim": 0.7704538295703108,
+      "sign": 1,
+      "weight": 0.33229039101128793
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::done6m_restaurants",
+     "text": "ΜΠΟΡΕΙΤΕ ΝΑ ΜΟΥ ΠΕΙΤΕ ΑΝ ΕΧΕΤΕ ΚΑΝΕΙ ΚΑΠΟΙΑ ΑΠΟ ΤΙΣ ΠΑΡΑΚΑΤΩ ΔΡΑΣΤΗΡΙΟΤΗΤΕΣ ΤΟΥΣ ΤΕΛΕΥΤΑΙΟΥΣ ΕΞΙ ΜΗΝΕΣ? [πολλαπλή επιλογή] Επιλογή: Έξοδος σ",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018a::Q41B",
+      "sim": 0.8496590521999585,
+      "sign": -1,
+      "weight": 0.3341021292547324
+     },
+     {
+      "itemId": "dn2018b::B12A_9",
+      "sim": 0.846728096145727,
+      "sign": 1,
+      "weight": 0.332949621485957
+     },
+     {
+      "itemId": "dn2018b::B12A_5",
+      "sim": 0.8467246064200121,
+      "sign": 1,
+      "weight": 0.33294824925931055
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::done6m_discos",
+     "text": "ΜΠΟΡΕΙΤΕ ΝΑ ΜΟΥ ΠΕΙΤΕ ΑΝ ΕΧΕΤΕ ΚΑΝΕΙ ΚΑΠΟΙΑ ΑΠΟ ΤΙΣ ΠΑΡΑΚΑΤΩ ΔΡΑΣΤΗΡΙΟΤΗΤΕΣ ΤΟΥΣ ΤΕΛΕΥΤΑΙΟΥΣ ΕΞΙ ΜΗΝΕΣ? [πολλαπλή επιλογή] Επιλογή: Έξοδος σ",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B12A_9",
+      "sim": 0.8302945140328791,
+      "sign": 1,
+      "weight": 0.33355584906911945
+     },
+     {
+      "itemId": "dn2018b::B12A_5",
+      "sim": 0.8299568323451467,
+      "sign": 1,
+      "weight": 0.3334201915401788
+     },
+     {
+      "itemId": "dn2018a::Q41B",
+      "sim": 0.8289705226134708,
+      "sign": -1,
+      "weight": 0.33302395939070173
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::done6m_fairs",
+     "text": "ΜΠΟΡΕΙΤΕ ΝΑ ΜΟΥ ΠΕΙΤΕ ΑΝ ΕΧΕΤΕ ΚΑΝΕΙ ΚΑΠΟΙΑ ΑΠΟ ΤΙΣ ΠΑΡΑΚΑΤΩ ΔΡΑΣΤΗΡΙΟΤΗΤΕΣ ΤΟΥΣ ΤΕΛΕΥΤΑΙΟΥΣ ΕΞΙ ΜΗΝΕΣ? [πολλαπλή επιλογή] Επιλογή: Επίσκεψη",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B12A_9",
+      "sim": 0.8564906721161667,
+      "sign": 1,
+      "weight": 0.3357600837240335
+     },
+     {
+      "itemId": "dn2018b::B12A_8",
+      "sim": 0.8483499653626683,
+      "sign": 1,
+      "weight": 0.3325687770699002
+     },
+     {
+      "itemId": "dn2018b::B2_2",
+      "sim": 0.8460601802018333,
+      "sign": -1,
+      "weight": 0.3316711392060663
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::done6m_citywalks",
+     "text": "ΜΠΟΡΕΙΤΕ ΝΑ ΜΟΥ ΠΕΙΤΕ ΑΝ ΕΧΕΤΕ ΚΑΝΕΙ ΚΑΠΟΙΑ ΑΠΟ ΤΙΣ ΠΑΡΑΚΑΤΩ ΔΡΑΣΤΗΡΙΟΤΗΤΕΣ ΤΟΥΣ ΤΕΛΕΥΤΑΙΟΥΣ ΕΞΙ ΜΗΝΕΣ? [πολλαπλή επιλογή] Επιλογή: Περίπατο",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B12A_8",
+      "sim": 0.7635207496977091,
+      "sign": 1,
+      "weight": 0.3355074295885693
+     },
+     {
+      "itemId": "dn2018a::Q41B",
+      "sim": 0.7571574311611635,
+      "sign": -1,
+      "weight": 0.33271125064163826
+     },
+     {
+      "itemId": "dn2018b::B12A_9",
+      "sim": 0.7550411694816248,
+      "sign": 1,
+      "weight": 0.33178131976979236
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::done6m_naturewalks",
+     "text": "ΜΠΟΡΕΙΤΕ ΝΑ ΜΟΥ ΠΕΙΤΕ ΑΝ ΕΧΕΤΕ ΚΑΝΕΙ ΚΑΠΟΙΑ ΑΠΟ ΤΙΣ ΠΑΡΑΚΑΤΩ ΔΡΑΣΤΗΡΙΟΤΗΤΕΣ ΤΟΥΣ ΤΕΛΕΥΤΑΙΟΥΣ ΕΞΙ ΜΗΝΕΣ? [πολλαπλή επιλογή] Επιλογή: Περίπατο",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B12A_5",
+      "sim": 0.7538383051562338,
+      "sign": 1,
+      "weight": 0.33639322707968217
+     },
+     {
+      "itemId": "dn2018b::B12A_2",
+      "sim": 0.74358840748794,
+      "sign": 1,
+      "weight": 0.33181930700917145
+     },
+     {
+      "itemId": "dn2018b::B12A_9",
+      "sim": 0.7435170533778175,
+      "sign": 1,
+      "weight": 0.3317874659111464
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::wantmore_storytelling",
+     "text": "ΘΑ ΘΕΛΑΤΕ ΝΑ ΠΕΡΑΣΤΕ ΠΕΡΙΣΣΟΤΕΡΟ ΧΡΟΝΟ ΚΑΝΟΝΤΑΣ ΟΠΟΙΑΔΗΠΟΤΕ ΑΠΟ ΤΙΣ ΔΡΑΣΤΗΡΙΟΤΗΤΕΣ ΠΑΡΑΚΑΤΩ? [πολλαπλή επιλογή] Επιλογή: Διήγηση μύθων",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B12A_5",
+      "sim": 0.8741950098769645,
+      "sign": 1,
+      "weight": 0.3357269133328454
+     },
+     {
+      "itemId": "dn2018b::B12A_2",
+      "sim": 0.8679506224630418,
+      "sign": 1,
+      "weight": 0.3333288112063807
+     },
+     {
+      "itemId": "dn2018b::B12A_9",
+      "sim": 0.8617415603744861,
+      "sign": 1,
+      "weight": 0.3309442754607738
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::wantmore_artscrafts",
+     "text": "ΘΑ ΘΕΛΑΤΕ ΝΑ ΠΕΡΑΣΤΕ ΠΕΡΙΣΣΟΤΕΡΟ ΧΡΟΝΟ ΚΑΝΟΝΤΑΣ ΟΠΟΙΑΔΗΠΟΤΕ ΑΠΟ ΤΙΣ ΔΡΑΣΤΗΡΙΟΤΗΤΕΣ ΠΑΡΑΚΑΤΩ? [πολλαπλή επιλογή] Επιλογή: Δραστηριότητες με τ",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B12A_5",
+      "sim": 0.7316771196200608,
+      "sign": 1,
+      "weight": 0.33841339373841683
+     },
+     {
+      "itemId": "dn2018b::B19B_1",
+      "sim": 0.7161405392001452,
+      "sign": -1,
+      "weight": 0.3312274550695629
+     },
+     {
+      "itemId": "dn2018b::B12A_9",
+      "sim": 0.7142631960103349,
+      "sign": 1,
+      "weight": 0.3303591511920202
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::wantmore_groupsports",
+     "text": "ΘΑ ΘΕΛΑΤΕ ΝΑ ΠΕΡΑΣΤΕ ΠΕΡΙΣΣΟΤΕΡΟ ΧΡΟΝΟ ΚΑΝΟΝΤΑΣ ΟΠΟΙΑΔΗΠΟΤΕ ΑΠΟ ΤΙΣ ΔΡΑΣΤΗΡΙΟΤΗΤΕΣ ΠΑΡΑΚΑΤΩ? [πολλαπλή επιλογή] Επιλογή: Εξάσκηση ομαδικών π",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018a::Q20",
+      "sim": 0.6740951730838814,
+      "sign": -1,
+      "weight": 0.3382895393511865
+     },
+     {
+      "itemId": "dn2018b::B12A_5",
+      "sim": 0.6622586749512657,
+      "sign": 1,
+      "weight": 0.33234948272313597
+     },
+     {
+      "itemId": "dn2018a::Q41B",
+      "sim": 0.6563036085824724,
+      "sign": -1,
+      "weight": 0.3293609779256775
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::wantmore_popularevents",
+     "text": "ΘΑ ΘΕΛΑΤΕ ΝΑ ΠΕΡΑΣΤΕ ΠΕΡΙΣΣΟΤΕΡΟ ΧΡΟΝΟ ΚΑΝΟΝΤΑΣ ΟΠΟΙΑΔΗΠΟΤΕ ΑΠΟ ΤΙΣ ΔΡΑΣΤΗΡΙΟΤΗΤΕΣ ΠΑΡΑΚΑΤΩ? [πολλαπλή επιλογή] Επιλογή: Συμμετοχή σε παραδο",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B12A_3",
+      "sim": 0.7103457829393179,
+      "sign": 1,
+      "weight": 0.3344528903027675
+     },
+     {
+      "itemId": "dn2018b::B12A_8",
+      "sim": 0.7073575542115029,
+      "sign": 1,
+      "weight": 0.3330459392672197
+     },
+     {
+      "itemId": "dn2018b::B20_1",
+      "sim": 0.7062005175782231,
+      "sign": -1,
+      "weight": 0.33250117043001287
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::wantmore_religious",
+     "text": "ΘΑ ΘΕΛΑΤΕ ΝΑ ΠΕΡΑΣΤΕ ΠΕΡΙΣΣΟΤΕΡΟ ΧΡΟΝΟ ΚΑΝΟΝΤΑΣ ΟΠΟΙΑΔΗΠΟΤΕ ΑΠΟ ΤΙΣ ΔΡΑΣΤΗΡΙΟΤΗΤΕΣ ΠΑΡΑΚΑΤΩ? [πολλαπλή επιλογή] Επιλογή: Επίσκεψη σε θρησκευ",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B12A_3",
+      "sim": 0.7135936004804602,
+      "sign": 1,
+      "weight": 0.3360330428307443
+     },
+     {
+      "itemId": "dn2018b::B2_2",
+      "sim": 0.7071879168734148,
+      "sign": -1,
+      "weight": 0.3330165901153091
+     },
+     {
+      "itemId": "dn2018a::Q30C4",
+      "sim": 0.7028001235143668,
+      "sign": 1,
+      "weight": 0.3309503670539466
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::wantmore_restaurants",
+     "text": "ΘΑ ΘΕΛΑΤΕ ΝΑ ΠΕΡΑΣΤΕ ΠΕΡΙΣΣΟΤΕΡΟ ΧΡΟΝΟ ΚΑΝΟΝΤΑΣ ΟΠΟΙΑΔΗΠΟΤΕ ΑΠΟ ΤΙΣ ΔΡΑΣΤΗΡΙΟΤΗΤΕΣ ΠΑΡΑΚΑΤΩ? [πολλαπλή επιλογή] Επιλογή: Έξοδος σε εστιατόρι",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018a::Q41B",
+      "sim": 0.8030302603466373,
+      "sign": -1,
+      "weight": 0.337279303847396
+     },
+     {
+      "itemId": "dn2018b::E1",
+      "sim": 0.7889377840528875,
+      "sign": -1,
+      "weight": 0.331360348076302
+     },
+     {
+      "itemId": "dn2018a::E1",
+      "sim": 0.7889377840528875,
+      "sign": -1,
+      "weight": 0.331360348076302
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::wantmore_discos",
+     "text": "ΘΑ ΘΕΛΑΤΕ ΝΑ ΠΕΡΑΣΤΕ ΠΕΡΙΣΣΟΤΕΡΟ ΧΡΟΝΟ ΚΑΝΟΝΤΑΣ ΟΠΟΙΑΔΗΠΟΤΕ ΑΠΟ ΤΙΣ ΔΡΑΣΤΗΡΙΟΤΗΤΕΣ ΠΑΡΑΚΑΤΩ? [πολλαπλή επιλογή] Επιλογή: Έξοδος σε ντίσκο, κ",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018a::Q41B",
+      "sim": 0.7243893959142981,
+      "sign": -1,
+      "weight": 0.3362793235718887
+     },
+     {
+      "itemId": "dn2018b::B21_11",
+      "sim": 0.7169559362087048,
+      "sign": -1,
+      "weight": 0.3328285292674791
+     },
+     {
+      "itemId": "dn2018a::Q20",
+      "sim": 0.7127847173251325,
+      "sign": -1,
+      "weight": 0.3308921471606323
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::wantmore_fairs",
+     "text": "ΘΑ ΘΕΛΑΤΕ ΝΑ ΠΕΡΑΣΤΕ ΠΕΡΙΣΣΟΤΕΡΟ ΧΡΟΝΟ ΚΑΝΟΝΤΑΣ ΟΠΟΙΑΔΗΠΟΤΕ ΑΠΟ ΤΙΣ ΔΡΑΣΤΗΡΙΟΤΗΤΕΣ ΠΑΡΑΚΑΤΩ? [πολλαπλή επιλογή] Επιλογή: Επίσκεψη σε εκθέσει",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B12A_8",
+      "sim": 0.7954842839779683,
+      "sign": 1,
+      "weight": 0.33374911308558775
+     },
+     {
+      "itemId": "dn2018b::B12A_9",
+      "sim": 0.794969602694997,
+      "sign": 1,
+      "weight": 0.333533176171216
+     },
+     {
+      "itemId": "dn2018a::Q41B",
+      "sim": 0.7930259572838684,
+      "sign": -1,
+      "weight": 0.3327177107431963
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::wantmore_citywalks",
+     "text": "ΘΑ ΘΕΛΑΤΕ ΝΑ ΠΕΡΑΣΤΕ ΠΕΡΙΣΣΟΤΕΡΟ ΧΡΟΝΟ ΚΑΝΟΝΤΑΣ ΟΠΟΙΑΔΗΠΟΤΕ ΑΠΟ ΤΙΣ ΔΡΑΣΤΗΡΙΟΤΗΤΕΣ ΠΑΡΑΚΑΤΩ? [πολλαπλή επιλογή] Επιλογή: Περίπατοι στην πόλη",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018a::Q41B",
+      "sim": 0.7587432937310005,
+      "sign": -1,
+      "weight": 0.33673200310964535
+     },
+     {
+      "itemId": "dn2018b::B12A_8",
+      "sim": 0.7559770495242364,
+      "sign": 1,
+      "weight": 0.33550433762577175
+     },
+     {
+      "itemId": "dn2018b::B12A_9",
+      "sim": 0.7385353221527863,
+      "sign": 1,
+      "weight": 0.3277636592645829
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::wantmore_naturewalks",
+     "text": "ΘΑ ΘΕΛΑΤΕ ΝΑ ΠΕΡΑΣΤΕ ΠΕΡΙΣΣΟΤΕΡΟ ΧΡΟΝΟ ΚΑΝΟΝΤΑΣ ΟΠΟΙΑΔΗΠΟΤΕ ΑΠΟ ΤΙΣ ΔΡΑΣΤΗΡΙΟΤΗΤΕΣ ΠΑΡΑΚΑΤΩ? [πολλαπλή επιλογή] Επιλογή: Περίπατοι στην φύση",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B12A_1",
+      "sim": 0.7354488894910914,
+      "sign": 1,
+      "weight": 0.33577104554347637
+     },
+     {
+      "itemId": "dn2018b::B21_11",
+      "sim": 0.7282663470365381,
+      "sign": -1,
+      "weight": 0.3324918376690929
+     },
+     {
+      "itemId": "dn2018b::B21_13",
+      "sim": 0.7266132603822205,
+      "sign": -1,
+      "weight": 0.3317371167874307
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::wantmore2_artscrafts",
+     "text": "ΘΑ ΘΕΛΑΤΕ ΝΑ ΠΕΡΑΣΕΤΕ ΠΕΡΙΣΣΟΤΕΡΟ ΧΡΟΝΟ ΓΙΑ ΝΑ ΚΑΝΕΤΕ ΚΑΠΟΙΟ ΑΠΟ ΑΥΤΑ? [πολλαπλή επιλογή] Επιλογή: Δραστηριότητες σχετικές με τέχνες,χειροτε",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2017::EmploymentScenario",
+      "sim": 0.6428308323640778,
+      "sign": 1,
+      "weight": 0.34207237529757245
+     },
+     {
+      "itemId": "dn2022b::Q09",
+      "sim": 0.6181968980319813,
+      "sign": 1,
+      "weight": 0.32896381235121375
+     },
+     {
+      "itemId": "dn2024c::Q14",
+      "sim": 0.6181968980319813,
+      "sign": 1,
+      "weight": 0.32896381235121375
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::wantmore2_groupsports",
+     "text": "ΘΑ ΘΕΛΑΤΕ ΝΑ ΠΕΡΑΣΕΤΕ ΠΕΡΙΣΣΟΤΕΡΟ ΧΡΟΝΟ ΓΙΑ ΝΑ ΚΑΝΕΤΕ ΚΑΠΟΙΟ ΑΠΟ ΑΥΤΑ? [πολλαπλή επιλογή] Επιλογή: Εξάσκηση ομαδικών παιχνιδιών ή αθλημάτων ",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2017::FreqAthlet",
+      "sim": 0.6287262496309314,
+      "sign": 1,
+      "weight": 1.0
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::wantmore2_popularevents",
+     "text": "ΘΑ ΘΕΛΑΤΕ ΝΑ ΠΕΡΑΣΕΤΕ ΠΕΡΙΣΣΟΤΕΡΟ ΧΡΟΝΟ ΓΙΑ ΝΑ ΚΑΝΕΤΕ ΚΑΠΟΙΟ ΑΠΟ ΑΥΤΑ? [πολλαπλή επιλογή] Επιλογή: Συμμετοχή σε παραδοσιακές ή λαϊκές συλλογ",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2024c::Q23_10",
+      "sim": 0.57805755622734,
+      "sign": -1,
+      "weight": 0.5007167133692559
+     },
+     {
+      "itemId": "dn2018b::B5",
+      "sim": 0.5764027219959849,
+      "sign": -1,
+      "weight": 0.49928328663074406
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::wantmore2_religious",
+     "text": "ΘΑ ΘΕΛΑΤΕ ΝΑ ΠΕΡΑΣΕΤΕ ΠΕΡΙΣΣΟΤΕΡΟ ΧΡΟΝΟ ΓΙΑ ΝΑ ΚΑΝΕΤΕ ΚΑΠΟΙΟ ΑΠΟ ΑΥΤΑ? [πολλαπλή επιλογή] Επιλογή: Επίσκεψη σε θρησκευτικούς χώρους ή χώρους",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2022a::Q36",
+      "sim": 0.6768911318056525,
+      "sign": -1,
+      "weight": 0.3385004781825218
+     },
+     {
+      "itemId": "dn2020a::Q27",
+      "sim": 0.6624512518522706,
+      "sign": -1,
+      "weight": 0.33127936678152126
+     },
+     {
+      "itemId": "dn2018b::B21_14",
+      "sim": 0.6603331720163824,
+      "sign": -1,
+      "weight": 0.33022015503595686
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::wantmore2_restaurants",
+     "text": "ΘΑ ΘΕΛΑΤΕ ΝΑ ΠΕΡΑΣΕΤΕ ΠΕΡΙΣΣΟΤΕΡΟ ΧΡΟΝΟ ΓΙΑ ΝΑ ΚΑΝΕΤΕ ΚΑΠΟΙΟ ΑΠΟ ΑΥΤΑ? [πολλαπλή επιλογή] Επιλογή: Έξοδος σε εστιατόρια, μπαρ κλπ",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B5",
+      "sim": 0.655358408832492,
+      "sign": -1,
+      "weight": 0.35386715632777566
+     },
+     {
+      "itemId": "dn2018b::B13",
+      "sim": 0.6163931438706354,
+      "sign": 1,
+      "weight": 0.33282748197283074
+     },
+     {
+      "itemId": "dn2017::EmploymentScenario",
+      "sim": 0.5802383737806255,
+      "sign": 1,
+      "weight": 0.31330536169939355
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::wantmore2_discos",
+     "text": "ΘΑ ΘΕΛΑΤΕ ΝΑ ΠΕΡΑΣΕΤΕ ΠΕΡΙΣΣΟΤΕΡΟ ΧΡΟΝΟ ΓΙΑ ΝΑ ΚΑΝΕΤΕ ΚΑΠΟΙΟ ΑΠΟ ΑΥΤΑ? [πολλαπλή επιλογή] Επιλογή: Έξοδος σε ντίσκο, κλαμπ, αίθουσες χορού κ",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2024a::Q7_2",
+      "sim": 0.6007259655522373,
+      "sign": -1,
+      "weight": 0.3454850182581648
+     },
+     {
+      "itemId": "dn2017::EmploymentScenario",
+      "sim": 0.5699956678195907,
+      "sign": 1,
+      "weight": 0.3278116395762855
+     },
+     {
+      "itemId": "dn2018b::B5",
+      "sim": 0.5680685711381195,
+      "sign": -1,
+      "weight": 0.3267033421655497
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::wantmore2_fairs",
+     "text": "ΘΑ ΘΕΛΑΤΕ ΝΑ ΠΕΡΑΣΕΤΕ ΠΕΡΙΣΣΟΤΕΡΟ ΧΡΟΝΟ ΓΙΑ ΝΑ ΚΑΝΕΤΕ ΚΑΠΟΙΟ ΑΠΟ ΑΥΤΑ? [πολλαπλή επιλογή] Επιλογή: Επίσκεψη σε εκθέσεις και αγορές",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B5",
+      "sim": 0.6620333681266147,
+      "sign": -1,
+      "weight": 0.35265949157586907
+     },
+     {
+      "itemId": "dn2018b::B13",
+      "sim": 0.6359736238316462,
+      "sign": 1,
+      "weight": 0.3387776895155489
+     },
+     {
+      "itemId": "dn2024c::Q23_13",
+      "sim": 0.5792524720314919,
+      "sign": -1,
+      "weight": 0.30856281890858206
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::wantmore2_citywalks",
+     "text": "ΘΑ ΘΕΛΑΤΕ ΝΑ ΠΕΡΑΣΕΤΕ ΠΕΡΙΣΣΟΤΕΡΟ ΧΡΟΝΟ ΓΙΑ ΝΑ ΚΑΝΕΤΕ ΚΑΠΟΙΟ ΑΠΟ ΑΥΤΑ? [πολλαπλή επιλογή] Επιλογή: Περίπατοι στην πόλη",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B13",
+      "sim": 0.7322091185026144,
+      "sign": 1,
+      "weight": 0.35335974984738744
+     },
+     {
+      "itemId": "dn2018b::B5",
+      "sim": 0.6719907127592327,
+      "sign": -1,
+      "weight": 0.32429870669457145
+     },
+     {
+      "itemId": "dn2018b::B7_2",
+      "sim": 0.6679352062427023,
+      "sign": -1,
+      "weight": 0.32234154345804106
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::wantmore2_naturewalks",
+     "text": "ΘΑ ΘΕΛΑΤΕ ΝΑ ΠΕΡΑΣΕΤΕ ΠΕΡΙΣΣΟΤΕΡΟ ΧΡΟΝΟ ΓΙΑ ΝΑ ΚΑΝΕΤΕ ΚΑΠΟΙΟ ΑΠΟ ΑΥΤΑ? [πολλαπλή επιλογή] Επιλογή: Περίπατοι στην φύση",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B5",
+      "sim": 0.721591171680217,
+      "sign": -1,
+      "weight": 0.34974624538774635
+     },
+     {
+      "itemId": "dn2018b::B21_3",
+      "sim": 0.6749093637608388,
+      "sign": -1,
+      "weight": 0.327120155035646
+     },
+     {
+      "itemId": "dn2018b::B21_4",
+      "sim": 0.6666843627419817,
+      "sign": -1,
+      "weight": 0.3231335995766077
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "culture::groups_artistic",
+     "text": "ΣΕ ΠΟΙΑ/ΠΟΙΕΣ ΑΠΟ ΤΙΣ ΟΜΑΔΕΣ ΘΑ ΣΥΜΜΕΤΕΙΧΑΤΕ? [πολλαπλή επιλογή] Επιλογή: Καλλιτεχνικός ή πολιτιστικός σύλλογος ή ομάδα",
+     "domain": "consumer"
+    },
+    "analogs": []
+   }
+  ],
+  "covidistress": [
+   {
+    "target": {
+     "id": "covidistress::Scale_PSS10_UCLA_1",
+     "text": "Την περασμένη εβδομάδα, πόσο συχνά ... Αναστατωθήκατε εξαιτίας κάποιου αναπάντεχου γεγονότος;",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2020b::Q19",
+      "sim": 0.5918533018844849,
+      "sign": -1,
+      "weight": 1.0
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::Scale_PSS10_UCLA_2",
+     "text": "Την περασμένη εβδομάδα, πόσο συχνά ... Αισθανθήκατε ότι δε μπορούσατε να έχετε τον έλεγχο στα σημαντικά πράγματα της ζωής;",
+     "domain": "social"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "covidistress::Scale_PSS10_UCLA_3",
+     "text": "Την περασμένη εβδομάδα, πόσο συχνά ... Αισθανθήκατε νευρικότητα και στρές;",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2020b::Q19",
+      "sim": 0.6157312760096971,
+      "sign": -1,
+      "weight": 1.0
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::Scale_PSS10_UCLA_4",
+     "text": "Την περασμένη εβδομάδα, πόσο συχνά ... Αισθανθήκατε σιγουριά ως προς την ικανότητά σας να χειριστείτε τα προσωπικά σας προβλήματα;",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B21_16",
+      "sim": 0.579787416836171,
+      "sign": -1,
+      "weight": 1.0
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::Scale_PSS10_UCLA_5",
+     "text": "Την περασμένη εβδομάδα, πόσο συχνά ... Αισθανθήκατε ότι τα πράγματα πήγαιναν όπως τα θέλετε;",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2020b::Q19",
+      "sim": 0.6184911363682939,
+      "sign": -1,
+      "weight": 1.0
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::Scale_PSS10_UCLA_6",
+     "text": "Την περασμένη εβδομάδα, πόσο συχνά ... Αισθανθήκατε ότι δε μπορείτε να ανταποκριθείτε στις υποχρεώσεις σας;",
+     "domain": "social"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "covidistress::Scale_PSS10_UCLA_7",
+     "text": "Την περασμένη εβδομάδα, πόσο συχνά ... Αισθανθήκατε ότι μπορούσατε να ελέγξετε όσα σας ενοχλούν στη ζωή σας;",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B21_16",
+      "sim": 0.5993662185888963,
+      "sign": -1,
+      "weight": 0.3446422975110016
+     },
+     {
+      "itemId": "dn2020b::Q184",
+      "sim": 0.5729496515298208,
+      "sign": -1,
+      "weight": 0.32945247519330806
+     },
+     {
+      "itemId": "dn2022b::Q18_5",
+      "sim": 0.5667806450725543,
+      "sign": -1,
+      "weight": 0.3259052272956904
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::Scale_PSS10_UCLA_8",
+     "text": "Την περασμένη εβδομάδα, πόσο συχνά ... Αισθανθήκατε ότι μπορούσατε να αναπεξέλθετε στις υποχρεώσεις σας στο μεγιστο βαθμό;",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2020b::Q19",
+      "sim": 0.5792432135454966,
+      "sign": -1,
+      "weight": 0.5084063763522625
+     },
+     {
+      "itemId": "dn2018b::B21_12",
+      "sim": 0.5600879209329447,
+      "sign": -1,
+      "weight": 0.49159362364773757
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::Scale_PSS10_UCLA_9",
+     "text": "Την περασμένη εβδομάδα, πόσο συχνά ... Νιώσατε θυμό επειδή δεν έχετε τον έλεγχο να ελέγξετε την κατάσταση;",
+     "domain": "social"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "covidistress::Scale_PSS10_UCLA_10",
+     "text": "Την περασμένη εβδομάδα, πόσο συχνά ... Νιώσατε ότι οι δυσκολίες που αντιμετωπίζετε είναι τόσες πολλές που δε μπορείτε να τις ξεπεράσετε;",
+     "domain": "social"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "covidistress::Scale_SLON_1",
+     "text": "Την περασμένη εβδομάδα, πόσο συχνά ... Νιώσατε μοναξιά;",
+     "domain": "social"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "covidistress::Scale_SLON_2",
+     "text": "Την περασμένη εβδομάδα, πόσο συχνά ... Νιώσατε να σας έχουν ξεχάσει;",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2020b::Q19",
+      "sim": 0.5903897590017447,
+      "sign": -1,
+      "weight": 1.0
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::Scale_SLON_3",
+     "text": "Την περασμένη εβδομάδα, πόσο συχνά ... Νιώσατε αποκομμένος από τους άλλους;",
+     "domain": "political"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2020b::Q19",
+      "sim": 0.5716144971214384,
+      "sign": -1,
+      "weight": 1.0
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::OECD_people_1",
+     "text": "Χρησιμοποιώντας μια κλίμακα από το «0» έως το «10», όπου το «0» αντιστοιχεί στη μηδενική εμπιστοσύνη και το «10» στην πλήρη εμπιστοσύνη, πόσ",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "maple2019feb::Q17_1_w1::m10",
+      "sim": 0.7859443507994278,
+      "sign": 1,
+      "weight": 0.3444924803103876
+     },
+     {
+      "itemId": "maple2019feb::Q17_1_w1::m9",
+      "sim": 0.7508090478659727,
+      "sign": 1,
+      "weight": 0.32909209268537154
+     },
+     {
+      "itemId": "maple2019feb::Q17_1_w1::m7",
+      "sim": 0.7447023535509969,
+      "sign": 1,
+      "weight": 0.32641542700424087
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::OECD_people_2",
+     "text": "Χρησιμοποιώντας μια κλίμακα από το «0» έως το «10», όπου το «0» αντιστοιχεί στη μηδενική εμπιστοσύνη και το «10» στην πλήρη εμπιστοσύνη, πόσ",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "maple2019feb::Q17_1_w1::m10",
+      "sim": 0.7668755008082684,
+      "sign": 1,
+      "weight": 0.346144039343301
+     },
+     {
+      "itemId": "maple2019feb::Q17_1_w1::m9",
+      "sim": 0.7258541368674527,
+      "sign": 1,
+      "weight": 0.32762825601356904
+     },
+     {
+      "itemId": "maple2019feb::Q17_1_w1::m7",
+      "sim": 0.7227512420851223,
+      "sign": 1,
+      "weight": 0.32622770464313006
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::OECD_insititutions_1",
+     "text": "Ακόμα και αν είχατε περιορισμένη ή και καθόλου προσωπική επαφή με τους παρακάτω θεσμούς, παρακαλείστε να διαμορφώσετε την απάντησή σας βάση ",
+     "domain": "political"
+    },
+    "analogs": [
+     {
+      "itemId": "maple2019feb::Q17_1_w1::m10",
+      "sim": 0.7680355274483769,
+      "sign": 1,
+      "weight": 0.33559363845682433
+     },
+     {
+      "itemId": "maple2019feb::Q17_1_w1::m9",
+      "sim": 0.764183948932079,
+      "sign": 1,
+      "weight": 0.3339106886427958
+     },
+     {
+      "itemId": "maple2019feb::Q17_1_w1::m7",
+      "sim": 0.756368385356346,
+      "sign": 1,
+      "weight": 0.33049567290037996
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::OECD_insititutions_2",
+     "text": "Ακόμα και αν είχατε περιορισμένη ή και καθόλου προσωπική επαφή με τους παρακάτω θεσμούς, παρακαλείστε να διαμορφώσετε την απάντησή σας βάση ",
+     "domain": "political"
+    },
+    "analogs": [
+     {
+      "itemId": "maple2019feb::Q17_1_w1::m10",
+      "sim": 0.78309912568306,
+      "sign": 1,
+      "weight": 0.336913578919519
+     },
+     {
+      "itemId": "maple2019feb::Q17_1_w1::m9",
+      "sim": 0.7756987898777304,
+      "sign": 1,
+      "weight": 0.3337297244883127
+     },
+     {
+      "itemId": "maple2019feb::Q17_1_w1::m7",
+      "sim": 0.7655344197355691,
+      "sign": 1,
+      "weight": 0.3293566965921683
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::OECD_insititutions_3",
+     "text": "Ακόμα και αν είχατε περιορισμένη ή και καθόλου προσωπική επαφή με τους παρακάτω θεσμούς, παρακαλείστε να διαμορφώσετε την απάντησή σας βάση ",
+     "domain": "political"
+    },
+    "analogs": [
+     {
+      "itemId": "maple2019feb::Q17_1_w1::m10",
+      "sim": 0.788469445411698,
+      "sign": 1,
+      "weight": 0.3362642586563378
+     },
+     {
+      "itemId": "maple2019feb::Q17_1_w1::m9",
+      "sim": 0.7831409644578715,
+      "sign": 1,
+      "weight": 0.33399178290203985
+     },
+     {
+      "itemId": "maple2019feb::Q17_1_w1::m7",
+      "sim": 0.773180703412303,
+      "sign": 1,
+      "weight": 0.3297439584416223
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::OECD_insititutions_4",
+     "text": "Ακόμα και αν είχατε περιορισμένη ή και καθόλου προσωπική επαφή με τους παρακάτω θεσμούς, παρακαλείστε να διαμορφώσετε την απάντησή σας βάση ",
+     "domain": "political"
+    },
+    "analogs": [
+     {
+      "itemId": "maple2019feb::Q17_1_w1::m10",
+      "sim": 0.779946319359661,
+      "sign": 1,
+      "weight": 0.33666879987468584
+     },
+     {
+      "itemId": "maple2019feb::Q17_1_w1::m9",
+      "sim": 0.7745131593115053,
+      "sign": 1,
+      "weight": 0.33432354171071194
+     },
+     {
+      "itemId": "maple2019feb::Q17_1_w1::m7",
+      "sim": 0.7621980781026452,
+      "sign": 1,
+      "weight": 0.3290076584146023
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::OECD_insititutions_5",
+     "text": "Ακόμα και αν είχατε περιορισμένη ή και καθόλου προσωπική επαφή με τους παρακάτω θεσμούς, παρακαλείστε να διαμορφώσετε την απάντησή σας βάση ",
+     "domain": "political"
+    },
+    "analogs": [
+     {
+      "itemId": "maple2019feb::Q17_1_w1::m10",
+      "sim": 0.7905800146081412,
+      "sign": 1,
+      "weight": 0.33870143029345595
+     },
+     {
+      "itemId": "maple2019feb::Q17_1_w1::m9",
+      "sim": 0.775927142250965,
+      "sign": 1,
+      "weight": 0.3324238255809931
+     },
+     {
+      "itemId": "maple2019feb::Q17_1_w1::m7",
+      "sim": 0.7676430530268423,
+      "sign": 1,
+      "weight": 0.3288747441255509
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::OECD_insititutions_6",
+     "text": "Ακόμα και αν είχατε περιορισμένη ή και καθόλου προσωπική επαφή με τους παρακάτω θεσμούς, παρακαλείστε να διαμορφώσετε την απάντησή σας βάση ",
+     "domain": "political"
+    },
+    "analogs": [
+     {
+      "itemId": "maple2019feb::Q17_1_w1::m10",
+      "sim": 0.7859106391822723,
+      "sign": 1,
+      "weight": 0.33507213558827437
+     },
+     {
+      "itemId": "maple2019feb::Q17_1_w1::m9",
+      "sim": 0.7846531043061395,
+      "sign": 1,
+      "weight": 0.3345359869786042
+     },
+     {
+      "itemId": "maple2019feb::Q17_1_w1::m7",
+      "sim": 0.7749331084132738,
+      "sign": 1,
+      "weight": 0.3303918774331214
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::Corona_concerns_1",
+     "text": "Πόσο συμφωνείτε, με το ότι σας απασχολούν οι συνέπειες του κορονοϊού... … για τον εαυτό σας;",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B21_16",
+      "sim": 0.6941551518074124,
+      "sign": -1,
+      "weight": 0.3478072395342402
+     },
+     {
+      "itemId": "dn2018b::B21_7",
+      "sim": 0.6620451323808123,
+      "sign": -1,
+      "weight": 0.33171847726102566
+     },
+     {
+      "itemId": "dn2018b::B21_19",
+      "sim": 0.6396039225815303,
+      "sign": -1,
+      "weight": 0.3204742832047342
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::Corona_concerns_2",
+     "text": "Πόσο συμφωνείτε, με το ότι σας απασχολούν οι συνέπειες του κορονοϊού... … για την οικογένειά σας;",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2022a::Q21_2",
+      "sim": 0.6461532181182662,
+      "sign": -1,
+      "weight": 0.339420028809303
+     },
+     {
+      "itemId": "dn2018b::B21_16",
+      "sim": 0.6410693176916586,
+      "sign": -1,
+      "weight": 0.3367494894064536
+     },
+     {
+      "itemId": "dn2020a::Q222",
+      "sim": 0.6164754291716754,
+      "sign": -1,
+      "weight": 0.32383048178424345
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::Corona_concerns_3",
+     "text": "Πόσο συμφωνείτε, με το ότι σας απασχολούν οι συνέπειες του κορονοϊού... … για τους κοντινούς σας φίλους;",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B21_16",
+      "sim": 0.6276757214776968,
+      "sign": -1,
+      "weight": 0.34881344276376286
+     },
+     {
+      "itemId": "dn2018b::B21_7",
+      "sim": 0.5909419340939474,
+      "sign": -1,
+      "weight": 0.32839965519059955
+     },
+     {
+      "itemId": "dn2024b::q2_4",
+      "sim": 0.5808420111900983,
+      "sign": 1,
+      "weight": 0.32278690204563765
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::Corona_concerns_4",
+     "text": "Πόσο συμφωνείτε, με το ότι σας απασχολούν οι συνέπειες του κορονοϊού... … για την χώρα σας;",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "maple2019feb::Q24_4_w1",
+      "sim": 0.7222308361454886,
+      "sign": 1,
+      "weight": 0.3397108157928275
+     },
+     {
+      "itemId": "dn2022b::Q32_5",
+      "sim": 0.7075955831030192,
+      "sign": -1,
+      "weight": 0.33282693116540596
+     },
+     {
+      "itemId": "maple2019feb::Q24_1_w1::m5",
+      "sim": 0.6961901883179133,
+      "sign": 1,
+      "weight": 0.3274622530417665
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::Corona_concerns_5",
+     "text": "Πόσο συμφωνείτε, με το ότι σας απασχολούν οι συνέπειες του κορονοϊού... … για όλες τις χώρες του κόσμου;",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "maple2019feb::Q24_4_w1",
+      "sim": 0.6725864469774963,
+      "sign": 1,
+      "weight": 0.3398461495835811
+     },
+     {
+      "itemId": "dn2022b::Q32_5",
+      "sim": 0.6638550322176308,
+      "sign": -1,
+      "weight": 0.3354343186585122
+     },
+     {
+      "itemId": "dn2022b::Q32_2",
+      "sim": 0.6426494941809937,
+      "sign": -1,
+      "weight": 0.3247195317579067
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::Compliance_1",
+     "text": "Πολλές χώρες καθώς και o Παγκόσμιoς Οργανισμός Υγείας (ΠΟΥ) έχουν εκδώσει μια σειρά από κατευθυντήριες γραμμές για το πώς να συμπεριφέρονται",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2024a::Q4_3",
+      "sim": 0.6138728377432634,
+      "sign": -1,
+      "weight": 0.3555754216431343
+     },
+     {
+      "itemId": "dn2017::InOUrCountry_safety",
+      "sim": 0.5591923473279502,
+      "sign": -1,
+      "weight": 0.32390267569373643
+     },
+     {
+      "itemId": "dn2015n::Q054_2",
+      "sim": 0.5533557101259909,
+      "sign": -1,
+      "weight": 0.3205219026631293
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::Compliance_2",
+     "text": "Πολλές χώρες καθώς και o Παγκόσμιoς Οργανισμός Υγείας (ΠΟΥ) έχουν εκδώσει μια σειρά από κατευθυντήριες γραμμές για το πώς να συμπεριφέρονται",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2024a::Q4_3",
+      "sim": 0.6193780013214316,
+      "sign": -1,
+      "weight": 0.3539523491324183
+     },
+     {
+      "itemId": "dn2017::InOUrCountry_safety",
+      "sim": 0.5723392638531188,
+      "sign": -1,
+      "weight": 0.32707139502747584
+     },
+     {
+      "itemId": "dn2015n::Q054_2",
+      "sim": 0.5581736533053097,
+      "sign": -1,
+      "weight": 0.31897625584010586
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::Compliance_3",
+     "text": "Πολλές χώρες καθώς και o Παγκόσμιoς Οργανισμός Υγείας (ΠΟΥ) έχουν εκδώσει μια σειρά από κατευθυντήριες γραμμές για το πώς να συμπεριφέρονται",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2024a::Q4_3",
+      "sim": 0.6193780013214316,
+      "sign": -1,
+      "weight": 0.3539523491324183
+     },
+     {
+      "itemId": "dn2017::InOUrCountry_safety",
+      "sim": 0.5723392638531188,
+      "sign": -1,
+      "weight": 0.32707139502747584
+     },
+     {
+      "itemId": "dn2015n::Q054_2",
+      "sim": 0.5581736533053097,
+      "sign": -1,
+      "weight": 0.31897625584010586
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::Compliance_4",
+     "text": "Πολλές χώρες καθώς και o Παγκόσμιoς Οργανισμός Υγείας (ΠΟΥ) έχουν εκδώσει μια σειρά από κατευθυντήριες γραμμές για το πώς να συμπεριφέρονται",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2024a::Q4_3",
+      "sim": 0.6093767854079493,
+      "sign": -1,
+      "weight": 0.35279023845989094
+     },
+     {
+      "itemId": "dn2017::InOUrCountry_safety",
+      "sim": 0.5657028955616267,
+      "sign": -1,
+      "weight": 0.3275058456469281
+     },
+     {
+      "itemId": "dn2015n::Q054_2",
+      "sim": 0.5522265735010389,
+      "sign": -1,
+      "weight": 0.319703915893181
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::Compliance_5",
+     "text": "Πολλές χώρες καθώς και o Παγκόσμιoς Οργανισμός Υγείας (ΠΟΥ) έχουν εκδώσει μια σειρά από κατευθυντήριες γραμμές για το πώς να συμπεριφέρονται",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2024a::Q4_3",
+      "sim": 0.627320253523269,
+      "sign": -1,
+      "weight": 0.3587536258969535
+     },
+     {
+      "itemId": "dn2017::InOUrCountry_safety",
+      "sim": 0.5709767923941508,
+      "sign": -1,
+      "weight": 0.32653177292452196
+     },
+     {
+      "itemId": "dn2015n::Q054_2",
+      "sim": 0.5503131652124248,
+      "sign": -1,
+      "weight": 0.3147146011785246
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::Compliance_6",
+     "text": "Πολλές χώρες καθώς και o Παγκόσμιoς Οργανισμός Υγείας (ΠΟΥ) έχουν εκδώσει μια σειρά από κατευθυντήριες γραμμές για το πώς να συμπεριφέρονται",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2024a::Q4_3",
+      "sim": 0.6111103914514254,
+      "sign": -1,
+      "weight": 0.35297083351441505
+     },
+     {
+      "itemId": "dn2017::InOUrCountry_safety",
+      "sim": 0.5631387648458156,
+      "sign": -1,
+      "weight": 0.3252629344754076
+     },
+     {
+      "itemId": "dn2015n::Q054_2",
+      "sim": 0.5570848051148091,
+      "sign": -1,
+      "weight": 0.3217662320101773
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::BFF_15_1",
+     "text": "Πλησιάζοντας στο τέλος του πρώτου μέρους της έρευνας, παρακαλείστε να ξεχάσετε για λίγο την κατάσταση με τον κορονοϊό, και να σκεφτείτε τον ",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B21_19",
+      "sim": 0.6416757512133531,
+      "sign": -1,
+      "weight": 0.3433517145022024
+     },
+     {
+      "itemId": "dn2018b::B21_16",
+      "sim": 0.6340449433994516,
+      "sign": -1,
+      "weight": 0.3392685760308084
+     },
+     {
+      "itemId": "dn2018b::B21_12",
+      "sim": 0.5931377502726862,
+      "sign": -1,
+      "weight": 0.3173797094669891
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::BFF_15_2",
+     "text": "Πλησιάζοντας στο τέλος του πρώτου μέρους της έρευνας, παρακαλείστε να ξεχάσετε για λίγο την κατάσταση με τον κορονοϊό, και να σκεφτείτε τον ",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B21_19",
+      "sim": 0.6269480771429188,
+      "sign": -1,
+      "weight": 0.3526110854998433
+     },
+     {
+      "itemId": "dn2018b::B21_16",
+      "sim": 0.5885345757439422,
+      "sign": -1,
+      "weight": 0.33100638342009653
+     },
+     {
+      "itemId": "dn2018b::B21_3",
+      "sim": 0.5625331353978138,
+      "sign": -1,
+      "weight": 0.31638253108006015
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::BFF_15_3",
+     "text": "Πλησιάζοντας στο τέλος του πρώτου μέρους της έρευνας, παρακαλείστε να ξεχάσετε για λίγο την κατάσταση με τον κορονοϊό, και να σκεφτείτε τον ",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B21_19",
+      "sim": 0.6535503737019999,
+      "sign": -1,
+      "weight": 0.34422835756975434
+     },
+     {
+      "itemId": "dn2018b::B21_16",
+      "sim": 0.6282452511406218,
+      "sign": -1,
+      "weight": 0.3309000188097855
+     },
+     {
+      "itemId": "dn2018b::B21_12",
+      "sim": 0.6167997678090851,
+      "sign": -1,
+      "weight": 0.3248716236204602
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::BFF_15_4",
+     "text": "Πλησιάζοντας στο τέλος του πρώτου μέρους της έρευνας, παρακαλείστε να ξεχάσετε για λίγο την κατάσταση με τον κορονοϊό, και να σκεφτείτε τον ",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B21_19",
+      "sim": 0.6267936262261302,
+      "sign": -1,
+      "weight": 0.34788801009389875
+     },
+     {
+      "itemId": "dn2018b::B21_16",
+      "sim": 0.6011146089507987,
+      "sign": -1,
+      "weight": 0.3336354366035311
+     },
+     {
+      "itemId": "dn2017::jihad",
+      "sim": 0.5738026833941131,
+      "sign": -1,
+      "weight": 0.31847655330257013
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::BFF_15_5",
+     "text": "Πλησιάζοντας στο τέλος του πρώτου μέρους της έρευνας, παρακαλείστε να ξεχάσετε για λίγο την κατάσταση με τον κορονοϊό, και να σκεφτείτε τον ",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B21_19",
+      "sim": 0.6537095986032604,
+      "sign": -1,
+      "weight": 0.3483192473208489
+     },
+     {
+      "itemId": "dn2018b::B21_16",
+      "sim": 0.6317544909976447,
+      "sign": -1,
+      "weight": 0.33662080114172593
+     },
+     {
+      "itemId": "dn2018b::B21_12",
+      "sim": 0.5912900766743392,
+      "sign": -1,
+      "weight": 0.31505995153742516
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::BFF_15_6",
+     "text": "Πλησιάζοντας στο τέλος του πρώτου μέρους της έρευνας, παρακαλείστε να ξεχάσετε για λίγο την κατάσταση με τον κορονοϊό, και να σκεφτείτε τον ",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B21_19",
+      "sim": 0.6532077066741798,
+      "sign": -1,
+      "weight": 0.3514721625235293
+     },
+     {
+      "itemId": "dn2018b::B21_16",
+      "sim": 0.6106616307917498,
+      "sign": -1,
+      "weight": 0.32857935041415415
+     },
+     {
+      "itemId": "dn2018b::B21_3",
+      "sim": 0.5946212524693425,
+      "sign": -1,
+      "weight": 0.31994848706231654
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::BFF_15_7",
+     "text": "Πλησιάζοντας στο τέλος του πρώτου μέρους της έρευνας, παρακαλείστε να ξεχάσετε για λίγο την κατάσταση με τον κορονοϊό, και να σκεφτείτε τον ",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B21_19",
+      "sim": 0.6093981828373675,
+      "sign": -1,
+      "weight": 0.3509328720838277
+     },
+     {
+      "itemId": "dn2018b::B21_12",
+      "sim": 0.5636732786485179,
+      "sign": -1,
+      "weight": 0.3246013660100179
+     },
+     {
+      "itemId": "dn2020b::Q184",
+      "sim": 0.563437800866146,
+      "sign": -1,
+      "weight": 0.3244657619061544
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::BFF_15_8",
+     "text": "Πλησιάζοντας στο τέλος του πρώτου μέρους της έρευνας, παρακαλείστε να ξεχάσετε για λίγο την κατάσταση με τον κορονοϊό, και να σκεφτείτε τον ",
+     "domain": "social"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "covidistress::BFF_15_9",
+     "text": "Πλησιάζοντας στο τέλος του πρώτου μέρους της έρευνας, παρακαλείστε να ξεχάσετε για λίγο την κατάσταση με τον κορονοϊό, και να σκεφτείτε τον ",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B21_19",
+      "sim": 0.5982916535448703,
+      "sign": -1,
+      "weight": 1.0
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::BFF_15_10",
+     "text": "Πλησιάζοντας στο τέλος του πρώτου μέρους της έρευνας, παρακαλείστε να ξεχάσετε για λίγο την κατάσταση με τον κορονοϊό, και να σκεφτείτε τον ",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B21_19",
+      "sim": 0.6279043067437553,
+      "sign": -1,
+      "weight": 0.3438650208637453
+     },
+     {
+      "itemId": "dn2018b::B21_16",
+      "sim": 0.6130766517976033,
+      "sign": -1,
+      "weight": 0.335744815567081
+     },
+     {
+      "itemId": "dn2018b::B21_7",
+      "sim": 0.5850387545615888,
+      "sign": -1,
+      "weight": 0.3203901635691736
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::BFF_15_11",
+     "text": "Πλησιάζοντας στο τέλος του πρώτου μέρους της έρευνας, παρακαλείστε να ξεχάσετε για λίγο την κατάσταση με τον κορονοϊό, και να σκεφτείτε τον ",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B21_19",
+      "sim": 0.6175972369359415,
+      "sign": -1,
+      "weight": 0.33905333426527934
+     },
+     {
+      "itemId": "dn2018b::B21_7",
+      "sim": 0.6166542669791554,
+      "sign": -1,
+      "weight": 0.3385356552848057
+     },
+     {
+      "itemId": "dn2018b::B21_16",
+      "sim": 0.5872826752849403,
+      "sign": -1,
+      "weight": 0.3224110104499148
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::BFF_15_12",
+     "text": "Πλησιάζοντας στο τέλος του πρώτου μέρους της έρευνας, παρακαλείστε να ξεχάσετε για λίγο την κατάσταση με τον κορονοϊό, και να σκεφτείτε τον ",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B21_19",
+      "sim": 0.6245081704660811,
+      "sign": -1,
+      "weight": 0.33853119587550984
+     },
+     {
+      "itemId": "dn2018b::B21_16",
+      "sim": 0.611175931708932,
+      "sign": -1,
+      "weight": 0.33130410271068045
+     },
+     {
+      "itemId": "dn2017::jihad",
+      "sim": 0.6090740119213178,
+      "sign": -1,
+      "weight": 0.3301647014138097
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::BFF_15_13",
+     "text": "Πλησιάζοντας στο τέλος του πρώτου μέρους της έρευνας, παρακαλείστε να ξεχάσετε για λίγο την κατάσταση με τον κορονοϊό, και να σκεφτείτε τον ",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B21_19",
+      "sim": 0.6751461250031148,
+      "sign": -1,
+      "weight": 0.3493731105674911
+     },
+     {
+      "itemId": "dn2018b::B21_12",
+      "sim": 0.6296075168507607,
+      "sign": -1,
+      "weight": 0.3258078932139461
+     },
+     {
+      "itemId": "dn2018b::B21_16",
+      "sim": 0.627696522689316,
+      "sign": -1,
+      "weight": 0.3248189962185628
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::BFF_15_14",
+     "text": "Πλησιάζοντας στο τέλος του πρώτου μέρους της έρευνας, παρακαλείστε να ξεχάσετε για λίγο την κατάσταση με τον κορονοϊό, και να σκεφτείτε τον ",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B21_19",
+      "sim": 0.618472261479231,
+      "sign": -1,
+      "weight": 0.35532477627802683
+     },
+     {
+      "itemId": "dn2018b::B21_3",
+      "sim": 0.5719576929793198,
+      "sign": -1,
+      "weight": 0.3286012194181451
+     },
+     {
+      "itemId": "dn2018b::B21_4",
+      "sim": 0.550153035440533,
+      "sign": -1,
+      "weight": 0.3160740043038281
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::BFF_15_15",
+     "text": "Πλησιάζοντας στο τέλος του πρώτου μέρους της έρευνας, παρακαλείστε να ξεχάσετε για λίγο την κατάσταση με τον κορονοϊό, και να σκεφτείτε τον ",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B21_19",
+      "sim": 0.6465805829414323,
+      "sign": -1,
+      "weight": 0.3493674042009682
+     },
+     {
+      "itemId": "dn2017::jihad",
+      "sim": 0.6130242147924896,
+      "sign": -1,
+      "weight": 0.3312358649251126
+     },
+     {
+      "itemId": "dn2018b::B21_3",
+      "sim": 0.5911133149652721,
+      "sign": -1,
+      "weight": 0.3193967308739192
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::Expl_Distress_1",
+     "text": "Στην παρούσα κατάσταση, πόσο συμφωνείτε ότι αισθάνεστε άγχος/ανησυχείτε για... Το καθημερινό σας εισόδημα αυτή τη στιγμή",
+     "domain": "economic"
+    },
+    "analogs": [
+     {
+      "itemId": "maple2019post::Q8_w4",
+      "sim": 0.7258782189868602,
+      "sign": -1,
+      "weight": 0.3466916890633316
+     },
+     {
+      "itemId": "maple2019pre::Q8_w3",
+      "sim": 0.7258782189868602,
+      "sign": -1,
+      "weight": 0.3466916890633316
+     },
+     {
+      "itemId": "undpolar2022::hhincome",
+      "sim": 0.6419719145806472,
+      "sign": -1,
+      "weight": 0.30661662187333694
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::Expl_Distress_2",
+     "text": "Στην παρούσα κατάσταση, πόσο συμφωνείτε ότι αισθάνεστε άγχος/ανησυχείτε για... Τη δυνατότητά σας να ανταπεξέλθετε σωστά στη δουλειά σας",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2017::Failure_r",
+      "sim": 0.6829899153268186,
+      "sign": 1,
+      "weight": 0.5040915682231483
+     },
+     {
+      "itemId": "dn2024b::q2_5",
+      "sim": 0.6719026446385502,
+      "sign": 1,
+      "weight": 0.49590843177685184
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::Expl_Distress_3",
+     "text": "Στην παρούσα κατάσταση, πόσο συμφωνείτε ότι αισθάνεστε άγχος/ανησυχείτε για... Τη μόρφωση των παιδιών σας",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B25",
+      "sim": 0.6900552579071837,
+      "sign": -1,
+      "weight": 0.35021859230986846
+     },
+     {
+      "itemId": "dn2022a::Q21_2",
+      "sim": 0.66642694894009,
+      "sign": -1,
+      "weight": 0.3382266930955722
+     },
+     {
+      "itemId": "dn2018b::B12A_7",
+      "sim": 0.613873659630062,
+      "sign": 1,
+      "weight": 0.31155471459455936
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::Expl_Distress_4",
+     "text": "Στην παρούσα κατάσταση, πόσο συμφωνείτε ότι αισθάνεστε άγχος/ανησυχείτε για... Τις μελλοντικές σας προοπτικές απασχόλησης",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2024b::q2_5",
+      "sim": 0.6913154931950196,
+      "sign": 1,
+      "weight": 0.3608064009964224
+     },
+     {
+      "itemId": "dn2017::Failure_r",
+      "sim": 0.651656129574405,
+      "sign": 1,
+      "weight": 0.3401076716975468
+     },
+     {
+      "itemId": "maple2019post::Q8_w4",
+      "sim": 0.5730572816121092,
+      "sign": -1,
+      "weight": 0.2990859273060308
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::Expl_Distress_5",
+     "text": "Στην παρούσα κατάσταση, πόσο συμφωνείτε ότι αισθάνεστε άγχος/ανησυχείτε για... Την πρόσβασή σας και κάλυψη των βασικών σας αναγκών όπως για ",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2020b::Q182",
+      "sim": 0.640053495294927,
+      "sign": -1,
+      "weight": 0.34639957564873614
+     },
+     {
+      "itemId": "dn2022b::Q18_2",
+      "sim": 0.6059121490610626,
+      "sign": -1,
+      "weight": 0.32792213909940876
+     },
+     {
+      "itemId": "dn2018b::B21_16",
+      "sim": 0.60176610905692,
+      "sign": -1,
+      "weight": 0.3256782852518551
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::Expl_Distress_6",
+     "text": "Στην παρούσα κατάσταση, πόσο συμφωνείτε ότι αισθάνεστε άγχος/ανησυχείτε για... Την αδυναμία σας να πάρετε μέρος σε κοινωνικές δραστηριότητες",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B21_16",
+      "sim": 0.6146277782579139,
+      "sign": -1,
+      "weight": 0.34003130186408886
+     },
+     {
+      "itemId": "dn2020b::Q187",
+      "sim": 0.6103842694663641,
+      "sign": -1,
+      "weight": 0.33768366013700624
+     },
+     {
+      "itemId": "dn2024b::q2_3",
+      "sim": 0.5825502998844776,
+      "sign": 1,
+      "weight": 0.3222850379989049
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::Expl_Distress_7",
+     "text": "Στην παρούσα κατάσταση, πόσο συμφωνείτε ότι αισθάνεστε άγχος/ανησυχείτε για... Την αδυναμία σας να πάρετε μέρος σε θρησκευτικές δραστηριότητ",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2024a::Q21",
+      "sim": 0.7364129265313836,
+      "sign": -1,
+      "weight": 0.3537308013034341
+     },
+     {
+      "itemId": "dn2015n::Q051",
+      "sim": 0.6894749378914716,
+      "sign": -1,
+      "weight": 0.33118446658417255
+     },
+     {
+      "itemId": "dn2018b::B21_14",
+      "sim": 0.6559577758715012,
+      "sign": -1,
+      "weight": 0.31508473211239324
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::Expl_Distress_8",
+     "text": "Στην παρούσα κατάσταση, πόσο συμφωνείτε ότι αισθάνεστε άγχος/ανησυχείτε για... Την ικανότητά σας να αντιμετωπίσετε την συμπεριφορά των ενήλι",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B21_16",
+      "sim": 0.6758350715265782,
+      "sign": -1,
+      "weight": 0.3566336161867019
+     },
+     {
+      "itemId": "dn2022a::Q21_2",
+      "sim": 0.6158454955463786,
+      "sign": -1,
+      "weight": 0.32497752091037957
+     },
+     {
+      "itemId": "dn2024b::q2_4",
+      "sim": 0.6033597231636498,
+      "sign": 1,
+      "weight": 0.3183888629029185
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::Expl_Distress_9",
+     "text": "Στην παρούσα κατάσταση, πόσο συμφωνείτε ότι αισθάνεστε άγχος/ανησυχείτε για... Την ικανότητά σας να αντιμετωπίσετε την συμπεριφορά των ανήλι",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2022a::Q21_2",
+      "sim": 0.6324325509632783,
+      "sign": -1,
+      "weight": 0.5004570861962611
+     },
+     {
+      "itemId": "dn2018b::B21_16",
+      "sim": 0.6312773023032641,
+      "sign": -1,
+      "weight": 0.49954291380373905
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::Expl_Distress_10",
+     "text": "Στην παρούσα κατάσταση, πόσο συμφωνείτε ότι αισθάνεστε άγχος/ανησυχείτε για... Την εθνική οικονομία",
+     "domain": "economic"
+    },
+    "analogs": [
+     {
+      "itemId": "maple2019post::Q8_w4",
+      "sim": 0.6961885725080939,
+      "sign": -1,
+      "weight": 0.3414273984628866
+     },
+     {
+      "itemId": "maple2019pre::Q8_w3",
+      "sim": 0.6961885725080939,
+      "sign": -1,
+      "weight": 0.3414273984628866
+     },
+     {
+      "itemId": "maple2019pre::Q7_w3",
+      "sim": 0.6466758883441973,
+      "sign": -1,
+      "weight": 0.3171452030742267
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::Expl_Distress_11",
+     "text": "Στην παρούσα κατάσταση, πόσο συμφωνείτε ότι αισθάνεστε άγχος/ανησυχείτε για... Τις κοινωνικές υπηρεσίες όπως η αστυνομία, τα δημοτικά συνεργ",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2017::Administration",
+      "sim": 0.5873759423177687,
+      "sign": 1,
+      "weight": 0.34601646435032524
+     },
+     {
+      "itemId": "dn2015n::Q056_10",
+      "sim": 0.5550808055243523,
+      "sign": -1,
+      "weight": 0.32699176782483735
+     },
+     {
+      "itemId": "dn2015a::Q016_10",
+      "sim": 0.5550808055243523,
+      "sign": -1,
+      "weight": 0.32699176782483735
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::Expl_Distress_12",
+     "text": "Στην παρούσα κατάσταση, πόσο συμφωνείτε ότι αισθάνεστε άγχος/ανησυχείτε για... Τον κίνδυνο να κολλήσετε τον κορονοϊό εσείς ή άλλοι που γνωρί",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B21_16",
+      "sim": 0.7453472701307284,
+      "sign": -1,
+      "weight": 0.3722489832270928
+     },
+     {
+      "itemId": "dn2018b::B21_8",
+      "sim": 0.6299000482853452,
+      "sign": -1,
+      "weight": 0.31459114684593986
+     },
+     {
+      "itemId": "dn2018b::B21_19",
+      "sim": 0.6270342289213564,
+      "sign": -1,
+      "weight": 0.3131598699269673
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "covidistress::Expl_Distress_13",
+     "text": "Στην παρούσα κατάσταση, πόσο συμφωνείτε ότι αισθάνεστε άγχος/ανησυχείτε για... Τον κίνδυνο νοσηλείας η ακόμα και θανάτου εξαιτίας του κορονο",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B21_16",
+      "sim": 0.6937128479155568,
+      "sign": -1,
+      "weight": 0.37026664083248395
+     },
+     {
+      "itemId": "dn2017::Failure_r",
+      "sim": 0.5905827671611693,
+      "sign": 1,
+      "weight": 0.31522134552845626
+     },
+     {
+      "itemId": "dn2024b::q2_3",
+      "sim": 0.5892537988155353,
+      "sign": 1,
+      "weight": 0.31451201363905973
+     }
+    ]
+   }
+  ],
+  "dinas": [
+   {
+    "target": {
+     "id": "dinas::muslims",
+     "text": "Would you like to have the following as neighbours? Muslims",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2015n::Q051",
+      "sim": 0.6321249012164781,
+      "sign": -1,
+      "weight": 0.3472937263900931
+     },
+     {
+      "itemId": "dn2020a::Q141",
+      "sim": 0.5960735001527979,
+      "sign": -1,
+      "weight": 0.32748684108483994
+     },
+     {
+      "itemId": "dn2022a::Q17_1",
+      "sim": 0.5919464880505005,
+      "sign": -1,
+      "weight": 0.325219432525067
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "dinas::refugees",
+     "text": "Would you like to have the following as neighbours? Refugees",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2020a::Q143",
+      "sim": 0.6309541142772451,
+      "sign": -1,
+      "weight": 0.34873778578024145
+     },
+     {
+      "itemId": "dn2017::immigrants_cultural",
+      "sim": 0.5944923002151938,
+      "sign": -1,
+      "weight": 0.3285847952317983
+     },
+     {
+      "itemId": "dn2022s::Q07_3",
+      "sim": 0.5838043750817181,
+      "sign": -1,
+      "weight": 0.3226774189879602
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "dinas::gays",
+     "text": "Would you like to have the following as neighbours? Homosexuals",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2015n::Q044_2",
+      "sim": 0.5794181920560617,
+      "sign": -1,
+      "weight": 0.3417735201357338
+     },
+     {
+      "itemId": "dn2017::tolerance_homosex",
+      "sim": 0.5650380236124276,
+      "sign": -1,
+      "weight": 0.33329128596271684
+     },
+     {
+      "itemId": "dn2015n::Q044_3",
+      "sim": 0.5508717074132884,
+      "sign": -1,
+      "weight": 0.32493519390154935
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "dinas::alcoholics",
+     "text": "Would you like to have the following as neighbours? Alcoholics",
+     "domain": "social"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "dinas::unmarried",
+     "text": "Would you like to have the following as neighbours? Unmarried couples",
+     "domain": "social"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "dinas::jews",
+     "text": "Would you like to have the following as neighbours? Jews",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2020a::Q146",
+      "sim": 0.5878445598917426,
+      "sign": -1,
+      "weight": 0.5148769535588172
+     },
+     {
+      "itemId": "dn2017::GoodBad_jewish",
+      "sim": 0.5538739727179908,
+      "sign": -1,
+      "weight": 0.48512304644118287
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "dinas::otherace",
+     "text": "Would you like to have the following as neighbours? People of another race",
+     "domain": "social"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "dinas::id_religion",
+     "text": "How important is each of the following for a person's character and identity? Religion",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "maple2019pre::Q67_w3",
+      "sim": 0.5822961979281064,
+      "sign": 1,
+      "weight": 0.3333333333333333
+     },
+     {
+      "itemId": "maple2019post::Q67_w4",
+      "sim": 0.5822961979281064,
+      "sign": 1,
+      "weight": 0.3333333333333333
+     },
+     {
+      "itemId": "maple2019feb::Q67_w1",
+      "sim": 0.5822961979281064,
+      "sign": 1,
+      "weight": 0.3333333333333333
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "dinas::id_nationality",
+     "text": "How important is each of the following for a person's character and identity? Nationality",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2022s::Q02_4",
+      "sim": 0.5740513036962184,
+      "sign": -1,
+      "weight": 0.33651905962367346
+     },
+     {
+      "itemId": "dn2022s::Q02_1",
+      "sim": 0.566294686765609,
+      "sign": -1,
+      "weight": 0.331971993153233
+     },
+     {
+      "itemId": "undpolar2022::identities_9",
+      "sim": 0.5655047994998922,
+      "sign": 1,
+      "weight": 0.3315089472230936
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "dinas::id_language",
+     "text": "How important is each of the following for a person's character and identity? Language",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2015n::Q052_98",
+      "sim": 0.565677566409621,
+      "sign": 1,
+      "weight": 0.3363364997393334
+     },
+     {
+      "itemId": "dn2022s::Q02_4",
+      "sim": 0.5615372415324597,
+      "sign": -1,
+      "weight": 0.3338747751462818
+     },
+     {
+      "itemId": "dn2015n::Q052_1",
+      "sim": 0.5546649965038565,
+      "sign": 1,
+      "weight": 0.32978872511438484
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "dinas::id_gender",
+     "text": "How important is each of the following for a person's character and identity? Gender",
+     "domain": "social"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "dinas::id_sclass",
+     "text": "How important is each of the following for a person's character and identity? Social class",
+     "domain": "social"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "dinas::proud",
+     "text": "Do you agree or disagree with the following statement? I am proud to be Greek.",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2015n::Q052_1",
+      "sim": 0.8394752589912453,
+      "sign": -1,
+      "weight": 0.3362878708020722
+     },
+     {
+      "itemId": "dn2015n::Q052_99",
+      "sim": 0.8290997701477896,
+      "sign": -1,
+      "weight": 0.332131523114245
+     },
+     {
+      "itemId": "dn2015n::Q052_3",
+      "sim": 0.8277245162148694,
+      "sign": -1,
+      "weight": 0.3315806060836828
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "dinas::suffer",
+     "text": "Do you agree or disagree with the following statement? Greeks have historically suffered more than other people.",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2024a::Q24_1::m4",
+      "sim": 0.7463604697999578,
+      "sign": -1,
+      "weight": 0.3405216889298904
+     },
+     {
+      "itemId": "dn2024a::Q24_1::m6",
+      "sim": 0.7287341625368918,
+      "sign": -1,
+      "weight": 0.3324798108271753
+     },
+     {
+      "itemId": "dn2024a::Q24_1::m2",
+      "sim": 0.7167201449991842,
+      "sign": -1,
+      "weight": 0.3269985002429344
+     }
+    ]
+   }
+  ],
+  "demotec2022": [
+   {
+    "target": {
+     "id": "demotec2022::trust_institutional_government",
+     "text": "Πόση εμπιστοσύνη έχετε στην Κυβέρνηση;",
+     "domain": "political"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2015a::Q016_3",
+      "sim": 0.8146753788407819,
+      "sign": -1,
+      "weight": 0.341441135357866
+     },
+     {
+      "itemId": "dn2015n::Q056_3",
+      "sim": 0.8146753788407819,
+      "sign": -1,
+      "weight": 0.341441135357866
+     },
+     {
+      "itemId": "dn2017::trust_Gov",
+      "sim": 0.756639957780757,
+      "sign": -1,
+      "weight": 0.3171177292842679
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "demotec2022::trust_institutional_parliament",
+     "text": "Πόση εμπιστοσύνη έχετε στη Βουλή;",
+     "domain": "political"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2015n::Q056_6",
+      "sim": 0.7576543084622334,
+      "sign": -1,
+      "weight": 0.34467619391591675
+     },
+     {
+      "itemId": "dn2015a::Q016_6",
+      "sim": 0.7576543084622334,
+      "sign": -1,
+      "weight": 0.34467619391591675
+     },
+     {
+      "itemId": "dn2017::trust_Parliament",
+      "sim": 0.6828539537318113,
+      "sign": -1,
+      "weight": 0.3106476121681665
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "demotec2022::trust_institutional_polParties",
+     "text": "Πόση εμπιστοσύνη έχετε στα πολιτικά κόμματα;",
+     "domain": "political"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2015a::Q016_8",
+      "sim": 0.821598074321861,
+      "sign": -1,
+      "weight": 0.3409592260081575
+     },
+     {
+      "itemId": "dn2015n::Q056_8",
+      "sim": 0.821598074321861,
+      "sign": -1,
+      "weight": 0.3409592260081575
+     },
+     {
+      "itemId": "dn2017::trust_Parties",
+      "sim": 0.766470496664196,
+      "sign": -1,
+      "weight": 0.3180815479836851
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "demotec2022::trust_institutional_Courts",
+     "text": "Πόση εμπιστοσύνη έχετε στα δικαστήρια;",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2015n::Q056_7",
+      "sim": 0.7269229743935842,
+      "sign": -1,
+      "weight": 0.34452975641422157
+     },
+     {
+      "itemId": "dn2015a::Q016_7",
+      "sim": 0.7269229743935842,
+      "sign": -1,
+      "weight": 0.34452975641422157
+     },
+     {
+      "itemId": "dn2017::trust_Justice",
+      "sim": 0.6560530101858227,
+      "sign": -1,
+      "weight": 0.310940487171557
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "demotec2022::trust_institutional_EU",
+     "text": "Πόση εμπιστοσύνη έχετε στην Ευρωπαϊκή Ένωση;",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2015n::Q056_18",
+      "sim": 0.8274098869572653,
+      "sign": -1,
+      "weight": 0.33664124507363674
+     },
+     {
+      "itemId": "dn2015a::Q016_18",
+      "sim": 0.8274098869572653,
+      "sign": -1,
+      "weight": 0.33664124507363674
+     },
+     {
+      "itemId": "dn2017::trust_EU",
+      "sim": 0.8030189462823311,
+      "sign": -1,
+      "weight": 0.32671750985272663
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "demotec2022::trust_institutional_localGovernment",
+     "text": "Πόση εμπιστοσύνη έχετε στην τοπική αυτοδιοίκηση;",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2015n::Q056_4",
+      "sim": 0.6946257093107924,
+      "sign": -1,
+      "weight": 0.34009907833352054
+     },
+     {
+      "itemId": "dn2015a::Q016_4",
+      "sim": 0.6946257093107924,
+      "sign": -1,
+      "weight": 0.34009907833352054
+     },
+     {
+      "itemId": "dn2015a::Q016_10",
+      "sim": 0.6531701977922143,
+      "sign": -1,
+      "weight": 0.3198018433329588
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "demotec2022::trust_institutional_media",
+     "text": "Πόση εμπιστοσύνη έχετε στα μέσα ενημέρωσης;",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2015a::Q016_16",
+      "sim": 0.7449568534926763,
+      "sign": -1,
+      "weight": 0.3424935087569361
+     },
+     {
+      "itemId": "dn2015n::Q056_16",
+      "sim": 0.7449568534926763,
+      "sign": -1,
+      "weight": 0.3424935087569361
+     },
+     {
+      "itemId": "dn2017::trust_SocialMedia",
+      "sim": 0.6851840231773642,
+      "sign": -1,
+      "weight": 0.3150129824861278
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "demotec2022::trust_institutional_church",
+     "text": "Πόση εμπιστοσύνη έχετε στην Εκκλησία;",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2015n::Q056_14",
+      "sim": 0.836480258646007,
+      "sign": -1,
+      "weight": 0.34547603755446893
+     },
+     {
+      "itemId": "dn2015a::Q016_14",
+      "sim": 0.836480258646007,
+      "sign": -1,
+      "weight": 0.34547603755446893
+     },
+     {
+      "itemId": "dn2018b::B21_14",
+      "sim": 0.7482790701688808,
+      "sign": -1,
+      "weight": 0.3090479248910621
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "demotec2022::mediaUse_newspapers",
+     "text": "Πόσο συχνά ενημερώνεστε από ημερήσιες εφημερίδες;",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "maple2019pre::Q32_w3",
+      "sim": 0.7142617480563185,
+      "sign": 1,
+      "weight": 0.33333333333333337
+     },
+     {
+      "itemId": "maple2019post::Q32_w4",
+      "sim": 0.7142617480563185,
+      "sign": 1,
+      "weight": 0.33333333333333337
+     },
+     {
+      "itemId": "maple2019feb::Q32_w1",
+      "sim": 0.7142617480563185,
+      "sign": 1,
+      "weight": 0.33333333333333337
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "demotec2022::mediaUse_tvRadio",
+     "text": "Πόσο συχνά ενημερώνεστε από τηλεόραση/ραδιόφωνο;",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B21_20",
+      "sim": 0.7580611332865761,
+      "sign": -1,
+      "weight": 0.5463845561424973
+     },
+     {
+      "itemId": "dn2024a::Q26_14",
+      "sim": 0.6293520444183834,
+      "sign": 1,
+      "weight": 0.45361544385750263
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "demotec2022::mediaUse_internet",
+     "text": "Πόσο συχνά ενημερώνεστε από το διαδίκτυο;",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2024a::Q26_11",
+      "sim": 0.5529574413827378,
+      "sign": 1,
+      "weight": 1.0
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "demotec2022::mediaUse_socialMedia",
+     "text": "Πόσο συχνά ενημερώνεστε από τα κοινωνικά δίκτυα;",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B21_24",
+      "sim": 0.7767397744504176,
+      "sign": -1,
+      "weight": 0.354335376311689
+     },
+     {
+      "itemId": "dn2024c::Q23_7",
+      "sim": 0.7372719466849889,
+      "sign": -1,
+      "weight": 0.33633082953363436
+     },
+     {
+      "itemId": "dn2024a::Q26_11",
+      "sim": 0.6780916543039206,
+      "sign": 1,
+      "weight": 0.3093337941546766
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "demotec2022::pol_voteNational",
+     "text": "Στις εθνικές εκλογές ψηφίζετε πάντα, συνήθως ή ποτέ;",
+     "domain": "political"
+    },
+    "analogs": [
+     {
+      "itemId": "undpolar2022::dem_inno_2_1",
+      "sim": 0.5872821537550456,
+      "sign": 1,
+      "weight": 0.34088746859883967
+     },
+     {
+      "itemId": "undpolar2022::farright_vote",
+      "sim": 0.5823635625671795,
+      "sign": 1,
+      "weight": 0.33803247617589
+     },
+     {
+      "itemId": "undpolar2022::dem_inno_2_2",
+      "sim": 0.5531578709406614,
+      "sign": 1,
+      "weight": 0.32108005522527033
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "demotec2022::pol_efficacy",
+     "text": "Πόσο σίγουρος/η νιώθετε για την ικανότητά σας να συμμετέχετε στην πολιτική;",
+     "domain": "political"
+    },
+    "analogs": [
+     {
+      "itemId": "maple2019feb::Q34_w1",
+      "sim": 0.6980661388601808,
+      "sign": -1,
+      "weight": 0.33333333333333337
+     },
+     {
+      "itemId": "maple2019post::Q34_w4",
+      "sim": 0.6980661388601808,
+      "sign": -1,
+      "weight": 0.33333333333333337
+     },
+     {
+      "itemId": "maple2019pre::Q34_w3",
+      "sim": 0.6980661388601808,
+      "sign": -1,
+      "weight": 0.33333333333333337
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "demotec2022::pol_leftRight",
+     "text": "Αυτοτοποθέτηση αριστερά (1) – δεξιά (10)",
+     "domain": "social"
+    },
+    "analogs": []
+   }
+  ],
+  "qog2024": [
+   {
+    "target": {
+     "id": "qog2024::Q1",
+     "text": "Have you or any of your immediate family been enrolled or employed in the public school system in your area in the past 12 months?",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2015n::Q062",
+      "sim": 0.5590381164658006,
+      "sign": 1,
+      "weight": 1.0
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "qog2024::Q2",
+     "text": "Have you or any of your immediate family used public health care services in your area in the past 12 months?",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2024c::Q5_10",
+      "sim": 0.5673320024356444,
+      "sign": 1,
+      "weight": 1.0
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "qog2024::Q3",
+     "text": "Have you or anyone in your immediate family had any recent contact (positive or negative) with the security or police forces in your area in",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2017::Administration",
+      "sim": 0.5523233142340332,
+      "sign": -1,
+      "weight": 1.0
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "qog2024::Q4",
+     "text": "How would you rate the quality of public education in your area? (1 = very poor, 10 = excellent)",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2018b::B12A_7",
+      "sim": 0.5833808282357777,
+      "sign": 1,
+      "weight": 0.33940378969905405
+     },
+     {
+      "itemId": "dn2017::pubServPerm",
+      "sim": 0.5684176986213849,
+      "sign": -1,
+      "weight": 0.33069842495088214
+     },
+     {
+      "itemId": "dn2015n::Q023",
+      "sim": 0.5670415272066287,
+      "sign": -1,
+      "weight": 0.3298977853500638
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "qog2024::Q5",
+     "text": "How would you rate the quality of the public health care system in your area? (1 = very poor, 10 = excellent)",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2022b::Q04_10",
+      "sim": 0.670650654037548,
+      "sign": -1,
+      "weight": 0.367149354544948
+     },
+     {
+      "itemId": "dn2024c::Q5_10",
+      "sim": 0.6055788360933685,
+      "sign": -1,
+      "weight": 0.33152562732804397
+     },
+     {
+      "itemId": "dn2015a::Q009",
+      "sim": 0.5504131165781853,
+      "sign": -1,
+      "weight": 0.301325018127008
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "qog2024::Q6",
+     "text": "How would you rate the quality of the police force in your area? (1 = very poor, 10 = excellent)",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2015n::Q056_10",
+      "sim": 0.6300397834296176,
+      "sign": -1,
+      "weight": 0.5
+     },
+     {
+      "itemId": "dn2015a::Q016_10",
+      "sim": 0.6300397834296176,
+      "sign": -1,
+      "weight": 0.5
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "qog2024::Q7",
+     "text": "How much do you agree (1 = strongly disagree, 10 = strongly agree): Certain people are given special advantages in the public education syst",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2015n::Q062",
+      "sim": 0.6302613572401168,
+      "sign": -1,
+      "weight": 0.3419263591666489
+     },
+     {
+      "itemId": "dn2015a::Q009",
+      "sim": 0.6065025039988612,
+      "sign": -1,
+      "weight": 0.32903682041667554
+     },
+     {
+      "itemId": "dn2015n::Q023",
+      "sim": 0.6065025039988612,
+      "sign": -1,
+      "weight": 0.32903682041667554
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "qog2024::Q8",
+     "text": "How much do you agree (1 = strongly disagree, 10 = strongly agree): Certain people are given special advantages in the public health care sy",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2015a::Q010",
+      "sim": 0.6158663593077305,
+      "sign": -1,
+      "weight": 0.33427138731141265
+     },
+     {
+      "itemId": "dn2015n::Q024",
+      "sim": 0.6158663593077305,
+      "sign": -1,
+      "weight": 0.33427138731141265
+     },
+     {
+      "itemId": "dn2022b::Q32_2",
+      "sim": 0.6106815073259875,
+      "sign": -1,
+      "weight": 0.33145722537717465
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "qog2024::Q9",
+     "text": "How much do you agree (1 = strongly disagree, 10 = strongly agree): The police force gives special advantages to certain people in my area.",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2015a::Q016_10",
+      "sim": 0.7257963410864658,
+      "sign": -1,
+      "weight": 0.36134873261580336
+     },
+     {
+      "itemId": "dn2015n::Q056_10",
+      "sim": 0.7257963410864658,
+      "sign": -1,
+      "weight": 0.36134873261580336
+     },
+     {
+      "itemId": "dn2015n::Q037_2",
+      "sim": 0.5569831770321809,
+      "sign": -1,
+      "weight": 0.2773025347683931
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "qog2024::Q10",
+     "text": "Do you agree, rather agree, rather disagree or disagree: All citizens are treated equally in the public education system in my area.",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2022b::Q32_3",
+      "sim": 0.6404707408774059,
+      "sign": 1,
+      "weight": 0.3429144530896901
+     },
+     {
+      "itemId": "dn2020b::Q243",
+      "sim": 0.6340768135096644,
+      "sign": 1,
+      "weight": 0.33949108030079334
+     },
+     {
+      "itemId": "dn2017::InOUrCountry_equality",
+      "sim": 0.5931799068112162,
+      "sign": 1,
+      "weight": 0.3175944666095165
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "qog2024::Q11",
+     "text": "Do you agree, rather agree, rather disagree or disagree: All citizens are treated equally in the public health care system in my area.",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2024c::Q5_10",
+      "sim": 0.6111724737456649,
+      "sign": 1,
+      "weight": 0.34042084407961537
+     },
+     {
+      "itemId": "dn2022b::Q32_3",
+      "sim": 0.6043081033748746,
+      "sign": 1,
+      "weight": 0.33659741475960975
+     },
+     {
+      "itemId": "dn2020b::Q243",
+      "sim": 0.579863287318995,
+      "sign": 1,
+      "weight": 0.3229817411607748
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "qog2024::Q12",
+     "text": "Do you agree, rather agree, rather disagree or disagree: All citizens are treated equally by the police force in my area.",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2015a::Q016_10",
+      "sim": 0.6252852871644535,
+      "sign": 1,
+      "weight": 0.34316847934288713
+     },
+     {
+      "itemId": "dn2015n::Q056_10",
+      "sim": 0.6252852871644535,
+      "sign": 1,
+      "weight": 0.34316847934288713
+     },
+     {
+      "itemId": "dn2022b::Q32_3",
+      "sim": 0.5715236004093296,
+      "sign": 1,
+      "weight": 0.31366304131422573
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "qog2024::Q13",
+     "text": "Do you agree, rather agree, rather disagree or disagree: In the area where I live, elections are conducted freely and fairly.",
+     "domain": "political"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2020b::Q252",
+      "sim": 0.638805884018382,
+      "sign": 1,
+      "weight": 0.3481641012824594
+     },
+     {
+      "itemId": "undpolar2022::dem_inno_2_2",
+      "sim": 0.5987770516496319,
+      "sign": -1,
+      "weight": 0.3263474543233167
+     },
+     {
+      "itemId": "undpolar2022::dem_inno_2_1",
+      "sim": 0.597200954070607,
+      "sign": -1,
+      "weight": 0.325488444394224
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "qog2024::Q14",
+     "text": "In this survey, we define corruption to mean ‘the abuse of entrusted public power for private gain’. This ‘abuse’ could be by any public emp",
+     "domain": "political"
+    },
+    "analogs": [
+     {
+      "itemId": "maple2019feb::Q26_1_w1::m5",
+      "sim": 0.7643404868309857,
+      "sign": 1,
+      "weight": 0.33493460296151806
+     },
+     {
+      "itemId": "maple2019feb::Q26_1_w1::m1",
+      "sim": 0.7610057664482799,
+      "sign": 1,
+      "weight": 0.3334733258649717
+     },
+     {
+      "itemId": "maple2019feb::Q26_1_w1::m9",
+      "sim": 0.7567126324632855,
+      "sign": 1,
+      "weight": 0.33159207117351025
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "qog2024::Q15",
+     "text": "In this survey, we define corruption to mean ‘the abuse of entrusted public power for private gain’. This ‘abuse’ could be by any public emp",
+     "domain": "political"
+    },
+    "analogs": [
+     {
+      "itemId": "maple2019feb::Q26_1_w1::m1",
+      "sim": 0.7596951519673729,
+      "sign": 1,
+      "weight": 0.334480047245774
+     },
+     {
+      "itemId": "maple2019feb::Q26_1_w1::m5",
+      "sim": 0.7589292756857137,
+      "sign": 1,
+      "weight": 0.3341428457588218
+     },
+     {
+      "itemId": "maple2019feb::Q26_1_w1::m9",
+      "sim": 0.7526475307879896,
+      "sign": 1,
+      "weight": 0.3313771069954041
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "qog2024::Q16",
+     "text": "In this survey, we define corruption to mean ‘the abuse of entrusted public power for private gain’. This ‘abuse’ could be by any public emp",
+     "domain": "political"
+    },
+    "analogs": [
+     {
+      "itemId": "maple2019feb::Q26_1_w1::m1",
+      "sim": 0.7732690916762506,
+      "sign": 1,
+      "weight": 0.3339241385042005
+     },
+     {
+      "itemId": "maple2019feb::Q26_1_w1::m5",
+      "sim": 0.7726466419117864,
+      "sign": 1,
+      "weight": 0.3336553433285001
+     },
+     {
+      "itemId": "maple2019feb::Q26_1_w1::m9",
+      "sim": 0.7697871537206726,
+      "sign": 1,
+      "weight": 0.33242051816729945
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "qog2024::Q17_1",
+     "text": "People engage in corruption for different reasons. Thinking about the reasons why people engage in corruption in your area, again, using the",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "maple2019feb::Q26_1_w1::m9",
+      "sim": 0.6595273656068905,
+      "sign": 1,
+      "weight": 0.3370004002334558
+     },
+     {
+      "itemId": "maple2019feb::Q26_1_w1::m0",
+      "sim": 0.6506259684966168,
+      "sign": 1,
+      "weight": 0.3324520303776594
+     },
+     {
+      "itemId": "maple2019feb::Q26_1_w1::m1",
+      "sim": 0.6468988389799827,
+      "sign": 1,
+      "weight": 0.3305475693888848
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "qog2024::Q17_2",
+     "text": "People engage in corruption for different reasons. Thinking about the reasons why people engage in corruption in your area, again, using the",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "maple2019feb::Q26_1_w1::m9",
+      "sim": 0.6911012406258153,
+      "sign": 1,
+      "weight": 0.3375759568954203
+     },
+     {
+      "itemId": "maple2019feb::Q26_1_w1::m1",
+      "sim": 0.6786617359497482,
+      "sign": 1,
+      "weight": 0.33149974483345696
+     },
+     {
+      "itemId": "maple2019feb::Q26_1_w1::m10",
+      "sim": 0.6774836549134076,
+      "sign": 1,
+      "weight": 0.33092429827112274
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "qog2024::Q18_1",
+     "text": "In the last 12 months, have you or anyone in your family been asked by a public official to give an informal gift or bribe in schools and ot",
+     "domain": "social"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "qog2024::Q18_2",
+     "text": "In the last 12 months, have you or anyone in your family been asked by a public official to give an informal gift or bribe in health or medi",
+     "domain": "social"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "qog2024::Q18_3",
+     "text": "In the last 12 months, have you or anyone in your family been asked by a public official to give an informal gift or bribe in police authori",
+     "domain": "social"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "qog2024::Q18_4",
+     "text": "In the last 12 months, have you or anyone in your family been asked by a public official to give an informal gift or bribe in utilities (e.g",
+     "domain": "social"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "qog2024::Q18_5",
+     "text": "In the last 12 months, have you or anyone in your family been asked by a public official to give an informal gift or bribe to any other gove",
+     "domain": "political"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "qog2024::Q19_1",
+     "text": "In the last 12 months, have you or anyone in your family given an informal gift or bribe to schools or other education services?",
+     "domain": "social"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "qog2024::Q19_2",
+     "text": "In the last 12 months, have you or anyone in your family given an informal gift or bribe to health or medical services?",
+     "domain": "social"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "qog2024::Q19_3",
+     "text": "In the last 12 months, have you or anyone in your family given an informal gift or bribe to police?",
+     "domain": "social"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "qog2024::Q19_4",
+     "text": "In the last 12 months, have you or anyone in your family given an informal gift or bribe in utilities (such as electric, water, trash collec",
+     "domain": "social"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "qog2024::Q19_5",
+     "text": "In the last 12 months, have you or anyone in your family given an informal gift or bribe to any other government-run agency?",
+     "domain": "political"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "qog2024::Q20",
+     "text": "From what you remember, in the run-up to the last parliamentary election (month/year of the last national election inserted by country), did",
+     "domain": "political"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "qog2024::Q21",
+     "text": "Changing topics a bit, how would you judge the current state of the economy in the area where you live?",
+     "domain": "economic"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2017::stateInterv",
+      "sim": 0.5886061133023628,
+      "sign": -1,
+      "weight": 0.340949419724526
+     },
+     {
+      "itemId": "maple2019post::Q7_w4",
+      "sim": 0.568883796369325,
+      "sign": 1,
+      "weight": 0.32952529013773696
+     },
+     {
+      "itemId": "maple2019pre::Q7_w3",
+      "sim": 0.568883796369325,
+      "sign": 1,
+      "weight": 0.32952529013773696
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "qog2024::Q23_1",
+     "text": "On a 1 to 10 scale, with ‘1’ being ‘no confidence at all’, and ‘10’ being ‘complete confidence’ to do the right thing, how much confidence d",
+     "domain": "political"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2015n::Q056_6",
+      "sim": 0.5645881357563718,
+      "sign": -1,
+      "weight": 0.5
+     },
+     {
+      "itemId": "dn2015a::Q016_6",
+      "sim": 0.5645881357563718,
+      "sign": -1,
+      "weight": 0.5
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "qog2024::Q23_2",
+     "text": "On a 1 to 10 scale, with ‘1’ being ‘no confidence at all’, and ‘10’ being ‘complete confidence’ to do the right thing, how much confidence d",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2024c::Q19",
+      "sim": 0.5855112470902335,
+      "sign": -1,
+      "weight": 0.5039408369642658
+     },
+     {
+      "itemId": "dn2022b::Q33",
+      "sim": 0.5763538055960044,
+      "sign": -1,
+      "weight": 0.4960591630357342
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "qog2024::Q23_3",
+     "text": "On a 1 to 10 scale, with ‘1’ being ‘no confidence at all’, and ‘10’ being ‘complete confidence’ to do the right thing, how much confidence d",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2024b::q12_1_1::m5",
+      "sim": 0.6441259138065335,
+      "sign": 1,
+      "weight": 0.33976410445032046
+     },
+     {
+      "itemId": "dn2015n::Q056_18",
+      "sim": 0.6258386980532181,
+      "sign": -1,
+      "weight": 0.33011794777483977
+     },
+     {
+      "itemId": "dn2015a::Q016_18",
+      "sim": 0.6258386980532181,
+      "sign": -1,
+      "weight": 0.33011794777483977
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "qog2024::Q24_1",
+     "text": "People might feel different levels of attachment to where they live and to Europe, on a scale of 1-10 with ’1’ being ’not at all’ and ’10’ b",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2015n::Q021",
+      "sim": 0.6229885821937449,
+      "sign": -1,
+      "weight": 0.3479284966295284
+     },
+     {
+      "itemId": "dn2015n::Q054_6",
+      "sim": 0.5900672391449536,
+      "sign": -1,
+      "weight": 0.3295424880871941
+     },
+     {
+      "itemId": "dn2015n::Q017",
+      "sim": 0.5775091603422886,
+      "sign": -1,
+      "weight": 0.32252901528327754
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "qog2024::Q24_2",
+     "text": "People might feel different levels of attachment to where they live and to Europe, on a scale of 1-10 with ’1’ being ’not at all’ and ’10’ b",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2015n::Q021",
+      "sim": 0.5623884060991966,
+      "sign": -1,
+      "weight": 0.33802571387405955
+     },
+     {
+      "itemId": "dn2024a::Q4_7",
+      "sim": 0.550877204357488,
+      "sign": -1,
+      "weight": 0.33110686180653837
+     },
+     {
+      "itemId": "dn2015n::Q054_6",
+      "sim": 0.5504788415666584,
+      "sign": -1,
+      "weight": 0.33086742431940197
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "qog2024::Q24_3",
+     "text": "People might feel different levels of attachment to where they live and to Europe, on a scale of 1-10 with ’1’ being ’not at all’ and ’10’ b",
+     "domain": "social"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "qog2024::Q25",
+     "text": "How much do you agree (1 = strongly disagree, 10 = strongly agree): The government in Greece should reduce differences in peoples’ incomes b",
+     "domain": "political"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2015n::Q027_7",
+      "sim": 0.6914028866250638,
+      "sign": -1,
+      "weight": 0.345541131445693
+     },
+     {
+      "itemId": "dn2020b::Q044",
+      "sim": 0.6629597235869196,
+      "sign": -1,
+      "weight": 0.33132614488978007
+     },
+     {
+      "itemId": "dn2017::AgDisag_Naives",
+      "sim": 0.6465652785529125,
+      "sign": -1,
+      "weight": 0.323132723664527
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "qog2024::Q26",
+     "text": "How much do you agree (1 = strongly disagree, 10 = strongly agree): Discrimination against women is no longer a problem in Greece.",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "maple2019feb::Q24_5_w1",
+      "sim": 0.6670558981347933,
+      "sign": 1,
+      "weight": 0.3568178337180203
+     },
+     {
+      "itemId": "dn2015n::Q054_5",
+      "sim": 0.6272441776200263,
+      "sign": -1,
+      "weight": 0.33552196944279594
+     },
+     {
+      "itemId": "dn2015n::Q037_6",
+      "sim": 0.5751577682775569,
+      "sign": -1,
+      "weight": 0.30766019683918366
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "qog2024::Q27",
+     "text": "How much do you agree (1 = strongly disagree, 10 = strongly agree): On whole, Greece is worse-off by people coming to live here from other c",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2015n::Q017",
+      "sim": 0.7518022213055209,
+      "sign": -1,
+      "weight": 0.3484506894569152
+     },
+     {
+      "itemId": "dn2024a::Q24_1::m4",
+      "sim": 0.7139289544068665,
+      "sign": 1,
+      "weight": 0.33089691588611486
+     },
+     {
+      "itemId": "dn2022a::Q08_1::m1",
+      "sim": 0.691825816002157,
+      "sign": 1,
+      "weight": 0.32065239465697
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "qog2024::Q28",
+     "text": "How much do you agree (1 = strongly disagree, 10 = strongly agree): Gays and lesbians should be allowed to marry legally.",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2015n::Q044_1",
+      "sim": 0.8047516193017857,
+      "sign": -1,
+      "weight": 0.36539639204127533
+     },
+     {
+      "itemId": "dn2015n::Q044_2",
+      "sim": 0.7113927803319187,
+      "sign": -1,
+      "weight": 0.32300693657879515
+     },
+     {
+      "itemId": "dn2022a::Q21_1",
+      "sim": 0.6862627308966942,
+      "sign": -1,
+      "weight": 0.3115966713799296
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "qog2024::Q29",
+     "text": "How much do you agree (1 = strongly disagree, 10 = strongly agree): Advancing women’s and girls’ rights has gone too far, because it threate",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "maple2019feb::Q24_5_w1",
+      "sim": 0.68360240813777,
+      "sign": 1,
+      "weight": 0.36286753748884343
+     },
+     {
+      "itemId": "dn2022a::Q21_2",
+      "sim": 0.603716305514594,
+      "sign": -1,
+      "weight": 0.32046266443197324
+     },
+     {
+      "itemId": "dn2022a::Q21_3",
+      "sim": 0.5965709637448258,
+      "sign": -1,
+      "weight": 0.3166697980791833
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "qog2024::D6",
+     "text": "Apart from special occasions such as weddings and funerals, which of the following best describes how often do you attend religious services",
+     "domain": "social"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2020a::Q27",
+      "sim": 0.7403522382264561,
+      "sign": 1,
+      "weight": 0.35910432648020274
+     },
+     {
+      "itemId": "dn2022a::Q36",
+      "sim": 0.7299593386568937,
+      "sign": 1,
+      "weight": 0.35406330005061487
+     },
+     {
+      "itemId": "cses2019::IMD2005_1",
+      "sim": 0.5913517995596276,
+      "sign": -1,
+      "weight": 0.28683237346918233
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "qog2024::D7",
+     "text": "On average, how many hours do you usually spend on social media platforms including Facebook, Instagram, Twitter, TikTok, YouTube and others",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2024c::Q23_7",
+      "sim": 0.6581696178732703,
+      "sign": -1,
+      "weight": 0.3459265381248639
+     },
+     {
+      "itemId": "dn2018b::B21_24",
+      "sim": 0.6408296900927516,
+      "sign": -1,
+      "weight": 0.3368128673847402
+     },
+     {
+      "itemId": "dn2020b::Q187",
+      "sim": 0.6036289825402726,
+      "sign": -1,
+      "weight": 0.3172605944903959
+     }
+    ]
+   }
+  ],
+  "hbs2019": [
+   {
+    "target": {
+     "id": "hbs2019::Car",
+     "text": "Το νοικοκυριό διαθέτει αυτοκίνητο",
+     "domain": "consumer"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "hbs2019::PC",
+     "text": "Το νοικοκυριό διαθέτει υπολογιστή",
+     "domain": "consumer"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "hbs2019::Mobile",
+     "text": "Το νοικοκυριό διαθέτει κινητό τηλέφωνο",
+     "domain": "consumer"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "hbs2019::DishWash",
+     "text": "Το νοικοκυριό διαθέτει πλυντήριο πιάτων",
+     "domain": "consumer"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "hbs2019::Freezer",
+     "text": "Το νοικοκυριό διαθέτει καταψύκτη",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2022b::Q20",
+      "sim": 0.6375022805313251,
+      "sign": -1,
+      "weight": 1.0
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "hbs2019::DVD",
+     "text": "Το νοικοκυριό διαθέτει συσκευή DVD",
+     "domain": "consumer"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "hbs2019::Camera",
+     "text": "Το νοικοκυριό διαθέτει φωτογραφική/βιντεοκάμερα",
+     "domain": "consumer"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "hbs2019::Game",
+     "text": "Το νοικοκυριό διαθέτει κονσόλα παιχνιδιών",
+     "domain": "consumer"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "hbs2019::Solar_water",
+     "text": "Το νοικοκυριό διαθέτει ηλιακό θερμοσίφωνα",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2020a::Q327",
+      "sim": 0.5646117168902736,
+      "sign": -1,
+      "weight": 0.5
+     },
+     {
+      "itemId": "dn2024a::Q5_7",
+      "sim": 0.5646117168902736,
+      "sign": -1,
+      "weight": 0.5
+     }
+    ]
+   },
+   {
+    "target": {
+     "id": "hbs2019::Aircon",
+     "text": "Το νοικοκυριό διαθέτει κλιματιστικό",
+     "domain": "consumer"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "hbs2019::Double_glaze",
+     "text": "Η κατοικία έχει διπλά τζάμια",
+     "domain": "consumer"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "hbs2019::Public_transport",
+     "text": "Μέλη του νοικοκυριού χρησιμοποιούν δημόσια συγκοινωνία",
+     "domain": "consumer"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "hbs2019::fuel_Oil",
+     "text": "Το νοικοκυριό αγόρασε πετρέλαιο θέρμανσης",
+     "domain": "consumer"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "hbs2019::fuel_Nat_gas",
+     "text": "Το νοικοκυριό χρησιμοποιεί φυσικό αέριο",
+     "domain": "consumer"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "hbs2019::fuel_Liq_gas",
+     "text": "Το νοικοκυριό αγόρασε υγραέριο",
+     "domain": "consumer"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "hbs2019::fuel_Wood",
+     "text": "Το νοικοκυριό αγόρασε καυσόξυλα",
+     "domain": "consumer"
+    },
+    "analogs": []
+   },
+   {
+    "target": {
+     "id": "hbs2019::Heat_electr",
+     "text": "Το νοικοκυριό θερμαίνεται με ηλεκτρισμό",
+     "domain": "consumer"
+    },
+    "analogs": [
+     {
+      "itemId": "dn2024a::Q5_7",
+      "sim": 0.6282271181085882,
+      "sign": -1,
+      "weight": 0.5
+     },
+     {
+      "itemId": "dn2020a::Q327",
+      "sim": 0.6282271181085882,
+      "sign": -1,
+      "weight": 0.5
+     }
+    ]
+   }
+  ]
+ },
+ "seconds": 447.7
+}

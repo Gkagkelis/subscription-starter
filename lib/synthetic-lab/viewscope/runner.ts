@@ -35,8 +35,11 @@ export interface ViewscopeOptions {
   /** Στοιχεία της μελέτης-στόχου για τον χρονικό φραγμό και τον φορέα (διαδρομή δημοσιευμένων κυμάτων). */
   study?: { org?: string | null; fieldworkStart?: string };
   routes?: { publishedWaves?: boolean; allowOtherOrg?: boolean; crosswalks?: boolean };
-  /** Βήμα 2: ανάθεση απαντήσεων διαδρομών περιθωρίου μέσω κοινού πυρήνα (βλ. core.ts). */
-  core?: { enabled: boolean };
+  /**
+   * Βήμα 2: κοινός συνθετικός άνθρωπος (βλ. core.ts). links: έξοδος του build_core_links.py για τη μελέτη.
+   * applyToScenario: εφαρμογή και σε ερωτήσεις σεναρίου S του υπάρχοντος μηχανισμού (παραδοχή ερευνητή) — το περιθώριο μένει S.
+   */
+  core?: { enabled: boolean; links?: import('./core').CoreLinks | null; applyToScenario?: boolean };
   save?: boolean;
   /** Μόνο για δοκιμές: συγκεκριμένο μητρώο δημοσιευμένων κυμάτων. */
   publishedWaveEntries?: import('./published-waves').PublishedWave[];
@@ -69,6 +72,31 @@ function valueFor(q: Question, option: string): SyntheticAnswer['value'] {
   return { choice: option };
 }
 
+/**
+ * Ποιοι ερωτώμενοι απαντούν μια ερώτηση που ΔΡΟΜΟΛΟΓΕΙ το v2: αν ο υπάρχων μηχανισμός είχε απαντήσει, όσοι δεν την παρέλειψαν·
+ * αν είχε απόσχει (μη εκτιμήσιμη), όλοι — εκτός αν η ερώτηση είναι συνέχεια (followUpOf), οπότε μόνο όσοι έδωσαν (στο v2) μία από
+ * τις δηλωμένες απαντήσεις της προηγούμενης ερώτησης.
+ */
+export function eligibleAnswers(q: Question, qs: Question[], respondents: SyntheticRespondent[]): SyntheticAnswer[] {
+  const baseAnswered = respondents.some((r) => r.answers.some((a) => a.questionId === q.id && !a.skipped && a.value));
+  const parent = q.followUpOf ? qs.find((x) => x.id === q.followUpOf!.questionId) : null;
+  const out: SyntheticAnswer[] = [];
+  respondents.forEach((r) => {
+    const a = r.answers.find((x) => x.questionId === q.id);
+    if (!a) return;
+    if (baseAnswered) { if (!a.skipped) out.push(a); return; }
+    if (parent) {
+      const pa = r.answers.find((x) => x.questionId === parent.id);
+      const v = pa && !pa.skipped ? pa.value : null;
+      const given = v ? (v.choice ?? (v.scaleIndex != null ? (parent.scale || [])[v.scaleIndex] : undefined)) : undefined;
+      if (given === undefined || !q.followUpOf!.whenAnswerIn.includes(given)) return;
+    }
+    a.skipped = false;
+    out.push(a);
+  });
+  return out;
+}
+
 /** Κανόνας προτεραιότητας (βλ. επικεφαλίδα). */
 export function shouldOverride(base: QuestionRoute, candidate: { route: string; validated: boolean; mae: number | null }): boolean {
   if (!base.answerable || base.class === null || base.class === 'S') return true;
@@ -94,6 +122,8 @@ export async function runViewscope(o: ViewscopeOptions): Promise<ViewscopeRun> {
   let panel: ReturnType<typeof corePanelFor> | null = null;
   const needPanel = o.routes?.crosswalks || o.core?.enabled;
   if (needPanel) panel = corePanelFor(base, seed);
+  coreLinks = o.core?.enabled ? o.core.links || null : null;
+  const coreApplied: string[] = [];
 
   for (let qi = 0; qi < qs.length; qi++) {
     const q = qs[qi];
@@ -108,7 +138,8 @@ export async function runViewscope(o: ViewscopeOptions): Promise<ViewscopeRun> {
         if (w.routed && w.route) {
           const info = routeInfo(w.route);
           if (shouldOverride(routes[qi], { route: w.route, validated: info.validated, mae: info.mae })) {
-            assignFromDistribution(q, respondents, w.dist!, seed, w.route, panel, !!o.core?.enabled);
+            assignFromDistribution(q, respondents, w.dist!, seed, w.route, panel, !!o.core?.enabled, false, qs);
+            if (o.core?.enabled && coreLinks?.links?.[q.id]?.enabled) coreApplied.push(q.id);
             overrides.push({ questionId: q.id, from: routes[qi].route, to: w.route, class: 'T', reason: `προηγούμενο κύμα ${w.source!.orgLabel} (${w.source!.fieldworkEnd || w.source!.availableAt}), ηλικία ${w.ageMonths!.toFixed(1)} μήνες, ομοιότητα ${w.textSimilarity!.toFixed(2)}`, source: { id: w.source!.id, doc: w.source!.doc, extraction: w.source!.extraction.method } });
             routes[qi] = { ...routes[qi], answerable: true, route: w.route, engineClass: routes[qi].engineClass, class: 'T', validated: info.validated, expectedMAE: info.mae, validationStatus: info.status, notes: [...routes[qi].notes, `νέα διαδρομή: ${w.route}`] };
             answerClasses[q.id] = { T: 1 };
@@ -124,12 +155,13 @@ export async function runViewscope(o: ViewscopeOptions): Promise<ViewscopeRun> {
         const info = routeInfo('crosswalk_anchor');
         if (shouldOverride(routes[qi], { route: 'crosswalk_anchor', validated: info.validated, mae: info.mae })) {
           const counts: Record<string, number> = { T: 0, S: 0 };
+          const elig = new Set(eligibleAnswers(q, qs, respondents));
           respondents.forEach((r) => {
             const a = r.answers.find((x) => x.questionId === q.id);
-            if (!a || a.skipped) return;
+            if (!a || !elig.has(a)) return;
             const ps = panel!.states.get(r.personaId);
             const ans = ps ? answerFromCrosswalk(c, ps, seed) : { option: null, cls: null };
-            if (!ans.option) { a.value = null; a.basis = 'not_estimable'; a.rationale = 'vs2: χωρίς τιμή άγκυρας'; return; }
+            if (!ans.option) { a.value = null; a.skipped = true; a.basis = 'not_estimable'; a.rationale = 'vs2: χωρίς τιμή άγκυρας'; return; }
             a.value = valueFor(q, ans.option); a.basis = ans.cls === 'T' ? 'model_extrapolated' : 'assumption';
             a.rationale = `vs2:crosswalk_anchor ${c.id} (${ans.cls})`; counts[ans.cls!]++;
           });
@@ -142,13 +174,31 @@ export async function runViewscope(o: ViewscopeOptions): Promise<ViewscopeRun> {
       }
     }
   }
+  // Βήμα 2 (προαιρετικό): σενάρια S του υπάρχοντος μηχανισμού — ίδιο περιθώριο, συνεπής ανάθεση στα πρόσωπα
+  if (o.core?.enabled && o.core.applyToScenario && panel) {
+    for (let qi = 0; qi < qs.length; qi++) {
+      const q = qs[qi];
+      if (overrides.some((x) => x.questionId === q.id) || routes[qi].class !== 'S' || routes[qi].route === 'prod1_uninformed' || routes[qi].route === 'new_format_scenario') continue;
+      if (!coreLinks?.links?.[q.id]?.enabled) continue;
+      const opts = optionsOf(q);
+      const act = respondents.filter((r) => r.answers.some((a) => a.questionId === q.id && !a.skipped && a.value));
+      const counts = opts.map((op) => act.filter((r) => { const v = r.answers.find((a) => a.questionId === q.id)!.value!; return q.type === 'likert' ? opts[v.scaleIndex ?? -1] === op : v.choice === op; }).length);
+      const tot = counts.reduce((s, x) => s + x, 0);
+      if (!tot) continue;
+      const dist = Object.fromEntries(opts.map((op, k) => [op, (100 * counts[k]) / tot]));
+      assignFromDistribution(q, act, dist, seed, routes[qi].route || 'scenario', panel, true, true, qs);
+      coreApplied.push(q.id);
+      routes[qi].notes.push('κοινός πυρήνας: ίδιο περιθώριο S, συνεπής ανάθεση στα πρόσωπα (δομή συνάφειας T)');
+    }
+  }
+  if (o.core?.enabled) warnings.push(`Κοινός συνθετικός άνθρωπος (vs-core-1.0): ${coreApplied.length ? coreApplied.join(', ') : 'καμία ερώτηση'}· οι υπόλοιπες διαδρομές περιθωρίου μένουν ανεξάρτητες.`);
   const t2 = Date.now();
   const pop = loadPopulation(populationId);
   const personaMap = new Map<string, Persona>();
   const byId = new Map<string, Persona>((pop?.personas || []).map((p) => [p.id, p]));
   respondents.forEach((r) => { const p = byId.get(r.personaId.split('~')[0]); if (p) personaMap.set(r.personaId, p); });
   const aggregates = qs.map((q) => {
-    if (!overrides.some((x) => x.questionId === q.id)) return base.aggregates.find((a) => a.questionId === q.id)!;
+    if (!overrides.some((x) => x.questionId === q.id) && !respondents.some((r) => r.answers.some((a) => a.questionId === q.id && a.rationale?.startsWith('vs2')))) return base.aggregates.find((a) => a.questionId === q.id)!;
     return aggregateQuestion(q, respondents, personaMap);
   });
   const political = qs.map((q, i) => politicalSplit(q, routes[i], aggregates[i])).filter((x): x is PoliticalSplit => !!x);
@@ -181,24 +231,36 @@ export async function runViewscope(o: ViewscopeOptions): Promise<ViewscopeRun> {
  * Ανάθεση απαντήσεων από κατανομή-στόχο. Χωρίς κοινό πυρήνα: ανεξάρτητες κληρώσεις (συμπεριφορά Βήματος 1).
  * Με κοινό πυρήνα (Βήμα 2): βλ. core.ts — η κατανομή διατηρείται, αλλάζει μόνο ΠΟΙΟΣ δίνει ποια απάντηση.
  */
-function assignFromDistribution(q: Question, respondents: SyntheticRespondent[], dist: Record<string, number>, seed: number, route: string, panel: ReturnType<typeof corePanelFor> | null, useCore: boolean) {
+let coreLinks: import('./core').CoreLinks | null = null;
+function assignFromDistribution(q: Question, respondents: SyntheticRespondent[], dist: Record<string, number>, seed: number, route: string, panel: ReturnType<typeof corePanelFor> | null, useCore: boolean, keepBasis = false, qs: Question[] = [q]) {
   const opts = optionsOf(q);
   const p = opts.map((o) => Math.max(0, dist[o] || 0));
   const tot = p.reduce((s, x) => s + x, 0) || 1;
   const cum: number[] = []; p.reduce((s, x, i) => (cum[i] = s + x / tot), 0);
-  const active = respondents.map((r) => r.answers.find((a) => a.questionId === q.id)).filter((a): a is SyntheticAnswer => !!a && !a.skipped);
+  const active = eligibleAnswers(q, qs, respondents);
+  const activeSet = new Set(active);
   let picks: number[] | null = null;
+  let usedCore = false;
   if (useCore && panel) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const core = require('./core') as typeof import('./core');
-    picks = core.coreAssign(q, opts, p.map((x) => x / tot), respondents.filter((r) => r.answers.some((a) => a.questionId === q.id && !a.skipped)), panel, seed);
+    picks = core.coreAssign(q, opts, p.map((x) => x / tot), respondents.filter((r) => r.answers.some((a) => activeSet.has(a))), panel, seed, coreLinks);
+    usedCore = !!picks;
+  }
+  if (!picks) {
+    // ανεξάρτητη ανάθεση με ΑΚΡΙΒΗ πλήθη (τυχαία σειρά, κατανομή = κατανομή της διαδρομής, χωρίς θόρυβο δείγματος)
+    const z = active.map((_, i) => createRng(deriveSeed(seed, 'vs2-draw', q.id, i)).next());
+    const order = z.map((_, i) => i).sort((x, y) => z[x] - z[y]);
+    picks = new Array(active.length).fill(opts.length - 1);
+    let pos = 0;
+    p.forEach((pk, k) => { const c = k === p.length - 1 ? order.length - pos : Math.round((pk / tot) * order.length); for (let j = 0; j < c && pos < order.length; j++) picks![order[pos++]] = k; });
   }
   active.forEach((a, i) => {
     let k: number;
     if (picks && picks[i] != null && picks[i] >= 0) k = picks[i];
     else { const u = createRng(deriveSeed(seed, 'vs2-draw', q.id, i)).next(); k = cum.findIndex((c) => u < c); if (k < 0) k = opts.length - 1; }
     a.value = valueFor(q, opts[k]);
-    a.basis = 'model_extrapolated';
-    a.rationale = `vs2:${route}${picks ? ' + κοινός πυρήνας' : ''}`;
+    if (!keepBasis) a.basis = 'model_extrapolated';
+    a.rationale = `vs2:${route}${usedCore ? ' + κοινός πυρήνας' : ''}`;
   });
 }

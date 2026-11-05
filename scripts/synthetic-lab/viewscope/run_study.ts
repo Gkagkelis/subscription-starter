@@ -1,6 +1,7 @@
 // Viewscope v2 — ενεργοποίηση της νέας, ΠΡΟΑΙΡΕΤΙΚΗΣ έκδοσης για μία μελέτη (η παραγωγική προεπιλογή δεν αλλάζει).
 //   tsx scripts/synthetic-lab/viewscope/run_study.ts --plan <study.json | plan.json> [--n 500] [--seed 20261105]
-//        [--org "Metron Analysis" --fieldwork-start 2026-11-20 --published-waves] [--crosswalks] [--core] [--other-org]
+//        [--org "Metron Analysis" --fieldwork-start 2026-11-20 --published-waves] [--crosswalks] [--other-org]
+//        [--core --core-links <links.json> [--apply-scenario]]   (links: build_core_links.py)
 //        [--out <αρχείο.json>] [--save]
 // Χωρίς σημαίες νέων διαδρομών: εκτελεί τον υπάρχοντα μηχανισμό και προσθέτει μόνο ταξινόμηση E/T/S, 3 δείκτες κάλυψης
 // και πολιτικό διαχωρισμό. 0 κλήσεις API.
@@ -20,7 +21,7 @@ async function main() {
     plan, populationId: doc.populationId, seed: Number(arg('seed', '20261105')),
     study: { org: arg('org') || null, fieldworkStart: arg('fieldwork-start') },
     routes: { publishedWaves: arg('published-waves') === 'true', crosswalks: arg('crosswalks') === 'true', allowOtherOrg: arg('other-org') === 'true' },
-    core: { enabled: arg('core') === 'true' },
+    core: { enabled: arg('core') === 'true', links: arg('core-links') ? JSON.parse(readFileSync(arg('core-links')!, 'utf8')) : null, applyToScenario: arg('apply-scenario') === 'true' },
     save: arg('save') === 'true'
   });
   const c = (x: typeof v.coverage.base) => `τεχνική ${x.technical.n}/${x.questions} · εμπειρική (E/T) ${x.empirical.n} · επικυρωμένη ${x.validated.n}${x.validated.meanExpectedMAE != null ? ` (αναμ. σφάλμα ${x.validated.meanExpectedMAE.toFixed(1)} π.μ.)` : ''} · S ${x.scenarioS} · αποχή ${x.abstained}`;

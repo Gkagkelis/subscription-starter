@@ -126,3 +126,52 @@ describe('Viewscope v2 — runner (προαιρετικός, χωρίς αλλα
     expect(v.base.respondents.every((x) => x.answers.find((a) => a.questionId === 'dir')!.rationale?.startsWith('vs2') !== true)).toBe(true);
   });
 });
+
+// ------------------------------------------------------------ Βήμα 2: κοινός συνθετικός άνθρωπος
+import { coreAssign, loadCoreConfig } from '@/lib/synthetic-lab/viewscope/core';
+import { eligibleAnswers } from '@/lib/synthetic-lab/viewscope/runner';
+
+function fakePanel(n: number) {
+  const item = { id: 'fake::fem', file: 'fake', wave: '2024-01', type: 'ordinal', text: 'x', options: [{ code: '1', label: 'Πολύ' }, { code: '2', label: 'Καθόλου' }], feats: ['female'], means: [0.5], n: 100, dkShare: 0, observed: [0.5, 0.5], model: { kind: 'ordinal', b: [3.0], tau: [0] }, lambda: 0, inSampleMaxErrPp: 0 };
+  const states = new Map<string, any>();
+  const rs: any[] = [];
+  for (let i = 0; i < n; i++) {
+    const id = `p${i}`;
+    states.set(id, { personaId: id, weight: 1, demographics: { age_band: '35-44', gender: i % 2 ? 'female' : 'male', edu3: 'medium', nuts1: 'attica', urban: 'urban' }, anchors: {}, pseed: 1000 + i });
+    rs.push({ personaId: id, weight: 1, label: 'x', answers: [{ questionId: 'c1', value: null, skipped: false, basis: 'model_extrapolated' }] });
+  }
+  return { panel: { model: { version: 'pie-0.7', items: [item], constructLatent: null } as any, states, reproducedPie: false }, rs };
+}
+
+describe('Viewscope v2 — κοινός συνθετικός άνθρωπος (core)', () => {
+  const q: Question = { id: 'c1', type: 'likert', text: 'Πόσο εμπιστεύεστε…', scale: ['Πολύ', 'Λίγο', 'Καθόλου', 'ΔΓ/ΔΑ'] };
+  const links = (enabled: boolean, domain = 'social') => ({ version: 'vs-core-1.0', model: 'pie-0.7', atten: 0.9, links: { c1: { domain, enabled, analogs: [{ itemId: 'fake::fem', sim: 0.9, sign: 1, weight: 1 }], reason: 'ok' } } });
+  it('διατηρεί ΑΚΡΙΒΩΣ το περιθώριο της διαδρομής και αλλάζει μόνο ποιος απαντά τι', () => {
+    const { panel, rs } = fakePanel(1000);
+    const p = [0.3, 0.4, 0.25, 0.05];
+    const picks = coreAssign(q, q.scale!, p, rs, panel, 7, links(true))!;
+    const share = (k: number) => picks.filter((x) => x === k).length / picks.length;
+    expect(Math.abs(share(3) - 0.05)).toBeLessThan(0.03); // ΔΓ/ΔΑ ανεξάρτητα, στο ποσοστό της διαδρομής
+    const subst = [0, 1, 2].map(share); const tot = subst.reduce((s, x) => s + x, 0);
+    [0.3, 0.4, 0.25].forEach((x, k) => expect(Math.abs(subst[k] / tot - x / 0.95)).toBeLessThan(0.01));
+    // η δομή προέρχεται από το συγγενικό item (εδώ: φύλο), όχι από επινόηση
+    const fem = picks.filter((_, i) => i % 2 === 1 && picks[i] !== 3), mal = picks.filter((_, i) => i % 2 === 0 && picks[i] !== 3);
+    const mean = (v: number[]) => v.reduce((s, x) => s + x, 0) / v.length;
+    expect(Math.abs(mean(fem) - mean(mal))).toBeGreaterThan(0.2);
+    expect(coreAssign(q, q.scale!, p, rs, panel, 7, links(true))).toEqual(picks); // ντετερμινιστικό
+  });
+  it('χωρίς ενεργή σύνδεση ή σε τομέα που δεν πέρασε την αξιολόγηση → null (μένει ανεξάρτητη)', () => {
+    const { panel, rs } = fakePanel(50);
+    expect(coreAssign(q, q.scale!, [0.25, 0.25, 0.25, 0.25], rs, panel, 7, links(false))).toBeNull();
+    const disabled = Object.keys(loadCoreConfig().disabledDomains)[0];
+    if (disabled) expect(coreAssign(q, q.scale!, [0.25, 0.25, 0.25, 0.25], rs, panel, 7, links(true, disabled))).toBeNull();
+  });
+  it('ερώτηση στην οποία ο μηχανισμός απείχε: απαντούν όλοι, εκτός αν είναι συνέχεια άλλης ερώτησης', () => {
+    const parent: Question = { id: 'p', type: 'single_choice', text: 'Έχετε αυτοκίνητο;', options: ['Ναι', 'Όχι'] };
+    const child: Question = { id: 'c', type: 'single_choice', text: 'Πόσο ικανοποιημένος;', options: ['Πολύ', 'Λίγο'], followUpOf: { questionId: 'p', whenAnswerIn: ['Ναι'] } };
+    const rs: any[] = ['Ναι', 'Όχι', 'Ναι'].map((v, i) => ({ personaId: `r${i}`, weight: 1, label: 'x', answers: [{ questionId: 'p', value: { choice: v }, skipped: false, basis: 'persona_model' }, { questionId: 'c', value: null, skipped: true, basis: 'not_estimable' }] }));
+    expect(eligibleAnswers(child, [parent, child], rs).length).toBe(2);
+    const solo: Question = { ...child, id: 'c', followUpOf: null };
+    expect(eligibleAnswers(solo, [parent, solo], rs).length).toBe(3);
+  });
+});
