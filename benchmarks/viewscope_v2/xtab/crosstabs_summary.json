@@ -1,0 +1,56 @@
+{
+ "sha256": "2f4d2e31368d046715e6852d9920421fdd498d273422dca51a3169d2bc5d7d3f",
+ "stats": {
+  "parsed": 306,
+  "verified": 239,
+  "rejected": 67
+ },
+ "verified": 239,
+ "byDim": {
+  "age": 163,
+  "gender": 120,
+  "ideology": 62,
+  "party": 60
+ },
+ "byOrg": [
+  [
+   "marc",
+   106
+  ],
+  [
+   "opinion_poll",
+   99
+  ],
+  [
+   "dianeosis",
+   27
+  ],
+  [
+   "eett",
+   3
+  ],
+  [
+   "prorata",
+   2
+  ],
+  [
+   "interview",
+   2
+  ]
+ ],
+ "partyBase": {
+  "unknown": 53,
+  "pastvote_2023-06": 7
+ },
+ "withTotalCrossCheck": 0,
+ "questionFromTotalTable": 0,
+ "years": {
+  "2026": 33,
+  "2024": 51,
+  "2021": 82,
+  "2022": 29,
+  "2023": 7,
+  "2020": 34,
+  "2025": 3
+ }
+}

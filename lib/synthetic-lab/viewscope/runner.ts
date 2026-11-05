@@ -40,6 +40,13 @@ export interface ViewscopeOptions {
    * applyToScenario: εφαρμογή και σε ερωτήσεις σεναρίου S του υπάρχοντος μηχανισμού (παραδοχή ερευνητή) — το περιθώριο μένει S.
    */
   core?: { enabled: boolean; links?: import('./core').CoreLinks | null; applyToScenario?: boolean };
+  /**
+   * vs-xtab-1.0: επαληθευμένοι δημοσιευμένοι πίνακες υποομάδων ως πιθανοτικές συνθήκες (βλ. xtab.ts). links: ρητή σύνδεση
+   * ερώτησης → πίνακες· αλλιώς αυτόματα (ίδιο έγγραφο με την πηγή της διαδρομής ή ίδια διατύπωση/επιλογές).
+   */
+  xtab?: { enabled: boolean; links?: Record<string, string[]>; tables?: import('./xtab').Crosstab[] };
+  /** Δηλωμένες σχέσεις S (ήπια/μέτρια) για ερωτήσεις σεναρίου χωρίς πίνακες· με ανάλυση ευαισθησίας. */
+  declaredRelations?: import('./xtab').DeclaredRelation[];
   save?: boolean;
   /** Μόνο για δοκιμές: συγκεκριμένο μητρώο δημοσιευμένων κυμάτων. */
   publishedWaveEntries?: import('./published-waves').PublishedWave[];
@@ -59,6 +66,8 @@ export interface ViewscopeRun {
   political: PoliticalSplit[];
   overrides: Override[];
   answerClasses: Record<string, Record<string, number>>;
+  xtabReports: import('./xtab').XtabReport[];
+  declared: { questionId: string; driver: string; direction: number; strength: string; class: 'S'; sensitivity: Record<string, { lowGroupShare: number; highGroupShare: number; option: string }> }[];
   warnings: string[];
   apiCalls: 0;
   timingsMs: Record<string, number>;
@@ -120,9 +129,10 @@ export async function runViewscope(o: ViewscopeOptions): Promise<ViewscopeRun> {
   const answerClasses: Record<string, Record<string, number>> = {};
   const R = loadRoutes();
   let panel: ReturnType<typeof corePanelFor> | null = null;
-  const needPanel = o.routes?.crosswalks || o.core?.enabled;
+  const needPanel = o.routes?.crosswalks || o.core?.enabled || o.xtab?.enabled || !!o.declaredRelations?.length;
   if (needPanel) panel = corePanelFor(base, seed);
   coreLinks = o.core?.enabled ? o.core.links || null : null;
+  xtabCtx = o.xtab?.enabled ? { opts: o.xtab, org: o.study?.org || null, fieldworkStart: o.study?.fieldworkStart || '9999-12-31', reports: [] } : null;
   const coreApplied: string[] = [];
 
   for (let qi = 0; qi < qs.length; qi++) {
@@ -138,7 +148,7 @@ export async function runViewscope(o: ViewscopeOptions): Promise<ViewscopeRun> {
         if (w.routed && w.route) {
           const info = routeInfo(w.route);
           if (shouldOverride(routes[qi], { route: w.route, validated: info.validated, mae: info.mae })) {
-            assignFromDistribution(q, respondents, w.dist!, seed, w.route, panel, !!o.core?.enabled, false, qs);
+            assignFromDistribution(q, respondents, w.dist!, seed, w.route, panel, !!o.core?.enabled, false, qs, w.source!.doc.docId);
             if (o.core?.enabled && coreLinks?.links?.[q.id]?.enabled) coreApplied.push(q.id);
             overrides.push({ questionId: q.id, from: routes[qi].route, to: w.route, class: 'T', reason: `προηγούμενο κύμα ${w.source!.orgLabel} (${w.source!.fieldworkEnd || w.source!.availableAt}), ηλικία ${w.ageMonths!.toFixed(1)} μήνες, ομοιότητα ${w.textSimilarity!.toFixed(2)}`, source: { id: w.source!.id, doc: w.source!.doc, extraction: w.source!.extraction.method } });
             routes[qi] = { ...routes[qi], answerable: true, route: w.route, engineClass: routes[qi].engineClass, class: 'T', validated: info.validated, expectedMAE: info.mae, validationStatus: info.status, notes: [...routes[qi].notes, `νέα διαδρομή: ${w.route}`] };
@@ -191,6 +201,39 @@ export async function runViewscope(o: ViewscopeOptions): Promise<ViewscopeRun> {
       routes[qi].notes.push('κοινός πυρήνας: ίδιο περιθώριο S, συνεπής ανάθεση στα πρόσωπα (δομή συνάφειας T)');
     }
   }
+  // Δηλωμένες σχέσεις S: μόνο σε ερωτήσεις σεναρίου S, ίδιο συνολικό ποσοστό· ευαισθησία για ένταση 0 / ήπια / μέτρια
+  const declared: ViewscopeRun['declared'] = [];
+  if (o.declaredRelations?.length && panel) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const xt = require('./xtab') as typeof import('./xtab');
+    for (const rel of o.declaredRelations) {
+      const qi = qs.findIndex((x) => x.id === rel.questionId);
+      if (qi < 0 || routes[qi].class !== 'S' || overrides.some((x) => x.questionId === rel.questionId)) { warnings.push(`Δηλωμένη σχέση για ${rel.questionId}: αγνοήθηκε (εφαρμόζεται μόνο σε ερωτήσεις σεναρίου S).`); continue; }
+      const q = qs[qi]; const opts = optionsOf(q);
+      const act = respondents.filter((r) => r.answers.some((a) => a.questionId === q.id && !a.skipped && a.value));
+      const counts = opts.map((op) => act.filter((r) => { const v = r.answers.find((a) => a.questionId === q.id)!.value!; return (q.type === 'likert' ? opts[v.scaleIndex ?? -1] : v.choice) === op; }).length);
+      const tot = counts.reduce((x, y) => x + y, 0); if (!tot) continue;
+      const p = counts.map((c) => c / tot);
+      const sens: Record<string, { lowGroupShare: number; highGroupShare: number; option: string }> = {};
+      const dv = act.map((r) => xt.driverValue(panel!.states.get(r.personaId)!, rel.driver));
+      const sorted = dv.filter((x): x is number => x != null).sort((a, b) => a - b);
+      const lo = sorted[Math.floor(sorted.length / 3)], hi = sorted[Math.floor((2 * sorted.length) / 3)];
+      let final: number[] | null = null;
+      for (const lvl of ['none', 'mild', 'moderate'] as const) {
+        const picks = xt.declaredAssign(q, opts, p, act, panel.states, rel, xt.STRENGTH[lvl], seed);
+        if (!picks) continue;
+        const last = opts.length - 1 - (opts.findIndex((x) => /ΔΓ|ΔΑ|Δεν ξέρω/.test(x)) === opts.length - 1 ? 1 : 0);
+        const share = (pred: (x: number) => boolean) => { const idx = act.map((_, i) => i).filter((i) => dv[i] != null && pred(dv[i]!)); return idx.length ? idx.filter((i) => picks[i] === last).length / idx.length : NaN; };
+        sens[lvl] = { option: opts[last], lowGroupShare: +(100 * share((x) => x <= lo)).toFixed(1), highGroupShare: +(100 * share((x) => x >= hi)).toFixed(1) };
+        if (lvl === rel.strength) final = picks;
+      }
+      if (final) {
+        act.forEach((r, i) => { const a = r.answers.find((x) => x.questionId === q.id)!; if (final![i] >= 0) { a.value = valueFor(q, opts[final![i]]); a.rationale = `vs2:declared-S ${rel.driver} ${rel.direction > 0 ? '+' : '−'} ${rel.strength}`; } });
+        declared.push({ questionId: q.id, driver: rel.driver, direction: rel.direction, strength: rel.strength, class: 'S', sensitivity: sens });
+        routes[qi].notes.push(`δηλωμένη σχέση S: ${rel.driver} (${rel.strength})`);
+      }
+    }
+  }
   if (o.core?.enabled) warnings.push(`Κοινός συνθετικός άνθρωπος (vs-core-1.0): ${coreApplied.length ? coreApplied.join(', ') : 'καμία ερώτηση'}· οι υπόλοιπες διαδρομές περιθωρίου μένουν ανεξάρτητες.`);
   const t2 = Date.now();
   const pop = loadPopulation(populationId);
@@ -215,6 +258,8 @@ export async function runViewscope(o: ViewscopeOptions): Promise<ViewscopeRun> {
     political,
     overrides,
     answerClasses,
+    xtabReports: xtabCtx?.reports || [],
+    declared,
     warnings,
     apiCalls: 0,
     timingsMs: { base: t1 - t0, routing: t2 - t1, total: Date.now() - t0 }
@@ -232,7 +277,8 @@ export async function runViewscope(o: ViewscopeOptions): Promise<ViewscopeRun> {
  * Με κοινό πυρήνα (Βήμα 2): βλ. core.ts — η κατανομή διατηρείται, αλλάζει μόνο ΠΟΙΟΣ δίνει ποια απάντηση.
  */
 let coreLinks: import('./core').CoreLinks | null = null;
-function assignFromDistribution(q: Question, respondents: SyntheticRespondent[], dist: Record<string, number>, seed: number, route: string, panel: ReturnType<typeof corePanelFor> | null, useCore: boolean, keepBasis = false, qs: Question[] = [q]) {
+let xtabCtx: { opts: NonNullable<ViewscopeOptions['xtab']>; org: string | null; fieldworkStart: string; reports: import('./xtab').XtabReport[] } | null = null;
+function assignFromDistribution(q: Question, respondents: SyntheticRespondent[], dist: Record<string, number>, seed: number, route: string, panel: ReturnType<typeof corePanelFor> | null, useCore: boolean, keepBasis = false, qs: Question[] = [q], sourceDocId: string | null = null) {
   const opts = optionsOf(q);
   const p = opts.map((o) => Math.max(0, dist[o] || 0));
   const tot = p.reduce((s, x) => s + x, 0) || 1;
@@ -241,7 +287,16 @@ function assignFromDistribution(q: Question, respondents: SyntheticRespondent[],
   const activeSet = new Set(active);
   let picks: number[] | null = null;
   let usedCore = false;
-  if (useCore && panel) {
+  let usedXtab = false;
+  if (xtabCtx && panel) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const xt = require('./xtab') as typeof import('./xtab');
+    const tables = xt.matchCrosstabs(q, opts, { org: xtabCtx.org, fieldworkStart: xtabCtx.fieldworkStart, sourceDocId, explicit: xtabCtx.opts.links?.[q.id] }, xtabCtx.opts.tables || xt.loadCrosstabs());
+    const rsAct = respondents.filter((r) => r.answers.some((a) => activeSet.has(a)));
+    const r = xt.xtabAssign(q, opts, p.map((x) => x / tot), rsAct, panel.states, tables, seed);
+    if (r) { xtabCtx.reports.push(r.report); if (r.picks) { picks = r.picks; usedXtab = true; } }
+  }
+  if (!picks && useCore && panel) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const core = require('./core') as typeof import('./core');
     picks = core.coreAssign(q, opts, p.map((x) => x / tot), respondents.filter((r) => r.answers.some((a) => activeSet.has(a))), panel, seed, coreLinks);
@@ -261,6 +316,6 @@ function assignFromDistribution(q: Question, respondents: SyntheticRespondent[],
     else { const u = createRng(deriveSeed(seed, 'vs2-draw', q.id, i)).next(); k = cum.findIndex((c) => u < c); if (k < 0) k = opts.length - 1; }
     a.value = valueFor(q, opts[k]);
     if (!keepBasis) a.basis = 'model_extrapolated';
-    a.rationale = `vs2:${route}${usedCore ? ' + κοινός πυρήνας' : ''}`;
+    a.rationale = `vs2:${route}${usedXtab ? ' + πίνακες υποομάδων (T)' : usedCore ? ' + κοινός πυρήνας' : ''}`;
   });
 }

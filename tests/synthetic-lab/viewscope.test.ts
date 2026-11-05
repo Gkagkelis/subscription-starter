@@ -179,3 +179,68 @@ describe('Viewscope v2 — κοινός συνθετικός άνθρωπος (c
     expect(eligibleAnswers(solo, [parent, solo], rs).length).toBe(3);
   });
 });
+
+// ------------------------------------------------------------ vs-xtab: πίνακες υποομάδων ως πιθανοτικές συνθήκες
+import { declaredAssign, matchCrosstabs, personaGroup, xtabAssign, type Crosstab } from '@/lib/synthetic-lab/viewscope/xtab';
+
+function people(n: number) {
+  const states = new Map<string, any>(); const rs: any[] = [];
+  const ages = ['17-24', '25-34', '35-44', '45-54', '55-64', '65+'];
+  for (let i = 0; i < n; i++) {
+    const id = `x${i}`;
+    states.set(id, { personaId: id, weight: 1, demographics: { age_band: ages[i % 6], gender: i % 2 ? 'female' : 'male', edu3: 'medium', nuts1: 'attica', urban: 'urban' }, anchors: { pv: i % 3 === 0 ? 'nd' : 'syriza', lr7: (i % 7) + 1, econ4: (i % 4) + 1 }, pseed: 7 + i });
+    rs.push({ personaId: id, weight: 1, label: 'x', answers: [] });
+  }
+  return { states, rs };
+}
+const XT = (o: Partial<Crosstab>): Crosstab => ({ id: 'xt1', org: 'opinion_poll', orgLabel: 'Opinion Poll', question: 'Πόσο πιθανό να ψηφίσετε ένα κόμμα Τσίπρα;', options: ['ΠΟΛΥ', 'ΛΙΓΟ', 'ΚΑΘΟΛΟΥ', 'ΔΓ/ΔΑ'], groups: { 'age:17-34': [30, 30, 40, 0], 'age:35-54': [10, 20, 70, 0], 'age:55-99': [5, 10, 85, 0] }, dims: { age: 3 }, partyBase: null, availableAt: '2026-03-06', fieldworkEnd: '2026-03-06', doc: { docId: 'd1', page: 1, url: null, title: null }, verification: {}, ...o });
+
+describe('Viewscope v2 — vs-xtab (πίνακες υποομάδων)', () => {
+  const q: Question = { id: 'tq', type: 'single_choice', text: 'Πόσο πιθανό να ψηφίσετε ένα κόμμα Τσίπρα;', options: ['ΠΟΛΥ', 'ΛΙΓΟ', 'ΚΑΘΟΛΟΥ', 'ΔΓ/ΔΑ'] };
+  const p = [0.15, 0.2, 0.62, 0.03];
+  it('διατηρεί το συνολικό ποσοστό, ακολουθεί τη διαφορά ομάδων του πίνακα, κρατά ατομική μεταβλητότητα', () => {
+    const { states, rs } = people(1200);
+    const r = xtabAssign(q, q.options!, p, rs, states, [XT({})], 3)!;
+    expect(r.picks).not.toBeNull();
+    const picks = r.picks!; const share = (idx: number[], k: number) => idx.filter((i) => picks[i] === k).length / idx.length;
+    const all = picks.map((_, i) => i); const subst = all.filter((i) => picks[i] !== 3);
+    expect(Math.abs(share(subst, 2) - 0.62 / 0.97)).toBeLessThan(0.02);
+    expect(r.report.maxMarginalDevPp).toBeLessThan(2);
+    const young = subst.filter((i) => ['17-24', '25-34'].includes(states.get(rs[i].personaId).demographics.age_band));
+    const old = subst.filter((i) => ['55-64', '65+'].includes(states.get(rs[i].personaId).demographics.age_band));
+    expect(share(old, 2) - share(young, 2)).toBeGreaterThan(0.25);
+    expect(new Set(young.map((i) => picks[i])).size).toBeGreaterThan(1); // ίδια ομάδα → διαφορετικές απαντήσεις
+    expect(r.report.residual).toMatch(/ανεξαρτησία υπό συνθήκη/);
+  });
+  it('παλιός πίνακας ή μεγάλη απόκλιση συμφιλίωσης → η διάσταση απορρίπτεται και καταγράφεται', () => {
+    const { states, rs } = people(600);
+    expect(matchCrosstabs(q, q.options!, { org: 'Opinion Poll', fieldworkStart: '2026-11-16' }, [XT({ availableAt: '2023-01-10', fieldworkEnd: '2023-01-10' })]).length).toBe(0);
+    const far = XT({ groups: { 'age:17-34': [90, 5, 5, 0], 'age:35-54': [90, 5, 5, 0], 'age:55-99': [90, 5, 5, 0] } });
+    const r = xtabAssign(q, q.options!, p, rs, states, [far], 3)!;
+    expect(r.picks).toBeNull();
+    expect(r.report.dimsDropped[0].reason).toMatch(/απόκλιση συμφιλίωσης/);
+  });
+  it('πίνακας ανά κόμμα: μόνο με βάση την ψήφο 2023 (ίδια με την άγκυρα του προσώπου)', () => {
+    const { states } = people(3);
+    const ps = states.get('x0');
+    expect(personaGroup(ps, 'party', ['party:nd', 'party:syriza'], 'unknown')).toBeNull();
+    expect(personaGroup(ps, 'party', ['party:nd', 'party:syriza'], 'pastvote_2023-06')).toBe('party:nd');
+  });
+  it('ίδιο έγγραφο: ο πίνακας πηγαίνει μόνο στην ίδια ερώτηση (οντότητες)', () => {
+    const tabs = [XT({ id: 'ts', question: '...Τσίπρα' }), XT({ id: 'sm', question: '...Σαμαρά' })];
+    expect(matchCrosstabs(q, q.options!, { org: 'Opinion Poll', fieldworkStart: '2026-11-16', sourceDocId: 'd1' }, tabs).map((t) => t.id)).toEqual(['ts']);
+  });
+  it('δηλωμένη σχέση S: ίδιο συνολικό ποσοστό, ένταση ήπια < μέτρια', () => {
+    const { states, rs } = people(1500);
+    const sq: Question = { id: 'sq', type: 'likert', text: 'Πρόθεση αγοράς', scale: ['Όχι', 'Ίσως', 'Ναι'] };
+    const pp = [0.3, 0.4, 0.3];
+    const diff = (s: number) => { const pk = declaredAssign(sq, sq.scale!, pp, rs, states, { questionId: 'sq', driver: 'econ4', direction: 1, strength: 'mild' }, s, 5)!;
+      const hi = pk.filter((_, i) => states.get(rs[i].personaId).anchors.econ4 === 4), lo = pk.filter((_, i) => states.get(rs[i].personaId).anchors.econ4 === 1);
+      expect(Math.abs(pk.filter((x) => x === 2).length / pk.length - 0.3)).toBeLessThan(0.01);
+      return hi.filter((x) => x === 2).length / hi.length - lo.filter((x) => x === 2).length / lo.length; };
+    const d0 = diff(0), d1 = diff(0.15), d2 = diff(0.3);
+    expect(Math.abs(d0)).toBeLessThan(0.1); // χωρίς σχέση: μόνο θόρυβος δείγματος
+    expect(d2).toBeGreaterThan(d1);
+    expect(d1).toBeGreaterThan(d0);
+  });
+});
