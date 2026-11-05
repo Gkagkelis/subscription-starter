@@ -1,0 +1,351 @@
+{
+ "seed": 20261105,
+ "dataDir": "isolated",
+ "node": "v22.22.0",
+ "results": [
+  {
+   "case": "prod-1",
+   "domain": "καταναλωτική/οικονομική",
+   "n": 500,
+   "coldWallMs": 3308,
+   "wallMs": 106,
+   "respondents": 500,
+   "questions": 11,
+   "engineVersion": "demo-rules-1.0+mc-logit-1.1",
+   "apiCalls": 0,
+   "usd": 0,
+   "basisShares": {
+    "empirical_prior": 0.2727272727272727,
+    "assumption": 0.36363636363636365,
+    "uninformed": 0.36363636363636365
+   },
+   "naShare": 0.04145454545454545,
+   "coherence": {
+    "pairs": 36,
+    "meanV": 0.19878114309212297,
+    "meanVnull": 0.13660558615743143,
+    "excessV": 0.06217555693469154,
+    "strongPairsShare": 0.4444444444444444,
+    "ordinalPairs": 3,
+    "meanAbsRho": 0.3216440483070091
+   }
+  },
+  {
+   "case": "prod-1",
+   "domain": "καταναλωτική/οικονομική",
+   "n": 1000,
+   "coldWallMs": 211,
+   "wallMs": 203,
+   "respondents": 1000,
+   "questions": 11,
+   "engineVersion": "demo-rules-1.0+mc-logit-1.1",
+   "apiCalls": 0,
+   "usd": 0,
+   "basisShares": {
+    "empirical_prior": 0.2727272727272727,
+    "assumption": 0.36363636363636365,
+    "uninformed": 0.36363636363636365
+   },
+   "naShare": 0.04118181818181818,
+   "coherence": {
+    "pairs": 36,
+    "meanV": 0.16972026433818221,
+    "meanVnull": 0.09595241827829964,
+    "excessV": 0.07376784605988257,
+    "strongPairsShare": 0.3888888888888889,
+    "ordinalPairs": 3,
+    "meanAbsRho": 0.3145398210793589
+   }
+  },
+  {
+   "case": "EGPS",
+   "domain": "καταναλωτική/οικονομική (ίδιο σχέδιο)",
+   "n": 500,
+   "coldWallMs": 95,
+   "wallMs": 71,
+   "respondents": 500,
+   "questions": 11,
+   "engineVersion": "egps-exp-0.1-platform+mc-logit-1.1",
+   "apiCalls": 0,
+   "usd": 0,
+   "basisShares": {
+    "empirical_prior": 0.2727272727272727,
+    "not_estimable": 0.6363636363636364,
+    "assumption": 0.09090909090909091
+   },
+   "naShare": 0.6363636363636364,
+   "coherence": {
+    "pairs": 3,
+    "meanV": 0.2198834644027622,
+    "meanVnull": 0.08391024296302903,
+    "excessV": 0.13597322143973317,
+    "strongPairsShare": 1,
+    "ordinalPairs": 0,
+    "meanAbsRho": null
+   }
+  },
+  {
+   "case": "EGPS",
+   "domain": "καταναλωτική/οικονομική (ίδιο σχέδιο)",
+   "n": 1000,
+   "coldWallMs": 151,
+   "wallMs": 163,
+   "respondents": 1000,
+   "questions": 11,
+   "engineVersion": "egps-exp-0.1-platform+mc-logit-1.1",
+   "apiCalls": 0,
+   "usd": 0,
+   "basisShares": {
+    "empirical_prior": 0.2727272727272727,
+    "not_estimable": 0.6363636363636364,
+    "assumption": 0.09090909090909091
+   },
+   "naShare": 0.6363636363636364,
+   "coherence": {
+    "pairs": 3,
+    "meanV": 0.21256421057755429,
+    "meanVnull": 0.01867281431241091,
+    "excessV": 0.19389139626514337,
+    "strongPairsShare": 0.6666666666666666,
+    "ordinalPairs": 0,
+    "meanAbsRho": null
+   }
+  },
+  {
+   "case": "PIE (pie-0.2) πολιτική",
+   "domain": "πολιτική",
+   "n": 500,
+   "coldWallMs": 639,
+   "wallMs": 533,
+   "respondents": 500,
+   "questions": 27,
+   "engineVersion": "pie-runtime-2+pie-0.2",
+   "apiCalls": 0,
+   "usd": 0,
+   "basisShares": {
+    "model_extrapolated": 0.48148148148148145,
+    "not_estimable": 0.4444444444444444,
+    "persona_model": 0.07407407407407407
+   },
+   "naShare": 0.44681481481481483,
+   "coherence": {
+    "pairs": 105,
+    "meanV": 0.15981878184666853,
+    "meanVnull": 0.10484170876786311,
+    "excessV": 0.05497707307880542,
+    "strongPairsShare": 0.22857142857142856,
+    "ordinalPairs": 0,
+    "meanAbsRho": null
+   }
+  },
+  {
+   "case": "PIE (pie-0.2) πολιτική",
+   "domain": "πολιτική",
+   "n": 1000,
+   "coldWallMs": 807,
+   "wallMs": 817,
+   "respondents": 1000,
+   "questions": 27,
+   "engineVersion": "pie-runtime-2+pie-0.2",
+   "apiCalls": 0,
+   "usd": 0,
+   "basisShares": {
+    "model_extrapolated": 0.48148148148148145,
+    "not_estimable": 0.4444444444444444,
+    "persona_model": 0.07407407407407407
+   },
+   "naShare": 0.44722222222222224,
+   "coherence": {
+    "pairs": 105,
+    "meanV": 0.1429179243148901,
+    "meanVnull": 0.07334042036434399,
+    "excessV": 0.0695775039505461,
+    "strongPairsShare": 0.18095238095238095,
+    "ordinalPairs": 0,
+    "meanAbsRho": null
+   }
+  },
+  {
+   "case": "PIE βαρόμετρο",
+   "domain": "κοινωνική/πολιτική",
+   "n": 500,
+   "coldWallMs": 567,
+   "wallMs": 538,
+   "respondents": 500,
+   "questions": 33,
+   "engineVersion": "pie-runtime-2+pie-0.2",
+   "apiCalls": 0,
+   "usd": 0,
+   "basisShares": {
+    "not_estimable": 0.5757575757575758,
+    "model_extrapolated": 0.18181818181818182,
+    "persona_model": 0.24242424242424243
+   },
+   "naShare": 0.5757575757575758,
+   "coherence": {
+    "pairs": 91,
+    "meanV": 0.1789021049961618,
+    "meanVnull": 0.1060187596632807,
+    "excessV": 0.0728833453328811,
+    "strongPairsShare": 0.32967032967032966,
+    "ordinalPairs": 0,
+    "meanAbsRho": null
+   }
+  },
+  {
+   "case": "PIE βαρόμετρο",
+   "domain": "κοινωνική/πολιτική",
+   "n": 1000,
+   "coldWallMs": 912,
+   "wallMs": 1000,
+   "respondents": 1000,
+   "questions": 33,
+   "engineVersion": "pie-runtime-2+pie-0.2",
+   "apiCalls": 0,
+   "usd": 0,
+   "basisShares": {
+    "not_estimable": 0.5757575757575758,
+    "model_extrapolated": 0.18181818181818182,
+    "persona_model": 0.24242424242424243
+   },
+   "naShare": 0.5757575757575758,
+   "coherence": {
+    "pairs": 91,
+    "meanV": 0.1571504290519712,
+    "meanVnull": 0.07521495434287252,
+    "excessV": 0.08193547470909869,
+    "strongPairsShare": 0.1978021978021978,
+    "ordinalPairs": 0,
+    "meanAbsRho": null
+   }
+  },
+  {
+   "case": "PIE Cinobo",
+   "domain": "καταναλωτική",
+   "n": 500,
+   "coldWallMs": 764,
+   "wallMs": 723,
+   "respondents": 500,
+   "questions": 53,
+   "engineVersion": "pie-runtime-2+pie-0.2",
+   "apiCalls": 0,
+   "usd": 0,
+   "basisShares": {
+    "not_estimable": 0.9056603773584906,
+    "persona_model": 0.09433962264150944
+   },
+   "naShare": 0.9056603773584906,
+   "coherence": {
+    "pairs": 10,
+    "meanV": 0.11722380687619012,
+    "meanVnull": 0.07424306359967366,
+    "excessV": 0.042980743276516464,
+    "strongPairsShare": 0,
+    "ordinalPairs": 0,
+    "meanAbsRho": null
+   }
+  },
+  {
+   "case": "PIE Cinobo",
+   "domain": "καταναλωτική",
+   "n": 1000,
+   "coldWallMs": 1303,
+   "wallMs": 1196,
+   "respondents": 1000,
+   "questions": 53,
+   "engineVersion": "pie-runtime-2+pie-0.2",
+   "apiCalls": 0,
+   "usd": 0,
+   "basisShares": {
+    "not_estimable": 0.9056603773584906,
+    "persona_model": 0.09433962264150944
+   },
+   "naShare": 0.9056603773584906,
+   "coherence": {
+    "pairs": 10,
+    "meanV": 0.08425335025652257,
+    "meanVnull": 0.05865578831742572,
+    "excessV": 0.025597561939096854,
+    "strongPairsShare": 0,
+    "ordinalPairs": 0,
+    "meanAbsRho": null
+   }
+  },
+  {
+   "case": "structured-1.0 (Κωτσόβολος pilot)",
+   "domain": "καταναλωτική",
+   "n": 500,
+   "coldWallMs": 490,
+   "coherenceSingleChoice": {
+    "pairs": 304,
+    "meanV": 0.16884855615128663,
+    "meanVnull": 0.15034580777744286,
+    "excessV": 0.018502748373843775,
+    "strongPairsShare": 0.3092105263157895,
+    "ordinalPairs": 0,
+    "meanAbsRho": null
+   },
+   "wallMs": 389,
+   "generationMs": 185,
+   "respondents": 500,
+   "questions": 37,
+   "engineVersion": "structured-1.0+mc-logit-1.1+pie-0.7",
+   "apiCalls": 0,
+   "usd": 0,
+   "basisShares": {
+    "E": 0.08108108108108109,
+    "T": 0.058702702702702704,
+    "S": 0.5615675675675675
+   },
+   "naShare": 0.29864864864864865,
+   "coherence": {
+    "pairs": 443,
+    "meanV": 0.26543077825308004,
+    "meanVnull": 0.2526730256407274,
+    "excessV": 0.012757752612352624,
+    "strongPairsShare": 0.5259593679458239,
+    "ordinalPairs": 0,
+    "meanAbsRho": null
+   },
+   "note": "NA = ερωτήσεις εκτός διαδρομής (skip logic), όχι αποχή"
+  },
+  {
+   "case": "structured-1.0 (Κωτσόβολος pilot)",
+   "domain": "καταναλωτική",
+   "n": 1000,
+   "coldWallMs": 644,
+   "coherenceSingleChoice": {
+    "pairs": 413,
+    "meanV": 0.17608811259277674,
+    "meanVnull": 0.16011941483244627,
+    "excessV": 0.01596869776033047,
+    "strongPairsShare": 0.31234866828087166,
+    "ordinalPairs": 0,
+    "meanAbsRho": null
+   },
+   "wallMs": 717,
+   "generationMs": 385,
+   "respondents": 1000,
+   "questions": 37,
+   "engineVersion": "structured-1.0+mc-logit-1.1+pie-0.7",
+   "apiCalls": 0,
+   "usd": 0,
+   "basisShares": {
+    "E": 0.08108108108108109,
+    "T": 0.06289189189189189,
+    "S": 0.5668378378378378
+   },
+   "naShare": 0.2891891891891892,
+   "coherence": {
+    "pairs": 600,
+    "meanV": 0.26393672235694304,
+    "meanVnull": 0.2537138700609375,
+    "excessV": 0.010222852296005558,
+    "strongPairsShare": 0.5266666666666666,
+    "ordinalPairs": 0,
+    "meanAbsRho": null
+   },
+   "note": "NA = ερωτήσεις εκτός διαδρομής (skip logic), όχι αποχή"
+  }
+ ]
+}
