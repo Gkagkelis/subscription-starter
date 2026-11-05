@@ -1,0 +1,51 @@
+{
+ "step": "1",
+ "startedAt": "2026-11-05T12:44:06Z",
+ "checks": {
+  "integrity_hashes": {
+   "ok": true,
+   "seconds": 5.2,
+   "detail": {
+    "ok": true,
+    "checkedAt": "2026-11-05T12:44:11Z",
+    "baselineGitHead": "471a832f6919afbbd6ce19aa98324adda21b13ad",
+    "counts": {
+     "git": 14471,
+     "data": 1223,
+     "shallow": 7523
+    },
+    "changed": [],
+    "missing": [],
+    "added_protected": [],
+    "shallow_changed": [],
+    "n_added_protected": 0
+   }
+  },
+  "regression_fingerprints": {
+   "ok": true,
+   "seconds": 6.3,
+   "detail": "{\n \"ok\": true,\n \"diffs\": [],\n \"checked\": [\n  \"prod-1\",\n  \"EGPS\",\n  \"PIE pie-0.2 political\",\n  \"PIE barometer\",\n  \"PIE Cinobo\",\n  \"structured-1.0 kotsovolos\"\n ]\n}\n"
+  },
+  "phase7a_locked": {
+   "ok": true,
+   "csv": "41f12134ec4ae77d9aa51d2e6557be1259e59c50b1d8959a0386aebd1b315c47",
+   "json": "1e5dafd636bf3b4086f212e5fc7dca229f4ebdf9034c24ae358cb278c827885f"
+  },
+  "political_eval_rerun": {
+   "ok": true,
+   "seconds": 11.5
+  },
+  "tests_ts": {
+   "ok": true,
+   "seconds": 21.6,
+   "summary": "Tests  168 passed (168)",
+   "failed": null
+  },
+  "tests_python": {
+   "ok": true,
+   "seconds": 84.4,
+   "summary": "[ase] run_id: 20261105T124614Z_mock_full (συνέχεια μετά από διακοπή: --resume 20261105T124614Z_mock_full)"
+  }
+ },
+ "ok": true
+}

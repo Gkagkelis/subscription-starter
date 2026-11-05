@@ -1,0 +1,4 @@
+d1aeaaa51c0e1576ac7eadb561548affdcab12b63aa43ff445bec6bcbbdf4da5  docs/synthetic-lab/VIEWSCOPE_V2_PREREGISTRATION.md
+1d2e956000f6d83a6c3238310ad80817efdad27a9ddf98da95e25ccbe628b582  lib/synthetic-lab/viewscope/published-waves.ts
+02e52ce31baa048e44bf83af91cee40d1378d6066c618efe4f64f7fc99b69d3a  lib/synthetic-lab/viewscope/text.ts
+Thu Nov  5 12:35:22 UTC 2026

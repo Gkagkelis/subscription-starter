@@ -1,0 +1,40 @@
+{
+ "createdAt": "2026-11-05T12:26:05.917Z",
+ "seed": 20261105,
+ "fingerprints": {
+  "prod-1": {
+   "answers": "8c56d3742611eb0b2b3a2b871bc8bedb217312fb50e37535f8449b1ee7df6d61",
+   "aggregates": "4ad69129ee5e77963a611fdd9ca3abd3ae36a30778e6bc97e0242dc3a7c2ec7e",
+   "n": 300,
+   "apiCalls": 0
+  },
+  "EGPS": {
+   "answers": "b644b1bf2bb7d32e8a2baed76f1598145023fd0b888c283eea0805be95fe3cb9",
+   "aggregates": "f1d33b4147eab39dbe5cc5317605302946b08fdb41cf4fc11bdf4635013e9043",
+   "n": 300,
+   "apiCalls": 0
+  },
+  "PIE pie-0.2 political": {
+   "answers": "9269939b4147ddfc4ebcb03ff70e533d59c3017f475130ce80dc1ca84b465fa3",
+   "aggregates": "e3b9d901ea9aae17102f457bf4e3bc0a6f8cca307944c94400debb770bc1486f",
+   "n": 300,
+   "apiCalls": 0
+  },
+  "PIE barometer": {
+   "answers": "841998f69170e007135fa430a200f31ae767aa40b52c488a644f687e2ae330a4",
+   "aggregates": "174e05cb4eddd066c617759d34f81297ed615d17e63c03581f143c4d6bfa0d14",
+   "n": 300,
+   "apiCalls": 0
+  },
+  "PIE Cinobo": {
+   "answers": "7432fcefaf79e418b3f7e3b629c9db6921b54b86526bb9b1ba135bdd674fa3c4",
+   "aggregates": "fcdb83763744472a4a9c7a33ef29903d56f2da8724312df524003e7f69d3a20b",
+   "n": 300,
+   "apiCalls": 0
+  },
+  "structured-1.0 kotsovolos": {
+   "answers": "106528a6c379665faf9b55b4dec01834792f70aae98de7b238ad9dce4afe7cdf",
+   "matchesStoredRun": true
+  }
+ }
+}

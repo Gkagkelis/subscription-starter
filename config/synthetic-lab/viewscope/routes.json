@@ -1,0 +1,28 @@
+{
+  "version": "vs-routes-1.0",
+  "note": "Μητρώο διαδρομών Viewscope v2. «validation.status»: validated = μετρημένο σφάλμα σε ανεξάρτητο holdout· validated_historical = ιστορική δοκιμή σε μεταγενέστερα κύματα (όχι μελλοντική)· retrospective_only = μόνο αναδρομικά σε γνωστές τιμές· rejected = απέτυχε προκαταχωρημένο κριτήριο· unvalidated = καμία μέτρηση. Μόνο validated/validated_historical μετρούν στην «επικυρωμένη κάλυψη». Οι αριθμοί αντιγράφονται από τα έγγραφα αποτελεσμάτων (καμία νέα εκτίμηση εδώ).",
+  "validatedFormats": ["single_choice", "likert", "multiple_choice"],
+  "routes": {
+    "pie_tier1": { "label": "PIE — ίδια ελληνική ερώτηση (βαθμίδα 1)", "class": "E", "validation": { "status": "validated", "mae": 5.3, "holdout": "διαΝΕΟσις 2024", "source": "docs/synthetic-lab/PHASE6_RESULTS.md §I" } },
+    "pie_tier2": { "label": "PIE — σχετική ελληνική (βαθμίδα 2)", "class": "E", "validation": { "status": "rejected", "mae": 12.8, "uniformMae": 13.1, "holdout": "Phase 4 H1–H7", "source": "docs/synthetic-lab/PHASE6_RESULTS.md §I" } },
+    "pie_tier3": { "label": "Διεθνής ισοδύναμη ερώτηση (B5, βαθμίδα 3)", "class": "T", "validation": { "status": "validated", "mae": 4.39, "holdout": "H6 (Phase 6) · 5,95 στο Phase 5", "source": "docs/synthetic-lab/PHASE6_RESULTS.md §I" } },
+    "pie_tier4": { "label": "Πειραματική μεταφορά (βαθμίδα 4)", "class": "T", "validation": { "status": "unvalidated", "mae": 10.2, "note": "μόνο ενδεικτικό", "source": "docs/synthetic-lab/PHASE6_RESULTS.md §I" } },
+    "pie_direct": { "label": "PIE χωρίς πολιτική βαθμίδων — άμεση ερώτηση (pie-0.2 έως 0.6)", "class": "E", "validation": { "status": "validated", "mae": 5.28, "holdout": "διαΝΕΟσις 2024 (H1)", "source": "docs/synthetic-lab/PERSONA_RESULTS.md" } },
+    "pie_extrapolated": { "label": "PIE — συγγενής ερώτηση / αυτόματη σύνδεση / IQGE", "class": "T", "validation": { "status": "unvalidated", "note": "τυφλή αξιολόγηση: συχνά χειρότερη από ομοιόμορφη στο επίπεδο", "source": "lib/synthetic-lab/persona/survey.ts (προειδοποίηση)" } },
+    "egps_anchored": { "label": "EGPS — εμπειρικά αγκυρωμένη", "class": "E", "validation": { "status": "validated", "mae": 8.5, "holdout": "EGPS test (170 εκτιμήσιμοι δείκτες)", "source": "docs/synthetic-lab/EGPS_RESULTS.md" } },
+    "egps_extrapolated": { "label": "EGPS — μεταφορά από συγγενικούς δείκτες", "class": "T", "validation": { "status": "unvalidated", "source": "docs/synthetic-lab/EGPS_RESULTS.md" } },
+    "prod1_prior": { "label": "prod-1 — εμπειρικό prior (mc-logit)", "class": "E", "validation": { "status": "validated", "mae": 6.18, "holdout": "Phase 2 holdout", "note": "χειρότερο από την επιμονή κατά +3,84", "source": "docs/synthetic-lab/PHASE2_RESULTS.md" } },
+    "prod1_assumption": { "label": "prod-1 — παραδοχή ερευνητή", "class": "S", "validation": { "status": "unvalidated" } },
+    "prod1_uninformed": { "label": "prod-1 — καμία πληροφορία (ουδέτερη προεπιλογή)", "class": "S", "validation": { "status": "unvalidated" } },
+    "prev_wave_same_org": { "label": "Προηγούμενο δημοσιευμένο κύμα, ίδιος φορέας", "class": "T", "maxAgeMonths": 24, "validation": { "status": "validated_historical", "mae": 1.38, "uniformMae": 9.11, "n": 41, "holdout": "κύματα 2025–09/2026 (ιστορική δοκιμή, κανόνες από < 2025)", "sensitivity": "μόνο πλήρη κείμενα: 1,41 (n = 11)· ηλικία > 6 μήνες: λίγα ζεύγη (n = 4)", "prospective": "εκκρεμεί", "source": "benchmarks/viewscope_v2/results/prev_wave_backtest.json" } },
+    "prev_wave_other_org": { "label": "Προηγούμενο κύμα άλλου φορέα (ίδια διατύπωση)", "class": "T", "validation": { "status": "unvalidated", "note": "διαφορές φορέα (house effects) δεν έχουν μετρηθεί" } },
+    "crosswalk_anchor": { "label": "Ρητός πίνακας αντιστοίχισης προς άγκυρα PIE", "class": "T", "validation": { "status": "retrospective_only", "note": "μόνο αναδρομικά στην Phase 7A" } },
+    "political_national": { "label": "Εθνικά πολιτικά ποσοστά (επίπεδο από μέσο δημοσκοπήσεων)", "class": "T", "validation": { "status": "validated", "mae": 1.62, "baselineMae": 1.5, "holdout": "6 εκλογές (P1)", "note": "μη κατώτερο του μέσου δημοσκοπήσεων, όχι καλύτερο", "source": "docs/synthetic-lab/POLITICAL_RESULTS.md" } },
+    "political_subgroup": { "label": "Διαφορές πολιτικών υποομάδων", "class": "S", "validation": { "status": "rejected", "mae": 3.8, "baselineMae": 2.22, "holdout": "NORAYA 2022-Q4 (P2, 56 κελιά)", "source": "docs/synthetic-lab/POLITICAL_RESULTS.md" } },
+    "structured_E": { "label": "structured-1.0 — εμπειρικά βαθμονομημένη", "class": "E", "validation": { "status": "unvalidated", "note": "χωρίς εξωτερικό holdout της μελέτης" } },
+    "structured_T": { "label": "structured-1.0 — μεταφερόμενη", "class": "T", "validation": { "status": "unvalidated" } },
+    "structured_S": { "label": "structured-1.0 — σενάριο", "class": "S", "validation": { "status": "unvalidated" } },
+    "scenario": { "label": "Συνθετικό σενάριο (ρητές παραδοχές, ευαισθησία)", "class": "S", "validation": { "status": "unvalidated" } },
+    "new_format_scenario": { "label": "Νέα μορφή ερώτησης (κατάταξη, αριθμητική, ανοιχτή) — μόνο σενάριο", "class": "S", "validation": { "status": "unvalidated" } }
+  }
+}

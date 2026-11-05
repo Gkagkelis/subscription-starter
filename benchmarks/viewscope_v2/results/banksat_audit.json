@@ -1,0 +1,40 @@
+{
+ "dataset": "banksat",
+ "status": "structure_unverified",
+ "rows": 5018,
+ "columns": 39,
+ "hasIds": false,
+ "fullRowDuplicates": 4227,
+ "distinctPatterns": 2218,
+ "maxRepeat": 72,
+ "straightLiningRowsAmongDuplicates": 92,
+ "medianGapBetweenRepeats": 996,
+ "contiguousRepeats": 108,
+ "repeatsTotalGaps": 2800,
+ "independenceSimulationDuplicates": 0,
+ "interpretation": "Οι επαναλήψεις δεν είναι τυχαίες (0 στην προσομοίωση ανεξαρτησίας) και δεν είναι κυρίως «ίδια απάντηση παντού»· δεν αποδεικνύουν όμως ότι είναι οι ίδιοι άνθρωποι. Η δομή μένει μη επιβεβαιωμένη → καραντίνα.",
+ "marginalTestSensitivity": {
+  "items": 30,
+  "meanShiftFullVsDedupPp": 1.0222294419979867,
+  "full": {
+   "iqge": 6.069490632130789,
+   "uniform": 6.314388202471104
+  },
+  "dedup": {
+   "iqge": 6.251597629197589,
+   "uniform": 6.77439134355275
+  },
+  "conclusionStable": true
+ },
+ "usePolicy": {
+  "forbidden": [
+   "individual_training",
+   "individual_validation",
+   "correlation_estimation",
+   "subgroup_validation"
+  ],
+  "allowedWithFlag": [
+   "marginal_validation"
+  ]
+ }
+}

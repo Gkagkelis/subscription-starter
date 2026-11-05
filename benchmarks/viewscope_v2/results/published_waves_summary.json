@@ -1,0 +1,194 @@
+{
+ "file": "viewscope/published_waves.json",
+ "sha256": "417a92aa77a28d72d0e0d5057fd60ac7fc9af17a153265994bcd710e340fb7ea",
+ "entries": 884,
+ "excludedTargetDocs": 0,
+ "byQuality": {
+  "low": 473,
+  "high": 411
+ },
+ "byMethod": {
+  "pdf_text_auto": 872,
+  "manual_transcription": 12
+ },
+ "byOrg": [
+  [
+   "prorata",
+   280
+  ],
+  [
+   "interview",
+   119
+  ],
+  [
+   "marc",
+   111
+  ],
+  [
+   "opinion_poll",
+   94
+  ],
+  [
+   "kapa",
+   83
+  ],
+  [
+   "dianeosis",
+   66
+  ],
+  [
+   "dg_just",
+   58
+  ],
+  [
+   "gpo",
+   20
+  ],
+  [
+   "metron",
+   12
+  ],
+  [
+   "eurobarometer",
+   11
+  ],
+  [
+   "reuters",
+   10
+  ],
+  [
+   "rass",
+   6
+  ],
+  [
+   "eett",
+   5
+  ],
+  [
+   "focus_bari",
+   4
+  ],
+  [
+   "palmos",
+   3
+  ],
+  [
+   "mrb",
+   2
+  ]
+ ],
+ "metronVerification": [
+  {
+   "survey": "P7A-POL-01",
+   "qid": "Q1",
+   "docId": "e4a07b5b2ef3",
+   "page": 2,
+   "valuesFoundShare": 1.0,
+   "labelsFoundShare": 1.0,
+   "questionExtracted": true
+  },
+  {
+   "survey": "P7A-POL-01",
+   "qid": "Q2",
+   "docId": "a839a1e5848f",
+   "page": 6,
+   "valuesFoundShare": 1.0,
+   "labelsFoundShare": 1.0,
+   "questionExtracted": true
+  },
+  {
+   "survey": "P7A-POL-01",
+   "qid": "Q5",
+   "docId": "e4a07b5b2ef3",
+   "page": 4,
+   "valuesFoundShare": 1.0,
+   "labelsFoundShare": 1.0,
+   "questionExtracted": true
+  },
+  {
+   "survey": "P7A-POL-01",
+   "qid": "Q6",
+   "docId": "e4a07b5b2ef3",
+   "page": 5,
+   "valuesFoundShare": 1.0,
+   "labelsFoundShare": 1.0,
+   "questionExtracted": true
+  },
+  {
+   "survey": "P7A-POL-01",
+   "qid": "Q7",
+   "docId": "e4a07b5b2ef3",
+   "page": 6,
+   "valuesFoundShare": 1.0,
+   "labelsFoundShare": 1.0,
+   "questionExtracted": true
+  },
+  {
+   "survey": "P7A-POL-01",
+   "qid": "Q8",
+   "docId": "e4a07b5b2ef3",
+   "page": 7,
+   "valuesFoundShare": 1.0,
+   "labelsFoundShare": 1.0,
+   "questionExtracted": true
+  },
+  {
+   "survey": "P7A-POL-01",
+   "qid": "Q10",
+   "docId": "a839a1e5848f",
+   "page": 19,
+   "valuesFoundShare": 1.0,
+   "labelsFoundShare": 1.0,
+   "questionExtracted": true
+  },
+  {
+   "survey": "P7A-POL-01",
+   "qid": "Q11",
+   "docId": "367d12687385",
+   "page": 5,
+   "valuesFoundShare": 1.0,
+   "labelsFoundShare": 1.0,
+   "questionExtracted": true
+  },
+  {
+   "survey": "P7A-POL-01",
+   "qid": "Q13",
+   "docId": "e4a07b5b2ef3",
+   "page": 9,
+   "valuesFoundShare": 1.0,
+   "labelsFoundShare": 1.0,
+   "questionExtracted": true
+  },
+  {
+   "survey": "P7A-POL-01",
+   "qid": "Q19",
+   "docId": "e2aa0ed26554",
+   "page": 12,
+   "valuesFoundShare": 1.0,
+   "labelsFoundShare": 1.0,
+   "questionExtracted": true
+  },
+  {
+   "survey": "P7A-POL-01",
+   "qid": "Q20",
+   "docId": "e4a07b5b2ef3",
+   "page": 12,
+   "valuesFoundShare": 1.0,
+   "labelsFoundShare": 1.0,
+   "questionExtracted": true
+  },
+  {
+   "survey": "P7A-POL-01",
+   "qid": "Q21",
+   "docId": "a839a1e5848f",
+   "page": 46,
+   "valuesFoundShare": 1.0,
+   "labelsFoundShare": 1.0,
+   "questionExtracted": true
+  }
+ ],
+ "dateRange": [
+  "2018-02-05",
+  "2026-10-10"
+ ]
+}

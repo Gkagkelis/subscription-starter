@@ -1,0 +1,498 @@
+{
+ "variant": "μετά τον συντηρητικό περιορισμό minQuestionChars=40 (ανάλυση ευαισθησίας)",
+ "preregistration": "docs/synthetic-lab/VIEWSCOPE_V2_PREREGISTRATION.md §Α",
+ "registryEntries": 884,
+ "pairs": {
+  "total": 33,
+  "calibration": 22,
+  "validation": 11
+ },
+ "calibrationTable": [
+  {
+   "A": 1,
+   "bucketN": 16,
+   "bucketMAE": 1.0100918829073693,
+   "cumN": 16,
+   "cumMAE": 1.0100918829073693
+  },
+  {
+   "A": 2,
+   "bucketN": 2,
+   "bucketMAE": 1.7999999999999998,
+   "cumN": 18,
+   "cumMAE": 1.0978594514732172
+  },
+  {
+   "A": 3,
+   "bucketN": 1,
+   "bucketMAE": 2.818181818181819,
+   "cumN": 19,
+   "cumMAE": 1.1884027339315646
+  },
+  {
+   "A": 4,
+   "bucketN": 0,
+   "bucketMAE": null,
+   "cumN": 19,
+   "cumMAE": 1.1884027339315646
+  },
+  {
+   "A": 6,
+   "bucketN": 2,
+   "bucketMAE": 2,
+   "cumN": 21,
+   "cumMAE": 1.2656977116523678
+  },
+  {
+   "A": 9,
+   "bucketN": 0,
+   "bucketMAE": null,
+   "cumN": 21,
+   "cumMAE": 1.2656977116523678
+  },
+  {
+   "A": 12,
+   "bucketN": 0,
+   "bucketMAE": null,
+   "cumN": 21,
+   "cumMAE": 1.2656977116523678
+  },
+  {
+   "A": 18,
+   "bucketN": 1,
+   "bucketMAE": 1.6,
+   "cumN": 22,
+   "cumMAE": 1.2808932702136238
+  },
+  {
+   "A": 24,
+   "bucketN": 0,
+   "bucketMAE": null,
+   "cumN": 22,
+   "cumMAE": 1.2808932702136238
+  }
+ ],
+ "chosenMaxAgeMonths": 24,
+ "validation": {
+  "n": 11,
+  "mae": 1.4053382923512792,
+  "maeUniform": 13.187496469314652,
+  "diffVsUniform": -11.782158176963376,
+  "ci95": [
+   -16.50979461498942,
+   -7.777179090166104
+  ],
+  "medianAge": 3.154004106776181,
+  "byOrg": {
+   "opinion_poll": {
+    "n": 5,
+    "mae": 1.2422204336490048
+   },
+   "prorata": {
+    "n": 6,
+    "mae": 1.5412698412698411
+   }
+  }
+ },
+ "accepted": true,
+ "status": "validated_historical",
+ "prospective": "εκκρεμεί (πρώτα κύματα που θα δημοσιευτούν μετά τις 5/11/2026)",
+ "pairsDetail": [
+  {
+   "target": "pw-1e01ed486824-p52-95418ebd",
+   "source": "pw-7f2b90cb15ac-p41-95418ebd",
+   "org": "opinion_poll",
+   "date": "2026-03-04",
+   "ageMonths": 13.73305954825462,
+   "mae": 1.4937794937794937,
+   "maeUniform": 6.753061224489797,
+   "split": "val",
+   "kind": "polls",
+   "question": "Ποιον από τους πολιτικούς ηγέτες θεωρείτε καταλληλότερο για Πρωθυπουργό;"
+  },
+  {
+   "target": "pw-c09d98d06c3f-p6-95418ebd",
+   "source": "pw-cba7e890c839-p24-95418ebd",
+   "org": "opinion_poll",
+   "date": "2025-10-07",
+   "ageMonths": 3.1211498973305956,
+   "mae": 0.9834119834119832,
+   "maeUniform": 6.7097709954852816,
+   "split": "val",
+   "kind": "polls",
+   "question": "Ποιον από τους πολιτικούς ηγέτες θεωρείτε καταλληλότερο για Πρωθυπουργό;"
+  },
+  {
+   "target": "pw-7b7eb21305f7-p49-95418ebd",
+   "source": "pw-c09d98d06c3f-p6-95418ebd",
+   "org": "opinion_poll",
+   "date": "2026-01-14",
+   "ageMonths": 3.154004106776181,
+   "mae": 1.014286728572443,
+   "maeUniform": 6.721849578992438,
+   "split": "val",
+   "kind": "polls",
+   "question": "Ποιον από τους πολιτικούς ηγέτες θεωρείτε καταλληλότερο για Πρωθυπουργό;"
+  },
+  {
+   "target": "pw-e345bf8212e4-p59-95418ebd",
+   "source": "pw-084ca3ca22ba-p13-95418ebd",
+   "org": "opinion_poll",
+   "date": "2025-03-14",
+   "ageMonths": 2.9897330595482545,
+   "mae": 1.9559162416305262,
+   "maeUniform": 6.9145140573712,
+   "split": "val",
+   "kind": "polls",
+   "question": "Ποιον από τους πολιτικούς ηγέτες θεωρείτε καταλληλότερο για Πρωθυπουργό;"
+  },
+  {
+   "target": "pw-cba7e890c839-p24-95418ebd",
+   "source": "pw-e345bf8212e4-p59-95418ebd",
+   "org": "opinion_poll",
+   "date": "2025-07-02",
+   "ageMonths": 3.482546201232033,
+   "mae": 0.7637077208505774,
+   "maeUniform": 6.653061224489796,
+   "split": "val",
+   "kind": "polls",
+   "question": "Ποιον από τους πολιτικούς ηγέτες θεωρείτε καταλληλότερο για Πρωθυπουργό;"
+  },
+  {
+   "target": "pw-7cbf8b950ba2-p4-82ab86c1",
+   "source": "pw-048499f3cd8a-p4-82ab86c1",
+   "org": "prorata",
+   "date": "2026-06-29",
+   "ageMonths": 0.8542094455852156,
+   "mae": 0.6666666666666666,
+   "maeUniform": 23.777777777777782,
+   "split": "val",
+   "kind": "polls",
+   "question": "Κατά τη γνώμη σας, η χώρα κινείται προς τη σωστή ή προς τη λάθος κατεύθυνση;"
+  },
+  {
+   "target": "pw-7cbf8b950ba2-p10-3848019e",
+   "source": "pw-048499f3cd8a-p6-3848019e",
+   "org": "prorata",
+   "date": "2026-06-29",
+   "ageMonths": 0.8542094455852156,
+   "mae": 0.7142857142857143,
+   "maeUniform": 6.510204081632655,
+   "split": "val",
+   "kind": "polls",
+   "question": "Ποιον πολιτικό αρχηγό εμπιστεύεστε περισσότερο για Πρωθυπουργό της χώρας;"
+  },
+  {
+   "target": "pw-048499f3cd8a-p4-82ab86c1",
+   "source": "pw-217f90adb237-p4-82ab86c1",
+   "org": "prorata",
+   "date": "2026-05-28",
+   "ageMonths": 0.9856262833675564,
+   "mae": 0.6666666666666666,
+   "maeUniform": 24.444444444444446,
+   "split": "val",
+   "kind": "polls",
+   "question": "Κατά τη γνώμη σας, η χώρα κινείται προς τη σωστή ή προς τη λάθος κατεύθυνση;"
+  },
+  {
+   "target": "pw-217f90adb237-p4-82ab86c1",
+   "source": "pw-94641d106280-p4-82ab86c1",
+   "org": "prorata",
+   "date": "2026-04-22",
+   "ageMonths": 7.063655030800821,
+   "mae": 2,
+   "maeUniform": 23.777777777777782,
+   "split": "val",
+   "kind": "polls",
+   "question": "Κατά τη γνώμη σας, η χώρα κινείται προς τη σωστή ή προς τη λάθος κατεύθυνση;"
+  },
+  {
+   "target": "pw-217f90adb237-p20-7474371e",
+   "source": "pw-94641d106280-p35-7474371e",
+   "org": "prorata",
+   "date": "2026-04-22",
+   "ageMonths": 7.063655030800821,
+   "mae": 2.4,
+   "maeUniform": 16.4,
+   "split": "val",
+   "kind": "polls",
+   "question": "πόσο πιθανό είναι να τον ψηφίσετε στις επόμενες εθνικές εκλογές;"
+  },
+  {
+   "target": "pw-217f90adb237-p23-7474371e",
+   "source": "pw-94641d106280-p35-7474371e",
+   "org": "prorata",
+   "date": "2026-04-22",
+   "ageMonths": 7.063655030800821,
+   "mae": 2.8,
+   "maeUniform": 16.4,
+   "split": "val",
+   "kind": "polls",
+   "question": "πόσο πιθανό είναι να τον ψηφίσετε στις επόμενες εθνικές εκλογές;"
+  },
+  {
+   "target": "pw-4b2ea4bc853a-p9-82ab86c1",
+   "source": "pw-f787ba4d3b8b-p4-82ab86c1",
+   "org": "prorata",
+   "date": "2024-12-03",
+   "ageMonths": 5.979466119096509,
+   "mae": 2,
+   "maeUniform": 11.6,
+   "split": "cal",
+   "kind": "polls",
+   "question": "Κατά τη γνώμη σας, η χώρα κινείται προς τη σωστή ή προς τη λάθος κατεύθυνση;"
+  },
+  {
+   "target": "pw-f787ba4d3b8b-p4-82ab86c1",
+   "source": "pw-6b783dd59d38-p12-82ab86c1",
+   "org": "prorata",
+   "date": "2024-05-29",
+   "ageMonths": 0.03285420944558522,
+   "mae": 0.4,
+   "maeUniform": 9.6,
+   "split": "cal",
+   "kind": "polls",
+   "question": "Κατά τη γνώμη σας, η χώρα κινείται προς τη σωστή ή προς τη λάθος κατεύθυνση;"
+  },
+  {
+   "target": "pw-f787ba4d3b8b-p6-610a74bd",
+   "source": "pw-6b783dd59d38-p21-610a74bd",
+   "org": "prorata",
+   "date": "2024-05-29",
+   "ageMonths": 0.03285420944558522,
+   "mae": 2.8,
+   "maeUniform": 20.8,
+   "split": "cal",
+   "kind": "polls",
+   "question": "Πόσο πιθανό είναι να ψηφίσετε στις Ευρωεκλογές;"
+  },
+  {
+   "target": "pw-6b783dd59d38-p12-82ab86c1",
+   "source": "pw-d36f2ae5f506-p10-82ab86c1",
+   "org": "prorata",
+   "date": "2024-05-22",
+   "ageMonths": 1.379876796714579,
+   "mae": 2.4,
+   "maeUniform": 9.6,
+   "split": "cal",
+   "kind": "polls",
+   "question": "Κατά τη γνώμη σας, η χώρα κινείται προς τη σωστή ή προς τη λάθος κατεύθυνση;"
+  },
+  {
+   "target": "pw-6b783dd59d38-p17-e4519285",
+   "source": "pw-d36f2ae5f506-p15-e4519285",
+   "org": "prorata",
+   "date": "2024-05-22",
+   "ageMonths": 1.379876796714579,
+   "mae": 1.2,
+   "maeUniform": 10.2,
+   "split": "cal",
+   "kind": "polls",
+   "question": "Ποιον πολιτικό αρχηγό εμπιστεύεστε περισσότερο για πρωθυπουργό της χώρας;"
+  },
+  {
+   "target": "pw-d13333bc40ce-p6-648519a5",
+   "source": "pw-6ddaa62d0542-p12-648519a5",
+   "org": "prorata",
+   "date": "2023-11-15",
+   "ageMonths": 17.478439425051334,
+   "mae": 1.6,
+   "maeUniform": 13.2,
+   "split": "cal",
+   "kind": "polls",
+   "question": "Πως αξιολογείτε τη σημερινή προσωπική σας οικονομική κατάσταση;"
+  },
+  {
+   "target": "pw-309f9f513d3c-p14-dc92e7d4",
+   "source": "pw-b6406ae75561-p9-dc92e7d4",
+   "org": "prorata",
+   "date": "2023-03-24",
+   "ageMonths": 4.008213552361396,
+   "mae": 2,
+   "maeUniform": 11.5,
+   "split": "cal",
+   "kind": "polls",
+   "question": "χειρότερη, το ίδιο κακή - το ίδιο καλή ή καλύτερη απ’ ότι είναι σήμερα;"
+  },
+  {
+   "target": "pw-269c4306c968-p6-3e809312",
+   "source": "pw-2e0e67d3f600-p5-3e809312",
+   "org": "marc",
+   "date": "2024-05-29",
+   "ageMonths": 0.459958932238193,
+   "mae": 1.5272727272727273,
+   "maeUniform": 8.297520661157023,
+   "split": "cal",
+   "kind": "polls",
+   "question": "ΕΡ: Ποιο κόμμα της αντιπολίτευσης ασκεί την πιο ουσιαστική αντιπολίτευση;"
+  },
+  {
+   "target": "pw-2e0e67d3f600-p5-3e809312",
+   "source": "pw-5b4179173cc0-p6-3e809312",
+   "org": "marc",
+   "date": "2024-05-10",
+   "ageMonths": 0.4928131416837782,
+   "mae": 1.2363636363636363,
+   "maeUniform": 8.895867768595041,
+   "split": "cal",
+   "kind": "polls",
+   "question": "ΕΡ: Ποιο κόμμα της αντιπολίτευσης ασκεί την πιο ουσιαστική αντιπολίτευση;"
+  },
+  {
+   "target": "pw-2e0e67d3f600-p7-9583c186",
+   "source": "pw-5b4179173cc0-p11-9583c186",
+   "org": "marc",
+   "date": "2024-05-10",
+   "ageMonths": 0.4928131416837782,
+   "mae": 0.38333333333333436,
+   "maeUniform": 7.633333333333333,
+   "split": "cal",
+   "kind": "polls",
+   "question": "ΕΡ: Ποιον πολιτικό αρχηγό εμπιστεύεστε περισσότερο στο τιμόνι της χώρας;"
+  },
+  {
+   "target": "pw-5b4179173cc0-p6-3e809312",
+   "source": "pw-1f33890a3f88-p43-3e809312",
+   "org": "marc",
+   "date": "2024-04-18",
+   "ageMonths": 2.8254620123203287,
+   "mae": 2.818181818181819,
+   "maeUniform": 8.406611570247934,
+   "split": "cal",
+   "kind": "polls",
+   "question": "ΕΡ: Ποιο κόμμα της αντιπολίτευσης ασκεί την πιο ουσιαστική αντιπολίτευση;"
+  },
+  {
+   "target": "pw-1f33890a3f88-p46-9001a85a",
+   "source": "pw-f86180aa9852-p15-9001a85a",
+   "org": "marc",
+   "date": "2024-01-17",
+   "ageMonths": 0.06570841889117043,
+   "mae": 0.31030444964871157,
+   "maeUniform": 5.778287646419514,
+   "split": "cal",
+   "kind": "polls",
+   "question": "ΕΡ: Αν είχαμε βουλευτικές εκλογές την επόμενη Κυριακή, ποιο κόμμα είναι πιο πιθανό να ψηφίζατε;"
+  },
+  {
+   "target": "pw-13c86bed94e0-p4-ae37991a",
+   "source": "pw-ae1b775a7fa3-p4-ae37991a",
+   "org": "marc",
+   "date": "2023-06-07",
+   "ageMonths": 0.2299794661190965,
+   "mae": 0.5000000000000003,
+   "maeUniform": 7.600000000000001,
+   "split": "cal",
+   "kind": "polls",
+   "question": "ΕΡ: Γενικά μιλώντας, με ποιου πολιτικού αρχηγού τις απόψεις συμφωνείτε περισσότερο;"
+  },
+  {
+   "target": "pw-e6f82afad971-p3-ae37991a",
+   "source": "pw-5b5057f37f5e-p3-ae37991a",
+   "org": "marc",
+   "date": "2023-06-20",
+   "ageMonths": 0.16427104722792607,
+   "mae": 0.519999999999999,
+   "maeUniform": 7.839999999999999,
+   "split": "cal",
+   "kind": "polls",
+   "question": "ΕΡ: Γενικά μιλώντας, με ποιου πολιτικού αρχηγού τις απόψεις συμφωνείτε περισσότερο;"
+  },
+  {
+   "target": "pw-5b5057f37f5e-p3-ae37991a",
+   "source": "pw-13c86bed94e0-p4-ae37991a",
+   "org": "marc",
+   "date": "2023-06-12",
+   "ageMonths": 0.03285420944558522,
+   "mae": 0.6999999999999991,
+   "maeUniform": 8.120000000000001,
+   "split": "cal",
+   "kind": "polls",
+   "question": "ΕΡ: Γενικά μιλώντας, με ποιου πολιτικού αρχηγού τις απόψεις συμφωνείτε περισσότερο;"
+  },
+  {
+   "target": "pw-5b5057f37f5e-p13-17395c0f",
+   "source": "pw-ae1b775a7fa3-p8-17395c0f",
+   "org": "marc",
+   "date": "2023-06-12",
+   "ageMonths": 0.3942505133470226,
+   "mae": 1.1999999999999997,
+   "maeUniform": 11.350000000000001,
+   "split": "cal",
+   "kind": "polls",
+   "question": "ΕΡ: Ποια κυβέρνηση από τις παρακάτω θέλετε να προκύψει στις επόμενες βουλευτικές εκλογές;"
+  },
+  {
+   "target": "pw-d89f8f2be7e0-p3-d049082f",
+   "source": "pw-fcfdc183e5bc-p9-d049082f",
+   "org": "marc",
+   "date": "2023-05-16",
+   "ageMonths": 0.16427104722792607,
+   "mae": 0.7249999999999996,
+   "maeUniform": 10.5,
+   "split": "cal",
+   "kind": "polls",
+   "question": "ΕΡ: Ποιον πολιτικό αρχηγό από τα κόμματα της Βουλής εμπιστεύεστε περισσότερο;"
+  },
+  {
+   "target": "pw-d89f8f2be7e0-p5-81b33640",
+   "source": "pw-fcfdc183e5bc-p21-81b33640",
+   "org": "marc",
+   "date": "2023-05-16",
+   "ageMonths": 0.16427104722792607,
+   "mae": 0.3000000000000005,
+   "maeUniform": 10.149999999999995,
+   "split": "cal",
+   "kind": "polls",
+   "question": "ΕΡ: Τι πιστεύετε ότι πρέπει να κάνει ο ελληνικός λαός στις ερχόμενες εκλογές;"
+  },
+  {
+   "target": "pw-d89f8f2be7e0-p6-17395c0f",
+   "source": "pw-fcfdc183e5bc-p23-17395c0f",
+   "org": "marc",
+   "date": "2023-05-16",
+   "ageMonths": 0.16427104722792607,
+   "mae": 1.0800000000000032,
+   "maeUniform": 7.240000000000002,
+   "split": "cal",
+   "kind": "polls",
+   "question": "ΕΡ: Ποια κυβέρνηση από τις παρακάτω θέλετε να προκύψει στις επόμενες βουλευτικές εκλογές;"
+  },
+  {
+   "target": "pw-d89f8f2be7e0-p7-17395c0f",
+   "source": "pw-fcfdc183e5bc-p23-17395c0f",
+   "org": "marc",
+   "date": "2023-05-16",
+   "ageMonths": 0.16427104722792607,
+   "mae": 0,
+   "maeUniform": 6.56,
+   "split": "cal",
+   "kind": "polls",
+   "question": "ΕΡ: Ποια κυβέρνηση από τις παρακάτω θέλετε να προκύψει στις επόμενες βουλευτικές εκλογές;"
+  },
+  {
+   "target": "pw-fcfdc183e5bc-p23-17395c0f",
+   "source": "pw-d0a5e1115cba-p10-17395c0f",
+   "org": "marc",
+   "date": "2023-05-09",
+   "ageMonths": 0.459958932238193,
+   "mae": 2.04,
+   "maeUniform": 6.56,
+   "split": "cal",
+   "kind": "polls",
+   "question": "ΕΡ: Ποια κυβέρνηση από τις παρακάτω θέλετε να προκύψει στις επόμενες βουλευτικές εκλογές;"
+  },
+  {
+   "target": "pw-7fbcdf612599-p10-d5ba3431",
+   "source": "pw-d07d5989fa01-p10-d5ba3431",
+   "org": "interview",
+   "date": "2024-09-19",
+   "ageMonths": 0.7885010266940452,
+   "mae": 2.4391959798994978,
+   "maeUniform": 8.787755102040817,
+   "split": "cal",
+   "kind": "polls",
+   "question": "εκλογή Προέδρου, εσείς ποιον θα ψηφίζατε ;"
+  }
+ ]
+}
