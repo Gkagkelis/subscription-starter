@@ -1,0 +1,545 @@
+{
+ "seed": 20261105,
+ "rows": [
+  {
+   "case": "prod-1 (καταναλωτική/οικονομική)",
+   "n": 500,
+   "ms": 3789,
+   "apiCalls": 0,
+   "usd": 0,
+   "reproducible": true,
+   "coverageBase": {
+    "questions": 11,
+    "technical": {
+     "n": 11,
+     "share": 1
+    },
+    "empirical": {
+     "n": 3,
+     "share": 0.2727272727272727,
+     "E": 3,
+     "T": 0
+    },
+    "validated": {
+     "n": 3,
+     "share": 0.2727272727272727,
+     "meanExpectedMAE": 6.18
+    },
+    "scenarioS": 8,
+    "abstained": 0,
+    "note": "Η τεχνική κάλυψη ΔΕΝ είναι προβλεπτική ακρίβεια· μόνο η επικυρωμένη κάλυψη συνοδεύεται από μετρημένο σφάλμα."
+   },
+   "coverageV2": {
+    "questions": 11,
+    "technical": {
+     "n": 11,
+     "share": 1
+    },
+    "empirical": {
+     "n": 3,
+     "share": 0.2727272727272727,
+     "E": 3,
+     "T": 0
+    },
+    "validated": {
+     "n": 3,
+     "share": 0.2727272727272727,
+     "meanExpectedMAE": 6.18
+    },
+    "scenarioS": 8,
+    "abstained": 0,
+    "note": "Η τεχνική κάλυψη ΔΕΝ είναι προβλεπτική ακρίβεια· μόνο η επικυρωμένη κάλυψη συνοδεύεται από μετρημένο σφάλμα."
+   },
+   "overrides": 0,
+   "coreApplied": "Κοινός συνθετικός άνθρωπος (vs-core-1.0): q10· οι υπόλοιπες διαδρομές περιθωρίου μένουν ανεξάρτητες.",
+   "politicalSubgroupsAsScenario": 0,
+   "politicalSubgroupsAsForecast": 0
+  },
+  {
+   "case": "prod-1 (καταναλωτική/οικονομική)",
+   "n": 1000,
+   "ms": 459,
+   "apiCalls": 0,
+   "usd": 0,
+   "reproducible": true,
+   "coverageBase": {
+    "questions": 11,
+    "technical": {
+     "n": 11,
+     "share": 1
+    },
+    "empirical": {
+     "n": 3,
+     "share": 0.2727272727272727,
+     "E": 3,
+     "T": 0
+    },
+    "validated": {
+     "n": 3,
+     "share": 0.2727272727272727,
+     "meanExpectedMAE": 6.18
+    },
+    "scenarioS": 8,
+    "abstained": 0,
+    "note": "Η τεχνική κάλυψη ΔΕΝ είναι προβλεπτική ακρίβεια· μόνο η επικυρωμένη κάλυψη συνοδεύεται από μετρημένο σφάλμα."
+   },
+   "coverageV2": {
+    "questions": 11,
+    "technical": {
+     "n": 11,
+     "share": 1
+    },
+    "empirical": {
+     "n": 3,
+     "share": 0.2727272727272727,
+     "E": 3,
+     "T": 0
+    },
+    "validated": {
+     "n": 3,
+     "share": 0.2727272727272727,
+     "meanExpectedMAE": 6.18
+    },
+    "scenarioS": 8,
+    "abstained": 0,
+    "note": "Η τεχνική κάλυψη ΔΕΝ είναι προβλεπτική ακρίβεια· μόνο η επικυρωμένη κάλυψη συνοδεύεται από μετρημένο σφάλμα."
+   },
+   "overrides": 0,
+   "coreApplied": "Κοινός συνθετικός άνθρωπος (vs-core-1.0): q10· οι υπόλοιπες διαδρομές περιθωρίου μένουν ανεξάρτητες.",
+   "politicalSubgroupsAsScenario": 0,
+   "politicalSubgroupsAsForecast": 0
+  },
+  {
+   "case": "PIE pie-0.2 (πολιτική)",
+   "n": 500,
+   "ms": 872,
+   "apiCalls": 0,
+   "usd": 0,
+   "reproducible": true,
+   "coverageBase": {
+    "questions": 27,
+    "technical": {
+     "n": 15,
+     "share": 0.5555555555555556
+    },
+    "empirical": {
+     "n": 15,
+     "share": 0.5555555555555556,
+     "E": 2,
+     "T": 13
+    },
+    "validated": {
+     "n": 2,
+     "share": 0.07407407407407407,
+     "meanExpectedMAE": 5.28
+    },
+    "scenarioS": 0,
+    "abstained": 12,
+    "note": "Η τεχνική κάλυψη ΔΕΝ είναι προβλεπτική ακρίβεια· μόνο η επικυρωμένη κάλυψη συνοδεύεται από μετρημένο σφάλμα."
+   },
+   "coverageV2": {
+    "questions": 27,
+    "technical": {
+     "n": 15,
+     "share": 0.5555555555555556
+    },
+    "empirical": {
+     "n": 15,
+     "share": 0.5555555555555556,
+     "E": 2,
+     "T": 13
+    },
+    "validated": {
+     "n": 2,
+     "share": 0.07407407407407407,
+     "meanExpectedMAE": 5.28
+    },
+    "scenarioS": 0,
+    "abstained": 12,
+    "note": "Η τεχνική κάλυψη ΔΕΝ είναι προβλεπτική ακρίβεια· μόνο η επικυρωμένη κάλυψη συνοδεύεται από μετρημένο σφάλμα."
+   },
+   "overrides": 0,
+   "coreApplied": "Κοινός συνθετικός άνθρωπος (vs-core-1.0): καμία ερώτηση· οι υπόλοιπες διαδρομές περιθωρίου μένουν ανεξάρτητες.",
+   "politicalSubgroupsAsScenario": 8,
+   "politicalSubgroupsAsForecast": 0
+  },
+  {
+   "case": "PIE pie-0.2 (πολιτική)",
+   "n": 1000,
+   "ms": 1203,
+   "apiCalls": 0,
+   "usd": 0,
+   "reproducible": true,
+   "coverageBase": {
+    "questions": 27,
+    "technical": {
+     "n": 15,
+     "share": 0.5555555555555556
+    },
+    "empirical": {
+     "n": 15,
+     "share": 0.5555555555555556,
+     "E": 2,
+     "T": 13
+    },
+    "validated": {
+     "n": 2,
+     "share": 0.07407407407407407,
+     "meanExpectedMAE": 5.28
+    },
+    "scenarioS": 0,
+    "abstained": 12,
+    "note": "Η τεχνική κάλυψη ΔΕΝ είναι προβλεπτική ακρίβεια· μόνο η επικυρωμένη κάλυψη συνοδεύεται από μετρημένο σφάλμα."
+   },
+   "coverageV2": {
+    "questions": 27,
+    "technical": {
+     "n": 15,
+     "share": 0.5555555555555556
+    },
+    "empirical": {
+     "n": 15,
+     "share": 0.5555555555555556,
+     "E": 2,
+     "T": 13
+    },
+    "validated": {
+     "n": 2,
+     "share": 0.07407407407407407,
+     "meanExpectedMAE": 5.28
+    },
+    "scenarioS": 0,
+    "abstained": 12,
+    "note": "Η τεχνική κάλυψη ΔΕΝ είναι προβλεπτική ακρίβεια· μόνο η επικυρωμένη κάλυψη συνοδεύεται από μετρημένο σφάλμα."
+   },
+   "overrides": 0,
+   "coreApplied": "Κοινός συνθετικός άνθρωπος (vs-core-1.0): καμία ερώτηση· οι υπόλοιπες διαδρομές περιθωρίου μένουν ανεξάρτητες.",
+   "politicalSubgroupsAsScenario": 8,
+   "politicalSubgroupsAsForecast": 0
+  },
+  {
+   "case": "PIE βαρόμετρο (κοινωνική/πολιτική)",
+   "n": 500,
+   "ms": 1002,
+   "apiCalls": 0,
+   "usd": 0,
+   "reproducible": true,
+   "coverageBase": {
+    "questions": 33,
+    "technical": {
+     "n": 14,
+     "share": 0.42424242424242425
+    },
+    "empirical": {
+     "n": 14,
+     "share": 0.42424242424242425,
+     "E": 8,
+     "T": 6
+    },
+    "validated": {
+     "n": 8,
+     "share": 0.24242424242424243,
+     "meanExpectedMAE": 5.28
+    },
+    "scenarioS": 0,
+    "abstained": 19,
+    "note": "Η τεχνική κάλυψη ΔΕΝ είναι προβλεπτική ακρίβεια· μόνο η επικυρωμένη κάλυψη συνοδεύεται από μετρημένο σφάλμα."
+   },
+   "coverageV2": {
+    "questions": 33,
+    "technical": {
+     "n": 14,
+     "share": 0.42424242424242425
+    },
+    "empirical": {
+     "n": 14,
+     "share": 0.42424242424242425,
+     "E": 8,
+     "T": 6
+    },
+    "validated": {
+     "n": 8,
+     "share": 0.24242424242424243,
+     "meanExpectedMAE": 5.28
+    },
+    "scenarioS": 0,
+    "abstained": 19,
+    "note": "Η τεχνική κάλυψη ΔΕΝ είναι προβλεπτική ακρίβεια· μόνο η επικυρωμένη κάλυψη συνοδεύεται από μετρημένο σφάλμα."
+   },
+   "overrides": 0,
+   "coreApplied": "Κοινός συνθετικός άνθρωπος (vs-core-1.0): καμία ερώτηση· οι υπόλοιπες διαδρομές περιθωρίου μένουν ανεξάρτητες.",
+   "politicalSubgroupsAsScenario": 7,
+   "politicalSubgroupsAsForecast": 0
+  },
+  {
+   "case": "PIE βαρόμετρο (κοινωνική/πολιτική)",
+   "n": 1000,
+   "ms": 1381,
+   "apiCalls": 0,
+   "usd": 0,
+   "reproducible": true,
+   "coverageBase": {
+    "questions": 33,
+    "technical": {
+     "n": 14,
+     "share": 0.42424242424242425
+    },
+    "empirical": {
+     "n": 14,
+     "share": 0.42424242424242425,
+     "E": 8,
+     "T": 6
+    },
+    "validated": {
+     "n": 8,
+     "share": 0.24242424242424243,
+     "meanExpectedMAE": 5.28
+    },
+    "scenarioS": 0,
+    "abstained": 19,
+    "note": "Η τεχνική κάλυψη ΔΕΝ είναι προβλεπτική ακρίβεια· μόνο η επικυρωμένη κάλυψη συνοδεύεται από μετρημένο σφάλμα."
+   },
+   "coverageV2": {
+    "questions": 33,
+    "technical": {
+     "n": 14,
+     "share": 0.42424242424242425
+    },
+    "empirical": {
+     "n": 14,
+     "share": 0.42424242424242425,
+     "E": 8,
+     "T": 6
+    },
+    "validated": {
+     "n": 8,
+     "share": 0.24242424242424243,
+     "meanExpectedMAE": 5.28
+    },
+    "scenarioS": 0,
+    "abstained": 19,
+    "note": "Η τεχνική κάλυψη ΔΕΝ είναι προβλεπτική ακρίβεια· μόνο η επικυρωμένη κάλυψη συνοδεύεται από μετρημένο σφάλμα."
+   },
+   "overrides": 0,
+   "coreApplied": "Κοινός συνθετικός άνθρωπος (vs-core-1.0): καμία ερώτηση· οι υπόλοιπες διαδρομές περιθωρίου μένουν ανεξάρτητες.",
+   "politicalSubgroupsAsScenario": 7,
+   "politicalSubgroupsAsForecast": 0
+  },
+  {
+   "case": "PIE Cinobo (καταναλωτική)",
+   "n": 500,
+   "ms": 1503,
+   "apiCalls": 0,
+   "usd": 0,
+   "reproducible": true,
+   "coverageBase": {
+    "questions": 53,
+    "technical": {
+     "n": 5,
+     "share": 0.09433962264150944
+    },
+    "empirical": {
+     "n": 5,
+     "share": 0.09433962264150944,
+     "E": 5,
+     "T": 0
+    },
+    "validated": {
+     "n": 5,
+     "share": 0.09433962264150944,
+     "meanExpectedMAE": 5.28
+    },
+    "scenarioS": 0,
+    "abstained": 48,
+    "note": "Η τεχνική κάλυψη ΔΕΝ είναι προβλεπτική ακρίβεια· μόνο η επικυρωμένη κάλυψη συνοδεύεται από μετρημένο σφάλμα."
+   },
+   "coverageV2": {
+    "questions": 53,
+    "technical": {
+     "n": 5,
+     "share": 0.09433962264150944
+    },
+    "empirical": {
+     "n": 5,
+     "share": 0.09433962264150944,
+     "E": 5,
+     "T": 0
+    },
+    "validated": {
+     "n": 5,
+     "share": 0.09433962264150944,
+     "meanExpectedMAE": 5.28
+    },
+    "scenarioS": 0,
+    "abstained": 48,
+    "note": "Η τεχνική κάλυψη ΔΕΝ είναι προβλεπτική ακρίβεια· μόνο η επικυρωμένη κάλυψη συνοδεύεται από μετρημένο σφάλμα."
+   },
+   "overrides": 0,
+   "coreApplied": "Κοινός συνθετικός άνθρωπος (vs-core-1.0): καμία ερώτηση· οι υπόλοιπες διαδρομές περιθωρίου μένουν ανεξάρτητες.",
+   "politicalSubgroupsAsScenario": 0,
+   "politicalSubgroupsAsForecast": 0
+  },
+  {
+   "case": "PIE Cinobo (καταναλωτική)",
+   "n": 1000,
+   "ms": 1972,
+   "apiCalls": 0,
+   "usd": 0,
+   "reproducible": true,
+   "coverageBase": {
+    "questions": 53,
+    "technical": {
+     "n": 5,
+     "share": 0.09433962264150944
+    },
+    "empirical": {
+     "n": 5,
+     "share": 0.09433962264150944,
+     "E": 5,
+     "T": 0
+    },
+    "validated": {
+     "n": 5,
+     "share": 0.09433962264150944,
+     "meanExpectedMAE": 5.28
+    },
+    "scenarioS": 0,
+    "abstained": 48,
+    "note": "Η τεχνική κάλυψη ΔΕΝ είναι προβλεπτική ακρίβεια· μόνο η επικυρωμένη κάλυψη συνοδεύεται από μετρημένο σφάλμα."
+   },
+   "coverageV2": {
+    "questions": 53,
+    "technical": {
+     "n": 5,
+     "share": 0.09433962264150944
+    },
+    "empirical": {
+     "n": 5,
+     "share": 0.09433962264150944,
+     "E": 5,
+     "T": 0
+    },
+    "validated": {
+     "n": 5,
+     "share": 0.09433962264150944,
+     "meanExpectedMAE": 5.28
+    },
+    "scenarioS": 0,
+    "abstained": 48,
+    "note": "Η τεχνική κάλυψη ΔΕΝ είναι προβλεπτική ακρίβεια· μόνο η επικυρωμένη κάλυψη συνοδεύεται από μετρημένο σφάλμα."
+   },
+   "overrides": 0,
+   "coreApplied": "Κοινός συνθετικός άνθρωπος (vs-core-1.0): καμία ερώτηση· οι υπόλοιπες διαδρομές περιθωρίου μένουν ανεξάρτητες.",
+   "politicalSubgroupsAsScenario": 0,
+   "politicalSubgroupsAsForecast": 0
+  },
+  {
+   "case": "Metron POL-01 (πολιτική, αναδρομικά 10/2026)",
+   "n": 500,
+   "ms": 727,
+   "apiCalls": 0,
+   "usd": 0,
+   "reproducible": true,
+   "coverageBase": {
+    "questions": 23,
+    "technical": {
+     "n": 0,
+     "share": 0
+    },
+    "empirical": {
+     "n": 0,
+     "share": 0,
+     "E": 0,
+     "T": 0
+    },
+    "validated": {
+     "n": 0,
+     "share": 0,
+     "meanExpectedMAE": null
+    },
+    "scenarioS": 0,
+    "abstained": 23,
+    "note": "Η τεχνική κάλυψη ΔΕΝ είναι προβλεπτική ακρίβεια· μόνο η επικυρωμένη κάλυψη συνοδεύεται από μετρημένο σφάλμα."
+   },
+   "coverageV2": {
+    "questions": 23,
+    "technical": {
+     "n": 11,
+     "share": 0.4782608695652174
+    },
+    "empirical": {
+     "n": 11,
+     "share": 0.4782608695652174,
+     "E": 0,
+     "T": 11
+    },
+    "validated": {
+     "n": 11,
+     "share": 0.4782608695652174,
+     "meanExpectedMAE": 1.3799999999999997
+    },
+    "scenarioS": 0,
+    "abstained": 12,
+    "note": "Η τεχνική κάλυψη ΔΕΝ είναι προβλεπτική ακρίβεια· μόνο η επικυρωμένη κάλυψη συνοδεύεται από μετρημένο σφάλμα."
+   },
+   "overrides": 11,
+   "coreApplied": "Κοινός συνθετικός άνθρωπος (vs-core-1.0): Q2, Q5, Q6, Q7, Q8, Q10, Q19, Q20· οι υπόλοιπες διαδρομές περιθωρίου μένουν ανεξάρτητες.",
+   "politicalSubgroupsAsScenario": 6,
+   "politicalSubgroupsAsForecast": 0
+  },
+  {
+   "case": "Metron POL-01 (πολιτική, αναδρομικά 10/2026)",
+   "n": 1000,
+   "ms": 1210,
+   "apiCalls": 0,
+   "usd": 0,
+   "reproducible": true,
+   "coverageBase": {
+    "questions": 23,
+    "technical": {
+     "n": 0,
+     "share": 0
+    },
+    "empirical": {
+     "n": 0,
+     "share": 0,
+     "E": 0,
+     "T": 0
+    },
+    "validated": {
+     "n": 0,
+     "share": 0,
+     "meanExpectedMAE": null
+    },
+    "scenarioS": 0,
+    "abstained": 23,
+    "note": "Η τεχνική κάλυψη ΔΕΝ είναι προβλεπτική ακρίβεια· μόνο η επικυρωμένη κάλυψη συνοδεύεται από μετρημένο σφάλμα."
+   },
+   "coverageV2": {
+    "questions": 23,
+    "technical": {
+     "n": 11,
+     "share": 0.4782608695652174
+    },
+    "empirical": {
+     "n": 11,
+     "share": 0.4782608695652174,
+     "E": 0,
+     "T": 11
+    },
+    "validated": {
+     "n": 11,
+     "share": 0.4782608695652174,
+     "meanExpectedMAE": 1.3799999999999997
+    },
+    "scenarioS": 0,
+    "abstained": 12,
+    "note": "Η τεχνική κάλυψη ΔΕΝ είναι προβλεπτική ακρίβεια· μόνο η επικυρωμένη κάλυψη συνοδεύεται από μετρημένο σφάλμα."
+   },
+   "overrides": 11,
+   "coreApplied": "Κοινός συνθετικός άνθρωπος (vs-core-1.0): Q2, Q5, Q6, Q7, Q8, Q10, Q19, Q20· οι υπόλοιπες διαδρομές περιθωρίου μένουν ανεξάρτητες.",
+   "politicalSubgroupsAsScenario": 6,
+   "politicalSubgroupsAsForecast": 0
+  }
+ ]
+}
