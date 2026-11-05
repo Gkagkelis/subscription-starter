@@ -1,0 +1,133 @@
+[
+ {
+  "name": "seed_1",
+  "seed": 20261106
+ },
+ {
+  "name": "seed_2",
+  "seed": 20261107
+ },
+ {
+  "name": "seed_3",
+  "seed": 20261108
+ },
+ {
+  "name": "seed_4",
+  "seed": 20261109
+ },
+ {
+  "name": "sens_effects_x0.5",
+  "effectScale": 0.5
+ },
+ {
+  "name": "sens_effects_x1.5",
+  "effectScale": 1.5
+ },
+ {
+  "name": "sens_levels_-0.3",
+  "baseShift": -0.3
+ },
+ {
+  "name": "sens_levels_+0.3",
+  "baseShift": 0.3
+ },
+ {
+  "name": "ablate_buy3",
+  "ablate": [
+   "buy3"
+  ]
+ },
+ {
+  "name": "ablate_elec",
+  "ablate": [
+   "elec"
+  ]
+ },
+ {
+  "name": "ablate_hard",
+  "ablate": [
+   "hard"
+  ]
+ },
+ {
+  "name": "ablate_delay",
+  "ablate": [
+   "delay"
+  ]
+ },
+ {
+  "name": "ablate_wrong",
+  "ablate": [
+   "wrong"
+  ]
+ },
+ {
+  "name": "ablate_compl",
+  "ablate": [
+   "compl"
+  ]
+ },
+ {
+  "name": "ablate_info",
+  "ablate": [
+   "info"
+  ]
+ },
+ {
+  "name": "ablate_elec+hard",
+  "ablate": [
+   "elec",
+   "hard"
+  ]
+ },
+ {
+  "name": "ablate_buy3+elec+hard",
+  "ablate": [
+   "buy3",
+   "elec",
+   "hard"
+  ]
+ },
+ {
+  "name": "ablate_buy3+delay",
+  "ablate": [
+   "buy3",
+   "delay"
+  ]
+ },
+ {
+  "name": "ablate_buy3+compl+delay+wrong",
+  "ablate": [
+   "buy3",
+   "compl",
+   "delay",
+   "wrong"
+  ]
+ },
+ {
+  "name": "ablate_buy3+compl+delay+info+wrong",
+  "ablate": [
+   "buy3",
+   "compl",
+   "delay",
+   "info",
+   "wrong"
+  ]
+ },
+ {
+  "name": "ablate_all_metrics",
+  "ablate": [
+   "buy3",
+   "elec",
+   "hard",
+   "delay",
+   "wrong",
+   "compl",
+   "info"
+  ]
+ },
+ {
+  "name": "ablate_pie",
+  "ablatePie": true
+ }
+]

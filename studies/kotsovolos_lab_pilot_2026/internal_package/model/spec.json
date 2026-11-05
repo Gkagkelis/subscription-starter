@@ -1,0 +1,3207 @@
+{
+ "studyId": "kotsovolos_lab_pilot_2026",
+ "title": "Κωτσόβολος — εικόνα, εμπιστοσύνη και εμπειρία πελάτη (πιλοτική συνθετική έρευνα, Synthetic Lab)",
+ "specVersion": "kotsovolos-lab-1.0",
+ "domain": "consumer",
+ "referenceYear": 2026,
+ "questionnaireSha256": "c5fc909087d7b39fe53efe80395dde209bf8c3def94bcb61e21c91bb7705bf4d",
+ "sourceStudy": "kotsovolos_signalyth_2026_500",
+ "population": {
+  "populationId": "glopop-grc-2025-calibrated",
+  "pieModel": "pie-0.7",
+  "minAge": 18,
+  "sampling": "pps"
+ },
+ "metrics": {
+  "buy3": {
+   "metric": "lake:eurostat:isoc_ec_ib20::4385d31ffd",
+   "label": "Eurostat: τελευταία online αγορά στο τρίμηνο (% ατόμων)",
+   "fallback": null
+  },
+  "elec": {
+   "metric": "lake:eurostat:isoc_ec_ibgs::abbd2f7366",
+   "label": "Eurostat: online αγορά ηλεκτρονικών/οικιακών συσκευών στο τρίμηνο (% ατόμων)",
+   "fallback": 0.0
+  },
+  "hard": {
+   "metric": "lake:eurostat:isoc_ec_ibgs::54701561f8",
+   "label": "Eurostat: online αγορά υπολογιστή/tablet/κινητού στο τρίμηνο (% ατόμων)",
+   "fallback": 0.0
+  },
+  "delay": {
+   "metric": "lake:eurostat:isoc_ec_iprb21::bbbb74d80d",
+   "label": "Eurostat: online αγορά με παράδοση πιο αργή από την αναγγελθείσα (% ατόμων)",
+   "fallback": 0.035
+  },
+  "wrong": {
+   "metric": "lake:eurostat:isoc_ec_iprb21::eb744b43fa",
+   "label": "Eurostat: online αγορά με λάθος ή κατεστραμμένο προϊόν (% ατόμων)",
+   "fallback": 0.015
+  },
+  "compl": {
+   "metric": "lake:eurostat:isoc_ec_iprb21::04dbb17d85",
+   "label": "Eurostat: δύσκολα παράπονα / αποζημίωση σε online αγορά (% ατόμων)",
+   "fallback": 0.01
+  },
+  "info": {
+   "metric": "lake:eurostat:isoc_ec_iprb21::30368d3e77",
+   "label": "Eurostat: δυσκολία εύρεσης πληροφοριών για εγγυήσεις/δικαιώματα (% ατόμων)",
+   "fallback": 0.01
+  }
+ },
+ "derived": [
+  {
+   "name": "digital",
+   "expr": "logit(buy3)",
+   "standardize": true
+  },
+  {
+   "name": "elec_any",
+   "expr": "union(elec, hard)"
+  },
+  {
+   "name": "elec_buyer",
+   "expr": "min(0.95, elec_any / 0.72)"
+  },
+  {
+   "name": "r_delay",
+   "expr": "min(0.6, delay / max(buy3, 0.05))"
+  },
+  {
+   "name": "r_wrong",
+   "expr": "min(0.5, wrong / max(buy3, 0.05))"
+  },
+  {
+   "name": "r_compl",
+   "expr": "min(0.5, compl / max(buy3, 0.05))"
+  },
+  {
+   "name": "r_info",
+   "expr": "min(0.5, info / max(buy3, 0.05))"
+  }
+ ],
+ "latents": [
+  {
+   "name": "L_brand",
+   "note": "Γενική στάση απέναντι στην αλυσίδα (σενάριο, κανονική κατανομή)"
+  },
+  {
+   "name": "L_exp",
+   "note": "Ποιότητα της πιο πρόσφατης εμπειρίας αγοράς (μόνο για πελάτες)"
+  },
+  {
+   "name": "L_csr",
+   "note": "Ευαισθησία σε κοινωνική υπευθυνότητα",
+   "effects": [
+    {
+     "when": "edu3 == 'high'",
+     "shift": 0.2,
+     "assumption": "A-CSR"
+    }
+   ]
+  },
+  {
+   "name": "L_price",
+   "note": "Ευαισθησία στην τιμή",
+   "effects": [
+    {
+     "var": "econ4",
+     "coef": -0.35,
+     "center": 2.5,
+     "assumption": "A-PRICE"
+    }
+   ]
+  }
+ ],
+ "questions": [
+  {
+   "id": "D01",
+   "block": "B01",
+   "type": "single_choice",
+   "text": "Ποια είναι η ηλικιακή σας ομάδα;",
+   "options": [
+    {
+     "code": "1",
+     "label": "18–24"
+    },
+    {
+     "code": "2",
+     "label": "25–34"
+    },
+    {
+     "code": "3",
+     "label": "35–44"
+    },
+    {
+     "code": "4",
+     "label": "45–54"
+    },
+    {
+     "code": "5",
+     "label": "55–64"
+    },
+    {
+     "code": "6",
+     "label": "65+"
+    }
+   ],
+   "condition": null,
+   "minChoices": 1,
+   "maxChoices": null,
+   "class": "E",
+   "model": {
+    "kind": "profile",
+    "attribute": "age_band",
+    "map": {
+     "15-24": "1",
+     "25-34": "2",
+     "35-44": "3",
+     "45-54": "4",
+     "55-64": "5",
+     "65+": "6"
+    }
+   },
+   "sources": [
+    "population"
+   ],
+   "assumptions": []
+  },
+  {
+   "id": "D02",
+   "block": "B01",
+   "type": "single_choice",
+   "text": "Πώς αυτοπροσδιορίζεστε ως προς το φύλο;",
+   "options": [
+    {
+     "code": "1",
+     "label": "Γυναίκα"
+    },
+    {
+     "code": "2",
+     "label": "Άνδρας"
+    },
+    {
+     "code": "3",
+     "label": "Άλλο / μη δυαδικό"
+    },
+    {
+     "code": "4",
+     "label": "Προτιμώ να μην απαντήσω"
+    }
+   ],
+   "condition": null,
+   "minChoices": 1,
+   "maxChoices": null,
+   "class": "E",
+   "model": {
+    "kind": "profile",
+    "attribute": "gender",
+    "map": {
+     "female": "1",
+     "male": "2"
+    }
+   },
+   "sources": [
+    "population"
+   ],
+   "assumptions": [],
+   "note": "Ο πληθυσμός GLOPOP-S/ΕΛΣΤΑΤ έχει δύο φύλα· οι επιλογές 3–4 δεν παράγονται (δηλώνεται στη μεθοδολογία)."
+  },
+  {
+   "id": "D03",
+   "block": "B01",
+   "type": "single_choice",
+   "text": "Σε ποια περιφέρεια κατοικείτε;",
+   "options": [
+    {
+     "code": "1",
+     "label": "Αττική"
+    },
+    {
+     "code": "2",
+     "label": "Κεντρική Μακεδονία"
+    },
+    {
+     "code": "3",
+     "label": "Ανατολική Μακεδονία και Θράκη"
+    },
+    {
+     "code": "4",
+     "label": "Δυτική Μακεδονία"
+    },
+    {
+     "code": "5",
+     "label": "Ήπειρος"
+    },
+    {
+     "code": "6",
+     "label": "Θεσσαλία"
+    },
+    {
+     "code": "7",
+     "label": "Ιόνια Νησιά"
+    },
+    {
+     "code": "8",
+     "label": "Δυτική Ελλάδα"
+    },
+    {
+     "code": "9",
+     "label": "Στερεά Ελλάδα"
+    },
+    {
+     "code": "10",
+     "label": "Πελοπόννησος"
+    },
+    {
+     "code": "11",
+     "label": "Βόρειο Αιγαίο"
+    },
+    {
+     "code": "12",
+     "label": "Νότιο Αιγαίο"
+    },
+    {
+     "code": "13",
+     "label": "Κρήτη"
+    }
+   ],
+   "condition": null,
+   "minChoices": 1,
+   "maxChoices": null,
+   "class": "E",
+   "model": {
+    "kind": "profile",
+    "attribute": "region",
+    "map": {
+     "GRCr101": "1",
+     "GRCr106": "2",
+     "GRCr105": "3",
+     "GRCr107": "4",
+     "GRCr108": "5",
+     "GRCr109": "6",
+     "GRCr110": "7",
+     "GRCr111": "8",
+     "GRCr112": "9",
+     "GRCr113": "10",
+     "GRCr102": "11",
+     "GRCr103": "12",
+     "GRCr104": "13"
+    }
+   },
+   "sources": [
+    "population"
+   ],
+   "assumptions": []
+  },
+  {
+   "id": "Q01",
+   "block": "B02",
+   "type": "single_choice",
+   "text": "Τους τελευταίους 24 μήνες αγοράσατε ηλεκτρική ή ηλεκτρονική συσκευή για εσάς ή το νοικοκυριό σας;",
+   "options": [
+    {
+     "code": "1",
+     "label": "Ναι"
+    },
+    {
+     "code": "2",
+     "label": "Όχι"
+    },
+    {
+     "code": "3",
+     "label": "Δεν θυμάμαι"
+    }
+   ],
+   "condition": null,
+   "minChoices": 1,
+   "maxChoices": null,
+   "class": "T",
+   "model": {
+    "kind": "nominal",
+    "base": {
+     "1": 0.72,
+     "2": 0.255,
+     "3": 0.025
+    },
+    "effects": [
+     {
+      "code": "1",
+      "var": "digital",
+      "coef": 0.25
+     },
+     {
+      "code": "3",
+      "when": "age_band == '65+'",
+      "shift": 0.7
+     }
+    ],
+    "lowerBounds": [
+     {
+      "code": "1",
+      "expr": "elec_any"
+     }
+    ]
+   },
+   "sources": [
+    "elec",
+    "hard"
+   ],
+   "assumptions": [
+    "A-Q01"
+   ]
+  },
+  {
+   "id": "Q02",
+   "block": "B02",
+   "type": "multiple_choice",
+   "text": "Από ποιους τύπους καταστημάτων αγοράσατε ηλεκτρικά ή ηλεκτρονικά είδη τους τελευταίους 24 μήνες;",
+   "options": [
+    {
+     "code": "1",
+     "label": "Μεγάλη αλυσίδα φυσικών καταστημάτων"
+    },
+    {
+     "code": "2",
+     "label": "Ηλεκτρονικό κατάστημα μεγάλης αλυσίδας"
+    },
+    {
+     "code": "3",
+     "label": "Μικρό/ανεξάρτητο φυσικό κατάστημα"
+    },
+    {
+     "code": "4",
+     "label": "Αμιγώς ηλεκτρονικό κατάστημα / marketplace"
+    },
+    {
+     "code": "5",
+     "label": "Απευθείας από κατασκευαστή"
+    },
+    {
+     "code": "6",
+     "label": "Άλλο"
+    },
+    {
+     "code": "7",
+     "label": "Δεν θυμάμαι",
+     "exclusive": true
+    }
+   ],
+   "condition": "Q01 == '1'",
+   "minChoices": 1,
+   "maxChoices": 4,
+   "class": "T",
+   "model": {
+    "kind": "multi",
+    "base": {
+     "1": 0.62,
+     "2": 0.3,
+     "3": 0.18,
+     "4": 0.28,
+     "5": 0.05,
+     "6": 0.03,
+     "7": 0.03
+    },
+    "effects": [
+     {
+      "code": "2",
+      "var": "digital",
+      "coef": 0.45
+     },
+     {
+      "code": "4",
+      "var": "digital",
+      "coef": 0.55
+     },
+     {
+      "code": "1",
+      "when": "age_band in ['55-64', '65+']",
+      "shift": 0.35
+     },
+     {
+      "code": "3",
+      "when": "urban == 'rural'",
+      "shift": 0.35
+     }
+    ],
+    "unionLowerBound": {
+     "codes": [
+      "2",
+      "4",
+      "5",
+      "6"
+     ],
+     "expr": "elec_buyer"
+    }
+   },
+   "sources": [
+    "elec",
+    "hard",
+    "buy3"
+   ],
+   "assumptions": [
+    "A-DIGITAL",
+    "A-CHOICE"
+   ]
+  },
+  {
+   "id": "Q03",
+   "block": "B02",
+   "type": "multiple_choice",
+   "text": "Ποιοι τρεις παράγοντες είναι σημαντικότεροι όταν επιλέγετε κατάστημα ηλεκτρικών ειδών;",
+   "options": [
+    {
+     "code": "1",
+     "label": "Τελική τιμή"
+    },
+    {
+     "code": "2",
+     "label": "Διαθεσιμότητα προϊόντος"
+    },
+    {
+     "code": "3",
+     "label": "Αξιοπιστία παράδοσης"
+    },
+    {
+     "code": "4",
+     "label": "Εξυπηρέτηση προσωπικού"
+    },
+    {
+     "code": "5",
+     "label": "Εγγύηση / επισκευή / after-sales"
+    },
+    {
+     "code": "6",
+     "label": "Ευκολία επιστροφών"
+    },
+    {
+     "code": "7",
+     "label": "Ποικιλία προϊόντων"
+    },
+    {
+     "code": "8",
+     "label": "Ευκολία ηλεκτρονικής αγοράς"
+    },
+    {
+     "code": "9",
+     "label": "Φήμη και εμπιστοσύνη"
+    },
+    {
+     "code": "10",
+     "label": "Δυνατότητα δόσεων"
+    },
+    {
+     "code": "11",
+     "label": "Άλλο"
+    }
+   ],
+   "condition": null,
+   "minChoices": 1,
+   "maxChoices": 3,
+   "class": "S",
+   "model": {
+    "kind": "multi",
+    "base": {
+     "1": 0.62,
+     "2": 0.33,
+     "3": 0.28,
+     "4": 0.16,
+     "5": 0.3,
+     "6": 0.14,
+     "7": 0.15,
+     "8": 0.12,
+     "9": 0.24,
+     "10": 0.1,
+     "11": 0.02
+    },
+    "effects": [
+     {
+      "code": "1",
+      "var": "L_price",
+      "coef": 0.6
+     },
+     {
+      "code": "10",
+      "var": "L_price",
+      "coef": 0.5
+     },
+     {
+      "code": "8",
+      "var": "digital",
+      "coef": 0.5
+     },
+     {
+      "code": "9",
+      "var": "L_brand",
+      "coef": 0.2
+     },
+     {
+      "code": "4",
+      "when": "age_band == '65+'",
+      "shift": 0.4
+     }
+    ]
+   },
+   "sources": [],
+   "assumptions": [
+    "A-CHOICE",
+    "A-PRICE",
+    "A-DIGITAL"
+   ]
+  },
+  {
+   "id": "Q04",
+   "block": "B02",
+   "type": "single_choice",
+   "text": "Πόσο εξοικειωμένος/η είστε με την αλυσίδα Κωτσόβολος;",
+   "options": [
+    {
+     "code": "1",
+     "label": "Δεν τη γνωρίζω"
+    },
+    {
+     "code": "2",
+     "label": "Τη γνωρίζω μόνο ως όνομα"
+    },
+    {
+     "code": "3",
+     "label": "Γνωρίζω αρκετά την εταιρεία"
+    },
+    {
+     "code": "4",
+     "label": "Τη γνωρίζω πολύ καλά"
+    }
+   ],
+   "condition": null,
+   "minChoices": 1,
+   "maxChoices": null,
+   "class": "S",
+   "model": {
+    "kind": "nominal",
+    "base": {
+     "1": 0.03,
+     "2": 0.3,
+     "3": 0.45,
+     "4": 0.22
+    },
+    "effects": [
+     {
+      "code": "2",
+      "when": "age_band in ['15-24', '65+']",
+      "shift": 0.35
+     },
+     {
+      "code": "1",
+      "when": "age_band == '65+' and urban == 'rural'",
+      "shift": 0.6
+     },
+     {
+      "code": "4",
+      "var": "digital",
+      "coef": 0.15
+     },
+     {
+      "code": "4",
+      "when": "region in ['GRCr101', 'GRCr106']",
+      "shift": 0.2
+     }
+    ]
+   },
+   "sources": [],
+   "assumptions": [
+    "A-AWARE"
+   ]
+  },
+  {
+   "id": "Q05",
+   "block": "B02",
+   "type": "single_choice",
+   "text": "Έχετε πραγματοποιήσει αγορά από τον Κωτσόβολο τους τελευταίους 24 μήνες;",
+   "options": [
+    {
+     "code": "1",
+     "label": "Ναι"
+    },
+    {
+     "code": "2",
+     "label": "Όχι"
+    },
+    {
+     "code": "3",
+     "label": "Δεν θυμάμαι"
+    }
+   ],
+   "condition": "Q04 != '1'",
+   "minChoices": 1,
+   "maxChoices": null,
+   "class": "S",
+   "model": {
+    "kind": "nominal",
+    "base": {
+     "1": 0.4,
+     "2": 0.57,
+     "3": 0.03
+    },
+    "effects": [
+     {
+      "code": "1",
+      "when": "Q04 == '2'",
+      "shift": -1.6
+     },
+     {
+      "code": "1",
+      "when": "Q04 == '4'",
+      "shift": 0.9
+     },
+     {
+      "code": "1",
+      "when": "Q01 == '2'",
+      "shift": -9
+     },
+     {
+      "code": "1",
+      "when": "Q01 == '3'",
+      "shift": -1.5
+     },
+     {
+      "code": "1",
+      "var": "L_brand",
+      "coef": 0.4
+     }
+    ]
+   },
+   "sources": [],
+   "assumptions": [
+    "A-CUST"
+   ]
+  },
+  {
+   "id": "Q06",
+   "block": "B02",
+   "type": "single_choice",
+   "text": "Πώς πραγματοποιήσατε την πιο πρόσφατη αγορά σας από τον Κωτσόβολο;",
+   "options": [
+    {
+     "code": "1",
+     "label": "Σε φυσικό κατάστημα"
+    },
+    {
+     "code": "2",
+     "label": "Από το ηλεκτρονικό κατάστημα"
+    },
+    {
+     "code": "3",
+     "label": "Τηλεφωνικά / άλλο κανάλι"
+    },
+    {
+     "code": "4",
+     "label": "Δεν θυμάμαι"
+    }
+   ],
+   "condition": "Q05 == '1'",
+   "minChoices": 1,
+   "maxChoices": null,
+   "class": "S",
+   "model": {
+    "kind": "nominal",
+    "base": {
+     "1": 0.6,
+     "2": 0.33,
+     "3": 0.03,
+     "4": 0.04
+    },
+    "effects": [
+     {
+      "code": "2",
+      "var": "digital",
+      "coef": 0.6
+     },
+     {
+      "code": "1",
+      "when": "Q01 == '1' and not (contains(Q02, '1') or contains(Q02, '7'))",
+      "shift": -9
+     },
+     {
+      "code": "2",
+      "when": "Q01 == '1' and not (contains(Q02, '2') or contains(Q02, '4') or contains(Q02, '7'))",
+      "shift": -9
+     }
+    ]
+   },
+   "sources": [],
+   "assumptions": [
+    "A-DIGITAL"
+   ]
+  },
+  {
+   "id": "Q07",
+   "block": "B02",
+   "type": "single_choice",
+   "text": "Ποια κατηγορία προϊόντος αφορούσε η πιο πρόσφατη αγορά σας από τον Κωτσόβολο;",
+   "options": [
+    {
+     "code": "1",
+     "label": "Μεγάλη οικιακή συσκευή"
+    },
+    {
+     "code": "2",
+     "label": "Μικροσυσκευή"
+    },
+    {
+     "code": "3",
+     "label": "Τηλεόραση / ήχος"
+    },
+    {
+     "code": "4",
+     "label": "Υπολογιστής / tablet"
+    },
+    {
+     "code": "5",
+     "label": "Κινητό / wearable"
+    },
+    {
+     "code": "6",
+     "label": "Άλλη κατηγορία"
+    },
+    {
+     "code": "7",
+     "label": "Δεν θυμάμαι"
+    }
+   ],
+   "condition": "Q05 == '1'",
+   "minChoices": 1,
+   "maxChoices": null,
+   "class": "S",
+   "model": {
+    "kind": "nominal",
+    "base": {
+     "1": 0.24,
+     "2": 0.22,
+     "3": 0.14,
+     "4": 0.14,
+     "5": 0.19,
+     "6": 0.04,
+     "7": 0.03
+    },
+    "effects": [
+     {
+      "code": "4",
+      "var": "digital",
+      "coef": 0.3
+     },
+     {
+      "code": "5",
+      "when": "age_band in ['15-24', '25-34']",
+      "shift": 0.5
+     },
+     {
+      "code": "1",
+      "when": "age_band in ['45-54', '55-64', '65+']",
+      "shift": 0.3
+     }
+    ]
+   },
+   "sources": [],
+   "assumptions": [
+    "A-CHOICE"
+   ]
+  },
+  {
+   "id": "Q08",
+   "block": "B03",
+   "type": "single_choice",
+   "text": "Ποια είναι συνολικά η εικόνα σας για τον Κωτσόβολο;",
+   "options": [
+    {
+     "code": "1",
+     "label": "Πολύ αρνητική"
+    },
+    {
+     "code": "2",
+     "label": "Μάλλον αρνητική"
+    },
+    {
+     "code": "3",
+     "label": "Ούτε θετική ούτε αρνητική"
+    },
+    {
+     "code": "4",
+     "label": "Μάλλον θετική"
+    },
+    {
+     "code": "5",
+     "label": "Πολύ θετική"
+    },
+    {
+     "code": "6",
+     "label": "Δεν γνωρίζω / Δεν μπορώ να κρίνω"
+    }
+   ],
+   "condition": "Q04 != '1'",
+   "minChoices": 1,
+   "maxChoices": null,
+   "class": "S",
+   "model": {
+    "kind": "ordinal",
+    "scale": [
+     "1",
+     "2",
+     "3",
+     "4",
+     "5"
+    ],
+    "base": [
+     0.05,
+     0.12,
+     0.33,
+     0.35,
+     0.15
+    ],
+    "loadings": {
+     "L_brand": 1.0
+    },
+    "effects": [
+     {
+      "when": "Q05 == '1'",
+      "var": "L_exp",
+      "coef": 0.6
+     },
+     {
+      "when": "Q05 == '1'",
+      "shift": 0.2
+     },
+     {
+      "when": "Q18 == '3'",
+      "shift": -0.7
+     },
+     {
+      "when": "Q20 in ['1', '2']",
+      "shift": -0.4
+     },
+     {
+      "when": "Q18 == '1'",
+      "shift": 0.2
+     },
+     {
+      "when": "Q04 == '2'",
+      "shift": -0.35,
+      "assumption": "A-FAM"
+     }
+    ],
+    "extra": [
+     {
+      "code": "6",
+      "base": 0.03,
+      "effects": [
+       {
+        "when": "Q04 == '2'",
+        "shift": 1.6
+       },
+       {
+        "when": "Q04 == '4'",
+        "shift": -1.0
+       }
+      ]
+     }
+    ]
+   },
+   "sources": [],
+   "assumptions": [
+    "A-ATT",
+    "A-EXP",
+    "A-FAM"
+   ]
+  },
+  {
+   "id": "Q09",
+   "block": "B03",
+   "type": "single_choice",
+   "text": "Πόσο εμπιστεύεστε τον Κωτσόβολο ως κατάστημα για αγορά ηλεκτρικών ειδών;",
+   "options": [
+    {
+     "code": "1",
+     "label": "Καθόλου"
+    },
+    {
+     "code": "2",
+     "label": "Λίγο"
+    },
+    {
+     "code": "3",
+     "label": "Μέτρια"
+    },
+    {
+     "code": "4",
+     "label": "Πολύ"
+    },
+    {
+     "code": "5",
+     "label": "Πάρα πολύ"
+    },
+    {
+     "code": "6",
+     "label": "Δεν γνωρίζω / Δεν μπορώ να κρίνω"
+    }
+   ],
+   "condition": "Q04 != '1'",
+   "minChoices": 1,
+   "maxChoices": null,
+   "class": "S",
+   "model": {
+    "kind": "ordinal",
+    "scale": [
+     "1",
+     "2",
+     "3",
+     "4",
+     "5"
+    ],
+    "base": [
+     0.06,
+     0.16,
+     0.36,
+     0.31,
+     0.11
+    ],
+    "loadings": {
+     "L_brand": 1.0
+    },
+    "effects": [
+     {
+      "when": "Q05 == '1'",
+      "var": "L_exp",
+      "coef": 0.6
+     },
+     {
+      "when": "Q18 == '3'",
+      "shift": -0.8
+     },
+     {
+      "when": "Q20 in ['1', '2']",
+      "shift": -0.6
+     },
+     {
+      "when": "Q20 in ['4', '5']",
+      "shift": 0.3
+     },
+     {
+      "when": "Q08 == '1'",
+      "shift": -0.8
+     },
+     {
+      "when": "Q04 == '2'",
+      "shift": -0.7,
+      "assumption": "A-FAM"
+     },
+     {
+      "when": "Q04 == '4'",
+      "shift": 0.25,
+      "assumption": "A-FAM"
+     },
+     {
+      "when": "Q08 == '5'",
+      "shift": 0.6
+     }
+    ],
+    "extra": [
+     {
+      "code": "6",
+      "base": 0.04,
+      "effects": [
+       {
+        "when": "Q04 == '2'",
+        "shift": 1.6
+       },
+       {
+        "when": "Q04 == '4'",
+        "shift": -1.0
+       }
+      ]
+     }
+    ]
+   },
+   "sources": [],
+   "assumptions": [
+    "A-ATT",
+    "A-EXP",
+    "A-FAM"
+   ]
+  },
+  {
+   "id": "Q10",
+   "block": "B03",
+   "type": "single_choice",
+   "text": "Σε ποιο βαθμό συμφωνείτε ότι ο Κωτσόβολος τηρεί τις δεσμεύσεις του προς τους πελάτες;",
+   "options": [
+    {
+     "code": "1",
+     "label": "Διαφωνώ απόλυτα"
+    },
+    {
+     "code": "2",
+     "label": "Διαφωνώ"
+    },
+    {
+     "code": "3",
+     "label": "Ούτε συμφωνώ ούτε διαφωνώ"
+    },
+    {
+     "code": "4",
+     "label": "Συμφωνώ"
+    },
+    {
+     "code": "5",
+     "label": "Συμφωνώ απόλυτα"
+    },
+    {
+     "code": "6",
+     "label": "Δεν γνωρίζω / Δεν μπορώ να κρίνω"
+    }
+   ],
+   "condition": "Q04 != '1'",
+   "minChoices": 1,
+   "maxChoices": null,
+   "class": "S",
+   "model": {
+    "kind": "ordinal",
+    "scale": [
+     "1",
+     "2",
+     "3",
+     "4",
+     "5"
+    ],
+    "base": [
+     0.05,
+     0.14,
+     0.38,
+     0.33,
+     0.1
+    ],
+    "loadings": {
+     "L_brand": 0.9
+    },
+    "effects": [
+     {
+      "when": "Q05 == '1'",
+      "var": "L_exp",
+      "coef": 0.6
+     },
+     {
+      "when": "Q14 == '3'",
+      "shift": -0.6
+     },
+     {
+      "when": "Q18 == '3'",
+      "shift": -0.7
+     },
+     {
+      "when": "Q04 == '2'",
+      "shift": -0.5,
+      "assumption": "A-FAM"
+     }
+    ],
+    "extra": [
+     {
+      "code": "6",
+      "base": 0.06,
+      "effects": [
+       {
+        "when": "Q04 == '2'",
+        "shift": 1.7
+       },
+       {
+        "when": "Q04 == '4'",
+        "shift": -1.0
+       }
+      ]
+     }
+    ]
+   },
+   "sources": [],
+   "assumptions": [
+    "A-ATT",
+    "A-EXP",
+    "A-FAM"
+   ]
+  },
+  {
+   "id": "Q11",
+   "block": "B03",
+   "type": "multiple_choice",
+   "text": "Ποια από τα ακόλουθα επηρεάζουν περισσότερο την εμπιστοσύνη σας σε ένα κατάστημα ηλεκτρικών ειδών; Επιλέξτε έως τρία.",
+   "options": [
+    {
+     "code": "1",
+     "label": "Παράδοση στον συμφωνημένο χρόνο"
+    },
+    {
+     "code": "2",
+     "label": "Διαφανείς τιμές και όροι"
+    },
+    {
+     "code": "3",
+     "label": "Ποιότητα προϊόντων"
+    },
+    {
+     "code": "4",
+     "label": "Γρήγορη ανταπόκριση σε πρόβλημα"
+    },
+    {
+     "code": "5",
+     "label": "Δίκαιες επιστροφές / αντικαταστάσεις"
+    },
+    {
+     "code": "6",
+     "label": "Ευγένεια και επάρκεια προσωπικού"
+    },
+    {
+     "code": "7",
+     "label": "Αξιόπιστη εγγύηση / επισκευή"
+    },
+    {
+     "code": "8",
+     "label": "Κοινωνική υπευθυνότητα"
+    },
+    {
+     "code": "9",
+     "label": "Κριτικές άλλων πελατών"
+    },
+    {
+     "code": "10",
+     "label": "Άλλο"
+    }
+   ],
+   "condition": null,
+   "minChoices": 1,
+   "maxChoices": 3,
+   "class": "S",
+   "model": {
+    "kind": "multi",
+    "base": {
+     "1": 0.4,
+     "2": 0.36,
+     "3": 0.36,
+     "4": 0.3,
+     "5": 0.28,
+     "6": 0.16,
+     "7": 0.28,
+     "8": 0.06,
+     "9": 0.2,
+     "10": 0.02
+    },
+    "effects": [
+     {
+      "code": "8",
+      "var": "L_csr",
+      "coef": 0.8
+     },
+     {
+      "code": "9",
+      "var": "digital",
+      "coef": 0.4
+     },
+     {
+      "code": "2",
+      "var": "L_price",
+      "coef": 0.3
+     },
+     {
+      "code": "1",
+      "when": "contains(Q16, '1')",
+      "shift": 0.8
+     },
+     {
+      "code": "5",
+      "when": "contains(Q16, '6')",
+      "shift": 0.8
+     }
+    ]
+   },
+   "sources": [],
+   "assumptions": [
+    "A-CHOICE"
+   ]
+  },
+  {
+   "id": "Q12",
+   "block": "B04",
+   "type": "single_choice",
+   "text": "Πώς αξιολογείτε συνολικά την πιο πρόσφατη εμπειρία αγοράς σας από τον Κωτσόβολο;",
+   "options": [
+    {
+     "code": "1",
+     "label": "Πολύ αρνητικά"
+    },
+    {
+     "code": "2",
+     "label": "Μάλλον αρνητικά"
+    },
+    {
+     "code": "3",
+     "label": "Ούτε θετικά ούτε αρνητικά"
+    },
+    {
+     "code": "4",
+     "label": "Μάλλον θετικά"
+    },
+    {
+     "code": "5",
+     "label": "Πολύ θετικά"
+    },
+    {
+     "code": "6",
+     "label": "Δεν γνωρίζω / Δεν μπορώ να κρίνω"
+    }
+   ],
+   "condition": "Q05 == '1'",
+   "minChoices": 1,
+   "maxChoices": null,
+   "class": "S",
+   "model": {
+    "kind": "ordinal",
+    "scale": [
+     "1",
+     "2",
+     "3",
+     "4",
+     "5"
+    ],
+    "base": [
+     0.04,
+     0.09,
+     0.22,
+     0.42,
+     0.23
+    ],
+    "loadings": {
+     "L_exp": 1.0,
+     "L_brand": 0.3
+    },
+    "effects": [
+     {
+      "when": "Q15 == '1'",
+      "shift": -0.6
+     },
+     {
+      "when": "Q18 == '3'",
+      "shift": -0.9
+     },
+     {
+      "when": "Q14 == '3'",
+      "shift": -0.5
+     },
+     {
+      "when": "Q18 == '1'",
+      "shift": 0.3
+     }
+    ],
+    "extra": [
+     {
+      "code": "6",
+      "base": 0.02
+     }
+    ]
+   },
+   "sources": [],
+   "assumptions": [
+    "A-ATT",
+    "A-EXP"
+   ]
+  },
+  {
+   "id": "Q13",
+   "block": "B04",
+   "type": "single_choice",
+   "text": "Πώς αξιολογείτε τη σαφήνεια της ενημέρωσης για την παραγγελία σας;",
+   "options": [
+    {
+     "code": "1",
+     "label": "Πολύ κακή"
+    },
+    {
+     "code": "2",
+     "label": "Μάλλον κακή"
+    },
+    {
+     "code": "3",
+     "label": "Μέτρια"
+    },
+    {
+     "code": "4",
+     "label": "Μάλλον καλή"
+    },
+    {
+     "code": "5",
+     "label": "Πολύ καλή"
+    },
+    {
+     "code": "6",
+     "label": "Δεν εφαρμόζεται / δεν θυμάμαι"
+    }
+   ],
+   "condition": "Q05 == '1'",
+   "minChoices": 1,
+   "maxChoices": null,
+   "class": "S",
+   "model": {
+    "kind": "ordinal",
+    "scale": [
+     "1",
+     "2",
+     "3",
+     "4",
+     "5"
+    ],
+    "base": [
+     0.04,
+     0.09,
+     0.25,
+     0.4,
+     0.22
+    ],
+    "loadings": {
+     "L_exp": 0.8
+    },
+    "effects": [
+     {
+      "when": "Q14 == '3'",
+      "shift": -0.6
+     },
+     {
+      "when": "contains(Q16, '7')",
+      "shift": -0.7
+     }
+    ],
+    "extra": [
+     {
+      "code": "6",
+      "base": 0.05,
+      "effects": [
+       {
+        "when": "Q06 == '1'",
+        "shift": 0.9
+       }
+      ]
+     }
+    ]
+   },
+   "sources": [],
+   "assumptions": [
+    "A-ATT",
+    "A-EXP"
+   ]
+  },
+  {
+   "id": "Q14",
+   "block": "B04",
+   "type": "single_choice",
+   "text": "Στην πιο πρόσφατη αγορά σας, η παράδοση ή παραλαβή έγινε στον χρόνο που σας είχε γνωστοποιηθεί;",
+   "options": [
+    {
+     "code": "1",
+     "label": "Ναι, πλήρως"
+    },
+    {
+     "code": "2",
+     "label": "Ναι, με μικρή απόκλιση"
+    },
+    {
+     "code": "3",
+     "label": "Όχι, υπήρξε σημαντική καθυστέρηση"
+    },
+    {
+     "code": "4",
+     "label": "Δεν είχε δοθεί συγκεκριμένος χρόνος"
+    },
+    {
+     "code": "5",
+     "label": "Δεν εφαρμόζεται / δεν θυμάμαι"
+    }
+   ],
+   "condition": "Q05 == '1'",
+   "minChoices": 1,
+   "maxChoices": null,
+   "class": "T",
+   "model": {
+    "kind": "nominal",
+    "base": {
+     "1": 0.58,
+     "2": 0.22,
+     "4": 0.08,
+     "5": 0.12
+    },
+    "effects": [
+     {
+      "code": "5",
+      "when": "Q06 == '1'",
+      "shift": 1.4
+     },
+     {
+      "code": "1",
+      "var": "L_exp",
+      "coef": 0.4
+     }
+    ],
+    "probFrom": [
+     {
+      "code": "3",
+      "expr": "inv_logit(logit(r_delay * (0.5 + 0.5 * (Q06 == '2'))) - 0.4 * L_exp)"
+     }
+    ]
+   },
+   "sources": [
+    "delay",
+    "buy3"
+   ],
+   "assumptions": [
+    "A-DELAY"
+   ]
+  },
+  {
+   "id": "Q15",
+   "block": "B04",
+   "type": "single_choice",
+   "text": "Προέκυψε κάποιο πρόβλημα με το προϊόν, την παράδοση, την εγκατάσταση ή την εξυπηρέτηση μετά την αγορά;",
+   "options": [
+    {
+     "code": "1",
+     "label": "Ναι"
+    },
+    {
+     "code": "2",
+     "label": "Όχι"
+    },
+    {
+     "code": "3",
+     "label": "Δεν θυμάμαι"
+    }
+   ],
+   "condition": "Q05 == '1'",
+   "minChoices": 1,
+   "maxChoices": null,
+   "class": "T",
+   "model": {
+    "kind": "nominal",
+    "base": {
+     "2": 0.96,
+     "3": 0.04
+    },
+    "probFrom": [
+     {
+      "code": "1",
+      "expr": "max(0.85 * (Q14 == '3'), inv_logit(logit(union(r_delay * (0.5 + 0.5 * (Q06 == '2')), r_wrong, r_compl, 0.06)) - 0.5 * L_exp))"
+     }
+    ]
+   },
+   "sources": [
+    "delay",
+    "wrong",
+    "compl",
+    "buy3"
+   ],
+   "assumptions": [
+    "A-DELAY",
+    "A-EXTRA"
+   ]
+  },
+  {
+   "id": "Q16",
+   "block": "B04",
+   "type": "multiple_choice",
+   "text": "Τι είδους πρόβλημα αντιμετωπίσατε; Επιλέξτε όσα ισχύουν.",
+   "options": [
+    {
+     "code": "1",
+     "label": "Καθυστέρηση παράδοσης"
+    },
+    {
+     "code": "2",
+     "label": "Ελαττωματικό ή μη λειτουργικό προϊόν"
+    },
+    {
+     "code": "3",
+     "label": "Πρόβλημα εγκατάστασης"
+    },
+    {
+     "code": "4",
+     "label": "Δυσκολία επικοινωνίας"
+    },
+    {
+     "code": "5",
+     "label": "Καθυστέρηση επισκευής"
+    },
+    {
+     "code": "6",
+     "label": "Δυσκολία επιστροφής ή αντικατάστασης"
+    },
+    {
+     "code": "7",
+     "label": "Ασάφεια χρέωσης / όρων"
+    },
+    {
+     "code": "8",
+     "label": "Άλλο"
+    }
+   ],
+   "condition": "Q15 == '1'",
+   "minChoices": 1,
+   "maxChoices": 8,
+   "class": "T",
+   "model": {
+    "kind": "multi",
+    "base": {
+     "3": 0.18,
+     "5": 0.14,
+     "8": 0.06
+    },
+    "probFrom": [
+     {
+      "code": "1",
+      "expr": "max(0.9 * (Q14 == '3'), min(0.8, 0.02 + (Q14 != '1') * r_delay / max(0.05, union(r_delay, r_wrong, r_compl, 0.06))))"
+     },
+     {
+      "code": "2",
+      "expr": "min(0.8, r_wrong / max(0.05, union(r_delay, r_wrong, r_compl, 0.06)))"
+     },
+     {
+      "code": "4",
+      "expr": "min(0.7, 0.05 + r_compl / max(0.05, union(r_delay, r_wrong, r_compl, 0.06)))"
+     },
+     {
+      "code": "6",
+      "expr": "min(0.6, 0.6 * r_compl / max(0.05, union(r_delay, r_wrong, r_compl, 0.06)))"
+     },
+     {
+      "code": "7",
+      "expr": "min(0.5, r_info / max(0.05, union(r_delay, r_wrong, r_compl, 0.06)))"
+     }
+    ]
+   },
+   "sources": [
+    "delay",
+    "wrong",
+    "compl",
+    "info",
+    "buy3"
+   ],
+   "assumptions": [
+    "A-DELAY",
+    "A-EXTRA"
+   ]
+  },
+  {
+   "id": "Q17",
+   "block": "B04",
+   "type": "single_choice",
+   "text": "Όταν προέκυψε το πρόβλημα, επικοινωνήσατε με τον Κωτσόβολο για να επιλυθεί;",
+   "options": [
+    {
+     "code": "1",
+     "label": "Ναι"
+    },
+    {
+     "code": "2",
+     "label": "Όχι"
+    },
+    {
+     "code": "3",
+     "label": "Δεν θυμάμαι"
+    }
+   ],
+   "condition": "Q15 == '1'",
+   "minChoices": 1,
+   "maxChoices": null,
+   "class": "S",
+   "model": {
+    "kind": "nominal",
+    "base": {
+     "1": 0.72,
+     "2": 0.24,
+     "3": 0.04
+    },
+    "effects": [
+     {
+      "code": "1",
+      "when": "contains(Q16, '2') or contains(Q16, '5')",
+      "shift": 0.6
+     }
+    ]
+   },
+   "sources": [],
+   "assumptions": []
+  },
+  {
+   "id": "Q18",
+   "block": "B04",
+   "type": "single_choice",
+   "text": "Ποια είναι η τρέχουσα κατάσταση του προβλήματος;",
+   "options": [
+    {
+     "code": "1",
+     "label": "Επιλύθηκε πλήρως"
+    },
+    {
+     "code": "2",
+     "label": "Επιλύθηκε εν μέρει"
+    },
+    {
+     "code": "3",
+     "label": "Παραμένει άλυτο"
+    },
+    {
+     "code": "4",
+     "label": "Δεν γνωρίζω / δεν θυμάμαι"
+    }
+   ],
+   "condition": "Q15 == '1'",
+   "minChoices": 1,
+   "maxChoices": null,
+   "class": "S",
+   "model": {
+    "kind": "nominal",
+    "base": {
+     "1": 0.46,
+     "2": 0.24,
+     "3": 0.21,
+     "4": 0.09
+    },
+    "effects": [
+     {
+      "code": "1",
+      "var": "L_exp",
+      "coef": 0.7
+     },
+     {
+      "code": "3",
+      "var": "L_exp",
+      "coef": -0.6
+     },
+     {
+      "code": "1",
+      "when": "Q17 == '2'",
+      "shift": -0.9
+     }
+    ]
+   },
+   "sources": [],
+   "assumptions": [
+    "A-EXP"
+   ]
+  },
+  {
+   "id": "Q19",
+   "block": "B04",
+   "type": "single_choice",
+   "text": "Πόσο ικανοποιημένος/η είστε από τον τρόπο χειρισμού του προβλήματος;",
+   "options": [
+    {
+     "code": "1",
+     "label": "Καθόλου"
+    },
+    {
+     "code": "2",
+     "label": "Λίγο"
+    },
+    {
+     "code": "3",
+     "label": "Μέτρια"
+    },
+    {
+     "code": "4",
+     "label": "Πολύ"
+    },
+    {
+     "code": "5",
+     "label": "Πάρα πολύ"
+    },
+    {
+     "code": "6",
+     "label": "Δεν μπορώ να κρίνω"
+    }
+   ],
+   "condition": "Q15 == '1' and Q17 == '1'",
+   "minChoices": 1,
+   "maxChoices": null,
+   "class": "S",
+   "model": {
+    "kind": "ordinal",
+    "scale": [
+     "1",
+     "2",
+     "3",
+     "4",
+     "5"
+    ],
+    "base": [
+     0.14,
+     0.18,
+     0.28,
+     0.27,
+     0.13
+    ],
+    "loadings": {
+     "L_exp": 0.6
+    },
+    "effects": [
+     {
+      "when": "Q18 == '1'",
+      "shift": 1.0
+     },
+     {
+      "when": "Q18 == '3'",
+      "shift": -1.3
+     }
+    ],
+    "extra": [
+     {
+      "code": "6",
+      "base": 0.03
+     }
+    ]
+   },
+   "sources": [],
+   "assumptions": [
+    "A-EXP"
+   ]
+  },
+  {
+   "id": "Q20",
+   "block": "B04",
+   "type": "single_choice",
+   "text": "Μετά από αυτή την εμπειρία, η εμπιστοσύνη σας στον Κωτσόβολο:",
+   "options": [
+    {
+     "code": "1",
+     "label": "Μειώθηκε πολύ"
+    },
+    {
+     "code": "2",
+     "label": "Μειώθηκε λίγο"
+    },
+    {
+     "code": "3",
+     "label": "Δεν άλλαξε"
+    },
+    {
+     "code": "4",
+     "label": "Αυξήθηκε λίγο"
+    },
+    {
+     "code": "5",
+     "label": "Αυξήθηκε πολύ"
+    },
+    {
+     "code": "6",
+     "label": "Δεν γνωρίζω / Δεν μπορώ να κρίνω"
+    }
+   ],
+   "condition": "Q15 == '1'",
+   "minChoices": 1,
+   "maxChoices": null,
+   "class": "S",
+   "model": {
+    "kind": "ordinal",
+    "scale": [
+     "1",
+     "2",
+     "3",
+     "4",
+     "5"
+    ],
+    "base": [
+     0.18,
+     0.3,
+     0.36,
+     0.12,
+     0.04
+    ],
+    "loadings": {
+     "L_exp": 0.5
+    },
+    "effects": [
+     {
+      "when": "Q18 == '1'",
+      "shift": 0.8
+     },
+     {
+      "when": "Q18 == '3'",
+      "shift": -1.2
+     },
+     {
+      "when": "Q19 in ['4', '5']",
+      "shift": 0.4
+     }
+    ],
+    "extra": [
+     {
+      "code": "6",
+      "base": 0.03
+     }
+    ]
+   },
+   "sources": [],
+   "assumptions": [
+    "A-EXP"
+   ]
+  },
+  {
+   "id": "Q21",
+   "block": "B04",
+   "type": "single_choice",
+   "text": "Ποιο συναίσθημα περιγράφει καλύτερα την εμπειρία σας με το συγκεκριμένο πρόβλημα;",
+   "options": [
+    {
+     "code": "1",
+     "label": "Θυμός"
+    },
+    {
+     "code": "2",
+     "label": "Απογοήτευση / λύπη"
+    },
+    {
+     "code": "3",
+     "label": "Ανησυχία"
+    },
+    {
+     "code": "4",
+     "label": "Αδιαφορία"
+    },
+    {
+     "code": "5",
+     "label": "Ανακούφιση"
+    },
+    {
+     "code": "6",
+     "label": "Ικανοποίηση"
+    },
+    {
+     "code": "7",
+     "label": "Άλλο"
+    },
+    {
+     "code": "8",
+     "label": "Δεν μπορώ να προσδιορίσω"
+    }
+   ],
+   "condition": "Q15 == '1'",
+   "minChoices": 1,
+   "maxChoices": null,
+   "class": "S",
+   "model": {
+    "kind": "nominal",
+    "base": {
+     "1": 0.16,
+     "2": 0.3,
+     "3": 0.1,
+     "4": 0.06,
+     "5": 0.12,
+     "6": 0.14,
+     "7": 0.04,
+     "8": 0.08
+    },
+    "effects": [
+     {
+      "code": "1",
+      "when": "Q18 == '3'",
+      "shift": 0.9
+     },
+     {
+      "code": "2",
+      "when": "Q18 in ['2', '3']",
+      "shift": 0.5
+     },
+     {
+      "code": "5",
+      "when": "Q18 == '1'",
+      "shift": 1.0
+     },
+     {
+      "code": "6",
+      "when": "Q18 == '1'",
+      "shift": 1.1
+     },
+     {
+      "code": "6",
+      "when": "Q18 == '3'",
+      "shift": -2
+     }
+    ]
+   },
+   "sources": [],
+   "assumptions": [
+    "A-EXP"
+   ]
+  },
+  {
+   "id": "Q22",
+   "block": "B05",
+   "type": "single_choice",
+   "text": "Σε σύγκριση με άλλα καταστήματα ηλεκτρικών ειδών που γνωρίζετε, πώς αξιολογείτε τον Κωτσόβολο ως προς την αξιοπιστία;",
+   "options": [
+    {
+     "code": "1",
+     "label": "Πολύ χειρότερα"
+    },
+    {
+     "code": "2",
+     "label": "Μάλλον χειρότερα"
+    },
+    {
+     "code": "3",
+     "label": "Περίπου το ίδιο"
+    },
+    {
+     "code": "4",
+     "label": "Μάλλον καλύτερα"
+    },
+    {
+     "code": "5",
+     "label": "Πολύ καλύτερα"
+    },
+    {
+     "code": "6",
+     "label": "Δεν μπορώ να συγκρίνω"
+    }
+   ],
+   "condition": "Q04 != '1'",
+   "minChoices": 1,
+   "maxChoices": null,
+   "class": "S",
+   "model": {
+    "kind": "ordinal",
+    "scale": [
+     "1",
+     "2",
+     "3",
+     "4",
+     "5"
+    ],
+    "base": [
+     0.04,
+     0.12,
+     0.5,
+     0.25,
+     0.09
+    ],
+    "loadings": {
+     "L_brand": 0.9
+    },
+    "effects": [
+     {
+      "when": "Q05 == '1'",
+      "var": "L_exp",
+      "coef": 0.4
+     },
+     {
+      "when": "Q18 == '3'",
+      "shift": -0.5
+     }
+    ],
+    "extra": [
+     {
+      "code": "6",
+      "base": 0.08,
+      "effects": [
+       {
+        "when": "Q04 == '2'",
+        "shift": 1.3
+       },
+       {
+        "when": "Q05 == '1'",
+        "shift": -0.8
+       }
+      ]
+     }
+    ]
+   },
+   "sources": [],
+   "assumptions": [
+    "A-ATT"
+   ]
+  },
+  {
+   "id": "Q23",
+   "block": "B05",
+   "type": "multiple_choice",
+   "text": "Ποιες εναλλακτικές θα εξετάζατε για την επόμενη αγορά ηλεκτρικών ειδών; Επιλέξτε έως τρεις.",
+   "options": [
+    {
+     "code": "1",
+     "label": "Public"
+    },
+    {
+     "code": "2",
+     "label": "Πλαίσιο"
+    },
+    {
+     "code": "3",
+     "label": "Skroutz / συνεργαζόμενα καταστήματα"
+    },
+    {
+     "code": "4",
+     "label": "Άλλη μεγάλη αλυσίδα"
+    },
+    {
+     "code": "5",
+     "label": "Μικρό τοπικό κατάστημα"
+    },
+    {
+     "code": "6",
+     "label": "Απευθείας από κατασκευαστή"
+    },
+    {
+     "code": "7",
+     "label": "Κωτσόβολος"
+    },
+    {
+     "code": "8",
+     "label": "Άλλο"
+    },
+    {
+     "code": "9",
+     "label": "Δεν γνωρίζω",
+     "exclusive": true
+    }
+   ],
+   "condition": null,
+   "minChoices": 1,
+   "maxChoices": 3,
+   "class": "S",
+   "model": {
+    "kind": "multi",
+    "base": {
+     "1": 0.4,
+     "2": 0.3,
+     "3": 0.36,
+     "4": 0.14,
+     "5": 0.12,
+     "6": 0.06,
+     "7": 0.36,
+     "8": 0.02,
+     "9": 0.04
+    },
+    "effects": [
+     {
+      "code": "7",
+      "var": "L_brand",
+      "coef": 0.9
+     },
+     {
+      "code": "7",
+      "when": "Q05 == '1'",
+      "shift": 0.6
+     },
+     {
+      "code": "7",
+      "when": "Q04 == '1'",
+      "shift": -12
+     },
+     {
+      "code": "7",
+      "when": "Q04 == '2'",
+      "shift": -0.6
+     },
+     {
+      "code": "7",
+      "when": "Q18 == '3'",
+      "shift": -0.8
+     },
+     {
+      "code": "3",
+      "var": "digital",
+      "coef": 0.6
+     },
+     {
+      "code": "5",
+      "when": "urban == 'rural'",
+      "shift": 0.4
+     }
+    ]
+   },
+   "sources": [],
+   "assumptions": [
+    "A-CHOICE"
+   ]
+  },
+  {
+   "id": "Q24",
+   "block": "B05",
+   "type": "single_choice",
+   "text": "Πόσο πιθανό είναι να επιλέξετε τον Κωτσόβολο στην επόμενη σχετική αγορά σας;",
+   "options": [
+    {
+     "code": "1",
+     "label": "Καθόλου πιθανό"
+    },
+    {
+     "code": "2",
+     "label": "Λίγο πιθανό"
+    },
+    {
+     "code": "3",
+     "label": "Ούτε πιθανό ούτε απίθανο"
+    },
+    {
+     "code": "4",
+     "label": "Αρκετά πιθανό"
+    },
+    {
+     "code": "5",
+     "label": "Πολύ πιθανό"
+    },
+    {
+     "code": "6",
+     "label": "Δεν σχεδιάζω σχετική αγορά / δεν γνωρίζω"
+    }
+   ],
+   "condition": "Q04 != '1'",
+   "minChoices": 1,
+   "maxChoices": null,
+   "class": "S",
+   "model": {
+    "kind": "ordinal",
+    "scale": [
+     "1",
+     "2",
+     "3",
+     "4",
+     "5"
+    ],
+    "base": [
+     0.08,
+     0.17,
+     0.32,
+     0.3,
+     0.13
+    ],
+    "loadings": {
+     "L_brand": 1.1
+    },
+    "effects": [
+     {
+      "when": "Q05 == '1'",
+      "shift": 0.35
+     },
+     {
+      "when": "contains(Q23, '7')",
+      "shift": 0.8
+     },
+     {
+      "when": "Q05 == '1'",
+      "var": "L_exp",
+      "coef": 0.4
+     },
+     {
+      "when": "Q18 == '3'",
+      "shift": -0.7
+     }
+    ],
+    "extra": [
+     {
+      "code": "6",
+      "base": 0.05
+     }
+    ]
+   },
+   "sources": [],
+   "assumptions": [
+    "A-ATT",
+    "A-EXP"
+   ]
+  },
+  {
+   "id": "Q25",
+   "block": "B05",
+   "type": "single_choice",
+   "text": "Πόσο πιθανό είναι να συστήσετε τον Κωτσόβολο σε φίλο ή συγγενή;",
+   "options": [
+    {
+     "code": "1",
+     "label": "0"
+    },
+    {
+     "code": "2",
+     "label": "1"
+    },
+    {
+     "code": "3",
+     "label": "2"
+    },
+    {
+     "code": "4",
+     "label": "3"
+    },
+    {
+     "code": "5",
+     "label": "4"
+    },
+    {
+     "code": "6",
+     "label": "5"
+    },
+    {
+     "code": "7",
+     "label": "6"
+    },
+    {
+     "code": "8",
+     "label": "7"
+    },
+    {
+     "code": "9",
+     "label": "8"
+    },
+    {
+     "code": "10",
+     "label": "9"
+    },
+    {
+     "code": "11",
+     "label": "10"
+    },
+    {
+     "code": "12",
+     "label": "Δεν γνωρίζω / δεν μπορώ να κρίνω"
+    }
+   ],
+   "condition": "Q04 != '1'",
+   "minChoices": 1,
+   "maxChoices": null,
+   "class": "S",
+   "model": {
+    "kind": "ordinal",
+    "scale": [
+     "1",
+     "2",
+     "3",
+     "4",
+     "5",
+     "6",
+     "7",
+     "8",
+     "9",
+     "10",
+     "11"
+    ],
+    "base": [
+     0.05,
+     0.02,
+     0.03,
+     0.04,
+     0.05,
+     0.13,
+     0.1,
+     0.16,
+     0.17,
+     0.1,
+     0.15
+    ],
+    "loadings": {
+     "L_brand": 1.2
+    },
+    "effects": [
+     {
+      "when": "Q05 == '1'",
+      "var": "L_exp",
+      "coef": 0.5
+     },
+     {
+      "when": "Q24 == '5'",
+      "shift": 0.6
+     },
+     {
+      "when": "Q24 == '1'",
+      "shift": -0.6
+     },
+     {
+      "when": "Q18 == '3'",
+      "shift": -0.7
+     }
+    ],
+    "extra": [
+     {
+      "code": "12",
+      "base": 0.05,
+      "effects": [
+       {
+        "when": "Q04 == '2'",
+        "shift": 1.2
+       },
+       {
+        "when": "Q05 == '1'",
+        "shift": -0.8
+       }
+      ]
+     }
+    ]
+   },
+   "sources": [],
+   "assumptions": [
+    "A-ATT",
+    "A-EXP"
+   ]
+  },
+  {
+   "id": "Q26",
+   "block": "B05",
+   "type": "single_choice",
+   "text": "Έχετε αποτρέψει ή ενθαρρύνει κάποιον να αγοράσει από τον Κωτσόβολο τους τελευταίους 12 μήνες;",
+   "options": [
+    {
+     "code": "1",
+     "label": "Τον/την ενθάρρυνα"
+    },
+    {
+     "code": "2",
+     "label": "Τον/την απέτρεψα"
+    },
+    {
+     "code": "3",
+     "label": "Έκανα και τα δύο σε διαφορετικές περιπτώσεις"
+    },
+    {
+     "code": "4",
+     "label": "Όχι"
+    },
+    {
+     "code": "5",
+     "label": "Δεν θυμάμαι"
+    }
+   ],
+   "condition": "Q04 != '1'",
+   "minChoices": 1,
+   "maxChoices": null,
+   "class": "S",
+   "model": {
+    "kind": "nominal",
+    "base": {
+     "1": 0.13,
+     "2": 0.07,
+     "3": 0.03,
+     "4": 0.71,
+     "5": 0.06
+    },
+    "effects": [
+     {
+      "code": "1",
+      "var": "L_brand",
+      "coef": 0.8
+     },
+     {
+      "code": "2",
+      "var": "L_brand",
+      "coef": -0.8
+     },
+     {
+      "code": "1",
+      "when": "Q05 == '1'",
+      "shift": 0.5
+     },
+     {
+      "code": "2",
+      "when": "Q18 == '3'",
+      "shift": 1.2
+     },
+     {
+      "code": "1",
+      "when": "Q08 in ['1', '2']",
+      "shift": -2
+     },
+     {
+      "code": "1",
+      "when": "Q04 == '2'",
+      "shift": -0.7
+     }
+    ]
+   },
+   "sources": [],
+   "assumptions": [
+    "A-ATT"
+   ]
+  },
+  {
+   "id": "Q27",
+   "block": "B06",
+   "type": "single_choice",
+   "text": "Πριν από αυτό το ερωτηματολόγιο, γνωρίζατε κάποια κοινωνική ή εθελοντική δράση του Κωτσόβολου;",
+   "options": [
+    {
+     "code": "1",
+     "label": "Ναι"
+    },
+    {
+     "code": "2",
+     "label": "Όχι"
+    },
+    {
+     "code": "3",
+     "label": "Δεν είμαι βέβαιος/η"
+    }
+   ],
+   "condition": "Q04 != '1'",
+   "minChoices": 1,
+   "maxChoices": null,
+   "class": "S",
+   "model": {
+    "kind": "nominal",
+    "base": {
+     "1": 0.2,
+     "2": 0.62,
+     "3": 0.18
+    },
+    "effects": [
+     {
+      "code": "1",
+      "var": "L_csr",
+      "coef": 0.4
+     },
+     {
+      "code": "1",
+      "when": "Q04 == '4'",
+      "shift": 0.5
+     },
+     {
+      "code": "1",
+      "when": "Q04 == '2'",
+      "shift": -0.6
+     }
+    ]
+   },
+   "sources": [],
+   "assumptions": [
+    "A-CSR"
+   ]
+  },
+  {
+   "id": "Q28",
+   "block": "B06",
+   "type": "single_choice",
+   "text": "Σε ποιο βαθμό επηρεάζουν γενικά οι κοινωνικές δράσεις μιας εταιρείας την εικόνα που έχετε γι’ αυτήν;",
+   "options": [
+    {
+     "code": "1",
+     "label": "Καθόλου"
+    },
+    {
+     "code": "2",
+     "label": "Λίγο"
+    },
+    {
+     "code": "3",
+     "label": "Μέτρια"
+    },
+    {
+     "code": "4",
+     "label": "Πολύ"
+    },
+    {
+     "code": "5",
+     "label": "Πάρα πολύ"
+    },
+    {
+     "code": "6",
+     "label": "Δεν γνωρίζω / Δεν μπορώ να κρίνω"
+    }
+   ],
+   "condition": null,
+   "minChoices": 1,
+   "maxChoices": null,
+   "class": "S",
+   "model": {
+    "kind": "ordinal",
+    "scale": [
+     "1",
+     "2",
+     "3",
+     "4",
+     "5"
+    ],
+    "base": [
+     0.1,
+     0.22,
+     0.35,
+     0.25,
+     0.08
+    ],
+    "loadings": {
+     "L_csr": 1.0
+    },
+    "extra": [
+     {
+      "code": "6",
+      "base": 0.03
+     }
+    ]
+   },
+   "sources": [],
+   "assumptions": [
+    "A-CSR"
+   ]
+  },
+  {
+   "id": "Q29",
+   "block": "B06",
+   "type": "single_choice",
+   "text": "Αν μια εταιρεία έχει σημαντική κοινωνική προσφορά αλλά σας έχει απογοητεύσει στην εξυπηρέτηση, πόσο μπορεί η κοινωνική προσφορά να αποκαταστήσει την εμπιστοσύνη σας;",
+   "options": [
+    {
+     "code": "1",
+     "label": "Καθόλου"
+    },
+    {
+     "code": "2",
+     "label": "Λίγο"
+    },
+    {
+     "code": "3",
+     "label": "Μέτρια"
+    },
+    {
+     "code": "4",
+     "label": "Πολύ"
+    },
+    {
+     "code": "5",
+     "label": "Πάρα πολύ"
+    },
+    {
+     "code": "6",
+     "label": "Δεν γνωρίζω / Δεν μπορώ να κρίνω"
+    }
+   ],
+   "condition": null,
+   "minChoices": 1,
+   "maxChoices": null,
+   "class": "S",
+   "model": {
+    "kind": "ordinal",
+    "scale": [
+     "1",
+     "2",
+     "3",
+     "4",
+     "5"
+    ],
+    "base": [
+     0.3,
+     0.3,
+     0.25,
+     0.11,
+     0.04
+    ],
+    "loadings": {
+     "L_csr": 0.6
+    },
+    "effects": [
+     {
+      "when": "Q15 == '1'",
+      "shift": -0.3
+     }
+    ],
+    "extra": [
+     {
+      "code": "6",
+      "base": 0.04
+     }
+    ]
+   },
+   "sources": [],
+   "assumptions": [
+    "A-CSR",
+    "A-EXP"
+   ]
+  },
+  {
+   "id": "Q30",
+   "block": "B07",
+   "type": "multiple_choice",
+   "text": "Ποιες έως τρεις ενέργειες θα αύξαναν περισσότερο την εμπιστοσύνη σας στον Κωτσόβολο;",
+   "options": [
+    {
+     "code": "1",
+     "label": "Ακριβέστεροι χρόνοι παράδοσης"
+    },
+    {
+     "code": "2",
+     "label": "Συνεχής ενημέρωση για παραγγελίες"
+    },
+    {
+     "code": "3",
+     "label": "Γρηγορότερες επισκευές"
+    },
+    {
+     "code": "4",
+     "label": "Απλούστερες επιστροφές / αντικαταστάσεις"
+    },
+    {
+     "code": "5",
+     "label": "Άμεση και ανθρώπινη εξυπηρέτηση"
+    },
+    {
+     "code": "6",
+     "label": "Σαφέστεροι όροι / χρεώσεις"
+    },
+    {
+     "code": "7",
+     "label": "Ανταγωνιστικότερες τιμές"
+    },
+    {
+     "code": "8",
+     "label": "Καλύτερη διαθεσιμότητα προϊόντων"
+    },
+    {
+     "code": "9",
+     "label": "Περισσότερες κοινωνικές δράσεις"
+    },
+    {
+     "code": "10",
+     "label": "Καμία από τις παραπάνω",
+     "exclusive": true
+    },
+    {
+     "code": "11",
+     "label": "Άλλο"
+    }
+   ],
+   "condition": null,
+   "minChoices": 1,
+   "maxChoices": 3,
+   "class": "S",
+   "model": {
+    "kind": "multi",
+    "base": {
+     "1": 0.36,
+     "2": 0.28,
+     "3": 0.26,
+     "4": 0.28,
+     "5": 0.33,
+     "6": 0.22,
+     "7": 0.42,
+     "8": 0.18,
+     "9": 0.05,
+     "10": 0.03,
+     "11": 0.02
+    },
+    "effects": [
+     {
+      "code": "7",
+      "var": "L_price",
+      "coef": 0.5
+     },
+     {
+      "code": "1",
+      "when": "contains(Q16, '1') or Q14 == '3'",
+      "shift": 0.9
+     },
+     {
+      "code": "3",
+      "when": "contains(Q16, '5')",
+      "shift": 0.9
+     },
+     {
+      "code": "4",
+      "when": "contains(Q16, '6')",
+      "shift": 0.9
+     },
+     {
+      "code": "5",
+      "when": "contains(Q16, '4')",
+      "shift": 0.8
+     },
+     {
+      "code": "9",
+      "var": "L_csr",
+      "coef": 0.7
+     }
+    ]
+   },
+   "sources": [],
+   "assumptions": [
+    "A-CHOICE",
+    "A-PRICE"
+   ]
+  },
+  {
+   "id": "Q31",
+   "block": "B07",
+   "type": "single_choice",
+   "text": "Αν μια εταιρεία λύσει γρήγορα και δίκαια ένα πρόβλημα μετά την αγορά, πόσο πιθανό είναι να της δώσετε ξανά ευκαιρία;",
+   "options": [
+    {
+     "code": "1",
+     "label": "Καθόλου πιθανό"
+    },
+    {
+     "code": "2",
+     "label": "Λίγο πιθανό"
+    },
+    {
+     "code": "3",
+     "label": "Μέτρια πιθανό"
+    },
+    {
+     "code": "4",
+     "label": "Αρκετά πιθανό"
+    },
+    {
+     "code": "5",
+     "label": "Πολύ πιθανό"
+    },
+    {
+     "code": "6",
+     "label": "Δεν γνωρίζω / Δεν μπορώ να κρίνω"
+    }
+   ],
+   "condition": null,
+   "minChoices": 1,
+   "maxChoices": null,
+   "class": "S",
+   "model": {
+    "kind": "ordinal",
+    "scale": [
+     "1",
+     "2",
+     "3",
+     "4",
+     "5"
+    ],
+    "base": [
+     0.04,
+     0.1,
+     0.28,
+     0.37,
+     0.21
+    ],
+    "loadings": {
+     "L_brand": 0.3
+    },
+    "effects": [
+     {
+      "when": "Q18 == '1'",
+      "shift": 0.3
+     }
+    ],
+    "extra": [
+     {
+      "code": "6",
+      "base": 0.04
+     }
+    ]
+   },
+   "sources": [],
+   "assumptions": [
+    "A-EXP"
+   ]
+  },
+  {
+   "id": "Q32",
+   "block": "B07",
+   "type": "single_choice",
+   "text": "Ποιο είναι το μέγιστο εύλογο διάστημα για την πρώτη ουσιαστική απάντηση σε αίτημα υποστήριξης για σημαντική οικιακή συσκευή;",
+   "options": [
+    {
+     "code": "1",
+     "label": "Την ίδια ημέρα"
+    },
+    {
+     "code": "2",
+     "label": "Εντός 1–2 ημερών"
+    },
+    {
+     "code": "3",
+     "label": "Εντός 3–5 ημερών"
+    },
+    {
+     "code": "4",
+     "label": "Εντός μίας εβδομάδας"
+    },
+    {
+     "code": "5",
+     "label": "Περισσότερο από μία εβδομάδα"
+    },
+    {
+     "code": "6",
+     "label": "Εξαρτάται από το πρόβλημα / δεν γνωρίζω"
+    }
+   ],
+   "condition": null,
+   "minChoices": 1,
+   "maxChoices": null,
+   "class": "S",
+   "model": {
+    "kind": "nominal",
+    "base": {
+     "1": 0.26,
+     "2": 0.45,
+     "3": 0.14,
+     "4": 0.04,
+     "5": 0.01,
+     "6": 0.1
+    },
+    "effects": [
+     {
+      "code": "1",
+      "when": "age_band in ['15-24', '25-34']",
+      "shift": 0.3
+     }
+    ]
+   },
+   "sources": [],
+   "assumptions": [
+    "A-CHOICE"
+   ]
+  },
+  {
+   "id": "Q33",
+   "block": "B07",
+   "type": "single_choice",
+   "text": "Αν είχατε αρνητική εμπειρία από τον Κωτσόβολο, ποιο θα ήταν το σημαντικότερο στοιχείο για να ανακτήσετε την εμπιστοσύνη σας;",
+   "options": [
+    {
+     "code": "1",
+     "label": "Πλήρης και γρήγορη επίλυση"
+    },
+    {
+     "code": "2",
+     "label": "Δίκαιη αποζημίωση / επιστροφή χρημάτων"
+    },
+    {
+     "code": "3",
+     "label": "Ειλικρινής εξήγηση και ανάληψη ευθύνης"
+    },
+    {
+     "code": "4",
+     "label": "Συστηματική ενημέρωση μέχρι τη λύση"
+    },
+    {
+     "code": "5",
+     "label": "Εγγύηση ότι δεν θα επαναληφθεί"
+    },
+    {
+     "code": "6",
+     "label": "Δεν θα επανερχόταν η εμπιστοσύνη μου"
+    },
+    {
+     "code": "7",
+     "label": "Άλλο / δεν γνωρίζω"
+    }
+   ],
+   "condition": null,
+   "minChoices": 1,
+   "maxChoices": null,
+   "class": "S",
+   "model": {
+    "kind": "nominal",
+    "base": {
+     "1": 0.4,
+     "2": 0.22,
+     "3": 0.12,
+     "4": 0.08,
+     "5": 0.08,
+     "6": 0.06,
+     "7": 0.04
+    },
+    "effects": [
+     {
+      "code": "2",
+      "var": "L_price",
+      "coef": 0.3
+     },
+     {
+      "code": "6",
+      "when": "Q18 == '3'",
+      "shift": 0.7
+     },
+     {
+      "code": "6",
+      "var": "L_brand",
+      "coef": -0.4
+     }
+    ]
+   },
+   "sources": [],
+   "assumptions": [
+    "A-EXP"
+   ]
+  },
+  {
+   "id": "Q34",
+   "block": "B07",
+   "type": "single_choice",
+   "text": "Ποια μία βελτίωση θα έπρεπε, κατά τη γνώμη σας, να αποτελέσει την πρώτη προτεραιότητα του Κωτσόβολου;",
+   "options": [
+    {
+     "code": "1",
+     "label": "Παραδόσεις και συνέπεια χρόνων"
+    },
+    {
+     "code": "2",
+     "label": "After-sales / επισκευές"
+    },
+    {
+     "code": "3",
+     "label": "Επιστροφές και αντικαταστάσεις"
+    },
+    {
+     "code": "4",
+     "label": "Εξυπηρέτηση και επικοινωνία"
+    },
+    {
+     "code": "5",
+     "label": "Τιμές και προσφορές"
+    },
+    {
+     "code": "6",
+     "label": "Διαθεσιμότητα / ποιότητα προϊόντων"
+    },
+    {
+     "code": "7",
+     "label": "Κοινωνική προσφορά"
+    },
+    {
+     "code": "8",
+     "label": "Καμία συγκεκριμένη / δεν γνωρίζω"
+    }
+   ],
+   "condition": "Q04 != '1'",
+   "minChoices": 1,
+   "maxChoices": null,
+   "class": "S",
+   "model": {
+    "kind": "nominal",
+    "base": {
+     "1": 0.22,
+     "2": 0.17,
+     "3": 0.1,
+     "4": 0.18,
+     "5": 0.21,
+     "6": 0.07,
+     "7": 0.02,
+     "8": 0.03
+    },
+    "effects": [
+     {
+      "code": "1",
+      "when": "contains(Q16, '1') or Q14 == '3'",
+      "shift": 1.0
+     },
+     {
+      "code": "2",
+      "when": "contains(Q16, '5') or contains(Q16, '3')",
+      "shift": 0.9
+     },
+     {
+      "code": "3",
+      "when": "contains(Q16, '6')",
+      "shift": 0.9
+     },
+     {
+      "code": "4",
+      "when": "contains(Q16, '4') or Q17 == '1' and Q18 == '3'",
+      "shift": 0.8
+     },
+     {
+      "code": "5",
+      "var": "L_price",
+      "coef": 0.4
+     }
+    ]
+   },
+   "sources": [],
+   "assumptions": [
+    "A-CHOICE",
+    "A-PRICE"
+   ]
+  }
+ ],
+ "generationOrder": [
+  "D01",
+  "D02",
+  "D03",
+  "Q01",
+  "Q02",
+  "Q03",
+  "Q04",
+  "Q05",
+  "Q06",
+  "Q07",
+  "Q14",
+  "Q15",
+  "Q16",
+  "Q17",
+  "Q18",
+  "Q19",
+  "Q20",
+  "Q21",
+  "Q12",
+  "Q13",
+  "Q08",
+  "Q09",
+  "Q10",
+  "Q11",
+  "Q22",
+  "Q23",
+  "Q24",
+  "Q25",
+  "Q26",
+  "Q27",
+  "Q28",
+  "Q29",
+  "Q30",
+  "Q31",
+  "Q32",
+  "Q33",
+  "Q34"
+ ],
+ "constraints": [
+  {
+   "id": "C1",
+   "forbid": "Q01 == '2' and Q05 == '1'",
+   "reason": "Κανόνας «Q05=1 indicates recent buyer»: αγορά από τον Κωτσόβολο στους 24 μήνες είναι αγορά ηλεκτρικής/ηλεκτρονικής συσκευής στους ίδιους 24 μήνες. Όποιος απάντησε Q01=«Όχι» δεν μπορεί να απαντήσει Q05=«Ναι»."
+  },
+  {
+   "id": "C2",
+   "forbid": "Q01 == '1' and Q05 == '1' and not (contains(Q02, '1') or contains(Q02, '2') or contains(Q02, '4') or contains(Q02, '6') or contains(Q02, '7'))",
+   "reason": "Ο Κωτσόβολος είναι μεγάλη αλυσίδα (φυσικά καταστήματα, e-shop) και πουλά και μέσω marketplace. Αγοραστής του στους 24 μήνες πρέπει να έχει δηλώσει στο Q02 «Μεγάλη αλυσίδα φυσικών καταστημάτων», «Ηλεκτρονικό κατάστημα μεγάλης αλυσίδας», «Αμιγώς ηλεκτρονικό κατάστημα / marketplace» (ή «Άλλο» / «Δεν θυμάμαι»). Απαγορεύεται μόνο όταν το Q02 περιέχει ΜΟΝΟ μικρό κατάστημα ή κατασκευαστή. (v2 μετά την πιλοτική: η v1 δεν επέτρεπε το marketplace.)"
+  },
+  {
+   "id": "C3",
+   "forbid": "Q06 == '1' and Q01 == '1' and not (contains(Q02, '1') or contains(Q02, '7'))",
+   "reason": "Πιο πρόσφατη αγορά Κωτσόβολου σε φυσικό κατάστημα ⇒ το Q02 περιέχει «Μεγάλη αλυσίδα φυσικών καταστημάτων» (ή «Δεν θυμάμαι»)."
+  },
+  {
+   "id": "C4",
+   "forbid": "Q06 == '2' and Q01 == '1' and not (contains(Q02, '2') or contains(Q02, '4') or contains(Q02, '7'))",
+   "reason": "Πιο πρόσφατη αγορά Κωτσόβολου online ⇒ το Q02 περιέχει «Ηλεκτρονικό κατάστημα μεγάλης αλυσίδας» ή «Αμιγώς ηλεκτρονικό κατάστημα / marketplace» (ή «Δεν θυμάμαι»). v2: το Q06 δεν έχει επιλογή marketplace· αγορά από Κωτσόβολο μέσω marketplace καταγράφεται εύλογα ως «ηλεκτρονικό κατάστημα» (εύρημα QA· εκκρεμεί απόφαση συνεργάτη, βλ. Α14)."
+  },
+  {
+   "id": "C5",
+   "forbid": "Q04 == '1' and contains(Q23, '7')",
+   "reason": "Όποιος δεν γνωρίζει την αλυσίδα (Q04=1) δεν μπορεί να την εξετάζει ως εναλλακτική στο Q23."
+  }
+ ],
+ "rules": [
+  {
+   "id": "S1",
+   "when": "Q01 == '3' and Q05 == '1'",
+   "note": "Δεν θυμάται αν αγόρασε συσκευή, αλλά δηλώνει αγορά από Κωτσόβολο"
+  },
+  {
+   "id": "S2",
+   "when": "Q14 == '3' and Q15 == '2'",
+   "note": "Σημαντική καθυστέρηση παράδοσης, αλλά «κανένα πρόβλημα»"
+  },
+  {
+   "id": "S3",
+   "when": "Q14 == '1' and contains(Q16, '1')",
+   "note": "Παράδοση πλήρως στην ώρα της, αλλά πρόβλημα «καθυστέρηση παράδοσης»"
+  },
+  {
+   "id": "S4",
+   "when": "Q08 == '1' and Q09 in ['4', '5']",
+   "note": "Πολύ αρνητική εικόνα, αλλά πολύ μεγάλη εμπιστοσύνη"
+  },
+  {
+   "id": "S5",
+   "when": "Q08 == '5' and Q09 == '1'",
+   "note": "Πολύ θετική εικόνα, αλλά καμία εμπιστοσύνη"
+  },
+  {
+   "id": "S6",
+   "when": "Q18 == '3' and Q19 in ['4', '5']",
+   "note": "Πρόβλημα άλυτο, αλλά πολύ ικανοποιημένος από τον χειρισμό"
+  },
+  {
+   "id": "S7",
+   "when": "Q18 == '3' and Q20 in ['4', '5']",
+   "note": "Πρόβλημα άλυτο, αλλά η εμπιστοσύνη αυξήθηκε"
+  },
+  {
+   "id": "S8",
+   "when": "Q24 == '5' and Q25 in ['1', '2', '3', '4']",
+   "note": "Πολύ πιθανό να επιλέξει, αλλά σύσταση 0–3"
+  },
+  {
+   "id": "S9",
+   "when": "Q26 == '1' and Q08 in ['1', '2']",
+   "note": "Ενθάρρυνε άλλους, αλλά έχει αρνητική εικόνα"
+  },
+  {
+   "id": "S10",
+   "when": "contains(Q23, '7') and Q24 == '1'",
+   "note": "Εξετάζει τον Κωτσόβολο ως εναλλακτική, αλλά «καθόλου πιθανό» να τον επιλέξει"
+  },
+  {
+   "id": "S11",
+   "when": "Q12 == '5' and Q18 == '3'",
+   "note": "Πολύ θετική συνολική εμπειρία με πρόβλημα που παραμένει άλυτο"
+  },
+  {
+   "id": "S12",
+   "when": "Q04 == '2' and Q05 == '1'",
+   "note": "Γνωρίζει την αλυσίδα «μόνο ως όνομα», αλλά δηλώνει αγορά από αυτήν (δυνατό για περιστασιακό αγοραστή· εύρημα πιλοτικής)"
+  },
+  {
+   "id": "S13",
+   "when": "Q04 == '2' and Q09 in ['4', '5']",
+   "note": "Γνωρίζει την αλυσίδα μόνο ως όνομα, αλλά την εμπιστεύεται πολύ / πάρα πολύ (εύρημα πιλοτικής)"
+  },
+  {
+   "id": "S14",
+   "when": "Q08 in ['4', '5'] and Q09 == '1'",
+   "note": "Θετική εικόνα, αλλά καμία εμπιστοσύνη (εύρημα πιλοτικής)"
+  }
+ ],
+ "assumptions": [
+  {
+   "id": "A-Q01",
+   "text": "Περίπου 72% των ενηλίκων αγόρασε ηλεκτρική/ηλεκτρονική συσκευή στους 24 μήνες (υπόθεση σεναρίου)· η Eurostat δίνει μόνο κάτω όριο (online αγορές τριμήνου).",
+   "sensitivity": "±0.5 logit"
+  },
+  {
+   "id": "A-AWARE",
+   "text": "Η αλυσίδα είναι ευρέως γνωστή: 3% δεν τη γνωρίζει, 30% μόνο ως όνομα, 45% αρκετά, 22% πολύ καλά (υπόθεση σεναρίου, χωρίς μέτρηση)."
+  },
+  {
+   "id": "A-CUST",
+   "text": "Πιθανότητα αγοράς από την αλυσίδα στους 24 μήνες ανάλογα με την εξοικείωση: 12% / 40% / 62% (υπόθεση σεναρίου)."
+  },
+  {
+   "id": "A-ATT",
+   "text": "Γενική κατανομή βάσης για κλίμακες αξιολόγησης μάρκας: ελαφρά θετική με ουσιαστική διασπορά (υπόθεση σεναρίου, ίδια για όλες τις μάρκες λιανικής)."
+  },
+  {
+   "id": "A-EXP",
+   "text": "Η εικόνα, η εμπιστοσύνη και η σύσταση επηρεάζονται από την εμπειρία πελάτη: πρόβλημα που έμεινε άλυτο μειώνει, πλήρης επίλυση επαναφέρει μερικώς (κατεύθυνση από τη βιβλιογραφία service recovery· μέγεθος = υπόθεση, ευαισθησία ×0,5–×1,5)."
+  },
+  {
+   "id": "A-DELAY",
+   "text": "Η συχνότητα καθυστέρησης/προβλημάτων στους πελάτες της αλυσίδας ισούται με τη συχνότητα στους online αγοραστές της ίδιας δημογραφικής ομάδας (Eurostat· μεταφορά από όλους τους πωλητές στην αλυσίδα)· για αγορές από φυσικό κατάστημα η έκθεση σε καθυστέρηση θεωρείται μισή."
+  },
+  {
+   "id": "A-EXTRA",
+   "text": "Προβλήματα που δεν καλύπτει η Eurostat (εγκατάσταση, επισκευή, επικοινωνία): 6% των αγορών (υπόθεση σεναρίου)."
+  },
+  {
+   "id": "A-FAM",
+   "text": "Η εμπιστοσύνη και η θετική κρίση προϋποθέτουν γνώση: όσοι γνωρίζουν την αλυσίδα μόνο ως όνομα κρίνουν πιο συγκρατημένα (σε συμφωνία με τον κανόνα συνοχής S13 της εγκεκριμένης μελέτης· μέγεθος = υπόθεση)."
+  },
+  {
+   "id": "A-CSR",
+   "text": "Οι πτυχιούχοι είναι ελαφρώς πιο ευαίσθητοι σε θέματα κοινωνικής υπευθυνότητας (+0,2 τ.α.· υπόθεση)."
+  },
+  {
+   "id": "A-PRICE",
+   "text": "Η ευαισθησία στην τιμή αυξάνεται όσο δυσκολότερα τα βγάζει πέρα το νοικοκυριό (άγκυρα PIE econ4 από μικροδεδομένα διαΝΕΟσις· μέγεθος επίδρασης = υπόθεση)."
+  },
+  {
+   "id": "A-DIGITAL",
+   "text": "Η ψηφιακή εξοικείωση (Eurostat, online αγορές ανά ηλικία/φύλο/μόρφωση) αυξάνει τη χρήση e-shop και marketplace."
+  },
+  {
+   "id": "A-CHOICE",
+   "text": "Κατανομές βάσης για προτιμήσεις/κριτήρια επιλογής καταστήματος, εναλλακτικές και προτεραιότητες (υπόθεση σεναρίου)."
+  }
+ ]
+}

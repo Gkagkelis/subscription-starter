@@ -1,0 +1,54 @@
+$ /usr/bin/python3 -I /home/user/subscription-starter/scripts/synthetic-lab/structured/build_spec.py /home/user/subscription-starter/studies/kotsovolos_lab_pilot_2026/model.yaml --out /home/user/subscription-starter/studies/kotsovolos_lab_pilot_2026/spec.json
+/home/user/subscription-starter/studies/kotsovolos_lab_pilot_2026/spec.json 37 ερωτήσεις · 3 E / 5 T / 29 S
+
+$ /home/user/subscription-starter/node_modules/.bin/tsx /home/user/subscription-starter/scripts/synthetic-lab/structured/run.ts --spec /home/user/subscription-starter/studies/kotsovolos_lab_pilot_2026/spec.json --out /home/user/subscription-starter/studies/kotsovolos_lab_pilot_2026/internal_package/runs/main.json --n 500 --seed 20261105
+[main] 500 ερωτώμενοι σε 3.43 δευτ. (παραγωγή 261 ms) · ανεπίλυτοι κανόνες: 0
+
+$ /home/user/subscription-starter/node_modules/.bin/tsx /home/user/subscription-starter/scripts/synthetic-lab/structured/run.ts --spec /home/user/subscription-starter/studies/kotsovolos_lab_pilot_2026/spec.json --variants /home/user/subscription-starter/studies/kotsovolos_lab_pilot_2026/internal_package/runs/variants.json --out-dir /home/user/subscription-starter/studies/kotsovolos_lab_pilot_2026/internal_package/runs --n 500 --seed 20261105
+[seed_1] 500 ερωτώμενοι σε 3.75 δευτ. (παραγωγή 260 ms) · ανεπίλυτοι κανόνες: 0
+[seed_2] 500 ερωτώμενοι σε 0.41 δευτ. (παραγωγή 176 ms) · ανεπίλυτοι κανόνες: 0
+[seed_3] 500 ερωτώμενοι σε 0.39 δευτ. (παραγωγή 176 ms) · ανεπίλυτοι κανόνες: 0
+[seed_4] 500 ερωτώμενοι σε 0.38 δευτ. (παραγωγή 199 ms) · ανεπίλυτοι κανόνες: 0
+[sens_effects_x0.5] 500 ερωτώμενοι σε 0.35 δευτ. (παραγωγή 188 ms) · ανεπίλυτοι κανόνες: 0
+[sens_effects_x1.5] 500 ερωτώμενοι σε 0.34 δευτ. (παραγωγή 166 ms) · ανεπίλυτοι κανόνες: 0
+[sens_levels_-0.3] 500 ερωτώμενοι σε 0.43 δευτ. (παραγωγή 188 ms) · ανεπίλυτοι κανόνες: 0
+[sens_levels_+0.3] 500 ερωτώμενοι σε 0.38 δευτ. (παραγωγή 178 ms) · ανεπίλυτοι κανόνες: 0
+[ablate_buy3] 500 ερωτώμενοι σε 0.44 δευτ. (παραγωγή 154 ms) · ανεπίλυτοι κανόνες: 0
+[ablate_elec] 500 ερωτώμενοι σε 0.32 δευτ. (παραγωγή 145 ms) · ανεπίλυτοι κανόνες: 0
+[ablate_hard] 500 ερωτώμενοι σε 0.34 δευτ. (παραγωγή 154 ms) · ανεπίλυτοι κανόνες: 0
+[ablate_delay] 500 ερωτώμενοι σε 0.38 δευτ. (παραγωγή 142 ms) · ανεπίλυτοι κανόνες: 0
+[ablate_wrong] 500 ερωτώμενοι σε 0.31 δευτ. (παραγωγή 151 ms) · ανεπίλυτοι κανόνες: 0
+[ablate_compl] 500 ερωτώμενοι σε 0.32 δευτ. (παραγωγή 149 ms) · ανεπίλυτοι κανόνες: 0
+[ablate_info] 500 ερωτώμενοι σε 0.37 δευτ. (παραγωγή 196 ms) · ανεπίλυτοι κανόνες: 0
+[ablate_elec+hard] 500 ερωτώμενοι σε 0.37 δευτ. (παραγωγή 151 ms) · ανεπίλυτοι κανόνες: 0
+[ablate_buy3+elec+hard] 500 ερωτώμενοι σε 0.37 δευτ. (παραγωγή 205 ms) · ανεπίλυτοι κανόνες: 0
+[ablate_buy3+delay] 500 ερωτώμενοι σε 0.35 δευτ. (παραγωγή 190 ms) · ανεπίλυτοι κανόνες: 0
+[ablate_buy3+compl+delay+wrong] 500 ερωτώμενοι σε 0.31 δευτ. (παραγωγή 149 ms) · ανεπίλυτοι κανόνες: 0
+[ablate_buy3+compl+delay+info+wrong] 500 ερωτώμενοι σε 0.36 δευτ. (παραγωγή 179 ms) · ανεπίλυτοι κανόνες: 0
+[ablate_all_metrics] 500 ερωτώμενοι σε 0.34 δευτ. (παραγωγή 152 ms) · ανεπίλυτοι κανόνες: 0
+[ablate_pie] 500 ερωτώμενοι σε 0.36 δευτ. (παραγωγή 165 ms) · ανεπίλυτοι κανόνες: 0
+
+$ /usr/bin/python3 -I /home/user/subscription-starter/scripts/synthetic-lab/structured/analyze.py --spec /home/user/subscription-starter/studies/kotsovolos_lab_pilot_2026/spec.json --runs /home/user/subscription-starter/studies/kotsovolos_lab_pilot_2026/internal_package/runs --out /home/user/subscription-starter/studies/kotsovolos_lab_pilot_2026/internal_package/qc --ase-checkpoint /home/user/subscription-starter/studies/kotsovolos_signalyth_2026_500/internal/runs/k500_full_v1/checkpoint.jsonl
+PASS [Ολοκλήρωση] 500 ολοκληρωμένες συνθετικές συνεντεύξεις — 500
+PASS [Ολοκλήρωση] Κανένας διπλός ερωτώμενος (μοναδικό πρόσωπο πλαισίου) — 500 μοναδικά πρόσωπα
+PASS [Ολοκλήρωση] Κανένα πανομοιότυπο σύνολο απαντήσεων — μέγιστη επανάληψη 1
+PASS [Εγκυρότητα] Έγκυρες διαδρομές (skip logic, ανεξάρτητος έλεγχος ASE) — 0 ζητήματα
+PASS [Εγκυρότητα] Έγκυρες απαντήσεις (κωδικοί, πλήθος επιλογών, αποκλειστικές) — 0 ζητήματα
+PASS [Συνοχή] Λογικοί περιορισμοί C1–C5: καμία παραβίαση — {}
+PASS [Συνοχή] Συνοχή μεταξύ ερωτήσεων: κάθε κανόνας S ≤ 10% — μέγιστο 7.2% (S13)
+PASS [Αντιπροσωπευτικότητα] Δημογραφική σύνθεση ≈ βαθμονομημένος πληθυσμός (≤ 5 π.μ.) — D01 1.7, D02 1.8, D03 0.1
+PASS [Ποικιλία] Ποικιλία: καμία ερώτηση > 95% σε μία επιλογή — —
+PASS [Σχέσεις] Αναμενόμενες θετικές σχέσεις (εικόνα–εμπιστοσύνη–πρόθεση–σύσταση–εμπειρία) — Q08~Q09 ρ=0.54, Q09~Q10 ρ=0.47, Q09~Q24 ρ=0.50, Q09~Q25 ρ=0.57, Q24~Q25 ρ=0.68, Q12~Q09 ρ=0.40
+PASS [Σχέσεις] Άλυτο πρόβλημα → χαμηλότερη εμπιστοσύνη από πλήρη επίλυση — Q18=1: 4.00, Q18=2: 4.00, Q18=3: 2.33, Q18=4: 2.50
+PASS [Τεκμηρίωση] Δηλωμένη κατηγορία E/T/S συνεπής με τα δεδομένα που χρησιμοποιούνται — —
+PASS [Συνοχή] Καμία απάντηση με ανεπίλυτο κανόνα μετά τις επαναλήψεις — 0
+PASS [Τεκμηρίωση] Κατηγορία T μόνο όπου η πηγή αποδεδειγμένα επηρεάζει την εκτίμηση (δοκιμή αφαίρεσης) — υποβιβάστηκαν σε S: Q01, Q02 · τελικά E/T/S = 3/3/31
+INFO [Τεκμηρίωση] Πηγές αποθηκευμένες αλλά χωρίς ουσιαστική επίδραση σε αυτή τη μελέτη — καμία — κάθε δηλωμένη πηγή επηρεάζει τις εκτιμήσεις
+ΑΠΟΤΕΛΕΣΜΑ: PASS
+
+$ /usr/bin/python3 -I /home/user/subscription-starter/scripts/synthetic-lab/structured/client_report.py --study /home/user/subscription-starter/studies/kotsovolos_lab_pilot_2026
+/home/user/subscription-starter/studies/kotsovolos_lab_pilot_2026/client_deliverables/viewscope_kotsovolos_2026_client_report.pdf /home/user/subscription-starter/studies/kotsovolos_lab_pilot_2026/client_deliverables/viewscope_kotsovolos_2026_client_report.pptx
+
+$ /usr/bin/python3 -I /home/user/subscription-starter/scripts/synthetic-lab/structured/internal_package.py --study /home/user/subscription-starter/studies/kotsovolos_lab_pilot_2026 --timings /home/user/subscription-starter/studies/kotsovolos_lab_pilot_2026/internal_package/logs/timings.json
+/home/user/subscription-starter/studies/kotsovolos_lab_pilot_2026/internal_package
+

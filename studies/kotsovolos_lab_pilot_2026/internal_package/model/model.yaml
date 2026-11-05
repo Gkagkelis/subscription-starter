@@ -1,0 +1,437 @@
+# Πιλοτική μελέτη Κωτσόβολος 500 — γρήγορος στατιστικός μηχανισμός Synthetic Lab (structured engine).
+# ΣΥΝΘΕΤΙΚΗ ΠΡΟΣΟΜΟΙΩΣΗ — ΟΧΙ ΠΡΑΓΜΑΤΙΚΗ ΕΡΕΥΝΑ ΠΕΔΙΟΥ.
+#
+# Το ερωτηματολόγιο ΔΕΝ ορίζεται εδώ: διαβάζεται αυτούσιο (κείμενα, κωδικοί, skip logic, C1–C5, S1–S12) από την εγκεκριμένη και
+# παγωμένη μελέτη studies/kotsovolos_signalyth_2026_500 (μόνο ανάγνωση, έλεγχος sha256). Εδώ ορίζεται μόνο το ΜΟΝΤΕΛΟ:
+#   E  = άμεση εμπειρική βάση (προφίλ βαθμονομημένου πληθυσμού)
+#   T  = έμμεση/μεταφερόμενη τεκμηρίωση (δείκτες Eurostat από το data lake, προσαρμοσμένοι ανά πρόσωπο με το mc-logit του prod-1)
+#   S  = σενάριο με ρητές παραδοχές (παράμετροι παρακάτω· όλες καταγράφονται και ελέγχονται με ανάλυση ευαισθησίας)
+# Καμία παράμετρος δεν προέρχεται από την έκθεση Signalyth ή από τις συνθετικές απαντήσεις του ASE (αυτές χρησιμοποιούνται
+# μόνο ως σημείο σύγκρισης στον εσωτερικό φάκελο).
+
+study_id: kotsovolos_lab_pilot_2026
+title: "Κωτσόβολος — εικόνα, εμπιστοσύνη και εμπειρία πελάτη (πιλοτική συνθετική έρευνα, Synthetic Lab)"
+spec_version: kotsovolos-lab-1.0
+domain: consumer
+reference_year: 2026
+source_study: ../kotsovolos_signalyth_2026_500
+population: {populationId: glopop-grc-2025-calibrated, pieModel: pie-0.7, minAge: 18, sampling: pps}
+
+metrics:
+  buy3:  {metric: "lake:eurostat:isoc_ec_ib20::4385d31ffd", label: "Eurostat: τελευταία online αγορά στο τρίμηνο (% ατόμων)", fallback: null}
+  elec:  {metric: "lake:eurostat:isoc_ec_ibgs::abbd2f7366", label: "Eurostat: online αγορά ηλεκτρονικών/οικιακών συσκευών στο τρίμηνο (% ατόμων)", fallback: 0.0}
+  hard:  {metric: "lake:eurostat:isoc_ec_ibgs::54701561f8", label: "Eurostat: online αγορά υπολογιστή/tablet/κινητού στο τρίμηνο (% ατόμων)", fallback: 0.0}
+  delay: {metric: "lake:eurostat:isoc_ec_iprb21::bbbb74d80d", label: "Eurostat: online αγορά με παράδοση πιο αργή από την αναγγελθείσα (% ατόμων)", fallback: 0.035}
+  wrong: {metric: "lake:eurostat:isoc_ec_iprb21::eb744b43fa", label: "Eurostat: online αγορά με λάθος ή κατεστραμμένο προϊόν (% ατόμων)", fallback: 0.015}
+  compl: {metric: "lake:eurostat:isoc_ec_iprb21::04dbb17d85", label: "Eurostat: δύσκολα παράπονα / αποζημίωση σε online αγορά (% ατόμων)", fallback: 0.01}
+  info:  {metric: "lake:eurostat:isoc_ec_iprb21::30368d3e77", label: "Eurostat: δυσκολία εύρεσης πληροφοριών για εγγυήσεις/δικαιώματα (% ατόμων)", fallback: 0.01}
+
+derived:
+  - {name: digital, expr: "logit(buy3)", standardize: true}           # ψηφιακή αγοραστική εξοικείωση (τυποποιημένη)
+  - {name: elec_any, expr: "union(elec, hard)"}                      # online αγορά ηλεκτρικού/ηλεκτρονικού είδους στο τρίμηνο
+  - {name: elec_buyer, expr: "min(0.95, elec_any / 0.72)"}           # ως ποσοστό όσων αγόρασαν συσκευή στους 24 μήνες (A-Q01)
+  - {name: r_delay, expr: "min(0.6, delay / max(buy3, 0.05))"}       # ποσοστό ΑΓΟΡΑΣΤΩΝ με καθυστέρηση (μετατροπή σε βάση αγοραστών)
+  - {name: r_wrong, expr: "min(0.5, wrong / max(buy3, 0.05))"}
+  - {name: r_compl, expr: "min(0.5, compl / max(buy3, 0.05))"}
+  - {name: r_info,  expr: "min(0.5, info / max(buy3, 0.05))"}
+
+latents:
+  - {name: L_brand, note: "Γενική στάση απέναντι στην αλυσίδα (σενάριο, κανονική κατανομή)"}
+  - {name: L_exp, note: "Ποιότητα της πιο πρόσφατης εμπειρίας αγοράς (μόνο για πελάτες)"}
+  - {name: L_csr, note: "Ευαισθησία σε κοινωνική υπευθυνότητα", effects: [{when: "edu3 == 'high'", shift: 0.2, assumption: A-CSR}]}
+  - {name: L_price, note: "Ευαισθησία στην τιμή", effects: [{var: econ4, coef: -0.35, center: 2.5, assumption: A-PRICE}]}
+
+assumptions:
+  - {id: A-Q01, text: "Περίπου 72% των ενηλίκων αγόρασε ηλεκτρική/ηλεκτρονική συσκευή στους 24 μήνες (υπόθεση σεναρίου)· η Eurostat δίνει μόνο κάτω όριο (online αγορές τριμήνου).", sensitivity: "±0.5 logit"}
+  - {id: A-AWARE, text: "Η αλυσίδα είναι ευρέως γνωστή: 3% δεν τη γνωρίζει, 30% μόνο ως όνομα, 45% αρκετά, 22% πολύ καλά (υπόθεση σεναρίου, χωρίς μέτρηση)."}
+  - {id: A-CUST, text: "Πιθανότητα αγοράς από την αλυσίδα στους 24 μήνες ανάλογα με την εξοικείωση: 12% / 40% / 62% (υπόθεση σεναρίου)."}
+  - {id: A-ATT, text: "Γενική κατανομή βάσης για κλίμακες αξιολόγησης μάρκας: ελαφρά θετική με ουσιαστική διασπορά (υπόθεση σεναρίου, ίδια για όλες τις μάρκες λιανικής)."}
+  - {id: A-EXP, text: "Η εικόνα, η εμπιστοσύνη και η σύσταση επηρεάζονται από την εμπειρία πελάτη: πρόβλημα που έμεινε άλυτο μειώνει, πλήρης επίλυση επαναφέρει μερικώς (κατεύθυνση από τη βιβλιογραφία service recovery· μέγεθος = υπόθεση, ευαισθησία ×0,5–×1,5)."}
+  - {id: A-DELAY, text: "Η συχνότητα καθυστέρησης/προβλημάτων στους πελάτες της αλυσίδας ισούται με τη συχνότητα στους online αγοραστές της ίδιας δημογραφικής ομάδας (Eurostat· μεταφορά από όλους τους πωλητές στην αλυσίδα)· για αγορές από φυσικό κατάστημα η έκθεση σε καθυστέρηση θεωρείται μισή."}
+  - {id: A-EXTRA, text: "Προβλήματα που δεν καλύπτει η Eurostat (εγκατάσταση, επισκευή, επικοινωνία): 6% των αγορών (υπόθεση σεναρίου)."}
+  - {id: A-FAM, text: "Η εμπιστοσύνη και η θετική κρίση προϋποθέτουν γνώση: όσοι γνωρίζουν την αλυσίδα μόνο ως όνομα κρίνουν πιο συγκρατημένα (σε συμφωνία με τον κανόνα συνοχής S13 της εγκεκριμένης μελέτης· μέγεθος = υπόθεση)."}
+  - {id: A-CSR, text: "Οι πτυχιούχοι είναι ελαφρώς πιο ευαίσθητοι σε θέματα κοινωνικής υπευθυνότητας (+0,2 τ.α.· υπόθεση)."}
+  - {id: A-PRICE, text: "Η ευαισθησία στην τιμή αυξάνεται όσο δυσκολότερα τα βγάζει πέρα το νοικοκυριό (άγκυρα PIE econ4 από μικροδεδομένα διαΝΕΟσις· μέγεθος επίδρασης = υπόθεση)."}
+  - {id: A-DIGITAL, text: "Η ψηφιακή εξοικείωση (Eurostat, online αγορές ανά ηλικία/φύλο/μόρφωση) αυξάνει τη χρήση e-shop και marketplace."}
+  - {id: A-CHOICE, text: "Κατανομές βάσης για προτιμήσεις/κριτήρια επιλογής καταστήματος, εναλλακτικές και προτεραιότητες (υπόθεση σεναρίου)."}
+
+generation_order: [D01, D02, D03, Q01, Q02, Q03, Q04, Q05, Q06, Q07, Q14, Q15, Q16, Q17, Q18, Q19, Q20, Q21, Q12, Q13,
+                   Q08, Q09, Q10, Q11, Q22, Q23, Q24, Q25, Q26, Q27, Q28, Q29, Q30, Q31, Q32, Q33, Q34]
+
+questions:
+  D01: {class: E, sources: [population], model: {kind: profile, attribute: age_band, map: {"15-24": "1", "25-34": "2", "35-44": "3", "45-54": "4", "55-64": "5", "65+": "6"}}}
+  D02: {class: E, sources: [population], model: {kind: profile, attribute: gender, map: {female: "1", male: "2"}},
+        note: "Ο πληθυσμός GLOPOP-S/ΕΛΣΤΑΤ έχει δύο φύλα· οι επιλογές 3–4 δεν παράγονται (δηλώνεται στη μεθοδολογία)."}
+  D03: {class: E, sources: [population], model: {kind: profile, attribute: region,
+        map: {GRCr101: "1", GRCr106: "2", GRCr105: "3", GRCr107: "4", GRCr108: "5", GRCr109: "6", GRCr110: "7", GRCr111: "8", GRCr112: "9", GRCr113: "10", GRCr102: "11", GRCr103: "12", GRCr104: "13"}}}
+
+  Q01:
+    class: T
+    sources: [elec, hard]
+    assumptions: [A-Q01]
+    model:
+      kind: nominal
+      base: {"1": 0.72, "2": 0.255, "3": 0.025}
+      effects:
+        - {code: "1", var: digital, coef: 0.25}
+        - {code: "3", when: "age_band == '65+'", shift: 0.7}
+      lowerBounds: [{code: "1", expr: "elec_any"}]
+  Q02:
+    class: T
+    sources: [elec, hard, buy3]
+    assumptions: [A-DIGITAL, A-CHOICE]
+    model:
+      kind: multi
+      base: {"1": 0.62, "2": 0.30, "3": 0.18, "4": 0.28, "5": 0.05, "6": 0.03, "7": 0.03}
+      effects:
+        - {code: "2", var: digital, coef: 0.45}
+        - {code: "4", var: digital, coef: 0.55}
+        - {code: "1", when: "age_band in ['55-64', '65+']", shift: 0.35}
+        - {code: "3", when: "urban == 'rural'", shift: 0.35}
+      unionLowerBound: {codes: ["2", "4", "5", "6"], expr: "elec_buyer"}
+  Q03:
+    class: S
+    assumptions: [A-CHOICE, A-PRICE, A-DIGITAL]
+    model:
+      kind: multi
+      base: {"1": 0.62, "2": 0.33, "3": 0.28, "4": 0.16, "5": 0.30, "6": 0.14, "7": 0.15, "8": 0.12, "9": 0.24, "10": 0.10, "11": 0.02}
+      effects:
+        - {code: "1", var: L_price, coef: 0.6}
+        - {code: "10", var: L_price, coef: 0.5}
+        - {code: "8", var: digital, coef: 0.5}
+        - {code: "9", var: L_brand, coef: 0.2}
+        - {code: "4", when: "age_band == '65+'", shift: 0.4}
+  Q04:
+    class: S
+    assumptions: [A-AWARE]
+    model:
+      kind: nominal
+      base: {"1": 0.03, "2": 0.30, "3": 0.45, "4": 0.22}
+      effects:
+        - {code: "2", when: "age_band in ['15-24', '65+']", shift: 0.35}
+        - {code: "1", when: "age_band == '65+' and urban == 'rural'", shift: 0.6}
+        - {code: "4", var: digital, coef: 0.15}
+        - {code: "4", when: "region in ['GRCr101', 'GRCr106']", shift: 0.2}
+  Q05:
+    class: S
+    assumptions: [A-CUST]
+    model:
+      kind: nominal
+      base: {"1": 0.40, "2": 0.57, "3": 0.03}
+      effects:
+        - {code: "1", when: "Q04 == '2'", shift: -1.6}
+        - {code: "1", when: "Q04 == '4'", shift: 0.9}
+        - {code: "1", when: "Q01 == '2'", shift: -9}
+        - {code: "1", when: "Q01 == '3'", shift: -1.5}
+        - {code: "1", var: L_brand, coef: 0.4}
+  Q06:
+    class: S
+    assumptions: [A-DIGITAL]
+    model:
+      kind: nominal
+      base: {"1": 0.60, "2": 0.33, "3": 0.03, "4": 0.04}
+      effects:
+        - {code: "2", var: digital, coef: 0.6}
+        - {code: "1", when: "Q01 == '1' and not (contains(Q02, '1') or contains(Q02, '7'))", shift: -9}
+        - {code: "2", when: "Q01 == '1' and not (contains(Q02, '2') or contains(Q02, '4') or contains(Q02, '7'))", shift: -9}
+  Q07:
+    class: S
+    assumptions: [A-CHOICE]
+    model:
+      kind: nominal
+      base: {"1": 0.24, "2": 0.22, "3": 0.14, "4": 0.14, "5": 0.19, "6": 0.04, "7": 0.03}
+      effects:
+        - {code: "4", var: digital, coef: 0.3}
+        - {code: "5", when: "age_band in ['15-24', '25-34']", shift: 0.5}
+        - {code: "1", when: "age_band in ['45-54', '55-64', '65+']", shift: 0.3}
+  Q14:
+    class: T
+    sources: [delay, buy3]
+    assumptions: [A-DELAY]
+    model:
+      kind: nominal
+      base: {"1": 0.58, "2": 0.22, "4": 0.08, "5": 0.12}
+      effects:
+        - {code: "5", when: "Q06 == '1'", shift: 1.4}
+        - {code: "1", var: L_exp, coef: 0.4}
+      probFrom: [{code: "3", expr: "inv_logit(logit(r_delay * (0.5 + 0.5 * (Q06 == '2'))) - 0.4 * L_exp)"}]
+  Q15:
+    class: T
+    sources: [delay, wrong, compl, buy3]
+    assumptions: [A-DELAY, A-EXTRA]
+    model:
+      kind: nominal
+      base: {"2": 0.96, "3": 0.04}
+      probFrom: [{code: "1", expr: "max(0.85 * (Q14 == '3'), inv_logit(logit(union(r_delay * (0.5 + 0.5 * (Q06 == '2')), r_wrong, r_compl, 0.06)) - 0.5 * L_exp))"}]
+  Q16:
+    class: T
+    sources: [delay, wrong, compl, info, buy3]
+    assumptions: [A-DELAY, A-EXTRA]
+    model:
+      kind: multi
+      base: {"3": 0.18, "5": 0.14, "8": 0.06}
+      probFrom:
+        - {code: "1", expr: "max(0.9 * (Q14 == '3'), min(0.8, 0.02 + (Q14 != '1') * r_delay / max(0.05, union(r_delay, r_wrong, r_compl, 0.06))))"}
+        - {code: "2", expr: "min(0.8, r_wrong / max(0.05, union(r_delay, r_wrong, r_compl, 0.06)))"}
+        - {code: "4", expr: "min(0.7, 0.05 + r_compl / max(0.05, union(r_delay, r_wrong, r_compl, 0.06)))"}
+        - {code: "6", expr: "min(0.6, 0.6 * r_compl / max(0.05, union(r_delay, r_wrong, r_compl, 0.06)))"}
+        - {code: "7", expr: "min(0.5, r_info / max(0.05, union(r_delay, r_wrong, r_compl, 0.06)))"}
+  Q17:
+    class: S
+    model: {kind: nominal, base: {"1": 0.72, "2": 0.24, "3": 0.04}, effects: [{code: "1", when: "contains(Q16, '2') or contains(Q16, '5')", shift: 0.6}]}
+  Q18:
+    class: S
+    assumptions: [A-EXP]
+    model:
+      kind: nominal
+      base: {"1": 0.46, "2": 0.24, "3": 0.21, "4": 0.09}
+      effects:
+        - {code: "1", var: L_exp, coef: 0.7}
+        - {code: "3", var: L_exp, coef: -0.6}
+        - {code: "1", when: "Q17 == '2'", shift: -0.9}
+  Q19:
+    class: S
+    assumptions: [A-EXP]
+    model:
+      kind: ordinal
+      scale: ["1", "2", "3", "4", "5"]
+      base: [0.14, 0.18, 0.28, 0.27, 0.13]
+      loadings: {L_exp: 0.6}
+      effects: [{when: "Q18 == '1'", shift: 1.0}, {when: "Q18 == '3'", shift: -1.3}]
+      extra: [{code: "6", base: 0.03}]
+  Q20:
+    class: S
+    assumptions: [A-EXP]
+    model:
+      kind: ordinal
+      scale: ["1", "2", "3", "4", "5"]
+      base: [0.18, 0.30, 0.36, 0.12, 0.04]
+      loadings: {L_exp: 0.5}
+      effects: [{when: "Q18 == '1'", shift: 0.8}, {when: "Q18 == '3'", shift: -1.2}, {when: "Q19 in ['4', '5']", shift: 0.4}]
+      extra: [{code: "6", base: 0.03}]
+  Q21:
+    class: S
+    assumptions: [A-EXP]
+    model:
+      kind: nominal
+      base: {"1": 0.16, "2": 0.30, "3": 0.10, "4": 0.06, "5": 0.12, "6": 0.14, "7": 0.04, "8": 0.08}
+      effects:
+        - {code: "1", when: "Q18 == '3'", shift: 0.9}
+        - {code: "2", when: "Q18 in ['2', '3']", shift: 0.5}
+        - {code: "5", when: "Q18 == '1'", shift: 1.0}
+        - {code: "6", when: "Q18 == '1'", shift: 1.1}
+        - {code: "6", when: "Q18 == '3'", shift: -2}
+  Q12:
+    class: S
+    assumptions: [A-ATT, A-EXP]
+    model:
+      kind: ordinal
+      scale: ["1", "2", "3", "4", "5"]
+      base: [0.04, 0.09, 0.22, 0.42, 0.23]
+      loadings: {L_exp: 1.0, L_brand: 0.3}
+      effects: [{when: "Q15 == '1'", shift: -0.6}, {when: "Q18 == '3'", shift: -0.9}, {when: "Q14 == '3'", shift: -0.5}, {when: "Q18 == '1'", shift: 0.3}]
+      extra: [{code: "6", base: 0.02}]
+  Q13:
+    class: S
+    assumptions: [A-ATT, A-EXP]
+    model:
+      kind: ordinal
+      scale: ["1", "2", "3", "4", "5"]
+      base: [0.04, 0.09, 0.25, 0.40, 0.22]
+      loadings: {L_exp: 0.8}
+      effects: [{when: "Q14 == '3'", shift: -0.6}, {when: "contains(Q16, '7')", shift: -0.7}]
+      extra: [{code: "6", base: 0.05, effects: [{when: "Q06 == '1'", shift: 0.9}]}]
+  Q08:
+    class: S
+    assumptions: [A-ATT, A-EXP, A-FAM]
+    model: &att
+      kind: ordinal
+      scale: ["1", "2", "3", "4", "5"]
+      base: [0.05, 0.12, 0.33, 0.35, 0.15]
+      loadings: {L_brand: 1.0}
+      effects:
+        - {when: "Q05 == '1'", var: L_exp, coef: 0.6}
+        - {when: "Q05 == '1'", shift: 0.2}
+        - {when: "Q18 == '3'", shift: -0.7}
+        - {when: "Q20 in ['1', '2']", shift: -0.4}
+        - {when: "Q18 == '1'", shift: 0.2}
+        - {when: "Q04 == '2'", shift: -0.35, assumption: A-FAM}
+      extra: [{code: "6", base: 0.03, effects: [{when: "Q04 == '2'", shift: 1.6}, {when: "Q04 == '4'", shift: -1.0}]}]
+  Q09:
+    class: S
+    assumptions: [A-ATT, A-EXP, A-FAM]
+    model:
+      kind: ordinal
+      scale: ["1", "2", "3", "4", "5"]
+      base: [0.06, 0.16, 0.36, 0.31, 0.11]
+      loadings: {L_brand: 1.0}
+      effects:
+        - {when: "Q05 == '1'", var: L_exp, coef: 0.6}
+        - {when: "Q18 == '3'", shift: -0.8}
+        - {when: "Q20 in ['1', '2']", shift: -0.6}
+        - {when: "Q20 in ['4', '5']", shift: 0.3}
+        - {when: "Q08 == '1'", shift: -0.8}
+        - {when: "Q04 == '2'", shift: -0.7, assumption: A-FAM}
+        - {when: "Q04 == '4'", shift: 0.25, assumption: A-FAM}
+        - {when: "Q08 == '5'", shift: 0.6}
+      extra: [{code: "6", base: 0.04, effects: [{when: "Q04 == '2'", shift: 1.6}, {when: "Q04 == '4'", shift: -1.0}]}]
+  Q10:
+    class: S
+    assumptions: [A-ATT, A-EXP, A-FAM]
+    model:
+      kind: ordinal
+      scale: ["1", "2", "3", "4", "5"]
+      base: [0.05, 0.14, 0.38, 0.33, 0.10]
+      loadings: {L_brand: 0.9}
+      effects:
+        - {when: "Q05 == '1'", var: L_exp, coef: 0.6}
+        - {when: "Q14 == '3'", shift: -0.6}
+        - {when: "Q18 == '3'", shift: -0.7}
+        - {when: "Q04 == '2'", shift: -0.5, assumption: A-FAM}
+      extra: [{code: "6", base: 0.06, effects: [{when: "Q04 == '2'", shift: 1.7}, {when: "Q04 == '4'", shift: -1.0}]}]
+  Q11:
+    class: S
+    assumptions: [A-CHOICE]
+    model:
+      kind: multi
+      base: {"1": 0.40, "2": 0.36, "3": 0.36, "4": 0.30, "5": 0.28, "6": 0.16, "7": 0.28, "8": 0.06, "9": 0.20, "10": 0.02}
+      effects:
+        - {code: "8", var: L_csr, coef: 0.8}
+        - {code: "9", var: digital, coef: 0.4}
+        - {code: "2", var: L_price, coef: 0.3}
+        - {code: "1", when: "contains(Q16, '1')", shift: 0.8}
+        - {code: "5", when: "contains(Q16, '6')", shift: 0.8}
+  Q22:
+    class: S
+    assumptions: [A-ATT]
+    model:
+      kind: ordinal
+      scale: ["1", "2", "3", "4", "5"]
+      base: [0.04, 0.12, 0.50, 0.25, 0.09]
+      loadings: {L_brand: 0.9}
+      effects: [{when: "Q05 == '1'", var: L_exp, coef: 0.4}, {when: "Q18 == '3'", shift: -0.5}]
+      extra: [{code: "6", base: 0.08, effects: [{when: "Q04 == '2'", shift: 1.3}, {when: "Q05 == '1'", shift: -0.8}]}]
+  Q23:
+    class: S
+    assumptions: [A-CHOICE]
+    model:
+      kind: multi
+      base: {"1": 0.40, "2": 0.30, "3": 0.36, "4": 0.14, "5": 0.12, "6": 0.06, "7": 0.36, "8": 0.02, "9": 0.04}
+      effects:
+        - {code: "7", var: L_brand, coef: 0.9}
+        - {code: "7", when: "Q05 == '1'", shift: 0.6}
+        - {code: "7", when: "Q04 == '1'", shift: -12}
+        - {code: "7", when: "Q04 == '2'", shift: -0.6}
+        - {code: "7", when: "Q18 == '3'", shift: -0.8}
+        - {code: "3", var: digital, coef: 0.6}
+        - {code: "5", when: "urban == 'rural'", shift: 0.4}
+  Q24:
+    class: S
+    assumptions: [A-ATT, A-EXP]
+    model:
+      kind: ordinal
+      scale: ["1", "2", "3", "4", "5"]
+      base: [0.08, 0.17, 0.32, 0.30, 0.13]
+      loadings: {L_brand: 1.1}
+      effects:
+        - {when: "Q05 == '1'", shift: 0.35}
+        - {when: "contains(Q23, '7')", shift: 0.8}
+        - {when: "Q05 == '1'", var: L_exp, coef: 0.4}
+        - {when: "Q18 == '3'", shift: -0.7}
+      extra: [{code: "6", base: 0.05}]
+  Q25:
+    class: S
+    assumptions: [A-ATT, A-EXP]
+    model:
+      kind: ordinal
+      scale: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"]
+      base: [0.05, 0.02, 0.03, 0.04, 0.05, 0.13, 0.10, 0.16, 0.17, 0.10, 0.15]
+      loadings: {L_brand: 1.2}
+      effects:
+        - {when: "Q05 == '1'", var: L_exp, coef: 0.5}
+        - {when: "Q24 == '5'", shift: 0.6}
+        - {when: "Q24 == '1'", shift: -0.6}
+        - {when: "Q18 == '3'", shift: -0.7}
+      extra: [{code: "12", base: 0.05, effects: [{when: "Q04 == '2'", shift: 1.2}, {when: "Q05 == '1'", shift: -0.8}]}]
+  Q26:
+    class: S
+    assumptions: [A-ATT]
+    model:
+      kind: nominal
+      base: {"1": 0.13, "2": 0.07, "3": 0.03, "4": 0.71, "5": 0.06}
+      effects:
+        - {code: "1", var: L_brand, coef: 0.8}
+        - {code: "2", var: L_brand, coef: -0.8}
+        - {code: "1", when: "Q05 == '1'", shift: 0.5}
+        - {code: "2", when: "Q18 == '3'", shift: 1.2}
+        - {code: "1", when: "Q08 in ['1', '2']", shift: -2}
+        - {code: "1", when: "Q04 == '2'", shift: -0.7}
+  Q27:
+    class: S
+    assumptions: [A-CSR]
+    model: {kind: nominal, base: {"1": 0.20, "2": 0.62, "3": 0.18}, effects: [{code: "1", var: L_csr, coef: 0.4}, {code: "1", when: "Q04 == '4'", shift: 0.5}, {code: "1", when: "Q04 == '2'", shift: -0.6}]}
+  Q28:
+    class: S
+    assumptions: [A-CSR]
+    model:
+      kind: ordinal
+      scale: ["1", "2", "3", "4", "5"]
+      base: [0.10, 0.22, 0.35, 0.25, 0.08]
+      loadings: {L_csr: 1.0}
+      extra: [{code: "6", base: 0.03}]
+  Q29:
+    class: S
+    assumptions: [A-CSR, A-EXP]
+    model:
+      kind: ordinal
+      scale: ["1", "2", "3", "4", "5"]
+      base: [0.30, 0.30, 0.25, 0.11, 0.04]
+      loadings: {L_csr: 0.6}
+      effects: [{when: "Q15 == '1'", shift: -0.3}]
+      extra: [{code: "6", base: 0.04}]
+  Q30:
+    class: S
+    assumptions: [A-CHOICE, A-PRICE]
+    model:
+      kind: multi
+      base: {"1": 0.36, "2": 0.28, "3": 0.26, "4": 0.28, "5": 0.33, "6": 0.22, "7": 0.42, "8": 0.18, "9": 0.05, "10": 0.03, "11": 0.02}
+      effects:
+        - {code: "7", var: L_price, coef: 0.5}
+        - {code: "1", when: "contains(Q16, '1') or Q14 == '3'", shift: 0.9}
+        - {code: "3", when: "contains(Q16, '5')", shift: 0.9}
+        - {code: "4", when: "contains(Q16, '6')", shift: 0.9}
+        - {code: "5", when: "contains(Q16, '4')", shift: 0.8}
+        - {code: "9", var: L_csr, coef: 0.7}
+  Q31:
+    class: S
+    assumptions: [A-EXP]
+    model:
+      kind: ordinal
+      scale: ["1", "2", "3", "4", "5"]
+      base: [0.04, 0.10, 0.28, 0.37, 0.21]
+      loadings: {L_brand: 0.3}
+      effects: [{when: "Q18 == '1'", shift: 0.3}]
+      extra: [{code: "6", base: 0.04}]
+  Q32:
+    class: S
+    assumptions: [A-CHOICE]
+    model: {kind: nominal, base: {"1": 0.26, "2": 0.45, "3": 0.14, "4": 0.04, "5": 0.01, "6": 0.10}, effects: [{code: "1", when: "age_band in ['15-24', '25-34']", shift: 0.3}]}
+  Q33:
+    class: S
+    assumptions: [A-EXP]
+    model:
+      kind: nominal
+      base: {"1": 0.40, "2": 0.22, "3": 0.12, "4": 0.08, "5": 0.08, "6": 0.06, "7": 0.04}
+      effects: [{code: "2", var: L_price, coef: 0.3}, {code: "6", when: "Q18 == '3'", shift: 0.7}, {code: "6", var: L_brand, coef: -0.4}]
+  Q34:
+    class: S
+    assumptions: [A-CHOICE, A-PRICE]
+    model:
+      kind: nominal
+      base: {"1": 0.22, "2": 0.17, "3": 0.10, "4": 0.18, "5": 0.21, "6": 0.07, "7": 0.02, "8": 0.03}
+      effects:
+        - {code: "1", when: "contains(Q16, '1') or Q14 == '3'", shift: 1.0}
+        - {code: "2", when: "contains(Q16, '5') or contains(Q16, '3')", shift: 0.9}
+        - {code: "3", when: "contains(Q16, '6')", shift: 0.9}
+        - {code: "4", when: "contains(Q16, '4') or Q17 == '1' and Q18 == '3'", shift: 0.8}
+        - {code: "5", var: L_price, coef: 0.4}
