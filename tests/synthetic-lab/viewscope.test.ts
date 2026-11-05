@@ -92,6 +92,10 @@ describe('Viewscope v2 — πολιτικές μελέτες: εθνικά πο�
     expect(s.subgroups!.isForecast).toBe(false);
     expect(s.subgroups!.label).toBe(SUBGROUP_LABEL);
     expect(politicalSplit({ id: 'x', type: 'single_choice', text: 'Πόσο συχνά αγοράζετε φρούτα;', options: ['Συχνά', 'Σπάνια'] }, route({}))).toBeNull();
+    // σε πολιτική μελέτη, ΚΑΘΕ ερώτηση (π.χ. γνώμη για πρόσωπο χωρίς λέξη-κλειδί) έχει υποομάδες μόνο ως S
+    const leader: Question = { id: 'l', type: 'single_choice', text: 'Έχετε θετική ή αρνητική γνώμη για τον Κυριάκο Μητσοτάκη;', options: ['Θετική', 'Αρνητική'] };
+    expect(politicalSplit(leader, route({}))).toBeNull();
+    expect(politicalSplit(leader, route({}), undefined, 'political')!.subgroups!.isForecast).toBe(false);
   });
 });
 

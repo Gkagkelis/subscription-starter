@@ -13,12 +13,16 @@ export interface PoliticalSplit {
   subgroups: { class: 'S' | 'T' | 'E'; isForecast: boolean; label: string; route: string; segments: string[] } | null;
 }
 
-export function isPolitical(q: Question): boolean {
-  return detectDomain(q) === 'POLITICAL';
+/**
+ * Πολιτική ερώτηση: (α) κάθε ερώτηση μελέτης με domain «political» (συντηρητικά — ο έλεγχος αποδοχής έδειξε ότι οι λέξεις-κλειδιά
+ * χάνουν π.χ. «γνώμη για τον Κυριάκο Μητσοτάκη» ή «πορεία της χώρας»), ή (β) ερώτηση που οι κανόνες τομέα αναγνωρίζουν ως πολιτική.
+ */
+export function isPolitical(q: Question, planDomain?: string | null): boolean {
+  return planDomain === 'political' || detectDomain(q) === 'POLITICAL';
 }
 
-export function politicalSplit(q: Question, r: QuestionRoute, a?: QuestionAggregate): PoliticalSplit | null {
-  if (!isPolitical(q)) return null;
+export function politicalSplit(q: Question, r: QuestionRoute, a?: QuestionAggregate, planDomain?: string | null): PoliticalSplit | null {
+  if (!isPolitical(q, planDomain)) return null;
   const sub = loadRoutes().routes['political_subgroup'];
   const validatedSub = isValidatedStatus(sub?.validation.status);
   const segments = Object.keys(a?.bySegment || {});

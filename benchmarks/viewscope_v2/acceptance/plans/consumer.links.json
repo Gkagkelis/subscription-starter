@@ -1,0 +1,69 @@
+{
+ "version": "vs-core-1.0",
+ "model": "pie-0.7",
+ "atten": 0.5,
+ "links": {
+  "s2": {
+   "enabled": false,
+   "analogs": [],
+   "reason": "ονομαστικές επιλογές χωρίς φορά — μένει ανεξάρτητη"
+  },
+  "q1": {
+   "enabled": false,
+   "analogs": [],
+   "reason": "μορφή «concept_test» — δεν συνδέεται"
+  },
+  "q5": {
+   "enabled": false,
+   "analogs": [],
+   "reason": "μορφή «multiple_choice» — δεν συνδέεται"
+  },
+  "q6": {
+   "enabled": false,
+   "analogs": [],
+   "reason": "ονομαστικές επιλογές χωρίς φορά — μένει ανεξάρτητη"
+  },
+  "q7": {
+   "enabled": false,
+   "analogs": [],
+   "reason": "μορφή «open_ended» — δεν συνδέεται"
+  },
+  "s1": {
+   "domain": "economic",
+   "enabled": false,
+   "analogs": [
+    {
+     "itemId": "dn2022b::Q22",
+     "sim": 0.5998361409007252,
+     "sign": 1,
+     "weight": 0.3355321431893359
+    },
+    {
+     "itemId": "dn2024c::Q26",
+     "sim": 0.5977352907094923,
+     "sign": 1,
+     "weight": 0.3343569843099032
+    },
+    {
+     "itemId": "dn2022a::Q291::m2",
+     "sim": 0.5901444491966071,
+     "sign": -1,
+     "weight": 0.3301108725007609
+    }
+   ],
+   "reason": "τομέας «economic»: ανεπαρκή δεδομένα αξιολόγησης (8 ζεύγη σε έρευνες ελέγχου) — μένει η προηγούμενη (ανεξάρτητη) συμπεριφορά"
+  },
+  "b1": {
+   "domain": "consumer",
+   "enabled": false,
+   "analogs": [],
+   "reason": "χωρίς συγγενικό item (ομοιότητα/πρόσημο)"
+  },
+  "q2": {
+   "domain": "consumer",
+   "enabled": false,
+   "analogs": [],
+   "reason": "χωρίς συγγενικό item (ομοιότητα/πρόσημο)"
+  }
+ }
+}

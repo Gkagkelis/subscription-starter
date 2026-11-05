@@ -1,0 +1,192 @@
+{
+ "version": "vs-core-1.0",
+ "model": "pie-0.7",
+ "atten": 0.5,
+ "links": {
+  "q5": {
+   "enabled": false,
+   "analogs": [],
+   "reason": "μορφή «multiple_choice» — δεν συνδέεται"
+  },
+  "q6": {
+   "enabled": false,
+   "analogs": [],
+   "reason": "μορφή «open_ended» — δεν συνδέεται"
+  },
+  "q2": {
+   "domain": "political",
+   "enabled": true,
+   "analogs": [
+    {
+     "itemId": "dn2015a::Q016_3",
+     "sim": 0.8110036639718576,
+     "sign": 1,
+     "weight": 0.34333787225435014
+    },
+    {
+     "itemId": "dn2015n::Q056_3",
+     "sim": 0.8110036639718576,
+     "sign": 1,
+     "weight": 0.34333787225435014
+    },
+    {
+     "itemId": "dn2015a::Q016_1",
+     "sim": 0.7401080386100022,
+     "sign": 1,
+     "weight": 0.3133242554912998
+    }
+   ],
+   "reason": "ok"
+  },
+  "s1": {
+   "domain": "political",
+   "enabled": true,
+   "analogs": [
+    {
+     "itemId": "dn2018b::B21_1",
+     "sim": 0.9945537642120503,
+     "sign": 1,
+     "weight": 0.3623355722725215
+    },
+    {
+     "itemId": "dn2018b::B21_6",
+     "sim": 0.8824494428442768,
+     "sign": 1,
+     "weight": 0.32149375466681757
+    },
+    {
+     "itemId": "dn2018b::B21_21",
+     "sim": 0.8678384268311178,
+     "sign": 1,
+     "weight": 0.316170673060661
+    }
+   ],
+   "reason": "ok"
+  },
+  "s2": {
+   "domain": "consumer",
+   "enabled": true,
+   "analogs": [
+    {
+     "itemId": "dn2018b::B21_24",
+     "sim": 0.9951554512325788,
+     "sign": 1,
+     "weight": 0.39133496650608385
+    },
+    {
+     "itemId": "dn2024a::Q26_11",
+     "sim": 0.7806523840136318,
+     "sign": -1,
+     "weight": 0.30698377240710223
+    },
+    {
+     "itemId": "dn2024c::Q23_7",
+     "sim": 0.7671682246687108,
+     "sign": 1,
+     "weight": 0.3016812610868139
+    }
+   ],
+   "reason": "ok"
+  },
+  "q3": {
+   "domain": "political",
+   "enabled": true,
+   "analogs": [
+    {
+     "itemId": "dn2015n::Q054_6",
+     "sim": 0.7226279493115889,
+     "sign": -1,
+     "weight": 0.337347818226912
+    },
+    {
+     "itemId": "cses2015a::IMD3010",
+     "sim": 0.709728893072972,
+     "sign": -1,
+     "weight": 0.331326090886544
+    },
+    {
+     "itemId": "cses2019::IMD3010",
+     "sim": 0.709728893072972,
+     "sign": -1,
+     "weight": 0.331326090886544
+    }
+   ],
+   "reason": "ok"
+  },
+  "q4": {
+   "domain": "social",
+   "enabled": true,
+   "analogs": [
+    {
+     "itemId": "dn2020a::Q31",
+     "sim": 0.5860615981420526,
+     "sign": 1,
+     "weight": 0.3350055429697423
+    },
+    {
+     "itemId": "dn2024a::Q3",
+     "sim": 0.5835528321570331,
+     "sign": 1,
+     "weight": 0.33357147782426966
+    },
+    {
+     "itemId": "dn2022a::Q11",
+     "sim": 0.5797942300674257,
+     "sign": 1,
+     "weight": 0.331422979205988
+    }
+   ],
+   "reason": "ok"
+  },
+  "x1": {
+   "domain": "social",
+   "enabled": true,
+   "analogs": [
+    {
+     "itemId": "dn2015n::Q056_7",
+     "sim": 0.8288367290253567,
+     "sign": 1,
+     "weight": 0.3436725696104216
+    },
+    {
+     "itemId": "dn2015a::Q016_7",
+     "sim": 0.8288367290253567,
+     "sign": 1,
+     "weight": 0.3436725696104216
+    },
+    {
+     "itemId": "dn2017::trust_Justice",
+     "sim": 0.7540311768723028,
+     "sign": 1,
+     "weight": 0.3126548607791568
+    }
+   ],
+   "reason": "ok"
+  },
+  "x2": {
+   "domain": "social",
+   "enabled": true,
+   "analogs": [
+    {
+     "itemId": "undpolar2022::life_satisfaction_cat",
+     "sim": 0.873414178310081,
+     "sign": -1,
+     "weight": 0.4215017040653745
+    },
+    {
+     "itemId": "undpolar2022::hhincome",
+     "sim": 0.6003827023799914,
+     "sign": -1,
+     "weight": 0.28973920784544255
+    },
+    {
+     "itemId": "maple2019feb::Q9_w1",
+     "sim": 0.5983517485705467,
+     "sign": 1,
+     "weight": 0.28875908808918294
+    }
+   ],
+   "reason": "ok"
+  }
+ }
+}

@@ -1,0 +1,165 @@
+{
+ "version": "vs-core-1.0",
+ "model": "pie-0.7",
+ "atten": 0.5,
+ "links": {
+  "h1": {
+   "enabled": false,
+   "analogs": [],
+   "reason": "ονομαστικές επιλογές χωρίς φορά — μένει ανεξάρτητη"
+  },
+  "q5": {
+   "enabled": false,
+   "analogs": [],
+   "reason": "μορφή «multiple_choice» — δεν συνδέεται"
+  },
+  "q6": {
+   "enabled": false,
+   "analogs": [],
+   "reason": "μορφή «open_ended» — δεν συνδέεται"
+  },
+  "e1": {
+   "enabled": false,
+   "analogs": [],
+   "reason": "ονομαστικές επιλογές χωρίς φορά — μένει ανεξάρτητη"
+  },
+  "q1": {
+   "domain": "social",
+   "enabled": true,
+   "analogs": [
+    {
+     "itemId": "dn2020b::Q251",
+     "sim": 0.6319488747297056,
+     "sign": 1,
+     "weight": 0.34334940371317535
+    },
+    {
+     "itemId": "dn2020a::Q361",
+     "sim": 0.617532839819269,
+     "sign": 1,
+     "weight": 0.3355169077814058
+    },
+    {
+     "itemId": "undpolar2022::collectiv_narcissism_2",
+     "sim": 0.5910599258192678,
+     "sign": -1,
+     "weight": 0.32113368850541885
+    }
+   ],
+   "reason": "ok"
+  },
+  "q2": {
+   "domain": "political",
+   "enabled": true,
+   "analogs": [
+    {
+     "itemId": "dn2015a::Q016_3",
+     "sim": 0.8110036639718576,
+     "sign": 1,
+     "weight": 0.34333787225435014
+    },
+    {
+     "itemId": "dn2015n::Q056_3",
+     "sim": 0.8110036639718576,
+     "sign": 1,
+     "weight": 0.34333787225435014
+    },
+    {
+     "itemId": "dn2015a::Q016_1",
+     "sim": 0.7401080386100022,
+     "sign": 1,
+     "weight": 0.3133242554912998
+    }
+   ],
+   "reason": "ok"
+  },
+  "h2": {
+   "domain": "economic",
+   "enabled": false,
+   "analogs": [
+    {
+     "itemId": "undpolar2022::subj_inequality_2",
+     "sim": 0.6407438408835189,
+     "sign": -1,
+     "weight": 1.0
+    }
+   ],
+   "reason": "τομέας «economic»: ανεπαρκή δεδομένα αξιολόγησης (8 ζεύγη σε έρευνες ελέγχου) — μένει η προηγούμενη (ανεξάρτητη) συμπεριφορά"
+  },
+  "q3": {
+   "domain": "social",
+   "enabled": true,
+   "analogs": [
+    {
+     "itemId": "dn2022a::Q291::m15",
+     "sim": 0.5935134656473455,
+     "sign": 1,
+     "weight": 0.3379951528101027
+    },
+    {
+     "itemId": "dn2018b::B21_12",
+     "sim": 0.5903177405884719,
+     "sign": -1,
+     "weight": 0.3361752453570595
+    },
+    {
+     "itemId": "dn2018b::B21_16",
+     "sim": 0.572150974907478,
+     "sign": -1,
+     "weight": 0.3258296018328378
+    }
+   ],
+   "reason": "ok"
+  },
+  "q4": {
+   "domain": "social",
+   "enabled": true,
+   "analogs": [
+    {
+     "itemId": "dn2020a::Q31",
+     "sim": 0.5860615981420526,
+     "sign": 1,
+     "weight": 0.3350055429697423
+    },
+    {
+     "itemId": "dn2024a::Q3",
+     "sim": 0.5835528321570331,
+     "sign": 1,
+     "weight": 0.33357147782426966
+    },
+    {
+     "itemId": "dn2022a::Q11",
+     "sim": 0.5797942300674257,
+     "sign": 1,
+     "weight": 0.331422979205988
+    }
+   ],
+   "reason": "ok"
+  },
+  "e2": {
+   "domain": "economic",
+   "enabled": false,
+   "analogs": [
+    {
+     "itemId": "maple2019feb::Q8_w1",
+     "sim": 0.7156176716551639,
+     "sign": 1,
+     "weight": 0.3574039726319365
+    },
+    {
+     "itemId": "cses2015a::IMD3013_1",
+     "sim": 0.6433239529119051,
+     "sign": 1,
+     "weight": 0.3212980136840317
+    },
+    {
+     "itemId": "cses2015b::IMD3013_1",
+     "sim": 0.6433239529119051,
+     "sign": 1,
+     "weight": 0.3212980136840317
+    }
+   ],
+   "reason": "τομέας «economic»: ανεπαρκή δεδομένα αξιολόγησης (8 ζεύγη σε έρευνες ελέγχου) — μένει η προηγούμενη (ανεξάρτητη) συμπεριφορά"
+  }
+ }
+}

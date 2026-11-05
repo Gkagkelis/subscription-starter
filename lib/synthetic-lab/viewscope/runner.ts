@@ -201,7 +201,7 @@ export async function runViewscope(o: ViewscopeOptions): Promise<ViewscopeRun> {
     if (!overrides.some((x) => x.questionId === q.id) && !respondents.some((r) => r.answers.some((a) => a.questionId === q.id && a.rationale?.startsWith('vs2')))) return base.aggregates.find((a) => a.questionId === q.id)!;
     return aggregateQuestion(q, respondents, personaMap);
   });
-  const political = qs.map((q, i) => politicalSplit(q, routes[i], aggregates[i])).filter((x): x is PoliticalSplit => !!x);
+  const political = qs.map((q, i) => politicalSplit(q, routes[i], aggregates[i], o.plan.domain)).filter((x): x is PoliticalSplit => !!x);
   if (political.some((p) => p.subgroups && !p.subgroups.isForecast)) warnings.push('Πολιτικές υποομάδες: οι διαφορές ομάδων ΔΕΝ έχουν επικυρωθεί (P2) — παρουσιάζονται μόνο ως σενάριο S, όχι ως πρόβλεψη.');
   const run: ViewscopeRun = {
     version: VIEWSCOPE_VERSION,

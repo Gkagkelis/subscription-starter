@@ -1,0 +1,247 @@
+{
+ "version": "vs-core-1.0",
+ "model": "pie-0.7",
+ "atten": 0.5,
+ "links": {
+  "p1": {
+   "enabled": false,
+   "analogs": [],
+   "reason": "ονομαστικές επιλογές χωρίς φορά — μένει ανεξάρτητη"
+  },
+  "p7": {
+   "enabled": false,
+   "analogs": [],
+   "reason": "μορφή «open_ended» — δεν συνδέεται"
+  },
+  "t1": {
+   "enabled": false,
+   "analogs": [],
+   "reason": "ονομαστικές επιλογές χωρίς φορά — μένει ανεξάρτητη"
+  },
+  "p2": {
+   "domain": "social",
+   "enabled": true,
+   "analogs": [
+    {
+     "itemId": "dn2015n::Q022",
+     "sim": 0.6565548011924042,
+     "sign": 1,
+     "weight": 0.3457764725028001
+    },
+    {
+     "itemId": "dn2020b::Q251",
+     "sim": 0.6338163017480442,
+     "sign": 1,
+     "weight": 0.33380117643673174
+    },
+    {
+     "itemId": "dn2020a::Q361",
+     "sim": 0.6084128034373558,
+     "sign": 1,
+     "weight": 0.3204223510604681
+    }
+   ],
+   "reason": "ok"
+  },
+  "p3": {
+   "domain": "political",
+   "enabled": true,
+   "analogs": [
+    {
+     "itemId": "dn2015n::Q056_3",
+     "sim": 0.8141833299163568,
+     "sign": 1,
+     "weight": 0.34617987112284904
+    },
+    {
+     "itemId": "dn2015a::Q016_3",
+     "sim": 0.8141833299163568,
+     "sign": 1,
+     "weight": 0.34617987112284904
+    },
+    {
+     "itemId": "dn2017::trust_Gov",
+     "sim": 0.7235416913822739,
+     "sign": 1,
+     "weight": 0.3076402577543018
+    }
+   ],
+   "reason": "ok"
+  },
+  "p4": {
+   "domain": "political",
+   "enabled": true,
+   "analogs": [
+    {
+     "itemId": "cses2009::IMD3010",
+     "sim": 0.9913114942857216,
+     "sign": 1,
+     "weight": 0.33333333333333337
+    },
+    {
+     "itemId": "cses2019::IMD3010",
+     "sim": 0.9913114942857216,
+     "sign": 1,
+     "weight": 0.33333333333333337
+    },
+    {
+     "itemId": "cses2015a::IMD3010",
+     "sim": 0.9913114942857216,
+     "sign": 1,
+     "weight": 0.33333333333333337
+    }
+   ],
+   "reason": "ok"
+  },
+  "p5": {
+   "domain": "social",
+   "enabled": true,
+   "analogs": [
+    {
+     "itemId": "dn2020b::Q223",
+     "sim": 0.6956256913806249,
+     "sign": 1,
+     "weight": 0.35614817117309805
+    },
+    {
+     "itemId": "dn2020b::Q225",
+     "sim": 0.6316594636486516,
+     "sign": 1,
+     "weight": 0.323398582844396
+    },
+    {
+     "itemId": "dn2020b::Q228",
+     "sim": 0.6259066558098455,
+     "sign": 1,
+     "weight": 0.320453245982506
+    }
+   ],
+   "reason": "ok"
+  },
+  "s1": {
+   "domain": "social",
+   "enabled": true,
+   "analogs": [
+    {
+     "itemId": "dn2022b::Q04_5",
+     "sim": 0.9944992446078033,
+     "sign": 1,
+     "weight": 0.3478988674027482
+    },
+    {
+     "itemId": "dn2022b::Q04_4",
+     "sim": 0.9365168332597051,
+     "sign": 1,
+     "weight": 0.3276152770967156
+    },
+    {
+     "itemId": "dn2022b::Q04_3",
+     "sim": 0.9275711087832385,
+     "sign": 1,
+     "weight": 0.32448585550053616
+    }
+   ],
+   "reason": "ok"
+  },
+  "s2": {
+   "domain": "political",
+   "enabled": true,
+   "analogs": [
+    {
+     "itemId": "dn2020b::Q251",
+     "sim": 0.9972660834466032,
+     "sign": 1,
+     "weight": 0.37958059737089606
+    },
+    {
+     "itemId": "dn2020a::Q361",
+     "sim": 0.9287102975033827,
+     "sign": 1,
+     "weight": 0.35348681296019596
+    },
+    {
+     "itemId": "dn2015n::Q053",
+     "sim": 0.7013077593722707,
+     "sign": 1,
+     "weight": 0.26693258966890804
+    }
+   ],
+   "reason": "ok"
+  },
+  "t2": {
+   "domain": "political",
+   "enabled": true,
+   "analogs": [
+    {
+     "itemId": "cses2015b::IMD3014",
+     "sim": 0.8911291745936756,
+     "sign": 1,
+     "weight": 0.33333333333333337
+    },
+    {
+     "itemId": "cses2019::IMD3014",
+     "sim": 0.8911291745936756,
+     "sign": 1,
+     "weight": 0.33333333333333337
+    },
+    {
+     "itemId": "cses2009::IMD3014",
+     "sim": 0.8911291745936756,
+     "sign": 1,
+     "weight": 0.33333333333333337
+    }
+   ],
+   "reason": "ok"
+  },
+  "t3": {
+   "domain": "political",
+   "enabled": true,
+   "analogs": [
+    {
+     "itemId": "dn2015n::Q056_2",
+     "sim": 0.5813407006002163,
+     "sign": 1,
+     "weight": 0.3352635148598828
+    },
+    {
+     "itemId": "dn2015a::Q016_2",
+     "sim": 0.5813407006002163,
+     "sign": 1,
+     "weight": 0.3352635148598828
+    },
+    {
+     "itemId": "dn2024a::Q26_7",
+     "sim": 0.5713000039732762,
+     "sign": -1,
+     "weight": 0.32947297028023426
+    }
+   ],
+   "reason": "ok"
+  },
+  "t4": {
+   "domain": "political",
+   "enabled": true,
+   "analogs": [
+    {
+     "itemId": "dn2022b::Q03_1::m7",
+     "sim": 0.6858641467988317,
+     "sign": -1,
+     "weight": 0.33787358973484993
+    },
+    {
+     "itemId": "dn2022b::Q03_1::m4",
+     "sim": 0.6786433004918455,
+     "sign": -1,
+     "weight": 0.3343164228031009
+    },
+    {
+     "itemId": "dn2024c::Q4_1::m6",
+     "sim": 0.6654356072613855,
+     "sign": -1,
+     "weight": 0.3278099874620492
+    }
+   ],
+   "reason": "ok"
+  }
+ }
+}
