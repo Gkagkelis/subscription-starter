@@ -1,0 +1,76 @@
+{
+ "viewscopeVersion": "viewscope-2.0",
+ "platformCommit": "d01b571",
+ "engine": "egps-exp-0.1-platform+mc-logit-1.1",
+ "seed": 20261116,
+ "n": 500,
+ "seconds": 7.67,
+ "apiCalls": 0,
+ "reproducible": true,
+ "answersSha256": "b3eac61ce1dbf7709714e73a4f446bae2dc923e4b72a16af3efdd073a47d9561",
+ "flags": {
+  "publishedWaves": true,
+  "crosswalks": true,
+  "core": true,
+  "xtab": true,
+  "declared": false
+ },
+ "overrides": [
+  {
+   "questionId": "Q3",
+   "from": null,
+   "to": "crosswalk_anchor",
+   "class": "S",
+   "reason": "ρητός πίνακας econ4_hardship5: T 91.4% · S (παραδοχή διαχωρισμού) 8.6% — συντηρητικός κανόνας: κατηγορία ερώτησης S"
+  }
+ ],
+ "xtabReports": [],
+ "warnings": [
+  "Κοινός συνθετικός άνθρωπος (vs-core-1.0): καμία ερώτηση· οι υπόλοιπες διαδρομές περιθωρίου μένουν ανεξάρτητες.",
+  "Πολιτικές υποομάδες: οι διαφορές ομάδων ΔΕΝ έχουν επικυρωθεί (P2) — παρουσιάζονται μόνο ως σενάριο S, όχι ως πρόβλεψη."
+ ],
+ "coverage": {
+  "base": {
+   "questions": 20,
+   "technical": {
+    "n": 4,
+    "share": 0.2
+   },
+   "empirical": {
+    "n": 4,
+    "share": 0.2,
+    "E": 4,
+    "T": 0
+   },
+   "validated": {
+    "n": 4,
+    "share": 0.2,
+    "meanExpectedMAE": 8.5
+   },
+   "scenarioS": 0,
+   "abstained": 16,
+   "note": "Η τεχνική κάλυψη ΔΕΝ είναι προβλεπτική ακρίβεια· μόνο η επικυρωμένη κάλυψη συνοδεύεται από μετρημένο σφάλμα."
+  },
+  "v2": {
+   "questions": 20,
+   "technical": {
+    "n": 5,
+    "share": 0.25
+   },
+   "empirical": {
+    "n": 4,
+    "share": 0.2,
+    "E": 4,
+    "T": 0
+   },
+   "validated": {
+    "n": 4,
+    "share": 0.2,
+    "meanExpectedMAE": 8.5
+   },
+   "scenarioS": 1,
+   "abstained": 15,
+   "note": "Η τεχνική κάλυψη ΔΕΝ είναι προβλεπτική ακρίβεια· μόνο η επικυρωμένη κάλυψη συνοδεύεται από μετρημένο σφάλμα."
+  }
+ }
+}

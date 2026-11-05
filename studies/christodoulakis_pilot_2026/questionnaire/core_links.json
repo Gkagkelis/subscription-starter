@@ -1,0 +1,290 @@
+{
+ "version": "vs-core-1.0",
+ "model": "pie-0.7",
+ "atten": 0.5,
+ "links": {
+  "Q1": {
+   "enabled": false,
+   "analogs": [],
+   "reason": "ονομαστικές επιλογές χωρίς φορά — μένει ανεξάρτητη"
+  },
+  "Q2": {
+   "enabled": false,
+   "analogs": [],
+   "reason": "ονομαστικές επιλογές χωρίς φορά — μένει ανεξάρτητη"
+  },
+  "Q3": {
+   "enabled": false,
+   "analogs": [],
+   "reason": "ονομαστικές επιλογές χωρίς φορά — μένει ανεξάρτητη"
+  },
+  "Q14": {
+   "enabled": false,
+   "analogs": [],
+   "reason": "μορφή «multiple_choice» — δεν συνδέεται"
+  },
+  "Q15": {
+   "enabled": false,
+   "analogs": [],
+   "reason": "ονομαστικές επιλογές χωρίς φορά — μένει ανεξάρτητη"
+  },
+  "Q16": {
+   "enabled": false,
+   "analogs": [],
+   "reason": "μορφή «multiple_choice» — δεν συνδέεται"
+  },
+  "Q23": {
+   "enabled": false,
+   "analogs": [],
+   "reason": "ονομαστικές επιλογές χωρίς φορά — μένει ανεξάρτητη"
+  },
+  "Q24": {
+   "enabled": false,
+   "analogs": [],
+   "reason": "ονομαστικές επιλογές χωρίς φορά — μένει ανεξάρτητη"
+  },
+  "Q4": {
+   "domain": "economic",
+   "enabled": false,
+   "analogs": [
+    {
+     "itemId": "maple2019feb::Q8_w1",
+     "sim": 0.7223308965960649,
+     "sign": 1,
+     "weight": 0.35800275485223837
+    },
+    {
+     "itemId": "cses2019::IMD3013_1",
+     "sim": 0.6476688229552696,
+     "sign": 1,
+     "weight": 0.32099862257388084
+    },
+    {
+     "itemId": "cses2015a::IMD3013_1",
+     "sim": 0.6476688229552696,
+     "sign": 1,
+     "weight": 0.32099862257388084
+    }
+   ],
+   "reason": "τομέας «economic»: ανεπαρκή δεδομένα αξιολόγησης (8 ζεύγη σε έρευνες ελέγχου) — μένει η προηγούμενη (ανεξάρτητη) συμπεριφορά"
+  },
+  "Q5": {
+   "domain": "political",
+   "enabled": true,
+   "analogs": [
+    {
+     "itemId": "dn2015n::Q056_3",
+     "sim": 0.8141833299163568,
+     "sign": 1,
+     "weight": 0.34617987112284904
+    },
+    {
+     "itemId": "dn2015a::Q016_3",
+     "sim": 0.8141833299163568,
+     "sign": 1,
+     "weight": 0.34617987112284904
+    },
+    {
+     "itemId": "dn2017::trust_Gov",
+     "sim": 0.7235416913822739,
+     "sign": 1,
+     "weight": 0.3076402577543018
+    }
+   ],
+   "reason": "ok"
+  },
+  "Q6": {
+   "domain": "political",
+   "enabled": true,
+   "analogs": [
+    {
+     "itemId": "cses2012::IMD3010",
+     "sim": 0.9902594104273353,
+     "sign": 1,
+     "weight": 0.3333333333333333
+    },
+    {
+     "itemId": "cses2015a::IMD3010",
+     "sim": 0.9902594104273353,
+     "sign": 1,
+     "weight": 0.3333333333333333
+    },
+    {
+     "itemId": "cses2015b::IMD3010",
+     "sim": 0.9902594104273353,
+     "sign": 1,
+     "weight": 0.3333333333333333
+    }
+   ],
+   "reason": "ok"
+  },
+  "Q10": {
+   "domain": "political",
+   "enabled": false,
+   "analogs": [],
+   "reason": "χωρίς συγγενικό item (ομοιότητα/πρόσημο)"
+  },
+  "Q11": {
+   "domain": "social",
+   "enabled": true,
+   "analogs": [
+    {
+     "itemId": "dn2020b::Q221",
+     "sim": 0.6742587630648798,
+     "sign": 1,
+     "weight": 0.3434178420638766
+    },
+    {
+     "itemId": "dn2020b::Q229",
+     "sim": 0.6501943316040587,
+     "sign": 1,
+     "weight": 0.33116118990676696
+    },
+    {
+     "itemId": "dn2020b::Q225",
+     "sim": 0.6389241108155276,
+     "sign": 1,
+     "weight": 0.32542096802935644
+    }
+   ],
+   "reason": "ok"
+  },
+  "Q12": {
+   "domain": "political",
+   "enabled": true,
+   "analogs": [
+    {
+     "itemId": "dn2024a::Q26_10",
+     "sim": 0.6038157449157862,
+     "sign": -1,
+     "weight": 0.3536253216544431
+    },
+    {
+     "itemId": "dn2015n::Q056_6",
+     "sim": 0.5518428460862742,
+     "sign": 1,
+     "weight": 0.3231873391727785
+    },
+    {
+     "itemId": "dn2015a::Q016_6",
+     "sim": 0.5518428460862742,
+     "sign": 1,
+     "weight": 0.3231873391727785
+    }
+   ],
+   "reason": "ok"
+  },
+  "Q13": {
+   "domain": "social",
+   "enabled": false,
+   "analogs": [],
+   "reason": "χωρίς συγγενικό item (ομοιότητα/πρόσημο)"
+  },
+  "Q20": {
+   "domain": "social",
+   "enabled": true,
+   "analogs": [
+    {
+     "itemId": "dn2020b::Q225",
+     "sim": 0.5590397389589495,
+     "sign": 1,
+     "weight": 0.3341832523635253
+    },
+    {
+     "itemId": "dn2020b::Q229",
+     "sim": 0.5585223742318406,
+     "sign": 1,
+     "weight": 0.33387398163532017
+    },
+    {
+     "itemId": "dn2015n::Q056_8",
+     "sim": 0.5552917327309225,
+     "sign": 1,
+     "weight": 0.3319427660011545
+    }
+   ],
+   "reason": "ok"
+  },
+  "Q21": {
+   "domain": "political",
+   "enabled": false,
+   "analogs": [],
+   "reason": "χωρίς συγγενικό item (ομοιότητα/πρόσημο)"
+  },
+  "Q22": {
+   "domain": "social",
+   "enabled": true,
+   "analogs": [
+    {
+     "itemId": "dn2020b::Q223",
+     "sim": 0.6956256913806249,
+     "sign": 1,
+     "weight": 0.35614817117309805
+    },
+    {
+     "itemId": "dn2020b::Q225",
+     "sim": 0.6316594636486516,
+     "sign": 1,
+     "weight": 0.323398582844396
+    },
+    {
+     "itemId": "dn2020b::Q228",
+     "sim": 0.6259066558098455,
+     "sign": 1,
+     "weight": 0.320453245982506
+    }
+   ],
+   "reason": "ok"
+  },
+  "Q25": {
+   "domain": "political",
+   "enabled": true,
+   "analogs": [
+    {
+     "itemId": "dn2015a::Q17_Alt",
+     "sim": 0.7078703276410693,
+     "sign": 1,
+     "weight": 0.3609528813006107
+    },
+    {
+     "itemId": "maple2019pre::Q33_w3",
+     "sim": 0.6266226379213733,
+     "sign": -1,
+     "weight": 0.3195235593496947
+    },
+    {
+     "itemId": "maple2019feb::Q33_w1",
+     "sim": 0.6266226379213733,
+     "sign": -1,
+     "weight": 0.3195235593496947
+    }
+   ],
+   "reason": "ok"
+  },
+  "Q26": {
+   "domain": "political",
+   "enabled": true,
+   "analogs": [
+    {
+     "itemId": "dn2020b::Q252",
+     "sim": 0.6730669471201133,
+     "sign": 1,
+     "weight": 0.33999373532144683
+    },
+    {
+     "itemId": "dn2020a::Q362",
+     "sim": 0.6537449230335722,
+     "sign": 1,
+     "weight": 0.3302333880465394
+    },
+    {
+     "itemId": "undpolar2022::inst_trust_2",
+     "sim": 0.652833273848049,
+     "sign": -1,
+     "weight": 0.3297728766320137
+    }
+   ],
+   "reason": "ok"
+  }
+ }
+}
